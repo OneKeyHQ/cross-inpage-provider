@@ -16,9 +16,9 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - macOS-latest
+#          - macOS-latest
         node_version:
-          - 14
+#          - 14
           - 16
 
     steps:

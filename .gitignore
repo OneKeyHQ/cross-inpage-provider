@@ -1,0 +1,7 @@
+node_modules/
+packages/*/dist/
+packages/example/.next/
+.env.local
+inpage-provider-legacy/
+.idea/
+yarn-error.log

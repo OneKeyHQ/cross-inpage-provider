@@ -1,0 +1,1 @@
+# @onekeyfe/extension-bridge-injected

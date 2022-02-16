@@ -1,0 +1,1 @@
+# @onekeyfe/onekey-near-wallet

@@ -31,6 +31,8 @@ abstract class ProviderBase extends EventEmitter {
     }, 0);
   }
 
+  // TODO ping/_isBridgeConnected , metamask_sendDomainMetadata method auto call
+
   public events = new EventEmitter();
 
   public isOneKey = true;

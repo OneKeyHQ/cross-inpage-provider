@@ -93,6 +93,12 @@ export type SignTransactionsOptions = {
   transactions: NearTransaction[];
   callbackUrl?: string;
   meta?: unknown | string;
+  send?: boolean;
+};
+
+export type SignMessagesOptions = {
+  messages: string[];
+  meta?: unknown | string | object;
 };
 
 export type CreateTransactionOptions = {
@@ -120,6 +126,22 @@ const DEFAULT_AUTH_DATA = {
   accountId: '',
   publicKey: '', // ed25519:****
   allKeys: [],
+};
+
+const PROVIDER_METHODS = {
+  near_accounts: 'near_accounts',
+  near_networkId: 'near_networkId',
+
+  near_requestSignIn: 'near_requestSignIn',
+  near_signOut: 'near_signOut',
+
+  near_requestSignTransactions: 'near_requestSignTransactions',
+  near_sendTransactions: 'near_sendTransactions',
+
+  near_signTransactions: 'near_signTransactions',
+
+  near_requestSignMessages: 'near_requestSignMessages',
+  near_signMessages: 'near_signMessages',
 };
 
 function isWalletEventMethodMatch({ method, name }: { method: string; name: string }) {
@@ -152,6 +174,8 @@ function getOrCreateExtInjectedJsBridge() {
 // TODO import { ethErrors } from 'eth-rpc-errors';
 // TODO check methods return type match web wallet
 
+// TODO console.log remove
+
 class OneKeyNearWallet extends ProviderNearBase {
   _enablePageReload?: boolean = false;
   _authData: NearAccountInfo = DEFAULT_AUTH_DATA;
@@ -179,7 +203,7 @@ class OneKeyNearWallet extends ProviderNearBase {
     shouldSendMetadata,
     maxEventListeners,
   }: OneKeyNearWalletProps) {
-    // TODO props: logger shouldSendMetadata
+    // TODO props: logger, shouldSendMetadata
     super({
       bridge: bridge || getOrCreateExtInjectedJsBridge(),
     });
@@ -191,14 +215,15 @@ class OneKeyNearWallet extends ProviderNearBase {
     this._connection = connection as NearConnection;
     this._networkId = networkId;
     this._selectedNetworkId = networkId;
+    // TODO remove transactionCreator in ref-ui
     this._transactionCreator = transactionCreator || defaultTransactionCreator;
     this._initAuthDataFromStorage();
     this._registerEvents();
     void this.detectWalletInstalled().then((installed) => {
       if (installed) {
         // TODO metamask_sendDomainMetadata
-        void this.request({ method: 'near_accounts', params: [] });
-        void this.request({ method: 'near_networkId', params: [] });
+        void this.request({ method: PROVIDER_METHODS.near_accounts, params: [] });
+        void this.request({ method: PROVIDER_METHODS.near_networkId, params: [] });
       }
     });
   }
@@ -428,7 +453,7 @@ class OneKeyNearWallet extends ProviderNearBase {
       { accountId, allKeys: [], publicKey }
      */
     const res = (await this._callBridgeRequest({
-      method: 'near_requestSignIn',
+      method: PROVIDER_METHODS.near_requestSignIn,
     })) as NearAccountInfo;
 
     this._handleAccountsChanged({
@@ -444,6 +469,7 @@ class OneKeyNearWallet extends ProviderNearBase {
     return res;
   }
 
+  // TODO check if account is activated, and show ApprovalPopup message
   async requestSignTransactions(signTransactionsOptions: SignTransactionsOptions) {
     // eslint-disable-next-line prefer-rest-params
     const args = arguments;
@@ -459,7 +485,7 @@ class OneKeyNearWallet extends ProviderNearBase {
     }
 
     console.log('requestSignTransactions', options);
-    const { transactions = [], callbackUrl = window.location.href, meta = {} } = options;
+    const { transactions = [], callbackUrl = window.location.href, meta = {}, send = true } = options;
     const txSerialized = transactions.map((tx) =>
       serializeTransaction({
         transaction: tx,
@@ -467,8 +493,8 @@ class OneKeyNearWallet extends ProviderNearBase {
     );
     // sign and send
     const res = await this._callBridgeRequest({
-      method: 'near_requestSignTransactions',
-      params: [{ transactions: txSerialized, meta }],
+      method: PROVIDER_METHODS.near_requestSignTransactions,
+      params: [{ transactions: txSerialized, meta, send }],
     });
     console.log('requestSignTransactions', options);
     this._reloadPage({
@@ -478,9 +504,9 @@ class OneKeyNearWallet extends ProviderNearBase {
     return res;
   }
 
-  async requestSignMessages({ messages = [], meta = {} }) {
+  async requestSignMessages({ messages = [], meta = {} }: SignMessagesOptions) {
     const res = await this._callBridgeRequest({
-      method: 'near_requestSignMessages',
+      method: PROVIDER_METHODS.near_requestSignMessages,
       params: [{ messages, meta }],
     });
     return res;
@@ -489,8 +515,26 @@ class OneKeyNearWallet extends ProviderNearBase {
   // TODO requestBatch
 
   async request({ method, params }: IJsonRpcRequest = { method: '', params: [] }) {
-    // TODO check networkId matched in background
-    // TODO near_requestSignMessages, near_requestSignTransactions, near_requestSignIn
+    const paramsArr = ([] as any[]).concat(params);
+    const paramObj = paramsArr[0] as unknown;
+
+    if (method === PROVIDER_METHODS.near_requestSignIn) {
+      return this.requestSignIn(paramObj as SignInOptions);
+    }
+    if (
+      method === PROVIDER_METHODS.near_sendTransactions ||
+      method === PROVIDER_METHODS.near_requestSignTransactions ||
+      method === PROVIDER_METHODS.near_signTransactions // sign only, do not send
+    ) {
+      const options = paramObj as SignTransactionsOptions;
+      const optionsNew = { ...options };
+      optionsNew.send = method !== PROVIDER_METHODS.near_signTransactions;
+      return this.requestSignTransactions(optionsNew);
+    }
+    if (method === PROVIDER_METHODS.near_signMessages || method === PROVIDER_METHODS.near_requestSignMessages) {
+      return this.requestSignMessages(paramObj as SignMessagesOptions);
+    }
+
     return await this._callBridgeRequest({
       method,
       params,
@@ -520,7 +564,7 @@ class OneKeyNearWallet extends ProviderNearBase {
 
   signOut() {
     void this._callBridgeRequest({
-      method: 'near_signOut',
+      method: PROVIDER_METHODS.near_signOut,
       params: this._authData,
     });
     this._clearAuthData();
@@ -564,10 +608,6 @@ class OneKeyWalletAccount extends Account {
     }
 
     const { receiverId, actions, meta, callbackUrl } = options;
-    // accessKeyForTransaction
-    // accessKeyMatchesTransaction
-    // TODO blockHash fetch
-    //      Cannot read properties of null (reading 'constructor')
 
     const transaction = await this.createTransaction({
       receiverId,

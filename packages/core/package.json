@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/cross-inpage-provider-core",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -31,6 +31,8 @@
   },
   "dependencies": {
     "eventemitter3": "^4.0.7",
-    "@onekeyfe/cross-inpage-provider-types": "^0.0.1"
+    "@onekeyfe/cross-inpage-provider-types": "^0.0.2",
+    "@onekeyfe/cross-inpage-provider-errors": "^0.0.1",
+    "lodash": "^4.17.21"
   }
 }

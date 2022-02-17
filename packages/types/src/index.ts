@@ -1,6 +1,3 @@
-import React from 'react';
-
-import { WebView } from 'react-native-webview';
 
 declare global {
   interface Window {
@@ -65,7 +62,7 @@ export type IJsBridgeConfig = {
   sendAsString?: boolean;
   debug?: boolean;
   receiveHandler?: IJsBridgeReceiveHandler;
-  webviewRef?: React.RefObject<IElectronWebView | WebView | any>;
+  webviewRef?: unknown;
 };
 
 export type IJsBridgeReceiveHandler = (

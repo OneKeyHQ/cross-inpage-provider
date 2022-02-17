@@ -2,11 +2,29 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { debugLogger, consts } from '@onekeyfe/cross-inpage-provider-core';
 
-import { IJsBridgeConfig, IJsBridgeMessagePayload, IPostMessageEventData } from '@onekeyfe/cross-inpage-provider-types';
+import {
+  IJsBridgeConfig,
+  IJsBridgeMessagePayload,
+  IPostMessageEventData,
+} from '@onekeyfe/cross-inpage-provider-types';
 
-import { JsBridgeBase } from '@onekeyfe/cross-inpage-provider-core';
+import {
+  JsBridgeBase,
+  injectedProviderReceiveHandler,
+  injectJsBridge,
+} from '@onekeyfe/cross-inpage-provider-core';
 
 const { JS_BRIDGE_MESSAGE_DIRECTION, JS_BRIDGE_MESSAGE_EXT_CHANNEL } = consts;
+
+function getOrCreateExtInjectedJsBridge(): JsBridgeBase {
+  // create ext bridge by default
+  const bridgeCreator = () =>
+    new JsBridgeExtInjected({
+      receiveHandler: injectedProviderReceiveHandler,
+    }) as unknown;
+  const bridge = injectJsBridge(bridgeCreator);
+  return bridge;
+}
 
 class JsBridgeExtInjected extends JsBridgeBase {
   constructor(config: IJsBridgeConfig) {
@@ -58,4 +76,4 @@ class JsBridgeExtInjected extends JsBridgeBase {
   }
 }
 
-export { JsBridgeExtInjected };
+export { JsBridgeExtInjected, getOrCreateExtInjectedJsBridge };

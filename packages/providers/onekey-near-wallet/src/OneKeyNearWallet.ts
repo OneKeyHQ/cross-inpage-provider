@@ -61,9 +61,10 @@ export type TransactionCreator = (params: TransactionCreatorParams) => any;
 export type OneKeyNearWalletProps = {
   connection: NearConnection | any;
   networkId: string;
-  transactionCreator?: TransactionCreator;
-  keyPrefix?: string;
+  connectEagerly?: boolean;
   enablePageReload?: boolean;
+  keyPrefix?: string;
+  transactionCreator?: TransactionCreator;
 } & IInpageProviderConfig;
 
 export type OneKeyWalletAccountProps = {
@@ -173,6 +174,7 @@ function defaultTransactionCreator({
 
 class OneKeyNearWallet extends ProviderNearBase {
   _enablePageReload?: boolean = false;
+  _connectEagerly?: boolean = false;
   _authData: NearAccountInfo = DEFAULT_AUTH_DATA;
   _authDataKey = '@OneKeyNearWalletAuthData';
   _account?: OneKeyWalletAccount | null;
@@ -186,11 +188,11 @@ class OneKeyNearWallet extends ProviderNearBase {
   _isInstalledDetected = false;
   _isUnlocked = false;
 
-  // TODO connectEager
   constructor({
     connection,
     keyPrefix = '',
     enablePageReload,
+    connectEagerly = false,
     networkId,
     transactionCreator,
     bridge,
@@ -209,12 +211,15 @@ class OneKeyNearWallet extends ProviderNearBase {
     }
     this._authDataKey = keyPrefix + this._authDataKey;
     this._enablePageReload = enablePageReload;
+    this._connectEagerly = connectEagerly;
     this._connection = connection as NearConnection;
     this._networkId = networkId;
     this._transactionCreator = transactionCreator || defaultTransactionCreator;
     this._initAuthDataFromStorage();
     this._registerEvents();
-    void this.detectWalletInstalled();
+    void this.detectWalletInstalled().then(() => {
+      this._removeCallbackUrlParams();
+    });
   }
 
   _initializedEmitted = false;
@@ -227,8 +232,7 @@ class OneKeyNearWallet extends ProviderNearBase {
 
     if (isInstalled) {
       const providerState = walletInfo?.providerState as NearProviderState | null;
-      if (providerState?.accounts) {
-        // TODO connectEager
+      if (providerState?.accounts && this._connectEagerly) {
         this._handleAccountsChanged(
           {
             accounts: providerState.accounts,
@@ -310,11 +314,7 @@ class OneKeyNearWallet extends ProviderNearBase {
   }
 
   _handleChainChanged(payload: NearChainChangedPayload, { emit = true } = {}) {
-    if (
-      payload &&
-      payload.networkId &&
-      payload.networkId !== this._selectedNetworkId
-    ) {
+    if (payload && payload.networkId && payload.networkId !== this._selectedNetworkId) {
       emit && this.emit('networkChanged', payload);
       emit && this.emit('chainChanged', payload);
       this._selectedNetworkId = payload.networkId;
@@ -344,6 +344,23 @@ class OneKeyNearWallet extends ProviderNearBase {
       }
     } catch (e) {
       this._authData = DEFAULT_AUTH_DATA;
+    }
+  }
+
+  //  similar to WalletConnection._completeSignInWithAccessKey
+  _removeCallbackUrlParams() {
+    try {
+      if (this._enablePageReload) {
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.delete('public_key');
+        currentUrl.searchParams.delete('all_keys');
+        currentUrl.searchParams.delete('account_id');
+        currentUrl.searchParams.delete('meta');
+        currentUrl.searchParams.delete('transactionHashes');
+        window.history.replaceState({}, document.title, currentUrl.toString());
+      }
+    } catch (err) {
+      //noop
     }
   }
 
@@ -414,7 +431,7 @@ class OneKeyNearWallet extends ProviderNearBase {
   }
 
   async requestSignIn(signInOptions: SignInOptions) {
-    let options;
+    let options: SignInOptions;
     if (typeof signInOptions === 'string') {
       const contractId = signInOptions;
       const deprecate = depd('requestSignIn(contractId, title)');
@@ -448,8 +465,20 @@ class OneKeyNearWallet extends ProviderNearBase {
 
     if (res && res.accountId) {
       this._saveAuthData(res);
-      // TODO successUrl, failureUrl callback
-      this._reloadPage();
+      this._reloadPage({
+        url: options.successUrl || window.location.href,
+        query: {
+          account_id: res.accountId,
+          public_key: res.publicKey,
+          all_keys: res.allKeys,
+        },
+      });
+    } else {
+      this._clearAuthData();
+      this._reloadPage({
+        url: options.failureUrl || window.location.href,
+        query: DEFAULT_AUTH_DATA,
+      });
     }
     return res;
   }

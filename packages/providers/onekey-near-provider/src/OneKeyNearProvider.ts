@@ -68,7 +68,7 @@ export type OneKeyNearWalletProps = {
 } & IInpageProviderConfig;
 
 export type OneKeyWalletAccountProps = {
-  wallet: OneKeyNearWallet;
+  wallet: OneKeyNearProvider;
   connection: unknown;
   accountId: string;
 };
@@ -182,13 +182,13 @@ function defaultTransactionCreator({
     receiverId,
     nonce,
     actions,
-    blockHash
+    blockHash,
   );
 }
 
 // TODO check methods return type match official web wallet
 
-class OneKeyNearWallet extends ProviderNearBase {
+class OneKeyNearProvider extends ProviderNearBase {
   _enablePageReload?: boolean = false;
   _connectEagerly?: boolean = false;
   _authData: NearAccountInfo = DEFAULT_AUTH_DATA;
@@ -254,7 +254,7 @@ class OneKeyNearWallet extends ProviderNearBase {
           {
             accounts: providerState.accounts,
           },
-          { emit: false }
+          { emit: false },
         );
       }
       if (providerState?.network) {
@@ -475,7 +475,7 @@ class OneKeyNearWallet extends ProviderNearBase {
       const contractId = signInOptions;
       const deprecate = depd('requestSignIn(contractId, title)');
       deprecate(
-        '`title` ignored; use `requestSignIn({ contractId, successUrl, failureUrl })` instead'
+        '`title` ignored; use `requestSignIn({ contractId, successUrl, failureUrl })` instead',
       );
       // eslint-disable-next-line prefer-rest-params
       const successUrl = arguments[2] as string;
@@ -531,10 +531,10 @@ class OneKeyNearWallet extends ProviderNearBase {
     let options = signTransactionsOptions;
     if (Array.isArray(args[0])) {
       const deprecate = depd(
-        'WalletConnection.requestSignTransactions(transactions, callbackUrl, meta)'
+        'WalletConnection.requestSignTransactions(transactions, callbackUrl, meta)',
       );
       deprecate(
-        'use `WalletConnection.requestSignTransactions(RequestSignTransactionsOptions)` instead'
+        'use `WalletConnection.requestSignTransactions(RequestSignTransactionsOptions)` instead',
       );
       options = {
         transactions: args[0] as NearTransaction[],
@@ -552,7 +552,7 @@ class OneKeyNearWallet extends ProviderNearBase {
     const txSerialized = transactions.map((tx) =>
       serializeTransaction({
         transaction: tx,
-      })
+      }),
     );
     // sign and send
     const res = await this._callBridgeRequest({
@@ -632,7 +632,7 @@ class OneKeyNearWallet extends ProviderNearBase {
       method: PROVIDER_METHODS.near_signOut,
       params: this._authData,
     });
-    this._clearAuthData();
+    this._handleAccountsChanged({ accounts: [] });
 
     // signOut() in near web wallet does not reload page
     // this._reloadPage();
@@ -652,7 +652,7 @@ class OneKeyNearWallet extends ProviderNearBase {
 }
 
 class OneKeyWalletAccount extends Account {
-  _wallet: OneKeyNearWallet;
+  _wallet: OneKeyNearProvider;
 
   constructor({ wallet, connection, accountId }: OneKeyWalletAccountProps) {
     super(connection as Connection, accountId);
@@ -736,4 +736,4 @@ class OneKeyWalletAccount extends Account {
   }
 }
 
-export { OneKeyNearWallet, OneKeyWalletAccount, serializeTransaction };
+export { OneKeyNearProvider, OneKeyWalletAccount, serializeTransaction };

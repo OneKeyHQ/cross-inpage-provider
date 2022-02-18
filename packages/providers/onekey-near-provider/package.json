@@ -1,5 +1,5 @@
 {
-  "name": "@onekeyfe/onekey-near-wallet",
+  "name": "@onekeyfe/onekey-near-provider",
   "version": "0.0.2",
   "keywords": [
     "cross-inpage-provider"

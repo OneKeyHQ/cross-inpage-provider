@@ -3,8 +3,8 @@ import Head from 'next/head';
 import Image from 'next/image';
 import styles from '../styles/Home.module.css';
 import * as NearApi from 'near-api-js';
-import { OneKeyNearWallet } from '@onekeyfe/onekey-near-wallet';
-import { useEffect } from 'react';
+import { OneKeyNearProvider, NearAccountsChangedPayload } from '@onekeyfe/onekey-near-provider';
+import { useEffect, useState } from 'react';
 
 const hasWindow = typeof window !== 'undefined';
 
@@ -13,6 +13,8 @@ const myImageLoader = ({ src, width, quality }: any) => {
 };
 
 const Home: NextPage = () => {
+  const [provider, setProvider] = useState<OneKeyNearProvider | null>(null);
+  const [accountId, setAccountId] = useState('');
   useEffect(() => {
     if (!hasWindow) {
       // return;
@@ -23,21 +25,34 @@ const Home: NextPage = () => {
       headers: {},
       keyStore: new NearApi.keyStores.BrowserLocalStorageKeyStore(),
     };
-    const near = new NearApi.Near(config);
-    const connection = near.connection;
-    // const connection = NearApi.Connection.fromConfig({
-    //   networkId: config.networkId,
-    //   provider: { type: 'JsonRpcProvider', args: { url: config.nodeUrl, headers: config.headers } },
-    //   signer: config.signer || { type: 'InMemorySigner', keyStore: config.keyStore || config.deps.keyStore }
-    // });
-    console.log('OneKeyNearWallet00', OneKeyNearWallet);
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    global.$nearWallet = new OneKeyNearWallet({
-      connection,
-      networkId: config.networkId,
-    });
+    void (async () => {
+      const near = new NearApi.Near(config);
+      const connection = near.connection;
+      // const connection = NearApi.Connection.fromConfig({
+      //   networkId: config.networkId,
+      //   provider: { type: 'JsonRpcProvider', args: { url: config.nodeUrl, headers: config.headers } },
+      //   signer: config.signer || { type: 'InMemorySigner', keyStore: config.keyStore || config.deps.keyStore }
+      // });
+      console.log('OneKeyNearProvider00', OneKeyNearProvider);
+
+      const _provider = new OneKeyNearProvider({
+        connection,
+        networkId: config.networkId,
+      });
+      await _provider.detectWalletInstalled();
+      setAccountId(_provider.getAccountId());
+      // TODO event name typescript
+      _provider.on('accountsChanged', (payload: NearAccountsChangedPayload) => {
+        const _accountId = payload?.accounts?.[0]?.accountId || '';
+        console.log('accountsChanged', _accountId);
+        setAccountId(_accountId);
+      });
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      global.$nearWallet = _provider;
+      setProvider(_provider);
+    })();
   }, []);
   return (
     <div className={styles.container}>
@@ -51,6 +66,11 @@ const Home: NextPage = () => {
         <h1 className={styles.title}>
           Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
+
+        <div>{accountId}</div>
+        <button onClick={() => provider?.requestSignIn()}>requestSignIn</button>
+        {/* TODO signOut emit accountsChanged */}
+        <button onClick={() => provider?.signOut()}>signOut</button>
 
         <p className={styles.description}>
           Get started by editing <code className={styles.code}>pages/index.tsx</code>
@@ -90,7 +110,13 @@ const Home: NextPage = () => {
         >
           Powered by{' '}
           <span className={styles.logo}>
-            <Image loader={myImageLoader} src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
+            <Image
+              loader={myImageLoader}
+              src="/vercel.svg"
+              alt="Vercel Logo"
+              width={72}
+              height={16}
+            />
           </span>
         </a>
       </footer>

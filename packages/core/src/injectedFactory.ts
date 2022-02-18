@@ -21,7 +21,6 @@ function injectCodeWithScriptTag({
   file?: string;
   remove?: boolean;
 }): void {
-  console.log('injectCodeWithScriptTag: ', { remove, file });
   (function () {
     const s = document.createElement('script');
     s.setAttribute('async', 'false');

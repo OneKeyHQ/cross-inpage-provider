@@ -34,7 +34,6 @@ const Home: NextPage = () => {
       //   provider: { type: 'JsonRpcProvider', args: { url: config.nodeUrl, headers: config.headers } },
       //   signer: config.signer || { type: 'InMemorySigner', keyStore: config.keyStore || config.deps.keyStore }
       // });
-      console.log('OneKeyNearProvider00', OneKeyNearProvider);
 
       const _provider = new OneKeyNearProvider({
         connection,
@@ -46,7 +45,7 @@ const Home: NextPage = () => {
       }
       setAccountId(_provider.getAccountId());
       // TODO event name typescript
-      _provider.on('accountsChanged', (payload: NearAccountsChangedPayload) => {
+      _provider.on('accountsChanged', (payload) => {
         const _accountId = payload?.accounts?.[0]?.accountId || '';
         console.log('accountsChanged', _accountId);
         setAccountId(_accountId);

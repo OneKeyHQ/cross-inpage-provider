@@ -19,7 +19,8 @@ function injectJsBridge(bridgeCreator: () => JsBridgeBase | unknown): JsBridgeBa
   if (!window?.$onekey?.jsBridge) {
     window.$onekey = window.$onekey || {};
     window.$onekey.jsBridge = bridgeCreator();
-    console.log('===== OneKey jsBridge injected success! 897 >>>>> ', performance.now());
+    // TODO debugLogger
+    // console.log('===== OneKey jsBridge injected success! >>>>> ', performance.now());
   }
 
   return window.$onekey.jsBridge as JsBridgeBase;

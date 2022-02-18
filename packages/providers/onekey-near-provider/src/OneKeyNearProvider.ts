@@ -9,6 +9,7 @@ import type { Action as NearTransactionAction } from 'near-api-js/lib/transactio
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
+import type EventEmitter from 'eventemitter3';
 
 export type NearAccountInfo = {
   accountId: string;
@@ -156,13 +157,15 @@ const PROVIDER_EVENTS = {
   accountsChanged: 'accountsChanged',
   networkChanged: 'networkChanged',
   message: 'message', // alias notification
+  message_low_level: 'message_low_level',
   initialized: 'near#initialized',
   // legacy events
   connect: 'connect', // alias open (bridge connect)
   disconnect: 'disconnect', // alias close (bridge disconnect)
   chainChanged: 'chainChanged', // alias networkChanged
   unlockChanged: 'unlockChanged',
-};
+} as const;
+export type PROVIDER_EVENTS_STRINGS = keyof typeof PROVIDER_EVENTS;
 
 function isWalletEventMethodMatch({ method, name }: { method: string; name: string }) {
   return method === `metamask_${name}` || method === `wallet_events_${name}`;
@@ -187,8 +190,36 @@ function defaultTransactionCreator({
   );
 }
 
+type OneKeyNearProviderEventsMap = {
+  [PROVIDER_EVENTS.accountsChanged]: (payload: NearAccountsChangedPayload) => void;
+  [PROVIDER_EVENTS.networkChanged]: (payload: NearChainChangedPayload) => void;
+  [PROVIDER_EVENTS.chainChanged]: (payload: NearChainChangedPayload) => void;
+  [PROVIDER_EVENTS.message]: (payload: any) => void;
+  [PROVIDER_EVENTS.message_low_level]: (payload: IJsonRpcRequest) => void;
+  [PROVIDER_EVENTS.initialized]: (payload?: any) => void;
+  [PROVIDER_EVENTS.connect]: (payload?: any) => void;
+  [PROVIDER_EVENTS.disconnect]: (payload?: any) => void;
+  [PROVIDER_EVENTS.unlockChanged]: (payload: NearUnlockChangedPayload) => void;
+};
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+declare interface OneKeyNearProvider {
+  on<U extends keyof OneKeyNearProviderEventsMap>(
+    event: U,
+    listener: OneKeyNearProviderEventsMap[U],
+    context?: any,
+  ): this;
+  emit<U extends keyof OneKeyNearProviderEventsMap>(
+    event: U,
+    ...args: Parameters<OneKeyNearProviderEventsMap[U]>
+  ): boolean;
+}
+
 // TODO check methods return type match official web wallet
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 class OneKeyNearProvider extends ProviderNearBase {
   _enablePageReload?: boolean = false;
   _connectEagerly?: boolean = false;
@@ -283,7 +314,7 @@ class OneKeyNearProvider extends ProviderNearBase {
     window.addEventListener('onekey_bridge_disconnect', () => {
       this._handleBridgeDisconnect();
     });
-    this.on('message_low_level', (payload: IJsonRpcRequest) => {
+    this.on(PROVIDER_EVENTS.message_low_level, (payload) => {
       const { method, params } = payload;
       if (
         // wallet_events_accountsChanged

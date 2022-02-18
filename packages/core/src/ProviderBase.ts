@@ -6,6 +6,7 @@ import {
   IInjectedProviderNamesStrings,
   IJsonRpcResponse,
 } from '@onekeyfe/cross-inpage-provider-types';
+import siteMetadata from './siteMetadata';
 
 export type ConsoleLike = Pick<Console, 'log' | 'warn' | 'error' | 'debug' | 'info' | 'trace'>;
 
@@ -38,7 +39,11 @@ export type ConnectWalletInfo = {
   providerState?: unknown;
 };
 
-// TODO check extension connection ping/pong, get extension meta (version, vendor, bridgeVersion)
+const METHODS = {
+  wallet_getConnectWalletInfo: 'wallet_getConnectWalletInfo',
+  wallet_sendSiteMetadata: 'wallet_sendSiteMetadata',
+};
+
 abstract class ProviderBase extends EventEmitter {
   protected constructor(config: IInpageProviderConfig) {
     super();
@@ -47,17 +52,15 @@ abstract class ProviderBase extends EventEmitter {
     }
     this.config = config;
     this.bridge = config.bridge;
-    this.logger = config.logger || this.logger;
-    // TODO logger shouldSendMetadata in ProviderBase
+    this.logger = config.logger || fakeLogger;
     setTimeout(() => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       this.bridge.attachProviderInstance(this as any);
     }, 0);
+    if (config.shouldSendMetadata) {
+      void this.sendSiteMetadata();
+    }
   }
-
-  // TODO metamask_sendDomainMetadata method auto call
-  // TODO ping return walletProviderMeta={ version, isLegacy, name, platform }
-  //      window.$onekey.walletProviderMeta
 
   async getConnectWalletInfo({ timeout = 3000 } = {}): Promise<ConnectWalletInfo | null> {
     // eslint-disable-next-line no-async-promise-executor,@typescript-eslint/no-misused-promises
@@ -67,7 +70,7 @@ abstract class ProviderBase extends EventEmitter {
       }, timeout);
       try {
         const result = (await this.bridgeRequest({
-          method: 'wallet_getConnectWalletInfo',
+          method: METHODS.wallet_getConnectWalletInfo,
           params: [{ time: Date.now() }],
         })) as ConnectWalletInfo;
         if (result && result.walletInfo) {
@@ -88,8 +91,6 @@ abstract class ProviderBase extends EventEmitter {
       }
     });
   }
-
-  public events = new EventEmitter();
 
   public isOneKey = true;
 
@@ -122,6 +123,14 @@ abstract class ProviderBase extends EventEmitter {
       }
       throw error;
     }
+  }
+
+  async sendSiteMetadata() {
+    const metadata = await siteMetadata.getSiteMetadata();
+    return await this.bridgeRequest({
+      method: METHODS.wallet_sendSiteMetadata,
+      params: metadata,
+    });
   }
 }
 

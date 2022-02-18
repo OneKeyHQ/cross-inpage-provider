@@ -1,9 +1,6 @@
-import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
+import { IInjectedProviderNames, IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 
-import {
-  ProviderBase,
-  IInpageProviderConfig,
-} from '@onekeyfe/cross-inpage-provider-core';
+import { ProviderBase, IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 
 class ProviderNearBase extends ProviderBase {
   constructor(props: IInpageProviderConfig) {

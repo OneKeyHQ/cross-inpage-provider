@@ -1,0 +1,35 @@
+name: test_web
+
+on:
+  push:
+    branches: [main,master]
+  pull_request:
+    branches: [main,master]
+
+jobs:
+  test_web:
+    runs-on: ubuntu-latest
+    env:
+      TEST_ENDPOINT: dapp-example.test.onekey.so
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+      - name: Install Dependency
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          yarn
+      - name: Build Target
+        run: |
+          yarn example-build
+          cp ./packages/example/out/index.html ./packages/example/out/404.html
+      - name: Deploy Github Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./packages/example/out
+          cname: ${{ env.TEST_ENDPOINT }}
+          force_orphan: true

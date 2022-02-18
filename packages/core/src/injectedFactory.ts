@@ -1,5 +1,5 @@
 function createCodeWithScriptTag({ code }: { code: string }): string {
-  // TODO script id check, only inject once.
+  // script id check, only inject once.
   return `
     (function(){
       const s = document.createElement('script');

@@ -131,6 +131,10 @@ const DEFAULT_AUTH_DATA = {
   allKeys: [],
 };
 
+const DEFAULT_NETWORK_INFO = {
+  networkId: '',
+  nodeUrls: [],
+};
 const PROVIDER_METHODS = {
   near_accounts: 'near_accounts',
   near_networkInfo: 'near_networkInfo',
@@ -145,6 +149,18 @@ const PROVIDER_METHODS = {
 
   near_requestSignMessages: 'near_requestSignMessages',
   near_signMessages: 'near_signMessages',
+};
+
+const PROVIDER_EVENTS = {
+  accountsChanged: 'accountsChanged',
+  networkChanged: 'networkChanged',
+  message: 'message', // alias notification
+  initialized: 'near#initialized',
+  // legacy events
+  connect: 'connect', // alias open (bridge connect)
+  disconnect: 'disconnect', // alias close (bridge disconnect)
+  chainChanged: 'chainChanged', // alias networkChanged
+  unlockChanged: 'unlockChanged',
 };
 
 function isWalletEventMethodMatch({ method, name }: { method: string; name: string }) {
@@ -181,7 +197,7 @@ class OneKeyNearWallet extends ProviderNearBase {
 
   _connection: NearConnection;
   _networkId = '';
-  _selectedNetworkId = '';
+  _selectedNetwork: NearChainChangedPayload = DEFAULT_NETWORK_INFO;
   _transactionCreator: TransactionCreator;
 
   _isInstalled = false;
@@ -190,14 +206,14 @@ class OneKeyNearWallet extends ProviderNearBase {
 
   constructor({
     connection,
-    keyPrefix = '',
+    networkId,
     enablePageReload,
     connectEagerly = false,
-    networkId,
+    logger,
+    keyPrefix = '',
     transactionCreator,
     bridge,
-    logger,
-    shouldSendMetadata,
+    shouldSendMetadata = true,
     maxEventListeners,
   }: OneKeyNearWalletProps) {
     super({
@@ -231,6 +247,7 @@ class OneKeyNearWallet extends ProviderNearBase {
     const isInstalled = Boolean(walletInfo);
 
     if (isInstalled) {
+      // TODO debugLoggerConfig this.bridge.debugLogger
       const providerState = walletInfo?.providerState as NearProviderState | null;
       if (providerState?.accounts && this._connectEagerly) {
         this._handleAccountsChanged(
@@ -245,23 +262,29 @@ class OneKeyNearWallet extends ProviderNearBase {
       }
     }
 
-    if (isInstalled && !this._initializedEmitted) {
-      this._initializedEmitted = true;
-      this.emit('near#initialized');
-      window.dispatchEvent(new Event('near#initialized'));
-    }
     this._isInstalled = isInstalled;
     this._isInstalledDetected = true;
     if (!isInstalled && this.isSignedIn()) {
       this._clearAuthData();
     }
+
+    if (isInstalled && !this._initializedEmitted) {
+      this._initializedEmitted = true;
+      window.dispatchEvent(new Event(PROVIDER_EVENTS.initialized));
+      this.emit(PROVIDER_EVENTS.initialized);
+      this.emit(PROVIDER_EVENTS.connect);
+    }
     return isInstalled;
   }
 
   _registerEvents() {
-    this.events.on('notification', (payload: IJsonRpcRequest) => {
+    window.addEventListener('onekey_bridge_disconnect', () => {
+      this._handleBridgeDisconnect();
+    });
+    this.on('message_low_level', (payload: IJsonRpcRequest) => {
       const { method, params } = payload;
       if (
+        // wallet_events_accountsChanged
         isWalletEventMethodMatch({
           method,
           name: 'accountsChanged',
@@ -276,6 +299,7 @@ class OneKeyNearWallet extends ProviderNearBase {
       ) {
         this._handleUnlockStateChanged(params as NearUnlockChangedPayload);
       } else if (
+        // wallet_events_chainChanged
         isWalletEventMethodMatch({
           method,
           name: 'chainChanged',
@@ -287,9 +311,10 @@ class OneKeyNearWallet extends ProviderNearBase {
       ) {
         this._handleChainChanged(params as NearChainChangedPayload);
       } else if (
+        // wallet_events_message
         isWalletEventMethodMatch({
           method,
-          name: 'messageNotification',
+          name: 'message',
         })
       ) {
         this._handleMessageNotificationEvent(params);
@@ -298,26 +323,35 @@ class OneKeyNearWallet extends ProviderNearBase {
   }
 
   _handleMessageNotificationEvent(payload: any) {
-    this.emit('message', payload);
+    this.emit(PROVIDER_EVENTS.message, payload);
+  }
+
+  _handleBridgeDisconnect() {
+    this._handleAccountsChanged({
+      accounts: [],
+    });
+    this._handleChainChanged(DEFAULT_NETWORK_INFO);
+    this._isInstalled = false;
+    this.emit(PROVIDER_EVENTS.disconnect);
   }
 
   _handleAccountsChanged(payload: NearAccountsChangedPayload, { emit = true } = {}) {
     const accounts = payload?.accounts || [];
     const account = accounts?.[0];
     if (account && account?.accountId !== this.getAccountId()) {
-      emit && this.emit('accountsChanged', payload);
       this._saveAuthData(account);
+      emit && this.emit(PROVIDER_EVENTS.accountsChanged, payload);
     } else if (!account && this.isSignedIn()) {
-      emit && this.emit('accountsChanged', { accounts: [] });
       this._clearAuthData();
+      emit && this.emit(PROVIDER_EVENTS.accountsChanged, { accounts: [] });
     }
   }
 
   _handleChainChanged(payload: NearChainChangedPayload, { emit = true } = {}) {
-    if (payload && payload.networkId && payload.networkId !== this._selectedNetworkId) {
-      emit && this.emit('networkChanged', payload);
-      emit && this.emit('chainChanged', payload);
-      this._selectedNetworkId = payload.networkId;
+    if (payload && payload.networkId !== this._selectedNetwork.networkId) {
+      this._selectedNetwork = payload;
+      emit && this.emit(PROVIDER_EVENTS.networkChanged, payload);
+      emit && this.emit(PROVIDER_EVENTS.chainChanged, payload);
     }
   }
 
@@ -328,8 +362,8 @@ class OneKeyNearWallet extends ProviderNearBase {
       return;
     }
     if (isUnlocked !== this._isUnlocked) {
-      this.emit('unlockChanged', payload);
       this._isUnlocked = isUnlocked;
+      this.emit(PROVIDER_EVENTS.unlockChanged, payload);
     }
   }
 
@@ -383,8 +417,9 @@ class OneKeyNearWallet extends ProviderNearBase {
 
   _callBridgeRequest(payload: any) {
     if (!this.isInstalled()) {
-      // web3Errors.provider.custom({ code, message })
-      throw web3Errors.provider.disconnected();
+      // const error = web3Errors.provider.custom({ code, message })
+      const error = web3Errors.provider.disconnected();
+      throw error;
     }
     return this.bridgeRequest({
       ...payload,
@@ -392,7 +427,7 @@ class OneKeyNearWallet extends ProviderNearBase {
         accountId: this.getAccountId(),
         publicKey: this.getPublicKey(),
         networkId: this.getNetworkId(),
-        selectedNetworkId: this.getSelectedNetworkId(),
+        selectedNetworkId: this.getSelectedNetwork()?.networkId || '',
       },
     });
   }
@@ -417,12 +452,16 @@ class OneKeyNearWallet extends ProviderNearBase {
     return this._authData?.publicKey || '';
   }
 
-  getNetworkId() {
-    return this._networkId;
+  getAccountInfo() {
+    return this._authData || DEFAULT_AUTH_DATA;
   }
 
-  getSelectedNetworkId() {
-    return this._selectedNetworkId;
+  getNetworkId() {
+    return this._networkId || '';
+  }
+
+  getSelectedNetwork() {
+    return this._selectedNetwork;
   }
 
   _saveAuthData(data: NearAccountInfo) {
@@ -430,7 +469,7 @@ class OneKeyNearWallet extends ProviderNearBase {
     this._initAuthDataFromStorage();
   }
 
-  async requestSignIn(signInOptions: SignInOptions) {
+  async requestSignIn(signInOptions: SignInOptions = {}) {
     let options: SignInOptions;
     if (typeof signInOptions === 'string') {
       const contractId = signInOptions;
@@ -457,6 +496,7 @@ class OneKeyNearWallet extends ProviderNearBase {
      */
     const res = (await this._callBridgeRequest({
       method: PROVIDER_METHODS.near_requestSignIn,
+      params: [options],
     })) as NearAccountInfo;
 
     this._handleAccountsChanged({
@@ -484,6 +524,7 @@ class OneKeyNearWallet extends ProviderNearBase {
   }
 
   // TODO check if account is activated on chain, and show ApprovalPopup message
+  //      DO NOT allow inactivated account approve connection
   async requestSignTransactions(signTransactionsOptions: SignTransactionsOptions) {
     // eslint-disable-next-line prefer-rest-params
     const args = arguments;
@@ -670,7 +711,8 @@ class OneKeyWalletAccount extends Account {
     const accountId = _authData.accountId;
 
     if (!accountId) {
-      throw web3Errors.provider.unauthorized();
+      const error = web3Errors.provider.unauthorized();
+      throw error;
     }
 
     const accessKeyInfo = await this._fetchAccountAccessKey({

@@ -1,5 +1,13 @@
-import { consts, isLegacyExtMessage, debugLogger, injectedFactory } from '@onekeyfe/cross-inpage-provider-core';
-import { IPostMessageEventData } from '@onekeyfe/cross-inpage-provider-types';
+import {
+  consts,
+  isLegacyExtMessage,
+  fakeDebugLogger,
+  injectedFactory,
+} from '@onekeyfe/cross-inpage-provider-core';
+import {
+  IPostMessageEventData,
+  IOptionsWithDebugLogger,
+} from '@onekeyfe/cross-inpage-provider-types';
 
 import messagePort from '../extensionMessagePort';
 
@@ -22,7 +30,8 @@ function inject(filename: string) {
 }
 
 // TODO one-time only
-function setupMessagePort() {
+function setupMessagePort(options: IOptionsWithDebugLogger = {}) {
+  const debugLogger = options.debugLogger || fakeDebugLogger;
   messagePort.connect({
     name: EXT_PORT_CS_TO_BG,
     // #### background -> content-script
@@ -58,6 +67,10 @@ function setupMessagePort() {
       };
       window.addEventListener('message', onWindowPostMessage, false);
       return () => {
+        console.error(
+          'ONEKEY: lost connection to hosted bridge. You should reload page to establish a new connection.',
+        );
+        window.dispatchEvent(new Event('onekey_bridge_disconnect'));
         window.removeEventListener('message', onWindowPostMessage, false);
       };
     },

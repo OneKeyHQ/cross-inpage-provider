@@ -1,4 +1,3 @@
-
 declare global {
   interface Window {
     $onekey: any;
@@ -58,12 +57,22 @@ export type IJsBridgeMessagePayload = {
   internal?: boolean;
 };
 
+export type IDebugLogger = {
+  jsBridge: (...args: any[]) => unknown;
+  extInjected: (...args: any[]) => unknown;
+  extContentScripts: (...args: any[]) => unknown;
+};
+
+export type IOptionsWithDebugLogger = {
+  debugLogger?: IDebugLogger;
+};
+
 export type IJsBridgeConfig = {
   sendAsString?: boolean;
   debug?: boolean;
   receiveHandler?: IJsBridgeReceiveHandler;
   webviewRef?: unknown;
-};
+} & IOptionsWithDebugLogger;
 
 export type IJsBridgeReceiveHandler = (
   payload: IJsBridgeMessagePayload,

@@ -13,7 +13,6 @@ function fixGlobalShim() {
   window.global = window.global || window || window.globalThis;
 }
 
-// TODO injectWindowJsBridge
 function injectJsBridge(bridgeCreator: () => JsBridgeBase | unknown): JsBridgeBase {
   fixGlobalShim();
 

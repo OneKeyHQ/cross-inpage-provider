@@ -17,10 +17,11 @@ import {
 
 const { JS_BRIDGE_MESSAGE_DIRECTION, JS_BRIDGE_MESSAGE_EXT_CHANNEL } = consts;
 
-function getOrCreateExtInjectedJsBridge(): JsBridgeBase {
+function getOrCreateExtInjectedJsBridge(options: IJsBridgeConfig = {}): JsBridgeBase {
   // create ext bridge by default
   const bridgeCreator = () =>
     new JsBridgeExtInjected({
+      ...options,
       receiveHandler: injectedProviderReceiveHandler,
     }) as unknown;
   const bridge = injectJsBridge(bridgeCreator);

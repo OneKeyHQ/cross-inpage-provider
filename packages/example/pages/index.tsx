@@ -40,7 +40,10 @@ const Home: NextPage = () => {
         connection,
         networkId: config.networkId,
       });
-      await _provider.detectWalletInstalled();
+      const installed = await _provider.detectWalletInstalled();
+      if (!installed) {
+        return;
+      }
       setAccountId(_provider.getAccountId());
       // TODO event name typescript
       _provider.on('accountsChanged', (payload: NearAccountsChangedPayload) => {

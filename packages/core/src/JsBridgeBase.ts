@@ -12,6 +12,7 @@ import {
   IJsonRpcResponse,
   IDebugLogger,
 } from '@onekeyfe/cross-inpage-provider-types';
+import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
 
 function isLegacyExtMessage(payload: unknown): boolean {
   const payloadObj = payload as { name: string };
@@ -33,13 +34,11 @@ const BRIDGE_EVENTS = {
   error: 'error',
 };
 
-// TODO console.log
-
 abstract class JsBridgeBase extends EventEmitter {
-  // TODO remove debug
-  protected constructor(config: IJsBridgeConfig = { debug: false }) {
+  protected constructor(config: IJsBridgeConfig = {}) {
     super();
     this.config = config;
+    this.callbacksExpireTimeout = config.timeout ?? 60 * 1000;
     this.debugLogger = config.debugLogger || fakeDebugLogger;
     this.sendAsString = config.sendAsString ?? this.sendAsString;
     this.version = (process.env.VERSION as string) || '';
@@ -48,7 +47,8 @@ abstract class JsBridgeBase extends EventEmitter {
       this.on(BRIDGE_EVENTS.message, this.globalOnMessage);
     }
     // TODO logger
-    this.on(BRIDGE_EVENTS.error, (error) => console.error('OneKey JsBridge ERROR: ', error));
+    this.on(BRIDGE_EVENTS.error, (error) => console.error('JsBridge ERROR: ', error));
+    this.rejectExpiredCallbacks();
   }
 
   protected isExtUi = false;
@@ -112,6 +112,8 @@ abstract class JsBridgeBase extends EventEmitter {
 
   private config: IJsBridgeConfig;
 
+  private readonly callbacksExpireTimeout: number;
+
   public debugLogger: IDebugLogger = fakeDebugLogger;
 
   private callbacks: Array<IJsBridgeCallback> = [];
@@ -137,7 +139,7 @@ abstract class JsBridgeBase extends EventEmitter {
     if (resolve && reject && id && type === IJsBridgeMessageTypes.REQUEST) {
       if (this.callbacks[id]) {
         // TODO custom error
-        throw new Error(`JsBridgeError: callback exists, id=${id}`);
+        throw new Error(`JsBridge ERROR: callback exists, id=${id}`);
       }
       this.callbacks[id] = { id, resolve, reject, created: Date.now() };
     }
@@ -152,7 +154,10 @@ abstract class JsBridgeBase extends EventEmitter {
         stack: errorInfo.stack,
       };
     }
-    // TODO delete resolve, reject function can not be send
+    // delete resolve, reject function which can not be send as string
+    delete payload?.resolve;
+    delete payload?.reject;
+
     return payload;
   }
 
@@ -194,6 +199,44 @@ abstract class JsBridgeBase extends EventEmitter {
     }
   }
 
+  rejectCallback(callbackInfo: IJsBridgeCallback, error: any) {
+    if (callbackInfo.reject) {
+      callbackInfo.reject(error);
+    }
+    this.emit(BRIDGE_EVENTS.error, error);
+  }
+
+  resolveCallback(callbackInfo: IJsBridgeCallback, data: any) {
+    if (callbackInfo.resolve) {
+      callbackInfo.resolve(data);
+    }
+  }
+
+  rejectExpiredCallbacks() {
+    if (!this.callbacksExpireTimeout) {
+      return;
+    }
+    const now = Date.now();
+    // eslint-disable-next-line @typescript-eslint/no-for-in-array
+    for (const id in this.callbacks) {
+      const callbackInfo = this.callbacks[id];
+      if (callbackInfo && callbackInfo.created) {
+        if (now - callbackInfo.created > this.callbacksExpireTimeout) {
+          const error = web3Errors.provider.requestTimeout();
+          this.rejectCallback(callbackInfo, error);
+          this.clearCallbackCache(id);
+        }
+      }
+    }
+    setTimeout(() => {
+      this.rejectExpiredCallbacks();
+    }, this.callbacksExpireTimeout);
+  }
+
+  clearCallbackCache(id: number | string) {
+    delete this.callbacks[id as number];
+  }
+
   public receive(
     payloadReceived: string | IJsBridgeMessagePayload = '',
     sender?: {
@@ -224,12 +267,12 @@ abstract class JsBridgeBase extends EventEmitter {
     }
 
     if (!payload.origin && !this.isInjected) {
-      throw new Error('JsBridge receive message [payload.origin] is required.');
+      throw new Error('JsBridge ERROR: receive message [payload.origin] is required.');
     }
 
     if (!payload.internal && !payload.scope) {
       throw new Error(
-        'JsBridge receive message [payload.scope] is required for non-internal method call.',
+        'JsBridge ERROR: receive message [payload.scope] is required for non-internal method call.',
       );
     }
 
@@ -243,26 +286,22 @@ abstract class JsBridgeBase extends EventEmitter {
 
     if (type === IJsBridgeMessageTypes.RESPONSE) {
       if (id === undefined || id === null) {
-        throw new Error('id is required in JsBridge receive() REQUEST type message');
+        throw new Error(
+          'JsBridge ERROR: parameter [id] is required in JsBridge.receive() when REQUEST type message',
+        );
       }
-      // TODO resolveCallback() rejectCallback() finallyCallback(resolve,reject)
       const callbackInfo = this.callbacks[id];
       if (callbackInfo) {
         try {
           if (error) {
-            if (callbackInfo.reject) {
-              callbackInfo.reject(error);
-            }
-            this.emit(BRIDGE_EVENTS.error, error);
-          } else if (callbackInfo.resolve) {
-            callbackInfo.resolve(data);
+            this.rejectCallback(callbackInfo, error);
+          } else {
+            this.resolveCallback(callbackInfo, data);
           }
         } catch (error0) {
           this.emit(BRIDGE_EVENTS.error, error0);
         } finally {
-          // TODO timeout reject
-          // TODO auto clean callbacks
-          delete this.callbacks[id];
+          this.clearCallbackCache(id);
         }
       }
     } else if (type === IJsBridgeMessageTypes.REQUEST) {
@@ -276,7 +315,7 @@ abstract class JsBridgeBase extends EventEmitter {
       // only type=REQUEST message will be handled by globalOnMessage
       this.emit(BRIDGE_EVENTS.message, eventMessagePayload);
     } else {
-      throw new Error(`JsBridge payload type not support yet (type=${type || 'undefined'})`);
+      throw new Error(`JsBridge ERROR: payload type not support yet (type=${type || 'undefined'})`);
     }
   }
 
@@ -307,7 +346,7 @@ abstract class JsBridgeBase extends EventEmitter {
     const { data, remoteId, scope } = info;
     if (data === undefined) {
       console.warn(
-        'PARAMS ERROR: data field missing. Call method like `bridge.request({ data: {...} });`',
+        'JsBridge ERROR: params data field is missing. Call method like `bridge.request({ data: {...} });`',
       );
     }
     return this.send({

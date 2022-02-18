@@ -18,6 +18,7 @@ interface ErrorCodes {
     readonly unsupportedMethod: 4200;
     readonly disconnected: 4900;
     readonly chainDisconnected: 4901;
+    readonly requestTimeout: 4500;
   };
 }
 
@@ -41,6 +42,7 @@ export const errorCodes: ErrorCodes = {
     unsupportedMethod: 4200,
     disconnected: 4900,
     chainDisconnected: 4901,
+    requestTimeout: 4500,
   },
 };
 
@@ -109,4 +111,10 @@ export const errorValues = {
     standard: 'EIP-1193',
     message: 'The provider is disconnected from the specified chain.',
   },
+  '4500': {
+    standard: '',
+    message: 'The request by this Web3 provider is timeout.',
+  },
 };
+// https://eips.ethereum.org/EIPS/eip-1474#error-codes
+// https://eips.ethereum.org/EIPS/eip-1193#provider-errors

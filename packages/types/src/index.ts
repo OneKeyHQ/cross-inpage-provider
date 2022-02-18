@@ -69,7 +69,7 @@ export type IOptionsWithDebugLogger = {
 
 export type IJsBridgeConfig = {
   sendAsString?: boolean;
-  debug?: boolean;
+  timeout?: number;
   receiveHandler?: IJsBridgeReceiveHandler;
   webviewRef?: unknown;
 } & IOptionsWithDebugLogger;

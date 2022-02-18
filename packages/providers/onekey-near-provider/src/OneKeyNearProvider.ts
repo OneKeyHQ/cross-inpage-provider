@@ -63,6 +63,7 @@ export type OneKeyNearWalletProps = {
   networkId: string;
   connectEagerly?: boolean;
   enablePageReload?: boolean;
+  timeout?: number;
   keyPrefix?: string;
   transactionCreator?: TransactionCreator;
 } & IInpageProviderConfig;
@@ -209,6 +210,7 @@ class OneKeyNearProvider extends ProviderNearBase {
     networkId,
     enablePageReload,
     connectEagerly = false,
+    timeout,
     logger,
     keyPrefix = '',
     transactionCreator,
@@ -217,7 +219,7 @@ class OneKeyNearProvider extends ProviderNearBase {
     maxEventListeners,
   }: OneKeyNearWalletProps) {
     super({
-      bridge: bridge || getOrCreateExtInjectedJsBridge(),
+      bridge: bridge || getOrCreateExtInjectedJsBridge({ timeout }),
       logger,
       shouldSendMetadata,
       maxEventListeners,

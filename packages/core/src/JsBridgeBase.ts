@@ -170,26 +170,32 @@ abstract class JsBridgeBase extends EventEmitter {
       if (!sync && type === IJsBridgeMessageTypes.REQUEST) {
         _id = this.createCallbackId();
       }
-      const payload = this.createPayload(
-        {
-          id: _id,
-          data,
-          error,
-          type,
-          origin: global?.location?.origin || '',
-          remoteId,
-          scope,
-        },
-        { resolve, reject },
-      );
-      let payloadToSend: unknown = payload;
-      if (this.sendAsString) {
-        payloadToSend = JSON.stringify(payload);
+      try {
+        const payload = this.createPayload(
+          {
+            id: _id,
+            data,
+            error,
+            type,
+            origin: global?.location?.origin || '',
+            remoteId,
+            scope,
+          },
+          { resolve, reject },
+        );
+        let payloadToSend: unknown = payload;
+        if (this.sendAsString) {
+          payloadToSend = JSON.stringify(payload);
+        }
+        this.debugLogger.jsBridge('send', payload.data, payload);
+        this.sendPayload(payloadToSend as string);
+      } catch (error) {
+        if (_id) {
+          this.rejectCallback(_id, error);
+        } else {
+          this.emit(BRIDGE_EVENTS.error, error);
+        }
       }
-      this.debugLogger.jsBridge('send', payload.data, payload);
-      // TODO sendPayload with function field and stringify?
-      this.sendPayload(payloadToSend as string);
-      // TODO try catch and reject
     };
     if (sync) {
       executor();
@@ -199,16 +205,47 @@ abstract class JsBridgeBase extends EventEmitter {
     }
   }
 
-  rejectCallback(callbackInfo: IJsBridgeCallback, error: any) {
-    if (callbackInfo.reject) {
-      callbackInfo.reject(error);
-    }
-    this.emit(BRIDGE_EVENTS.error, error);
+  rejectCallback(id: number | string, error: unknown) {
+    this.processCallback({
+      method: 'reject',
+      id,
+      error,
+    });
   }
 
-  resolveCallback(callbackInfo: IJsBridgeCallback, data: any) {
-    if (callbackInfo.resolve) {
-      callbackInfo.resolve(data);
+  resolveCallback(id: number | string, data?: unknown) {
+    this.processCallback({
+      method: 'resolve',
+      id,
+      data,
+    });
+  }
+
+  processCallback({
+    method,
+    id,
+    data,
+    error,
+  }: {
+    method: 'resolve' | 'reject';
+    id: number | string;
+    data?: unknown;
+    error?: unknown;
+  }) {
+    const callbackInfo = this.callbacks[id as number];
+    if (callbackInfo) {
+      if (method === 'reject') {
+        if (callbackInfo.reject) {
+          callbackInfo.reject(error);
+        }
+        this.emit(BRIDGE_EVENTS.error, error);
+      }
+      if (method === 'resolve') {
+        if (callbackInfo.resolve) {
+          callbackInfo.resolve(data);
+        }
+      }
+      this.clearCallbackCache(id);
     }
   }
 
@@ -223,8 +260,7 @@ abstract class JsBridgeBase extends EventEmitter {
       if (callbackInfo && callbackInfo.created) {
         if (now - callbackInfo.created > this.callbacksExpireTimeout) {
           const error = web3Errors.provider.requestTimeout();
-          this.rejectCallback(callbackInfo, error);
-          this.clearCallbackCache(id);
+          this.rejectCallback(id, error);
         }
       }
     }
@@ -252,8 +288,12 @@ abstract class JsBridgeBase extends EventEmitter {
       payload = payloadReceived as IJsBridgeMessagePayload;
     }
     if (isString(payloadReceived)) {
-      // TODO try catch
-      payload = JSON.parse(payloadReceived) as IJsBridgeMessagePayload;
+      try {
+        payload = JSON.parse(payloadReceived) as IJsBridgeMessagePayload;
+      } catch (error) {
+        this.emit(BRIDGE_EVENTS.error, error);
+        throw new Error('JsBridge ERROR: JSON.parse payloadReceived failed');
+      }
     }
 
     // !IMPORTANT: force overwrite origin and internal field
@@ -294,14 +334,14 @@ abstract class JsBridgeBase extends EventEmitter {
       if (callbackInfo) {
         try {
           if (error) {
-            this.rejectCallback(callbackInfo, error);
+            this.rejectCallback(id, error);
           } else {
-            this.resolveCallback(callbackInfo, data);
+            this.resolveCallback(id, data);
           }
         } catch (error0) {
           this.emit(BRIDGE_EVENTS.error, error0);
         } finally {
-          this.clearCallbackCache(id);
+          // noop
         }
       }
     } else if (type === IJsBridgeMessageTypes.REQUEST) {
@@ -309,8 +349,6 @@ abstract class JsBridgeBase extends EventEmitter {
         ...payload,
         created: Date.now(),
       };
-      // TODO onReceive/responseMessage -> auto response resolve, catch error reject
-      // TODO add an internal try catch on('message')
       // https://nodejs.org/api/events.html#capture-rejections-of-promises
       // only type=REQUEST message will be handled by globalOnMessage
       this.emit(BRIDGE_EVENTS.message, eventMessagePayload);

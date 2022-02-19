@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { JsBridgeBase } from './JsBridgeBase';
+import { DEBUG_LOGGER_STORAGE_KEY } from './consts';
 
 function fixGlobalShim() {
   // FIX errors in ReactNative
@@ -19,7 +20,9 @@ function injectJsBridge(bridgeCreator: () => JsBridgeBase | unknown): JsBridgeBa
   if (!window?.$onekey?.jsBridge) {
     window.$onekey = window.$onekey || {};
     window.$onekey.jsBridge = bridgeCreator();
-    console.log('===== OneKey jsBridge injected success! 897 >>>>> ', performance.now());
+    if (localStorage.getItem(DEBUG_LOGGER_STORAGE_KEY)) {
+      console.log('===== jsBridge injected success! >>>>> ', performance.now());
+    }
   }
 
   return window.$onekey.jsBridge as JsBridgeBase;

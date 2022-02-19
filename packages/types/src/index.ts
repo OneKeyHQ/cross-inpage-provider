@@ -4,6 +4,8 @@ declare global {
   }
 }
 
+export type ConsoleLike = Pick<Console, 'log' | 'warn' | 'error' | 'debug' | 'info' | 'trace'>;
+
 export enum IJsBridgeMessageTypes {
   RESPONSE = 'RESPONSE', // response result or error
   REQUEST = 'REQUEST',
@@ -58,7 +60,12 @@ export type IJsBridgeMessagePayload = {
 };
 
 export type IDebugLogger = {
+  _externalLogger: ConsoleLike;
+  _debug: { enable: (config: string) => void };
+  _createDebugInstance: (name: string) => unknown;
+  _attachExternalLogger: (logger: ConsoleLike) => void;
   jsBridge: (...args: any[]) => unknown;
+  providerBase: (...args: any[]) => unknown;
   extInjected: (...args: any[]) => unknown;
   extContentScripts: (...args: any[]) => unknown;
 };
@@ -69,7 +76,7 @@ export type IOptionsWithDebugLogger = {
 
 export type IJsBridgeConfig = {
   sendAsString?: boolean;
-  debug?: boolean;
+  timeout?: number;
   receiveHandler?: IJsBridgeReceiveHandler;
   webviewRef?: unknown;
 } & IOptionsWithDebugLogger;

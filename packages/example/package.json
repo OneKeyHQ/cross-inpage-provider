@@ -1,5 +1,6 @@
 {
   "name": "@onekeyfe/cross-inpage-provider-example",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -11,7 +12,7 @@
     "next": "12.0.10",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "@onekeyfe/onekey-near-wallet": "^0.0.2",
+    "@onekeyfe/onekey-near-provider": "^0.0.2",
     "near-api-js": "^0.44.2"
   },
   "devDependencies": {

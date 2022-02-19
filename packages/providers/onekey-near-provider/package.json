@@ -1,5 +1,5 @@
 {
-  "name": "@onekeyfe/onekey-near-wallet",
+  "name": "@onekeyfe/onekey-near-provider",
   "version": "0.0.2",
   "keywords": [
     "cross-inpage-provider"
@@ -35,12 +35,12 @@
     "near-api-js": "^0.44.2"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-types": "^0.0.2",
     "@onekeyfe/cross-inpage-provider-core": "^0.0.2",
+    "@onekeyfe/cross-inpage-provider-errors": "^0.0.2",
+    "@onekeyfe/cross-inpage-provider-types": "^0.0.2",
     "@onekeyfe/extension-bridge-injected": "^0.0.2",
-    "@onekeyfe/cross-inpage-provider-errors": "^0.0.1",
-    "depd": "^2.0.0",
     "borsh": "^0.6.0",
+    "depd": "^2.0.0",
     "tweetnacl": "^1.0.3"
   }
 }

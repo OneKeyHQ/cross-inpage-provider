@@ -26,7 +26,5 @@
     "prebuild": "rm -rf dist",
     "build": "tsc && tsc --project tsconfig.cjs.json",
     "start": "tsc --watch"
-  },
-  "dependencies": {
   }
 }

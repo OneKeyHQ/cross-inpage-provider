@@ -28,7 +28,7 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-types": "^0.0.2",
-    "@onekeyfe/cross-inpage-provider-core": "^0.0.2"
+    "@onekeyfe/cross-inpage-provider-core": "^0.0.2",
+    "@onekeyfe/cross-inpage-provider-types": "^0.0.2"
   }
 }

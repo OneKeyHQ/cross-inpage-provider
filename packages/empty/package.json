@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/cross-inpage-provider-empty",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -26,7 +26,5 @@
     "prebuild": "rm -rf dist",
     "build": "tsc && tsc --project tsconfig.cjs.json",
     "start": "tsc --watch"
-  },
-  "dependencies": {
   }
 }

@@ -63,12 +63,13 @@ export type OneKeyNearWalletProps = {
   networkId: string;
   connectEagerly?: boolean;
   enablePageReload?: boolean;
+  timeout?: number;
   keyPrefix?: string;
   transactionCreator?: TransactionCreator;
 } & IInpageProviderConfig;
 
 export type OneKeyWalletAccountProps = {
-  wallet: OneKeyNearWallet;
+  wallet: OneKeyNearProvider;
   connection: unknown;
   accountId: string;
 };
@@ -155,13 +156,15 @@ const PROVIDER_EVENTS = {
   accountsChanged: 'accountsChanged',
   networkChanged: 'networkChanged',
   message: 'message', // alias notification
+  message_low_level: 'message_low_level',
   initialized: 'near#initialized',
   // legacy events
   connect: 'connect', // alias open (bridge connect)
   disconnect: 'disconnect', // alias close (bridge disconnect)
   chainChanged: 'chainChanged', // alias networkChanged
   unlockChanged: 'unlockChanged',
-};
+} as const;
+export type PROVIDER_EVENTS_STRINGS = keyof typeof PROVIDER_EVENTS;
 
 function isWalletEventMethodMatch({ method, name }: { method: string; name: string }) {
   return method === `metamask_${name}` || method === `wallet_events_${name}`;
@@ -182,13 +185,41 @@ function defaultTransactionCreator({
     receiverId,
     nonce,
     actions,
-    blockHash
+    blockHash,
   );
+}
+
+type OneKeyNearProviderEventsMap = {
+  [PROVIDER_EVENTS.accountsChanged]: (payload: NearAccountsChangedPayload) => void;
+  [PROVIDER_EVENTS.networkChanged]: (payload: NearChainChangedPayload) => void;
+  [PROVIDER_EVENTS.chainChanged]: (payload: NearChainChangedPayload) => void;
+  [PROVIDER_EVENTS.message]: (payload: any) => void;
+  [PROVIDER_EVENTS.message_low_level]: (payload: IJsonRpcRequest) => void;
+  [PROVIDER_EVENTS.initialized]: (payload?: any) => void;
+  [PROVIDER_EVENTS.connect]: (payload?: any) => void;
+  [PROVIDER_EVENTS.disconnect]: (payload?: any) => void;
+  [PROVIDER_EVENTS.unlockChanged]: (payload: NearUnlockChangedPayload) => void;
+};
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+declare interface OneKeyNearProvider {
+  on<U extends keyof OneKeyNearProviderEventsMap>(
+    event: U,
+    listener: OneKeyNearProviderEventsMap[U],
+    context?: any,
+  ): this;
+  emit<U extends keyof OneKeyNearProviderEventsMap>(
+    event: U,
+    ...args: Parameters<OneKeyNearProviderEventsMap[U]>
+  ): boolean;
 }
 
 // TODO check methods return type match official web wallet
 
-class OneKeyNearWallet extends ProviderNearBase {
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+class OneKeyNearProvider extends ProviderNearBase {
   _enablePageReload?: boolean = false;
   _connectEagerly?: boolean = false;
   _authData: NearAccountInfo = DEFAULT_AUTH_DATA;
@@ -209,6 +240,7 @@ class OneKeyNearWallet extends ProviderNearBase {
     networkId,
     enablePageReload,
     connectEagerly = false,
+    timeout,
     logger,
     keyPrefix = '',
     transactionCreator,
@@ -217,7 +249,7 @@ class OneKeyNearWallet extends ProviderNearBase {
     maxEventListeners,
   }: OneKeyNearWalletProps) {
     super({
-      bridge: bridge || getOrCreateExtInjectedJsBridge(),
+      bridge: bridge || getOrCreateExtInjectedJsBridge({ timeout }),
       logger,
       shouldSendMetadata,
       maxEventListeners,
@@ -247,14 +279,13 @@ class OneKeyNearWallet extends ProviderNearBase {
     const isInstalled = Boolean(walletInfo);
 
     if (isInstalled) {
-      // TODO debugLoggerConfig this.bridge.debugLogger
       const providerState = walletInfo?.providerState as NearProviderState | null;
       if (providerState?.accounts && this._connectEagerly) {
         this._handleAccountsChanged(
           {
-            accounts: providerState.accounts,
+            accounts: providerState.accounts || [],
           },
-          { emit: false }
+          { emit: false },
         );
       }
       if (providerState?.network) {
@@ -265,7 +296,12 @@ class OneKeyNearWallet extends ProviderNearBase {
     this._isInstalled = isInstalled;
     this._isInstalledDetected = true;
     if (!isInstalled && this.isSignedIn()) {
-      this._clearAuthData();
+      this._handleAccountsChanged(
+        {
+          accounts: [],
+        },
+        { emit: false },
+      );
     }
 
     if (isInstalled && !this._initializedEmitted) {
@@ -281,7 +317,7 @@ class OneKeyNearWallet extends ProviderNearBase {
     window.addEventListener('onekey_bridge_disconnect', () => {
       this._handleBridgeDisconnect();
     });
-    this.on('message_low_level', (payload: IJsonRpcRequest) => {
+    this.on(PROVIDER_EVENTS.message_low_level, (payload) => {
       const { method, params } = payload;
       if (
         // wallet_events_accountsChanged
@@ -338,17 +374,18 @@ class OneKeyNearWallet extends ProviderNearBase {
   _handleAccountsChanged(payload: NearAccountsChangedPayload, { emit = true } = {}) {
     const accounts = payload?.accounts || [];
     const account = accounts?.[0];
-    if (account && account?.accountId !== this.getAccountId()) {
+    const hasAccount = account && account?.accountId;
+    if (hasAccount && account?.accountId !== this.getAccountId()) {
       this._saveAuthData(account);
       emit && this.emit(PROVIDER_EVENTS.accountsChanged, payload);
-    } else if (!account && this.isSignedIn()) {
+    } else if (!hasAccount && this.isSignedIn()) {
       this._clearAuthData();
       emit && this.emit(PROVIDER_EVENTS.accountsChanged, { accounts: [] });
     }
   }
 
   _handleChainChanged(payload: NearChainChangedPayload, { emit = true } = {}) {
-    if (payload && payload.networkId !== this._selectedNetwork.networkId) {
+    if (payload && payload.networkId !== this._selectedNetwork?.networkId) {
       this._selectedNetwork = payload;
       emit && this.emit(PROVIDER_EVENTS.networkChanged, payload);
       emit && this.emit(PROVIDER_EVENTS.chainChanged, payload);
@@ -358,7 +395,7 @@ class OneKeyNearWallet extends ProviderNearBase {
   _handleUnlockStateChanged(payload: NearUnlockChangedPayload) {
     const isUnlocked = payload?.isUnlocked;
     if (typeof isUnlocked !== 'boolean') {
-      this.logger.error('Received invalid isUnlocked parameter. Please report this bug.');
+      console.error('Received invalid isUnlocked parameter. Please report this bug.');
       return;
     }
     if (isUnlocked !== this._isUnlocked) {
@@ -475,7 +512,7 @@ class OneKeyNearWallet extends ProviderNearBase {
       const contractId = signInOptions;
       const deprecate = depd('requestSignIn(contractId, title)');
       deprecate(
-        '`title` ignored; use `requestSignIn({ contractId, successUrl, failureUrl })` instead'
+        '`title` ignored; use `requestSignIn({ contractId, successUrl, failureUrl })` instead',
       );
       // eslint-disable-next-line prefer-rest-params
       const successUrl = arguments[2] as string;
@@ -499,12 +536,11 @@ class OneKeyNearWallet extends ProviderNearBase {
       params: [options],
     })) as NearAccountInfo;
 
-    this._handleAccountsChanged({
-      accounts: [res],
-    });
-
     if (res && res.accountId) {
-      this._saveAuthData(res);
+      this._handleAccountsChanged({
+        accounts: [res].filter(Boolean),
+      });
+
       this._reloadPage({
         url: options.successUrl || window.location.href,
         query: {
@@ -514,7 +550,10 @@ class OneKeyNearWallet extends ProviderNearBase {
         },
       });
     } else {
-      this._clearAuthData();
+      this._handleAccountsChanged({
+        accounts: [],
+      });
+
       this._reloadPage({
         url: options.failureUrl || window.location.href,
         query: DEFAULT_AUTH_DATA,
@@ -531,10 +570,10 @@ class OneKeyNearWallet extends ProviderNearBase {
     let options = signTransactionsOptions;
     if (Array.isArray(args[0])) {
       const deprecate = depd(
-        'WalletConnection.requestSignTransactions(transactions, callbackUrl, meta)'
+        'WalletConnection.requestSignTransactions(transactions, callbackUrl, meta)',
       );
       deprecate(
-        'use `WalletConnection.requestSignTransactions(RequestSignTransactionsOptions)` instead'
+        'use `WalletConnection.requestSignTransactions(RequestSignTransactionsOptions)` instead',
       );
       options = {
         transactions: args[0] as NearTransaction[],
@@ -552,7 +591,7 @@ class OneKeyNearWallet extends ProviderNearBase {
     const txSerialized = transactions.map((tx) =>
       serializeTransaction({
         transaction: tx,
-      })
+      }),
     );
     // sign and send
     const res = await this._callBridgeRequest({
@@ -632,7 +671,7 @@ class OneKeyNearWallet extends ProviderNearBase {
       method: PROVIDER_METHODS.near_signOut,
       params: this._authData,
     });
-    this._clearAuthData();
+    this._handleAccountsChanged({ accounts: [] });
 
     // signOut() in near web wallet does not reload page
     // this._reloadPage();
@@ -652,7 +691,7 @@ class OneKeyNearWallet extends ProviderNearBase {
 }
 
 class OneKeyWalletAccount extends Account {
-  _wallet: OneKeyNearWallet;
+  _wallet: OneKeyNearProvider;
 
   constructor({ wallet, connection, accountId }: OneKeyWalletAccountProps) {
     super(connection as Connection, accountId);
@@ -736,4 +775,4 @@ class OneKeyWalletAccount extends Account {
   }
 }
 
-export { OneKeyNearWallet, OneKeyWalletAccount, serializeTransaction };
+export { OneKeyNearProvider, OneKeyWalletAccount, serializeTransaction };

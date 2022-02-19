@@ -161,6 +161,12 @@ export const web3Errors = {
       );
     },
 
+    requestTimeout: <T>(arg?: Web3ErrorsArg<T>) => {
+      return getWeb3ProviderError(
+        errorCodes.provider.requestTimeout, arg,
+      );
+    },
+
     /**
      * Get a custom Web3 Provider error.
      */

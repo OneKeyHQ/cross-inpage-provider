@@ -109,7 +109,7 @@ export function serializeError(
   } else {
     serialized.code = fallbackError.code;
 
-    const message = (error as any)?.message;
+    const message = (error as Error)?.message;
 
     serialized.message = (
       message && typeof message === 'string'
@@ -119,7 +119,7 @@ export function serializeError(
     serialized.data = { originalError: assignOriginalError(error) };
   }
 
-  const stack = (error as any)?.stack;
+  const stack = (error as Error)?.stack;
 
   if (shouldIncludeStack && error && stack && typeof stack === 'string') {
     serialized.stack = stack;

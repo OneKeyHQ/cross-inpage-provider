@@ -46,7 +46,6 @@ abstract class JsBridgeBase extends EventEmitter {
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       this.on(BRIDGE_EVENTS.message, this.globalOnMessage);
     }
-    // TODO logger
     this.on(BRIDGE_EVENTS.error, (error) => console.error('JsBridge ERROR: ', error));
     this.rejectExpiredCallbacks();
   }

@@ -4,8 +4,11 @@
 /**
  * This is the web browser implementation of `debug()`.
  */
+
+import { DEBUG_LOGGER_STORAGE_KEY } from '../consts';
+
 import humanize from 'ms';
-const storageKey = '$$ONEKEY_DEBUG_LOGGER';
+const storageKey = DEBUG_LOGGER_STORAGE_KEY;
 
 const exportsBrowser = {};
 
@@ -117,7 +120,6 @@ exportsBrowser.colors = [
  * and the Firebug extension (any Firefox version) are known
  * to support "%c" CSS customizations.
  *
- * TODO: add a `localStorage` variable to explicitly enable/disable colors
  */
 
 function useColors() {

@@ -279,7 +279,6 @@ class OneKeyNearProvider extends ProviderNearBase {
     const isInstalled = Boolean(walletInfo);
 
     if (isInstalled) {
-      // TODO debugLoggerConfig this.bridge.debugLogger
       const providerState = walletInfo?.providerState as NearProviderState | null;
       if (providerState?.accounts && this._connectEagerly) {
         this._handleAccountsChanged(

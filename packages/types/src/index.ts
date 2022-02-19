@@ -58,6 +58,8 @@ export type IJsBridgeMessagePayload = {
 };
 
 export type IDebugLogger = {
+  _debug: { enable: (config: string) => void };
+  _createDebugInstance: (name: string) => unknown;
   jsBridge: (...args: any[]) => unknown;
   extInjected: (...args: any[]) => unknown;
   extContentScripts: (...args: any[]) => unknown;

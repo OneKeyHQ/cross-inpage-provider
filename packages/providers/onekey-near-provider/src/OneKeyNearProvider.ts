@@ -9,7 +9,6 @@ import type { Action as NearTransactionAction } from 'near-api-js/lib/transactio
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
-import type EventEmitter from 'eventemitter3';
 
 export type NearAccountInfo = {
   accountId: string;
@@ -285,7 +284,7 @@ class OneKeyNearProvider extends ProviderNearBase {
       if (providerState?.accounts && this._connectEagerly) {
         this._handleAccountsChanged(
           {
-            accounts: providerState.accounts,
+            accounts: providerState.accounts || [],
           },
           { emit: false },
         );
@@ -298,7 +297,12 @@ class OneKeyNearProvider extends ProviderNearBase {
     this._isInstalled = isInstalled;
     this._isInstalledDetected = true;
     if (!isInstalled && this.isSignedIn()) {
-      this._clearAuthData();
+      this._handleAccountsChanged(
+        {
+          accounts: [],
+        },
+        { emit: false },
+      );
     }
 
     if (isInstalled && !this._initializedEmitted) {
@@ -371,17 +375,18 @@ class OneKeyNearProvider extends ProviderNearBase {
   _handleAccountsChanged(payload: NearAccountsChangedPayload, { emit = true } = {}) {
     const accounts = payload?.accounts || [];
     const account = accounts?.[0];
-    if (account && account?.accountId !== this.getAccountId()) {
+    const hasAccount = account && account?.accountId;
+    if (hasAccount && account?.accountId !== this.getAccountId()) {
       this._saveAuthData(account);
       emit && this.emit(PROVIDER_EVENTS.accountsChanged, payload);
-    } else if (!account && this.isSignedIn()) {
+    } else if (!hasAccount && this.isSignedIn()) {
       this._clearAuthData();
       emit && this.emit(PROVIDER_EVENTS.accountsChanged, { accounts: [] });
     }
   }
 
   _handleChainChanged(payload: NearChainChangedPayload, { emit = true } = {}) {
-    if (payload && payload.networkId !== this._selectedNetwork.networkId) {
+    if (payload && payload.networkId !== this._selectedNetwork?.networkId) {
       this._selectedNetwork = payload;
       emit && this.emit(PROVIDER_EVENTS.networkChanged, payload);
       emit && this.emit(PROVIDER_EVENTS.chainChanged, payload);
@@ -532,12 +537,11 @@ class OneKeyNearProvider extends ProviderNearBase {
       params: [options],
     })) as NearAccountInfo;
 
-    this._handleAccountsChanged({
-      accounts: [res],
-    });
-
     if (res && res.accountId) {
-      this._saveAuthData(res);
+      this._handleAccountsChanged({
+        accounts: [res].filter(Boolean),
+      });
+
       this._reloadPage({
         url: options.successUrl || window.location.href,
         query: {
@@ -547,7 +551,10 @@ class OneKeyNearProvider extends ProviderNearBase {
         },
       });
     } else {
-      this._clearAuthData();
+      this._handleAccountsChanged({
+        accounts: [],
+      });
+
       this._reloadPage({
         url: options.failureUrl || window.location.href,
         query: DEFAULT_AUTH_DATA,

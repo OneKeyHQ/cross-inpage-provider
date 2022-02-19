@@ -12,7 +12,7 @@ export type ConsoleLike = Pick<Console, 'log' | 'warn' | 'error' | 'debug' | 'in
 
 export type IBridgeRequestCallback = (
   error: Error | null,
-  result?: IJsonRpcResponse<unknown>
+  result?: IJsonRpcResponse<unknown>,
 ) => void;
 
 export type IInpageProviderConfig = {
@@ -23,20 +23,24 @@ export type IInpageProviderConfig = {
 };
 
 const fakeLogger: ConsoleLike = {
-  log: () => undefined,
-  warn: () => undefined,
-  error: () => undefined,
-  debug: () => undefined,
-  info: () => undefined,
-  trace: () => undefined,
+  log: (...args: any[]) => undefined,
+  warn: (...args: any[]) => undefined,
+  error: (...args: any[]) => undefined,
+  debug: (...args: any[]) => undefined,
+  info: (...args: any[]) => undefined,
+  trace: (...args: any[]) => undefined,
 };
-
+export type DebugLoggerConfig = {
+  config: string;
+  enabledKeys: string[];
+};
 export type ConnectWalletInfo = {
+  debugLoggerConfig?: DebugLoggerConfig;
   walletInfo?: {
     version?: 'string';
     name?: 'string';
   };
-  providerState?: unknown;
+  providerState: unknown;
 };
 
 const METHODS = {
@@ -62,6 +66,28 @@ abstract class ProviderBase extends EventEmitter {
     }
   }
 
+  configDebugLogger(config: DebugLoggerConfig) {
+    try {
+      if (!config || !this.bridge.debugLogger) {
+        return;
+      }
+      const debugLogger = this.bridge.debugLogger;
+      (config.enabledKeys || []).forEach((key) => {
+        debugLogger._createDebugInstance(key);
+      });
+      if (config.config) {
+        debugLogger._debug.enable(config.config);
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      window.$onekey = window.$onekey || {};
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      window.$onekey.$debugLogger = debugLogger;
+    } catch (error) {
+      console.error('configDebugLogger ERROR:', error);
+    }
+  }
+
   async getConnectWalletInfo({ timeout = 3000 } = {}): Promise<ConnectWalletInfo | null> {
     // eslint-disable-next-line no-async-promise-executor,@typescript-eslint/no-misused-promises
     return new Promise(async (resolve, reject) => {
@@ -73,18 +99,25 @@ abstract class ProviderBase extends EventEmitter {
           method: METHODS.wallet_getConnectWalletInfo,
           params: [{ time: Date.now() }],
         })) as ConnectWalletInfo;
+        if (result) {
+          result.providerState = result.providerState || {};
+        }
+        if (result && result.debugLoggerConfig) {
+          this.configDebugLogger(result.debugLoggerConfig);
+        }
         if (result && result.walletInfo) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           window.$onekey = window.$onekey || {};
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          window.$onekey.walletInfo = result.walletInfo;
+          window.$onekey.$walletInfo = result.walletInfo;
         }
-        if (result && result.providerState) {
+        if (result) {
           resolve(result);
         } else {
           resolve(null);
         }
       } catch (err) {
+        console.error('getConnectWalletInfo: ERROR', err);
         resolve(null);
       } finally {
         clearTimeout(timer);

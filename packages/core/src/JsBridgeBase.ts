@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 import isPlainObject from 'lodash/isPlainObject';
 import isString from 'lodash/isString';
-import { fakeDebugLogger } from './fakeDebugLogger';
+import { fakeDebugLogger, appDebugLogger } from './appDebugLogger';
 
 import {
   IInjectedProviderNamesStrings,
@@ -39,7 +39,7 @@ abstract class JsBridgeBase extends EventEmitter {
     super();
     this.config = config;
     this.callbacksExpireTimeout = config.timeout ?? 60 * 1000;
-    this.debugLogger = config.debugLogger || fakeDebugLogger;
+    this.debugLogger = config.debugLogger || appDebugLogger;
     this.sendAsString = config.sendAsString ?? this.sendAsString;
     this.version = (process.env.VERSION as string) || '';
     if (this.config.receiveHandler) {

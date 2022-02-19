@@ -1,62 +1,16 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import styles from '../styles/Home.module.css';
-import * as NearApi from 'near-api-js';
-import { OneKeyNearProvider, NearAccountsChangedPayload } from '@onekeyfe/onekey-near-provider';
-import { useEffect, useState } from 'react';
 
-const hasWindow = typeof window !== 'undefined';
+const NearExample = dynamic(() => import('../components/near/NearExample'), { ssr: false });
 
 const myImageLoader = ({ src, width, quality }: any) => {
   return src as string;
 };
 
 const Home: NextPage = () => {
-  const [provider, setProvider] = useState<OneKeyNearProvider | null>(null);
-  const [accountId, setAccountId] = useState('');
-  useEffect(() => {
-    if (!hasWindow) {
-      // return;
-    }
-    const config = {
-      networkId: 'mainnet',
-      nodeUrl: 'https://rpc.mainnet.near.org',
-      headers: {},
-      keyStore: new NearApi.keyStores.BrowserLocalStorageKeyStore(),
-    };
-
-    void (async () => {
-      const near = new NearApi.Near(config);
-      const connection = near.connection;
-      // const connection = NearApi.Connection.fromConfig({
-      //   networkId: config.networkId,
-      //   provider: { type: 'JsonRpcProvider', args: { url: config.nodeUrl, headers: config.headers } },
-      //   signer: config.signer || { type: 'InMemorySigner', keyStore: config.keyStore || config.deps.keyStore }
-      // });
-
-      const _provider = new OneKeyNearProvider({
-        connection,
-        networkId: config.networkId,
-        logger: console,
-      });
-      const installed = await _provider.detectWalletInstalled();
-      if (!installed) {
-        return;
-      }
-      setAccountId(_provider.getAccountId());
-      // TODO event name typescript
-      _provider.on('accountsChanged', (payload) => {
-        const _accountId = payload?.accounts?.[0]?.accountId || '';
-        console.log('accountsChanged', _accountId);
-        setAccountId(_accountId);
-      });
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      global.$nearWallet = _provider;
-      setProvider(_provider);
-    })();
-  }, []);
   return (
     <div className={styles.container}>
       <Head>
@@ -70,10 +24,7 @@ const Home: NextPage = () => {
           Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
 
-        <div>{accountId}</div>
-        <button onClick={() => provider?.requestSignIn()}>requestSignIn</button>
-        {/* TODO signOut emit accountsChanged */}
-        <button onClick={() => provider?.signOut()}>signOut</button>
+        <NearExample />
 
         <p className={styles.description}>
           Get started by editing <code className={styles.code}>pages/index.tsx</code>

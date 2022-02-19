@@ -22,7 +22,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          yarn
+          echo 'skipped yarn install at workspace root'
       - name: Build Target
         run: |
           yarn example-build

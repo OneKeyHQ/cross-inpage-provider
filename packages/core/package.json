@@ -27,12 +27,10 @@
     "build": "tsc && tsc --project tsconfig.cjs.json",
     "start": "tsc --watch"
   },
-  "devDependencies": {
-  },
   "dependencies": {
-    "eventemitter3": "^4.0.7",
+    "@onekeyfe/cross-inpage-provider-errors": "^0.0.2",
     "@onekeyfe/cross-inpage-provider-types": "^0.0.2",
-    "@onekeyfe/cross-inpage-provider-errors": "^0.0.1",
+    "eventemitter3": "^4.0.7",
     "lodash": "^4.17.21",
     "ms": "^2.1.3"
   }

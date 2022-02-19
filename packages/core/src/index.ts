@@ -1,6 +1,6 @@
 export * from './JsBridgeBase';
 export * from './ProviderBase';
-export * from './appDebugLogger';
+export * from './loggers';
 export * from './injectJsBridge';
 export * from './injectedProviderReceiveHandler';
 import * as consts from './consts';

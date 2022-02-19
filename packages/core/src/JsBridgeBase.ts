@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 import isPlainObject from 'lodash/isPlainObject';
 import isString from 'lodash/isString';
-import { fakeDebugLogger, appDebugLogger } from './appDebugLogger';
+import { appDebugLogger } from './loggers';
 
 import {
   IInjectedProviderNamesStrings,
@@ -114,7 +114,7 @@ abstract class JsBridgeBase extends EventEmitter {
 
   private readonly callbacksExpireTimeout: number;
 
-  public debugLogger: IDebugLogger = fakeDebugLogger;
+  public debugLogger: IDebugLogger = appDebugLogger;
 
   private callbacks: Array<IJsBridgeCallback> = [];
 
@@ -187,7 +187,7 @@ abstract class JsBridgeBase extends EventEmitter {
         if (this.sendAsString) {
           payloadToSend = JSON.stringify(payload);
         }
-        this.debugLogger.jsBridge('send', payload.data, payload);
+        this.debugLogger.jsBridge('send', payload, '\r\n ------> ', payload.data);
         this.sendPayload(payloadToSend as string);
       } catch (error) {
         if (_id) {
@@ -316,7 +316,15 @@ abstract class JsBridgeBase extends EventEmitter {
       );
     }
 
-    this.debugLogger.jsBridge('receive', payload.data, payload, sender);
+    this.debugLogger.jsBridge(
+      'receive',
+      payload,
+      { sender },
+      '\r\n -----> ',
+      (payload.data as IJsonRpcResponse<any>)?.result,
+      '\r\n -----> ',
+      payload.data,
+    );
 
     const { type, id, data, error, origin, remoteId } = payload;
     this.remoteInfo = {

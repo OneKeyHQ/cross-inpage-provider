@@ -396,7 +396,7 @@ class OneKeyNearProvider extends ProviderNearBase {
   _handleUnlockStateChanged(payload: NearUnlockChangedPayload) {
     const isUnlocked = payload?.isUnlocked;
     if (typeof isUnlocked !== 'boolean') {
-      this.logger.error('Received invalid isUnlocked parameter. Please report this bug.');
+      console.error('Received invalid isUnlocked parameter. Please report this bug.');
       return;
     }
     if (isUnlocked !== this._isUnlocked) {

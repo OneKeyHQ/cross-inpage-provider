@@ -51,7 +51,7 @@ function setupPostMessageListener(options: IOptionsWithDebugLogger = {}) {
         eventData.channel === JS_BRIDGE_MESSAGE_EXT_CHANNEL &&
         eventData.direction === JS_BRIDGE_MESSAGE_DIRECTION.HOST_TO_INPAGE
       ) {
-        debugLogger.extInjected('window.onMessage', eventData);
+        debugLogger.extInjected('onWindowPostMessage', eventData);
 
         const payload = eventData.payload as IJsBridgeMessagePayload;
         const jsBridge = window?.$onekey?.jsBridge as JsBridgeBase;

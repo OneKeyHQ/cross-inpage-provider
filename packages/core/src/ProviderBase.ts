@@ -5,10 +5,11 @@ import { JsBridgeBase } from './JsBridgeBase';
 import {
   IInjectedProviderNamesStrings,
   IJsonRpcResponse,
+  ConsoleLike,
+  IDebugLogger,
 } from '@onekeyfe/cross-inpage-provider-types';
 import siteMetadata from './siteMetadata';
-
-export type ConsoleLike = Pick<Console, 'log' | 'warn' | 'error' | 'debug' | 'info' | 'trace'>;
+import { fakeLogger, fakeDebugLogger } from './loggers';
 
 export type IBridgeRequestCallback = (
   error: Error | null,
@@ -22,14 +23,6 @@ export type IInpageProviderConfig = {
   shouldSendMetadata?: boolean;
 };
 
-const fakeLogger: ConsoleLike = {
-  log: (...args: any[]) => undefined,
-  warn: (...args: any[]) => undefined,
-  error: (...args: any[]) => undefined,
-  debug: (...args: any[]) => undefined,
-  info: (...args: any[]) => undefined,
-  trace: (...args: any[]) => undefined,
-};
 export type DebugLoggerConfig = {
   config: string;
   enabledKeys: string[];
@@ -57,6 +50,8 @@ abstract class ProviderBase extends EventEmitter {
     this.config = config;
     this.bridge = config.bridge;
     this.logger = config.logger || fakeLogger;
+    this.debugLogger = this.bridge?.debugLogger || fakeDebugLogger;
+    this.bridge?.debugLogger?._attachExternalLogger(this.logger);
     setTimeout(() => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       this.bridge.attachProviderInstance(this as any);
@@ -133,6 +128,8 @@ abstract class ProviderBase extends EventEmitter {
 
   public readonly bridge: JsBridgeBase;
 
+  public debugLogger: IDebugLogger = fakeDebugLogger;
+
   public readonly logger: ConsoleLike = fakeLogger;
 
   async bridgeRequest(data: unknown, callback?: IBridgeRequestCallback) {
@@ -141,14 +138,24 @@ abstract class ProviderBase extends EventEmitter {
       hasCallback = true;
     }
     try {
-      const resData = await this.bridge.request({
+      const payload = {
         data: data ?? {},
         scope: this.providerName,
-      });
+      };
+      this.debugLogger.providerBase('bridgeRequest:', payload, '\r\n -----> ', payload.data);
+      const resData = await this.bridge.request(payload);
       const result = resData ? (resData.result as unknown) : undefined;
       if (callback && hasCallback) {
         callback(null, result);
       }
+      this.debugLogger.providerBase(
+        'bridgeRequest RETURN:',
+        { req: payload, res: resData },
+        '\r\n -----> ',
+        payload.data,
+        '\r\n -----> ',
+        result,
+      );
       return result;
     } catch (error) {
       if (callback && hasCallback) {

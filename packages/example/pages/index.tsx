@@ -38,6 +38,7 @@ const Home: NextPage = () => {
       const _provider = new OneKeyNearProvider({
         connection,
         networkId: config.networkId,
+        logger: console,
       });
       const installed = await _provider.detectWalletInstalled();
       if (!installed) {

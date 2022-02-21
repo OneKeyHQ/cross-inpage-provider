@@ -14,19 +14,23 @@ jobs:
       TEST_ENDPOINT: dapp-example.test.onekey.so
     steps:
       - uses: actions/checkout@v2
+
       - name: Setup Environment
         uses: actions/setup-node@v2
         with:
           node-version: 16.x
+
       - name: Install Dependency
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          yarn
+          echo 'skipped yarn install at workspace root'
+
       - name: Build Target
         run: |
           yarn example-build
           cp ./packages/example/out/index.html ./packages/example/out/404.html
+
       - name: Deploy Github Pages
         uses: peaceiris/actions-gh-pages@v3
         with:

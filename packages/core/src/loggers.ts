@@ -28,13 +28,20 @@ class FakeDebugLogger implements IDebugLogger {
     // noop
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  _callExternalLog = (...args: any[]) => this._externalLogger?.log(...args);
+  _createExternalLog =
+    (name: string) =>
+    (...args: any[]) => {
+      const _logger = this._externalLogger;
+      if (_logger) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        return _logger.log(name, ...args);
+      }
+    };
 
-  jsBridge = this._callExternalLog;
-  providerBase = this._callExternalLog;
-  extInjected = this._callExternalLog;
-  extContentScripts = this._callExternalLog;
+  jsBridge = this._createExternalLog('jsBridge >>');
+  providerBase = this._createExternalLog('providerBase >>');
+  extInjected = this._createExternalLog('extInjected >>');
+  extContentScripts = this._createExternalLog('extContentScripts >>');
 }
 
 class AppDebugLogger extends FakeDebugLogger {
@@ -54,8 +61,6 @@ class AppDebugLogger extends FakeDebugLogger {
       this[name] = (...args: any[]) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         _instance(...args);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        this._externalLogger?.log(...args);
       };
     }
   }

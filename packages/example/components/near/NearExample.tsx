@@ -38,7 +38,7 @@ export default function NearExample() {
       const _provider = new OneKeyNearProvider({
         connection,
         networkId: config.networkId,
-        logger: null,
+        // logger: console,
       });
       const installed = await _provider.detectWalletInstalled();
       if (!installed) {
@@ -74,6 +74,9 @@ export default function NearExample() {
           <div>
             <button onClick={() => provider?.requestSignIn()}>signIn</button>
             <button onClick={() => provider?.signOut()}>signOut</button>
+            <button onClick={() => provider?.request({ method: 'near_accounts', params: [] })}>
+              near_accounts
+            </button>
           </div>
         </div>
       )}

@@ -235,6 +235,8 @@ class OneKeyNearProvider extends ProviderNearBase {
   _isInstalledDetected = false;
   _isUnlocked = false;
 
+  // TODO package.json version (process.env.npm_package_version)
+
   constructor({
     connection,
     networkId,

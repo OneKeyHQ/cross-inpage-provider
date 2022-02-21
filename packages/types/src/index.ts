@@ -28,7 +28,7 @@ export type IJsonRpcRequest = {
   id?: number | string;
   jsonrpc?: '2.0' | '1.0';
   method: string;
-  params: Record<string, unknown> | Array<unknown> | unknown;
+  params?: Record<string, unknown> | Array<unknown> | unknown;
 };
 
 export type IJsonRpcResponse<T> = {

@@ -18,7 +18,7 @@ export type IBridgeRequestCallback = (
 
 export type IInpageProviderConfig = {
   bridge?: JsBridgeBase;
-  logger?: ConsoleLike;
+  logger?: ConsoleLike | null;
   maxEventListeners?: number;
   shouldSendMetadata?: boolean;
 };

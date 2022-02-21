@@ -16,14 +16,14 @@ export type NearAccountInfo = {
   allKeys?: string[];
 };
 
-export type NearChainChangedPayload = {
+export type NearNetworkChangedPayload = {
   networkId: string;
   nodeUrls?: string[];
 };
 
 export type NearProviderState = {
   accounts: Array<NearAccountInfo>;
-  network: NearChainChangedPayload;
+  network: NearNetworkChangedPayload;
 };
 
 export type NearAccountsChangedPayload = {
@@ -191,8 +191,8 @@ function defaultTransactionCreator({
 
 type OneKeyNearProviderEventsMap = {
   [PROVIDER_EVENTS.accountsChanged]: (payload: NearAccountsChangedPayload) => void;
-  [PROVIDER_EVENTS.networkChanged]: (payload: NearChainChangedPayload) => void;
-  [PROVIDER_EVENTS.chainChanged]: (payload: NearChainChangedPayload) => void;
+  [PROVIDER_EVENTS.networkChanged]: (payload: NearNetworkChangedPayload) => void;
+  [PROVIDER_EVENTS.chainChanged]: (payload: NearNetworkChangedPayload) => void;
   [PROVIDER_EVENTS.message]: (payload: any) => void;
   [PROVIDER_EVENTS.message_low_level]: (payload: IJsonRpcRequest) => void;
   [PROVIDER_EVENTS.initialized]: (payload?: any) => void;
@@ -228,7 +228,7 @@ class OneKeyNearProvider extends ProviderNearBase {
 
   _connection: NearConnection;
   _networkId = '';
-  _selectedNetwork: NearChainChangedPayload = DEFAULT_NETWORK_INFO;
+  _selectedNetwork: NearNetworkChangedPayload = DEFAULT_NETWORK_INFO;
   _transactionCreator: TransactionCreator;
 
   _isInstalled = false;
@@ -289,7 +289,7 @@ class OneKeyNearProvider extends ProviderNearBase {
         );
       }
       if (providerState?.network) {
-        this._handleChainChanged(providerState.network, { emit: false });
+        this._handleNetworkChanged(providerState.network, { emit: false });
       }
     }
 
@@ -345,7 +345,7 @@ class OneKeyNearProvider extends ProviderNearBase {
           name: 'networkChanged',
         })
       ) {
-        this._handleChainChanged(params as NearChainChangedPayload);
+        this._handleNetworkChanged(params as NearNetworkChangedPayload);
       } else if (
         // wallet_events_message
         isWalletEventMethodMatch({
@@ -366,7 +366,7 @@ class OneKeyNearProvider extends ProviderNearBase {
     this._handleAccountsChanged({
       accounts: [],
     });
-    this._handleChainChanged(DEFAULT_NETWORK_INFO);
+    this._handleNetworkChanged(DEFAULT_NETWORK_INFO);
     this._isInstalled = false;
     this.emit(PROVIDER_EVENTS.disconnect);
   }
@@ -384,7 +384,7 @@ class OneKeyNearProvider extends ProviderNearBase {
     }
   }
 
-  _handleChainChanged(payload: NearChainChangedPayload, { emit = true } = {}) {
+  _handleNetworkChanged(payload: NearNetworkChangedPayload, { emit = true } = {}) {
     if (payload && payload.networkId !== this._selectedNetwork?.networkId) {
       this._selectedNetwork = payload;
       emit && this.emit(PROVIDER_EVENTS.networkChanged, payload);
@@ -528,25 +528,25 @@ class OneKeyNearProvider extends ProviderNearBase {
       options = signInOptions;
     }
 
-    /*
-      { accountId, allKeys: [], publicKey }
-     */
     const res = (await this._callBridgeRequest({
       method: PROVIDER_METHODS.near_requestSignIn,
       params: [options],
-    })) as NearAccountInfo;
+    })) as NearAccountsChangedPayload;
 
-    if (res && res.accountId) {
+    const accounts = res?.accounts || [];
+    const account = accounts?.[0];
+
+    if (account && account.accountId) {
       this._handleAccountsChanged({
-        accounts: [res].filter(Boolean),
+        accounts: accounts.filter(Boolean),
       });
 
       this._reloadPage({
         url: options.successUrl || window.location.href,
         query: {
-          account_id: res.accountId,
-          public_key: res.publicKey,
-          all_keys: res.allKeys,
+          account_id: account.accountId,
+          public_key: account.publicKey,
+          all_keys: account.allKeys,
         },
       });
     } else {

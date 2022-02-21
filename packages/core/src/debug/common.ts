@@ -284,7 +284,8 @@ async function setup(env) {
     );
   }
 
-  await createDebug.enable(await createDebug.load());
+  const config = await createDebug.load();
+  await createDebug.enable(config);
 
   return createDebug;
 }

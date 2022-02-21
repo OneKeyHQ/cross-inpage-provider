@@ -291,6 +291,7 @@ function customLocalStorage() {
       return window.localStorage;
     }
 
+    console.warn('debugLogger init warning, neither `global.$$onekeyAppStorage` nor `window.localStorage` found.')
     return {
       async getItem() {
         return '';

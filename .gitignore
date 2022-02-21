@@ -3,6 +3,7 @@ dist/
 packages/*/dist/
 .next/
 .env.local
-inpage-provider-legacy/
+/inpage-provider-legacy/
 .idea/
 yarn-error.log
+.DS_Store

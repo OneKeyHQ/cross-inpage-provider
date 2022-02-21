@@ -67,7 +67,9 @@ function setupPostMessageListener(options: IOptionsWithDebugLogger = {}) {
 class JsBridgeExtInjected extends JsBridgeBase {
   constructor(config: IJsBridgeConfig) {
     super(config);
-    setupPostMessageListener(config);
+    setupPostMessageListener({
+      debugLogger: this.debugLogger,
+    });
   }
 
   sendAsString = false;

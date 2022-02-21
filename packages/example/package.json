@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "12.1.0",
+    "next": "^12.1.0",
     "@onekeyfe/onekey-near-provider": "^0.0.3",
     "near-api-js": "^0.44.2",
     "react": "17.0.2",

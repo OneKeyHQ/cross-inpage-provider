@@ -43,6 +43,20 @@ class JsBridgeExtBackground extends JsBridgeBase {
     }
   }
 
+  _getOriginFromPort(port: chrome.runtime.Port) {
+    // chrome
+    let origin = port?.sender?.origin || '';
+    // firefox
+    if (!origin && port?.sender?.url) {
+      const uri = new URL(port?.sender?.url);
+      origin = uri?.origin || '';
+    }
+    if (!origin) {
+      console.error(this?.constructor?.name, 'ERROR: origin not found from port sender', port);
+    }
+    return origin;
+  }
+
   setupMessagePortOnConnect() {
     // TODO removeListener
     chrome.runtime.onConnect.addListener((port) => {
@@ -59,7 +73,7 @@ class JsBridgeExtBackground extends JsBridgeBase {
         const portId = this.portIdIndex;
         this.ports[portId] = port;
         const onMessage = (payload: IJsBridgeMessagePayload, port0: chrome.runtime.Port) => {
-          const origin = port0.sender?.origin || '';
+          const origin = this._getOriginFromPort(port0);
           payload.remoteId = portId;
           // eslint-disable-next-line @typescript-eslint/no-this-alias
           const jsBridge = this;
@@ -91,7 +105,7 @@ class JsBridgeExtBackground extends JsBridgeBase {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     entries(this.ports).forEach(async ([portId, port]) => {
       if (port.name === EXT_PORT_CS_TO_BG) {
-        const origin = port?.sender?.origin || '';
+        const origin = this._getOriginFromPort(port);
         if (isFunction(data)) {
           // eslint-disable-next-line no-param-reassign
           data = await data({ origin });

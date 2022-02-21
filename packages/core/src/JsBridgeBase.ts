@@ -99,6 +99,7 @@ abstract class JsBridgeBase extends EventEmitter {
     }
   };
 
+  // TODO package.json version (process.env.npm_package_version)
   public version: string;
 
   public remoteInfo: {
@@ -306,6 +307,7 @@ abstract class JsBridgeBase extends EventEmitter {
     }
 
     if (!payload.origin && !this.isInjected) {
+      console.error(this?.constructor?.name, '[payload.origin] is missing.', this);
       throw new Error('JsBridge ERROR: receive message [payload.origin] is required.');
     }
 

@@ -16,7 +16,7 @@
     "publish-packages": "lerna publish from-package",
     "example": "cd ./packages/example && yarn dev",
     "example-build": "cd ./packages/example && yarn && yarn build",
-    "update-version": "lerna version --no-git-tag-version --no-push"
+    "update-version": "lerna version --no-git-tag-version"
   },
   "devDependencies": {
     "@testing-library/react-hooks": "^7.0.2",

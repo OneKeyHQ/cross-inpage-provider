@@ -8,13 +8,13 @@ import {
   SignInResult,
   SignTransactionsResult,
 } from '@onekeyfe/onekey-near-provider';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as NearApi from 'near-api-js';
 import { random } from 'lodash';
 
 const hasWindow = typeof window !== 'undefined';
 
-function defaultTransactionCreator({
+function transactionCreator({
   accountId,
   publicKey,
   receiverId,
@@ -68,44 +68,50 @@ export default function NearExample() {
     console.log('onNetworkChanged >>>', payload);
     setNetworkId(payload.networkId);
   }, []);
-  const config = {
-    // networkId: 'mainnet',
-    // nodeUrl: 'https://rpc.mainnet.near.org',
-    networkId: 'testnet',
-    nodeUrl: 'https://rpc.testnet.near.org',
-    headers: {},
-    keyStore: new NearApi.keyStores.BrowserLocalStorageKeyStore(),
-  };
+  const config = useMemo(
+    () => ({
+      // networkId: 'mainnet',
+      // nodeUrl: 'https://rpc.mainnet.near.org',
+      networkId: 'testnet',
+      nodeUrl: 'https://rpc.testnet.near.org',
+      headers: {},
+      keyStore: new NearApi.keyStores.BrowserLocalStorageKeyStore(),
+    }),
+    [],
+  );
   useEffect(() => {
     if (!hasWindow) {
       // return;
     }
 
     void (async () => {
-      const near = new NearApi.Near(config);
-      const connection = near.connection;
+      // const near = new NearApi.Near(config);
+      // const connection = near.connection;
       const _provider = new OneKeyNearProvider({
-        connection,
-        networkId: config.networkId,
-        transactionCreator: defaultTransactionCreator,
+        // connection,
+        // networkId: config.networkId, // TODO check values and warning
+        transactionCreator: process.env.NODE_ENV !== 'production' ? transactionCreator : undefined,
         // logger: console,
       });
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      global.$nearWallet = _provider;
       const installed = await _provider.detectWalletInstalled();
       if (!installed) {
         return;
       }
-      setAccountId(_provider.getAccountId());
-      setNetworkId(_provider.getSelectedNetwork().networkId);
-
-      _provider.on('accountsChanged', onAccountsChanged);
-      _provider.on('networkChanged', onNetworkChanged);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      global.$nearWallet = _provider;
       setProvider(_provider);
     })();
-  }, [config, onAccountsChanged, onNetworkChanged]);
+  }, [config]);
   useEffect(() => {
+    if (provider) {
+      setAccountId(provider.getAccountId());
+      setNetworkId(provider.getNetworkInfo().networkId);
+
+      provider.on('accountsChanged', onAccountsChanged);
+      provider.on('networkChanged', onNetworkChanged);
+    }
+
     return () => {
       if (provider) {
         provider.off('accountsChanged', onAccountsChanged);
@@ -120,7 +126,9 @@ export default function NearExample() {
       {provider && (
         <div>
           <div>accountId: {accountId}</div>
-          <div>localNetworkId: {config.networkId}</div>
+          <div>
+            localNetworkId: {provider._networkId} <button>switch</button>
+          </div>
           <div>walletNetworkId: {networkId}</div>
 
           <hr />
@@ -172,6 +180,28 @@ export default function NearExample() {
           >
             near_network
           </button>
+          <button
+            onClick={async () => {
+              const res = await provider?.request({
+                method: 'near_accountNonce',
+                params: [],
+              });
+              console.log('near_accountNonce', res);
+            }}
+          >
+            near_accountNonce
+          </button>
+          <button
+            onClick={async () => {
+              const res = await provider?.request({
+                method: 'near_blockInfo',
+                params: [],
+              });
+              console.log('near_blockInfo', res);
+            }}
+          >
+            near_blockInfo
+          </button>
 
           <hr />
           <div>
@@ -200,6 +230,21 @@ export default function NearExample() {
             >
               requestSignTransactions
             </button>
+            <button
+              onClick={async () => {
+                const transactions = await createSampleBatchTransactions();
+                const res = (await provider.request({
+                  method: 'near_signTransactions',
+                  params: {
+                    transactions,
+                  },
+                })) as SignMessagesResult;
+                console.log('near_signTransactions', res, res.signatures);
+              }}
+            >
+              near_signTransactions
+            </button>
+            <button>TODO Send USDT Token (mainnet only)</button>
             <button
               onClick={async () => {
                 const num1 = random(100, 900) / 10000;
@@ -243,6 +288,57 @@ export default function NearExample() {
               }}
             >
               requestSignMessages
+            </button>
+
+            <hr />
+            <button
+              onClick={async () => {
+                const res = await provider.request({
+                  'method': 'query',
+                  'params': {
+                    'request_type': 'view_access_key_list',
+                    'account_id':
+                      'c3be856133196da252d0f1083614cdc87a85c8aa8abeaf87daff1520355eec53',
+                    'finality': 'optimistic',
+                  },
+                });
+                console.log('RPC Call: view_access_key_list', res);
+              }}
+            >
+              RPC Call: view_access_key_list
+            </button>
+            <button
+              onClick={async () => {
+                const res = await provider.request({
+                  'method': 'gas_price',
+                  'params': [null],
+                });
+                console.log('RPC Call: gas_price', res);
+              }}
+            >
+              RPC Call: gas_price
+            </button>
+            <button
+              onClick={async () => {
+                const res = await provider.request({
+                  'method': 'status',
+                  'params': [null],
+                });
+                console.log('RPC Call: status', res);
+              }}
+            >
+              RPC Call: status
+            </button>
+            <button
+              onClick={async () => {
+                const res = await provider.request({
+                  'method': 'network_info',
+                  'params': [],
+                });
+                console.log('RPC Call: network_info', res);
+              }}
+            >
+              RPC Call: network_info
             </button>
           </div>
         </div>

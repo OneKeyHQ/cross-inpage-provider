@@ -3,6 +3,7 @@ import Head from 'next/head';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import styles from '../styles/Home.module.css';
+import { version } from '../package.json';
 
 const NearExample = dynamic(() => import('../components/near/NearExample'), { ssr: false });
 
@@ -20,16 +21,14 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Near Dapp Example
-        </h1>
+        <h1 className={styles.title}>Near Dapp Example</h1>
 
         <NearExample />
       </main>
 
       <footer className={styles.footer}>
         <a href="https://www.onekey.so" target="_blank" rel="noopener noreferrer">
-          Powered by OneKey
+          Powered by OneKey v{version}
         </a>
       </footer>
     </div>

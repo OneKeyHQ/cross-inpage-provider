@@ -5,6 +5,8 @@ on: workflow_dispatch
 jobs:
   publish-packages:
     runs-on: ubuntu-latest
+    env:
+      TEST_ENDPOINT: dapp-example.test.onekey.so
     steps:
       - uses: actions/checkout@v2
 

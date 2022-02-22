@@ -1,9 +1,14 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { IDebugLogger, ConsoleLike } from '@onekeyfe/cross-inpage-provider-types';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import createDebugAsync from './debug';
 
+// enable debugLogger:
+//    localStorage.setItem('$$ONEKEY_DEBUG_LOGGER', '*');
+
 const fakeLogger: ConsoleLike = {
+  // @ts-ignore
+  _isFakeLogger: true,
   log: (...args: any[]) => undefined,
   warn: (...args: any[]) => undefined,
   error: (...args: any[]) => undefined,
@@ -51,16 +56,27 @@ class AppDebugLogger extends FakeDebugLogger {
   }
   _debug: any;
 
+  _debugInstanceCreatedMap: Record<string, boolean> = {};
+
   _createDebugInstance(name: string) {
+    if (this._debugInstanceCreatedMap[name]) {
+      return;
+    }
+    this._debugInstanceCreatedMap[name] = true;
     if (name && this._debug && typeof this._debug === 'function') {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
-      const _instance = this._debug(name);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      const _debugLog = this._debug(name) as (...args: any[]) => any;
+      // @ts-ignore
+      const _originLog = this[name] as (...args: any[]) => any;
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
       this[name] = (...args: any[]) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        _instance(...args);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        _debugLog(...args);
+        if (_originLog && typeof _originLog === 'function') {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          _originLog(...args);
+        }
       };
     }
   }

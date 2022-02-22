@@ -1,15 +1,16 @@
 {
   "name": "@onekeyfe/cross-inpage-provider-example",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build && next export",
     "start-web": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "clean": "rm -rf ./node_modules && rm -rf ./.next && rm -rf ./out"
   },
   "dependencies": {
-    "@onekeyfe/onekey-near-provider": "^0.0.4",
+    "@onekeyfe/onekey-near-provider": "^0.0.5",
     "near-api-js": "^0.44.2",
     "next": "^12.1.0",
     "react": "17.0.2",

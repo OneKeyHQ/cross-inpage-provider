@@ -1,7 +1,7 @@
 import {
   consts,
   isLegacyExtMessage,
-  fakeDebugLogger,
+  appDebugLogger,
   injectedFactory,
 } from '@onekeyfe/cross-inpage-provider-core';
 import {
@@ -31,7 +31,7 @@ function inject(filename: string) {
 
 // TODO one-time only
 function setupMessagePort(options: IOptionsWithDebugLogger = {}) {
-  const debugLogger = options.debugLogger || fakeDebugLogger;
+  const debugLogger = options.debugLogger || appDebugLogger;
   messagePort.connect({
     name: EXT_PORT_CS_TO_BG,
     // #### background -> content-script

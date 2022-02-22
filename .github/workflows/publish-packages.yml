@@ -27,3 +27,17 @@ jobs:
         run: |
           git reset --hard
           yarn publish-packages -y
+
+      - name: Build Example Web
+        run: |
+          yarn clean-workspace
+          yarn example-build
+          cp ./packages/example/out/index.html ./packages/example/out/404.html
+
+      - name: Deploy Github Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./packages/example/out
+          cname: ${{ env.TEST_ENDPOINT }}
+          force_orphan: true

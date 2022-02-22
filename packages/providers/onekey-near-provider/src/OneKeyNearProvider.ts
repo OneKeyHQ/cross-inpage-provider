@@ -16,10 +16,12 @@ export type NearAccountInfo = {
   allKeys?: string[];
 };
 
-export type NearNetworkChangedPayload = {
+export type NearNetworkInfo = {
   networkId: string;
   nodeUrls?: string[];
 };
+
+export type NearNetworkChangedPayload = NearNetworkInfo;
 
 export type NearProviderState = {
   accounts: Array<NearAccountInfo>;
@@ -74,12 +76,16 @@ export type OneKeyWalletAccountProps = {
   accountId: string;
 };
 
+export type CommonOptionsMeta = unknown | string | object;
+
 export type SignInOptions = {
   contractId?: string;
   methodNames?: string[];
   successUrl?: string;
   failureUrl?: string;
 };
+
+export type SignInResult = NearAccountsChangedPayload;
 
 export type NearTransaction = {
   encode: () => Uint8Array;
@@ -96,13 +102,21 @@ export type NearAccountAccessKeyInfo = {
 export type SignTransactionsOptions = {
   transactions: NearTransaction[];
   callbackUrl?: string;
-  meta?: unknown | string;
+  meta?: CommonOptionsMeta;
   send?: boolean;
+};
+
+export type SignTransactionsResult = {
+  transactionHashes: string[];
 };
 
 export type SignMessagesOptions = {
   messages: string[];
-  meta?: unknown | string | object;
+  meta?: CommonOptionsMeta;
+};
+
+export type SignMessagesResult = {
+  signatures: string[];
 };
 
 export type CreateTransactionOptions = {
@@ -114,7 +128,7 @@ export type CreateTransactionOptions = {
 export type SignAndSendTransactionOptions = {
   receiverId: string;
   actions: NearTransactionAction[];
-  meta?: object;
+  meta?: CommonOptionsMeta;
   callbackUrl?: string;
 };
 
@@ -138,9 +152,13 @@ const DEFAULT_NETWORK_INFO = {
 };
 const PROVIDER_METHODS = {
   near_accounts: 'near_accounts',
+
+  near_network: 'near_network',
   near_networkInfo: 'near_networkInfo',
 
+  near_requestAccounts: 'near_requestAccounts',
   near_requestSignIn: 'near_requestSignIn',
+
   near_signOut: 'near_signOut',
 
   near_requestSignTransactions: 'near_requestSignTransactions',
@@ -148,8 +166,8 @@ const PROVIDER_METHODS = {
 
   near_signTransactions: 'near_signTransactions',
 
-  near_requestSignMessages: 'near_requestSignMessages',
   near_signMessages: 'near_signMessages',
+  near_requestSignMessages: 'near_requestSignMessages',
 };
 
 const PROVIDER_EVENTS = {
@@ -508,7 +526,7 @@ class OneKeyNearProvider extends ProviderNearBase {
     this._initAuthDataFromStorage();
   }
 
-  async requestSignIn(signInOptions: SignInOptions = {}) {
+  async requestSignIn(signInOptions: SignInOptions = {}): Promise<SignInResult> {
     let options: SignInOptions;
     if (typeof signInOptions === 'string') {
       const contractId = signInOptions;
@@ -533,7 +551,7 @@ class OneKeyNearProvider extends ProviderNearBase {
     const res = (await this._callBridgeRequest({
       method: PROVIDER_METHODS.near_requestSignIn,
       params: [options],
-    })) as NearAccountsChangedPayload;
+    })) as SignInResult;
 
     const accounts = res?.accounts || [];
     const account = accounts?.[0];
@@ -566,7 +584,9 @@ class OneKeyNearProvider extends ProviderNearBase {
 
   // TODO check if account is activated on chain, and show ApprovalPopup message
   //      DO NOT allow inactivated account approve connection
-  async requestSignTransactions(signTransactionsOptions: SignTransactionsOptions) {
+  async requestSignTransactions(
+    signTransactionsOptions: SignTransactionsOptions,
+  ): Promise<SignTransactionsResult> {
     // eslint-disable-next-line prefer-rest-params
     const args = arguments;
     let options = signTransactionsOptions;
@@ -604,15 +624,18 @@ class OneKeyNearProvider extends ProviderNearBase {
       url: callbackUrl,
       query: res,
     });
-    return res;
+    return res as SignTransactionsResult;
   }
 
-  async requestSignMessages({ messages = [], meta = {} }: SignMessagesOptions) {
+  async requestSignMessages({
+    messages = [],
+    meta = {},
+  }: SignMessagesOptions): Promise<SignMessagesResult> {
     const res = await this._callBridgeRequest({
       method: PROVIDER_METHODS.near_requestSignMessages,
       params: [{ messages, meta }],
     });
-    return res;
+    return res as SignMessagesResult;
   }
 
   // TODO requestBatch
@@ -621,9 +644,17 @@ class OneKeyNearProvider extends ProviderNearBase {
     const paramsArr = ([] as any[]).concat(params);
     const paramObj = paramsArr[0] as unknown;
 
-    if (method === PROVIDER_METHODS.near_requestSignIn) {
+    if (method === PROVIDER_METHODS.near_network) {
+      method = PROVIDER_METHODS.near_networkInfo;
+    }
+
+    if (
+      method === PROVIDER_METHODS.near_requestAccounts ||
+      method === PROVIDER_METHODS.near_requestSignIn
+    ) {
       return this.requestSignIn(paramObj as SignInOptions);
     }
+
     if (
       method === PROVIDER_METHODS.near_sendTransactions ||
       method === PROVIDER_METHODS.near_requestSignTransactions ||
@@ -634,11 +665,16 @@ class OneKeyNearProvider extends ProviderNearBase {
       optionsNew.send = method !== PROVIDER_METHODS.near_signTransactions;
       return this.requestSignTransactions(optionsNew);
     }
+
     if (
       method === PROVIDER_METHODS.near_signMessages ||
       method === PROVIDER_METHODS.near_requestSignMessages
     ) {
       return this.requestSignMessages(paramObj as SignMessagesOptions);
+    }
+
+    if (method === PROVIDER_METHODS.near_signOut) {
+      return this.signOut();
     }
 
     return await this._callBridgeRequest({
@@ -653,7 +689,6 @@ class OneKeyNearProvider extends ProviderNearBase {
     return provider.sendJsonRpc(method, params);
   }
 
-  // SpecialWallet required
   createTransaction({ receiverId, actions, nonceOffset = 1 }: CreateTransactionOptions) {
     return this.account().createTransaction({
       receiverId,
@@ -722,14 +757,17 @@ class OneKeyWalletAccount extends Account {
 
     const txHashList = await this._wallet.requestSignTransactions({
       transactions: [transaction],
-      meta: {
-        ...meta,
-      },
+      meta,
       callbackUrl,
     });
-    // TODO return typeof this.connection.provider.sendTransaction
-    // same type to pending tx polling result
-    return txHashList;
+    const txHash = txHashList?.transactionHashes?.[0];
+    if (txHash) {
+      const res = await this.connection.provider.txStatus(txHash, this.accountId);
+      return res;
+    }
+    throw web3Errors.rpc.internal({
+      message: 'Transaction sign and send failed: transactionHash not found',
+    });
   }
 
   async _fetchAccountAccessKey({ publicKey, accountId }: { publicKey: string; accountId: string }) {

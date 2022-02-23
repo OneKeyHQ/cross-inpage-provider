@@ -1,5 +1,5 @@
 .container {
-  padding: 0 2rem;
+  padding: 1rem 2rem;
 }
 
 .main {
@@ -40,9 +40,9 @@
 }
 
 .title {
-  margin: 0;
+  margin: 12px auto;
   line-height: 1.15;
-  font-size: 4rem;
+  font-size: 3rem;
 }
 
 .title,

@@ -59,6 +59,7 @@ export default function NearExample() {
     const transactions = [tx1, tx2];
     return transactions;
   }, [provider]);
+
   const onAccountsChanged = useCallback((payload: NearAccountsChangedPayload) => {
     const _accountId = payload?.accounts?.[0]?.accountId || '';
     console.log('onAccountsChanged >>>', _accountId);
@@ -79,69 +80,70 @@ export default function NearExample() {
     }),
     [],
   );
+
   useEffect(() => {
     if (!hasWindow) {
       // return;
     }
 
-    void (async () => {
-      // const near = new NearApi.Near(config);
-      // const connection = near.connection;
-      const _provider = new OneKeyNearProvider({
-        // connection,
-        // networkId: config.networkId,
-        connectEagerly: true, // auto connect wallet accounts even if localStorage cleared
-        transactionCreator: process.env.NODE_ENV !== 'production' ? transactionCreator : undefined,
-        // logger: console,
-      });
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      global.$wallet = _provider;
-      const installed = await _provider.detectWalletInstalled();
-      if (!installed) {
-        return;
-      }
-      setProvider(_provider);
-    })();
-  }, [config]);
-  useEffect(() => {
-    if (provider) {
-      provider.on('accountsChanged', onAccountsChanged);
-      provider.on('networkChanged', onNetworkChanged);
+    // const near = new NearApi.Near(config);
+    // const connection = near.connection;
+    const _provider = new OneKeyNearProvider({
+      // connection,
+      // networkId: config.networkId,
+      connectEagerly: true, // auto connect wallet accounts even if localStorage cleared
+      transactionCreator: process.env.NODE_ENV !== 'production' ? transactionCreator : undefined,
+      // logger: console,
+    });
+    _provider.on('accountsChanged', onAccountsChanged);
+    _provider.on('networkChanged', onNetworkChanged);
 
-      void (async () => {
-        const res1 = (await provider.request({
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    global.$wallet = _provider;
+
+    void (async () => {
+      const installed = await _provider.detectWalletInstalled();
+      if (installed) {
+        setProvider(_provider);
+
+        const res1 = (await _provider.request({
           method: 'near_accounts',
         })) as NearAccountsChangedPayload;
         setAccountId(res1?.accounts?.[0]?.accountId || '');
         // setAccountId(provider.getAccountId());
 
-        const res2 = (await provider.request({
+        const res2 = (await _provider.request({
           method: 'near_networkInfo',
         })) as NearNetworkChangedPayload;
         setNetworkId(res2?.networkId || '');
         // setNetworkId(provider.getNetworkInfo().networkId);
-      })();
-    }
+      }
+    })();
 
     return () => {
-      if (provider) {
-        provider.off('accountsChanged', onAccountsChanged);
-        provider.off('networkChanged', onNetworkChanged);
-      }
+      _provider.off('accountsChanged', onAccountsChanged);
+      _provider.off('networkChanged', onNetworkChanged);
     };
-  }, [onAccountsChanged, onNetworkChanged, provider]);
+  }, [config, onAccountsChanged, onNetworkChanged]);
 
   return (
     <div>
       {!provider && <a href={'https://onekey.so/plugin'}>Install OneKey Extension →</a>}
       {provider && (
         <div>
-          <div>accountId: {accountId}</div>
           <div>
-            localNetworkId: {provider._networkId} <button>switch</button>
+            accountId: <strong>{accountId}</strong>
           </div>
-          <div>walletNetworkId: {networkId}</div>
+          <div>
+            localNetworkId: <strong>{provider._networkId}</strong> <button>switch</button>
+          </div>
+          <div>
+            walletNetworkId: <strong>{networkId}</strong>
+          </div>
+          <div>
+            providerVersion: <strong>v{provider.version}</strong>
+          </div>
 
           <hr />
           <button

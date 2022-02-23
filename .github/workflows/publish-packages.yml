@@ -30,6 +30,11 @@ jobs:
           git reset --hard
           yarn publish-packages -y
 
+      - name: Sleep for 30 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '30s'
+
       - name: Build Example Web
         run: |
           yarn clean-workspace

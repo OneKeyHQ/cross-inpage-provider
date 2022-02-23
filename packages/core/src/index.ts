@@ -11,3 +11,5 @@ export { injectedFactory };
 
 import siteMetadata from './siteMetadata';
 export { siteMetadata };
+
+export { default as versionInfo } from './versionInfo';

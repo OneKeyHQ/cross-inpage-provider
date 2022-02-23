@@ -10,6 +10,7 @@ import {
 } from '@onekeyfe/cross-inpage-provider-types';
 import siteMetadata from './siteMetadata';
 import { fakeLogger, fakeDebugLogger } from './loggers';
+import versionInfo from './versionInfo';
 
 export type IBridgeRequestCallback = (
   error: Error | null,
@@ -119,6 +120,8 @@ abstract class ProviderBase extends EventEmitter {
       }
     });
   }
+
+  public version: string = versionInfo.version;
 
   public isOneKey = true;
 

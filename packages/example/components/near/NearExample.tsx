@@ -89,13 +89,14 @@ export default function NearExample() {
       // const connection = near.connection;
       const _provider = new OneKeyNearProvider({
         // connection,
-        // networkId: config.networkId, // TODO check values and warning
+        // networkId: config.networkId,
+        connectEagerly: true, // auto connect wallet accounts even if localStorage cleared
         transactionCreator: process.env.NODE_ENV !== 'production' ? transactionCreator : undefined,
         // logger: console,
       });
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      global.$nearWallet = _provider;
+      global.$wallet = _provider;
       const installed = await _provider.detectWalletInstalled();
       if (!installed) {
         return;
@@ -105,11 +106,22 @@ export default function NearExample() {
   }, [config]);
   useEffect(() => {
     if (provider) {
-      setAccountId(provider.getAccountId());
-      setNetworkId(provider.getNetworkInfo().networkId);
-
       provider.on('accountsChanged', onAccountsChanged);
       provider.on('networkChanged', onNetworkChanged);
+
+      void (async () => {
+        const res1 = (await provider.request({
+          method: 'near_accounts',
+        })) as NearAccountsChangedPayload;
+        setAccountId(res1?.accounts?.[0]?.accountId || '');
+        // setAccountId(provider.getAccountId());
+
+        const res2 = (await provider.request({
+          method: 'near_networkInfo',
+        })) as NearNetworkChangedPayload;
+        setNetworkId(res2?.networkId || '');
+        // setNetworkId(provider.getNetworkInfo().networkId);
+      })();
     }
 
     return () => {
@@ -172,13 +184,13 @@ export default function NearExample() {
           <button
             onClick={async () => {
               const res = (await provider?.request({
-                method: 'near_network',
+                method: 'near_networkInfo',
                 params: [],
               })) as NearNetworkChangedPayload;
-              console.log('near_network', res, res.networkId);
+              console.log('near_networkInfo', res, res.networkId);
             }}
           >
-            near_network
+            near_networkInfo
           </button>
           <button
             onClick={async () => {

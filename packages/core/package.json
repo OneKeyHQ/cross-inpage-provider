@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/cross-inpage-provider-core",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -24,12 +24,13 @@
   "main": "./dist/cjs/index.js",
   "scripts": {
     "prebuild": "rm -rf dist",
-    "build": "tsc && tsc --project tsconfig.cjs.json",
-    "start": "tsc --watch"
+    "build": "yarn build-version-info && tsc && tsc --project tsconfig.cjs.json",
+    "start": "tsc --watch",
+    "build-version-info": "node ./scripts/buildVersionInfo.js"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-errors": "^0.0.5",
-    "@onekeyfe/cross-inpage-provider-types": "^0.0.5",
+    "@onekeyfe/cross-inpage-provider-errors": "^0.0.6",
+    "@onekeyfe/cross-inpage-provider-types": "^0.0.6",
     "eventemitter3": "^4.0.7",
     "lodash": "^4.17.21",
     "ms": "^2.1.3"

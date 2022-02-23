@@ -1,6 +1,8 @@
 import depd from 'depd';
-import { ProviderNearBase } from './ProviderNearBase';
 import { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
+import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
+import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
+import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
 import entries from 'lodash/entries';
 import isString from 'lodash/isString';
 import { baseEncode, baseDecode } from 'borsh';
@@ -15,9 +17,7 @@ import type {
   FinalExecutionOutcome,
 } from 'near-api-js/lib/providers/provider';
 import type { JsonRpcProvider } from 'near-api-js/lib/providers';
-import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
-import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
-import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
+import { ProviderNearBase } from './ProviderNearBase';
 
 export type NearAccountInfo = {
   accountId: string;
@@ -225,7 +225,7 @@ declare interface OneKeyNearProvider {
 // @ts-ignore
 class OneKeyNearProvider extends ProviderNearBase {
   _enablePageReload?: boolean = false;
-  _connectEagerly?: boolean = false;
+  _connectEagerly?: boolean = true;
   _authData: NearAccountInfo = DEFAULT_AUTH_DATA;
   _authDataKey = '@OneKeyNearWalletAuthData';
   _account?: OneKeyWalletAccount | null;
@@ -245,7 +245,7 @@ class OneKeyNearProvider extends ProviderNearBase {
     connection,
     networkId,
     enablePageReload,
-    connectEagerly = false,
+    connectEagerly = true,
     timeout,
     logger,
     keyPrefix = '',
@@ -500,7 +500,7 @@ class OneKeyNearProvider extends ProviderNearBase {
   }
 
   getNetworkInfo() {
-    return this._selectedNetwork;
+    return this._selectedNetwork || DEFAULT_NETWORK_INFO;
   }
 
   _saveAuthData(data: NearAccountInfo) {

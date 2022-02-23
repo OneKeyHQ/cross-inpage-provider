@@ -82,6 +82,7 @@ class AppDebugLogger extends FakeDebugLogger {
   }
 }
 
+// TODO merge FakeDebugLogger and AppDebugLogger to single class
 const fakeDebugLogger: IDebugLogger = new FakeDebugLogger();
 const appDebugLogger: IDebugLogger = new AppDebugLogger();
 

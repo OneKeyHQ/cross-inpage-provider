@@ -24,8 +24,9 @@
   "main": "./dist/cjs/index.js",
   "scripts": {
     "prebuild": "rm -rf dist",
-    "build": "tsc && tsc --project tsconfig.cjs.json",
-    "start": "tsc --watch"
+    "build": "yarn build-version-info && tsc && tsc --project tsconfig.cjs.json",
+    "start": "tsc --watch",
+    "build-version-info": "node ./scripts/buildVersionInfo.js"
   },
   "dependencies": {
     "@onekeyfe/cross-inpage-provider-errors": "^0.0.5",

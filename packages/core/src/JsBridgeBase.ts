@@ -13,6 +13,7 @@ import {
   IDebugLogger,
 } from '@onekeyfe/cross-inpage-provider-types';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
+import versionInfo from './versionInfo';
 
 function isLegacyExtMessage(payload: unknown): boolean {
   const payloadObj = payload as { name: string };
@@ -41,7 +42,6 @@ abstract class JsBridgeBase extends EventEmitter {
     this.callbacksExpireTimeout = config.timeout ?? 60 * 1000;
     this.debugLogger = config.debugLogger || appDebugLogger;
     this.sendAsString = config.sendAsString ?? this.sendAsString;
-    this.version = (process.env.VERSION as string) || '';
     if (this.config.receiveHandler) {
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       this.on(BRIDGE_EVENTS.message, this.globalOnMessage);
@@ -99,8 +99,7 @@ abstract class JsBridgeBase extends EventEmitter {
     }
   };
 
-  // TODO package.json version (process.env.npm_package_version)
-  public version: string;
+  public version: string = versionInfo.version;
 
   public remoteInfo: {
     origin?: string;

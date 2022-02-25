@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 import isPlainObject from 'lodash/isPlainObject';
 import isString from 'lodash/isString';
-import { appDebugLogger } from './loggers';
+import { appDebugLogger, consoleErrorInDev } from './loggers';
 
 import {
   IInjectedProviderNamesStrings,
@@ -46,7 +46,9 @@ abstract class JsBridgeBase extends EventEmitter {
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       this.on(BRIDGE_EVENTS.message, this.globalOnMessage);
     }
-    this.on(BRIDGE_EVENTS.error, (error) => console.error('JsBridge ERROR: ', error));
+    this.on(BRIDGE_EVENTS.error, (error) => {
+      consoleErrorInDev('JsBridge ERROR: ', error);
+    });
     this.rejectExpiredCallbacks();
   }
 
@@ -306,7 +308,7 @@ abstract class JsBridgeBase extends EventEmitter {
     }
 
     if (!payload.origin && !this.isInjected) {
-      console.error(this?.constructor?.name, '[payload.origin] is missing.', this);
+      consoleErrorInDev(this?.constructor?.name, '[payload.origin] is missing.', this);
       throw new Error('JsBridge ERROR: receive message [payload.origin] is required.');
     }
 
@@ -391,9 +393,7 @@ abstract class JsBridgeBase extends EventEmitter {
   }): Promise<IJsonRpcResponse<unknown>> | undefined {
     const { data, remoteId, scope } = info;
     if (data === undefined) {
-      console.warn(
-        'JsBridge ERROR: params data field is missing. Call method like `bridge.request({ data: {...} });`',
-      );
+      console.warn('JsBridge ERROR: data required. Call like `bridge.request({ data: {...} });`');
     }
     return this.send({
       type: IJsBridgeMessageTypes.REQUEST,

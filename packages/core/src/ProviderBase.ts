@@ -9,7 +9,7 @@ import {
   IDebugLogger,
 } from '@onekeyfe/cross-inpage-provider-types';
 import siteMetadata from './siteMetadata';
-import { fakeLogger, fakeDebugLogger } from './loggers';
+import { fakeLogger, fakeDebugLogger, consoleErrorInDev } from './loggers'
 import versionInfo from './versionInfo';
 
 export type IBridgeRequestCallback = (
@@ -80,7 +80,7 @@ abstract class ProviderBase extends EventEmitter {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       window.$onekey.$debugLogger = debugLogger;
     } catch (error) {
-      console.error('configDebugLogger ERROR:', error);
+      consoleErrorInDev('configDebugLogger ERROR:', error);
     }
   }
 
@@ -113,7 +113,7 @@ abstract class ProviderBase extends EventEmitter {
           resolve(null);
         }
       } catch (err) {
-        console.error('getConnectWalletInfo: ERROR', err);
+        consoleErrorInDev('getConnectWalletInfo: ERROR', err);
         resolve(null);
       } finally {
         clearTimeout(timer);

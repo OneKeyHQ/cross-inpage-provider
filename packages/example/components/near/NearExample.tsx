@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/restrict-plus-operands */
+/* eslint-disable @typescript-eslint/restrict-plus-operands,@typescript-eslint/ban-ts-comment */
 import {
   OneKeyNearProvider,
   NearAccountsChangedPayload,
@@ -14,6 +14,22 @@ import { random } from 'lodash';
 
 const hasWindow = typeof window !== 'undefined';
 
+declare global {
+  interface Window {
+    provider: OneKeyNearProvider;
+    nearAPI: typeof NearApi;
+    OneKeyNearProvider: any;
+  }
+}
+
+window.nearAPI = NearApi;
+window.OneKeyNearProvider = OneKeyNearProvider;
+
+// TODO mobile web
+// TODO Toggle debugLogger button
+// TODO 0.0.7
+
+// fix: Error: Class Action is missing in schema: actions.actions
 function transactionCreator({
   accountId,
   publicKey,
@@ -36,6 +52,7 @@ function transactionCreator({
 export default function NearExample() {
   const [provider, setProvider] = useState<OneKeyNearProvider | null>(null);
   const [accountId, setAccountId] = useState('');
+  const [publicKey, setPublicKey] = useState('');
   const [networkId, setNetworkId] = useState('');
 
   const createSampleBatchTransactions = useCallback(async () => {
@@ -46,6 +63,7 @@ export default function NearExample() {
     const num2 = random(100, 900) / 10000;
     const action1 = NearApi.transactions.transfer(NearApi.utils.format.parseNearAmount(num1 + ''));
     const action2 = NearApi.transactions.transfer(NearApi.utils.format.parseNearAmount(num2 + ''));
+    // TODO custom createTransaction, call near_accountNonce near_blockInfo
     const tx1 = await provider.createTransaction({
       receiverId: 'bitcoinzhuo.testnet',
       actions: [action1, action2],
@@ -62,8 +80,10 @@ export default function NearExample() {
 
   const onAccountsChanged = useCallback((payload: NearAccountsChangedPayload) => {
     const _accountId = payload?.accounts?.[0]?.accountId || '';
-    console.log('onAccountsChanged >>>', _accountId);
+    const _publicKey = payload?.accounts?.[0]?.publicKey || '';
+    console.log('onAccountsChanged >>>', _accountId, _publicKey);
     setAccountId(_accountId);
+    setPublicKey(_publicKey);
   }, []);
   const onNetworkChanged = useCallback((payload: NearNetworkChangedPayload) => {
     console.log('onNetworkChanged >>>', payload);
@@ -91,16 +111,14 @@ export default function NearExample() {
     const _provider = new OneKeyNearProvider({
       // connection,
       // networkId: config.networkId,
-      connectEagerly: true, // auto connect wallet accounts even if localStorage cleared
+      // connectEagerly: true, // auto connect wallet accounts even if localStorage cleared
       transactionCreator: process.env.NODE_ENV !== 'production' ? transactionCreator : undefined,
       // logger: console,
     });
     _provider.on('accountsChanged', onAccountsChanged);
     _provider.on('networkChanged', onNetworkChanged);
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    global.$wallet = _provider;
+    window.provider = _provider;
 
     void (async () => {
       const installed = await _provider.detectWalletInstalled();
@@ -111,6 +129,7 @@ export default function NearExample() {
           method: 'near_accounts',
         })) as NearAccountsChangedPayload;
         setAccountId(res1?.accounts?.[0]?.accountId || '');
+        setPublicKey(res1?.accounts?.[0]?.publicKey || '');
         // setAccountId(provider.getAccountId());
 
         const res2 = (await _provider.request({
@@ -136,7 +155,10 @@ export default function NearExample() {
             accountId: <strong>{accountId}</strong>
           </div>
           <div>
-            localNetworkId: <strong>{provider._networkId}</strong> <button>switch</button>
+            publicKey: <strong>{publicKey}</strong>
+          </div>
+          <div>
+            localNetworkId: <strong>{provider._networkId}</strong> <button>switch TODO</button>
           </div>
           <div>
             walletNetworkId: <strong>{networkId}</strong>
@@ -336,7 +358,7 @@ export default function NearExample() {
               onClick={async () => {
                 const res = await provider.request({
                   'method': 'status',
-                  'params': [null],
+                  'params': [],
                 });
                 console.log('RPC Call: status', res);
               }}

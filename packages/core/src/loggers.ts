@@ -2,9 +2,18 @@
 import { IDebugLogger, ConsoleLike } from '@onekeyfe/cross-inpage-provider-types';
 // @ts-ignore
 import createDebugAsync from './debug';
+import { DEBUG_LOGGER_STORAGE_KEY } from './consts';
 
 // enable debugLogger:
 //    localStorage.setItem('$$ONEKEY_DEBUG_LOGGER', '*');
+
+function consoleErrorInDev(...args: unknown[]) {
+  const loggerConfig =
+    typeof localStorage !== 'undefined' && localStorage.getItem(DEBUG_LOGGER_STORAGE_KEY);
+  if (process.env.NODE_ENV !== 'production' || loggerConfig) {
+    console.error(...args);
+  }
+}
 
 const fakeLogger: ConsoleLike = {
   // @ts-ignore
@@ -86,4 +95,4 @@ class AppDebugLogger extends FakeDebugLogger {
 const fakeDebugLogger: IDebugLogger = new FakeDebugLogger();
 const appDebugLogger: IDebugLogger = new AppDebugLogger();
 
-export { fakeDebugLogger, appDebugLogger, fakeLogger };
+export { fakeDebugLogger, appDebugLogger, fakeLogger, consoleErrorInDev };

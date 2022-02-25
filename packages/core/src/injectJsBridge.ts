@@ -20,7 +20,7 @@ function injectJsBridge(bridgeCreator: () => JsBridgeBase | unknown): JsBridgeBa
   if (!window?.$onekey?.jsBridge) {
     window.$onekey = window.$onekey || {};
     window.$onekey.jsBridge = bridgeCreator();
-    if (localStorage.getItem(DEBUG_LOGGER_STORAGE_KEY)) {
+    if (typeof localStorage !== 'undefined' && localStorage.getItem(DEBUG_LOGGER_STORAGE_KEY)) {
       console.log('===== jsBridge injected success! >>>>> ', performance.now());
     }
   }

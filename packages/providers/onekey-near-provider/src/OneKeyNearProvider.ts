@@ -19,6 +19,8 @@ import type {
 import type { JsonRpcProvider } from 'near-api-js/lib/providers';
 import { ProviderNearBase } from './ProviderNearBase';
 
+// TODO log same error only once
+
 export type NearAccountInfo = {
   accountId: string;
   publicKey: string;
@@ -55,6 +57,7 @@ export type TransactionCreatorParams = {
   actions: NearTransactionAction[];
   blockHash: Buffer;
 };
+
 export type TransactionCreator = (params: TransactionCreatorParams) => any;
 
 export type OneKeyNearWalletProps = {
@@ -122,7 +125,15 @@ function serializeTransaction({ transaction }: { transaction: NearTransaction })
     return transaction;
   }
   const message = transaction.encode();
-  return Buffer.from(message).toString('base64');
+
+  // const hash = new Uint8Array(sha256.sha256.array(message));
+  if (typeof Buffer !== 'undefined' && Buffer.from) {
+    return Buffer.from(message).toString('base64');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  return message.toString('base64');
 }
 
 const DEFAULT_AUTH_DATA = {
@@ -135,6 +146,7 @@ const DEFAULT_NETWORK_INFO = {
   networkId: '',
   nodeUrls: [],
 };
+
 const PROVIDER_METHODS = {
   near_accounts: 'near_accounts',
 
@@ -208,6 +220,7 @@ type OneKeyNearProviderEventsMap = {
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 declare interface OneKeyNearProvider {
+  // TODO add request type define
   on<U extends keyof OneKeyNearProviderEventsMap>(
     event: U,
     listener: OneKeyNearProviderEventsMap[U],
@@ -253,7 +266,7 @@ class OneKeyNearProvider extends ProviderNearBase {
     bridge,
     shouldSendMetadata = true,
     maxEventListeners,
-  }: OneKeyNearWalletProps) {
+  }: OneKeyNearWalletProps = {}) {
     super({
       bridge: bridge || getOrCreateExtInjectedJsBridge({ timeout }),
       logger,
@@ -401,6 +414,7 @@ class OneKeyNearProvider extends ProviderNearBase {
   _handleUnlockStateChanged(payload: NearUnlockChangedPayload) {
     const isUnlocked = payload?.isUnlocked;
     if (typeof isUnlocked !== 'boolean') {
+      // TODO log same error only once
       console.error('Received invalid isUnlocked parameter. Please report this bug.');
       return;
     }
@@ -717,6 +731,9 @@ class OneKeyWalletAccount extends Account {
     this._wallet = wallet;
   }
 
+  // TODO
+  // state()
+
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   async signAndSendTransaction(
@@ -732,6 +749,7 @@ class OneKeyWalletAccount extends Account {
       };
     }
 
+    // TODO walletMeta, walletCallbackUrl
     const { receiverId, actions, meta, callbackUrl } = options;
 
     const transaction = await this.createTransaction({

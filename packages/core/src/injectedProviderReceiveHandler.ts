@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { IJsBridgeMessagePayload, IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 import { JsBridgeBase } from './JsBridgeBase';
+import { consoleErrorInDev } from './loggers';
 import { ProviderBase } from './ProviderBase';
 
 function injectedProviderReceiveHandler(payload: IJsBridgeMessagePayload, bridge?: JsBridgeBase) {
@@ -13,7 +14,7 @@ function injectedProviderReceiveHandler(payload: IJsBridgeMessagePayload, bridge
   const payloadData = payload.data as IJsonRpcRequest;
 
   if (!providerName) {
-    console.error('providerName (scope) is required in injectedProviderReceiveHandler.');
+    consoleErrorInDev('providerName (scope) is required in injectedProviderReceiveHandler.');
     return;
   }
 
@@ -21,7 +22,7 @@ function injectedProviderReceiveHandler(payload: IJsBridgeMessagePayload, bridge
     .concat(providerHub[providerName] as ProviderBase)
     .filter(Boolean);
   if (!providers || !providers.length) {
-    console.error(`[${providerName as string}] provider is NOT injected to document.`);
+    consoleErrorInDev(`[${providerName as string}] provider is NOT injected to document or bridge.`);
     return;
   }
 

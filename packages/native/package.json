@@ -1,5 +1,5 @@
 {
-  "name": "@onekeyfe/cross-inpage-provider-errors",
+  "name": "@onekeyfe/cross-inpage-provider-native",
   "version": "0.0.7-alpha.0",
   "keywords": [
     "cross-inpage-provider"
@@ -24,10 +24,20 @@
   "main": "./dist/cjs/index.js",
   "scripts": {
     "prebuild": "rm -rf dist",
-    "build": "tsc && tsc --project tsconfig.cjs.json",
-    "start": "tsc --watch"
+    "build": "tsc && tsc --project tsconfig.cjs.json && yarn webpack",
+    "start": "tsc --watch",
+    "webpack": "NODE_ENV=production webpack"
+  },
+  "devDependencies": {
+    "babel-loader": "^8.2.3",
+    "ts-loader": "^9.2.6",
+    "webpack": "^5.69.1",
+    "webpack-cli": "^4.9.2"
   },
   "dependencies": {
-    "fast-safe-stringify": "^2.1.1"
+    "@onekeyfe/cross-inpage-provider-core": "^0.0.7-alpha.0",
+    "@onekeyfe/cross-inpage-provider-types": "^0.0.7-alpha.0",
+    "@onekeyfe/inpage-providers-hub": "^0.0.7-alpha.0",
+    "@onekeyfe/onekey-cross-webview": "^0.0.7-alpha.0"
   }
 }

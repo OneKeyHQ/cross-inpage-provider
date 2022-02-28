@@ -1,6 +1,13 @@
 declare global {
   interface Window {
+    ethereum: any;
     $onekey: any;
+    ReactNativeWebView?: {
+      postMessage: (payload: string)=>void
+    },
+    ONEKEY_DESKTOP_GLOBALS?: {
+      preloadJsUrl: string;
+    }
   }
 }
 
@@ -68,6 +75,8 @@ export type IDebugLogger = {
   providerBase: (...args: any[]) => unknown;
   extInjected: (...args: any[]) => unknown;
   extContentScripts: (...args: any[]) => unknown;
+  webview: (...args: any[]) => unknown;
+  desktopInjected: (...args: any[]) => unknown;
 };
 
 export type IOptionsWithDebugLogger = {

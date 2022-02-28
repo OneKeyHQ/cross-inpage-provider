@@ -43,7 +43,7 @@ const METHODS = {
 };
 
 abstract class ProviderBase extends EventEmitter {
-  protected constructor(config: IInpageProviderConfig) {
+  constructor(config: IInpageProviderConfig) {
     super();
     if (!config.bridge) {
       throw new Error('ProviderBase init error: bridge required.');
@@ -51,6 +51,7 @@ abstract class ProviderBase extends EventEmitter {
     this.config = config;
     this.bridge = config.bridge;
     this.logger = config.logger || fakeLogger;
+    // TODO init this.debugLogger first, and enable debug config after extension connect
     this.debugLogger = this.bridge?.debugLogger || fakeDebugLogger;
     this.bridge?.debugLogger?._attachExternalLogger(this.logger);
     setTimeout(() => {
@@ -113,6 +114,7 @@ abstract class ProviderBase extends EventEmitter {
           resolve(null);
         }
       } catch (err) {
+        // TODO wallet not installed, timeout ERROR
         consoleErrorInDev('getConnectWalletInfo: ERROR', err);
         resolve(null);
       } finally {

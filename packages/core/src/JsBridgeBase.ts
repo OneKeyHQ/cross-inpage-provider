@@ -13,6 +13,7 @@ import {
   IDebugLogger,
 } from '@onekeyfe/cross-inpage-provider-types';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
+import type { Web3ProviderError } from '@onekeyfe/cross-inpage-provider-errors';
 import versionInfo from './versionInfo';
 
 function isLegacyExtMessage(payload: unknown): boolean {
@@ -36,7 +37,7 @@ const BRIDGE_EVENTS = {
 };
 
 abstract class JsBridgeBase extends EventEmitter {
-  protected constructor(config: IJsBridgeConfig = {}) {
+  constructor(config: IJsBridgeConfig = {}) {
     super();
     this.config = config;
     this.callbacksExpireTimeout = config.timeout ?? 60 * 1000;
@@ -47,7 +48,9 @@ abstract class JsBridgeBase extends EventEmitter {
       this.on(BRIDGE_EVENTS.message, this.globalOnMessage);
     }
     this.on(BRIDGE_EVENTS.error, (error) => {
-      consoleErrorInDev('JsBridge ERROR: ', error);
+      consoleErrorInDev('JsBridge ERROR: ', error, {
+        code: (error as Web3ProviderError<any>)?.code,
+      });
     });
     this.rejectExpiredCallbacks();
   }

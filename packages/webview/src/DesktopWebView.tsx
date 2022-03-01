@@ -123,13 +123,15 @@ const DesktopWebView = forwardRef(
         if (event.channel === consts.JS_BRIDGE_MESSAGE_IPC_CHANNEL) {
           const data: string = event?.args?.[0];
           let origin = '';
-          const url = event.target.getURL();
-          // url initial value is empty after webview mounted
+          // url initial value is empty after webview mounted first time
+          const url = (event.target.getURL() || event.target.src || src) as string;
           if (url) {
             const uri = new URL(url);
             origin = uri?.origin || '';
             // - receive
             jsBridge.receive(data, { origin });
+          } else {
+            // TODO log error if url is empty
           }
         }
 

@@ -102,6 +102,7 @@ export type IElectronWebView = {
   closeDevTools: () => void;
   openDevTools: () => void;
   getURL: () => string;
+  src: string;
   addEventListener: (name: string, callback: unknown) => void;
   removeEventListener: (name: string, callback: unknown) => void;
   executeJavaScript: (code: string) => void;

@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/cross-inpage-provider-injected",
-  "version": "0.0.7-alpha.0",
+  "version": "0.0.7-alpha.1",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -31,20 +31,20 @@
   },
   "devDependencies": {
     "babel-loader": "^8.2.3",
+    "electron": "^17.1.0",
     "ts-loader": "^9.2.6",
     "webpack": "^5.69.1",
-    "webpack-cli": "^4.9.2",
-    "electron": "^17.1.0"
+    "webpack-cli": "^4.9.2"
   },
   "peerDependencies": {
     "electron": "*"
   },
   "dependencies": {
-    "@onekeyfe/native-bridge-injected": "^0.0.7-alpha.0",
-    "@onekeyfe/extension-bridge-injected": "^0.0.7-alpha.0",
-    "@onekeyfe/desktop-bridge-injected":  "^0.0.7-alpha.0",
-    "@onekeyfe/cross-inpage-provider-core": "^0.0.7-alpha.0",
-    "@onekeyfe/cross-inpage-provider-types": "^0.0.7-alpha.0",
-    "@onekeyfe/inpage-providers-hub": "^0.0.7-alpha.0"
+    "@onekeyfe/cross-inpage-provider-core": "^0.0.7-alpha.1",
+    "@onekeyfe/cross-inpage-provider-types": "^0.0.7-alpha.1",
+    "@onekeyfe/desktop-bridge-injected": "^0.0.7-alpha.1",
+    "@onekeyfe/extension-bridge-injected": "^0.0.7-alpha.1",
+    "@onekeyfe/inpage-providers-hub": "^0.0.7-alpha.1",
+    "@onekeyfe/native-bridge-injected": "^0.0.7-alpha.1"
   }
 }

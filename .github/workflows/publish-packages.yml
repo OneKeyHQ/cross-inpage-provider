@@ -16,10 +16,11 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install Packages
+        # global env make ci `yarn && yarn bootstrap` not correctly
         run: |
           yarn
           yarn bootstrap
-          yarn build
+          NODE_ENV=production yarn build
           yarn test
           yarn lint
 

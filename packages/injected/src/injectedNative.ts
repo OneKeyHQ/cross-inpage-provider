@@ -1,4 +1,4 @@
-import { JsBridgeNativeInjected } from './JsBridgeNativeInjected';
+import { JsBridgeNativeInjected } from '@onekeyfe/native-bridge-injected';
 import { injectWeb3Provider } from '@onekeyfe/inpage-providers-hub';
 
 import {

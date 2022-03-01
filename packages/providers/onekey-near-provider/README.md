@@ -1,1 +1,1 @@
-# @onekeyfe/onekey-near-provider
+# cross-inpage-provider

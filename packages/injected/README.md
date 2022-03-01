@@ -1,1 +1,1 @@
-# @onekeyfe/cross-inpage-provider-injected
+# cross-inpage-provider

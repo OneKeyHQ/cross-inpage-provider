@@ -1,1 +1,1 @@
-# @onekeyfe/cross-inpage-provider-core
+# cross-inpage-provider

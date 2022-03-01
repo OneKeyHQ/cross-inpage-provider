@@ -1,1 +1,1 @@
-# @onekeyfe/extension-bridge-injected
+# cross-inpage-provider

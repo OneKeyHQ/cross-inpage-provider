@@ -1,1 +1,1 @@
-# @onekeyfe/desktop-bridge-injected
+# cross-inpage-provider

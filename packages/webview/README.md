@@ -1,1 +1,1 @@
-# @onekeyfe/onekey-native-webview
+# cross-inpage-provider

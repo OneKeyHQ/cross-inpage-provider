@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/cross-inpage-provider-example",
-  "version": "0.0.7-alpha.2",
+  "version": "0.0.7-alpha.3",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,7 +10,7 @@
     "clean": "rm -rf ./node_modules && rm -rf ./.next && rm -rf ./out"
   },
   "dependencies": {
-    "@onekeyfe/onekey-near-provider": "^0.0.7-alpha.2",
+    "@onekeyfe/onekey-near-provider": "^0.0.7-alpha.3",
     "console-feed": "^3.3.0",
     "near-api-js": "^0.44.2",
     "next": "^12.1.0",

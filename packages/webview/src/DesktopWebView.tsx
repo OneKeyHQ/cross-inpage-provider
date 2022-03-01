@@ -124,7 +124,7 @@ const DesktopWebView = forwardRef(
           const data: string = event?.args?.[0];
           let origin = '';
           // url initial value is empty after webview mounted first time
-          const url = (event.target.getURL() || event.target.src || src) as string;
+          const url = event.target.getURL() || event.target.src || src;
           if (url) {
             const uri = new URL(url);
             origin = uri?.origin || '';

@@ -3,6 +3,7 @@ export * from './ProviderBase';
 export * from './loggers';
 export * from './injectJsBridge';
 export * from './injectedProviderReceiveHandler';
+export * from './JsBridgeSimple';
 import * as consts from './consts';
 export { consts };
 

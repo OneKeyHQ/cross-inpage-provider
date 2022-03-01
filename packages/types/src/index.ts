@@ -77,6 +77,7 @@ export type IDebugLogger = {
   extContentScripts: (...args: any[]) => unknown;
   webview: (...args: any[]) => unknown;
   desktopInjected: (...args: any[]) => unknown;
+  ethereum: (...args: any[]) => unknown;
 };
 
 export type IOptionsWithDebugLogger = {

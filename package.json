@@ -17,9 +17,11 @@
     "publish-packages": "lerna publish from-package",
     "example": "cd ./packages/example && yarn dev",
     "example-build": "cd ./packages/example && yarn --registry 'https://registry.npmjs.org' && yarn build",
-    "update-version": "lerna version --no-git-tag-version"
+    "update-version": "lerna version --no-git-tag-version",
+    "version": "yarn update-version"
   },
   "devDependencies": {
+    "gulp": "^4.0.2",
     "@testing-library/react-hooks": "^7.0.2",
     "@tsconfig/recommended": "^1.0.1",
     "@types/chrome": "^0.0.178",

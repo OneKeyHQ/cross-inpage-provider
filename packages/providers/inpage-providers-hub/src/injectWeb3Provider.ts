@@ -2,13 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { JsBridgeBase, ProviderBase } from '@onekeyfe/cross-inpage-provider-core';
 import { IInjectedProviderNames, IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
-
-class ProviderPrivate extends ProviderBase {
-  public providerName = IInjectedProviderNames.$private;
-}
-class ProviderEthereum extends ProviderBase {
-  public providerName = IInjectedProviderNames.ethereum;
-}
+import { ProviderEthereum } from '@onekeyfe/onekey-eth-provider';
+import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
 
 export type WindowOneKeyHub = {
   debugLogger?: any;

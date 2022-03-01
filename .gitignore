@@ -7,3 +7,4 @@ packages/*/dist/
 .idea/
 yarn-error.log
 .DS_Store
+.watchman-*

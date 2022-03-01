@@ -58,6 +58,7 @@ class FakeDebugLogger implements IDebugLogger {
   extContentScripts = this._createExternalLog('extContentScripts >>');
   webview = this._createExternalLog('webview >>');
   desktopInjected = this._createExternalLog('desktopInjected >>');
+  ethereum = this._createExternalLog('ethereum >>');
 }
 
 class AppDebugLogger extends FakeDebugLogger {

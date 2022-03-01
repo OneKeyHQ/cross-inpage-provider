@@ -42,6 +42,7 @@ module.exports = {
   entry: {
     injectedNative: './src/injectedNative.ts',
     injectedExtension: './src/injectedExtension.ts',
+    injectedDesktop: './src/injectedDesktop.ts',
   },
   output: {
     // Fix: "Uncaught ReferenceError: exports is not defined".

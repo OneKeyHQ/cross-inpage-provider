@@ -1,0 +1,1 @@
+# @onekeyfe/desktop-bridge-injected

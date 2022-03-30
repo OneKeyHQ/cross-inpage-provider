@@ -14,8 +14,13 @@ function buildInjected(cb) {
   // execSync('yarn build-inject');
   execCmd('cd packages/injected && yarn build && cd -');
   execCmd('sh rsync-npm.sh');
-  execCmd('cd ~/workspace/onekey-app-monorepo && yarn copy:inject');
-  execCmd('echo "manually set app-monorepo WebView.js hash"');
+  // TODO use .env set onekey-app-monorepo folder
+  execCmd('cd ~/workspace/onekey-app-monorepo && yarn copy:inject && cd -');
+  execCmd('echo ">>>>>>>>>>>>>>>  "');
+  execCmd(
+    'echo "\t Manually update app-monorepo WebView.js comment hash in code make iOS hot-reload take effect."',
+  );
+  execCmd('echo ">>>>>>>>>>>>>>>  "');
   cb();
 }
 

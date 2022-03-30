@@ -9,6 +9,8 @@ class JsBridgeSimple extends JsBridgeBase {
 
   private remote: JsBridgeBase | null = null;
 
+  callbacksExpireTimeout = 0;
+
   sendPayload(payload: IJsBridgeMessagePayload | string): void {
     if (!this.remote) {
       throw new Error('JsBridgeSimple ERROR: remote not set.');

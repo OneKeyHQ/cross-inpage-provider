@@ -27,9 +27,10 @@ jobs:
       - name: Publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        # TODO check published packages injected is minified
         run: |
           git reset --hard
-          yarn publish-packages -y
+          NODE_ENV=production yarn publish-packages -y
 
       - name: Sleep for 30 seconds
         uses: jakejarvis/wait-action@master

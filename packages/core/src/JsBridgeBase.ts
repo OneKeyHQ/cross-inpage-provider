@@ -25,6 +25,7 @@ function isLegacyExtMessage(payload: unknown): boolean {
 }
 
 type IErrorInfo = {
+  key?: string;
   code?: string | number;
   message?: string;
   stack?: string;
@@ -40,7 +41,7 @@ abstract class JsBridgeBase extends EventEmitter {
   constructor(config: IJsBridgeConfig = {}) {
     super();
     this.config = config;
-    this.callbacksExpireTimeout = config.timeout ?? 60 * 1000;
+    this.callbacksExpireTimeout = config.timeout ?? this.callbacksExpireTimeout;
     this.debugLogger = config.debugLogger || appDebugLogger;
     this.sendAsString = config.sendAsString ?? this.sendAsString;
     if (this.config.receiveHandler) {
@@ -116,7 +117,9 @@ abstract class JsBridgeBase extends EventEmitter {
 
   private config: IJsBridgeConfig;
 
-  private readonly callbacksExpireTimeout: number;
+  // TODO increase timeout as hardware sign transaction may take a long time
+  //    can set timeout for each callback
+  protected callbacksExpireTimeout: number = 10 * 60 * 1000;
 
   public debugLogger: IDebugLogger = appDebugLogger;
 
@@ -152,6 +155,7 @@ abstract class JsBridgeBase extends EventEmitter {
     if (payload.error) {
       const errorInfo = payload.error as IErrorInfo;
       payload.error = {
+        key: errorInfo.key, // i18n key
         code: errorInfo.code,
         message: errorInfo.message,
         data: errorInfo.data as unknown,

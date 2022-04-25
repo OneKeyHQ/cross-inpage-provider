@@ -35,7 +35,6 @@ export function initializeProvider({
   bridge,
   logger = console,
   maxEventListeners = 100,
-  shouldSendMetadata = true,
   shouldSetOnWindow = true,
   shouldShimWeb3 = false,
 }: InitializeProviderOptions): MetaMaskInpageProvider {
@@ -43,7 +42,6 @@ export function initializeProvider({
     bridge,
     logger,
     maxEventListeners,
-    shouldSendMetadata,
   });
 
   provider = new Proxy(provider, {

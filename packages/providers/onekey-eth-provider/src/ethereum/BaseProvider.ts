@@ -228,18 +228,12 @@ export default class BaseProvider extends ProviderBase {
       const res = await this.request({
         method: 'metamask_getProviderState',
       });
-      const { accounts, chainId, isUnlocked, networkVersion, debugLoggerSettings } = res as {
+      const { accounts, chainId, isUnlocked, networkVersion } = res as {
         accounts: string[];
         chainId: string;
         isUnlocked: boolean;
         networkVersion: string;
-        debugLoggerSettings?: string;
       };
-
-      // Sync debugLogger settings to injected.js
-      if (window?.$onekey?.debugLogger?.debug?.enable) {
-        window.$onekey.debugLogger.debug.enable(debugLoggerSettings || '');
-      }
 
       // indicate that we've connected, for EIP-1193 compliance
       this.emit('connect', { chainId });

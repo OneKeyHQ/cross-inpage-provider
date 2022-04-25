@@ -1,8 +1,11 @@
 /* eslint-disable no-dupe-class-members,@typescript-eslint/ban-ts-comment */
 import { ethErrors } from 'eth-rpc-errors';
 
-import { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
-import { IBridgeRequestCallback, IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
+import { IJsonRpcRequest, IJsonRpcResponse } from '@onekeyfe/cross-inpage-provider-types';
+import {
+  IBridgeRequestCallback,
+  IInpageProviderConfig,
+} from '@onekeyfe/cross-inpage-provider-core';
 
 import BaseProvider, { BaseProviderOptions } from './BaseProvider';
 import messages from './messages';
@@ -10,11 +13,7 @@ import sendSiteMetadata from './siteMetadata';
 import { EMITTED_NOTIFICATIONS, NOOP } from './utils';
 
 export interface SendSyncJsonRpcRequest extends IJsonRpcRequest {
-  method:
-    | 'eth_accounts'
-    | 'eth_coinbase'
-    | 'eth_uninstallFilter'
-    | 'net_version';
+  method: 'eth_accounts' | 'eth_coinbase' | 'eth_uninstallFilter' | 'net_version';
 }
 
 type WarningEventName = keyof SentWarningsState['events'];
@@ -58,9 +57,7 @@ export default class MetaMaskInpageProvider extends BaseProvider {
   /**
    * Experimental methods can be found here.
    */
-  public readonly _metamask: ReturnType<
-    MetaMaskInpageProvider['_getExperimentalApi']
-  >;
+  public readonly _metamask: ReturnType<MetaMaskInpageProvider['_getExperimentalApi']>;
 
   public networkVersion: string | null;
 
@@ -82,7 +79,9 @@ export default class MetaMaskInpageProvider extends BaseProvider {
    */
   constructor(config: IInpageProviderConfig) {
     super(config);
-    const shouldSendMetadata = config.shouldSendMetadata ?? true;
+
+    // sendSiteMetadataDomReady in ProviderPrivate, dont need here
+    const shouldSendMetadata = false;
 
     this.networkVersion = null;
     this.isMetaMask = true;
@@ -115,10 +114,7 @@ export default class MetaMaskInpageProvider extends BaseProvider {
       } else {
         const domContentLoadedHandler = () => {
           void sendSiteMetadata(this.bridge, this._log);
-          window.removeEventListener(
-            'DOMContentLoaded',
-            domContentLoadedHandler,
-          );
+          window.removeEventListener('DOMContentLoaded', domContentLoadedHandler);
         };
         window.addEventListener('DOMContentLoaded', domContentLoadedHandler);
       }
@@ -165,15 +161,12 @@ export default class MetaMaskInpageProvider extends BaseProvider {
 
   prependListener(eventName: string, listener: (...args: unknown[]) => void) {
     this._warnOfDeprecation(eventName);
-    return super.addListener(eventName, listener);
+    return super.prependListener(eventName, listener);
   }
 
-  prependOnceListener(
-    eventName: string,
-    listener: (...args: unknown[]) => void,
-  ) {
+  prependOnceListener(eventName: string, listener: (...args: unknown[]) => void) {
     this._warnOfDeprecation(eventName);
-    return super.once(eventName, listener);
+    return super.prependOnceListener(eventName, listener);
   }
 
   //= ===================
@@ -230,20 +223,26 @@ export default class MetaMaskInpageProvider extends BaseProvider {
     })) as Promise<string[]>;
   }
 
+  _rpcResult(result: any, payload?: SendSyncJsonRpcRequest): IJsonRpcResponse<any> {
+    return {
+      id: payload?.id ?? Date.now(),
+      jsonrpc: payload?.jsonrpc ?? '2.0',
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      result,
+    };
+  }
+
   send(methodOrPayload: unknown, callbackOrArgs?: unknown): unknown {
     if (!this._sentWarnings.send) {
       this._log.warn(messages.warnings.sendDeprecation);
       this._sentWarnings.send = true;
     }
 
-    if (
-      typeof methodOrPayload === 'string' &&
-      (!callbackOrArgs || Array.isArray(callbackOrArgs))
-    ) {
+    if (typeof methodOrPayload === 'string' && (!callbackOrArgs || Array.isArray(callbackOrArgs))) {
       return this._rpcRequest({
         method: methodOrPayload,
         params: callbackOrArgs,
-      });
+      }).then((result) => this._rpcResult(result));
     }
 
     if (
@@ -288,11 +287,7 @@ export default class MetaMaskInpageProvider extends BaseProvider {
         throw new Error(messages.errors.unsupportedSync(payload.method));
     }
 
-    return {
-      id: payload.id,
-      jsonrpc: payload.jsonrpc,
-      result,
-    };
+    return this._rpcResult(result, payload);
   }
 
   /**
@@ -323,8 +318,7 @@ export default class MetaMaskInpageProvider extends BaseProvider {
         requestBatch: async (requests: IJsonRpcRequest[]) => {
           if (!Array.isArray(requests)) {
             throw ethErrors.rpc.invalidRequest({
-              message:
-                'Batch requests must be made with an array of request objects.',
+              message: 'Batch requests must be made with an array of request objects.',
               data: requests,
             });
           }
@@ -362,11 +356,7 @@ export default class MetaMaskInpageProvider extends BaseProvider {
   }: { chainId?: string; networkVersion?: string } = {}) {
     super._handleChainChanged({ chainId, networkVersion });
 
-    if (
-      networkVersion &&
-      networkVersion !== 'loading' &&
-      networkVersion !== this.networkVersion
-    ) {
+    if (networkVersion && networkVersion !== 'loading' && networkVersion !== this.networkVersion) {
       this.networkVersion = networkVersion;
       if (this._state.initialized) {
         this.emit('networkChanged', this.networkVersion);

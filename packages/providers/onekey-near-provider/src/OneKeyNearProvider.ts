@@ -264,13 +264,11 @@ class OneKeyNearProvider extends ProviderNearBase {
     keyPrefix = '',
     transactionCreator,
     bridge,
-    shouldSendMetadata = true,
     maxEventListeners,
   }: OneKeyNearWalletProps = {}) {
     super({
       bridge: bridge || getOrCreateExtInjectedJsBridge({ timeout }),
       logger,
-      shouldSendMetadata,
       maxEventListeners,
     });
     if (!networkId) {

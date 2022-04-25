@@ -8,6 +8,8 @@ import React, {
   useRef,
 } from 'react';
 
+import type { ViewStyle } from 'react-native';
+
 import { WebView, WebViewProps } from 'react-native-webview';
 
 import { appDebugLogger } from '@onekeyfe/cross-inpage-provider-core';
@@ -19,16 +21,23 @@ import { IWebViewWrapperRef } from './useWebViewBridge';
 
 import type { WebViewMessageEvent } from 'react-native-webview/lib/WebViewTypes';
 
+export type NativeWebViewProps = WebViewProps &
+  InpageProviderWebViewProps & {
+    style?: ViewStyle;
+  };
+
 const NativeWebView = forwardRef(
   (
     {
+      style,
       src,
       receiveHandler,
       onSrcChange,
       onLoadProgress,
       injectedJavaScriptBeforeContentLoaded,
+      onMessage,
       ...props
-    }: WebViewProps & InpageProviderWebViewProps,
+    }: NativeWebViewProps,
     ref,
   ) => {
     const webviewRef = useRef<WebView | null>(null);
@@ -43,22 +52,16 @@ const NativeWebView = forwardRef(
     );
 
     const webviewOnMessage = useCallback(
-      (event) => {
-        // as WebViewMessageEvent
-        const event0 = event as {
-          nativeEvent: {
-            url: string;
-            data: string;
-          };
-        };
-        const { data } = event0.nativeEvent;
-        const uri = new URL(event0.nativeEvent.url);
+      (event: WebViewMessageEvent) => {
+        const { data } = event.nativeEvent;
+        const uri = new URL(event.nativeEvent.url);
         const origin = uri?.origin || '';
         appDebugLogger.webview('onMessage', origin, data);
         // - receive
         jsBridge.receive(data, { origin });
+        onMessage?.(event);
       },
-      [jsBridge],
+      [jsBridge, onMessage],
     );
 
     useImperativeHandle(ref, (): IWebViewWrapperRef => {
@@ -90,15 +93,15 @@ const NativeWebView = forwardRef(
 
     return (
       <WebView
-        {...props}
         // @ts-ignore
-        style={{ backgroundColor: 'transparent' }}
+        style={[{ backgroundColor: 'transparent' }, style]}
         onLoadProgress={onLoadProgress}
         ref={webviewRef}
         // injectedJavaScript={injectedNative}
         injectedJavaScriptBeforeContentLoaded={injectedJavaScriptBeforeContentLoaded || ''}
         source={{ uri: src }}
         onMessage={webviewOnMessage}
+        {...props}
       />
     );
   },

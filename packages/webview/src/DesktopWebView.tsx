@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-explicit-any */
 import React, {
   forwardRef,
   useCallback,
@@ -49,6 +49,7 @@ const DesktopWebView = forwardRef(
   (
     {
       src,
+      style,
       receiveHandler,
       onSrcChange,
       ...props
@@ -59,6 +60,10 @@ const DesktopWebView = forwardRef(
     const webviewRef = useRef<IElectronWebView | null>(null);
     const isIpcReady = useIsIpcReady();
     const [devToolsAtLeft, setDevToolsAtLeft] = useState(false);
+
+    if (props.preload) {
+      console.warn('DesktopWebView:  custom preload url may disable built-in injected function');
+    }
 
     useEffect(
       () => () => {
@@ -142,7 +147,7 @@ const DesktopWebView = forwardRef(
       return () => {
         webview.removeEventListener('ipc-message', handleMessage);
       };
-    }, [jsBridge, isIpcReady, isWebviewReady]);
+    }, [jsBridge, isIpcReady, isWebviewReady, src]);
 
     const preloadJsUrl = usePreloadJsUrl();
 
@@ -179,11 +184,14 @@ const DesktopWebView = forwardRef(
         {/* <div ref={ref} className="webview-container" /> */}
         {isBrowser && (
           <webview
-            {...props}
             ref={initWebviewByRef}
             preload={preloadJsUrl}
             src={src}
-            style={{ 'width': '100%', 'height': '100%' }}
+            style={{
+              'width': '100%',
+              'height': '100%',
+              ...style,
+            }}
             // @ts-ignore
             allowpopups="true"
             // @ts-ignore
@@ -192,6 +200,7 @@ const DesktopWebView = forwardRef(
             webpreferences="contextIsolation=0, contextisolation=0, nativeWindowOpen=1"
             // mobile user-agent
             // useragent="Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1"
+            {...props}
           />
         )}
       </>

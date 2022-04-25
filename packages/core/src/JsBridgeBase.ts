@@ -1,4 +1,5 @@
-import EventEmitter from 'eventemitter3';
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+import { CrossEventEmitter } from './CrossEventEmitter';
 import isPlainObject from 'lodash/isPlainObject';
 import isString from 'lodash/isString';
 import { appDebugLogger, consoleErrorInDev } from './loggers';
@@ -12,9 +13,24 @@ import {
   IJsonRpcResponse,
   IDebugLogger,
 } from '@onekeyfe/cross-inpage-provider-types';
-import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
+import { web3Errors, Web3RpcError } from '@onekeyfe/cross-inpage-provider-errors';
 import type { Web3ProviderError } from '@onekeyfe/cross-inpage-provider-errors';
 import versionInfo from './versionInfo';
+
+function toPlainError(errorInfo: IErrorInfo) {
+  return {
+    name: errorInfo.name,
+    message: errorInfo.message,
+    stack: errorInfo.stack,
+
+    code: errorInfo.code,
+    data: errorInfo.data as unknown,
+
+    key: errorInfo.key, // i18n key
+    info: errorInfo.info as unknown, // i18n params
+    className: errorInfo.className,
+  };
+}
 
 function isLegacyExtMessage(payload: unknown): boolean {
   const payloadObj = payload as { name: string };
@@ -24,12 +40,20 @@ function isLegacyExtMessage(payload: unknown): boolean {
   );
 }
 
-type IErrorInfo = {
-  key?: string;
-  code?: string | number;
+type IErrorInfo = Error & {
+  // Error
+  name?: string;
   message?: string;
   stack?: string;
+
+  // Web3RpcError
+  code?: string | number;
   data?: any;
+
+  // OneKeyError
+  key?: string;
+  info?: any;
+  className?: string;
 };
 
 const BRIDGE_EVENTS = {
@@ -37,7 +61,9 @@ const BRIDGE_EVENTS = {
   error: 'error',
 };
 
-abstract class JsBridgeBase extends EventEmitter {
+let requestPayloadCache: Record<string | number, IJsBridgeMessagePayload> = {};
+
+abstract class JsBridgeBase extends CrossEventEmitter {
   constructor(config: IJsBridgeConfig = {}) {
     super();
     this.config = config;
@@ -154,13 +180,7 @@ abstract class JsBridgeBase extends EventEmitter {
     // convert to plain error object which can be stringify
     if (payload.error) {
       const errorInfo = payload.error as IErrorInfo;
-      payload.error = {
-        key: errorInfo.key, // i18n key
-        code: errorInfo.code,
-        message: errorInfo.message,
-        data: errorInfo.data as unknown,
-        stack: errorInfo.stack,
-      };
+      payload.error = toPlainError(errorInfo);
     }
     // delete resolve, reject function which can not be send as string
     delete payload?.resolve;
@@ -195,7 +215,26 @@ abstract class JsBridgeBase extends EventEmitter {
         if (this.sendAsString) {
           payloadToSend = JSON.stringify(payload);
         }
-        this.debugLogger.jsBridge('send', payload, '\r\n ------> ', payload.data);
+
+        // @ts-ignore
+        if (this.debugLogger.jsBridge?.enabled) {
+          if (payload && payload.id && payload.type === IJsBridgeMessageTypes.REQUEST) {
+            requestPayloadCache[payload.id] = payload;
+            if (payload.id % 100 === 0) {
+              requestPayloadCache = {};
+            }
+          }
+        }
+        this.debugLogger.jsBridge(
+          'send',
+          payload,
+          '\r\n ------> ',
+          payload.data,
+          '\r\n ------> ',
+          // @ts-ignore
+          payload.data?.result,
+        );
+
         this.sendPayload(payloadToSend as string);
       } catch (error) {
         if (_id) {
@@ -325,14 +364,15 @@ abstract class JsBridgeBase extends EventEmitter {
       );
     }
 
+    const relatedSendPayload = requestPayloadCache[payload?.id ?? ''] ?? null;
     this.debugLogger.jsBridge(
       'receive',
       payload,
       { sender },
       '\r\n -----> ',
-      (payload.data as IJsonRpcResponse<any>)?.result,
-      '\r\n -----> ',
-      payload.data,
+      (payload.data as IJsonRpcResponse<any>)?.result ?? payload.data,
+      '\r\n <----- ',
+      relatedSendPayload?.data,
     );
 
     const { type, id, data, error, origin, remoteId } = payload;

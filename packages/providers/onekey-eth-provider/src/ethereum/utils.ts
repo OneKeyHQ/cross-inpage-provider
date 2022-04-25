@@ -1,9 +1,6 @@
-import EventEmitter from 'eventemitter3';
+import type { CrossEventEmitter } from '@onekeyfe/cross-inpage-provider-core';
 
-export type ConsoleLike = Pick<
-  Console,
-  'log' | 'warn' | 'error' | 'debug' | 'info' | 'trace'
->;
+export type ConsoleLike = Pick<Console, 'log' | 'warn' | 'error' | 'debug' | 'info' | 'trace'>;
 
 // utility functions
 
@@ -20,7 +17,7 @@ export function logStreamDisconnectWarning(
   log: ConsoleLike,
   remoteLabel: string,
   error: Error,
-  emitter: EventEmitter,
+  emitter: CrossEventEmitter,
 ): void {
   let warningMsg = `MetaMask: Lost connection to "${remoteLabel}".`;
   if (error?.stack) {

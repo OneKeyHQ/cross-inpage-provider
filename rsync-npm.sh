@@ -3,6 +3,10 @@
 syncFiles() {
 
     rsync -avz --exclude node_modules \
+              ~/workspace/onekey/cross-inpage-provider/packages/events/   \
+              ~/workspace/onekey-app-monorepo/node_modules/@onekeyfe/cross-inpage-provider-events/
+
+    rsync -avz --exclude node_modules \
               ~/workspace/onekey/cross-inpage-provider/packages/core/   \
               ~/workspace/onekey-app-monorepo/node_modules/@onekeyfe/cross-inpage-provider-core/
 

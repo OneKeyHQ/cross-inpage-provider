@@ -3,6 +3,7 @@ import { IDebugLogger, ConsoleLike } from '@onekeyfe/cross-inpage-provider-types
 // @ts-ignore
 import createDebugAsync from './debug';
 import { DEBUG_LOGGER_STORAGE_KEY } from './consts';
+import { CrossEventEmitter } from './CrossEventEmitter';
 
 // enable debugLogger:
 //    localStorage.setItem('$$ONEKEY_DEBUG_LOGGER', '*');
@@ -26,12 +27,45 @@ const fakeLogger: ConsoleLike = {
   trace: (...args: any[]) => undefined,
 };
 
-class FakeDebugLogger implements IDebugLogger {
+enum loggerNames {
+  jsBridge = 'jsBridge',
+  providerBase = 'providerBase',
+  extInjected = 'extInjected',
+  extContentScripts = 'extContentScripts',
+  webview = 'webview',
+  desktopInjected = 'desktopInjected',
+  ethereum = 'ethereum',
+}
+
+class FakeDebugLogger extends CrossEventEmitter implements IDebugLogger {
+  constructor() {
+    super();
+    this.initExternalLogInstances();
+  }
+
+  jsBridge = (...args: any[]) => null;
+  providerBase = (...args: any[]) => null;
+  extInjected = (...args: any[]) => null;
+  extContentScripts = (...args: any[]) => null;
+  webview = (...args: any[]) => null;
+  desktopInjected = (...args: any[]) => null;
+  ethereum = (...args: any[]) => null;
+
+  initExternalLogInstances() {
+    Object.keys(loggerNames).forEach((name) => {
+      // @ts-ignore
+      this[name] = this._createExternalLog(name);
+    });
+  }
+
   _debug = {
     enable(config: string) {
       //noop
     },
   };
+  isDebugReady() {
+    return this._debug && typeof this._debug === 'function';
+  }
   _externalLogger = fakeLogger;
   _attachExternalLogger(logger: ConsoleLike) {
     if (logger) {
@@ -45,27 +79,37 @@ class FakeDebugLogger implements IDebugLogger {
   _createExternalLog =
     (name: string) =>
     (...args: any[]) => {
-      const _logger = this._externalLogger;
-      if (_logger) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        return _logger.log(name, ...args);
-      }
+      this.once('debugReady', () => {
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        this[name]?.(...args);
+      });
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      return this._externalLogger?.log?.(name + ' >>> ', ...args);
     };
-
-  jsBridge = this._createExternalLog('jsBridge >>');
-  providerBase = this._createExternalLog('providerBase >>');
-  extInjected = this._createExternalLog('extInjected >>');
-  extContentScripts = this._createExternalLog('extContentScripts >>');
-  webview = this._createExternalLog('webview >>');
-  desktopInjected = this._createExternalLog('desktopInjected >>');
-  ethereum = this._createExternalLog('ethereum >>');
 }
 
 class AppDebugLogger extends FakeDebugLogger {
   constructor() {
     super();
-    void createDebugAsync().then((debug) => (this._debug = debug));
+    // TODO createDebugSync
+    void createDebugAsync().then((debug) => {
+      this._debug = debug;
+      this.initDebugInstances();
+      this.emit('debugReady');
+    });
   }
+
+  initDebugInstances() {
+    if (this.isDebugReady()) {
+      Object.keys(loggerNames).forEach((name) => {
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
+        this[name] = this._debug(name);
+      });
+    }
+  }
+
   _debug: any;
 
   _debugInstanceCreatedMap: Record<string, boolean> = {};

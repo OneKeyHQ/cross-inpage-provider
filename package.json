@@ -14,6 +14,7 @@
     "prestart": "yarn build",
     "start": "lerna run start --parallel",
     "prepack": "yarn build",
+    "watch": "yarn bootstrap && concurrently \"gulp watch\" \"yarn start\" ",
     "publish-packages": "lerna publish from-package",
     "example": "cd ./packages/example && yarn dev",
     "example-build": "cd ./packages/example && yarn --registry 'https://registry.npmjs.org' && yarn build",
@@ -27,6 +28,7 @@
     "@types/lodash": "^4.14.178",
     "@types/node": "^16.9.0",
     "@types/react": "^17.0.21",
+    "@types/react-native": "^0.67.6",
     "@typescript-eslint/eslint-plugin": "^5.7.0",
     "@typescript-eslint/parser": "^5.7.0",
     "eslint": "^8.4.1",
@@ -40,6 +42,7 @@
     "react": "^17.0.2",
     "react-test-renderer": "^17.0.2",
     "ts-jest": "^27.0.5",
-    "typescript": "^4.5.4"
+    "typescript": "^4.5.4",
+    "concurrently": "^7.1.0"
   }
 }

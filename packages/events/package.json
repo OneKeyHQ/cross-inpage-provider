@@ -1,0 +1,23 @@
+{
+  "name": "@onekeyfe/cross-inpage-provider-events",
+  "version": "0.0.8",
+  "keywords": [
+    "cross-inpage-provider"
+  ],
+  "author": "dev-fe@onekey.so",
+  "repository": "https://github.com/OneKeyHQ/cross-inpage-provider",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/*",
+    "cross-events.js"
+  ],
+  "main": "./cross-events.js",
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "echo 'skip'  ",
+    "start": "echo 'skip'  "
+  }
+}

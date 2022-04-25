@@ -1,5 +1,5 @@
-import EventEmitter from 'eventemitter3';
 import isFunction from 'lodash/isFunction';
+import { CrossEventEmitter } from './CrossEventEmitter';
 
 import { JsBridgeBase } from './JsBridgeBase';
 import {
@@ -9,7 +9,7 @@ import {
   IDebugLogger,
 } from '@onekeyfe/cross-inpage-provider-types';
 import siteMetadata from './siteMetadata';
-import { fakeLogger, fakeDebugLogger, consoleErrorInDev } from './loggers'
+import { fakeLogger, fakeDebugLogger, consoleErrorInDev } from './loggers';
 import versionInfo from './versionInfo';
 
 export type IBridgeRequestCallback = (
@@ -21,7 +21,6 @@ export type IInpageProviderConfig = {
   bridge?: JsBridgeBase;
   logger?: ConsoleLike | null;
   maxEventListeners?: number;
-  shouldSendMetadata?: boolean;
 };
 
 export type DebugLoggerConfig = {
@@ -42,7 +41,7 @@ const METHODS = {
   wallet_sendSiteMetadata: 'wallet_sendSiteMetadata',
 };
 
-abstract class ProviderBase extends EventEmitter {
+abstract class ProviderBase extends CrossEventEmitter {
   constructor(config: IInpageProviderConfig) {
     super();
     if (!config.bridge) {
@@ -58,9 +57,10 @@ abstract class ProviderBase extends EventEmitter {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       this.bridge.attachProviderInstance(this as any);
     }, 0);
-    if (config.shouldSendMetadata) {
-      void this.sendSiteMetadata();
-    }
+
+    // call sendSiteMetadataDomReady/getConnectWalletInfo in ProviderPrivate, dont need here
+    // void this.sendSiteMetadataDomReady();
+    // void this.getConnectWalletInfo();
   }
 
   configDebugLogger(config: DebugLoggerConfig) {
@@ -151,7 +151,8 @@ abstract class ProviderBase extends EventEmitter {
       const resData = await this.bridge.request(payload);
       const result = resData ? (resData.result as unknown) : undefined;
       if (callback && hasCallback) {
-        callback(null, result);
+        // callback with params: { id, result, jsonrpc }
+        callback(null, resData);
       }
       this.debugLogger.providerBase(
         'bridgeRequest RETURN:',
@@ -170,8 +171,21 @@ abstract class ProviderBase extends EventEmitter {
     }
   }
 
+  public sendSiteMetadataDomReady() {
+    if (document.readyState === 'complete') {
+      void this.sendSiteMetadata();
+    } else {
+      const domContentLoadedHandler = () => {
+        void this.sendSiteMetadata();
+        window.removeEventListener('DOMContentLoaded', domContentLoadedHandler);
+      };
+      window.addEventListener('DOMContentLoaded', domContentLoadedHandler);
+    }
+  }
+
   async sendSiteMetadata() {
     const metadata = await siteMetadata.getSiteMetadata();
+
     return await this.bridgeRequest({
       method: METHODS.wallet_sendSiteMetadata,
       params: metadata,

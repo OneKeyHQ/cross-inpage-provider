@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/desktop-bridge-injected",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -34,7 +34,7 @@
     "electron": "^17.1.0"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "^0.0.8",
-    "@onekeyfe/cross-inpage-provider-types": "^0.0.8"
+    "@onekeyfe/cross-inpage-provider-core": "^0.0.9",
+    "@onekeyfe/cross-inpage-provider-types": "^0.0.9"
   }
 }

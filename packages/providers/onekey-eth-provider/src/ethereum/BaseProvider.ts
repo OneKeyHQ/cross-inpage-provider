@@ -39,6 +39,7 @@ export interface BaseProviderOptions {
 }
 
 export interface RequestArguments {
+  id?: number|string;
   /** The RPC method to request. */
   method: string;
 
@@ -184,7 +185,7 @@ export default class BaseProvider extends ProviderBase {
       });
     }
 
-    const { method, params } = args;
+    const { method, params, id } = args;
 
     if (!method || typeof method !== 'string' || method.length === 0) {
       // createErrorMiddleware
@@ -208,7 +209,7 @@ export default class BaseProvider extends ProviderBase {
 
     // TODO error logger
     //      log.error(`MetaMask - RPC Error: ${error.message}`, error);
-    const res = (await this._rpcRequest({ method, params })) as T;
+    const res = (await this._rpcRequest({ method, params, id })) as T;
     debugLogger.ethereum('request->response', '\n', args, '\n ---> ', res);
 
     return res;

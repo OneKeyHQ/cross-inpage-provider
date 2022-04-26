@@ -225,7 +225,7 @@ export default class MetaMaskInpageProvider extends BaseProvider {
 
   _rpcResult(result: any, payload?: SendSyncJsonRpcRequest): IJsonRpcResponse<any> {
     return {
-      id: payload?.id ?? Date.now(),
+      id: payload?.id ?? undefined,
       jsonrpc: payload?.jsonrpc ?? '2.0',
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       result,

@@ -2,8 +2,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { JsBridgeBase, ProviderBase } from '@onekeyfe/cross-inpage-provider-core';
 import { IInjectedProviderNames, IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
-import { ProviderEthereum } from '@onekeyfe/onekey-eth-provider';
+import { ProviderEthereum, shimWeb3 } from '@onekeyfe/onekey-eth-provider';
 import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
+// import Web3 from 'web3'; // cause build error
 
 export type WindowOneKeyHub = {
   debugLogger?: any;
@@ -38,7 +39,14 @@ function injectWeb3Provider(): unknown {
   window.$onekey = $onekey;
   // TODO conflict with MetaMask
   window.ethereum = ethereum;
-  // window.web3 = ethereum; // dapp create web3.js or ethers.js itself
+
+  // ** shim or inject real web3
+  //
+  // if (!window.web3) {
+  //   // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-argument
+  //   window.web3 = new Web3(ethereum as any);
+  // }
+  shimWeb3(ethereum);
 
   // TODO use initializeInpageProvider.ts
   window.dispatchEvent(new Event('ethereum#initialized'));

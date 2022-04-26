@@ -17,9 +17,16 @@ export default function shimWeb3(
 
   if (!(window as Record<string, any>).web3) {
     const SHIM_IDENTIFIER = '__isMetaMaskShim__';
+    const SHIM_IDENTIFIER2 = '__isOneKeyShim__';
 
     let web3Shim = { currentProvider: provider };
     Object.defineProperty(web3Shim, SHIM_IDENTIFIER, {
+      value: true,
+      enumerable: true,
+      configurable: false,
+      writable: false,
+    });
+    Object.defineProperty(web3Shim, SHIM_IDENTIFIER2, {
       value: true,
       enumerable: true,
       configurable: false,
@@ -42,11 +49,9 @@ export default function shimWeb3(
           log.error(
             `MetaMask no longer injects web3. For details, see: https://docs.metamask.io/guide/provider-migration.html#replacing-window-web3`,
           );
-          provider
-            .request({ method: 'metamask_logWeb3ShimUsage' })
-            .catch((error) => {
-              log.debug('MetaMask: Failed to log web3 shim usage.', error);
-            });
+          provider.request({ method: 'metamask_logWeb3ShimUsage' }).catch((error) => {
+            log.debug('MetaMask: Failed to log web3 shim usage.', error);
+          });
         }
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return Reflect.get(target, property, ...args);

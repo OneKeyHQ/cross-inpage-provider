@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment,@typescript-eslint/ban-ts-comment */
 import isFunction from 'lodash/isFunction';
 import { CrossEventEmitter } from './CrossEventEmitter';
 
@@ -149,6 +150,14 @@ abstract class ProviderBase extends CrossEventEmitter {
       };
       this.debugLogger.providerBase('bridgeRequest:', payload, '\r\n -----> ', payload.data);
       const resData = await this.bridge.request(payload);
+
+      if (resData) {
+        // @ts-ignore
+        resData.id = data?.id ?? resData.id ?? undefined;
+        // @ts-ignore
+        resData.jsonrpc = data?.jsonrpc ?? resData.jsonrpc ?? '2.0';
+      }
+
       const result = resData ? (resData.result as unknown) : undefined;
       if (callback && hasCallback) {
         // callback with params: { id, result, jsonrpc }

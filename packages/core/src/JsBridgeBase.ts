@@ -61,7 +61,6 @@ const BRIDGE_EVENTS = {
   error: 'error',
 };
 
-let requestPayloadCache: Record<string | number, IJsBridgeMessagePayload> = {};
 
 abstract class JsBridgeBase extends CrossEventEmitter {
   constructor(config: IJsBridgeConfig = {}) {
@@ -81,6 +80,8 @@ abstract class JsBridgeBase extends CrossEventEmitter {
     });
     this.rejectExpiredCallbacks();
   }
+
+  private _requestPayloadCache: Record<string | number, IJsBridgeMessagePayload> = {};
 
   protected isExtUi = false;
 
@@ -219,9 +220,9 @@ abstract class JsBridgeBase extends CrossEventEmitter {
         // @ts-ignore
         if (this.debugLogger.jsBridge?.enabled) {
           if (payload && payload.id && payload.type === IJsBridgeMessageTypes.REQUEST) {
-            requestPayloadCache[payload.id] = payload;
+            this._requestPayloadCache[payload.id] = payload;
             if (payload.id % 100 === 0) {
-              requestPayloadCache = {};
+              this._requestPayloadCache = {};
             }
           }
         }
@@ -364,7 +365,7 @@ abstract class JsBridgeBase extends CrossEventEmitter {
       );
     }
 
-    const relatedSendPayload = requestPayloadCache[payload?.id ?? ''] ?? null;
+    const relatedSendPayload = this._requestPayloadCache[payload?.id ?? ''] ?? null;
     this.debugLogger.jsBridge(
       'receive',
       payload,

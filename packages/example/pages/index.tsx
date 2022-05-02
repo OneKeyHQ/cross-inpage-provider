@@ -21,6 +21,7 @@ const Home: NextPage = () => {
       <main className={styles.main}>
         <Link href="/ethereum">EVM →</Link>
         <Link href="/near">NEAR →</Link>
+        <Link href="/solana">Solana →</Link>
       </main>
 
       <footer className={styles.footer}>

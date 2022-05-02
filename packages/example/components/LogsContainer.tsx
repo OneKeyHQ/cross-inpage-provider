@@ -42,7 +42,6 @@ export const LogsContainer = () => {
         overflow: 'auto',
       }}
     >
-      <Console logs={logs} variant="dark" />
       <div style={{ fontSize: 12 }}>
         <button onClick={() => setLogs([])}>Clear</button>
         {['jsBridge', 'providerBase', 'extInjected'].map((name) => {
@@ -68,6 +67,8 @@ export const LogsContainer = () => {
           );
         })}
       </div>
+
+      <Console logs={logs} variant="dark" />
     </div>
   );
 };

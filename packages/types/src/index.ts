@@ -2,13 +2,14 @@ declare global {
   interface Window {
     web3: any;
     ethereum: any;
+    solana: any;
     $onekey: any;
     ReactNativeWebView?: {
-      postMessage: (payload: string)=>void
-    },
+      postMessage: (payload: string) => void;
+    };
     ONEKEY_DESKTOP_GLOBALS?: {
       preloadJsUrl: string;
-    }
+    };
   }
 }
 

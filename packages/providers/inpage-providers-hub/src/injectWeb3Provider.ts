@@ -4,12 +4,14 @@ import { JsBridgeBase, ProviderBase } from '@onekeyfe/cross-inpage-provider-core
 import { IInjectedProviderNames, IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 import { ProviderEthereum, shimWeb3 } from '@onekeyfe/onekey-eth-provider';
 import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
+// import { ProviderSolana } from '@onekeyfe/onekey-solana-provider';
 // import Web3 from 'web3'; // cause build error
 
 export type WindowOneKeyHub = {
   debugLogger?: any;
   jsBridge?: JsBridgeBase;
   ethereum?: ProviderEthereum;
+  // solana?: ProviderSolana;
   $private?: ProviderPrivate;
 };
 
@@ -25,6 +27,9 @@ function injectWeb3Provider(): unknown {
   const $private = new ProviderPrivate({
     bridge,
   });
+  // const solana = new ProviderSolana({
+  //   bridge,
+  // });
 
   // providerHub
   const $onekey = {
@@ -32,13 +37,14 @@ function injectWeb3Provider(): unknown {
     jsBridge: bridge,
     ethereum,
     $private,
-    solana: null,
+    // solana,
     conflux: null,
     sollet: null,
   };
   window.$onekey = $onekey;
   // TODO conflict with MetaMask
   window.ethereum = ethereum;
+  // window.solana = solana;
 
   // ** shim or inject real web3
   //

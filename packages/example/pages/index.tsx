@@ -1,16 +1,13 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
-import Image from 'next/image';
-import dynamic from 'next/dynamic';
+// import Image from 'next/image';
 import Link from 'next/link';
 import styles from '../styles/Home.module.css';
 import packageJson from '../package.json';
 
-const NearExample = dynamic(() => import('../components/near/NearExample'), { ssr: false });
-
-const myImageLoader = ({ src, width, quality }: any) => {
-  return src as string;
-};
+// const myImageLoader = ({ src, width, quality }: any) => {
+//   return src as string;
+// };
 
 const Home: NextPage = () => {
   return (
@@ -22,7 +19,7 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-        <Link href="/evm/index.html">EVM →</Link>
+        <Link href="/ethereum">EVM →</Link>
         <Link href="/near">NEAR →</Link>
       </main>
 

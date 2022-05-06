@@ -22,6 +22,7 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
+        <Link href="/evm/index.html">EVM →</Link>
         <Link href="/near">NEAR →</Link>
       </main>
 

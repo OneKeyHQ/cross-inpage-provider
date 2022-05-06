@@ -18,6 +18,7 @@ declare global {
   interface Window {
     provider: OneKeyNearProvider;
     nearAPI: typeof NearApi;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     OneKeyNearProvider: any;
   }
 }

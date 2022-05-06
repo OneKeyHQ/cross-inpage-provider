@@ -1,12 +1,13 @@
 const path = require('path');
 const webpack = require('webpack');
 const packageJson = require('./package.json');
+const { merge } = require('webpack-merge');
 
 const IS_PRD = process.env.NODE_ENV === 'production';
 
 console.log('============ , IS_PRD', IS_PRD, process.env.NODE_ENV);
 
-module.exports = {
+const commonConfig = {
   mode: IS_PRD ? 'production' : 'development', // development, production
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.d.ts'],
@@ -25,7 +26,7 @@ module.exports = {
         use: ['babel-loader'],
         resolve: {
           fullySpecified: false,
-        }
+        },
       },
       {
         test: /\.(ts|tsx)$/,
@@ -34,16 +35,9 @@ module.exports = {
       },
     ],
   },
-  plugins: [
-  ],
+  plugins: [],
 
   devtool: IS_PRD ? undefined : 'inline-source-map',
-  target: 'electron-preload', // web, electron-preload, electron-renderer, node12.18.2
-  entry: {
-    injectedNative: './src/injectedNative.ts',
-    injectedExtension: './src/injectedExtension.ts',
-    injectedDesktop: './src/injectedDesktop.ts',
-  },
   output: {
     // Fix: "Uncaught ReferenceError: exports is not defined".
     // Fix: JIRA window.require('...') error
@@ -54,3 +48,30 @@ module.exports = {
     filename: '[name].js',
   },
 };
+
+const extensionConfig = merge(commonConfig, {
+  resolve: {
+    fallback: {
+      buffer: require.resolve('buffer/'),
+    },
+  },
+  target: 'web',
+  plugins: [
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
+  ],
+  entry: {
+    injectedExtension: './src/injectedExtension.ts',
+    injectedNative: './src/injectedNative.ts',
+  },
+});
+
+const nativeConfig = merge(commonConfig, {
+  target: 'electron-preload',
+  entry: {
+    injectedDesktop: './src/injectedDesktop.ts',
+  },
+});
+
+module.exports = [extensionConfig, nativeConfig];

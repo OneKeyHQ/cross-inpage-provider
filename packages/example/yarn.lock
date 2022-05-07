@@ -656,7 +656,7 @@
     "@onekeyfe/cross-inpage-provider-core" "^0.0.9"
     "@onekeyfe/cross-inpage-provider-types" "^0.0.9"
 
-"@onekeyfe/onekey-near-provider@*":
+"@onekeyfe/onekey-near-provider@latest":
   version "0.0.9"
   resolved "https://registry.yarnpkg.com/@onekeyfe/onekey-near-provider/-/onekey-near-provider-0.0.9.tgz#038f10c341c585d03e20abc8f1399a38268c66ed"
   integrity sha512-2Ix/ad+ScxE8PUheK5C3NQlHCnxkQ4JZ3MEcUWdjfpJa3AQrHXQCASWmuvrcLMc02DGD8FEEwMrP9q2dcPAJrg==
@@ -2298,9 +2298,9 @@ minimatch@^3.0.4:
     brace-expansion "^1.1.7"
 
 minimist@^1.2.0:
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.5.tgz#67d66014b66a6a8aaa0c083c5fd58df4e4e97602"
-  integrity sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==
+  version "1.2.6"
+  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.6.tgz#8637a5b759ea0d6e98702cfb3a9283323c93af44"
+  integrity sha512-Jsjnk4bw3YJqYzbdyBiNsPWHPfO++UGG749Cxs6peCu5Xg4nrena6OVxOYxrQTqww0Jmwt+Ref8rggumkTLz9Q==
 
 ms@2.0.0:
   version "2.0.0"

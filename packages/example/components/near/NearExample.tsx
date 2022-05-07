@@ -11,6 +11,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as NearApi from 'near-api-js';
 import { random } from 'lodash';
+import BN from 'bn.js';
 
 const hasWindow = typeof window !== 'undefined';
 
@@ -29,6 +30,10 @@ window.OneKeyNearProvider = OneKeyNearProvider;
 // TODO mobile web
 // TODO Toggle debugLogger button
 // TODO 0.0.7
+
+function toBN(value: string | null | undefined) {
+  return new BN(value ?? '', 10);
+}
 
 // fix: Error: Class Action is missing in schema: actions.actions
 function transactionCreator({
@@ -62,8 +67,12 @@ export default function NearExample() {
     }
     const num1 = random(100, 900) / 10000;
     const num2 = random(100, 900) / 10000;
-    const action1 = NearApi.transactions.transfer(NearApi.utils.format.parseNearAmount(num1 + ''));
-    const action2 = NearApi.transactions.transfer(NearApi.utils.format.parseNearAmount(num2 + ''));
+    const action1 = NearApi.transactions.transfer(
+      toBN(NearApi.utils.format.parseNearAmount(num1 + '')),
+    );
+    const action2 = NearApi.transactions.transfer(
+      toBN(NearApi.utils.format.parseNearAmount(num2 + '')),
+    );
     // TODO custom createTransaction, call near_accountNonce near_blockInfo
     const tx1 = await provider.createTransaction({
       receiverId: 'bitcoinzhuo.testnet',
@@ -287,9 +296,9 @@ export default function NearExample() {
                 const num1 = random(100, 900) / 10000;
                 const num2 = random(100, 900) / 10000;
                 const amount = NearApi.utils.format.parseNearAmount(num1.toString());
-                const action1 = NearApi.transactions.transfer(amount);
+                const action1 = NearApi.transactions.transfer(toBN(amount));
                 const action2 = NearApi.transactions.transfer(
-                  NearApi.utils.format.parseNearAmount(num2.toString()),
+                  toBN(NearApi.utils.format.parseNearAmount(num2.toString())),
                 );
                 const acc = provider.account();
                 const res = await acc.signAndSendTransaction({

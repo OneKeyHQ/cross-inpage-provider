@@ -14,19 +14,30 @@ import messagePort from '../extensionMessagePort';
 const { EXT_PORT_CS_TO_BG, JS_BRIDGE_MESSAGE_DIRECTION, JS_BRIDGE_MESSAGE_EXT_CHANNEL } = consts;
 
 // TODO one-time only
-function inject(filename: string) {
+function inject({
+  file,
+  code,
+  remove = true,
+}: {
+  file?: string;
+  code?: string;
+  remove?: boolean;
+}) {
   // Manifest V2 Only
-  /*
-  injectedFactory.injectCodeWithScriptTag({
-    code: injectedExtension as string,
-  });
-  */
+  if (code) {
+    injectedFactory.injectCodeWithScriptTag({
+      code,
+      remove,
+    });
+  }
 
   // Manifest V3 & V2
-  injectedFactory.injectCodeWithScriptTag({
-    file: chrome.runtime.getURL(filename),
-    remove: true,
-  });
+  if (file) {
+    injectedFactory.injectCodeWithScriptTag({
+      file: chrome.runtime.getURL(file),
+      remove,
+    });
+  }
 }
 
 // TODO one-time only

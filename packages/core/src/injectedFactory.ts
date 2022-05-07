@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 function createCodeWithScriptTag({ code }: { code: string }): string {
   // script id check, only inject once.
   return `
@@ -23,11 +24,11 @@ function injectCodeWithScriptTag({
 }): void {
   (function () {
     const s = document.createElement('script');
-    s.setAttribute('async', 'false');
-    s.setAttribute('defer', 'false');
-    s.setAttribute('data-onekey-injected', 'true');
+    s.removeAttribute('async');
+    s.removeAttribute('defer');
+    s.setAttribute('data-onekey-injected', 'yes');
     if (code) {
-      s.textContent = JSON.stringify(code);
+      s.textContent = code;
     }
     if (file) {
       s.src = file;

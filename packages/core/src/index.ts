@@ -4,6 +4,7 @@ export * from './loggers';
 export * from './injectJsBridge';
 export * from './injectedProviderReceiveHandler';
 export * from './JsBridgeSimple';
+export * from './JsBridgeIframe';
 export * from './CrossEventEmitter'
 import * as consts from './consts';
 export { consts };

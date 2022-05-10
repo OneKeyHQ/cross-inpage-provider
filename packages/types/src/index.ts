@@ -4,11 +4,11 @@ declare global {
     ethereum: any;
     $onekey: any;
     ReactNativeWebView?: {
-      postMessage: (payload: string)=>void
-    },
+      postMessage: (payload: string) => void;
+    };
     ONEKEY_DESKTOP_GLOBALS?: {
       preloadJsUrl: string;
-    }
+    };
   }
 }
 
@@ -28,6 +28,7 @@ export enum IInjectedProviderNames {
   sollet = 'sollet',
   near = 'near',
   $private = '$private',
+  $hardware_sdk = '$hardware_sdk',
 }
 
 export type IInjectedProviderNamesStrings = keyof typeof IInjectedProviderNames;

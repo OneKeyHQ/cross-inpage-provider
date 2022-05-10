@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@metamask/onboarding": "^1.0.1",
-    "@onekeyfe/onekey-near-provider": "latest",
+    "@onekeyfe/onekey-near-provider": "0.0.10",
     "console-feed": "^3.3.0",
     "eth-sig-util": "^3.0.1",
     "ethereumjs-util": "^7.1.4",

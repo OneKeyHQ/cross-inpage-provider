@@ -19,6 +19,7 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
+        <Link href="/iframe">iframe →</Link>
         <Link href="/ethereum">EVM →</Link>
         <Link href="/near">NEAR →</Link>
       </main>

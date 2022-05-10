@@ -40,6 +40,8 @@ function isLegacyExtMessage(payload: unknown): boolean {
   );
 }
 
+const globalWindow = typeof window !== 'undefined' ? window : global;
+
 type IErrorInfo = Error & {
   // Error
   name?: string;
@@ -60,7 +62,6 @@ const BRIDGE_EVENTS = {
   message: 'message',
   error: 'error',
 };
-
 
 abstract class JsBridgeBase extends CrossEventEmitter {
   constructor(config: IJsBridgeConfig = {}) {
@@ -206,7 +207,7 @@ abstract class JsBridgeBase extends CrossEventEmitter {
             data,
             error,
             type,
-            origin: global?.location?.origin || '',
+            origin: globalWindow?.location?.origin || '',
             remoteId,
             scope,
           },

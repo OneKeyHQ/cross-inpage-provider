@@ -29,7 +29,10 @@ function getOrCreateExtInjectedJsBridge(options: IJsBridgeConfig = {}): JsBridge
 }
 
 let postMessageListenerAdded = false;
-function setupPostMessageListener(options: IOptionsWithDebugLogger = {}) {
+export type ISetupPostMessageListenerOptions = IOptionsWithDebugLogger & {
+  bridge?: JsBridgeBase;
+};
+function setupPostMessageListener(options: ISetupPostMessageListenerOptions = {}) {
   const debugLogger = options.debugLogger || fakeDebugLogger;
   if (postMessageListenerAdded) {
     return;
@@ -54,7 +57,7 @@ function setupPostMessageListener(options: IOptionsWithDebugLogger = {}) {
         debugLogger.extInjected('onWindowPostMessage', eventData);
 
         const payload = eventData.payload as IJsBridgeMessagePayload;
-        const jsBridge = window?.$onekey?.jsBridge as JsBridgeBase;
+        const jsBridge = options.bridge ?? (window?.$onekey?.jsBridge as JsBridgeBase);
         if (jsBridge) {
           jsBridge.receive(payload);
         }
@@ -67,8 +70,10 @@ function setupPostMessageListener(options: IOptionsWithDebugLogger = {}) {
 class JsBridgeExtInjected extends JsBridgeBase {
   constructor(config: IJsBridgeConfig) {
     super(config);
+    // receive message
     setupPostMessageListener({
       debugLogger: this.debugLogger,
+      bridge: this,
     });
   }
 
@@ -76,6 +81,7 @@ class JsBridgeExtInjected extends JsBridgeBase {
 
   isInjected = true;
 
+  // send message
   sendPayload(payloadObj: IJsBridgeMessagePayload | string) {
     window.postMessage({
       channel: JS_BRIDGE_MESSAGE_EXT_CHANNEL,

@@ -54,8 +54,10 @@ export const LogsContainer = () => {
                 onClick={(e) => {
                   // @ts-ignore
                   loggers[name] = Boolean(e.target.checked);
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+                  const bridge = window?.$onekey?.jsBridge ?? window?.hostBridge;
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-                  window?.$onekey?.jsBridge?.debugLogger?._debug?.enable(
+                  bridge?.debugLogger?._debug?.enable(
                     Object.entries(loggers)
                       .map(([k, v]) => (v ? k : null))
                       .filter(Boolean)

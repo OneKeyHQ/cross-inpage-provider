@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useEffect, useState } from 'react';
 import { Console, Hook, Unhook } from 'console-feed';
+import { JsBridgeBase } from '@onekeyfe/cross-inpage-provider-core';
 
 const loggers: Record<string, boolean> = {};
 
@@ -19,7 +20,7 @@ function loadLoggersConfig() {
 
 loadLoggersConfig();
 
-export const LogsContainer = () => {
+export const LogsContainer = ({ bridge }: { bridge?: JsBridgeBase } = {}) => {
   const [logs, setLogs] = useState([]);
 
   // run once!
@@ -55,9 +56,9 @@ export const LogsContainer = () => {
                   // @ts-ignore
                   loggers[name] = Boolean(e.target.checked);
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-                  const bridge = window?.$onekey?.jsBridge ?? window?.hostBridge;
+                  const _bridge = bridge ?? window?.$onekey?.jsBridge ?? window?.hostBridge;
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-                  bridge?.debugLogger?._debug?.enable(
+                  _bridge?.debugLogger?._debug?.enable(
                     Object.entries(loggers)
                       .map(([k, v]) => (v ? k : null))
                       .filter(Boolean)

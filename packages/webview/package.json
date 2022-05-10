@@ -1,6 +1,6 @@
 {
 	"name": "@onekeyfe/onekey-cross-webview",
-	"version": "0.0.10",
+	"version": "0.0.11",
 	"keywords": [
 		"cross-inpage-provider"
 	],
@@ -34,8 +34,8 @@
 		"electron": "^17.1.0"
 	},
 	"dependencies": {
-		"@onekeyfe/cross-inpage-provider-core": "^0.0.10",
-		"@onekeyfe/cross-inpage-provider-types": "^0.0.10",
+		"@onekeyfe/cross-inpage-provider-core": "^0.0.11",
+		"@onekeyfe/cross-inpage-provider-types": "^0.0.11",
 		"react-native-webview": "^11.17.2"
 	}
 }

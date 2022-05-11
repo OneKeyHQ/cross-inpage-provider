@@ -1,4 +1,5 @@
-import { PublicKey, Transaction, SendOptions } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
+import type { SendOptions, Transaction } from '@solana/web3.js';
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';

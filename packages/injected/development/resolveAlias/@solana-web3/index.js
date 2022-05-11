@@ -30170,4 +30170,5 @@ var solanaWeb3 = (function (exports) {
 
 })({});
 module.exports = solanaWeb3;
+module.exports.default = solanaWeb3;
 //# sourceMappingURL=index.iife.js.map

@@ -10,10 +10,12 @@ console.log('============ , IS_PRD', IS_PRD, process.env.NODE_ENV);
 const commonConfig = {
   mode: IS_PRD ? 'production' : 'development', // development, production
   resolve: {
+    // DO NOT need alias if injected working in all platforms
+    //    alias module should be ES module export
     alias: {
-      // >>>> required in @solana/web3.js index.iife.js
-      './precomputed/secp256k1': path.resolve(__dirname, 'development/resolveAlias/secp256k1-mock'),
-      '@solana/web3.js': path.resolve(__dirname, 'development/resolveAlias/@solana-web3'),
+      // required in @solana/web3.js index.iife.js
+      // './precomputed/secp256k1': path.resolve(__dirname, 'development/resolveAlias/secp256k1-mock'),
+      // '@solana/web3.js': path.resolve(__dirname, 'development/resolveAlias/@solana-web3'),
     },
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.d.ts'],
   },

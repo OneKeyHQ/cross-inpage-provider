@@ -30169,10 +30169,10 @@ var solanaWeb3 = (function (exports) {
 	return exports;
 
 })({});
-module.exports = solanaWeb3;
-module.exports.default = solanaWeb3;
-const {Transaction, PublicKey,SendOptions} = solanaWeb3
+// module.exports = solanaWeb3; // solanaWeb3_exports
+// module.exports.default = solanaWeb3;
+const { Transaction, PublicKey, SendOptions } = solanaWeb3
 export {
-  Transaction, PublicKey,SendOptions
+  Transaction, PublicKey, SendOptions
 }
 //# sourceMappingURL=index.iife.js.map

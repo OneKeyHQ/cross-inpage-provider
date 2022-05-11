@@ -2,6 +2,7 @@ declare global {
   interface Window {
     web3: any;
     ethereum: any;
+    solana: any;
     $onekey: any;
     ReactNativeWebView?: {
       postMessage: (payload: string) => void;

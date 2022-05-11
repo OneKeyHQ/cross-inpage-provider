@@ -22,6 +22,7 @@ const Home: NextPage = () => {
         <Link href="/iframe">iframe →</Link>
         <Link href="/ethereum">EVM →</Link>
         <Link href="/near">NEAR →</Link>
+        <Link href="/solana">Solana →</Link>
       </main>
 
       <footer className={styles.footer}>

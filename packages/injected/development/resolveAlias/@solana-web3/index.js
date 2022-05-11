@@ -30171,4 +30171,8 @@ var solanaWeb3 = (function (exports) {
 })({});
 module.exports = solanaWeb3;
 module.exports.default = solanaWeb3;
+const {Transaction, PublicKey,SendOptions} = solanaWeb3
+export {
+  Transaction, PublicKey,SendOptions
+}
 //# sourceMappingURL=index.iife.js.map

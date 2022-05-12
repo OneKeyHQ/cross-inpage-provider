@@ -26,6 +26,8 @@ const Home: NextPage = () => {
         <Link href="/iframe">iframe →</Link>
         <Link href="/ethereum">EVM →</Link>
         <Link href="/near">NEAR →</Link>
+        <Link href="/solana">Solana →</Link>
+        <button onClick={() => window.location.reload()}>refresh</button>
       </main>
 
       <footer className={styles.footer}>

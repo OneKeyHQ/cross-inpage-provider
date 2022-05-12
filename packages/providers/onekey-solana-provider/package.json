@@ -1,8 +1,9 @@
 {
-  "name": "@onekeyfe/inpage-providers-hub",
+  "name": "@onekeyfe/onekey-solana-provider",
   "version": "0.0.11",
   "keywords": [
-    "cross-inpage-provider"
+    "cross-inpage-provider",
+    "solona"
   ],
   "author": "dev-fe@onekey.so",
   "repository": "https://github.com/OneKeyHQ/cross-inpage-provider",
@@ -29,10 +30,13 @@
   },
   "dependencies": {
     "@onekeyfe/cross-inpage-provider-core": "^0.0.11",
+    "@onekeyfe/cross-inpage-provider-errors": "^0.0.11",
     "@onekeyfe/cross-inpage-provider-types": "^0.0.11",
-    "@onekeyfe/onekey-eth-provider": "^0.0.11",
-    "@onekeyfe/onekey-private-provider": "^0.0.11",
-    "@onekeyfe/onekey-solana-provider": "^0.0.11",
-    "web3": "^1.7.3"
+    "@onekeyfe/extension-bridge-injected": "^0.0.11",
+    "@solana/web3.js": "^1.41.3",
+    "bs58": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/bs58": "^4.0.1"
   }
 }

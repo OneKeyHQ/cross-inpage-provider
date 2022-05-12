@@ -1,19 +1,17 @@
-import dynamic from 'next/dynamic';
-import styles from '../../styles/Home.module.css';
-import Link from 'next/link';
-import { LogsContainer } from '../../components/LogsContainer';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { JsBridgeIframe } from '@onekeyfe/cross-inpage-provider-core';
-import { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
-import { sendMethod } from './utils';
+/* eslint-disable @typescript-eslint/restrict-plus-operands,@typescript-eslint/ban-ts-comment */
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { JsBridgeIframe } from '@onekeyfe/cross-inpage-provider-core'
+import { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types'
+import { sendMethod } from './utils'
 
 declare global {
   interface Window {
-    hostBridge?: JsBridgeIframe;
+    frameBridge: JsBridgeIframe;
+    hostBridge: JsBridgeIframe;
   }
 }
 
-export default function () {
+export default function IFrameHostExample() {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   useLayoutEffect(() => {
     if (!iframeRef.current || !iframeRef.current?.contentWindow) {
@@ -42,8 +40,6 @@ export default function () {
   }, []);
   return (
     <div>
-      <div className={styles.container}>
-        <h2>HOST</h2>
         {['hi', 'hello', 'error'].map((method, index) => {
           return (
             <button
@@ -69,8 +65,6 @@ export default function () {
           style={{ width: '100%', height: '400px' }}
           frameBorder={0}
         />
-        <LogsContainer />
-      </div>
     </div>
   );
 }

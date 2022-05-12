@@ -68,10 +68,10 @@ export default function NearExample() {
     const num1 = random(100, 900) / 10000;
     const num2 = random(100, 900) / 10000;
     const action1 = NearApi.transactions.transfer(
-      toBN(NearApi.utils.format.parseNearAmount(num1 + '')),
+      toBN(NearApi.utils.format.parseNearAmount(`${num1  }`)),
     );
     const action2 = NearApi.transactions.transfer(
-      toBN(NearApi.utils.format.parseNearAmount(num2 + '')),
+      toBN(NearApi.utils.format.parseNearAmount(`${num2  }`)),
     );
     // TODO custom createTransaction, call near_accountNonce near_blockInfo
     const tx1 = await provider.createTransaction({

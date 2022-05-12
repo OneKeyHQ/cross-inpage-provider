@@ -15,6 +15,7 @@ module.exports = {
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
     'react/self-closing-comp': 'error',
+    'prefer-template': 'error',
     'tsdoc/syntax': 'warn',
     // '@typescript-eslint/no-unsafe-assignment': 'warn',
     // '@typescript-eslint/no-unsafe-member-access': 'warn',

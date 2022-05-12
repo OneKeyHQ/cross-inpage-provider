@@ -4,16 +4,16 @@ import Head from 'next/head';
 import Link from 'next/link';
 import styles from '../styles/Home.module.css';
 import packageJson from '../package.json';
-import { useEffect } from 'react'
+import { useEffect } from 'react';
 
 // const myImageLoader = ({ src, width, quality }: any) => {
 //   return src as string;
 // };
 
 const Home: NextPage = () => {
-  useEffect(()=>{
-    fetch('/api/hello?_='+Date.now());
-  },[])
+  useEffect(() => {
+    void fetch(`/api/hello?_=${Date.now()}`);
+  }, []);
   return (
     <div className={styles.container}>
       <Head>

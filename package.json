@@ -9,6 +9,7 @@
     "clean": "lerna clean --yes",
     "clean-workspace": "yarn clean && lerna run clean",
     "lint": "yarn run eslint --ext .ts,.tsx . --ignore-pattern /packages/example/**/*",
+    "lint-all": "yarn run eslint --ext .ts,.tsx . --fix",
     "test": "jest",
     "build": "lerna run build --ignore @onekeyfe/cross-inpage-provider-example",
     "prestart": "yarn build",

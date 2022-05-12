@@ -40,19 +40,19 @@ export default function EVMExample() {
         <div className="row">
           <div className="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
             <p className="info-text alert alert-primary">
-              Network: <span id="network"></span>
+              Network: <span id="network" />
             </p>
           </div>
 
           <div className="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
             <p className="info-text alert alert-secondary">
-              ChainId: <span id="chainId"></span>
+              ChainId: <span id="chainId" />
             </p>
           </div>
 
           <div className="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
             <p className="info-text alert alert-success">
-              Accounts: <span id="accounts"></span>
+              Accounts: <span id="accounts" />
             </p>
           </div>
         </div>
@@ -78,7 +78,7 @@ export default function EVMExample() {
                 </button>
 
                 <p className="info-text alert alert-secondary">
-                  eth_accounts result: <span id="getAccountsResult"></span>
+                  eth_accounts result: <span id="getAccountsResult" />
                 </p>
               </div>
             </div>
@@ -102,7 +102,7 @@ export default function EVMExample() {
                 </button>
 
                 <p className="info-text alert alert-secondary">
-                  Permissions result: <span id="permissionsResult"></span>
+                  Permissions result: <span id="permissionsResult" />
                 </p>
               </div>
             </div>
@@ -204,7 +204,7 @@ export default function EVMExample() {
                 <h4 className="card-title">Send Tokens</h4>
 
                 <p className="info-text alert alert-success">
-                  Token: <span id="tokenAddress"></span>
+                  Token: <span id="tokenAddress" />
                 </p>
 
                 <button className="btn btn-primary btn-lg btn-block mb-3" id="createToken" disabled>
@@ -289,7 +289,7 @@ export default function EVMExample() {
                 </div>
 
                 <p className="info-text alert alert-secondary">
-                  Collectibles: <span id="collectiblesStatus"></span>
+                  Collectibles: <span id="collectiblesStatus" />
                 </p>
               </div>
             </div>
@@ -342,15 +342,15 @@ export default function EVMExample() {
                 </button>
 
                 <p className="info-text alert alert-secondary">
-                  Encryption key: <span id="encryptionKeyDisplay"></span>
+                  Encryption key: <span id="encryptionKeyDisplay" />
                 </p>
 
                 <p className="info-text text-truncate alert alert-secondary">
-                  Ciphertext: <span id="ciphertextDisplay"></span>
+                  Ciphertext: <span id="ciphertextDisplay" />
                 </p>
 
                 <p className="info-text alert alert-secondary">
-                  Cleartext: <span id="cleartextDisplay"></span>
+                  Cleartext: <span id="cleartextDisplay" />
                 </p>
               </div>
             </div>
@@ -376,7 +376,7 @@ export default function EVMExample() {
                 </button>
 
                 <p className="info-text alert alert-warning">
-                  Result: <span id="ethSignResult"></span>
+                  Result: <span id="ethSignResult" />
                 </p>
               </div>
             </div>
@@ -401,7 +401,7 @@ export default function EVMExample() {
                 </button>
 
                 <p className="info-text alert alert-warning">
-                  Result: <span id="personalSignResult"></span>
+                  Result: <span id="personalSignResult" />
                 </p>
 
                 <button
@@ -414,11 +414,11 @@ export default function EVMExample() {
 
                 <p className="info-text alert alert-warning">
                   eth-sig-util recovery result:
-                  <span id="personalSignVerifySigUtilResult"></span>
+                  <span id="personalSignVerifySigUtilResult" />
                 </p>
                 <p className="info-text alert alert-warning">
                   personal_ecRecover result:
-                  <span id="personalSignVerifyECRecoverResult"></span>
+                  <span id="personalSignVerifyECRecoverResult" />
                 </p>
               </div>
             </div>
@@ -443,7 +443,7 @@ export default function EVMExample() {
                 </button>
 
                 <p className="info-text alert alert-warning">
-                  Result: <span id="signTypedDataResult"></span>
+                  Result: <span id="signTypedDataResult" />
                 </p>
 
                 <button
@@ -456,7 +456,7 @@ export default function EVMExample() {
 
                 <p className="info-text alert alert-warning">
                   Recovery result:
-                  <span id="signTypedDataVerifyResult"></span>
+                  <span id="signTypedDataVerifyResult" />
                 </p>
               </div>
             </div>
@@ -482,7 +482,7 @@ export default function EVMExample() {
 
                 <p className="info-text alert alert-warning">
                   Result:
-                  <span id="signTypedDataV3Result"></span>
+                  <span id="signTypedDataV3Result" />
                 </p>
 
                 <button
@@ -495,7 +495,7 @@ export default function EVMExample() {
 
                 <p className="info-text alert alert-warning">
                   Recovery result:
-                  <span id="signTypedDataV3VerifyResult"></span>
+                  <span id="signTypedDataV3VerifyResult" />
                 </p>
               </div>
             </div>
@@ -521,7 +521,7 @@ export default function EVMExample() {
 
                 <p className="info-text alert alert-warning">
                   Result:
-                  <span id="signTypedDataV4Result"></span>
+                  <span id="signTypedDataV4Result" />
                 </p>
 
                 <button
@@ -534,7 +534,7 @@ export default function EVMExample() {
 
                 <p className="info-text alert alert-warning">
                   Recovery result:
-                  <span id="signTypedDataV4VerifyResult"></span>
+                  <span id="signTypedDataV4VerifyResult" />
                 </p>
               </div>
             </div>

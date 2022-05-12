@@ -59,7 +59,7 @@ export default function App() {
     provider.on('connect', (publicKey: PublicKey) => {
       setPublicKey(publicKey);
       setConnected(true);
-      console.log('[connect] ' + publicKey.toBase58());
+      console.log(`[connect] ${  publicKey.toBase58()}`);
     });
     provider.on('disconnect', () => {
       setPublicKey(null);
@@ -69,7 +69,7 @@ export default function App() {
     provider.on('accountChanged', (publicKey: PublicKey | null) => {
       setPublicKey(publicKey);
       if (publicKey) {
-        console.log('[accountChanged] Switched account to ' + publicKey?.toBase58());
+        console.log(`[accountChanged] Switched account to ${  publicKey?.toBase58()}`);
       } else {
         console.log('[accountChanged] Switched unknown account');
         // In this case, dapps could not to anything, or,
@@ -82,7 +82,7 @@ export default function App() {
           .connect()
           .then(() => console.log('[accountChanged] Reconnected successfully'))
           .catch((err: Error) => {
-            console.log('[accountChanged] Failed to re-connect: ' + err.message);
+            console.log(`[accountChanged] Failed to re-connect: ${  err.message}`);
           });
       }
     });
@@ -100,7 +100,7 @@ export default function App() {
       await provider.connect();
     } catch (err) {
       console.warn(err);
-      console.log('[error] connect: ' + JSON.stringify(err));
+      console.log(`[error] connect: ${  JSON.stringify(err)}`);
     }
   };
 
@@ -109,7 +109,7 @@ export default function App() {
       await provider.disconnect();
     } catch (err) {
       console.warn(err);
-      console.log('[error] disconnect: ' + JSON.stringify(err));
+      console.log(`[error] disconnect: ${  JSON.stringify(err)}`);
     }
   };
 
@@ -154,7 +154,7 @@ export default function App() {
       console.log('Transaction confirmed: ', result);
     } catch (err) {
       console.warn(err);
-      console.log('[error] sendTransaction: ' + JSON.stringify(err));
+      console.log(`[error] sendTransaction: ${  JSON.stringify(err)}`);
     }
   };
 

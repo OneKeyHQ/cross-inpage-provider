@@ -85,7 +85,7 @@ class FakeDebugLogger extends CrossEventEmitter implements IDebugLogger {
         this[name]?.(...args);
       });
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      return this._externalLogger?.log?.(name + ' >>> ', ...args);
+      return this._externalLogger?.log?.(`${name  } >>> `, ...args);
     };
 }
 

@@ -230,7 +230,7 @@ export default function App() {
           </>
         ) : (
           <>
-            <button onClick={() => connectWallet()}>Connect to Phantom</button>
+            <button onClick={() => connectWallet()}>Connect to OneKey</button>
           </>
         )}
       </main>

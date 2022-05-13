@@ -25,8 +25,9 @@ const Home: NextPage = () => {
       <main className={styles.main}>
         <Link href="/iframe">iframe →</Link>
         <Link href="/ethereum">EVM →</Link>
-        <Link href="/near">NEAR →</Link>
         <Link href="/solana">Solana →</Link>
+        <Link href="/near">NEAR →</Link>
+        <Link href="https://dapp-near-ref-ui.test.onekey.so/">NEAR ref-ui →</Link>
         <button onClick={() => window.location.reload()}>refresh</button>
       </main>
 

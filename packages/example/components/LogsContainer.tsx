@@ -43,8 +43,18 @@ export const LogsContainer = ({ bridge }: { bridge?: JsBridgeBase } = {}) => {
         overflow: 'auto',
       }}
     >
-      <div style={{ fontSize: 12 }}>
-        <button onClick={() => setLogs([])}>Clear</button>
+      <div
+        style={{
+          fontSize: 12,
+          position: 'sticky',
+          top: 0,
+          right: 0,
+          left: 0,
+          zIndex: 1,
+          background: '#333',
+        }}
+      >
+        <button onClick={() => setLogs([])}>Clear</button>{' '}
         {['jsBridge', 'providerBase', 'extInjected'].map((name) => {
           return (
             <label key={name}>
@@ -70,7 +80,6 @@ export const LogsContainer = ({ bridge }: { bridge?: JsBridgeBase } = {}) => {
           );
         })}
       </div>
-
       <Console logs={logs} variant="dark" />
     </div>
   );

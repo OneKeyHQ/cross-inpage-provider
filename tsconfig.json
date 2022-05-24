@@ -3,7 +3,7 @@
   "compilerOptions": {
     "module": "ES2020",
     "declaration": true,
-    "moduleResolution": "Node"
+    "moduleResolution": "node"
   },
   "exclude": ["**/*.spec.ts"]
 }

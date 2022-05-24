@@ -56,6 +56,7 @@ export type IJsBridgeIframeConfig = IJsBridgeConfig & {
   selfFrameName: string;
   remoteFrameName: string;
   channel: string;
+  targetOrigin?: string;
 };
 class JsBridgeIframe extends JsBridgeBase {
   constructor(config: IJsBridgeIframeConfig) {
@@ -82,7 +83,7 @@ class JsBridgeIframe extends JsBridgeBase {
       payload: payloadObj,
       direction: '',
     };
-    this.bridgeConfig.remoteFrame.postMessage(eventData);
+    this.bridgeConfig.remoteFrame.postMessage(eventData, this.bridgeConfig.targetOrigin ?? window.location.origin);
   }
 }
 

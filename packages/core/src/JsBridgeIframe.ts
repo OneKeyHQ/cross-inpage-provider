@@ -13,13 +13,13 @@ import { fakeDebugLogger } from './index';
 let postMessageListenerAdded = false;
 export type ISetupPostMessageListenerOptions = IOptionsWithDebugLogger & {
   bridge?: JsBridgeIframe;
+  origin?: string
 };
 
 export type IPostMessageEventDataIframe = IPostMessageEventData & {
   frameName: string;
 };
 function setupPostMessageListener(options: ISetupPostMessageListenerOptions = {}) {
-  const debugLogger = options.debugLogger || fakeDebugLogger;
   if (postMessageListenerAdded) {
     return;
   }
@@ -29,8 +29,8 @@ function setupPostMessageListener(options: ISetupPostMessageListenerOptions = {}
     'message',
     (event: MessageEvent) => {
       // TODO source whitelist
-      if (event.source !== window) {
-        // return;
+      if (event.origin !== options.origin) {
+        return;
       }
 
       const eventData = event.data as IPostMessageEventDataIframe;
@@ -59,13 +59,17 @@ export type IJsBridgeIframeConfig = IJsBridgeConfig & {
   targetOrigin?: string;
 };
 class JsBridgeIframe extends JsBridgeBase {
+  targetOrigin: string;
+
   constructor(config: IJsBridgeIframeConfig) {
     super(config);
     this.bridgeConfig = config;
+    this.targetOrigin = config.targetOrigin ?? window.location.origin
     // receive message
     setupPostMessageListener({
       debugLogger: this.debugLogger,
       bridge: this,
+      origin: this.targetOrigin,
     });
   }
 
@@ -83,7 +87,7 @@ class JsBridgeIframe extends JsBridgeBase {
       payload: payloadObj,
       direction: '',
     };
-    this.bridgeConfig.remoteFrame.postMessage(eventData, this.bridgeConfig.targetOrigin ?? window.location.origin);
+    this.bridgeConfig.remoteFrame.postMessage(eventData, this.targetOrigin);
   }
 }
 

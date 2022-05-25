@@ -8,7 +8,6 @@ import {
   IOptionsWithDebugLogger,
 } from '@onekeyfe/cross-inpage-provider-types';
 import { JsBridgeBase } from './JsBridgeBase';
-import { fakeDebugLogger } from './index';
 
 let postMessageListenerAdded = false;
 export type ISetupPostMessageListenerOptions = IOptionsWithDebugLogger & {

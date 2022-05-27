@@ -28,9 +28,13 @@ function setupPostMessageListener(options: ISetupPostMessageListenerOptions = {}
     'message',
     (event: MessageEvent) => {
       // TODO source whitelist
-      if (event.origin !== options.origin) {
-        return;
-      }
+      /**
+       * This origin is not guaranteed to be the current or future origin of the window
+       * temporarily comment this line
+       */
+      // if (event.origin !== options.origin) {
+      //   return;
+      // }
 
       const eventData = event.data as IPostMessageEventDataIframe;
       const config = options.bridge?.bridgeConfig;

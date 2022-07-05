@@ -11,7 +11,7 @@ export default function STCExample() {
   return (
     <main className={`${styles.main} container-fluid`}>
       <Head>
-        <title>E2E Test Dapp</title>
+        <title>Starcoin E2E Test Dapp</title>
 
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -19,7 +19,7 @@ export default function STCExample() {
       <div id="logo-container">
         <img src="/starcoin-logo.svg" />
         <h1 id="logo-text" className="text-center">
-          E2E Test Dapp
+        Starcoin E2E Test Dapp
         </h1>
       </div>
     </header>

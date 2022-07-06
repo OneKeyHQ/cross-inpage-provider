@@ -11,7 +11,7 @@ export default function EVMExample() {
   return (
     <main className={`${styles.main} container-fluid`}>
       <Head>
-        <title>E2E Test Dapp</title>
+        <title>Ethereum E2E Test Dapp</title>
 
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -19,7 +19,7 @@ export default function EVMExample() {
         <div id="logo-container">
           <img id="logo" src="/logo.png" />
           <h1 id="logo-text" className="text-center">
-            E2E Test Dapp
+          Ethereum E2E Test Dapp
           </h1>
         </div>
       </header>

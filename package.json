@@ -16,6 +16,7 @@
     "start": "lerna run start --parallel --ignore @onekeyfe/cross-inpage-provider-example",
     "prepack": "yarn build",
     "watch": "yarn bootstrap && concurrently \"gulp watch\" \"yarn start\" ",
+    "gulp-watch": "gulp watch",
     "publish-packages": "lerna publish from-package",
     "example": "cd ./packages/example && yarn dev",
     "example-build": "cd ./packages/example && yarn --registry 'https://registry.npmjs.org' && yarn build",

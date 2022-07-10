@@ -28,6 +28,7 @@ const Home: NextPage = () => {
         <Link href="/solana">Solana →</Link>
         <Link href="/near">NEAR →</Link>
         <Link href="https://dapp-near-ref-ui.test.onekey.so/">NEAR ref-ui →</Link>
+        <Link href="/starcoin">Starcoin →</Link>
         <button onClick={() => window.location.reload()}>refresh</button>
       </main>
 

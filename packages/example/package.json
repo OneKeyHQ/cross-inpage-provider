@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/cross-inpage-provider-example",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -16,10 +16,10 @@
     "@starcoin/starcoin": "^2.1.6",
     "@starcoin/starmask-onboarding": "^1.0.0",
     "@metamask/onboarding": "^1.0.1",
-    "@onekeyfe/cross-inpage-provider-core": "^0.0.14",
-    "@onekeyfe/cross-inpage-provider-types": "^0.0.14",
-    "@onekeyfe/onekey-near-provider": "^0.0.14",
-    "@onekeyfe/onekey-solana-provider": "^0.0.14",
+    "@onekeyfe/cross-inpage-provider-core": "^0.0.15",
+    "@onekeyfe/cross-inpage-provider-types": "^0.0.15",
+    "@onekeyfe/onekey-near-provider": "^0.0.15",
+    "@onekeyfe/onekey-solana-provider": "^0.0.15",
     "@solana/web3.js": "^1.41.3",
     "@types/bs58": "^4.0.1",
     "bs58": "^5.0.0",

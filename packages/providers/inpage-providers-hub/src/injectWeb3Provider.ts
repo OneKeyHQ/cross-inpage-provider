@@ -35,7 +35,7 @@ function injectWeb3Provider(): unknown {
 
   const starcoin = new ProviderStarcoin({
     bridge,
-  });;
+  });
 
   // providerHub
   const $onekey = {

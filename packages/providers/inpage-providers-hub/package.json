@@ -33,7 +33,7 @@
     "@onekeyfe/onekey-eth-provider": "^0.0.14",
     "@onekeyfe/onekey-private-provider": "^0.0.14",
     "@onekeyfe/onekey-solana-provider": "^0.0.14",
-    "@onekeyfe/onekey-starcoin-provider": "^0.0.15",
+    "@onekeyfe/onekey-starcoin-provider": "^0.0.14",
     "web3": "^1.7.3"
   }
 }

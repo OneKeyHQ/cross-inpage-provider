@@ -1,6 +1,5 @@
 /* eslint-disable no-dupe-class-members,@typescript-eslint/ban-ts-comment */
-import { ethErrors } from 'eth-rpc-errors';
-
+import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
 import { IJsonRpcRequest, IJsonRpcResponse } from '@onekeyfe/cross-inpage-provider-types';
 import {
   IBridgeRequestCallback,
@@ -317,7 +316,7 @@ export default class StcInpageProvider extends BaseProvider {
          */
         requestBatch: async (requests: IJsonRpcRequest[]) => {
           if (!Array.isArray(requests)) {
-            throw ethErrors.rpc.invalidRequest({
+            throw web3Errors.rpc.invalidRequest({
               message: 'Batch requests must be made with an array of request objects.',
               data: requests,
             });

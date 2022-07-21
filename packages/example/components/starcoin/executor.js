@@ -6,7 +6,6 @@ import { providers, utils, bcs, encoding, version as starcoinVersion } from '@st
 import { encrypt } from 'eth-sig-util'
 import { compare } from 'compare-versions';
 import { useEffect } from 'react';
-
 import Constants from './constants.json';
 
 export function useExecutor() {
@@ -289,7 +288,7 @@ export function useExecutor() {
           const txParams = {
             to: toAccount,
             value: sendAmountHex,
-            gasLimit: 127845,
+            gasLimit: 4000000,
             gasPrice: 1,
           }
 

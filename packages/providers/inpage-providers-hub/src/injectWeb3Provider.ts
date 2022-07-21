@@ -5,6 +5,7 @@ import { IInjectedProviderNames, IJsonRpcRequest } from '@onekeyfe/cross-inpage-
 import { ProviderEthereum, shimWeb3 } from '@onekeyfe/onekey-eth-provider';
 import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
 import { ProviderSolana } from '@onekeyfe/onekey-solana-provider';
+import { ProviderStarcoin } from '@onekeyfe/onekey-starcoin-provider';
 // import Web3 from 'web3'; // cause build error
 
 export type WindowOneKeyHub = {
@@ -12,6 +13,7 @@ export type WindowOneKeyHub = {
   jsBridge?: JsBridgeBase;
   ethereum?: ProviderEthereum;
   solana?: ProviderSolana;
+  starcoin?: any;
   $private?: ProviderPrivate;
 };
 
@@ -31,6 +33,10 @@ function injectWeb3Provider(): unknown {
     bridge,
   });
 
+  const starcoin = new ProviderStarcoin({
+    bridge,
+  });;
+
   // providerHub
   const $onekey = {
     ...window.$onekey,
@@ -38,6 +44,7 @@ function injectWeb3Provider(): unknown {
     ethereum,
     $private,
     solana,
+    starcoin,
     conflux: null,
     sollet: null,
   };
@@ -45,6 +52,7 @@ function injectWeb3Provider(): unknown {
   // TODO conflict with MetaMask
   window.ethereum = ethereum;
   window.solana = solana;
+  window.starcoin = starcoin;
 
   // ** shim or inject real web3
   //

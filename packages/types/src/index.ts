@@ -3,6 +3,7 @@ declare global {
     web3: any;
     ethereum: any;
     solana: any;
+    starcoin: any;
     $onekey: any;
     ReactNativeWebView?: {
       postMessage: (payload: string) => void;
@@ -26,6 +27,7 @@ export enum IInjectedProviderNames {
   ethereum = 'ethereum',
   conflux = 'conflux',
   solana = 'solana',
+  starcoin = 'starcoin',
   sollet = 'sollet',
   near = 'near',
   $private = '$private',

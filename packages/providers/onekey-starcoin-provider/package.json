@@ -1,5 +1,5 @@
 {
-  "name": "@onekeyfe/inpage-providers-hub",
+  "name": "@onekeyfe/onekey-starcoin-provider",
   "version": "0.0.15",
   "keywords": [
     "cross-inpage-provider"
@@ -29,11 +29,9 @@
   },
   "dependencies": {
     "@onekeyfe/cross-inpage-provider-core": "^0.0.15",
+    "@onekeyfe/cross-inpage-provider-errors": "^0.0.15",
     "@onekeyfe/cross-inpage-provider-types": "^0.0.15",
-    "@onekeyfe/onekey-eth-provider": "^0.0.15",
-    "@onekeyfe/onekey-private-provider": "^0.0.15",
-    "@onekeyfe/onekey-solana-provider": "^0.0.15",
-    "@onekeyfe/onekey-starcoin-provider": "^0.0.15",
-    "web3": "^1.7.3"
+    "@onekeyfe/extension-bridge-injected": "^0.0.15",
+    "eth-rpc-errors": "^4.0.3"
   }
 }

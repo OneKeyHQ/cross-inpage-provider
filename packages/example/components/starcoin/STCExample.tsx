@@ -31,19 +31,19 @@ export default function STCExample() {
       <div className="row">
         <div className="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
           <p className="info-text alert alert-primary">
-            Network: <span id="network"></span>
+            Network: <span id="network" />
           </p>
         </div>
 
         <div className="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
           <p className="info-text alert alert-secondary">
-            ChainId: <span id="chainId"></span>
+            ChainId: <span id="chainId" />
           </p>
         </div>
 
         <div className="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
           <p className="info-text alert alert-success">
-            SelectedAccount: <span id="accounts"></span>
+            SelectedAccount: <span id="accounts" />
           </p>
         </div>
       </div>
@@ -67,7 +67,7 @@ export default function STCExample() {
               </button>
 
               <p className="info-text alert alert-secondary">
-                SelectedAccount: <span id="getAccountsResult"></span>
+                SelectedAccount: <span id="getAccountsResult" />
               </p>
             </div>
           </div>
@@ -93,7 +93,7 @@ export default function STCExample() {
               </button>
 
               <p className="info-text alert alert-secondary">
-                Permissions result: <span id="permissionsResult"></span>
+                Permissions result: <span id="permissionsResult" />
               </p>
             </div>
           </div>
@@ -154,7 +154,7 @@ export default function STCExample() {
                 Contract blob hex
               </h4>
               <div className="form-outline mb-3">
-                <textarea id="contractPayloadhex" className="form-control" rows={5} placeholder="search `payloadInHex` in index.js, generate your payloadInHex and paste it here"></textarea>
+                <textarea id="contractPayloadhex" className="form-control" rows={5} placeholder="search `payloadInHex` in index.js, generate your payloadInHex and paste it here" />
               </div>
               <button className="btn btn-primary btn-lg btn-block mb-3" id="deployButton" disabled>
                 Deploy Contract using blob hex
@@ -196,18 +196,15 @@ export default function STCExample() {
               </h4>
 
               <p id="resolveResultView" className="info-text alert alert-warning">
-                Result: <span className="tips"></span>
+                Result: <span className="tips" />
               </p>
 
-              <div id="moduleFunctionsDiv" className="list-group">
-
-
-              </div>
+              <div id="moduleFunctionsDiv" className="list-group" />
 
             </div>
           </div>
         </div>
-    
+
       </div>
     </section>
     <section>
@@ -224,7 +221,7 @@ export default function STCExample() {
               </button>
 
               <p className="info-text alert alert-warning">
-                Result: <span id="personalSignResult"></span>
+                Result: <span id="personalSignResult" />
               </p>
 
               <button className="btn btn-primary btn-lg btn-block mb-3" id="personalSignVerify" disabled>
@@ -233,7 +230,7 @@ export default function STCExample() {
 
               <p className="info-text alert alert-warning">
                 @starcoin/starcoin recovery result:
-                <span id="personalSignRecoverResult"></span>
+                <span id="personalSignRecoverResult" />
               </p>
             </div>
           </div>
@@ -267,15 +264,15 @@ export default function STCExample() {
               </button>
 
               <p className="info-text alert alert-secondary">
-                Encryption key: <span id="encryptionKeyDisplay"></span>
+                Encryption key: <span id="encryptionKeyDisplay" />
               </p>
 
               <p className="info-text text-truncate alert alert-secondary">
-                Ciphertext: <span id="ciphertextDisplay"></span>
+                Ciphertext: <span id="ciphertextDisplay" />
               </p>
 
               <p className="info-text alert alert-secondary">
-                Cleartext: <span id="cleartextDisplay"></span>
+                Cleartext: <span id="cleartextDisplay" />
               </p>
             </div>
           </div>
@@ -297,7 +294,7 @@ export default function STCExample() {
               </button>
 
               <p className="info-text alert alert-warning">
-                Result: <span id="crossChainResult"></span>
+                Result: <span id="crossChainResult" />
               </p>
             </div>
           </div>
@@ -322,7 +319,7 @@ export default function STCExample() {
               </button>
 
               <p className="info-text alert alert-warning">
-                Result: <span id="claimAirdropResult"></span>
+                Result: <span id="claimAirdropResult" />
               </p>
             </div>
           </div>
@@ -355,7 +352,7 @@ export default function STCExample() {
               </button>
 
               <p className="info-text alert alert-warning">
-                Result: <span id="nftResult"></span>
+                Result: <span id="nftResult" />
               </p>
             </div>
           </div>
@@ -386,7 +383,7 @@ export default function STCExample() {
               </button>
 
               <p className="info-text alert alert-warning">
-                Result: <span id="autoAcceptTokenResult"></span>
+                Result: <span id="autoAcceptTokenResult" />
               </p>
             </div>
           </div>

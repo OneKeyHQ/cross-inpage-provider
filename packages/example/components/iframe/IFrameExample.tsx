@@ -14,7 +14,7 @@ declare global {
 export default function IFrameExample() {
   useEffect(() => {
     window.frameBridge = new JsBridgeIframe({
-      remoteFrame: parent,
+      remoteFrame: window.parent,
       remoteFrameName: 'HOST',
       selfFrameName: 'FRAME',
       channel: 'onekey-js-sdk',

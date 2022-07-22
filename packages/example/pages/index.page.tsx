@@ -27,8 +27,13 @@ const Home: NextPage = () => {
         <Link href="/ethereum">EVM →</Link>
         <Link href="/solana">Solana →</Link>
         <Link href="/near">NEAR →</Link>
-        <Link href="https://dapp-near-ref-ui.test.onekey.so/">NEAR ref-ui →</Link>
+        <a target="_blank" href="https://dapp-near-ref-ui.test.onekey.so/">
+          NEAR ref-ui →
+        </a>
         <Link href="/starcoin">Starcoin →</Link>
+        <a target="_blank" href="https://example.walletconnect.org/">
+          WalletConnect →
+        </a>
         <button onClick={() => window.location.reload()}>refresh</button>
       </main>
 

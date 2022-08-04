@@ -18,6 +18,14 @@ export type ISetupPostMessageListenerOptions = IOptionsWithDebugLogger & {
 export type IPostMessageEventDataIframe = IPostMessageEventData & {
   frameName: string;
 };
+
+/**
+ * When the JsBridgeIframe instance changes, the tag can be changed manually
+ */
+ function setPostMessageListenerFlag(value: boolean) {
+  postMessageListenerAdded = value;
+}
+
 function setupPostMessageListener(options: ISetupPostMessageListenerOptions = {}) {
   if (postMessageListenerAdded) {
     return;
@@ -94,4 +102,4 @@ class JsBridgeIframe extends JsBridgeBase {
   }
 }
 
-export { JsBridgeIframe };
+export { JsBridgeIframe, setPostMessageListenerFlag };

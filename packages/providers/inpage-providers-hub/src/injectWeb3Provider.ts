@@ -13,6 +13,7 @@ export type WindowOneKeyHub = {
   jsBridge?: JsBridgeBase;
   ethereum?: ProviderEthereum;
   solana?: ProviderSolana;
+  phantom?: {solana?: ProviderSolana};
   starcoin?: any;
   $private?: ProviderPrivate;
 };
@@ -44,6 +45,7 @@ function injectWeb3Provider(): unknown {
     ethereum,
     $private,
     solana,
+    phantom: {solana},
     starcoin,
     conflux: null,
     sollet: null,
@@ -52,6 +54,7 @@ function injectWeb3Provider(): unknown {
   // TODO conflict with MetaMask
   window.ethereum = ethereum;
   window.solana = solana;
+  window.phantom = { solana };
   window.starcoin = starcoin;
 
   // ** shim or inject real web3

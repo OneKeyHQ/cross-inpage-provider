@@ -15,7 +15,7 @@ import base58 from 'bs58';
 
 const NETWORK = clusterApiUrl('devnet');
 
-const Receiver = new PublicKey('GWYfd2h4UhEb3hTj52M5jc6aefCKN2thnUkc5uk924kr');
+const Receiver = new PublicKey('8yAmEoio2d7DszNucNzKf4AqW2JfGRJ1z5Nu9czdrgc1');
 const LastBlockHash = 'GLXLbuzf788BVk738RKcgNWftzGHwjzXzVPAxFDt8naQ';
 
 declare global {

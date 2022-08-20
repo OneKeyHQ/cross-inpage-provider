@@ -37,16 +37,14 @@ const Home: NextPage = () => {
         <a target="_blank" href="https://react-app.walletconnect.com">
           WalletConnect V2 →
         </a>
-        <a>
-          Hardware SDK (coming soon)
-        </a>
+        <a>Hardware SDK (coming soon)</a>
         <button onClick={() => window.location.reload()}>refresh</button>
       </main>
 
       <footer className={styles.footer}>
         <a>
-          {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access */}
-          v{packageJson.version}
+          {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access */}v
+          {packageJson.version}
         </a>
         <iframe
           src="https://ghbtns.com/github-btn.html?user=OneKeyHQ&repo=cross-inpage-provider&type=star&count=true"

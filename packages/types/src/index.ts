@@ -2,7 +2,7 @@ declare global {
   interface Window {
     web3: any;
     ethereum: any;
-    phantom: any;
+    phantom: { solana: any; };
     solana: any;
     starcoin: any;
     $onekey: any;

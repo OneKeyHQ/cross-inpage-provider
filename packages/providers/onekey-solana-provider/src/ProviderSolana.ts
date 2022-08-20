@@ -176,6 +176,11 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
     return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
   }
 
+  private postMessage(param: any) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    return this._callBridge(param);
+  }
+
   async connect(options?: ConnectOptions): Promise<{ publicKey: PublicKey }> {
     if (this.publicKey) {
       return { publicKey: this.publicKey };

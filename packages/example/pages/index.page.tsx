@@ -32,7 +32,10 @@ const Home: NextPage = () => {
         </a>
         <Link href="/starcoin">Starcoin →</Link>
         <a target="_blank" href="https://example.walletconnect.org">
-          WalletConnect →
+          WalletConnect V1 →
+        </a>
+        <a target="_blank" href="https://react-app.walletconnect.com">
+          WalletConnect V2 →
         </a>
         <button onClick={() => window.location.reload()}>refresh</button>
       </main>

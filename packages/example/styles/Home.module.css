@@ -26,10 +26,7 @@
 }
 
 .footer a {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-grow: 1;
+  margin-right: 16px;
 }
 
 .title a {

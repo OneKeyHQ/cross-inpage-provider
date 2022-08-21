@@ -217,7 +217,7 @@ export default function App() {
 
   return (
     <div>
-      {!provider && <a href={'https://onekey.so/plugin'}>Install OneKey Extension →</a>}
+      {!provider && <a  target="_blank"  href={'https://www.onekey.so/download/'}>Install OneKey Extension →</a>}
       <main>
         {provider && publicKey ? (
           <>

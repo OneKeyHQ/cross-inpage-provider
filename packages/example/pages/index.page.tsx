@@ -32,15 +32,30 @@ const Home: NextPage = () => {
         </a>
         <Link href="/starcoin">Starcoin →</Link>
         <a target="_blank" href="https://example.walletconnect.org">
-          WalletConnect →
+          WalletConnect V1 →
         </a>
+        <a target="_blank" href="https://react-app.walletconnect.com">
+          WalletConnect V2 →
+        </a>
+        <a>Hardware SDK (coming soon)</a>
         <button onClick={() => window.location.reload()}>refresh</button>
       </main>
 
       <footer className={styles.footer}>
+        <a>
+          {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access */}v
+          {packageJson.version}
+        </a>
+        <iframe
+          src="https://ghbtns.com/github-btn.html?user=OneKeyHQ&repo=cross-inpage-provider&type=star&count=true"
+          frameBorder="0"
+          scrolling="0"
+          title="GitHub"
+          height={20}
+          width={100}
+        />
         <a href="https://www.onekey.so" target="_blank" rel="noopener noreferrer">
-          {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access */}
-          Powered by OneKey v{packageJson.version}
+          Powered by OneKey →
         </a>
       </footer>
     </div>

@@ -13,7 +13,7 @@ export type WindowOneKeyHub = {
   jsBridge?: JsBridgeBase;
   ethereum?: ProviderEthereum;
   solana?: ProviderSolana;
-  phantom?: {solana?: ProviderSolana};
+  phantom?: { solana?: ProviderSolana };
   starcoin?: any;
   $private?: ProviderPrivate;
 };
@@ -42,19 +42,27 @@ function injectWeb3Provider(): unknown {
   const $onekey = {
     ...window.$onekey,
     jsBridge: bridge,
-    ethereum,
     $private,
+    ethereum,
     solana,
-    phantom: {solana},
     starcoin,
     conflux: null,
     sollet: null,
   };
   window.$onekey = $onekey;
+
+  // ** EVM
   // TODO conflict with MetaMask
   window.ethereum = ethereum;
+
+  // ** SOL
   window.solana = solana;
   window.phantom = { solana };
+  // sim multiple providers may cause opensea.io prompt Connection twice.
+  // window.solflare = solana;
+  // window.glowSolana = solana;
+
+  // ** STC
   window.starcoin = starcoin;
 
   // ** shim or inject real web3

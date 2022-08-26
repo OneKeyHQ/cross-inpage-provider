@@ -7,7 +7,7 @@ import {
 import { injectWeb3Provider } from '@onekeyfe/inpage-providers-hub';
 
 // - send
-const bridge = () =>
+const bridge = (): JsBridgeExtInjected =>
   new JsBridgeExtInjected({
     receiveHandler: injectedProviderReceiveHandler,
   });

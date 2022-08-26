@@ -74,6 +74,8 @@ type SolanaAccountChangedPayload = {
 
 interface IProviderSolana extends ProviderSolanaBase {
   readonly isPhantom: true;
+  readonly isGlow: true;
+  readonly isSolflare: true;
   isConnected: boolean;
   publicKey: PublicKey | null;
 
@@ -135,6 +137,8 @@ type OneKeySolanaProviderProps = IInpageProviderConfig & {
 
 class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
   public readonly isPhantom = true;
+  public readonly isSolflare = true;
+  public readonly isGlow = true;
 
   private _publicKey: PublicKey | null = null;
 

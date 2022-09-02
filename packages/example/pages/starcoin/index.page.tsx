@@ -2,7 +2,7 @@ import dynamic from 'next/dynamic';
 import styles from '../../styles/Home.module.css';
 import Link from 'next/link';
 
-// near provider works only if nextjs ssr disabled
+// injected provider works only if nextjs ssr disabled
 const STCExample = dynamic(() => import('../../components/starcoin/STCExample'), { ssr: false });
 
 export default function () {

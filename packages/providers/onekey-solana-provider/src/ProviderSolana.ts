@@ -74,6 +74,8 @@ type SolanaAccountChangedPayload = {
 
 interface IProviderSolana extends ProviderSolanaBase {
   readonly isPhantom: true;
+  readonly isGlow: true;
+  readonly isSolflare: true;
   isConnected: boolean;
   publicKey: PublicKey | null;
 
@@ -135,6 +137,8 @@ type OneKeySolanaProviderProps = IInpageProviderConfig & {
 
 class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
   public readonly isPhantom = true;
+  public readonly isSolflare = true;
+  public readonly isGlow = true;
 
   private _publicKey: PublicKey | null = null;
 
@@ -193,7 +197,7 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
     });
 
     const publicKey = new PublicKey(result.publicKey);
-    this._handleConnected(publicKey);
+    this._handleConnected(publicKey, { emit: true });
     return { publicKey };
   }
 
@@ -219,6 +223,7 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
   private _handleAccountChange(payload: SolanaAccountChangedPayload) {
     const account = payload.accounts[0];
     if (!account) {
+      this._handleDisconnected();
       return this.emit('accountChanged', null);
     }
     const publicKey = new PublicKey(account.publicKey);

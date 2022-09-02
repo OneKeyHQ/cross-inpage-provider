@@ -3,6 +3,8 @@ declare global {
     web3: any;
     ethereum: any;
     phantom: { solana: any; };
+    solflare: any;
+    glowSolana: any;
     solana: any;
     starcoin: any;
     $onekey: any;

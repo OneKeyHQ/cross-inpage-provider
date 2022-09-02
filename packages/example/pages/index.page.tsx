@@ -31,12 +31,13 @@ const Home: NextPage = () => {
           NEAR ref-ui →
         </a>
         <Link href="/starcoin">Starcoin →</Link>
-        <a target="_blank" href="https://example.walletconnect.org">
+        <a target="WalletConnectExampleV1" href="https://example.walletconnect.org">
           WalletConnect V1 →
         </a>
         <a target="_blank" href="https://react-app.walletconnect.com">
           WalletConnect V2 →
         </a>
+        <Link href="/deeplink">DeepLink →</Link>
         <a>Hardware SDK (coming soon)</a>
         <button onClick={() => window.location.reload()}>refresh</button>
       </main>

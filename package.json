@@ -20,7 +20,7 @@
     "publish-packages": "lerna publish from-package",
     "example": "cd ./packages/example && yarn dev",
     "example-build": "cd ./packages/example && yarn --registry 'https://registry.npmjs.org' && yarn build",
-    "update-version": "lerna version --no-git-tag-version"
+    "update-version": "lerna version --no-git-tag-version --exact"
   },
   "devDependencies": {
     "@testing-library/react-hooks": "^7.0.2",

@@ -3,7 +3,7 @@ import styles from '../../styles/Home.module.css';
 import Link from 'next/link';
 import { LogsContainer } from '../../components/LogsContainer';
 
-// near provider works only if nextjs ssr disabled
+// injected provider works only if nextjs ssr disabled
 const NearExample = dynamic(() => import('../../components/near/NearExample'), { ssr: false });
 
 export default function () {

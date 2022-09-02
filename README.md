@@ -19,7 +19,7 @@ gulp watch
 yarn example
 
 # update all versions before publish
-yarn update-version
+yarn update-version 1.0.1
 
 # publish to npmjs.com
 yarn publish-packages

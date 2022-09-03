@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+import React from 'react';
 import { useEffect, useState } from 'react';
 import { Console, Hook, Unhook } from 'console-feed';
 import { JsBridgeBase } from '@onekeyfe/cross-inpage-provider-core';

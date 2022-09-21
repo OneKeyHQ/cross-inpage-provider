@@ -2,11 +2,13 @@ declare global {
   interface Window {
     web3: any;
     ethereum: any;
-    phantom: { solana: any; };
+    phantom: { solana: any };
     solflare: any;
     glowSolana: any;
     solana: any;
     starcoin: any;
+    aptos: any;
+    martian: any;
     $onekey: any;
     ReactNativeWebView?: {
       postMessage: (payload: string) => void;
@@ -33,6 +35,8 @@ export enum IInjectedProviderNames {
   starcoin = 'starcoin',
   sollet = 'sollet',
   near = 'near',
+  aptos = 'aptos',
+  martian = 'martian',
   $private = '$private',
   $hardware_sdk = '$hardware_sdk',
 }

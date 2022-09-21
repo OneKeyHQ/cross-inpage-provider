@@ -6,6 +6,7 @@ import { ProviderEthereum, shimWeb3 } from '@onekeyfe/onekey-eth-provider';
 import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
 import { ProviderSolana } from '@onekeyfe/onekey-solana-provider';
 import { ProviderStarcoin } from '@onekeyfe/onekey-starcoin-provider';
+import { ProviderAptos, ProviderAptosMartian } from '@onekeyfe/onekey-aptos-provider';
 // import Web3 from 'web3'; // cause build error
 
 export type WindowOneKeyHub = {
@@ -15,6 +16,8 @@ export type WindowOneKeyHub = {
   solana?: ProviderSolana;
   phantom?: { solana?: ProviderSolana };
   starcoin?: any;
+  aptos?: ProviderAptos;
+  martian?: ProviderAptosMartian;
   $private?: ProviderPrivate;
 };
 
@@ -38,6 +41,14 @@ function injectWeb3Provider(): unknown {
     bridge,
   });
 
+  const aptos = new ProviderAptos({
+    bridge,
+  });
+
+  const martian = new ProviderAptosMartian({
+    bridge,
+  });
+
   // providerHub
   const $onekey = {
     ...window.$onekey,
@@ -46,6 +57,7 @@ function injectWeb3Provider(): unknown {
     ethereum,
     solana,
     starcoin,
+    aptos,
     conflux: null,
     sollet: null,
   };
@@ -64,6 +76,10 @@ function injectWeb3Provider(): unknown {
 
   // ** STC
   window.starcoin = starcoin;
+
+  // ** Aptos
+  window.aptos = aptos;
+  window.martian = martian;
 
   // ** shim or inject real web3
   //

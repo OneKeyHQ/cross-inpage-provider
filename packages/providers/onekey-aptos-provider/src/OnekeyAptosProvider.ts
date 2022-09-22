@@ -1,5 +1,5 @@
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
-import { getOrCreateExtInjectedJsBridge } from '../../../extension/extension-bridge-injected/dist';
+import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { ProviderAptosBase } from './ProviderAptosBase';
 import { AptosAccountInfo, SignMessagePayload, SignMessageResponse } from './types';
 import type * as TypeUtils from './type-utils';

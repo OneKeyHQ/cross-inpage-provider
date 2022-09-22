@@ -1,14 +1,19 @@
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '../../../extension/extension-bridge-injected/dist';
 import { AptosClient, BCS, Types, MaybeHexString } from 'aptos';
-import { SignMessagePayload, SignMessageResponse, TxnPayload, TxnOptions } from './types';
+import { TxnPayload, TxnOptions } from './types';
 import type * as TypeUtils from './type-utils';
-import { IProviderAptos, ProviderAptos } from './OnekeyAptosProvider';
+import {  ProviderAptos } from './OnekeyAptosProvider';
+import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
 
 export type AptosRequestMartian = {
   'martianSignAndSubmitTransaction': (transactions: string) => Promise<string>;
 
   'martianSignTransaction': (transactions:string) => Promise<string>;
+
+  'signAndSubmitTransaction': (transactions: Types.TransactionPayload) => Promise<string>;
+
+  'signTransaction': (transactions: Types.TransactionPayload) => Promise<string>;
 
   'signGenericTransaction': (transaction: {
     func: string;
@@ -82,22 +87,43 @@ class ProviderAptosMartian extends ProviderAptos {
     return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
   }
 
-  async signAndSubmitTransaction(transaction: string): Promise<string> {
-    const res = this._callMartianBridge({
-      method: 'martianSignAndSubmitTransaction',
-      params: transaction,
-    });
+  async signAndSubmitTransaction(
+    transaction: string | Types.TransactionPayload,
+  ): Promise<string | Types.Transaction> {
+    if (typeof transaction === 'string') {
+      return await this._callMartianBridge({
+        method: 'martianSignAndSubmitTransaction',
+        params: transaction,
+      });
+    } else {
+      const res = await this._callMartianBridge({
+        method: 'signAndSubmitTransaction',
+        params: transaction,
+      });
+      if (!res) throw web3Errors.provider.unauthorized();
 
-    return Promise.resolve(res);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return JSON.parse(res);
+    }
   }
 
-  async signTransaction(transaction: string): Promise<string> {
-    const res = this._callMartianBridge({
-      method: 'martianSignTransaction',
-      params: transaction,
-    });
+  async signTransaction(
+    transaction: string | Types.TransactionPayload,
+  ): Promise<string | Uint8Array> {
+    if (typeof transaction === 'string') {
+      return this._callMartianBridge({
+        method: 'martianSignTransaction',
+        params: transaction,
+      });
+    } else {
+      const res = await this._callMartianBridge({
+        method: 'signTransaction',
+        params: transaction,
+      });
+      if (!res) throw web3Errors.provider.unauthorized();
 
-    return Promise.resolve(res);
+      return new Uint8Array(Buffer.from(res, 'hex'));
+    }
   }
 
   async signGenericTransaction(transaction: {
@@ -122,7 +148,7 @@ class ProviderAptosMartian extends ProviderAptos {
   ): Promise<string> {
     const txn = await this.generateTransaction(sender, payload, options);
     const txnHash = await this.signAndSubmitTransaction(txn);
-    return txnHash;
+    return txnHash as string;
   }
 
   async createCollection(name: string, description: string, uri: string): Promise<string> {

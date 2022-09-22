@@ -41,10 +41,6 @@ function injectWeb3Provider(): unknown {
     bridge,
   });
 
-  const aptos = new ProviderAptos({
-    bridge,
-  });
-
   const martian = new ProviderAptosMartian({
     bridge,
   });
@@ -57,7 +53,7 @@ function injectWeb3Provider(): unknown {
     ethereum,
     solana,
     starcoin,
-    aptos,
+    aptos: martian,
     conflux: null,
     sollet: null,
   };
@@ -78,7 +74,7 @@ function injectWeb3Provider(): unknown {
   window.starcoin = starcoin;
 
   // ** Aptos
-  window.aptos = aptos;
+  window.aptos = martian;
   window.martian = martian;
 
   // ** shim or inject real web3

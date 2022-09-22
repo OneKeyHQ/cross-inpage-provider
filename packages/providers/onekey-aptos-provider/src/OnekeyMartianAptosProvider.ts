@@ -1,5 +1,5 @@
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
-import { getOrCreateExtInjectedJsBridge } from '../../../extension/extension-bridge-injected/dist';
+import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { AptosClient, BCS, Types, MaybeHexString } from 'aptos';
 import { TxnPayload, TxnOptions } from './types';
 import type * as TypeUtils from './type-utils';

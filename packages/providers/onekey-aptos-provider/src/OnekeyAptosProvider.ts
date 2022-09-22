@@ -5,6 +5,7 @@ import { AptosAccountInfo, SignMessagePayload, SignMessageResponse } from './typ
 import type * as TypeUtils from './type-utils';
 import { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
+import { Types } from 'aptos';
 
 const PROVIDER_EVENTS = {
   'connect': 'connect',
@@ -15,9 +16,9 @@ const PROVIDER_EVENTS = {
 } as const;
 
 type AptosProviderEventsMap = {
-  [PROVIDER_EVENTS.connect]: (address: string) => void;
+  [PROVIDER_EVENTS.connect]: (account: string) => void;
   [PROVIDER_EVENTS.disconnect]: () => void;
-  [PROVIDER_EVENTS.accountChanged]: (address: string | null) => void;
+  [PROVIDER_EVENTS.accountChanged]: (account: string | null) => void;
   [PROVIDER_EVENTS.networkChange]: (name: string | null) => void;
   [PROVIDER_EVENTS.message_low_level]: (payload: IJsonRpcRequest) => void;
 };
@@ -35,7 +36,9 @@ export type AptosRequest = {
 
   'signMessage': (payload: SignMessagePayload) => Promise<SignMessageResponse>;
 
-  'signAndSubmitTransaction': (transactions: any) => Promise<string>;
+  'signAndSubmitTransaction': (transactions: Types.TransactionPayload) => Promise<string>;
+
+  'signTransaction': (transactions: Types.TransactionPayload) => Promise<string>;
 };
 
 type JsBridgeRequest = {
@@ -76,6 +79,8 @@ export interface IProviderAptos extends ProviderAptosBase {
    * @returns Transaction
    */
   signAndSubmitTransaction(transactions: any): Promise<any>;
+
+  signTransaction(transactions: any): Promise<any>;
 
   /**
    * Sign message
@@ -137,6 +142,34 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
   }
 
+  private _handleConnected(account: AptosAccountInfo, options: { emit: boolean } = { emit: true }) {
+    this._account = account;
+    options.emit && this.emit('connect', account?.address ?? null);
+  }
+
+  private _handleDisconnected(options: { emit: boolean } = { emit: true }) {
+    this._account = null;
+    options.emit && this.emit('disconnect');
+  }
+
+  // trigger by bridge account change event
+  private _handleAccountChange(payload: AptosAccountInfo) {
+    const account = payload;
+    if (!account) {
+      this._handleDisconnected();
+      return this.emit('accountChanged', null);
+    }
+
+    this._handleConnected(account, { emit: false });
+    this.emit('accountChanged', account?.address ?? null);
+  }
+
+  private _handleNetworkChange(payload: string) {
+    const network = payload;
+
+    this.emit('networkChange', network ?? null);
+  }
+
   async connect(): Promise<AptosAccountInfo> {
     if (this._account) {
       return Promise.resolve(this._account);
@@ -172,13 +205,22 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
   async signAndSubmitTransaction(transactions: any): Promise<any> {
     const res = await this._callBridge({
       method: 'signAndSubmitTransaction',
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      params: transactions,
+      params: transactions as Types.TransactionPayload,
     });
     if (!res) throw web3Errors.provider.unauthorized();
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return JSON.parse(res);
+  }
+
+  async signTransaction(transactions: any): Promise<any> {
+    const res = await this._callBridge({
+      method: 'signTransaction',
+      params: transactions as Types.TransactionPayload,
+    });
+    if (!res) throw web3Errors.provider.unauthorized();
+
+    return new Uint8Array(Buffer.from(res, 'hex'));
   }
 
   signMessage(payload: SignMessagePayload): Promise<SignMessageResponse> {
@@ -202,11 +244,6 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     });
   }
 
-  private _handleConnected(account: AptosAccountInfo, options: { emit: boolean } = { emit: true }) {
-    this._account = account;
-    options.emit && this.emit('connect', account?.address);
-  }
-
   async disconnect(): Promise<void> {
     await this._callBridge({
       method: 'disconnect',
@@ -215,35 +252,12 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     this._handleDisconnected();
   }
 
-  private _handleDisconnected(options: { emit: boolean } = { emit: true }) {
-    this._account = null;
-    options.emit && this.emit('disconnect');
-  }
-
-  // trigger by bridge account change event
-  private _handleAccountChange(payload: AptosAccountInfo) {
-    const account = payload;
-    if (!account) {
-      this._handleDisconnected();
-      return this.emit('accountChanged', null);
-    }
-
-    this._handleConnected(account, { emit: false });
-    this.emit('accountChanged', account.address ?? null);
-  }
-
-  private _handleNetworkChange(payload: string) {
-    const network = payload;
-
-    this.emit('networkChange', network ?? null);
-  }
-
   onNetworkChange(listener: AptosProviderEventsMap['networkChange']): this {
     return super.on(PROVIDER_EVENTS.networkChange, listener);
   }
 
   onAccountChange(listener: AptosProviderEventsMap['accountChanged']): this {
-    return super.on(PROVIDER_EVENTS.networkChange, listener);
+    return super.on(PROVIDER_EVENTS.accountChanged, listener);
   }
 
   on<E extends keyof AptosProviderEventsMap>(event: E, listener: AptosProviderEventsMap[E]): this {

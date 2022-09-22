@@ -8,7 +8,7 @@ import { IProviderAptos, ProviderAptos } from './OnekeyAptosProvider';
 export type AptosRequestMartian = {
   'martianSignAndSubmitTransaction': (transactions: string) => Promise<string>;
 
-  'martianSignTransaction': (transactions: Types.Transaction) => Promise<string>;
+  'martianSignTransaction': (transactions:string) => Promise<string>;
 
   'signGenericTransaction': (transaction: {
     func: string;
@@ -51,27 +51,11 @@ type JsBridgeRequestParams<T extends keyof JsBridgeRequest> = Parameters<JsBridg
 
 type JsBridgeRequestResponse<T extends keyof JsBridgeRequest> = ReturnType<JsBridgeRequest[T]>;
 
-interface IProviderAptosMartian extends IProviderAptos {
-  readonly isMartian: true;
-
-  /**
-   * Sign and submit transactions
-   * @returns Transaction
-   */
-  signAndSubmitTransaction(transactions: string): Promise<string>;
-
-  /**
-   * Sign message
-   * @returns Transaction
-   */
-  signMessage(payload: SignMessagePayload): Promise<SignMessageResponse>;
-}
-
 type OneKeyAptosProviderProps = IInpageProviderConfig & {
   timeout?: number;
 };
 
-class ProviderAptosMartian extends ProviderAptos implements IProviderAptosMartian {
+class ProviderAptosMartian extends ProviderAptos {
   public readonly isMartian = true;
 
   get publicKey() {
@@ -107,7 +91,7 @@ class ProviderAptosMartian extends ProviderAptos implements IProviderAptosMartia
     return Promise.resolve(res);
   }
 
-  async signTransaction(transaction: Types.Transaction): Promise<string> {
+  async signTransaction(transaction: string): Promise<string> {
     const res = this._callMartianBridge({
       method: 'martianSignTransaction',
       params: transaction,
@@ -131,6 +115,16 @@ class ProviderAptosMartian extends ProviderAptos implements IProviderAptosMartia
     });
   }
 
+  async generateSignAndSubmitTransaction(
+    sender: string,
+    payload: TxnPayload,
+    options?: TxnOptions,
+  ): Promise<string> {
+    const txn = await this.generateTransaction(sender, payload, options);
+    const txnHash = await this.signAndSubmitTransaction(txn);
+    return txnHash;
+  }
+
   async createCollection(name: string, description: string, uri: string): Promise<string> {
     return this._callMartianBridge({
       method: 'createCollection',
@@ -149,7 +143,7 @@ class ProviderAptosMartian extends ProviderAptos implements IProviderAptosMartia
     description: string,
     supply: number,
     uri: string,
-    max?: string,
+    max?: number | bigint,
     royalty_payee_address?: string,
     royalty_points_denominator?: number,
     royalty_points_numerator?: number,
@@ -181,7 +175,7 @@ class ProviderAptosMartian extends ProviderAptos implements IProviderAptosMartia
   async generateTransaction(
     sender: string,
     payload: TxnPayload,
-    options: TxnOptions,
+    options?: TxnOptions,
   ): Promise<string> {
     const client = await this.getClient();
     const rawTx = await client.generateTransaction(sender, payload, options);
@@ -211,7 +205,7 @@ class ProviderAptosMartian extends ProviderAptos implements IProviderAptosMartia
     return client.getTransactions(query);
   }
 
-  async getTransactionByHash(txnHash: string): Promise<Types.Transaction> {
+  async getTransaction(txnHash: string): Promise<Types.Transaction> {
     const client = await this.getClient();
     return client.getTransactionByHash(txnHash);
   }

@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/inpage-providers-hub",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -28,12 +28,13 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "1.0.1",
-    "@onekeyfe/cross-inpage-provider-types": "1.0.1",
-    "@onekeyfe/onekey-eth-provider": "1.0.1",
-    "@onekeyfe/onekey-private-provider": "1.0.1",
-    "@onekeyfe/onekey-solana-provider": "1.0.1",
-    "@onekeyfe/onekey-starcoin-provider": "1.0.1",
+    "@onekeyfe/cross-inpage-provider-core": "1.0.2",
+    "@onekeyfe/cross-inpage-provider-types": "1.0.2",
+    "@onekeyfe/onekey-aptos-provider": "1.0.2",
+    "@onekeyfe/onekey-eth-provider": "1.0.2",
+    "@onekeyfe/onekey-private-provider": "1.0.2",
+    "@onekeyfe/onekey-solana-provider": "1.0.2",
+    "@onekeyfe/onekey-starcoin-provider": "1.0.2",
     "web3": "^1.7.3"
   }
 }

@@ -31,6 +31,8 @@ const Home: NextPage = () => {
           NEAR ref-ui →
         </a>
         <Link href="/starcoin">Starcoin →</Link>
+        <Link href="/aptos">Aptos →</Link>
+        <Link href="/aptosMartian">Aptos Martian →</Link>
         <a target="WalletConnectExampleV1" href="https://example.walletconnect.org">
           WalletConnect V1 →
         </a>

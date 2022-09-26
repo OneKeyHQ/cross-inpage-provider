@@ -53,10 +53,19 @@ export default function () {
         {uri ? (
           <ul>
             <li>
-              <a href="https://app.onekey.so/account/aaaaa" target={'_blank'}>
-                UniversalLink (TODO)
+              <a href={`https://app.onekey.so/wc/connect?uri=${uriEncoded}`} target={'_blank'}>
+                UniversalLink (wc uri)
               </a>
             </li>
+            <li>
+              <a
+                href="https://app.onekey.so/account/0xA9b4d559A98ff47C83B74522b7986146538cD4dF"
+                target={'_blank'}
+              >
+                UniversalLink (account)
+              </a>
+            </li>
+
             <li>
               <a href="wc://">wc:// (empty link)</a>
             </li>

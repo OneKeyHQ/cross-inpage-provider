@@ -10,6 +10,7 @@
     "clean": "rm -rf ./node_modules && rm -rf ./.next && rm -rf ./out"
   },
   "dependencies": {
+    "@types/react-native": "^0.67.6",
     "@ethersproject/bytes": "^5.0.6",
     "@metamask/onboarding": "^1.0.1",
     "@onekeyfe/cross-inpage-provider-core": "1.0.3",

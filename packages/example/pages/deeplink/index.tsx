@@ -33,7 +33,10 @@ export default function () {
             value={uri}
             rows={5}
             style={{ width: '100%' }}
-            onChange={(e) => setUri(e.target.value?.trim())}
+            onChangeText={(text) => {
+              text = text?.trim();
+              setUri(text);
+            }}
           />
           <HStack space={2}>
             <Button

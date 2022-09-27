@@ -3,7 +3,7 @@ import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injec
 import { AptosClient, BCS, Types, MaybeHexString } from 'aptos';
 import { TxnPayload, TxnOptions } from './types';
 import type * as TypeUtils from './type-utils';
-import {  ProviderAptos } from './OnekeyAptosProvider';
+import {  AptosProviderType, ProviderAptos } from './OnekeyAptosProvider';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
 
 export type AptosRequestMartian = {
@@ -83,7 +83,9 @@ class ProviderAptosMartian extends ProviderAptos {
   private _callMartianBridge<T extends keyof JsBridgeRequest>(params: {
     method: T;
     params: JsBridgeRequestParams<T>;
+    aptosProviderType?: AptosProviderType;
   }): JsBridgeRequestResponse<T> {
+    params.aptosProviderType  = this.aptosProviderType;
     return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
   }
 

@@ -75,7 +75,15 @@ function injectWeb3Provider(): unknown {
 
   // ** Aptos
   window.aptos = martian;
-  window.martian = martian;
+  window.martian = new Proxy(martian, {
+    get: (target, property, ...args) => {
+      if (property === 'aptosProviderType') {
+        return 'martian';
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return Reflect.get(target, property, ...args);
+    },
+  });
 
   // ** shim or inject real web3
   //

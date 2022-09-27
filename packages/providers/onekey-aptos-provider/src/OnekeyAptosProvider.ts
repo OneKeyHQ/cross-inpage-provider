@@ -7,6 +7,8 @@ import { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
 import { Types } from 'aptos';
 
+export type AptosProviderType = 'petra' | 'martian'
+
 const PROVIDER_EVENTS = {
   'connect': 'connect',
   'disconnect': 'disconnect',
@@ -103,6 +105,8 @@ function isWalletEventMethodMatch({ method, name }: { method: string; name: stri
 
 class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
   protected _account: AptosAccountInfo | null = null;
+  
+  protected aptosProviderType: AptosProviderType = 'petra';
 
   get publicKey() {
     return this._account?.publicKey ?? null;
@@ -138,7 +142,9 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
   private _callBridge<T extends keyof JsBridgeRequest>(params: {
     method: T;
     params: JsBridgeRequestParams<T>;
+    aptosProviderType?: AptosProviderType;
   }): JsBridgeRequestResponse<T> {
+    params.aptosProviderType  = this.aptosProviderType;
     return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
   }
 

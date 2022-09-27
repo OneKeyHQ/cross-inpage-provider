@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useEffect } from 'react';
 import { ProviderAptosMartian } from '@onekeyfe/onekey-aptos-provider';
 import { random } from 'lodash';
@@ -15,7 +16,7 @@ const useProvider = () => {
 
     useEffect(() => {
         console.log('useProvider', window.martian);
-        
+
         const injectedProvider = window.martian as ProviderAptosMartian;
         const aptosProvider =
             injectedProvider ||
@@ -131,7 +132,7 @@ export default function App() {
         console.log('[signTransaction]', res)
         return res
     }
-    
+
     const submitTransaction = async () => {
         const txn = await signTransaction()
         const res = await provider.submitTransaction(txn)
@@ -174,44 +175,44 @@ export default function App() {
         const res = await provider.createCollection(`ColName-${number}`, "CollectionDescription", "https://aptos.dev")
         console.log('[createCollection]', res)
     }
-    
+
     const createToken = async () => {
         const number = random(1, 100000, false)
         const res = await provider.createToken(`ColName-${number}`, "TokenName", "TokenDescription", 1, "https://aptos.dev/img/nyan.jpeg", 1)
         console.log('[createToken]', res)
     }
-    
-    const getTransactions = async () => {   
+
+    const getTransactions = async () => {
         const res = await provider.getTransactions()
         console.log('[getTransactions]', res)
     }
 
-    const getTransaction = async () => {   
+    const getTransaction = async () => {
         const res = await provider.getTransaction("0xbeb1f8c4e66bf0f58afca8c83338fd9a54490d46ce25fe9c8674b67f1e7bbd3a");
         console.log('[getTransaction]', res)
     }
 
-    const getAccountTransactions = async () => {   
+    const getAccountTransactions = async () => {
         const res = await provider.getAccountTransactions(address);
         console.log('[getAccountTransactions]', res)
     }
 
-    const getAccountResources = async () => {   
+    const getAccountResources = async () => {
         const res = await provider.getAccountResources(address);
         console.log('[getAccountResources]', res)
     }
 
-    const getAccount = async () => {   
+    const getAccount = async () => {
         const res = await provider.getAccount(address);
         console.log('[getAccount]', res)
     }
 
-    const getChainId = async () => {   
+    const getChainId = async () => {
         const res = await provider.getChainId();
         console.log('[getChainId]', res)
     }
 
-    const getLedgerInfo = async () => {   
+    const getLedgerInfo = async () => {
         const res = await provider.getLedgerInfo();
         console.log('[getLedgerInfo]', res)
     }

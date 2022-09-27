@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/onekey-starcoin-provider",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -28,10 +28,10 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "1.0.3",
-    "@onekeyfe/cross-inpage-provider-errors": "1.0.3",
-    "@onekeyfe/cross-inpage-provider-types": "1.0.3",
-    "@onekeyfe/extension-bridge-injected": "1.0.3",
+    "@onekeyfe/cross-inpage-provider-core": "1.0.4",
+    "@onekeyfe/cross-inpage-provider-errors": "1.0.4",
+    "@onekeyfe/cross-inpage-provider-types": "1.0.4",
+    "@onekeyfe/extension-bridge-injected": "1.0.4",
     "eth-rpc-errors": "^4.0.3"
   }
 }

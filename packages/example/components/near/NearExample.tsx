@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/restrict-plus-operands,@typescript-eslint/ban-ts-comment */
+import React from 'react';
 import {
   OneKeyNearProvider,
   NearAccountsChangedPayload,

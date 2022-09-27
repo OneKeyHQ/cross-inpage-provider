@@ -10,6 +10,7 @@
     "clean": "rm -rf ./node_modules && rm -rf ./.next && rm -rf ./out"
   },
   "dependencies": {
+    "@types/react-native": "^0.67.6",
     "@ethersproject/bytes": "^5.0.6",
     "@metamask/onboarding": "^1.0.1",
     "@onekeyfe/cross-inpage-provider-core": "1.0.4",
@@ -28,18 +29,27 @@
     "eth-sig-util": "^3.0.1",
     "ethereumjs-util": "^7.1.4",
     "ethers": "^5.6.5",
+    "native-base": "^3.4.13",
     "near-api-js": "^0.44.2",
     "next": "^12.1.0",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "react-native-safe-area-context": "3.3.2",
+    "react-native-svg": "12.1.1",
+    "react-native-web": "0.17.1",
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
+    "@expo/next-adapter": "^4.0.12",
+    "@expo/config": "^7.0.1",
     "@types/lodash": "^4.14.178",
     "@types/node": "17.0.18",
     "@types/react": "17.0.39",
     "eslint": "8.9.0",
     "eslint-config-next": "12.0.10",
+    "next-compose-plugins": "^2.2.1",
+    "next-fonts": "^1.5.1",
+    "next-transpile-modules": "^9.0.0",
     "sass": "^1.51.0",
     "typescript": "4.5.5"
   }

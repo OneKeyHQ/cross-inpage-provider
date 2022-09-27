@@ -1,3 +1,4 @@
+import React from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 // import Image from 'next/image';
@@ -5,6 +6,7 @@ import Link from 'next/link';
 import styles from '../styles/Home.module.css';
 import packageJson from '../package.json';
 import { useEffect } from 'react';
+import { Button } from 'native-base';
 
 // const myImageLoader = ({ src, width, quality }: any) => {
 //   return src as string;
@@ -41,7 +43,7 @@ const Home: NextPage = () => {
         </a>
         <Link href="/deeplink">DeepLink →</Link>
         <a>Hardware SDK (coming soon)</a>
-        <button onClick={() => window.location.reload()}>refresh</button>
+        <Button onPress={() => window.location.reload()}>refresh</Button>
       </main>
 
       <footer className={styles.footer}>

@@ -66,7 +66,7 @@ function injectWeb3Provider(): unknown {
   // ** SOL
   window.solana = solana;
   window.phantom = { solana };
-  // sim multiple providers may cause opensea.io prompt Connection twice.
+  // sim multiple providers may cause opensea.io prompts Connection twice.
   // window.solflare = solana;
   // window.glowSolana = solana;
 

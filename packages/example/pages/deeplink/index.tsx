@@ -1,9 +1,11 @@
 // @ts-nocheck
 /* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unused-vars */
+import React from 'react';
 import dynamic from 'next/dynamic';
 import styles from '../../styles/Home.module.css';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
+import { Button, HStack, TextArea, Box } from 'native-base';
 
 // injected provider works only if nextjs ssr disabled
 const STCExample = dynamic(() => import('../../components/starcoin/STCExample'), { ssr: false });
@@ -23,33 +25,50 @@ export default function () {
         <a target="WalletConnectExampleV1" href="https://example.walletconnect.org">
           Get uri from WalletConnectExample V1 →
         </a>
-        <div>
-          <textarea
+        <Box mb={4}>
+          <TextArea
+            my={4}
             placeholder={'Copy & Paste Wallet-Connect uri here'}
             id="text-uri"
             value={uri}
             rows={5}
             style={{ width: '100%' }}
-            onChange={(e) => setUri(e.target.value?.trim())}
-          />
-          <button
-            onClick={async () => {
-              const text = await navigator.clipboard.readText();
-              setUri(text || '');
+            onChangeText={(text) => {
+              text = text?.trim();
+              setUri(text);
             }}
-          >
-            Paste
-          </button>
-          <button onClick={() => setUri('')}>Clear</button>
-        </div>
+          />
+          <HStack space={2}>
+            <Button
+              onPress={async () => {
+                const text = await navigator.clipboard.readText();
+                setUri(text || '');
+              }}
+            >
+              Paste
+            </Button>
+            <Button variant={'outline'} onPress={() => setUri('')}>
+              Clear
+            </Button>
+          </HStack>
+        </Box>
 
         {uri ? (
           <ul>
             <li>
-              <a href="https://app.onekey.so/account/aaaaa" target={'_blank'}>
-                UniversalLink (TODO)
+              <a href={`https://app.onekey.so/wc/connect?uri=${uriEncoded}`} target={'_blank'}>
+                UniversalLink (wc uri)
               </a>
             </li>
+            <li>
+              <a
+                href="https://app.onekey.so/account/0xA9b4d559A98ff47C83B74522b7986146538cD4dF"
+                target={'_blank'}
+              >
+                UniversalLink (account)
+              </a>
+            </li>
+
             <li>
               <a href="wc://">wc:// (empty link)</a>
             </li>

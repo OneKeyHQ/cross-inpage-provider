@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { LogsContainer } from '../../components/LogsContainer';
 
 // injected provider works only if nextjs ssr disabled
-const AptosExample = dynamic(() => import('../../components/aptos/AptosExample'), { ssr: false });
+const NearExample = dynamic(() => import('../../components/near/NearExample'), { ssr: false });
 
 export default function () {
   // TODO <Layout />
@@ -14,8 +14,8 @@ export default function () {
     <div>
       <div className={styles.container}>
         <Link href={'/'}>← Back</Link>
-        <h2>Aptos Dapp Example</h2>
-        <AptosExample />
+        <h2>Near Dapp Example</h2>
+        <NearExample />
       </div>
       <LogsContainer />
     </div>

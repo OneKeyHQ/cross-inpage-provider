@@ -174,12 +174,6 @@ export default function App() {
                     </>
                 )}
             </main>
-            <a
-                target={'_blank'}
-                href="https://codesandbox.io/s/github/phantom-labs/sandbox?file=/src/App.tsx"
-            >
-                Go to official test Dapp →
-            </a>
         </div>
     );
 }

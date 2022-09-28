@@ -1,4 +1,5 @@
 import './sites/opensea';
+import './sites/walletconnect';
 import './sites/magiceden';
 import './sites/gem';
 import './sites/rarible';

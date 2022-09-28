@@ -78,7 +78,7 @@ function hackConnectButton({
   throttleSettings?: ThrottleSettings;
   callbackDelay?: number;
 }) {
-  const isUrlMatched = () => Boolean(urls.includes(window.location.hostname));
+  const isUrlMatched = () => Boolean(urls.includes(window.location.hostname) || urls.includes('*'));
   const run = () => {
     if (!isUrlMatched()) {
       return;

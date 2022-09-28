@@ -5,6 +5,7 @@ import { WALLET_CONNECT_INFO } from '../consts';
 hackConnectButton({
   urls: ['rarible.com', 'www.rarible.com'],
   providers: [IInjectedProviderNames.ethereum, IInjectedProviderNames.solana],
+  callbackDelay: 0,
   replaceMethod() {
     const replaceFunc = ({
       findName,

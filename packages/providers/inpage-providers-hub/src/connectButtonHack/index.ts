@@ -13,3 +13,4 @@ import './sites/indexcoop';
 import './sites/yearn';
 import './sites/zapper';
 import './sites/zerion';
+import './sites/aave';

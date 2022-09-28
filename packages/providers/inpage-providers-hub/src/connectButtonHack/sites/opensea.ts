@@ -5,12 +5,6 @@ import { WALLET_CONNECT_INFO } from '../consts';
 hackConnectButton({
   urls: ['opensea.io', 'www.opensea.io'],
   providers: [IInjectedProviderNames.ethereum, IInjectedProviderNames.solana],
-  throttleDelay: 200,
-  throttleSettings: {
-    leading: false,
-    trailing: true,
-  },
-  mutationObserverOptions: { attributes: false, childList: true, subtree: true },
   replaceMethod() {
     const replaceFunc = ({
       findName,

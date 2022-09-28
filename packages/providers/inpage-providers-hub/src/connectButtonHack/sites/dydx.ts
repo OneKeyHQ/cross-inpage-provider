@@ -17,7 +17,7 @@ hackConnectButton({
       icon: string;
       text: string;
     }) => {
-      const img = document.querySelector(`button img[src="${findIcon}"]`) as
+      const img = document.querySelector(`button img[src="${findIcon || ''}"]`) as
         | HTMLImageElement
         | undefined;
       if (img && img.src) {

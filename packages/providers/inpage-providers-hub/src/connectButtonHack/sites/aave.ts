@@ -1,13 +1,15 @@
 import { hackConnectButton } from '../hackConnectButton';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
+import { last } from 'lodash';
 
 hackConnectButton({
-  urls: ['1inch.io', 'app.1inch.io', 'www.1inch.io'],
+  urls: ['aave.com', 'app.aave.com', 'www.aave.com'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {
     const replaceFunc = ({
       findName,
+      findIcon,
       icon,
       text,
     }: {
@@ -16,24 +18,23 @@ hackConnectButton({
       icon: string;
       text: string;
     }) => {
-      const btn = document.querySelector(
-        `app-wallet-item button.wallet-connect-item[data-id=${findName}]`,
-      );
-      if (btn) {
-        const img = btn.querySelector('img.wallet-connect-img') as HTMLImageElement | undefined;
-        if (img && img.src) {
-          img.src = icon;
-          img.style.borderRadius = '0';
-        }
-        const span = btn.querySelector('.wallet-connect-item-down > p');
+      const img = last(
+        Array.from(
+          document.querySelectorAll(`.MuiModal-root button>span>img[src="${findIcon || ''}"]`),
+        ),
+      ) as HTMLImageElement | null;
+      if (img && img.src) {
+        img.src = icon;
+        const span = img?.parentNode?.previousSibling;
         if (span) {
-          span.innerHTML = text;
+          span.nodeValue = text;
         }
       }
     };
 
     replaceFunc({
-      findName: 'Metamask', // Metamask MetaMask
+      findName: 'Metamask',
+      findIcon: '/icons/wallets/browserWallet.svg',
       icon: WALLET_CONNECT_INFO.metamask.icon,
       text: WALLET_CONNECT_INFO.metamask.text,
     });

@@ -60,7 +60,7 @@ function hackConnectButton({
     leading: true,
     trailing: true,
   },
-  callbackDelay = 0,
+  callbackDelay = 10,
 }: {
   urls: string[];
   replaceMethod: () => void;
@@ -78,8 +78,9 @@ function hackConnectButton({
   throttleSettings?: ThrottleSettings;
   callbackDelay?: number;
 }) {
+  const isUrlMatched = () => Boolean(urls.includes(window.location.hostname));
   const run = () => {
-    if (!urls.includes(window.location.hostname)) {
+    if (!isUrlMatched()) {
       return;
     }
     // Select the node that will be observed for mutations
@@ -92,6 +93,9 @@ function hackConnectButton({
     const callback: MutationCallback = throttle(
       (mutationList, observer: MutationObserver) => {
         setTimeout(() => {
+          if (!isUrlMatched()) {
+            return;
+          }
           if (providers.find((providerName) => checkIfWalletConnected({ providerName }))) {
             return;
           }

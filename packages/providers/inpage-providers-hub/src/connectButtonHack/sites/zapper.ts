@@ -6,7 +6,7 @@ hackConnectButton({
   urls: ['zapper.fi', 'app.zapper.fi', 'www.zapper.fi'],
   providers: [IInjectedProviderNames.ethereum],
   mutationObserverOptions: {
-    attributes: true,
+    attributes: true, // shadowRoot changed watch required
     characterData: false,
     childList: true,
     subtree: true,

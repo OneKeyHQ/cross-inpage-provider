@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/cross-inpage-provider-example",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,18 +10,18 @@
     "clean": "rm -rf ./node_modules && rm -rf ./.next && rm -rf ./out"
   },
   "dependencies": {
-    "@types/react-native": "^0.67.6",
     "@ethersproject/bytes": "^5.0.6",
     "@metamask/onboarding": "^1.0.1",
-    "@onekeyfe/cross-inpage-provider-core": "1.0.4",
-    "@onekeyfe/cross-inpage-provider-types": "1.0.4",
-    "@onekeyfe/onekey-aptos-provider": "1.0.4",
-    "@onekeyfe/onekey-near-provider": "1.0.4",
-    "@onekeyfe/onekey-solana-provider": "1.0.4",
+    "@onekeyfe/cross-inpage-provider-core": "1.0.5",
+    "@onekeyfe/cross-inpage-provider-types": "1.0.5",
+    "@onekeyfe/onekey-aptos-provider": "1.0.5",
+    "@onekeyfe/onekey-near-provider": "1.0.5",
+    "@onekeyfe/onekey-solana-provider": "1.0.5",
     "@solana/web3.js": "^1.41.3",
     "@starcoin/starcoin": "^2.1.6",
     "@starcoin/starmask-onboarding": "^1.0.0",
     "@types/bs58": "^4.0.1",
+    "@types/react-native": "^0.67.6",
     "bignumber.js": "^9.0.1",
     "bs58": "^5.0.0",
     "compare-versions": "^4.1.2",
@@ -40,8 +40,8 @@
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
-    "@expo/next-adapter": "^4.0.12",
     "@expo/config": "^7.0.1",
+    "@expo/next-adapter": "^4.0.12",
     "@types/lodash": "^4.14.178",
     "@types/node": "17.0.18",
     "@types/react": "17.0.39",

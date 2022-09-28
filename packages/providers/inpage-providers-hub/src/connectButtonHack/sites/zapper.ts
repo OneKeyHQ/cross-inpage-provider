@@ -3,8 +3,14 @@ import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
 hackConnectButton({
-  urls: ['synthetix.io', 'staking.synthetix.io', 'app.synthetix.io', 'www.synthetix.io'],
+  urls: ['zapper.fi', 'app.zapper.fi', 'www.zapper.fi'],
   providers: [IInjectedProviderNames.ethereum],
+  mutationObserverOptions: {
+    attributes: true,
+    characterData: false,
+    childList: true,
+    subtree: true,
+  },
   replaceMethod() {
     const replaceFunc = ({
       findName,
@@ -12,9 +18,12 @@ hackConnectButton({
       text,
     }: {
       findName: string;
+      findIcon?: string;
       icon: string;
       text: string;
     }) => {
+      // TODO shadowRoot watch
+      //    https://stackoverflow.com/questions/46995421/shadow-dom-know-when-dom-is-rendered-changed
       const shadowRoot = document.querySelector('onboard-v2')?.shadowRoot;
       if (shadowRoot) {
         const buttons = Array.from(shadowRoot.querySelectorAll('.wallets-container button'));

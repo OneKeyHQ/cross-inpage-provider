@@ -12,6 +12,7 @@ hackConnectButton({
       text,
     }: {
       findName: string;
+      findIcon?: string;
       icon: string;
       text: string;
     }) => {

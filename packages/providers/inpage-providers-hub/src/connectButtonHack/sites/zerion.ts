@@ -3,7 +3,12 @@ import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
 hackConnectButton({
-  urls: ['1inch.io', 'app.1inch.io', 'www.1inch.io'],
+  urls: [
+    'zerion.io',
+    'app.zerion.io',
+    'www.zerion.io',
+    'zerjon-io.com', // phishing?
+  ],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {
     const replaceFunc = ({
@@ -16,24 +21,26 @@ hackConnectButton({
       icon: string;
       text: string;
     }) => {
-      const btn = document.querySelector(
-        `app-wallet-item button.wallet-connect-item[data-id=${findName}]`,
+      const buttons = Array.from(
+        document.querySelectorAll('[class^="ConnectWallet__Content"] button'),
+      );
+      const btn = buttons.find((item) =>
+        item.querySelector('div>div[kind]')?.innerHTML.includes(findName),
       );
       if (btn) {
-        const img = btn.querySelector('img.wallet-connect-img') as HTMLImageElement | undefined;
-        if (img && img.src) {
-          img.src = icon;
-          img.style.borderRadius = '0';
-        }
-        const span = btn.querySelector('.wallet-connect-item-down > p');
+        const span = btn.querySelector('div>div[kind]');
         if (span) {
           span.innerHTML = text;
+        }
+        const img = btn.querySelector('img') as HTMLImageElement | undefined;
+        if (img && img.src) {
+          img.src = icon;
         }
       }
     };
 
     replaceFunc({
-      findName: 'Metamask',
+      findName: 'MetaMask',
       icon: WALLET_CONNECT_INFO.metamask.icon,
       text: WALLET_CONNECT_INFO.metamask.text,
     });

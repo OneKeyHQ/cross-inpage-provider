@@ -3,7 +3,7 @@ import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
 hackConnectButton({
-  urls: ['dydx.exchange', 'trade.dydx.exchange'],
+  urls: ['dydx.exchange', 'trade.dydx.exchange', 'www.dydx.exchange'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {
     const replaceFunc = ({
@@ -13,7 +13,7 @@ hackConnectButton({
       text,
     }: {
       findName: string;
-      findIcon: string;
+      findIcon?: string;
       icon: string;
       text: string;
     }) => {

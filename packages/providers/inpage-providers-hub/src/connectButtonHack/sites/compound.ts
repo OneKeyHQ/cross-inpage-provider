@@ -3,7 +3,7 @@ import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
 hackConnectButton({
-  urls: ['compound.finance', 'app.compound.finance'],
+  urls: ['compound.finance', 'app.compound.finance', 'www.compound.finance'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {
     const replaceFunc = ({

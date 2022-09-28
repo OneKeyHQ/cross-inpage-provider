@@ -9,3 +9,7 @@ import './sites/dydx';
 import './sites/compound';
 import './sites/oasis';
 import './sites/synthetix';
+import './sites/indexcoop';
+import './sites/yearn';
+import './sites/zapper';
+import './sites/zerion';

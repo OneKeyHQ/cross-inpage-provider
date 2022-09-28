@@ -3,12 +3,7 @@ import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
 hackConnectButton({
-  urls: [
-    'zerion.io',
-    'app.zerion.io',
-    'www.zerion.io',
-    'zerjon-io.com', // phishing?
-  ],
+  urls: ['zerion.io', 'app.zerion.io', 'www.zerion.io'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {
     const replaceFunc = ({

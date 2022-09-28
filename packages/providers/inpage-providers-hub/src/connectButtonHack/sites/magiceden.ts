@@ -4,11 +4,6 @@ import { WALLET_CONNECT_INFO } from '../consts';
 
 hackConnectButton({
   urls: ['magiceden.io', 'www.magiceden.io'],
-  throttleDelay: 600,
-  throttleSettings: {
-    leading: true,
-    trailing: true,
-  },
   providers: [IInjectedProviderNames.ethereum, IInjectedProviderNames.solana],
   replaceMethod() {
     const replaceFunc = ({
@@ -23,7 +18,7 @@ hackConnectButton({
       text: string;
     }) => {
       const img = document.querySelector(
-        `#root > div.modal.show > div > div > div.modal-body > ul > li > button > img[alt="${findIconText}"]`,
+        `div.modal.show  li > button > img[alt="${findIconText}"]`,
       ) as HTMLImageElement | undefined;
       if (img && img.src) {
         img.src = icon;
@@ -47,5 +42,4 @@ hackConnectButton({
       text: WALLET_CONNECT_INFO.phantom.text,
     });
   },
-  options: { attributes: false, childList: true, subtree: true },
 });

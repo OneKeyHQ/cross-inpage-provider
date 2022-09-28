@@ -4,12 +4,13 @@ import { WALLET_CONNECT_INFO } from '../consts';
 
 hackConnectButton({
   urls: ['opensea.io', 'www.opensea.io'],
+  providers: [IInjectedProviderNames.ethereum, IInjectedProviderNames.solana],
   throttleDelay: 200,
   throttleSettings: {
     leading: false,
     trailing: true,
   },
-  providers: [IInjectedProviderNames.ethereum, IInjectedProviderNames.solana],
+  mutationObserverOptions: { attributes: false, childList: true, subtree: true },
   replaceMethod() {
     const replaceFunc = ({
       findName,
@@ -30,7 +31,7 @@ hackConnectButton({
         return;
       }
       const img = li?.querySelector?.('button > div > img') as HTMLImageElement | undefined;
-      if (img&&img.src) {
+      if (img && img.src) {
         img.src = icon;
       }
 
@@ -57,5 +58,4 @@ hackConnectButton({
       text: WALLET_CONNECT_INFO.phantom.text,
     });
   },
-  options: { attributes: false, childList: true, subtree: true },
 });

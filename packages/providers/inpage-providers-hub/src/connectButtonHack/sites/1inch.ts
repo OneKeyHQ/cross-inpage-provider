@@ -4,11 +4,6 @@ import { WALLET_CONNECT_INFO } from '../consts';
 
 hackConnectButton({
   urls: ['1inch.io', 'app.1inch.io'],
-  throttleDelay: 600,
-  throttleSettings: {
-    leading: true,
-    trailing: true,
-  },
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {
     const replaceFunc = ({
@@ -42,5 +37,4 @@ hackConnectButton({
       text: WALLET_CONNECT_INFO.metamask.text,
     });
   },
-  options: { attributes: false, childList: true, subtree: true },
 });

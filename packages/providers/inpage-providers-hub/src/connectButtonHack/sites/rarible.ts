@@ -4,11 +4,6 @@ import { WALLET_CONNECT_INFO } from '../consts';
 
 hackConnectButton({
   urls: ['rarible.com', 'www.rarible.com'],
-  throttleDelay: 600,
-  throttleSettings: {
-    leading: true,
-    trailing: true,
-  },
   providers: [IInjectedProviderNames.ethereum, IInjectedProviderNames.solana],
   replaceMethod() {
     const replaceFunc = ({
@@ -44,5 +39,4 @@ hackConnectButton({
       text: WALLET_CONNECT_INFO.phantom.text,
     });
   },
-  options: { attributes: false, childList: true, subtree: true },
 });

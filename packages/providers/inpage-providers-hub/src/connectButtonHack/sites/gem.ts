@@ -1,14 +1,9 @@
-import { hackConnectButton } from '../hackConnectButton';
+import { createNewImageToContainer, hackConnectButton } from '../hackConnectButton';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
 hackConnectButton({
   urls: ['gem.xyz', 'www.gem.xyz'],
-  throttleDelay: 600,
-  throttleSettings: {
-    leading: true,
-    trailing: true,
-  },
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {
     const replaceFunc = ({
@@ -38,10 +33,18 @@ hackConnectButton({
         } else {
           // maybe <svg />
           prevImg?.remove();
-          const newImg = document.createElement('img');
-          newImg.src = icon;
-          newImg.className = 'h-8 w-8 mr-4';
-          span.parentNode?.prepend(newImg);
+
+          const imgContainer = span.parentNode as HTMLElement | undefined;
+          if (imgContainer) {
+            createNewImageToContainer({
+              container: imgContainer,
+              icon,
+              removeSvg: true,
+              onCreated(img) {
+                img.className = 'h-8 w-8 mr-4';
+              },
+            });
+          }
         }
       }
     };
@@ -52,5 +55,4 @@ hackConnectButton({
       text: WALLET_CONNECT_INFO.metamask.text,
     });
   },
-  options: { attributes: false, childList: true, subtree: true },
 });

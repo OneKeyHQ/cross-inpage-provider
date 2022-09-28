@@ -3,7 +3,7 @@ import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
 hackConnectButton({
-  urls: ['sushi.com', 'www.sushi.com'],
+  urls: ['oasis.app', 'www.oasis.app'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {
     const replaceFunc = ({
@@ -15,23 +15,22 @@ hackConnectButton({
       icon: string;
       text: string;
     }) => {
-      const buttonList = Array.from(document.querySelectorAll('div[role=menu] div[role=menuitem]'));
-      const btn = buttonList.find((item) => item.innerHTML.includes(findName));
-      if (btn) {
-        const childNodes = Array.from(btn.childNodes);
-        const span = childNodes.find((item) => item.nodeValue === findName);
-        if (span) {
-          span.nodeValue = text;
-        }
-        const imgContainer = btn.querySelector('div');
+      const arrows = Array.from(document.querySelectorAll('button .connect-wallet-arrow'));
+      const arrow = arrows.find(
+        (item) => (item.previousSibling as HTMLElement | undefined)?.innerHTML === findName,
+      );
+      const span = arrow?.previousSibling as HTMLElement | undefined;
+      if (span) {
+        span.innerHTML = text;
+        const imgContainer = span.parentNode?.previousSibling as HTMLElement | undefined;
         if (imgContainer) {
           createNewImageToContainer({
             container: imgContainer,
-            icon,
+            icon: icon,
             removeSvg: true,
             onCreated(img) {
-              img.style.maxWidth = '16px';
-              img.style.maxHeight = '16px';
+              img.style.maxWidth = '22px';
+              img.style.maxHeight = '22px';
             },
           });
         }

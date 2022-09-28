@@ -3,36 +3,35 @@ import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
 hackConnectButton({
-  urls: ['uniswap.org', 'app.uniswap.org'],
+  urls: ['compound.finance', 'app.compound.finance'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {
     const replaceFunc = ({
       findName,
+      findIcon,
       icon,
       text,
     }: {
       findName: string;
+      findIcon?: string;
       icon: string;
       text: string;
     }) => {
-      const buttonList = Array.from(
-        document.querySelectorAll(
-          'div[data-testid=wallet-modal] div[data-testid=option-grid] button',
-        ),
-      );
-      const btn = buttonList.find((item) => item.innerHTML.includes(findName));
-      const span = btn?.querySelector('div > div');
-      const img = btn?.querySelector('img');
-      if (span) {
-        span.innerHTML = text;
-      }
-      if (img && img.src) {
-        img.src = icon;
+      const img = document.querySelector(`.connect-choices .connect-item ${findIcon || ''}`) as
+        | HTMLImageElement
+        | undefined;
+      if (img) {
+        img.style.backgroundImage = `url(${icon})`;
+        const span = img.nextSibling as HTMLElement | undefined;
+        if (span && span.innerText === findName) {
+          span.innerText = text;
+        }
       }
     };
 
     replaceFunc({
-      findName: 'MetaMask',
+      findName: 'Metamask',
+      findIcon: '.connect-wallet-icon--metamask',
       icon: WALLET_CONNECT_INFO.metamask.icon,
       text: WALLET_CONNECT_INFO.metamask.text,
     });

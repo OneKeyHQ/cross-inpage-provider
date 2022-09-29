@@ -7,6 +7,7 @@ import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
 import { ProviderSolana } from '@onekeyfe/onekey-solana-provider';
 import { ProviderStarcoin } from '@onekeyfe/onekey-starcoin-provider';
 import { ProviderAptos, ProviderAptosMartian } from '@onekeyfe/onekey-aptos-provider';
+import './connectButtonHack';
 // import Web3 from 'web3'; // cause build error
 
 export type WindowOneKeyHub = {

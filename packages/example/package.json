@@ -7,7 +7,8 @@
     "build": "next build && next export",
     "start-web": "next start",
     "lint": "next lint",
-    "clean": "rm -rf ./node_modules && rm -rf ./.next && rm -rf ./out"
+    "clean": "rm -rf ./node_modules && rm -rf ./.next && rm -rf ./out",
+    "swap-lock-registry": "npx swap-lock-registry --yarn --parallel --url https://registry.yarnpkg.com yarn.lock"
   },
   "dependencies": {
     "@ethersproject/bytes": "^5.0.6",

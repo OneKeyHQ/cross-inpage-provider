@@ -20,6 +20,12 @@ export type IWindowOneKeyHub = {
   aptos?: ProviderAptos;
   martian?: ProviderAptosMartian;
   $private?: ProviderPrivate;
+  $walletInfo?: {
+    buildNumber: string;
+    isLegacy: boolean;
+    platform: string;
+    version: string;
+  };
 };
 
 function injectWeb3Provider(): unknown {

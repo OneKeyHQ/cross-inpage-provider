@@ -187,14 +187,14 @@ function hackConnectButton({
             return;
           }
           if (process.env.NODE_ENV !== 'production') {
-            console.log('mutation triggered: hackConnectButton');
+            console.log('mutation triggered: hackConnectButton (DEV only log)');
           }
           try {
             observer?.disconnect?.();
             replaceMethod?.();
           } catch (error) {
             if (process.env.NODE_ENV !== 'production') {
-              console.error('hackConnectButton mutation ERROR:', error);
+              console.error('hackConnectButton mutation ERROR (DEV only log):  ', error);
             }
           } finally {
             observer?.observe?.(targetNode, config);

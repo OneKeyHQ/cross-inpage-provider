@@ -35,7 +35,8 @@
     "ts-loader": "^9.2.6",
     "webpack": "^5.69.1",
     "webpack-cli": "^4.9.2",
-    "webpack-merge": "^5.8.0"
+    "webpack-merge": "^5.8.0",
+    "babel-plugin-lodash": "^3.3.4"
   },
   "peerDependencies": {
     "electron": "*"

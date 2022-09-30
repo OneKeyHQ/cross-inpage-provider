@@ -1,9 +1,9 @@
 import { throttle, ThrottleSettings } from 'lodash';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
-import type { WindowOneKeyHub } from '../injectWeb3Provider';
+import type { IWindowOneKeyHub } from '../injectWeb3Provider';
 
 function checkIfWalletConnected({ providerName }: { providerName: IInjectedProviderNames }) {
-  const hub = window.$onekey as WindowOneKeyHub;
+  const hub = window.$onekey as IWindowOneKeyHub;
   if (providerName === IInjectedProviderNames.ethereum) {
     // dapp disconnect won't remove accounts in wallet, so this check won't working
     // @ts-ignore
@@ -14,6 +14,78 @@ function checkIfWalletConnected({ providerName }: { providerName: IInjectedProvi
     return Boolean(hub?.solana?.publicKey);
   }
   return false;
+}
+
+export async function detectQrcodeFromSvg({
+  img,
+}: {
+  img: HTMLImageElement | Element;
+}): Promise<string> {
+  // https://unpkg.com/qr-scanner@1.4.1/qr-scanner.umd.min.js
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  const barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] }) as {
+    detect: (data: any) => Promise<{ rawValue: string }[]>;
+  };
+  const serialized = new XMLSerializer().serializeToString(img);
+  const encodedData = window.btoa(serialized);
+  const base64 = `data:image/svg+xml;base64,${encodedData}`;
+  return new Promise((resolve, reject) => {
+    const imgTemp = document.createElement('img');
+    imgTemp.src = base64;
+    imgTemp.style.width = '100px';
+    imgTemp.style.height = '100px';
+    imgTemp.onload = () => {
+      barcodeDetector
+        .detect(imgTemp)
+        .then((result) => {
+          resolve(result?.[0]?.rawValue);
+        })
+        .catch(reject)
+        .finally(() => {
+          imgTemp.remove();
+        });
+    };
+    document.body.appendChild(imgTemp);
+  });
+
+  // const res = await fetch(base64);
+  // const blob = await res.blob();
+  // const result = await barcodeDetector.detect(blob);
+  // return result?.[0]?.rawValue;
+}
+
+export function createWalletConnectToButton({
+  container,
+  onCreated,
+}: {
+  container: HTMLElement;
+  onCreated?: (btn: HTMLElement) => void;
+}) {
+  const datasetKey = 'onekey_auto_created_wallet_connect_btn'; // can not include `-`
+  if (!container.querySelector(`[data-${datasetKey}]`)) {
+    const btn = document.createElement('div');
+    btn.dataset[datasetKey] = 'true';
+    btn.style.cssText = `
+border-radius: 12px;
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 16px;
+padding-right: 16px;
+background-color: #00B812;
+color: white;
+font-size: 14px;
+line-height: 20px;
+font-weight: 500;
+cursor: pointer;
+    `;
+    // i18n key:
+    //    action__connect_onekey_extension
+    //    action__connect_onekey
+    btn.innerHTML = 'Connect OneKey';
+    onCreated?.(btn);
+    container.append(btn);
+  }
 }
 
 export function createNewImageToContainer({
@@ -33,7 +105,7 @@ export function createNewImageToContainer({
       svg.remove();
     }
   }
-  const datasetKey = 'onekey_auto_created'; // can not include `-`
+  const datasetKey = 'onekey_auto_created_icon_img'; // can not include `-`
   if (!container.querySelector(`[data-${datasetKey}]`)) {
     const newImg = document.createElement('img');
     newImg.src = icon;

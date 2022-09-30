@@ -10,7 +10,7 @@ import { ProviderAptos, ProviderAptosMartian } from '@onekeyfe/onekey-aptos-prov
 import './connectButtonHack';
 // import Web3 from 'web3'; // cause build error
 
-export type WindowOneKeyHub = {
+export type IWindowOneKeyHub = {
   debugLogger?: any;
   jsBridge?: JsBridgeBase;
   ethereum?: ProviderEthereum;

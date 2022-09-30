@@ -1,6 +1,12 @@
-import { createNewImageToContainer, hackConnectButton } from '../hackConnectButton';
+import {
+  createNewImageToContainer,
+  createWalletConnectToButton,
+  detectQrcodeFromSvg,
+  hackConnectButton,
+} from '../hackConnectButton';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
+import type { IWindowOneKeyHub } from '../../injectWeb3Provider';
 
 hackConnectButton({
   urls: ['*'],
@@ -22,6 +28,7 @@ hackConnectButton({
       if (svg && qrcodeContainer) {
         qrcodeContainer.style.position = 'relative';
         qrcodeContainer.style.display = 'flex';
+        qrcodeContainer.style.flexDirection = 'column';
         qrcodeContainer.style.alignItems = 'center';
         qrcodeContainer.style.justifyContent = 'center';
         createNewImageToContainer({
@@ -40,6 +47,31 @@ hackConnectButton({
             // img.style.transform = 'translate(-50%, -50%)';
           },
         });
+
+        const footerContainer = qrcodeContainer.nextElementSibling as HTMLElement | undefined;
+        if (footerContainer) {
+          footerContainer.style.flexDirection = 'column';
+          createWalletConnectToButton({
+            container: footerContainer,
+            onCreated(btn) {
+              btn.style.marginTop = '16px';
+              btn.style.alignSelf = 'center';
+              btn.onclick = async () => {
+                const uri = await detectQrcodeFromSvg({ img: svg });
+                console.log('wallet_connectToWalletConnect >>>> ', uri);
+                if (btn.dataset['isClicked']) {
+                  return;
+                }
+                btn.dataset['isClicked'] = 'true';
+                btn.style.backgroundColor = '#bbb';
+                void (window.$onekey as IWindowOneKeyHub | undefined)?.$private?.request({
+                  method: 'wallet_connectToWalletConnect',
+                  params: { uri },
+                });
+              };
+            },
+          });
+        }
       }
     };
 

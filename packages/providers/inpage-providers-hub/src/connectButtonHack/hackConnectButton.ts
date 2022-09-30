@@ -93,11 +93,15 @@ export function createNewImageToContainer({
   icon,
   removeSvg = true,
   onCreated,
+  width,
+  height,
 }: {
   container: HTMLElement;
   icon: string;
   removeSvg: boolean;
   onCreated?: (img: HTMLImageElement) => void;
+  width?: string;
+  height?: string;
 }) {
   if (removeSvg) {
     const svg = container.querySelector('svg');
@@ -112,6 +116,12 @@ export function createNewImageToContainer({
     newImg.dataset[datasetKey] = 'true';
     newImg.style.maxHeight = '100%';
     newImg.style.maxWidth = '100%';
+    if (width) {
+      newImg.style.width = width;
+    }
+    if (height) {
+      newImg.style.height = height;
+    }
     onCreated?.(newImg);
     container.prepend(newImg);
   }
@@ -151,7 +161,12 @@ function hackConnectButton({
   callbackDelay?: number;
 }) {
   const isUrlMatched = () => Boolean(urls.includes(window.location.hostname) || urls.includes('*'));
+
   const run = () => {
+    // ignore web site run in iframe
+    if (window.top !== window) {
+      return;
+    }
     if (!isUrlMatched()) {
       return;
     }
@@ -197,18 +212,28 @@ function hackConnectButton({
     observer.observe(targetNode, config);
   };
 
+  let isRun = false;
+  const runOnce = () => {
+    if (isRun) {
+      return;
+    }
+    isRun = true;
+    setTimeout(() => {
+      run();
+    }, 1000);
+  };
   if (
     document.readyState === 'complete' ||
     // @ts-ignore
     document.readyState === 'loaded' ||
     document.readyState === 'interactive'
   ) {
-    run();
+    runOnce();
   } else {
     window.addEventListener(
       'DOMContentLoaded',
       function () {
-        run();
+        runOnce();
       },
       false,
     );

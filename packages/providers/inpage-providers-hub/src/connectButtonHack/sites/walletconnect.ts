@@ -23,56 +23,70 @@ hackConnectButton({
       text: string;
     }) => {
       const headerText = document.getElementById('walletconnect-qrcode-text');
-      const qrcodeContainer = headerText?.nextSibling as HTMLElement | undefined;
-      const svg = qrcodeContainer?.querySelector('svg.walletconnect-qrcode__image');
-      if (svg && qrcodeContainer) {
-        qrcodeContainer.style.position = 'relative';
-        qrcodeContainer.style.display = 'flex';
-        qrcodeContainer.style.flexDirection = 'column';
-        qrcodeContainer.style.alignItems = 'center';
-        qrcodeContainer.style.justifyContent = 'center';
-        createNewImageToContainer({
-          container: qrcodeContainer,
-          icon,
-          removeSvg: false,
-          onCreated(img) {
-            img.style.maxWidth = '10%';
-            img.style.borderRadius = '35%';
-            img.style.position = 'absolute';
-            img.style.border = '2px solid white';
-            img.style.backgroundColor = 'white';
-            img.style.outline = 'none';
-            // img.style.left = '50%';
-            // img.style.top = '50%';
-            // img.style.transform = 'translate(-50%, -50%)';
-          },
-        });
-
-        const footerContainer = qrcodeContainer.nextElementSibling as HTMLElement | undefined;
-        if (footerContainer) {
-          footerContainer.style.flexDirection = 'column';
-          createWalletConnectToButton({
-            container: footerContainer,
-            onCreated(btn) {
-              btn.style.marginTop = '16px';
-              btn.style.alignSelf = 'center';
-              btn.onclick = async () => {
-                const uri = await detectQrcodeFromSvg({ img: svg });
-                console.log('wallet_connectToWalletConnect >>>> ', uri);
-                if (btn.dataset['isClicked']) {
-                  return;
-                }
-                btn.dataset['isClicked'] = 'true';
-                btn.style.backgroundColor = '#bbb';
-                void (window.$onekey as IWindowOneKeyHub | undefined)?.$private?.request({
-                  method: 'wallet_connectToWalletConnect',
-                  params: { uri },
-                });
-              };
-            },
-          });
-        }
+      if (!headerText) {
+        return;
       }
+      const qrcodeContainer = headerText?.nextSibling as HTMLElement | undefined;
+      if (!qrcodeContainer) {
+        return;
+      }
+      const svg = qrcodeContainer?.querySelector('svg.walletconnect-qrcode__image');
+      if (!svg) {
+        return;
+      }
+      if (qrcodeContainer.dataset['isHacked']) {
+        return;
+      }
+
+      // starting hack
+      qrcodeContainer.dataset['isHacked'] = 'true';
+      qrcodeContainer.style.position = 'relative';
+      qrcodeContainer.style.display = 'flex';
+      qrcodeContainer.style.flexDirection = 'column';
+      qrcodeContainer.style.alignItems = 'center';
+      qrcodeContainer.style.justifyContent = 'center';
+
+      createNewImageToContainer({
+        container: qrcodeContainer,
+        icon,
+        removeSvg: false,
+        onCreated(img) {
+          img.style.maxWidth = '10%';
+          img.style.borderRadius = '35%';
+          img.style.position = 'absolute';
+          img.style.border = '2px solid white';
+          img.style.backgroundColor = 'white';
+          img.style.outline = 'none';
+          // img.style.left = '50%';
+          // img.style.top = '50%';
+          // img.style.transform = 'translate(-50%, -50%)';
+        },
+      });
+
+      const footerContainer = qrcodeContainer.nextElementSibling as HTMLElement | undefined;
+      if (!footerContainer) {
+        return;
+      }
+      footerContainer.style.flexDirection = 'column';
+      createWalletConnectToButton({
+        container: footerContainer,
+        onCreated(btn) {
+          btn.style.marginTop = '16px';
+          btn.style.alignSelf = 'center';
+          btn.onclick = async () => {
+            const uri = await detectQrcodeFromSvg({ img: svg });
+            if (btn.dataset['isClicked']) {
+              return;
+            }
+            btn.dataset['isClicked'] = 'true';
+            btn.style.backgroundColor = '#bbb';
+            void (window.$onekey as IWindowOneKeyHub | undefined)?.$private?.request({
+              method: 'wallet_connectToWalletConnect',
+              params: { uri },
+            });
+          };
+        },
+      });
     };
 
     replaceFunc({

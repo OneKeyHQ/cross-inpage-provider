@@ -1,5 +1,6 @@
-import './sites/opensea';
 import './sites/walletconnect';
+// ---------
+import './sites/opensea';
 import './sites/magiceden';
 import './sites/gem';
 import './sites/rarible';
@@ -15,3 +16,5 @@ import './sites/yearn';
 import './sites/zapper';
 import './sites/zerion';
 import './sites/aave';
+import './sites/pancake';
+// TODO list ----------------------------------------------

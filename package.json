@@ -14,13 +14,15 @@
     "build": "lerna run build --ignore @onekeyfe/cross-inpage-provider-example",
     "prestart": "yarn build",
     "start": "lerna run start --parallel --ignore @onekeyfe/cross-inpage-provider-example",
+    "start-all": "lerna run start --parallel",
     "prepack": "yarn build",
     "watch": "yarn bootstrap && concurrently \"gulp watch\" \"yarn start\" ",
     "gulp-watch": "gulp watch",
     "publish-packages": "lerna publish from-package",
     "example": "cd ./packages/example && yarn dev",
     "example-build": "cd ./packages/example && yarn --registry 'https://registry.npmjs.org' && yarn build",
-    "update-version": "lerna version --no-git-tag-version --exact"
+    "update-version": "lerna version --no-git-tag-version --exact",
+    "swap-lock-registry": "npx swap-lock-registry --yarn --parallel --url https://registry.yarnpkg.com yarn.lock"
   },
   "devDependencies": {
     "@testing-library/react-hooks": "^7.0.2",

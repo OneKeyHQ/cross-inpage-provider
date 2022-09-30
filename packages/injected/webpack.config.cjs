@@ -30,7 +30,12 @@ const commonConfig = {
         test: /\.(js|jsx)$/,
         // exclude: /node_modules/,
         exclude: [/node_modules/, /\.text\.(js|jsx|ts|tsx)$/],
-        use: ['babel-loader'],
+        use: [
+          {
+            loader: 'babel-loader',
+            options: require('./babel.config.cjs'),
+          },
+        ],
         resolve: {
           fullySpecified: false,
         },

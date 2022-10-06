@@ -25,6 +25,11 @@ export type IWindowOneKeyHub = {
     isLegacy: boolean;
     platform: string;
     version: string;
+    platformEnv: {
+      isExtension: boolean;
+      isDesktop: boolean;
+      isNative: boolean;
+    };
   };
 };
 

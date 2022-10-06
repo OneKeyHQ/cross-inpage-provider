@@ -8,14 +8,29 @@ import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 import type { IWindowOneKeyHub } from '../../injectWeb3Provider';
 
+const onekeyBtnBg = 'rgb(0, 184, 18)';
+function setOnClickToConnectWallet({ element, uri }: { element: HTMLElement; uri: string }) {
+  element.onclick = (e) => {
+    e.preventDefault();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    void window.$onekey?.$private?.request({
+      method: 'wallet_connectToWalletConnect',
+      params: { uri },
+    });
+    return false;
+  };
+}
+
 hackConnectButton({
   urls: ['*'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {
+    // $onekey.$walletInfo.platformEnv.isExtension
     const onekeyHub = window.$onekey as IWindowOneKeyHub | undefined;
     if (!onekeyHub || !onekeyHub.$walletInfo || !onekeyHub.$private) {
       return;
     }
+    const { isExtension, isDesktop, isNative } = onekeyHub.$walletInfo.platformEnv;
     const replaceFunc = ({
       findName,
       icon,
@@ -34,10 +49,30 @@ hackConnectButton({
       if (!qrcodeContainer) {
         return;
       }
+      // **** android single connect button replacement
       if (
-        ['desktop', 'app', 'ios', 'android'].includes(onekeyHub?.$walletInfo?.platform || '') &&
-        qrcodeContainer?.classList?.contains?.('walletconnect-search__input')
+        qrcodeContainer?.classList?.contains?.('walletconnect-connect__buttons__wrapper__android')
       ) {
+        const btn = qrcodeContainer.querySelector('.walletconnect-connect__button') as
+          | HTMLAnchorElement
+          | undefined;
+        if (!btn) {
+          return;
+        }
+        if (btn.dataset['isOneKeyReplaced']) {
+          return;
+        }
+        btn.dataset['isOneKeyReplaced'] = 'true';
+        btn.innerText = `${btn.innerText} ${text}`;
+        btn.style.backgroundColor = onekeyBtnBg;
+        setOnClickToConnectWallet({
+          element: btn,
+          uri: btn.href,
+        });
+      }
+      // **** deeplink buttons replacement
+      else if (qrcodeContainer?.classList?.contains?.('walletconnect-search__input')) {
+        const shouldHideOtherWallets = isDesktop || isNative;
         const inputEle = qrcodeContainer;
         const parent = headerText.parentNode;
         if (!parent) {
@@ -52,7 +87,10 @@ hackConnectButton({
         if (!firstItem || !iconsContainer) {
           return;
         }
-        if (firstItem.classList.contains('isOneKeyReplaced')) {
+        const newItemAdded = parent.querySelector(
+          '.isOneKeyReplaced.walletconnect-connect__button__icon_anchor',
+        ) as HTMLElement | undefined;
+        if (newItemAdded) {
           return;
         }
         const img = firstItem.querySelector('.walletconnect-connect__button__icon') as
@@ -69,38 +107,57 @@ hackConnectButton({
         }
         const uri = new URL(firstItem?.href).searchParams.get('uri');
         if (uri && uri.startsWith('wc:')) {
-          span.innerText = text;
-          img.style.backgroundImage = `url(${icon || ''})`;
-          img.style.backgroundColor = 'rgb(0, 184, 18)';
-          // const item = firstItem.cloneNode(true) as HTMLElement;
-          firstItem.classList.add('isOneKeyReplaced');
-          firstItem.onclick = (e) => {
-            e.preventDefault();
-            void onekeyHub?.$private?.request({
-              method: 'wallet_connectToWalletConnect',
-              params: { uri },
-            });
-            return false;
-          };
-          for (const item of Array.from(iconsContainer?.children || [])) {
-            const itemEl = item as HTMLElement | undefined;
-            if (itemEl && itemEl.style) {
-              itemEl.style.display = 'none';
-            }
+          const newItem = firstItem.cloneNode(true) as HTMLAnchorElement;
+          const newItemImg = newItem.querySelector('.walletconnect-connect__button__icon') as
+            | HTMLElement
+            | undefined;
+          const newItemSpan = newItem.querySelector('.walletconnect-connect__button__text') as
+            | HTMLElement
+            | undefined;
+          if (newItemSpan) {
+            newItemSpan.innerText = text;
           }
-          iconsContainer.style.display = 'flex';
-          iconsContainer.style.justifyContent = 'center';
-          iconsContainer.style.alignItems = 'center';
-          iconsContainer.style.minHeight = '150px';
+          if (newItemImg) {
+            newItemImg.style.backgroundImage = `url(${icon || ''})`;
+            newItemImg.style.backgroundColor = onekeyBtnBg;
+          }
+          newItem.classList.add('isOneKeyReplaced');
+          // TODO use universal link
+          newItem.href = `onekey-wallet:///wc?uri=${encodeURIComponent(uri)}`;
+          if (shouldHideOtherWallets) {
+            setOnClickToConnectWallet({
+              element: newItem,
+              uri,
+            });
+          }
 
-          firstItem.style.display = 'block';
-          inputEle.remove();
-          const footerContainer = iconsContainer?.parentNode?.querySelector(
-            '.walletconnect-modal__footer',
-          ) as HTMLElement | undefined;
-          footerContainer?.remove();
+          // hide all other wallets
+          if (shouldHideOtherWallets) {
+            for (const item of Array.from(iconsContainer?.children || [])) {
+              const itemEl = item as HTMLElement | undefined;
+              if (itemEl && itemEl.style) {
+                itemEl.style.display = 'none';
+              }
+            }
+            iconsContainer.style.display = 'flex';
+            iconsContainer.style.justifyContent = 'center';
+            iconsContainer.style.alignItems = 'center';
+          }
+          iconsContainer.style.minHeight = '150px';
+          iconsContainer.prepend(newItem);
+
+          // remove input and footer pagination
+          if (shouldHideOtherWallets) {
+            inputEle.remove();
+            const footerContainer = iconsContainer?.parentNode?.querySelector(
+              '.walletconnect-modal__footer',
+            ) as HTMLElement | undefined;
+            footerContainer?.remove();
+          }
         }
-      } else {
+      }
+      // **** qrcode replacement
+      else {
         const svg = qrcodeContainer?.querySelector('svg.walletconnect-qrcode__image');
         if (!svg) {
           return;

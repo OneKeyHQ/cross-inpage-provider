@@ -90,6 +90,7 @@ abstract class ProviderBase extends CrossEventEmitter {
     // eslint-disable-next-line no-async-promise-executor,@typescript-eslint/no-misused-promises
     return new Promise(async (resolve, reject) => {
       const timer = setTimeout(() => {
+        console.error(`getConnectWalletInfo timeout: ${timeout}`);
         resolve(null);
       }, timeout);
       try {
@@ -112,6 +113,7 @@ abstract class ProviderBase extends CrossEventEmitter {
         if (result) {
           resolve(result);
         } else {
+          console.error('getConnectWalletInfo error: result=null');
           resolve(null);
         }
       } catch (err) {

@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/cross-inpage-provider-example",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -14,11 +14,11 @@
   "dependencies": {
     "@ethersproject/bytes": "^5.0.6",
     "@metamask/onboarding": "^1.0.1",
-    "@onekeyfe/cross-inpage-provider-core": "1.0.6",
-    "@onekeyfe/cross-inpage-provider-types": "1.0.6",
-    "@onekeyfe/onekey-aptos-provider": "1.0.6",
-    "@onekeyfe/onekey-near-provider": "1.0.6",
-    "@onekeyfe/onekey-solana-provider": "1.0.6",
+    "@onekeyfe/cross-inpage-provider-core": "1.0.7",
+    "@onekeyfe/cross-inpage-provider-types": "1.0.7",
+    "@onekeyfe/onekey-aptos-provider": "1.0.7",
+    "@onekeyfe/onekey-near-provider": "1.0.7",
+    "@onekeyfe/onekey-solana-provider": "1.0.7",
     "@solana/web3.js": "^1.41.3",
     "@starcoin/starcoin": "^2.1.6",
     "@starcoin/starmask-onboarding": "^1.0.0",

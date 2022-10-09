@@ -31,7 +31,7 @@ hackConnectButton({
       return;
     }
     const { isExtension, isDesktop, isNative } = onekeyHub.$walletInfo.platformEnv;
-    const replaceFunc = ({
+    const replaceFunc = async ({
       findName,
       icon,
       text,
@@ -198,13 +198,16 @@ hackConnectButton({
         footerContainer.style.flexDirection = 'column';
         // @ts-ignore
         if (typeof window.BarcodeDetector !== 'undefined') {
+          const uri = await detectQrcodeFromSvg({ img: svg });
+          if (!uri) {
+            return;
+          }
           createWalletConnectToButton({
             container: footerContainer,
             onCreated(btn) {
               btn.style.marginTop = '16px';
               btn.style.alignSelf = 'center';
-              btn.onclick = async () => {
-                const uri = await detectQrcodeFromSvg({ img: svg });
+              btn.onclick = () => {
                 if (btn.dataset['isClicked']) {
                   return;
                 }
@@ -221,7 +224,7 @@ hackConnectButton({
       }
     };
 
-    replaceFunc({
+    void replaceFunc({
       findName: 'Metamask', // Metamask MetaMask
       icon: WALLET_CONNECT_INFO.onekey.icon,
       text: WALLET_CONNECT_INFO.onekey.text,

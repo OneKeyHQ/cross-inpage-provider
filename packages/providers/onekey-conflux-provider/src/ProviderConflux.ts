@@ -1,5 +1,6 @@
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
+import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
 
 import { ProviderConfluxBase } from './ProviderConfluxBase';
 import {
@@ -9,6 +10,7 @@ import {
   ProviderEventsMap,
   ConsoleLike,
   Network,
+  RequestArguments,
 } from './types';
 import { deprecated, isWalletEventMethodMatch } from './utils';
 type OneKeyConfluxProviderProps = IInpageProviderConfig & {
@@ -132,6 +134,29 @@ class ProviderConflux extends ProviderConfluxBase implements IProviderConflux {
 
   isConnected() {
     return this._isConnected;
+  }
+
+  async request<T>(args: RequestArguments): Promise<T> {
+    const { method, params } = args;
+
+    if (!method || typeof method !== 'string' || method.length === 0) {
+      throw web3Errors.rpc.methodNotFound();
+    }
+
+    if (
+      params !== undefined &&
+      !Array.isArray(params) &&
+      (typeof params !== 'object' || params === null)
+    ) {
+      throw web3Errors.rpc.invalidParams();
+    }
+
+    const resp = await this.bridgeRequest({
+      ...args,
+      method: method.startsWith('eth_') ? method.replace('eth_', 'cfx_') : method,
+    });
+
+    return resp as T;
   }
 
   async enable() {

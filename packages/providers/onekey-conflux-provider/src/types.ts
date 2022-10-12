@@ -37,9 +37,10 @@ export interface ProviderEventsMap {
   [ProviderEvents.MESSAGE]: (message: string) => void;
 }
 
-interface RequestArguments {
+export interface RequestArguments {
+  id?: number | string;
   method: string;
-  params?: unknown[] | object;
+  params?: unknown[] | Record<string, unknown>;
 }
 
 export interface IProviderConflux extends ProviderConfluxBase {
@@ -50,11 +51,10 @@ export interface IProviderConflux extends ProviderConfluxBase {
   isConnected(): boolean;
 
   /**
-   * @deprecated
-   * use provider.request(\{method: "cfx_requestAccounts"\}) instead
+   * @deprecated use provider.request(\{method: "cfx_requestAccounts"\}) instead
    * @see request
    */
   enable(): Promise<any>;
-}
 
-export interface SolanaProviderEventsMap {}
+  request<T>(args: RequestArguments): Promise<T>;
+}

@@ -6,7 +6,7 @@ class ProviderConfluxBase extends ProviderBase {
     super(props);
   }
 
-  protected providerName = IInjectedProviderNames.conflux;
+  protected readonly providerName = IInjectedProviderNames.conflux;
 
   request(data: unknown) {
     return this.bridgeRequest(data);

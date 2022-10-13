@@ -5,11 +5,7 @@ import { ProviderConfluxBase } from './ProviderConfluxBase';
 export enum DeprecatedType {
   EVENT = 'EVENT',
   METHOD = 'METHOD',
-}
-
-export enum DeprecatedEvents {
-  EVENT = 'EVENT',
-  METHOD = 'METHOD',
+  PROPERTY = 'PROPERTY',
 }
 
 export enum ProviderEvents {
@@ -19,6 +15,10 @@ export enum ProviderEvents {
   CHAIN_CHANGED = 'chainChanged',
   MESSAGE = 'message',
   MESSAGE_LOW_LEVEL = 'message_low_level',
+
+  // DEPRECATED
+  NETWORK_CHANGED = 'networkChanged',
+  CHAIN_ID_CHANGE = 'chainIdChanged',
 }
 
 export interface Network {
@@ -35,6 +35,10 @@ export interface ProviderEventsMap {
   [ProviderEvents.CHAIN_CHANGED]: (chainId: string) => void;
   [ProviderEvents.MESSAGE_LOW_LEVEL]: (payload: IJsonRpcRequest) => void;
   [ProviderEvents.MESSAGE]: (message: string) => void;
+
+  // DEPRECATED
+  [ProviderEvents.CHAIN_ID_CHANGE]: (chainId: string) => void;
+  [ProviderEvents.NETWORK_CHANGED]: (networkId: string) => void;
 }
 
 export interface RequestArguments {
@@ -50,11 +54,26 @@ export interface IProviderConflux extends ProviderConfluxBase {
 
   isConnected(): boolean;
 
+  request<T>(args: RequestArguments): Promise<T>;
+
   /**
    * @deprecated use provider.request(\{method: "cfx_requestAccounts"\}) instead
    * @see request
    */
-  enable(): Promise<any>;
+  enable(): Promise<unknown>;
 
-  request<T>(args: RequestArguments): Promise<T>;
+  /**
+   * @deprecated use provider.request instead
+   * @see request
+   */
+  sendAsync(
+    request: RequestArguments,
+    callback: (err: Error | null | string, resp: unknown) => void,
+  ): void;
+
+  /**
+   * @deprecated use provider.request instead
+   * @see request
+   */
+  send<T>(args: RequestArguments): Promise<T>;
 }

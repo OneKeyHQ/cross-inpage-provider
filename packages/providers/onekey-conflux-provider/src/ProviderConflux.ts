@@ -265,3 +265,12 @@ class ProviderConflux extends ProviderConfluxBase implements IProviderConflux {
 }
 
 export { ProviderConflux };
+export {
+  IProviderConflux,
+  DeprecatedType,
+  ProviderEvents,
+  ProviderEventsMap,
+  ConsoleLike,
+  Network,
+  RequestArguments,
+};

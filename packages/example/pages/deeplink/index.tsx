@@ -61,31 +61,13 @@ export default function () {
               </a>
             </li>
             <li>
-              <a
-                href={
-                  'cryptowallet://wc?uri=wc%3A9886b1ba-53f3-4763-9d33-b984b154d366%401%3Fbridge%3Dhttps%253A%252F%252Ff.bridge.walletconnect.org%26key%3Da213225afeabf93665a8780622c0eb4effd4f51ebe35e15f6dd71bfa8edd158e'
-                }
-              >
-                cryptowallet (wc uri)
-              </a>
+              <a href={`cryptowallet://wc?uri=${uriEncoded}`}>cryptowallet (wc uri)</a>
             </li>
             <li>
-              <a
-                href={
-                  'https://metamask.app.link/wc?uri=wc%3Ac1f8b4e9-1cfb-4b44-a555-823634f446ee%401%3Fbridge%3Dhttps%253A%252F%252Fj.bridge.walletconnect.org%26key%3D41c1c41844199b766916134e31c0ea60d341343b6f7d309e539e0e222ffed164'
-                }
-              >
-                metamask (wc uri)
-              </a>
+              <a href={`https://metamask.app.link/wc?uri=${uriEncoded}`}>metamask (wc uri)</a>
             </li>
             <li>
-              <a
-                href={
-                  'tpoutside://wc?uri=wc%3Ac1f8b4e9-1cfb-4b44-a555-823634f446ee%401%3Fbridge%3Dhttps%253A%252F%252Fj.bridge.walletconnect.org%26key%3D41c1c41844199b766916134e31c0ea60d341343b6f7d309e539e0e222ffed164'
-                }
-              >
-                tpoutside (wc uri)
-              </a>
+              <a href={`tpoutside://wc?uri=${uriEncoded}`}>tpoutside (wc uri)</a>
             </li>
             <li>
               <a

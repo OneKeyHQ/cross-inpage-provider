@@ -22,9 +22,12 @@ hackConnectButton({
       );
       const btn = buttonList.find((item) => item.innerHTML.includes(findName));
       const span = btn?.querySelector('div > div');
+      const textNode = Array.from(span?.childNodes || []).find((item) => {
+        return item?.nodeValue?.includes(findName);
+      });
       const img = btn?.querySelector('img');
-      if (span) {
-        span.innerHTML = text;
+      if (textNode) {
+        textNode.nodeValue = text;
       }
       if (img && img.src) {
         img.src = icon;
@@ -35,6 +38,11 @@ hackConnectButton({
       findName: 'MetaMask',
       icon: WALLET_CONNECT_INFO.metamask.icon,
       text: WALLET_CONNECT_INFO.metamask.text,
+    });
+    replaceFunc({
+      findName: 'WalletConnect',
+      icon: WALLET_CONNECT_INFO.walletconnect.icon,
+      text: WALLET_CONNECT_INFO.walletconnect.text,
     });
   },
 });

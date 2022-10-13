@@ -13,7 +13,7 @@ export default function () {
     <div>
       <div className={styles.container}>
         <Link href={'/'}>← Back</Link>
-        <h2>Solana Dapp Example</h2>
+        <h2>Conflux Dapp Example</h2>
         <ConfluxExample />
       </div>
       <LogsContainer />

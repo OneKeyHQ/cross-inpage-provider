@@ -36,6 +36,12 @@ hackConnectButton({
       text: WALLET_CONNECT_INFO.metamask.text,
     });
     replaceFunc({
+      findName: 'WalletConnect',
+      findIconText: 'WalletConnect icon',
+      icon: WALLET_CONNECT_INFO.walletconnect.icon,
+      text: WALLET_CONNECT_INFO.walletconnect.text,
+    });
+    replaceFunc({
       findName: 'Phantom',
       findIconText: 'Phantom icon',
       icon: WALLET_CONNECT_INFO.phantom.icon,

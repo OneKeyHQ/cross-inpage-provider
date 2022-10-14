@@ -33,10 +33,16 @@ hackConnectButton({
     };
 
     replaceFunc({
-      findName: 'Metamask',
+      findName: 'Browser wallet',
       findIcon: '/icons/wallets/browserWallet.svg',
       icon: WALLET_CONNECT_INFO.metamask.icon,
       text: WALLET_CONNECT_INFO.metamask.text,
+    });
+    replaceFunc({
+      findName: 'WalletConnect',
+      findIcon: '/icons/wallets/walletConnect.svg',
+      icon: WALLET_CONNECT_INFO.walletconnect.icon,
+      text: WALLET_CONNECT_INFO.walletconnect.text,
     });
   },
 });

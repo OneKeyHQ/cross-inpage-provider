@@ -1,4 +1,4 @@
-import { hackConnectButton } from '../hackConnectButton';
+import { detectQrcodeFromSvg, hackConnectButton } from '../hackConnectButton';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
@@ -6,7 +6,7 @@ hackConnectButton({
   urls: ['indexcoop.com', 'app.indexcoop.com', 'www.indexcoop.com'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {
-    const replaceFunc = ({
+    const replaceFunc = async ({
       findName,
       icon,
       text,
@@ -47,16 +47,31 @@ hackConnectButton({
         }
       }
     };
-
-    replaceFunc({
+    const replaceWalletConnectQrcode = async () => {
+      const qrcodeSvg = document.querySelector('div > div ~ svg[style]');
+      if (qrcodeSvg) {
+        if (qrcodeSvg.classList.contains('isOneKeyReplaced')) {
+          return;
+        }
+        const result = await detectQrcodeFromSvg({ img: qrcodeSvg });
+        qrcodeSvg.classList.add('isOneKeyReplaced');
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('indexcoop replaceWalletConnectQrcode >>>>', { result });
+        }
+      }
+    };
+    void replaceFunc({
       findName: 'MetaMask',
       icon: WALLET_CONNECT_INFO.metamask.icon,
       text: WALLET_CONNECT_INFO.metamask.text,
     });
-    replaceFunc({
+    void replaceFunc({
       findName: 'WalletConnect',
       icon: WALLET_CONNECT_INFO.walletconnect.icon,
       text: WALLET_CONNECT_INFO.walletconnect.text,
     });
+
+    // indexcoop WalletConnect Qrcode is WRONG
+    // void replaceWalletConnectQrcode();
   },
 });

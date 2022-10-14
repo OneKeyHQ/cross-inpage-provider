@@ -216,30 +216,28 @@ hackConnectButton({
         }
         footerContainer.style.flexDirection = 'column';
         // @ts-ignore
-        if (typeof window.BarcodeDetector !== 'undefined') {
-          const uri = await detectQrcodeFromSvg({ img: svgQrcode });
-          if (!uri || !uri.startsWith('wc:')) {
-            return;
-          }
-          createWalletConnectToButton({
-            container: footerContainer,
-            onCreated(btn) {
-              btn.style.marginTop = '16px';
-              btn.style.alignSelf = 'center';
-              btn.onclick = () => {
-                if (btn.dataset['isClicked']) {
-                  return;
-                }
-                btn.dataset['isClicked'] = 'true';
-                btn.style.backgroundColor = '#bbb';
-                void onekeyHub?.$private?.request({
-                  method: 'wallet_connectToWalletConnect',
-                  params: { uri },
-                });
-              };
-            },
-          });
+        const uri = await detectQrcodeFromSvg({ img: svgQrcode });
+        if (!uri || !uri.startsWith('wc:')) {
+          return;
         }
+        createWalletConnectToButton({
+          container: footerContainer,
+          onCreated(btn) {
+            btn.style.marginTop = '16px';
+            btn.style.alignSelf = 'center';
+            btn.onclick = () => {
+              if (btn.dataset['isClicked']) {
+                return;
+              }
+              btn.dataset['isClicked'] = 'true';
+              btn.style.backgroundColor = '#bbb';
+              void onekeyHub?.$private?.request({
+                method: 'wallet_connectToWalletConnect',
+                params: { uri },
+              });
+            };
+          },
+        });
       }
     };
 

@@ -22,32 +22,48 @@ export async function detectQrcodeFromSvg({
   img: HTMLImageElement | Element;
 }): Promise<string> {
   // https://unpkg.com/qr-scanner@1.4.1/qr-scanner.umd.min.js
-  // @ts-ignore
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  const barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] }) as {
-    detect: (data: any) => Promise<{ rawValue: string }[]>;
-  };
+
   const serialized = new XMLSerializer().serializeToString(img);
   const encodedData = window.btoa(serialized);
   const base64 = `data:image/svg+xml;base64,${encodedData}`;
-  return new Promise((resolve, reject) => {
-    const imgTemp = document.createElement('img');
-    imgTemp.src = base64;
-    imgTemp.style.width = '100px';
-    imgTemp.style.height = '100px';
-    imgTemp.onload = () => {
-      barcodeDetector
-        .detect(imgTemp)
-        .then((result) => {
-          resolve(result?.[0]?.rawValue);
-        })
-        .catch(reject)
-        .finally(() => {
-          imgTemp.remove();
-        });
-    };
-    document.body.appendChild(imgTemp);
-  });
+
+  const res = (await (window.$onekey as IWindowOneKeyHub)?.$private?.request({
+    method: 'wallet_scanQrcode',
+    params: [{ base64 }],
+  })) as { result?: string };
+  const result: string = res?.result || '';
+  if (result) {
+    return result;
+  }
+
+  // @ts-ignore
+  if (typeof window.BarcodeDetector !== 'undefined') {
+    return new Promise((resolve, reject) => {
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      const barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] }) as {
+        detect: (data: any) => Promise<{ rawValue: string }[]>;
+      };
+      const imgTemp = document.createElement('img');
+      imgTemp.src = base64;
+      imgTemp.style.width = '100px';
+      imgTemp.style.height = '100px';
+      imgTemp.onload = () => {
+        barcodeDetector
+          .detect(imgTemp)
+          .then((result) => {
+            resolve(result?.[0]?.rawValue || '');
+          })
+          .catch(() => resolve(''))
+          .finally(() => {
+            imgTemp.remove();
+          });
+      };
+      document.body.appendChild(imgTemp);
+    });
+  }
+
+  return '';
 
   // const res = await fetch(base64);
   // const blob = await res.blob();

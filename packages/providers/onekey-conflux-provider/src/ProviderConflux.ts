@@ -1,3 +1,5 @@
+import dequal from 'fast-deep-equal';
+
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
@@ -28,6 +30,7 @@ class ProviderConflux extends ProviderConfluxBase implements IProviderConflux {
   private _chainId = '';
   private _networkVersion = '';
   private _selectedAddress = '';
+  private _accounts: string[] = [];
 
   private readonly _log: ConsoleLike;
 
@@ -111,8 +114,34 @@ class ProviderConflux extends ProviderConfluxBase implements IProviderConflux {
   }
 
   private _handleAccountsChanged(accounts: string[]) {
-    if (this._initialized) {
-      this.emit(ProviderEvents.ACCOUNTS_CHANGED, accounts);
+    let _accounts = accounts;
+
+    if (!Array.isArray(accounts)) {
+      this._log.error(
+        'Onekey: Received invalid accounts parameter. Please report this bug.',
+        accounts,
+      );
+      _accounts = [];
+    }
+
+    for (const account of _accounts) {
+      if (typeof account !== 'string') {
+        this._log.error('Onekey: Received non-string account. Please report this bug.', accounts);
+        _accounts = [];
+        break;
+      }
+    }
+
+    if (!dequal(this._accounts, _accounts)) {
+      this._accounts = _accounts;
+
+      if (this._selectedAddress !== _accounts[0]) {
+        this._selectedAddress = _accounts[0];
+      }
+
+      if (this._initialized) {
+        this.emit(ProviderEvents.ACCOUNTS_CHANGED, _accounts);
+      }
     }
   }
 

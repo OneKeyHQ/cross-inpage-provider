@@ -9,6 +9,7 @@ declare global {
     starcoin: any;
     aptos: any;
     martian: any;
+    conflux: any;
     $onekey: any;
     ReactNativeWebView?: {
       postMessage: (payload: string) => void;

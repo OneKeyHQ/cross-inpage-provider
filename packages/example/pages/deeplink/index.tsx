@@ -61,6 +61,15 @@ export default function () {
               </a>
             </li>
             <li>
+              <a href={`cryptowallet://wc?uri=${uriEncoded}`}>cryptowallet (wc uri)</a>
+            </li>
+            <li>
+              <a href={`https://metamask.app.link/wc?uri=${uriEncoded}`}>metamask (wc uri)</a>
+            </li>
+            <li>
+              <a href={`tpoutside://wc?uri=${uriEncoded}`}>tpoutside (wc uri)</a>
+            </li>
+            <li>
               <a
                 href="https://app.onekey.so/account/0xA9b4d559A98ff47C83B74522b7986146538cD4dF"
                 target={'_blank'}

@@ -35,6 +35,7 @@ const Home: NextPage = () => {
         <Link href="/starcoin">Starcoin →</Link>
         <Link href="/aptos">Aptos →</Link>
         <Link href="/aptosMartian">Aptos Martian →</Link>
+        <Link href="/conflux">Conflux →</Link>
         <a target="WalletConnectExampleV1" href="https://example.walletconnect.org">
           WalletConnect V1 →
         </a>

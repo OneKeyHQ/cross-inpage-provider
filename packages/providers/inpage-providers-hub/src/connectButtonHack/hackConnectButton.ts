@@ -238,6 +238,10 @@ function hackConnectButton({
       false,
     );
   }
+
+  setTimeout(() => {
+    replaceMethod?.();
+  }, 3000);
 }
 
 export { hackConnectButton };

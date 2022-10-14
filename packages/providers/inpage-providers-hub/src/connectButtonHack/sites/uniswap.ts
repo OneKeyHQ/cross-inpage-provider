@@ -25,10 +25,10 @@ hackConnectButton({
       const textNode = Array.from(span?.childNodes || []).find((item) => {
         return item?.nodeValue?.includes(findName);
       });
-      const img = btn?.querySelector('img');
       if (textNode) {
         textNode.nodeValue = text;
       }
+      const img = btn?.querySelector('img');
       if (img && img.src) {
         img.src = icon;
       }

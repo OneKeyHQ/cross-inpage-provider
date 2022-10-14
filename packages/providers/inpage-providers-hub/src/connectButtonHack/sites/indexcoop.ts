@@ -42,6 +42,7 @@ hackConnectButton({
           const img = imgContainer.children?.[0] as HTMLElement | undefined;
           if (img && img.style.transition) {
             img.style.backgroundImage = `url(${icon})`;
+            imgContainer.style.backgroundColor = 'transparent';
           }
         }
       }
@@ -51,6 +52,11 @@ hackConnectButton({
       findName: 'MetaMask',
       icon: WALLET_CONNECT_INFO.metamask.icon,
       text: WALLET_CONNECT_INFO.metamask.text,
+    });
+    replaceFunc({
+      findName: 'WalletConnect',
+      icon: WALLET_CONNECT_INFO.walletconnect.icon,
+      text: WALLET_CONNECT_INFO.walletconnect.text,
     });
   },
 });

@@ -45,15 +45,17 @@ hackConnectButton({
       if (!headerText) {
         return;
       }
-      const qrcodeContainer = headerText?.nextSibling as HTMLElement | undefined;
-      if (!qrcodeContainer) {
+      const headerNextSibling = headerText?.nextSibling as HTMLElement | undefined;
+      if (!headerNextSibling) {
         return;
       }
+
       // **** android single connect button replacement
-      if (
-        qrcodeContainer?.classList?.contains?.('walletconnect-connect__buttons__wrapper__android')
-      ) {
-        const btn = qrcodeContainer.querySelector('.walletconnect-connect__button') as
+      const isAndroidSingleConnectButton = headerNextSibling?.classList?.contains?.(
+        'walletconnect-connect__buttons__wrapper__android',
+      );
+      if (isAndroidSingleConnectButton) {
+        const btn = headerNextSibling.querySelector('.walletconnect-connect__button') as
           | HTMLAnchorElement
           | undefined;
         if (!btn) {
@@ -70,10 +72,15 @@ hackConnectButton({
           uri: btn.href,
         });
       }
+
       // **** deeplink buttons replacement
-      else if (qrcodeContainer?.classList?.contains?.('walletconnect-search__input')) {
+      const isSearchInput = headerNextSibling?.classList?.contains?.('walletconnect-search__input');
+      const isConnectButtonsContainer = headerNextSibling?.classList?.contains?.(
+        'walletconnect-connect__buttons__wrapper__wrap',
+      );
+      if (isSearchInput || isConnectButtonsContainer) {
         const shouldHideOtherWallets = isDesktop || isNative;
-        const inputEle = qrcodeContainer;
+        const inputEle = isSearchInput ? headerNextSibling : undefined;
         const parent = headerText.parentNode;
         if (!parent) {
           return;
@@ -81,9 +88,18 @@ hackConnectButton({
         const iconsContainer = parent.querySelector(
           '.walletconnect-connect__buttons__wrapper__wrap',
         ) as HTMLElement | undefined;
-        const firstItem = iconsContainer?.querySelector(
+        let firstItem = iconsContainer?.querySelector(
           '.walletconnect-connect__button__icon_anchor',
         ) as HTMLAnchorElement | undefined;
+        if (!firstItem?.getAttribute('href')) {
+          try {
+            firstItem = iconsContainer?.querySelector(
+              '.walletconnect-connect__button__icon_anchor[href]:not([href=""])',
+            ) as HTMLAnchorElement | undefined;
+          } catch (error) {
+            // noop
+          }
+        }
         if (!firstItem || !iconsContainer) {
           return;
         }
@@ -103,6 +119,9 @@ hackConnectButton({
           | HTMLElement
           | undefined;
         if (!span) {
+          return;
+        }
+        if (!firstItem?.getAttribute('href')) {
           return;
         }
         const uri = new URL(firstItem?.href).searchParams.get('uri');
@@ -144,11 +163,12 @@ hackConnectButton({
             iconsContainer.style.alignItems = 'center';
           }
           iconsContainer.style.minHeight = '150px';
+          iconsContainer.style.minWidth = '310px';
           iconsContainer.prepend(newItem);
 
           // remove input and footer pagination
           if (shouldHideOtherWallets) {
-            inputEle.remove();
+            inputEle?.remove();
             const footerContainer = iconsContainer?.parentNode?.querySelector(
               '.walletconnect-modal__footer',
             ) as HTMLElement | undefined;
@@ -156,12 +176,11 @@ hackConnectButton({
           }
         }
       }
+
       // **** qrcode replacement
-      else {
-        const svg = qrcodeContainer?.querySelector('svg.walletconnect-qrcode__image');
-        if (!svg) {
-          return;
-        }
+      const svgQrcode = headerNextSibling?.querySelector('svg.walletconnect-qrcode__image');
+      if (svgQrcode) {
+        const qrcodeContainer = headerNextSibling;
         if (qrcodeContainer.dataset['isOneKeyReplaced']) {
           return;
         }
@@ -191,15 +210,15 @@ hackConnectButton({
           },
         });
 
-        const footerContainer = qrcodeContainer.nextElementSibling as HTMLElement | undefined;
+        const footerContainer = headerNextSibling.nextElementSibling as HTMLElement | undefined;
         if (!footerContainer) {
           return;
         }
         footerContainer.style.flexDirection = 'column';
         // @ts-ignore
         if (typeof window.BarcodeDetector !== 'undefined') {
-          const uri = await detectQrcodeFromSvg({ img: svg });
-          if (!uri) {
+          const uri = await detectQrcodeFromSvg({ img: svgQrcode });
+          if (!uri || !uri.startsWith('wc:')) {
             return;
           }
           createWalletConnectToButton({

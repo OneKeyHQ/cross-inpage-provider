@@ -43,6 +43,7 @@ const Home: NextPage = () => {
           WalletConnect V2 →
         </a>
         <Link href="/deeplink">DeepLink →</Link>
+        <Link href="/dappList">Dapp List →</Link>
         <a>Hardware SDK (coming soon)</a>
         <Button onPress={() => window.location.reload()}>refresh</Button>
       </main>

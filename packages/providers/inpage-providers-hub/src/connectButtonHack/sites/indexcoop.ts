@@ -1,4 +1,8 @@
-import { detectQrcodeFromSvg, hackConnectButton } from '../hackConnectButton';
+import {
+  createWalletConnectToButton,
+  detectQrcodeFromSvg,
+  hackConnectButton,
+} from '../hackConnectButton';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
@@ -6,7 +10,7 @@ hackConnectButton({
   urls: ['indexcoop.com', 'app.indexcoop.com', 'www.indexcoop.com'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {
-    const replaceFunc = async ({
+    const replaceFunc = ({
       findName,
       icon,
       text,
@@ -48,15 +52,32 @@ hackConnectButton({
       }
     };
     const replaceWalletConnectQrcode = async () => {
-      const qrcodeSvg = document.querySelector('div > div ~ svg[style]');
+      const qrcodeSvg = document.querySelector('div > div ~ svg[style]') as
+        | HTMLOrSVGImageElement
+        | undefined;
       if (qrcodeSvg) {
         if (qrcodeSvg.classList.contains('isOneKeyReplaced')) {
           return;
         }
-        const result = await detectQrcodeFromSvg({ img: qrcodeSvg });
+        // should add white bg color for qrcode scan
+        qrcodeSvg.style.backgroundColor = 'white';
         qrcodeSvg.classList.add('isOneKeyReplaced');
+        const uri = await detectQrcodeFromSvg({ img: qrcodeSvg });
         if (process.env.NODE_ENV !== 'production') {
-          console.log('indexcoop replaceWalletConnectQrcode >>>>', { result });
+          console.log('indexcoop replaceWalletConnectQrcode >>>>', { uri });
+        }
+        const container = qrcodeSvg.parentElement;
+        if (uri && container) {
+          createWalletConnectToButton({
+            container,
+            uri,
+            onCreated(btn) {
+              btn.style.padding = '6px 12px';
+              btn.style.width = '155px';
+              btn.style.display = 'block';
+              btn.style.margin = 'auto';
+            },
+          });
         }
       }
     };
@@ -71,7 +92,7 @@ hackConnectButton({
       text: WALLET_CONNECT_INFO.walletconnect.text,
     });
 
-    // indexcoop WalletConnect Qrcode is WRONG
-    // void replaceWalletConnectQrcode();
+    // TODO indexcoop WalletConnect Qrcode is WRONG
+    void replaceWalletConnectQrcode();
   },
 });

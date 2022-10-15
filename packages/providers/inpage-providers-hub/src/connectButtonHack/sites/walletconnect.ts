@@ -222,20 +222,10 @@ hackConnectButton({
         }
         createWalletConnectToButton({
           container: footerContainer,
+          uri,
           onCreated(btn) {
             btn.style.marginTop = '16px';
             btn.style.alignSelf = 'center';
-            btn.onclick = () => {
-              if (btn.dataset['isClicked']) {
-                return;
-              }
-              btn.dataset['isClicked'] = 'true';
-              btn.style.backgroundColor = '#bbb';
-              void onekeyHub?.$private?.request({
-                method: 'wallet_connectToWalletConnect',
-                params: { uri },
-              });
-            };
           },
         });
       }

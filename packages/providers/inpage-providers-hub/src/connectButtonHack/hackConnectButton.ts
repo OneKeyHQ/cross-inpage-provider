@@ -71,13 +71,41 @@ export async function detectQrcodeFromSvg({
   // return result?.[0]?.rawValue;
 }
 
+let isAddedRotateAnimation = false;
+function addRotateAnimationToCss() {
+  if (isAddedRotateAnimation) {
+    return;
+  }
+  isAddedRotateAnimation = true;
+  const css = window.document.styleSheets[0];
+  css.insertRule(
+    `
+@keyframes oneKeySpinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+`,
+    css.cssRules.length,
+  );
+}
+
 export function createWalletConnectToButton({
   container,
   onCreated,
+  uri,
 }: {
   container: HTMLElement;
   onCreated?: (btn: HTMLElement) => void;
+  uri: string;
 }) {
+  if (!uri || !uri.startsWith('wc:')) {
+    return;
+  }
+  const onekeyHub = window.$onekey as IWindowOneKeyHub | undefined;
   const datasetKey = 'onekey_auto_created_wallet_connect_btn'; // can not include `-`
   if (!container.querySelector(`[data-${datasetKey}]`)) {
     const btn = document.createElement('div');
@@ -94,11 +122,40 @@ font-size: 14px;
 line-height: 20px;
 font-weight: 500;
 cursor: pointer;
+text-align: center;
     `;
     // i18n key:
     //    action__connect_onekey_extension
     //    action__connect_onekey
-    btn.innerHTML = 'Connect OneKey';
+    btn.innerHTML = `
+    <span>Connect OneKey</span>
+    <span class='onekey-spinner-element' style='
+    display: none;
+    vertical-align: middle;
+    width: 12px;
+    height: 12px;
+    border: 2px solid white;
+    border-bottom-color: transparent;
+    border-radius: 50%;'></span>
+    `;
+    btn.onclick = () => {
+      if (btn.dataset['isClicked']) {
+        return;
+      }
+      btn.dataset['isClicked'] = 'true';
+      btn.style.backgroundColor = '#bbb';
+      btn.style.cursor = 'not-allowed';
+      void onekeyHub?.$private?.request({
+        method: 'wallet_connectToWalletConnect',
+        params: { uri },
+      });
+      const spinner = btn.querySelector('.onekey-spinner-element') as HTMLElement | undefined;
+      if (spinner) {
+        spinner.style.animation = 'oneKeySpinner 1s linear infinite';
+        spinner.style.display = 'inline-block';
+        addRotateAnimationToCss();
+      }
+    };
     onCreated?.(btn);
     container.append(btn);
   }

@@ -10,6 +10,8 @@ hackConnectButton({
   urls: ['indexcoop.com', 'app.indexcoop.com', 'www.indexcoop.com'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {
+    const getDialogDom = () =>
+      document.querySelector('[role=dialog]>[role=document]') as HTMLElement | undefined;
     const replaceFunc = ({
       findName,
       icon,
@@ -20,15 +22,19 @@ hackConnectButton({
       icon: string;
       text: string;
     }) => {
+      const dialog = getDialogDom();
+      if (!dialog) {
+        return;
+      }
       let isDesktop = true;
       let spans = Array.from(
         // desktop app selector
-        document.querySelectorAll('button > div > div > [role=img] ~ div > div'),
+        dialog.querySelectorAll('button > div > div > [role=img] ~ div > div'),
       );
       if (!spans.length) {
         isDesktop = false;
         // mobile app selector
-        spans = Array.from(document.querySelectorAll('button > div > div > h2 > span'));
+        spans = Array.from(dialog.querySelectorAll('button > div > div > h2 > span'));
       }
       const span = spans.find((item) => item.innerHTML === findName);
       if (span) {
@@ -52,7 +58,11 @@ hackConnectButton({
       }
     };
     const replaceWalletConnectQrcode = async () => {
-      const qrcodeSvg = document.querySelector('div > div ~ svg[style]') as
+      const dialog = getDialogDom();
+      if (!dialog) {
+        return;
+      }
+      const qrcodeSvg = dialog.querySelector('div > div ~ svg[style]') as
         | HTMLOrSVGImageElement
         | undefined;
       if (qrcodeSvg) {

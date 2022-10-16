@@ -98,6 +98,7 @@ hackConnectButton({
             ) as HTMLAnchorElement | undefined;
           } catch (error) {
             // noop
+            console.error(error);
           }
         }
         if (!firstItem || !iconsContainer) {
@@ -232,7 +233,7 @@ hackConnectButton({
     };
 
     void replaceFunc({
-      findName: 'Metamask', // Metamask MetaMask
+      findName: 'WalletConnect',
       icon: WALLET_CONNECT_INFO.onekey.icon,
       text: WALLET_CONNECT_INFO.onekey.text,
     });

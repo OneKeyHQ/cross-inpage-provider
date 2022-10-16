@@ -313,7 +313,13 @@ function hackConnectButton({
   }
 
   setTimeout(() => {
-    replaceMethod?.();
+    try {
+      replaceMethod?.();
+    } catch (error) {
+      // noop
+    } finally {
+      // noop
+    }
   }, 3000);
 }
 

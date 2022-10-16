@@ -2,7 +2,7 @@ import { throttle, ThrottleSettings } from 'lodash';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import type { IWindowOneKeyHub } from '../injectWeb3Provider';
 
-function checkIfWalletConnected({ providerName }: { providerName: IInjectedProviderNames }) {
+function checkIfInjectedProviderConnected({ providerName }: { providerName: IInjectedProviderNames }) {
   const hub = window.$onekey as IWindowOneKeyHub;
   if (providerName === IInjectedProviderNames.ethereum) {
     // dapp disconnect won't remove accounts in wallet, so this check won't working
@@ -256,7 +256,7 @@ function hackConnectButton({
           if (!isUrlMatched()) {
             return;
           }
-          if (providers.find((providerName) => checkIfWalletConnected({ providerName }))) {
+          if (providers.find((providerName) => checkIfInjectedProviderConnected({ providerName }))) {
             return;
           }
           if (process.env.NODE_ENV !== 'production') {

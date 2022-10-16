@@ -119,6 +119,7 @@ export type IElectronWebView = {
   addEventListener: (name: string, callback: unknown) => void;
   removeEventListener: (name: string, callback: unknown) => void;
   executeJavaScript: (code: string) => void;
+  send: (channel: string, payload: any) => void;
 };
 
 export type IPostMessageEventData = {

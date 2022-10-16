@@ -164,7 +164,7 @@ hackConnectButton({
             iconsContainer.style.alignItems = 'center';
           }
           iconsContainer.style.minHeight = '150px';
-          iconsContainer.style.minWidth = '310px';
+          iconsContainer.style.minWidth = isNative ? '0px' : '310px';
           iconsContainer.prepend(newItem);
 
           // remove input and footer pagination

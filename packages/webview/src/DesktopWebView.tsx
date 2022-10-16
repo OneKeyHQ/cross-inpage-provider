@@ -74,7 +74,7 @@ const DesktopWebView = forwardRef(
     );
 
     // TODO extract to hooks
-    const jsBridge = useMemo(
+    const jsBridgeHost = useMemo(
       () =>
         new JsBridgeDesktopHost({
           webviewRef,
@@ -86,7 +86,7 @@ const DesktopWebView = forwardRef(
     useImperativeHandle(ref as React.Ref<unknown>, (): IWebViewWrapperRef => {
       const wrapper = {
         innerRef: webviewRef.current,
-        jsBridge,
+        jsBridge: jsBridgeHost,
         reload: () => webviewRef.current?.reload(),
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         loadURL: (url: string, options?: LoadURLOptions) => {
@@ -103,7 +103,7 @@ const DesktopWebView = forwardRef(
         },
       };
 
-      jsBridge.webviewWrapper = wrapper;
+      jsBridgeHost.webviewWrapper = wrapper;
 
       return wrapper;
     });
@@ -134,7 +134,7 @@ const DesktopWebView = forwardRef(
             const uri = new URL(url);
             origin = uri?.origin || '';
             // - receive
-            jsBridge.receive(data, { origin });
+            jsBridgeHost.receive(data, { origin });
           } else {
             // TODO log error if url is empty
           }
@@ -147,7 +147,7 @@ const DesktopWebView = forwardRef(
       return () => {
         webview.removeEventListener('ipc-message', handleMessage);
       };
-    }, [jsBridge, isIpcReady, isWebviewReady, src]);
+    }, [jsBridgeHost, isIpcReady, isWebviewReady, src]);
 
     const preloadJsUrl = usePreloadJsUrl();
 

@@ -6,9 +6,20 @@ import {
   consts,
 } from '@onekeyfe/cross-inpage-provider-core';
 
-import { IJsBridgeMessagePayload } from '@onekeyfe/cross-inpage-provider-types';
+import { IJsBridgeConfig, IJsBridgeMessagePayload } from '@onekeyfe/cross-inpage-provider-types';
 
 class JsBridgeDesktopInjected extends JsBridgeBase {
+  constructor(config: IJsBridgeConfig) {
+    super(config);
+    ipcRenderer.on('JsBridgeDesktopHostToInjected', (event, data) => {
+      // console.log('JsBridgeDesktopInjected', event, data);
+
+      // window.$onekey.jsBridge.receive
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      window?.$onekey?.jsBridge?.receive?.(data);
+    });
+  }
+
   sendAsString = true;
 
   isInjected = true;

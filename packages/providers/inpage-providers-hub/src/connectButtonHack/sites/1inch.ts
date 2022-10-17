@@ -2,6 +2,10 @@ import { hackConnectButton } from '../hackConnectButton';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
+/*
+- small screen with ext or desktop, dapp walletconnect switch to `desktop` error
+ */
+
 hackConnectButton({
   urls: ['1inch.io', 'app.1inch.io', 'www.1inch.io'],
   providers: [IInjectedProviderNames.ethereum],

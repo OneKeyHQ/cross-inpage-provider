@@ -1,6 +1,7 @@
 import { createNewImageToContainer, hackConnectButton } from '../hackConnectButton';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
+import utilsDomNodes from '../utils/utilsDomNodes';
 
 hackConnectButton({
   urls: ['pancakeswap.finance', 'app.pancakeswap.finance', 'www.pancakeswap.finance'],
@@ -8,6 +9,7 @@ hackConnectButton({
   replaceMethod() {
     const replaceFunc = ({
       findName,
+      findIcon,
       icon,
       text,
     }: {
@@ -16,37 +18,33 @@ hackConnectButton({
       icon: string;
       text: string;
     }) => {
-      const btn = document.getElementById('wallet-connect-metamask');
-      if (!btn) {
+      const modalDom = document.querySelector(
+        '#portal-root>.appear>[role=presentation]',
+      )?.nextElementSibling;
+      if (!modalDom) {
         return;
       }
-      const svg = btn.querySelector('svg');
-      if (!svg) {
+      const images = Array.from(modalDom.querySelectorAll('img') || []);
+      const img = images.find((item) => item.getAttribute('src') === findIcon);
+      if (!img) {
         return;
       }
-      const span = btn.querySelector('div');
-      if (span && span.innerText.includes(findName)) {
-        span.innerText = text;
-        createNewImageToContainer({
-          container: btn,
-          removeSvg: true,
-          icon,
-          width: '40px',
-          height: '40px',
-          onCreated(img) {
-            img.style.marginBottom = '8px';
-          },
-        });
+      const span = img?.parentElement?.parentElement?.nextElementSibling;
+      if (span && img && utilsDomNodes.isInnerContentMatch(span, findName)) {
+        span.innerHTML = text;
+        img.src = icon;
       }
     };
 
     replaceFunc({
       findName: 'Metamask', // Metamask MetaMask
+      findIcon: '/images/wallets/metamask.png',
       icon: WALLET_CONNECT_INFO.metamask.icon,
       text: WALLET_CONNECT_INFO.metamask.text,
     });
     replaceFunc({
       findName: 'WalletConnect', // Metamask MetaMask
+      findIcon: '/images/wallets/walletconnect.png',
       icon: WALLET_CONNECT_INFO.walletconnect.icon,
       text: WALLET_CONNECT_INFO.walletconnect.text,
     });

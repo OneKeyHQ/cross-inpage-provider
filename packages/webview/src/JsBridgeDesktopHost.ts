@@ -28,13 +28,17 @@ class JsBridgeDesktopHost extends JsBridgeBase {
   sendPayload(payload: IJsBridgeMessagePayload | string) {
     if (this.webviewRef && this.webviewRef.current) {
       const payloadStr: string = payload as string;
-      const inpageReceiveCode = injectedFactory.createCodeJsBridgeReceive(payloadStr);
 
-      if (this.webviewRef.current && this.webviewRef.current.executeJavaScript) {
-        appDebugLogger.webview('executeJavaScript', inpageReceiveCode, payload);
-        this.webviewRef.current?.executeJavaScript?.(inpageReceiveCode);
+      if (this.webviewRef.current) {
+        // *** executeJavaScript will be blocked by head script loading
+        // const inpageReceiveCode = injectedFactory.createCodeJsBridgeReceive(payloadStr);
+        // appDebugLogger.webview('executeJavaScript', inpageReceiveCode, payload);
+        // this.webviewRef.current?.executeJavaScript?.(inpageReceiveCode);
+
+        // *** use ipcRenderer.on instead
+        this.webviewRef.current?.send('JsBridgeDesktopHostToInjected', payloadStr);
       } else {
-        throw new Error('JsBridgeDesktopHost executeJavaScript failed: webview ref not ready yet');
+        throw new Error('JsBridgeDesktopHost executeJavaScript failed: webview ref not ready yet.');
       }
     }
   }

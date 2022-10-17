@@ -2,7 +2,7 @@ import { throttle, ThrottleSettings } from 'lodash';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import type { IWindowOneKeyHub } from '../injectWeb3Provider';
 
-function checkIfWalletConnected({ providerName }: { providerName: IInjectedProviderNames }) {
+function checkIfInjectedProviderConnected({ providerName }: { providerName: IInjectedProviderNames }) {
   const hub = window.$onekey as IWindowOneKeyHub;
   if (providerName === IInjectedProviderNames.ethereum) {
     // dapp disconnect won't remove accounts in wallet, so this check won't working
@@ -22,32 +22,48 @@ export async function detectQrcodeFromSvg({
   img: HTMLImageElement | Element;
 }): Promise<string> {
   // https://unpkg.com/qr-scanner@1.4.1/qr-scanner.umd.min.js
-  // @ts-ignore
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  const barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] }) as {
-    detect: (data: any) => Promise<{ rawValue: string }[]>;
-  };
+
   const serialized = new XMLSerializer().serializeToString(img);
   const encodedData = window.btoa(serialized);
   const base64 = `data:image/svg+xml;base64,${encodedData}`;
-  return new Promise((resolve, reject) => {
-    const imgTemp = document.createElement('img');
-    imgTemp.src = base64;
-    imgTemp.style.width = '100px';
-    imgTemp.style.height = '100px';
-    imgTemp.onload = () => {
-      barcodeDetector
-        .detect(imgTemp)
-        .then((result) => {
-          resolve(result?.[0]?.rawValue);
-        })
-        .catch(reject)
-        .finally(() => {
-          imgTemp.remove();
-        });
-    };
-    document.body.appendChild(imgTemp);
-  });
+
+  const res = (await (window.$onekey as IWindowOneKeyHub)?.$private?.request({
+    method: 'wallet_scanQrcode',
+    params: [{ base64 }],
+  })) as { result?: string };
+  const result: string = res?.result || '';
+  if (result) {
+    return result;
+  }
+
+  // @ts-ignore
+  if (typeof window.BarcodeDetector !== 'undefined') {
+    return new Promise((resolve, reject) => {
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      const barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] }) as {
+        detect: (data: any) => Promise<{ rawValue: string }[]>;
+      };
+      const imgTemp = document.createElement('img');
+      imgTemp.src = base64;
+      imgTemp.style.width = '100px';
+      imgTemp.style.height = '100px';
+      imgTemp.onload = () => {
+        barcodeDetector
+          .detect(imgTemp)
+          .then((result) => {
+            resolve(result?.[0]?.rawValue || '');
+          })
+          .catch(() => resolve(''))
+          .finally(() => {
+            imgTemp.remove();
+          });
+      };
+      document.body.appendChild(imgTemp);
+    });
+  }
+
+  return '';
 
   // const res = await fetch(base64);
   // const blob = await res.blob();
@@ -55,13 +71,41 @@ export async function detectQrcodeFromSvg({
   // return result?.[0]?.rawValue;
 }
 
+let isAddedRotateAnimation = false;
+function addRotateAnimationToCss() {
+  if (isAddedRotateAnimation) {
+    return;
+  }
+  isAddedRotateAnimation = true;
+  const css = window.document.styleSheets[0];
+  css.insertRule(
+    `
+@keyframes oneKeySpinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+`,
+    css.cssRules.length,
+  );
+}
+
 export function createWalletConnectToButton({
   container,
   onCreated,
+  uri,
 }: {
   container: HTMLElement;
   onCreated?: (btn: HTMLElement) => void;
+  uri: string;
 }) {
+  if (!uri || !uri.startsWith('wc:')) {
+    return;
+  }
+  const onekeyHub = window.$onekey as IWindowOneKeyHub | undefined;
   const datasetKey = 'onekey_auto_created_wallet_connect_btn'; // can not include `-`
   if (!container.querySelector(`[data-${datasetKey}]`)) {
     const btn = document.createElement('div');
@@ -78,11 +122,40 @@ font-size: 14px;
 line-height: 20px;
 font-weight: 500;
 cursor: pointer;
+text-align: center;
     `;
     // i18n key:
     //    action__connect_onekey_extension
     //    action__connect_onekey
-    btn.innerHTML = 'Connect OneKey';
+    btn.innerHTML = `
+    <span>Connect OneKey</span>
+    <span class='onekey-spinner-element' style='
+    display: none;
+    vertical-align: middle;
+    width: 12px;
+    height: 12px;
+    border: 2px solid white;
+    border-bottom-color: transparent;
+    border-radius: 50%;'></span>
+    `;
+    btn.onclick = () => {
+      if (btn.dataset['isClicked']) {
+        return;
+      }
+      btn.dataset['isClicked'] = 'true';
+      btn.style.backgroundColor = '#bbb';
+      btn.style.cursor = 'not-allowed';
+      void onekeyHub?.$private?.request({
+        method: 'wallet_connectToWalletConnect',
+        params: { uri },
+      });
+      const spinner = btn.querySelector('.onekey-spinner-element') as HTMLElement | undefined;
+      if (spinner) {
+        spinner.style.animation = 'oneKeySpinner 1s linear infinite';
+        spinner.style.display = 'inline-block';
+        addRotateAnimationToCss();
+      }
+    };
     onCreated?.(btn);
     container.append(btn);
   }
@@ -183,7 +256,7 @@ function hackConnectButton({
           if (!isUrlMatched()) {
             return;
           }
-          if (providers.find((providerName) => checkIfWalletConnected({ providerName }))) {
+          if (providers.find((providerName) => checkIfInjectedProviderConnected({ providerName }))) {
             return;
           }
           if (process.env.NODE_ENV !== 'production') {
@@ -240,7 +313,13 @@ function hackConnectButton({
   }
 
   setTimeout(() => {
-    replaceMethod?.();
+    try {
+      replaceMethod?.();
+    } catch (error) {
+      // noop
+    } finally {
+      // noop
+    }
   }, 3000);
 }
 

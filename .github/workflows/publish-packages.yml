@@ -32,10 +32,10 @@ jobs:
           git reset --hard
           NODE_ENV=production yarn publish-packages -y
 
-      - name: Sleep for 30 seconds
+      - name: Sleep for 90 seconds
         uses: jakejarvis/wait-action@master
         with:
-          time: '30s'
+          time: '90s'
 
       - name: Build Example Web
         run: |

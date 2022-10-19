@@ -3,13 +3,15 @@ import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injec
 import { AptosClient, BCS, Types, MaybeHexString } from 'aptos';
 import { TxnPayload, TxnOptions } from './types';
 import type * as TypeUtils from './type-utils';
-import {  AptosProviderType, ProviderAptos } from './OnekeyAptosProvider';
+import { AptosProviderType, ProviderAptos } from './OnekeyAptosProvider';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
+
+type AnyNumber =  bigint | number
 
 export type AptosRequestMartian = {
   'martianSignAndSubmitTransaction': (transactions: string) => Promise<string>;
 
-  'martianSignTransaction': (transactions:string) => Promise<string>;
+  'martianSignTransaction': (transactions: string) => Promise<string>;
 
   'signAndSubmitTransaction': (transactions: Types.TransactionPayload) => Promise<string>;
 
@@ -85,7 +87,7 @@ class ProviderAptosMartian extends ProviderAptos {
     params: JsBridgeRequestParams<T>;
     aptosProviderType?: AptosProviderType;
   }): JsBridgeRequestResponse<T> {
-    params.aptosProviderType  = this.aptosProviderType;
+    params.aptosProviderType = this.aptosProviderType;
     return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
   }
 
@@ -226,7 +228,7 @@ class ProviderAptosMartian extends ProviderAptos {
   }
 
   async getTransactions(query?: {
-    start?: BigInt | number;
+    start?: AnyNumber;
     limit?: number;
   }): Promise<Types.Transaction[]> {
     const client = await this.getClient();
@@ -240,7 +242,7 @@ class ProviderAptosMartian extends ProviderAptos {
 
   async getAccountTransactions(
     accountAddress: MaybeHexString,
-    query?: { start?: BigInt | number; limit?: number },
+    query?: { start?: AnyNumber; limit?: number },
   ): Promise<Types.Transaction[]> {
     const client = await this.getClient();
     return client.getAccountTransactions(accountAddress, query);
@@ -248,7 +250,7 @@ class ProviderAptosMartian extends ProviderAptos {
 
   async getAccountResources(
     accountAddress: MaybeHexString,
-    query?: { ledgerVersion?: BigInt | number },
+    query?: { ledgerVersion?: AnyNumber },
   ): Promise<Types.MoveResource[]> {
     const client = await this.getClient();
     return client.getAccountResources(accountAddress, query);
@@ -259,9 +261,10 @@ class ProviderAptosMartian extends ProviderAptos {
     return client.getAccount(accountAddress);
   }
 
-  async getChainId(): Promise<number> {
+  async getChainId(): Promise<{ chainId: number }> {
     const client = await this.getClient();
-    return client.getChainId();
+    const chainId = await client.getChainId();
+    return { chainId };
   }
 
   async getLedgerInfo(): Promise<Types.IndexResponse> {

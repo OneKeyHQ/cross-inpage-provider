@@ -3,6 +3,7 @@
   "version": "1.1.2",
   "private": true,
   "scripts": {
+    "postinstall": "patch-package",
     "dev": "next dev",
     "start": "next dev",
     "build": "next build && next export",
@@ -25,6 +26,8 @@
     "@starcoin/starmask-onboarding": "^1.0.0",
     "@types/bs58": "^4.0.1",
     "@types/react-native": "^0.67.6",
+    "@walletconnect/client": "^1.8.0",
+    "@walletconnect/qrcode-modal": "^1.8.0",
     "bignumber.js": "^9.0.1",
     "bs58": "^5.0.0",
     "compare-versions": "^4.1.2",
@@ -54,6 +57,7 @@
     "next-compose-plugins": "^2.2.1",
     "next-fonts": "^1.5.1",
     "next-transpile-modules": "^9.0.0",
+    "patch-package": "^6.4.7",
     "sass": "^1.51.0",
     "typescript": "4.5.5"
   }

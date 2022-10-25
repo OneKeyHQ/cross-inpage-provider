@@ -42,6 +42,7 @@ const Home: NextPage = () => {
         <a target="_blank" href="https://react-app.walletconnect.com">
           WalletConnect V2 →
         </a>
+        <Link href="/aptosWalletconnect">Aptos WalletConnect →</Link>
         <Link href="/deeplink">DeepLink →</Link>
         <Link href="/dappList">Dapp List →</Link>
         <a>Hardware SDK (coming soon)</a>

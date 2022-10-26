@@ -10,6 +10,9 @@ declare global {
     aptos: any;
     martian: any;
     conflux: any;
+    tronLink: any;
+    tronWeb: any;
+    sunWeb: any;
     $onekey: any;
     ReactNativeWebView?: {
       postMessage: (payload: string) => void;
@@ -32,6 +35,7 @@ export type IJsBridgeMessageTypesStrings = keyof typeof IJsBridgeMessageTypes;
 export enum IInjectedProviderNames {
   ethereum = 'ethereum',
   conflux = 'conflux',
+  tron = 'tron',
   solana = 'solana',
   starcoin = 'starcoin',
   sollet = 'sollet',

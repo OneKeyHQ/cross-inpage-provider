@@ -4,6 +4,7 @@ import TronWeb from 'tronweb';
 import { ProviderTronBase } from './ProviderTronBase';
 
 export enum ProviderEvents {
+  TAB_REPLY = 'tabReply',
   CONNECT = 'connect',
   DISCONNECT = 'disconnect',
   ACCOUNTS_CHANGED = 'accountsChanged',

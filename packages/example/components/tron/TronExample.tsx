@@ -11,6 +11,7 @@ interface CustomMessage {
         [index: string]: any;
       };
     };
+    isTronLink: boolean;
   };
 }
 
@@ -89,10 +90,10 @@ function TronExample() {
         params: {
           'type': 'trc20',
           'options': {
-            'address': 'TG3XXyExBkPp9nzdajDZsozEu4BkaSJozs',
-            'symbol': 'Tether Token',
-            'decimals': 6,
-            'image': 'https://static.tronscan.org/production/logo/usdtlogo.png',
+            'address': 'TF17BgPaZYbz8oxbjhriubPDsA7ArKoLX3',
+            'symbol': 'JUST GOV',
+            'decimals': 18,
+            'image': 'https://static.tronscan.org/production/logo/just_icon.png',
           },
         },
       });
@@ -141,8 +142,9 @@ function TronExample() {
 
   useEffect(() => {
     if (!provider) return;
-    if (provider?.tronWeb?.defaultAddress.base58) {
+    if (provider?.tronWeb?.defaultAddress?.base58) {
       setAccounts([provider.tronWeb.defaultAddress.base58]);
+      setConnected(true);
     }
   }, [provider]);
 
@@ -156,8 +158,22 @@ function TronExample() {
     }
 
     window.addEventListener('message', function (e: CustomMessage) {
-      if (e.data.message && e.data.message.action == 'accountsChanged') {
+      if (e.data.message && e.data.message.action === 'accountsChanged') {
         setAccounts([e.data.message.data.address].filter((t) => t));
+      }
+
+      if (e.data.message && e.data.message.action === 'setAccount') {
+        setAccounts([e.data.message.data.address].filter((t) => t));
+      }
+
+      if (e.data.message && e.data.message.action === 'connect') {
+        setConnected(true);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        setAccounts([window.tronWeb?.defaultAddress?.base58]);
+      }
+
+      if (e.data.message && e.data.message.action === 'disconnect') {
+        setConnected(false);
       }
     });
   }, [handleTronLink]);
@@ -175,34 +191,33 @@ function TronExample() {
             <p>{'Wallet is initialized'}</p>
           </div>
           <div>
-            <button disabled={accounts.length > 0} onClick={handleConnectWallet}>
-              {accounts.length ? 'connected' : 'connecte wallet'}
+            <button disabled={connected} onClick={handleConnectWallet}>
+              {connected ? 'connected' : 'connect wallet'}
             </button>
-
-            <p>{accounts}</p>
+            {connected && <p>{accounts}</p>}
           </div>
           <div>
             <input ref={nativeTransferTo} placeholder={'to address'} />
-            <button disabled={accounts.length === 0} onClick={handleSendNativeToken}>
+            <button disabled={!connected} onClick={handleSendNativeToken}>
               send 1 trx token
             </button>
           </div>
           <div>
             <input ref={transferTokenContract} placeholder={'token address'} />
             <input ref={transferTokenTo} placeholder={'to address'} />
-            <button disabled={accounts.length === 0} onClick={handleSendToken}>
+            <button disabled={!connected} onClick={handleSendToken}>
               send token
             </button>
           </div>
           <div>
             <input ref={approveTokenContract} placeholder={'token address'} />
             <input ref={approveTokenSpender} placeholder={'spender address'} />
-            <button disabled={accounts.length === 0} onClick={handleApproveToken}>
+            <button disabled={!connected} onClick={handleApproveToken}>
               approve token
             </button>
           </div>
           <div>
-            <button disabled={accounts.length === 0} onClick={handleAddTRC20Token}>
+            <button disabled={!connected} onClick={handleAddTRC20Token}>
               add trc20 token
             </button>
           </div>

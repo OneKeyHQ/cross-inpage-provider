@@ -26,6 +26,7 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
   public ready = false;
 
   private _initialized = false;
+  private _connected = false;
   private _requestingAccounts = false;
 
   private _accounts: string[] = [];
@@ -83,6 +84,10 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
   }
 
   private _registerEvents(tronWeb: TronWeb) {
+    window.addEventListener('onekey_bridge_disconnect', () => {
+      this.__handleDisconnected();
+    });
+
     this.on(ProviderEvents.MESSAGE_LOW_LEVEL, (payload: { method: string; params: any }) => {
       const { method } = payload;
 
@@ -131,6 +136,7 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
           tronWeb.setAddress(address);
           tronWeb.ready = true;
           this.ready = true;
+          this._handleConnected();
         } else {
           tronWeb.defaultAddress = {
             hex: false,
@@ -138,12 +144,27 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
           };
           tronWeb.ready = false;
           this.ready = false;
+          this.__handleDisconnected();
         }
       }
     }
   }
 
-  private _postMessage<T>(action: string, data: T) {
+  private __handleDisconnected() {
+    if (this._connected) {
+      this._connected = false;
+      this._postMessage(ProviderEvents.DISCONNECT);
+    }
+  }
+
+  private _handleConnected() {
+    if (!this._connected) {
+      this._connected = true;
+      this._postMessage(ProviderEvents.CONNECT);
+    }
+  }
+
+  private _postMessage<T>(action: string, data?: T) {
     window.postMessage({
       message: {
         action,
@@ -178,7 +199,10 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
     this._requestingAccounts = true;
 
     const accounts = (await this.bridgeRequest(args)) as string[];
+
     this._handleAccountsChanged(accounts, this.tronWeb as TronWeb);
+
+    this._requestingAccounts = false;
 
     if (accounts.length > 0) {
       return {
@@ -209,7 +233,9 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
     }
 
     if (method === 'tron_requestAccounts') {
-      return this._requestAccounts(args) as unknown as T;
+      const result = await this._requestAccounts(args);
+      this._postMessage(ProviderEvents.TAB_REPLY, result);
+      return result as T;
     }
 
     const resp = await this.bridgeRequest(args);

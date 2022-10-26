@@ -7,7 +7,6 @@ import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
 import { ProviderTronBase } from './ProviderTronBase';
 import {
   IProviderTron,
-  DeprecatedType,
   ProviderEvents,
   ProviderEventsMap,
   ConsoleLike,
@@ -229,10 +228,10 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
 export { ProviderTron };
 export {
   IProviderTron,
-  DeprecatedType,
   ProviderEvents,
   ProviderEventsMap,
   ConsoleLike,
   Nodes,
   RequestArguments,
+  TronWeb,
 };

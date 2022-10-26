@@ -3,12 +3,6 @@ import TronWeb from 'tronweb';
 
 import { ProviderTronBase } from './ProviderTronBase';
 
-export enum DeprecatedType {
-  EVENT = 'EVENT',
-  METHOD = 'METHOD',
-  PROPERTY = 'PROPERTY',
-}
-
 export enum ProviderEvents {
   CONNECT = 'connect',
   DISCONNECT = 'disconnect',

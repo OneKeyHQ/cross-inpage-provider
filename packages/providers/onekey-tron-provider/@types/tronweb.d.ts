@@ -103,6 +103,7 @@ declare module 'tronweb' {
         transaction: IUnsignedTransaction;
       }>;
       sendTrx: (string, number, string) => Promise<IUnsignedTransaction>;
+      sendToken: (string, number, string, string) => Promise<IUnsignedTransaction>;
     };
 
     static isAddress: (string) => boolean;

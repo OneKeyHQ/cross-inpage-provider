@@ -59,20 +59,17 @@ function TronExample() {
     });
     try {
       const tronWeb = provider.tronWeb;
-      const parameter = [
-        { type: 'address', value: (transferTokenTo.current as HTMLInputElement).value },
-        { type: 'uint256', value: 100 },
-      ];
-      const options = {
-        feeLimit: 100000000,
-        callValue: 0,
-        tokenValue: 10,
-      };
       const tx = await tronWeb.transactionBuilder.triggerSmartContract(
         (transferTokenContract.current as HTMLInputElement).value,
         'transfer(address,uint256)',
-        options,
-        parameter,
+        {},
+        [
+          { type: 'address', value: (transferTokenTo.current as HTMLInputElement).value },
+          {
+            type: 'uint256',
+            value: '1000000000000000000',
+          },
+        ],
         connectedAddress,
       );
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -109,20 +106,17 @@ function TronExample() {
     });
     try {
       const tronWeb = provider.tronWeb;
-      const parameter = [
-        { type: 'address', value: (approveTokenSpender.current as HTMLInputElement).value },
-        { type: 'uint256', value: 100 },
-      ];
-      const options = {
-        feeLimit: 100000000,
-        callValue: 0,
-        tokenValue: 10,
-      };
       const tx = await tronWeb.transactionBuilder.triggerSmartContract(
-        (approveTokenContract.current as HTMLInputElement).value,
+        (transferTokenContract.current as HTMLInputElement).value,
         'approve(address,uint256)',
-        options,
-        parameter,
+        {},
+        [
+          { type: 'address', value: (transferTokenTo.current as HTMLInputElement).value },
+          {
+            type: 'uint256',
+            value: '1000000000000000000',
+          },
+        ],
         connectedAddress,
       );
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

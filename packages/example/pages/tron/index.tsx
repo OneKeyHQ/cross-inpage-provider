@@ -4,7 +4,7 @@ import styles from '../../styles/Home.module.css';
 import Link from 'next/link';
 import { LogsContainer } from '../../components/LogsContainer';
 
-const ConfluxExample = dynamic(() => import('../../components/tron/TronExample'), {
+const TronExample = dynamic(() => import('../../components/tron/TronExample'), {
   ssr: false,
 });
 
@@ -14,7 +14,7 @@ export default function () {
       <div className={styles.container}>
         <Link href={'/'}>← Back</Link>
         <h2>Tron Dapp Example</h2>
-        <ConfluxExample />
+        <TronExample />
       </div>
       <LogsContainer />
     </div>

@@ -15,7 +15,7 @@ import {
   requestAccountsResponse,
 } from './types';
 import { isWalletEventMethodMatch } from './utils';
-type OneKeyConfluxProviderProps = IInpageProviderConfig & {
+type OneKeyTronProviderProps = IInpageProviderConfig & {
   timeout?: number;
 };
 
@@ -28,12 +28,22 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
   private _initialized = false;
   private _connected = false;
   private _requestingAccounts = false;
+  private _defaultAddress: TronWeb['defaultAddress'] = {
+    hex: false,
+    base58: false,
+  };
 
   private _accounts: string[] = [];
+  private _nodes: Nodes = {
+    fullHost: '',
+    fullNode: '',
+    solidityNode: '',
+    eventServer: '',
+  };
 
   private readonly _log: ConsoleLike;
 
-  constructor(props: OneKeyConfluxProviderProps) {
+  constructor(props: OneKeyTronProviderProps) {
     super({
       ...props,
       bridge: props.bridge || getOrCreateExtInjectedJsBridge({ timeout: props.timeout }),
@@ -52,6 +62,30 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
 
     tronWeb.request = (args: RequestArguments) => this.request(args);
 
+    tronWeb.defaultAddress = {
+      hex: false,
+      base58: false,
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+    Object.defineProperty(tronWeb, 'defaultAddress', {
+      get() {
+        if (!self._connected) {
+          self._log.warn(
+            'OneKey: We recommend that DApp developers use tronLink.request({method: "tron_requestAccounts"}) to request users’ account information at the earliest time possible in order to get a complete TronWeb injection.',
+          );
+          void self.request({
+            method: 'tron_requestAccounts',
+          });
+        }
+        return self._defaultAddress;
+      },
+      set(value) {
+        self._defaultAddress = value as TronWeb['defaultAddress'];
+      },
+    });
+
     return tronWeb;
   }
 
@@ -67,17 +101,21 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
       const tronWeb = this._registerTronWeb(nodes);
 
       if (window.tronWeb !== undefined) {
-        this._log.warn('TronWeb is already initiated. Onekey will overwrite the current instance');
+        this._log.warn(
+          'OneKey: TronWeb is already initiated. Onekey will overwrite the current instance',
+        );
       }
 
       window.tronWeb = this.tronWeb = tronWeb;
+      // some DApp also check if the sunWeb object exists before requesting accounts
       window.sunWeb = {};
 
-      this._dispatch('tronLink#initialized');
       this._initialized = true;
 
       this._registerEvents(tronWeb);
       this._handleAccountsChanged(accounts, tronWeb);
+
+      this._dispatch('tronLink#initialized');
     } catch (error) {
       this._log.error('OneKey: Failed to get initial state. Please report this bug.', error);
     }
@@ -179,13 +217,17 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
   }
 
   private _handleNodesChanged(nodes: Nodes, tronWeb: TronWeb) {
-    tronWeb.setFullNode(nodes.fullNode);
-    tronWeb.setSolidityNode(nodes.solidityNode);
-    tronWeb.setEventServer(nodes.eventServer);
+    if (!dequal(nodes, this._nodes)) {
+      this._nodes = nodes;
 
-    this._postMessage(ProviderEvents.NODES_CHANGED, {
-      ...nodes,
-    });
+      tronWeb.setFullNode(nodes.fullNode ?? nodes.fullHost);
+      tronWeb.setSolidityNode(nodes.solidityNode ?? nodes.fullHost);
+      tronWeb.setEventServer(nodes.eventServer ?? nodes.fullHost);
+
+      this._postMessage(ProviderEvents.NODES_CHANGED, {
+        ...nodes,
+      });
+    }
   }
 
   private async _requestAccounts(args: RequestArguments): Promise<requestAccountsResponse> {

@@ -235,7 +235,7 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
     if (method === 'tron_requestAccounts') {
       const result = await this._requestAccounts(args);
       this._postMessage(ProviderEvents.TAB_REPLY, result);
-      return result as T;
+      return result as unknown as T;
     }
 
     const resp = await this.bridgeRequest(args);

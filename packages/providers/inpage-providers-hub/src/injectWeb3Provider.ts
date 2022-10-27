@@ -8,6 +8,7 @@ import { ProviderSolana } from '@onekeyfe/onekey-solana-provider';
 import { ProviderStarcoin } from '@onekeyfe/onekey-starcoin-provider';
 import { ProviderAptos, ProviderAptosMartian } from '@onekeyfe/onekey-aptos-provider';
 import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
+import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
 import './connectButtonHack';
 // import Web3 from 'web3'; // cause build error
 
@@ -62,6 +63,10 @@ function injectWeb3Provider(): unknown {
     bridge,
   });
 
+  const tron = new ProviderTron({
+    bridge,
+  });
+
   // providerHub
   const $onekey = {
     ...window.$onekey,
@@ -72,6 +77,7 @@ function injectWeb3Provider(): unknown {
     starcoin,
     aptos: martian,
     conflux,
+    tron,
     sollet: null,
   };
   window.$onekey = $onekey;
@@ -104,6 +110,8 @@ function injectWeb3Provider(): unknown {
 
   // ** Conflux
   window.conflux = conflux;
+
+  window.tronLink = tron;
 
   // ** shim or inject real web3
   //

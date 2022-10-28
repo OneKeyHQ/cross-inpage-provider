@@ -23,6 +23,7 @@ type ITreeNodeInfo = {
 type ITreeNodeData = {
   id: string;
   name: string;
+  icon?: string;
   href?: string;
   target?: string;
   children?: ITreeNodeData[];
@@ -33,7 +34,7 @@ type ITreeNodeProps = {
   dragHandle: RefObject<HTMLDivElement>;
 };
 function TreeNode({ node, style, dragHandle }: ITreeNodeProps) {
-  const { href, target, name } = node.data;
+  const { href, target, name, icon } = node.data;
   const link = useMemo(() => {
     if (target && href) {
       return (
@@ -47,10 +48,39 @@ function TreeNode({ node, style, dragHandle }: ITreeNodeProps) {
     }
     return <span>{name}</span>;
   }, [href, name, target]);
+  const imgIcon = useMemo(() => {
+    if (icon) {
+      return (
+        <img alt={icon} src={icon} style={{ width: '14px', height: '14px', borderRadius: '50%' }} />
+      );
+    }
+    if (node.isInternal) {
+      return '📂';
+    }
+    return '👉';
+  }, [icon, node.isInternal]);
   return (
     <div style={style} ref={dragHandle} onClick={() => node.toggle()}>
-      <div style={{ cursor: node.isInternal ? 'pointer' : undefined }}>
-        {node.isLeaf ? '👉' : '📂'} {link}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          cursor: node.isInternal ? 'pointer' : undefined,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            minWidth: '16px',
+            marginRight: '8px',
+          }}
+        >
+          {imgIcon}
+        </div>
+        {link}
       </div>
     </div>
   );
@@ -64,50 +94,100 @@ const data: ITreeNodeData[] = [
       { id: uuid.v4(), name: 'iframe', href: '/iframe' },
       { id: uuid.v4(), name: 'DeepLink', href: '/deeplink' },
       { id: uuid.v4(), name: 'DappList', href: '/dappList' },
-      { id: uuid.v4(), name: 'Hardware SDK (coming soon)', href: '' },
+      {
+        id: uuid.v4(),
+        name: 'Hardware SDK (coming soon)',
+        href: '',
+        icon: 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/319/mobile-phone_1f4f1.png',
+      },
     ],
   },
   {
     id: uuid.v4(),
     name: 'WalletConnect',
+    // icon: 'https://example.walletconnect.org/favicon.ico',
     children: [
       {
         id: uuid.v4(),
         name: 'WalletConnect V1',
         href: 'https://example.walletconnect.org',
         target: 'WalletConnectExampleV1',
+        icon: 'https://example.walletconnect.org/favicon.ico',
       },
       {
         id: uuid.v4(),
         name: 'WalletConnect V2',
         href: 'https://react-app.walletconnect.com',
         target: 'WalletConnectExampleV2',
+        icon: 'https://example.walletconnect.org/favicon.ico',
       },
       {
         id: uuid.v4(),
         name: 'Aptos WalletConnect',
         href: '/aptosWalletconnect',
+        icon: 'https://onekey-asset.com/assets/apt/apt.png',
       },
     ],
   },
   {
     id: uuid.v4(),
-    name: 'Chain',
+    name: 'Networks',
     children: [
-      { id: uuid.v4(), name: 'EVM', href: '/ethereum' },
-      { id: uuid.v4(), name: 'Solana', href: '/solana' },
-      { id: uuid.v4(), name: 'NEAR', href: '/near' },
+      {
+        id: uuid.v4(),
+        name: 'EVM',
+        href: '/ethereum',
+        icon: 'https://onekey-asset.com/assets/eth/eth.png',
+      },
+      {
+        id: uuid.v4(),
+        name: 'Solana',
+        href: '/solana',
+        icon: 'https://onekey-asset.com/assets/sol/sol.png',
+      },
+      {
+        id: uuid.v4(),
+        name: 'NEAR',
+        href: '/near',
+        icon: 'https://onekey-asset.com/assets/near/near.png',
+      },
       {
         id: uuid.v4(),
         name: 'NEAR ref-ui',
         href: 'https://dapp-near-ref-ui.onekeytest.com',
         target: '_blank',
+        icon: 'https://onekey-asset.com/assets/near/near.png',
       },
-      { id: uuid.v4(), name: 'Starcoin', href: '/starcoin' },
-      { id: uuid.v4(), name: 'Aptos', href: '/aptos' },
-      { id: uuid.v4(), name: 'Aptos Martian', href: '/aptosMartian' },
-      { id: uuid.v4(), name: 'Conflux', href: '/conflux' },
-      { id: uuid.v4(), name: 'Tron', href: '/tron' },
+      {
+        id: uuid.v4(),
+        name: 'Starcoin',
+        href: '/starcoin',
+        icon: 'https://onekey-asset.com/assets/stc/stc.png',
+      },
+      {
+        id: uuid.v4(),
+        name: 'Aptos',
+        href: '/aptos',
+        icon: 'https://onekey-asset.com/assets/apt/apt.png',
+      },
+      {
+        id: uuid.v4(),
+        name: 'Aptos Martian',
+        href: '/aptosMartian',
+        icon: 'https://onekey-asset.com/assets/apt/apt.png',
+      },
+      {
+        id: uuid.v4(),
+        name: 'Conflux',
+        href: '/conflux',
+        icon: 'https://onekey-asset.com/assets/cfx/cfx.png',
+      },
+      {
+        id: uuid.v4(),
+        name: 'Tron',
+        href: '/tron',
+        icon: 'https://onekey-asset.com/assets/trx/trx.png',
+      },
     ],
   },
 ];

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { RefObject, useMemo } from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 // import Image from 'next/image';
@@ -7,10 +7,110 @@ import styles from '../styles/Home.module.css';
 import packageJson from '../package.json';
 import { useEffect } from 'react';
 import { Button } from 'native-base';
+import { Tree, NodeApi } from 'react-arborist';
+import * as uuid from 'uuid';
 
 // const myImageLoader = ({ src, width, quality }: any) => {
 //   return src as string;
 // };
+
+type ITreeNodeInfo = {
+  isLeaf: boolean;
+  isInternal: boolean;
+  data: ITreeNodeData;
+  toggle: () => void;
+};
+type ITreeNodeData = {
+  id: string;
+  name: string;
+  href?: string;
+  target?: string;
+  children?: ITreeNodeData[];
+};
+type ITreeNodeProps = {
+  node: ITreeNodeInfo;
+  style: unknown;
+  dragHandle: RefObject<HTMLDivElement>;
+};
+function TreeNode({ node, style, dragHandle }: ITreeNodeProps) {
+  const { href, target, name } = node.data;
+  const link = useMemo(() => {
+    if (target && href) {
+      return (
+        <a href={href} target={target}>
+          {`${name} →`}
+        </a>
+      );
+    }
+    if (href) {
+      return <Link href={href}>{`${name} →`}</Link>;
+    }
+    return <span>{name}</span>;
+  }, [href, name, target]);
+  return (
+    <div style={style} ref={dragHandle} onClick={() => node.toggle()}>
+      <div style={{ cursor: node.isInternal ? 'pointer' : undefined }}>
+        {node.isLeaf ? '👉' : '📂'} {link}
+      </div>
+    </div>
+  );
+}
+
+const data: ITreeNodeData[] = [
+  {
+    id: uuid.v4(),
+    name: 'General',
+    children: [
+      { id: uuid.v4(), name: 'iframe', href: '/iframe' },
+      { id: uuid.v4(), name: 'DeepLink', href: '/deeplink' },
+      { id: uuid.v4(), name: 'DappList', href: '/dappList' },
+      { id: uuid.v4(), name: 'Hardware SDK (coming soon)', href: '' },
+    ],
+  },
+  {
+    id: uuid.v4(),
+    name: 'WalletConnect',
+    children: [
+      {
+        id: uuid.v4(),
+        name: 'WalletConnect V1',
+        href: 'https://example.walletconnect.org',
+        target: 'WalletConnectExampleV1',
+      },
+      {
+        id: uuid.v4(),
+        name: 'WalletConnect V2',
+        href: 'https://react-app.walletconnect.com',
+        target: 'WalletConnectExampleV2',
+      },
+      {
+        id: uuid.v4(),
+        name: 'Aptos WalletConnect',
+        href: '/aptosWalletconnect',
+      },
+    ],
+  },
+  {
+    id: uuid.v4(),
+    name: 'Chain',
+    children: [
+      { id: uuid.v4(), name: 'EVM', href: '/ethereum' },
+      { id: uuid.v4(), name: 'Solana', href: '/solana' },
+      { id: uuid.v4(), name: 'NEAR', href: '/near' },
+      {
+        id: uuid.v4(),
+        name: 'NEAR ref-ui',
+        href: 'https://dapp-near-ref-ui.onekeytest.com',
+        target: '_blank',
+      },
+      { id: uuid.v4(), name: 'Starcoin', href: '/starcoin' },
+      { id: uuid.v4(), name: 'Aptos', href: '/aptos' },
+      { id: uuid.v4(), name: 'Aptos Martian', href: '/aptosMartian' },
+      { id: uuid.v4(), name: 'Conflux', href: '/conflux' },
+      { id: uuid.v4(), name: 'Tron', href: '/tron' },
+    ],
+  },
+];
 
 const Home: NextPage = () => {
   useEffect(() => {
@@ -25,28 +125,7 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-        <Link href="/iframe">iframe →</Link>
-        <Link href="/ethereum">EVM →</Link>
-        <Link href="/solana">Solana →</Link>
-        <Link href="/near">NEAR →</Link>
-        <a target="_blank" href="https://dapp-near-ref-ui.onekeytest.com">
-          NEAR ref-ui →
-        </a>
-        <Link href="/starcoin">Starcoin →</Link>
-        <Link href="/aptos">Aptos →</Link>
-        <Link href="/aptosMartian">Aptos Martian →</Link>
-        <Link href="/conflux">Conflux →</Link>
-        <Link href="/tron">Tron →</Link>
-        <a target="WalletConnectExampleV1" href="https://example.walletconnect.org">
-          WalletConnect V1 →
-        </a>
-        <a target="_blank" href="https://react-app.walletconnect.com">
-          WalletConnect V2 →
-        </a>
-        <Link href="/aptosWalletconnect">Aptos WalletConnect →</Link>
-        <Link href="/deeplink">DeepLink →</Link>
-        <Link href="/dappList">Dapp List →</Link>
-        <a>Hardware SDK (coming soon)</a>
+        <Tree initialData={data}>{TreeNode as any}</Tree>
         <Button onPress={() => window.location.reload()}>refresh</Button>
       </main>
 

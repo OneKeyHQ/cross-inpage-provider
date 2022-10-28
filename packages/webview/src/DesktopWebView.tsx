@@ -21,6 +21,11 @@ import { useIsIpcReady } from './useIsIpcReady';
 
 import { IWebViewWrapperRef } from './useWebViewBridge';
 
+import isNil from 'lodash/isNil';
+import isEmpty from 'lodash/isEmpty';
+import isPlainObject from 'lodash/isPlainObject';
+import isArray from 'lodash/isArray';
+
 const isDev = process.env.NODE_ENV !== 'production';
 const isBrowser = true;
 
@@ -44,6 +49,79 @@ function usePreloadJsUrl() {
 
 // Used for webview type referencing
 const WEBVIEW_TAG = 'webview';
+
+export function waitAsync(timeout: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, timeout);
+  });
+}
+
+export async function waitForDataLoaded({
+  data,
+  wait = 600,
+  logName,
+  timeout = 0,
+}: {
+  data: (...args: any) => any;
+  wait?: number;
+  logName: string;
+  timeout?: number;
+}) {
+  return new Promise<void>((resolve, reject) => {
+    void (async () => {
+      let timeoutReject = false;
+      let timer: any = null;
+      const getDataArrFunc = ([] as ((...args: any) => any)[]).concat(data);
+      if (timeout) {
+        timer = setTimeout(() => {
+          timeoutReject = true;
+        }, timeout);
+      }
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        let isAllLoaded = true;
+
+        await Promise.all(
+          getDataArrFunc.map(async (getData) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const d = await getData();
+            if (d === false) {
+              isAllLoaded = false;
+              return;
+            }
+
+            if (isNil(d)) {
+              isAllLoaded = false;
+              return;
+            }
+
+            if (isEmpty(d)) {
+              if (isPlainObject(d) || isArray(d)) {
+                isAllLoaded = false;
+                return;
+              }
+            }
+          }),
+        );
+
+        if (isAllLoaded || timeoutReject) {
+          break;
+        }
+        await waitAsync(wait);
+        if (logName) {
+          console.log(`waitForDataLoaded: ${logName}`);
+        }
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      clearTimeout(timer);
+      if (timeoutReject) {
+        reject(new Error(`waitForDataLoaded: ${logName ?? ''} timeout`));
+      } else {
+        resolve();
+      }
+    })();
+  });
+}
 
 const DesktopWebView = forwardRef(
   (
@@ -120,19 +198,52 @@ const DesktopWebView = forwardRef(
       if (!webview || !isIpcReady || !isWebviewReady) {
         return;
       }
-      const handleMessage = (event: {
+      const handleMessage = async (event: {
         channel: string;
         args: Array<string>;
         target: IElectronWebView;
       }) => {
         if (event.channel === consts.JS_BRIDGE_MESSAGE_IPC_CHANNEL) {
           const data: string = event?.args?.[0];
+          let originInRequest = '';
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            originInRequest = JSON.parse(data)?.origin as string;
+          } catch (error) {
+            // noop
+          } finally {
+            // noop
+          }
           let origin = '';
-          // url initial value is empty after webview mounted first time
-          const url = event.target.getURL() || event.target.src || src;
-          if (url) {
-            const uri = new URL(url);
-            origin = uri?.origin || '';
+          await waitForDataLoaded({
+            wait: 600,
+            logName: 'DesktopWebView waitForDataLoaded if origin matched',
+            timeout: 5000,
+            data: () => {
+              let originInUrl = '';
+              // url initial value is empty after webview mounted first time
+              const url1 = event.target.getURL(); // url won't update immediately when goForward or goBack
+              const url2 = event.target.src;
+              const url3 = src;
+              const url = url1 || url2 || url3;
+              if (url) {
+                try {
+                  const uri = new URL(url);
+                  originInUrl = uri?.origin || '';
+                } catch (error) {
+                  // noop
+                } finally {
+                  // noop
+                }
+              }
+              if (originInUrl && originInRequest && originInUrl === originInRequest) {
+                origin = originInRequest;
+                return true;
+              }
+              return false;
+            },
+          });
+          if (origin) {
             // - receive
             jsBridgeHost.receive(data, { origin });
           } else {
@@ -186,7 +297,7 @@ const DesktopWebView = forwardRef(
           <webview
             ref={initWebviewByRef}
             preload={preloadJsUrl}
-            src={src}
+            src={isIpcReady && isWebviewReady ? src : undefined}
             style={{
               'width': '100%',
               'height': '100%',

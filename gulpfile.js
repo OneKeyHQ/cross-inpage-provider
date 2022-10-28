@@ -28,7 +28,7 @@ function buildInjected(cb) {
 }
 
 function watching(cb) {
-  gulp.watch(['packages/**/src/**/*.ts'], buildInjected);
+  gulp.watch(['packages/**/src/**/*.ts', 'packages/**/src/**/*.tsx'], buildInjected);
   cb();
 }
 const watch = gulp.series(buildInjected, watching);

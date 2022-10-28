@@ -57,17 +57,8 @@ export default function () {
           <ul>
             <li>
               <a href={`https://app.onekey.so/wc/connect?uri=${uriEncoded}`} target={'_blank'}>
-                UniversalLink (wc uri)
+                UniversalLink (full link)
               </a>
-            </li>
-            <li>
-              <a href={`cryptowallet://wc?uri=${uriEncoded}`}>cryptowallet (wc uri)</a>
-            </li>
-            <li>
-              <a href={`https://metamask.app.link/wc?uri=${uriEncoded}`}>metamask (wc uri)</a>
-            </li>
-            <li>
-              <a href={`tpoutside://wc?uri=${uriEncoded}`}>tpoutside (wc uri)</a>
             </li>
             <li>
               <a
@@ -77,7 +68,6 @@ export default function () {
                 UniversalLink (account)
               </a>
             </li>
-
             <li>
               <a href="wc://">wc:// (empty link)</a>
             </li>
@@ -102,6 +92,15 @@ export default function () {
             </li>
             <li>
               <a href={`onekey-wallet:wc?uri=${uriEncoded}`}>onekey-wallet:wc?uri= (full link)</a>
+            </li>
+            <li>
+              <a href={`cryptowallet://wc?uri=${uriEncoded}`}>cryptowallet (full link)</a>
+            </li>
+            <li>
+              <a href={`tpoutside://wc?uri=${uriEncoded}`}>tpoutside (full link)</a>
+            </li>
+            <li>
+              <a href={`https://metamask.app.link/wc?uri=${uriEncoded}`}>metamask (full link)</a>
             </li>
           </ul>
         ) : null}

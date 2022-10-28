@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Conflux, Contract } from 'js-conflux-sdk';
 
 export const exampleContract = new Conflux().Contract({

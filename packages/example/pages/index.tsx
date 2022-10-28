@@ -16,6 +16,8 @@ import * as uuid from 'uuid';
 
 type ITreeNodeInfo = {
   isLeaf: boolean;
+  isOpen: boolean;
+  isClosed: boolean;
   isInternal: boolean;
   data: ITreeNodeData;
   toggle: () => void;
@@ -55,10 +57,13 @@ function TreeNode({ node, style, dragHandle }: ITreeNodeProps) {
       );
     }
     if (node.isInternal) {
+      if (node.isClosed) {
+        return '📁';
+      }
       return '📂';
     }
     return '👉';
-  }, [icon, node.isInternal]);
+  }, [icon, node.isClosed, node.isInternal]);
   return (
     <div style={style} ref={dragHandle} onClick={() => node.toggle()}>
       <div

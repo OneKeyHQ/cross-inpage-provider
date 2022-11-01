@@ -132,6 +132,12 @@ const data: ITreeNodeData[] = [
         href: '/aptosWalletconnect',
         icon: 'https://onekey-asset.com/assets/apt/apt.png',
       },
+      {
+        id: uuid.v4(),
+        name: 'Algo WalletConnect',
+        href: '/algoWalletConnect',
+        icon: 'https://onekey-asset.com/assets/algo/algo.png',
+      },
     ],
   },
   {

@@ -29,6 +29,8 @@
     "@types/react-native": "^0.67.6",
     "@walletconnect/client": "^1.8.0",
     "@walletconnect/qrcode-modal": "^1.8.0",
+    "algosdk": "^1.21.0",
+    "algorand-walletconnect-qrcode-modal": "^1.8.0",
     "bignumber.js": "^9.0.1",
     "bs58": "^5.0.0",
     "compare-versions": "^4.1.2",

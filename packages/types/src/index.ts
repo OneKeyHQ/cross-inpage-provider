@@ -42,6 +42,7 @@ export enum IInjectedProviderNames {
   near = 'near',
   aptos = 'aptos',
   martian = 'martian',
+  algo = 'algo',
   $private = '$private',
   $hardware_sdk = '$hardware_sdk',
 }

@@ -1,5 +1,6 @@
 import dequal from 'fast-deep-equal';
 import TronWeb, { UnsignedTransaction, SignedTransaction } from 'tronweb';
+import { isEmpty } from 'lodash';
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
@@ -51,10 +52,14 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
 
     this._log = props.logger ?? window.console;
 
+    this._registerEvents();
+
     void this._initialize();
   }
 
-  private _registerTronWeb(nodes: Nodes): TronWeb {
+  private _registerTronWeb(nodes: Nodes): TronWeb | null {
+    if (isEmpty(nodes)) return null;
+
     const tronWeb = new TronWeb({
       ...nodes,
     });
@@ -100,6 +105,8 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
 
       const tronWeb = this._registerTronWeb(nodes);
 
+      if (!tronWeb) return;
+
       if (window.tronWeb !== undefined) {
         this._log.warn(
           'OneKey: TronWeb is already initiated. Onekey will overwrite the current instance',
@@ -112,8 +119,7 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
 
       this._initialized = true;
 
-      this._registerEvents(tronWeb);
-      this._handleAccountsChanged(accounts, tronWeb);
+      this._handleAccountsChanged(accounts);
 
       this._dispatch('tronLink#initialized');
     } catch (error) {
@@ -121,7 +127,7 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
     }
   }
 
-  private _registerEvents(tronWeb: TronWeb) {
+  private _registerEvents() {
     window.addEventListener('onekey_bridge_disconnect', () => {
       this.__handleDisconnected();
     });
@@ -130,16 +136,20 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
       const { method } = payload;
 
       if (isWalletEventMethodMatch(method, ProviderEvents.ACCOUNTS_CHANGED)) {
-        this._handleAccountsChanged(payload.params as string[], tronWeb);
+        this._handleAccountsChanged(payload.params as string[]);
       }
 
       if (isWalletEventMethodMatch(method, ProviderEvents.NODES_CHANGED)) {
-        this._handleNodesChanged(payload.params as Nodes, tronWeb);
+        if (this._initialized) {
+          this._handleNodesChanged(payload.params as Nodes);
+        } else {
+          void this._initialize();
+        }
       }
     });
   }
 
-  private _handleAccountsChanged(accounts: string[], tronWeb: TronWeb) {
+  private _handleAccountsChanged(accounts: string[]) {
     let _accounts = accounts;
 
     if (!Array.isArray(accounts)) {
@@ -169,6 +179,8 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
         this._postMessage(ProviderEvents.SET_ACCOUNT, {
           address,
         });
+
+        const tronWeb = this.tronWeb as TronWeb;
 
         if (tronWeb.isAddress(address)) {
           tronWeb.setAddress(address);
@@ -216,13 +228,15 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
     window.dispatchEvent(new Event(event));
   }
 
-  private _handleNodesChanged(nodes: Nodes, tronWeb: TronWeb) {
+  private _handleNodesChanged(nodes: Nodes) {
+    if (isEmpty(nodes)) return;
+
     if (!dequal(nodes, this._nodes)) {
       this._nodes = nodes;
 
-      tronWeb.setFullNode(nodes.fullNode ?? nodes.fullHost);
-      tronWeb.setSolidityNode(nodes.solidityNode ?? nodes.fullHost);
-      tronWeb.setEventServer(nodes.eventServer ?? nodes.fullHost);
+      this.tronWeb?.setFullNode(nodes.fullNode ?? nodes.fullHost);
+      this.tronWeb?.setSolidityNode(nodes.solidityNode ?? nodes.fullHost);
+      this.tronWeb?.setEventServer(nodes.eventServer ?? nodes.fullHost);
 
       this._postMessage(ProviderEvents.NODES_CHANGED, {
         ...nodes,
@@ -242,7 +256,7 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
 
     const accounts = (await this.bridgeRequest(args)) as string[];
 
-    this._handleAccountsChanged(accounts, this.tronWeb as TronWeb);
+    this._handleAccountsChanged(accounts);
 
     this._requestingAccounts = false;
 

@@ -3,6 +3,8 @@ import dynamic from 'next/dynamic';
 import styles from '../../styles/Home.module.css';
 import Link from 'next/link';
 import { LogsContainer } from '../../components/LogsContainer';
+import { DAppList } from '../../components/dappList/DAppList';
+import { dapps } from './dapps.config';
 
 // injected provider works only if nextjs ssr disabled
 const NearExample = dynamic(() => import('../../components/near/NearExample'), { ssr: false });
@@ -18,6 +20,7 @@ export default function () {
         <NearExample />
       </div>
       <LogsContainer />
+      <DAppList dapps={dapps} />
     </div>
   );
 }

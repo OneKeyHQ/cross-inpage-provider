@@ -3,6 +3,8 @@ import dynamic from 'next/dynamic';
 import styles from '../../styles/Home.module.css';
 import Link from 'next/link';
 import { LogsContainer } from '../../components/LogsContainer';
+import { DAppList } from '../../components/dappList/DAppList';
+import { dapps } from './dapps.config';
 
 const ConfluxExample = dynamic(() => import('../../components/conflux/ConfluxExample'), {
   ssr: false,
@@ -17,6 +19,7 @@ export default function () {
         <ConfluxExample />
       </div>
       <LogsContainer />
+      <DAppList dapps={dapps} />
     </div>
   );
 }

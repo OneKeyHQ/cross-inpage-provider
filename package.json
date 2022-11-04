@@ -15,6 +15,7 @@
     "prestart": "yarn build",
     "start": "lerna run start --parallel --ignore @onekeyfe/cross-inpage-provider-example",
     "start-all": "lerna run start --parallel",
+    "dev": "yarn bootstrap && yarn start-all",
     "prepack": "yarn build",
     "watch": "yarn bootstrap && concurrently \"gulp watch\" \"yarn start\" ",
     "gulp-watch": "gulp watch",

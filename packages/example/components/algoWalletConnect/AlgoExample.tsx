@@ -66,7 +66,7 @@ export default function AlgoExample() {
       }
 
       connector.on('session_update', (error, payload: IInternalEvent) => {
-        console.log(`connector.on("session_update")`);
+        console.log(`algo connector.on("session_update")`, payload);
 
         if (error) {
           throw error;
@@ -77,7 +77,7 @@ export default function AlgoExample() {
       });
 
       connector.on('connect', (error, payload: IInternalEvent) => {
-        console.log(`connector.on("connect")`);
+        console.log(`algo connector.on("connect")`);
 
         if (error) {
           throw error;
@@ -87,7 +87,7 @@ export default function AlgoExample() {
       });
 
       connector.on('disconnect', (error) => {
-        console.log(`connector.on("disconnect")`);
+        console.log(`algo connector.on("disconnect")`);
 
         if (error) {
           throw error;

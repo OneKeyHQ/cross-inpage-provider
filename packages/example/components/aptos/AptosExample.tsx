@@ -48,33 +48,33 @@ export default function App() {
     provider.on('connect', (address: string) => {
       setConnected(true);
       setAddress(address);
-      console.log(`[connect] ${address}`);
+      console.log(`aptos.on [connect] ${address}`);
     });
     provider.on('disconnect', () => {
       setAddress(null);
       setConnected(false);
-      console.log('[disconnect] 👋');
+      console.log('aptos.on [disconnect] 👋');
     });
     provider.on('networkChange', (network: string) => {
       setNetwork(network);
-      console.log(`[networkChange] ${network}`);
+      console.log(`aptos.on [networkChange] ${network}`);
     });
     provider.on('accountChanged', (network: string) => {
       setAddress(address);
       setConnected(address ? true : false);
-      console.log(`[accountChange] ${network}`);
+      console.log(`aptos.on [accountChange] ${network}`);
     });
     provider.onNetworkChange((network: string) => {
       setNetwork(network);
-      console.log(`[onNetworkChange] ${network}`);
+      console.log(`aptos [onNetworkChange] ${network}`);
     });
     provider.onAccountChange((address: string | null) => {
       setAddress(address);
       if (address) {
         setConnected(true);
-        console.log(`[onAccountChange] Switched account to ${address}`);
+        console.log(`aptos [onAccountChange] Switched account to ${address}`);
       } else {
-        console.log('[onAccountChange] Switched unknown account');
+        console.log('aptos [onAccountChange] Switched unknown account');
         // In this case, dapps could not to anything, or,
         // Only re-connecting to the new account if it is trusted
         // provider.connect({ onlyIfTrusted: true }).catch((err) => {
@@ -92,7 +92,7 @@ export default function App() {
     return () => {
       void provider.disconnect();
     };
-  }, [provider]);
+  }, [address, provider]);
 
   if (!provider) {
     return <h2>Could not find a provider</h2>;

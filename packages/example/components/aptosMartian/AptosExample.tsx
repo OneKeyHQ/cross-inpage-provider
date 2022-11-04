@@ -50,15 +50,16 @@ export default function App() {
 
     provider.onNetworkChange((network: string) => {
       setNetwork(network);
-      console.log(`[onNetworkChange] ${network}`);
+      console.log(`aptos [onNetworkChange] ${network}`);
     });
     provider.onAccountChange((address: string | null) => {
       setAddress(address);
       if (address) {
         setConnected(true);
-        console.log(`[onAccountChange] Switched account to ${address}`);
+        console.log(`aptos [onAccountChange] Switched account to ${address}`);
       } else {
-        console.log('[onAccountChange] Switched unknown account');
+        setConnected(false);
+        console.log('aptos [onAccountChange] Switched unknown account');
         // In this case, dapps could not to anything, or,
         // Only re-connecting to the new account if it is trusted
         // provider.connect({ onlyIfTrusted: true }).catch((err) => {

@@ -1,8 +1,11 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
-import styles from '../../styles/Home.module.css';
 import Link from 'next/link';
 import { LogsContainer } from '../../components/LogsContainer';
+import { DAppList } from '../../components/dappList/DAppList';
+import styles from '../../styles/Home.module.css';
+
+import { dapps } from './dapps.config';
 
 const TronExample = dynamic(() => import('../../components/tron/TronExample'), {
   ssr: false,
@@ -17,6 +20,7 @@ export default function () {
         <TronExample />
       </div>
       <LogsContainer />
+      <DAppList dapps={dapps} />
     </div>
   );
 }

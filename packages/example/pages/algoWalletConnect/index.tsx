@@ -3,6 +3,8 @@ import dynamic from 'next/dynamic';
 import styles from '../../styles/Home.module.css';
 import Link from 'next/link';
 import { LogsContainer } from '../../components/LogsContainer';
+import { DAppList } from '../../components/dappList/DAppList';
+import { dapps } from './dapps.config';
 
 // injected provider works only if nextjs ssr disabled
 const AlgoExample = dynamic(() => import('../../components/algoWalletConnect/AlgoExample'), {
@@ -20,6 +22,7 @@ export default function () {
         <AlgoExample />
       </div>
       <LogsContainer />
+      <DAppList dapps={dapps} />
     </div>
   );
 }

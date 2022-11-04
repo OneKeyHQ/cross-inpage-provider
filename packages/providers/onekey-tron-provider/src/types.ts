@@ -1,5 +1,5 @@
 import { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
-import TronWeb from 'tronweb';
+import TronWeb, { UnsignedTransaction, SignedTransaction } from 'tronweb';
 
 import { ProviderTronBase } from './ProviderTronBase';
 
@@ -44,12 +44,16 @@ export interface RequestArguments {
   params?: unknown[] | Record<string, unknown>;
 }
 
+export type Callback = false | ((err: Error | null, info: any) => any);
+
 export interface IProviderTron extends ProviderTronBase {
   readonly isTronLink: true;
   tronWeb: TronWeb | null;
   sunWeb: any;
   ready: boolean;
   request<T>(args: RequestArguments): Promise<T>;
+  sign(transaction: UnsignedTransaction): Promise<SignedTransaction>;
+  getNodeInfo(callback?: Callback): Promise<any>;
 }
 
 export interface requestAccountsResponse {

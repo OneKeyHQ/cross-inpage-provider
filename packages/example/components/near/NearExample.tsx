@@ -14,6 +14,9 @@ import * as NearApi from 'near-api-js';
 import { random } from 'lodash';
 import BN from 'bn.js';
 
+import { DAppList } from '../dappList/DAppList';
+import { dapps } from './dapps.config';
+
 const hasWindow = typeof window !== 'undefined';
 
 declare global {
@@ -69,10 +72,10 @@ export default function NearExample() {
     const num1 = random(100, 900) / 10000;
     const num2 = random(100, 900) / 10000;
     const action1 = NearApi.transactions.transfer(
-      toBN(NearApi.utils.format.parseNearAmount(`${num1  }`)),
+      toBN(NearApi.utils.format.parseNearAmount(`${num1}`)),
     );
     const action2 = NearApi.transactions.transfer(
-      toBN(NearApi.utils.format.parseNearAmount(`${num2  }`)),
+      toBN(NearApi.utils.format.parseNearAmount(`${num2}`)),
     );
     // TODO custom createTransaction, call near_accountNonce near_blockInfo
     const tx1 = await provider.createTransaction({
@@ -159,7 +162,12 @@ export default function NearExample() {
 
   return (
     <div>
-      {!provider && <a  target="_blank"  href={'https://www.onekey.so/download/'}>Install OneKey Extension →</a>}
+      <DAppList dapps={dapps} />
+      {!provider && (
+        <a target="_blank" href={'https://www.onekey.so/download/'}>
+          Install OneKey Extension →
+        </a>
+      )}
       {provider && (
         <div>
           <div>

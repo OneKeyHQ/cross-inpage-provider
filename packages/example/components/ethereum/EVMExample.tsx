@@ -5,6 +5,9 @@ import { useExecutor } from './executor';
 
 import styles from './styles.module.scss';
 
+import { DAppList } from '../dappList/DAppList';
+import { dapps } from './dapps.config';
+
 export default function EVMExample() {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   useExecutor();
@@ -20,7 +23,7 @@ export default function EVMExample() {
         <div id="logo-container">
           <img id="logo" src="/logo.png" />
           <h1 id="logo-text" className="text-center">
-          Ethereum E2E Test Dapp
+            Ethereum E2E Test Dapp
           </h1>
         </div>
       </header>
@@ -616,6 +619,7 @@ export default function EVMExample() {
           </div>
         </div>
       </section>
+      <DAppList dapps={dapps} />
     </main>
   );
 }

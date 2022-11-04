@@ -3,8 +3,6 @@ import dynamic from 'next/dynamic';
 import styles from '../../styles/Home.module.css';
 import Link from 'next/link';
 import { LogsContainer } from '../../components/LogsContainer';
-import { DAppList } from '../../components/dappList/DAppList';
-import { dapps } from './dapps.config';
 
 const SolanaExample = dynamic(() => import('../../components/solana/SolanaExample'), {
   ssr: false,
@@ -19,7 +17,6 @@ export default function () {
         <SolanaExample />
       </div>
       <LogsContainer />
-      <DAppList dapps={dapps} />
     </div>
   );
 }

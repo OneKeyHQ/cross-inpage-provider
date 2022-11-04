@@ -14,6 +14,9 @@ import nacl from 'tweetnacl';
 // import { CustomBridge } from './bridge';
 import base58 from 'bs58';
 
+import { DAppList } from '../dappList/DAppList';
+import { dapps } from './dapps.config';
+
 const NETWORK = clusterApiUrl('devnet');
 
 const Receiver = new PublicKey('8yAmEoio2d7DszNucNzKf4AqW2JfGRJ1z5Nu9czdrgc1');
@@ -218,7 +221,12 @@ export default function App() {
 
   return (
     <div>
-      {!provider && <a  target="_blank"  href={'https://www.onekey.so/download/'}>Install OneKey Extension →</a>}
+      <DAppList dapps={dapps} />
+      {!provider && (
+        <a target="_blank" href={'https://www.onekey.so/download/'}>
+          Install OneKey Extension →
+        </a>
+      )}
       <main>
         {provider && publicKey ? (
           <>

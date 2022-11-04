@@ -12,6 +12,7 @@ import {
   ProviderEventsMap,
   ConsoleLike,
   Nodes,
+  Callback,
   RequestArguments,
   requestAccountsResponse,
 } from './types';
@@ -19,6 +20,24 @@ import { isWalletEventMethodMatch } from './utils';
 type OneKeyTronProviderProps = IInpageProviderConfig & {
   timeout?: number;
 };
+
+class OneKeyTronWeb extends TronWeb {
+  constructor(props: any, provider: IProviderTron) {
+    super(props);
+    this.provider = provider;
+    this.defaultAddress = {
+      hex: false,
+      base58: false,
+    };
+    this.trx.sign = (transaction: UnsignedTransaction) => provider.sign(transaction);
+    this.trx.getNodeInfo = (callback?: Callback) => provider.getNodeInfo(callback);
+  }
+  provider!: IProviderTron;
+
+  override request<T>(args: RequestArguments): Promise<T> {
+    return this.provider.request(args);
+  }
+}
 
 class ProviderTron extends ProviderTronBase implements IProviderTron {
   public readonly isTronLink = true;
@@ -60,17 +79,14 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
   private _registerTronWeb(nodes: Nodes): TronWeb | null {
     if (isEmpty(nodes)) return null;
 
-    const tronWeb = new TronWeb({
-      ...nodes,
-    });
-    tronWeb.trx.sign = (transaction: UnsignedTransaction) => this.sign(transaction);
+    const tronWeb: TronWeb = new OneKeyTronWeb(
+      {
+        ...nodes,
+      },
+      this,
+    );
 
-    tronWeb.request = (args: RequestArguments) => this.request(args);
-
-    tronWeb.defaultAddress = {
-      hex: false,
-      base58: false,
-    };
+    tronWeb.getFullnodeVersion();
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
@@ -254,23 +270,31 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
 
     this._requestingAccounts = true;
 
-    const accounts = (await this.bridgeRequest(args)) as string[];
+    try {
+      const accounts = (await this.bridgeRequest(args)) as string[];
 
-    this._handleAccountsChanged(accounts);
+      this._handleAccountsChanged(accounts);
 
-    this._requestingAccounts = false;
+      this._requestingAccounts = false;
 
-    if (accounts.length > 0) {
+      if (accounts.length > 0) {
+        return {
+          code: 200,
+          message: 'ok',
+        };
+      }
+
       return {
-        code: 200,
-        message: 'ok',
+        code: 4000,
+        message: 'user rejected',
+      };
+    } catch (e) {
+      this._requestingAccounts = false;
+      return {
+        code: 4000,
+        message: 'user rejected',
       };
     }
-
-    return {
-      code: 4000,
-      message: 'user rejected',
-    };
   }
 
   async request<T>(args: RequestArguments): Promise<T> {
@@ -304,6 +328,14 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
       method: 'tron_signTransaction',
       params: transaction,
     });
+  }
+
+  async getNodeInfo(callback: Callback) {
+    const info = await this.request({
+      method: 'tron_getNodeInfo',
+    });
+    if (!callback) return info;
+    callback(null, info);
   }
 }
 

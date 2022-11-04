@@ -50,6 +50,8 @@ type ISignedTransaction = IUnsignedTransaction & {
   signature: string[];
 };
 
+type Callback = false | ((err: Error | null, info: any) => any);
+
 declare module 'tronweb' {
   export class TronWeb {
     ready: boolean;
@@ -60,12 +62,13 @@ declare module 'tronweb' {
       base58: string | false;
     };
 
-    isAddress: (address: string) => boolean;
-    setAddress: (address: string) => void;
-    setFullNode: (node: string) => void;
-    setSolidityNode: (node: string) => void;
-    setEventServer: (node: string) => void;
-    request: <T>(args) => Promise<T>;
+    isAddress(address: string): boolean;
+    setAddress(address: string): void;
+    setFullNode(node: string): void;
+    setSolidityNode(node: string): void;
+    setEventServer(node: string): void;
+    request<T>(args): Promise<T>;
+    getFullnodeVersion(): void;
 
     contract: () => {
       at: (address: string) => Promise<ITokenContract>;
@@ -80,7 +83,7 @@ declare module 'tronweb' {
         transaction: IUnsignedTransaction,
         privateKey: any,
         useTronHeader: boolean,
-        callback?: any,
+        callback?: Callback,
       ) => Promise<any>;
       getAccount: (string) => Promise<{ address: string }>;
       getAccountResources: (string) => Promise<IAccountResources>;
@@ -89,6 +92,7 @@ declare module 'tronweb' {
       getConfirmedTransaction: (string) => Promise<ITransactionWithResult>;
       sendRawTransaction: (any) => Promise<{ code?: string; message?: string; result?: boolean }>;
       getTransaction: (string) => Promise<ITransactionWithResult>;
+      getNodeInfo: (callback?: Callback) => Promise<any>;
     };
 
     transactionBuilder: {

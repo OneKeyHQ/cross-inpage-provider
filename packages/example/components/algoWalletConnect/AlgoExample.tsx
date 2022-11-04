@@ -11,6 +11,9 @@ import { Scenario, scenarios, signTxnWithTestAccount } from './scenarios';
 import { ChainType, apiSubmitTransactions } from './api';
 import { IWalletTransaction, SignTxnParams, IResult } from './types';
 
+import { DAppList } from '../dappList/DAppList';
+import { dapps } from './dapps.config';
+
 function stringToChainType(s: string): ChainType {
   switch (s) {
     case ChainType.MainNet.toString():
@@ -267,6 +270,7 @@ export default function AlgoExample() {
 
   return (
     <div>
+      <DAppList dapps={dapps} />
       <main>
         {connected && (
           <p>

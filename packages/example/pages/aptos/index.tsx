@@ -3,8 +3,6 @@ import dynamic from 'next/dynamic';
 import styles from '../../styles/Home.module.css';
 import Link from 'next/link';
 import { LogsContainer } from '../../components/LogsContainer';
-import { DAppList } from '../../components/dappList/DAppList';
-import { dapps } from './dapps.config';
 
 // injected provider works only if nextjs ssr disabled
 const AptosExample = dynamic(() => import('../../components/aptos/AptosExample'), { ssr: false });
@@ -20,7 +18,6 @@ export default function () {
         <AptosExample />
       </div>
       <LogsContainer />
-      <DAppList dapps={dapps} />
     </div>
   );
 }

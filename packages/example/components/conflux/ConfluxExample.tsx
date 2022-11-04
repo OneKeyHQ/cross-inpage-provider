@@ -4,6 +4,9 @@ import { ProviderConflux, ProviderEvents } from '@onekeyfe/onekey-conflux-provid
 
 import { exampleContract, cfxTypedData } from './contract';
 
+import { DAppList } from '../dappList/DAppList';
+import { dapps } from './dapps.config';
+
 const cusdtAddress = 'cfxtest:acepe88unk7fvs18436178up33hb4zkuf62a9dk1gv';
 
 const useProvider = () => {
@@ -264,6 +267,7 @@ function ConfluxExample() {
 
   return (
     <div>
+      <DAppList dapps={dapps} />
       {!provider && (
         <a target="_blank" href={'https://www.onekey.so/download/'}>
           Install OneKey Extension →

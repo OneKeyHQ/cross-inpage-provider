@@ -3,6 +3,9 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
 import type { TronWeb } from '@onekeyfe/onekey-tron-provider';
 
+import { DAppList } from '../dappList/DAppList';
+import { dapps } from './dapps.config';
+
 interface CustomMessage {
   data: {
     message: {
@@ -174,6 +177,7 @@ function TronExample() {
 
   return (
     <div>
+      <DAppList dapps={dapps} />
       {!provider && (
         <a target="_blank" href={'https://www.onekey.so/download/'}>
           Install OneKey Extension →

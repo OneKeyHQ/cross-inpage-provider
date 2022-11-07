@@ -1,4 +1,4 @@
-import React, { RefObject, useMemo } from 'react';
+import React, { RefObject, useMemo, useState } from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 // import Image from 'next/image';
@@ -207,6 +207,15 @@ const Home: NextPage = () => {
   useEffect(() => {
     void fetch(`/api/hello?_=${Date.now()}`);
   }, []);
+  const [chainId, setChainId] = useState('');
+  useEffect(() => {
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    global?.$onekey?.ethereum?.request({ method: 'net_version' }).then((res: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      setChainId(res);
+    });
+  }, []);
   return (
     <div className={styles.container}>
       <Head>
@@ -217,7 +226,8 @@ const Home: NextPage = () => {
 
       <main className={styles.main}>
         <Tree initialData={data}>{TreeNode as any}</Tree>
-        <Button onPress={() => window.location.reload()}>refresh</Button>
+        <Button onPress={() => window.location.reload()}>Refresh</Button>
+        <a>EVM-chainId={chainId}</a>
       </main>
 
       <footer className={styles.footer}>

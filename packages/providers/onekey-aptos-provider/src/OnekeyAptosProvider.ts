@@ -1,4 +1,7 @@
-import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
+import {
+  IInpageProviderConfig,
+  IProviderBaseConnectionStatus,
+} from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { ProviderAptosBase } from './ProviderAptosBase';
 import { AptosAccountInfo, SignMessagePayload, SignMessageResponse } from './types';
@@ -148,31 +151,34 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
   }
 
-  private _isConnectedFlag: boolean | undefined = undefined;
   private _handleConnected(account: AptosAccountInfo, options: { emit: boolean } = { emit: true }) {
     this._account = account;
-    if (options.emit && !this._isConnectedFlag) {
-      this.emit('connect', account?.address ?? null);
-      this.emit('accountChanged', account?.address ?? null);
-      this._isConnectedFlag = true;
+    if (options.emit && this.isConnectionChanged('connected')) {
+      const address = account?.address ?? null;
+      this.emit('connect', address);
+      this.emit('accountChanged', address);
+      this.connectionStatus = 'connected';
     }
   }
 
   private _handleDisconnected(options: { emit: boolean } = { emit: true }) {
     this._account = null;
 
-    if (options.emit && this._isConnectedFlag) {
+    if (options.emit && this.isConnectionChanged('disconnected')) {
       this.emit('disconnect');
       this.emit('accountChanged', null);
-      this._isConnectedFlag = false;
+      this.connectionStatus = 'disconnected';
     }
+  }
+
+  override isAccountsChanged(account: AptosAccountInfo) {
+    return account?.address !== this._account?.address;
   }
 
   // trigger by bridge account change event
   private _handleAccountChange(payload: AptosAccountInfo) {
     const account = payload;
-    const isAccountChanged = account?.address !== this._account?.address;
-    if (isAccountChanged) {
+    if (this.isAccountsChanged(account)) {
       this.emit('accountChanged', account?.address || null);
     }
     if (!account) {
@@ -183,10 +189,14 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     this._handleConnected(account, { emit: false });
   }
 
-  private _network: string | null = null;
+  private _network: string | null | undefined;
+  override isNetworkChanged(network: string) {
+    return this._network === undefined || network !== this._network;
+  }
+
   private _handleNetworkChange(payload: string) {
     const network = payload;
-    if (network !== this._network) {
+    if (this.isNetworkChanged(network)) {
       this.emit('networkChange', network || null);
     }
     this._network = network;

@@ -59,10 +59,10 @@ export default function App() {
       setNetwork(network);
       console.log(`aptos.on [networkChange] ${network}`);
     });
-    provider.on('accountChanged', (network: string) => {
+    provider.on('accountChanged', (address: string) => {
       setAddress(address);
       setConnected(address ? true : false);
-      console.log(`aptos.on [accountChange] ${network}`);
+      console.log(`aptos.on [accountChange] ${address}`);
     });
     provider.onNetworkChange((network: string) => {
       setNetwork(network);
@@ -92,7 +92,7 @@ export default function App() {
     return () => {
       void provider.disconnect();
     };
-  }, [address, provider]);
+  }, [provider]);
 
   if (!provider) {
     return <h2>Could not find a provider</h2>;

@@ -254,10 +254,12 @@ function ConfluxExample() {
 
     provider.on(ProviderEvents.ACCOUNTS_CHANGED, (accounts) => {
       setAccounts(accounts);
+      console.log('accountsChanged', accounts);
     });
     provider.on(ProviderEvents.CHAIN_CHANGED, (chainId) => {
       setChainId(chainId);
       setNetworkId(parseInt(chainId, 16).toString(10));
+      console.log('chainChanged', chainId);
     });
     provider.on(ProviderEvents.DISCONNECT, () => {
       setAccounts([]);

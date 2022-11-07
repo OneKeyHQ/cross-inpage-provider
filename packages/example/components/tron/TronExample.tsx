@@ -157,6 +157,7 @@ function TronExample() {
     window.addEventListener('message', function (e: CustomMessage) {
       if (e.data.message && e.data.message.action === 'accountsChanged') {
         setAccounts([e.data.message.data.address].filter((t) => t));
+        console.log('tron accountsChanged', e.data.message.data);
       }
 
       if (e.data.message && e.data.message.action === 'setAccount') {

@@ -113,7 +113,11 @@ export default function AlgoExample() {
   const handleConnectWallet = useCallback(async () => {
     const bridge = 'https://bridge.walletconnect.org';
 
-    const connector = new WalletConnect({ bridge, qrcodeModal: QRCodeModal });
+    const connector = new WalletConnect({
+      storageId: 'walletconnect_algo',
+      bridge,
+      qrcodeModal: QRCodeModal,
+    });
     // @ts-ignore
     window.wcConnector = connector;
     setConnector(connector);

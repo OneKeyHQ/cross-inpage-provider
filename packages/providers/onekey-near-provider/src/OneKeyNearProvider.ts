@@ -388,7 +388,7 @@ class OneKeyNearProvider extends ProviderNearBase {
     this.emit(PROVIDER_EVENTS.disconnect);
   }
 
-  override isAccountsChanged(account: NearAccountInfo) {
+  override isAccountsChanged(account: NearAccountInfo | undefined) {
     return account?.accountId !== this.getAccountId();
   }
 

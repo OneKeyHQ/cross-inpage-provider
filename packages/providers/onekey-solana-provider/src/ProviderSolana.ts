@@ -227,8 +227,8 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
     }
   }
 
-  override isAccountsChanged(account: SolanaAccountInfo) {
-    return account.publicKey !== this._publicKey?.toBase58();
+  override isAccountsChanged(account: SolanaAccountInfo | undefined) {
+    return account?.publicKey !== this._publicKey?.toBase58();
   }
 
   // trigger by bridge account change event

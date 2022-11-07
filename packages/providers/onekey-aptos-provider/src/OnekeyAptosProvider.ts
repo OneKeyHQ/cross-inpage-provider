@@ -171,7 +171,7 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     }
   }
 
-  override isAccountsChanged(account: AptosAccountInfo) {
+  override isAccountsChanged(account: AptosAccountInfo | undefined) {
     return account?.address !== this._account?.address;
   }
 

@@ -77,7 +77,7 @@ export default function AlgoExample() {
       });
 
       connector.on('connect', (error, payload: IInternalEvent) => {
-        console.log(`algo connector.on("connect")`);
+        console.log(`algo connector.on("connect")`, payload);
 
         if (error) {
           throw error;
@@ -114,7 +114,8 @@ export default function AlgoExample() {
     const bridge = 'https://bridge.walletconnect.org';
 
     const connector = new WalletConnect({ bridge, qrcodeModal: QRCodeModal });
-
+    // @ts-ignore
+    window.wcConnector = connector;
     setConnector(connector);
 
     if (!connector.connected) {
@@ -306,6 +307,7 @@ export default function AlgoExample() {
                 {name}
               </button>
             ))}
+            <button onClick={() => connector.killSession()}>Disconnect</button>
           </>
         ) : (
           <>

@@ -7,7 +7,7 @@ import { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
 import { Types } from 'aptos';
 
-export type AptosProviderType = 'petra' | 'martian'
+export type AptosProviderType = 'petra' | 'martian';
 
 const PROVIDER_EVENTS = {
   'connect': 'connect',
@@ -105,7 +105,7 @@ function isWalletEventMethodMatch({ method, name }: { method: string; name: stri
 
 class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
   protected _account: AptosAccountInfo | null = null;
-  
+
   protected aptosProviderType: AptosProviderType = 'petra';
 
   get publicKey() {
@@ -144,36 +144,52 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     params: JsBridgeRequestParams<T>;
     aptosProviderType?: AptosProviderType;
   }): JsBridgeRequestResponse<T> {
-    params.aptosProviderType  = this.aptosProviderType;
+    params.aptosProviderType = this.aptosProviderType;
     return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
   }
 
+  private _isConnectedFlag: boolean | undefined = undefined;
   private _handleConnected(account: AptosAccountInfo, options: { emit: boolean } = { emit: true }) {
     this._account = account;
-    options.emit && this.emit('connect', account?.address ?? null);
+    if (options.emit && !this._isConnectedFlag) {
+      this.emit('connect', account?.address ?? null);
+      this.emit('accountChanged', account?.address ?? null);
+      this._isConnectedFlag = true;
+    }
   }
 
   private _handleDisconnected(options: { emit: boolean } = { emit: true }) {
     this._account = null;
-    options.emit && this.emit('disconnect');
+
+    if (options.emit && this._isConnectedFlag) {
+      this.emit('disconnect');
+      this.emit('accountChanged', null);
+      this._isConnectedFlag = false;
+    }
   }
 
   // trigger by bridge account change event
   private _handleAccountChange(payload: AptosAccountInfo) {
     const account = payload;
+    const isAccountChanged = account?.address !== this._account?.address;
+    if (isAccountChanged) {
+      this.emit('accountChanged', account?.address || null);
+    }
     if (!account) {
       this._handleDisconnected();
-      return this.emit('accountChanged', null);
+      return;
     }
 
     this._handleConnected(account, { emit: false });
-    this.emit('accountChanged', account?.address ?? null);
   }
 
+  private _network: string | null = null;
   private _handleNetworkChange(payload: string) {
     const network = payload;
-
-    this.emit('networkChange', network ?? null);
+    if (network !== this._network) {
+      this.emit('networkChange', network || null);
+    }
+    this._network = network;
   }
 
   async connect(): Promise<AptosAccountInfo> {

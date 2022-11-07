@@ -268,6 +268,11 @@ export default function AlgoExample() {
     }
   }, [signedTxns, chain]);
 
+  const handleKissSession = useCallback(async () => {
+    await connector.killSession();
+    handleResetApp();
+  }, [connector, handleResetApp]);
+
   return (
     <div>
       <DAppList dapps={dapps} />
@@ -288,6 +293,7 @@ export default function AlgoExample() {
           <>
             <div>
               <pre>Connected as: {address}</pre>
+              <button onClick={handleKissSession}>Disconnect</button>
             </div>
             {formattedResult && (
               <div>

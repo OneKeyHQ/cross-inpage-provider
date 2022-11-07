@@ -75,7 +75,7 @@ export default function App() {
     }
 
     connectorRef.current.on('session_update', (error, payload) => {
-      console.log(`connector.on("session_update")`, payload);
+      console.log(`aptos connector.on("session_update")`, payload);
 
       if (error) {
         throw error;

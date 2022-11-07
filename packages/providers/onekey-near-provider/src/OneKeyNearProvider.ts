@@ -388,11 +388,15 @@ class OneKeyNearProvider extends ProviderNearBase {
     this.emit(PROVIDER_EVENTS.disconnect);
   }
 
+  override isAccountsChanged(account: NearAccountInfo) {
+    return account?.accountId !== this.getAccountId();
+  }
+
   _handleAccountsChanged(payload: NearAccountsChangedPayload, { emit = true } = {}) {
     const accounts = payload?.accounts || [];
     const account = accounts?.[0];
     const hasAccount = account && account?.accountId;
-    if (hasAccount && account?.accountId !== this.getAccountId()) {
+    if (hasAccount && this.isAccountsChanged(account)) {
       this._saveAuthData(account);
       emit && this.emit(PROVIDER_EVENTS.accountsChanged, payload);
     } else if (!hasAccount && this.isSignedIn()) {
@@ -401,8 +405,11 @@ class OneKeyNearProvider extends ProviderNearBase {
     }
   }
 
+  override isNetworkChanged(networkId: string) {
+    return networkId !== this._selectedNetwork?.networkId;
+  }
   _handleNetworkChanged(payload: NearNetworkChangedPayload, { emit = true } = {}) {
-    if (payload && payload.networkId !== this._selectedNetwork?.networkId) {
+    if (payload && this.isNetworkChanged(payload.networkId)) {
       this._selectedNetwork = payload;
       emit && this.emit(PROVIDER_EVENTS.networkChanged, payload);
       emit && this.emit(PROVIDER_EVENTS.chainChanged, payload);

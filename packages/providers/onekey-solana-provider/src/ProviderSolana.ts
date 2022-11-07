@@ -203,7 +203,11 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
 
   private _handleConnected(publicKey: PublicKey, options: { emit: boolean } = { emit: true }) {
     this._publicKey = publicKey;
-    options.emit && this.emit('connect', publicKey);
+    if (options.emit && this.isConnectionStatusChanged('connected')) {
+      this.connectionStatus = 'connected';
+      this.emit('connect', publicKey);
+      this.emit('accountChanged', publicKey);
+    }
   }
 
   async disconnect(): Promise<void> {
@@ -216,19 +220,36 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
 
   private _handleDisconnected(options: { emit: boolean } = { emit: true }) {
     this._publicKey = null;
-    options.emit && this.emit('disconnect');
+    if (options.emit && this.isConnectionStatusChanged('disconnected')) {
+      this.connectionStatus = 'disconnected';
+      this.emit('disconnect');
+      this.emit('accountChanged', null);
+    }
+  }
+
+  override isAccountsChanged(account: SolanaAccountInfo) {
+    return account.publicKey !== this._publicKey?.toBase58();
   }
 
   // trigger by bridge account change event
   private _handleAccountChange(payload: SolanaAccountChangedPayload) {
     const account = payload.accounts[0];
+    let publicKey: PublicKey | undefined;
+    try {
+      publicKey = new PublicKey(account.publicKey);
+    } catch (error) {
+      // noop
+    }
+    if (this.isAccountsChanged(account)) {
+      this.emit('accountChanged', publicKey || null);
+    }
     if (!account) {
       this._handleDisconnected();
-      return this.emit('accountChanged', null);
+      return;
     }
-    const publicKey = new PublicKey(account.publicKey);
-    this._handleConnected(publicKey, { emit: false });
-    this.emit('accountChanged', publicKey);
+    if (publicKey) {
+      this._handleConnected(publicKey, { emit: false });
+    }
   }
 
   async signAndSendTransaction(

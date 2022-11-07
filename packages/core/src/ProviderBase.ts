@@ -205,7 +205,7 @@ abstract class ProviderBase extends CrossEventEmitter {
   }
 
   connectionStatus?: IProviderBaseConnectionStatus;
-  isConnectionChanged(newStatus: IProviderBaseConnectionStatus): boolean {
+  isConnectionStatusChanged(newStatus: IProviderBaseConnectionStatus): boolean {
     return this.connectionStatus === undefined || newStatus !== this.connectionStatus;
   }
   isAccountsChanged(...args: any[]): boolean {

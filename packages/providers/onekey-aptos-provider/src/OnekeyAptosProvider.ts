@@ -153,21 +153,21 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
 
   private _handleConnected(account: AptosAccountInfo, options: { emit: boolean } = { emit: true }) {
     this._account = account;
-    if (options.emit && this.isConnectionChanged('connected')) {
+    if (options.emit && this.isConnectionStatusChanged('connected')) {
+      this.connectionStatus = 'connected';
       const address = account?.address ?? null;
       this.emit('connect', address);
       this.emit('accountChanged', address);
-      this.connectionStatus = 'connected';
     }
   }
 
   private _handleDisconnected(options: { emit: boolean } = { emit: true }) {
     this._account = null;
 
-    if (options.emit && this.isConnectionChanged('disconnected')) {
+    if (options.emit && this.isConnectionStatusChanged('disconnected')) {
+      this.connectionStatus = 'disconnected';
       this.emit('disconnect');
       this.emit('accountChanged', null);
-      this.connectionStatus = 'disconnected';
     }
   }
 

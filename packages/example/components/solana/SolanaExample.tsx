@@ -67,19 +67,19 @@ export default function App() {
     provider.on('connect', (publicKey: PublicKey) => {
       setPublicKey(publicKey);
       setConnected(true);
-      console.log(`[connect] ${publicKey.toBase58()}`);
+      console.log(`solana [connect] ${publicKey.toBase58()}`);
     });
     provider.on('disconnect', () => {
       setPublicKey(null);
       setConnected(false);
-      console.log('[disconnect] 👋');
+      console.log('solana [disconnect] 👋');
     });
     provider.on('accountChanged', (publicKey: PublicKey | null) => {
       setPublicKey(publicKey);
       if (publicKey) {
-        console.log(`[accountChanged] Switched account to ${publicKey?.toBase58()}`);
+        console.log(`solana [accountChanged] Switched account to ${publicKey?.toBase58()}`);
       } else {
-        console.log('[accountChanged] Switched unknown account');
+        console.log('solana [accountChanged] Switched unknown account');
         // In this case, dapps could not to anything, or,
         // Only re-connecting to the new account if it is trusted
         // provider.connect({ onlyIfTrusted: true }).catch((err) => {
@@ -90,7 +90,7 @@ export default function App() {
           .connect()
           .then(() => console.log('[accountChanged] Reconnected successfully'))
           .catch((err: Error) => {
-            console.log(`[accountChanged] Failed to re-connect: ${err.message}`);
+            console.log(`solana [accountChanged] Failed to re-connect: ${err.message}`);
           });
       }
     });

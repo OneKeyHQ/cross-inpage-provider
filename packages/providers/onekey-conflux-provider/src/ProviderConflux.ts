@@ -113,6 +113,10 @@ class ProviderConflux extends ProviderConfluxBase implements IProviderConflux {
     });
   }
 
+  override isAccountsChanged(accounts: string[]) {
+    return !dequal(this._accounts, accounts);
+  }
+
   private _handleAccountsChanged(accounts: string[]) {
     let _accounts = accounts;
 
@@ -132,7 +136,7 @@ class ProviderConflux extends ProviderConfluxBase implements IProviderConflux {
       }
     }
 
-    if (!dequal(this._accounts, _accounts)) {
+    if (this.isAccountsChanged(_accounts)) {
       this._accounts = _accounts;
 
       if (this._selectedAddress !== _accounts[0]) {
@@ -143,6 +147,10 @@ class ProviderConflux extends ProviderConfluxBase implements IProviderConflux {
         this.emit(ProviderEvents.ACCOUNTS_CHANGED, _accounts);
       }
     }
+  }
+
+  override isNetworkChanged(chainId: string) {
+    return chainId !== this._chainId;
   }
 
   private _handleChainChanged({ chainId, networkId }: Network = {}) {
@@ -164,7 +172,7 @@ class ProviderConflux extends ProviderConfluxBase implements IProviderConflux {
       this._handleDisconnected();
     } else {
       this._handleConnected({ chainId, networkId });
-      if (chainId !== this._chainId) {
+      if (this.isNetworkChanged(chainId)) {
         this._chainId = chainId;
         if (this._initialized) {
           this.emit(ProviderEvents.CHAIN_CHANGED, chainId);

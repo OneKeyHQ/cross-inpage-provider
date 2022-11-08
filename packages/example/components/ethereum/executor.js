@@ -1205,6 +1205,7 @@ export function useExecutor() {
         getNetworkAndChainId();
 
         ethereum.on('chainChanged', (chain) => {
+          console.log('evm chainChanged', chain);
           handleNewChain(chain);
           ethereum
             .request({
@@ -1217,6 +1218,7 @@ export function useExecutor() {
         });
         ethereum.on('networkChanged', handleNewNetwork);
         ethereum.on('accountsChanged', (newAccounts) => {
+          console.error('evm accountsChanged', newAccounts);
           ethereum
             .request({
               method: 'eth_getBlockByNumber',

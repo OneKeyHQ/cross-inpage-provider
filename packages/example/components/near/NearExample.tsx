@@ -95,12 +95,12 @@ export default function NearExample() {
   const onAccountsChanged = useCallback((payload: NearAccountsChangedPayload) => {
     const _accountId = payload?.accounts?.[0]?.accountId || '';
     const _publicKey = payload?.accounts?.[0]?.publicKey || '';
-    console.log('onAccountsChanged >>>', _accountId, _publicKey);
+    console.log('near onAccountsChanged >>>', _accountId, _publicKey);
     setAccountId(_accountId);
     setPublicKey(_publicKey);
   }, []);
   const onNetworkChanged = useCallback((payload: NearNetworkChangedPayload) => {
-    console.log('onNetworkChanged >>>', payload);
+    console.log('near onNetworkChanged >>>', payload);
     setNetworkId(payload.networkId);
   }, []);
   const config = useMemo(

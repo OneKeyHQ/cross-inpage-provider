@@ -66,7 +66,7 @@ export default function AlgoExample() {
       }
 
       connector.on('session_update', (error, payload: IInternalEvent) => {
-        console.log(`connector.on("session_update")`);
+        console.log(`algo connector.on("session_update")`, payload);
 
         if (error) {
           throw error;
@@ -77,7 +77,7 @@ export default function AlgoExample() {
       });
 
       connector.on('connect', (error, payload: IInternalEvent) => {
-        console.log(`connector.on("connect")`);
+        console.log(`algo connector.on("connect")`, payload);
 
         if (error) {
           throw error;
@@ -87,7 +87,7 @@ export default function AlgoExample() {
       });
 
       connector.on('disconnect', (error) => {
-        console.log(`connector.on("disconnect")`);
+        console.log(`algo connector.on("disconnect")`);
 
         if (error) {
           throw error;
@@ -113,8 +113,13 @@ export default function AlgoExample() {
   const handleConnectWallet = useCallback(async () => {
     const bridge = 'https://bridge.walletconnect.org';
 
-    const connector = new WalletConnect({ bridge, qrcodeModal: QRCodeModal });
-
+    const connector = new WalletConnect({
+      storageId: 'walletconnect_algo',
+      bridge,
+      qrcodeModal: QRCodeModal,
+    });
+    // @ts-ignore
+    window.wcConnector = connector;
     setConnector(connector);
 
     if (!connector.connected) {
@@ -306,6 +311,7 @@ export default function AlgoExample() {
                 {name}
               </button>
             ))}
+            <button onClick={() => connector.killSession()}>Disconnect</button>
           </>
         ) : (
           <>

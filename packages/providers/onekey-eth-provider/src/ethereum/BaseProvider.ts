@@ -39,7 +39,7 @@ export interface BaseProviderOptions {
 }
 
 export interface RequestArguments {
-  id?: number|string;
+  id?: number | string;
   /** The RPC method to request. */
   method: string;
 
@@ -374,13 +374,17 @@ export default class BaseProvider extends ProviderBase {
     } else {
       this._handleConnect(chainId);
 
-      if (chainId !== this.chainId) {
+      if (this.isNetworkChanged(chainId)) {
         this.chainId = chainId;
         if (this._state.initialized) {
           this.emit('chainChanged', this.chainId);
         }
       }
     }
+  }
+
+  override isNetworkChanged(chainId: string) {
+    return chainId !== this.chainId;
   }
 
   /**
@@ -413,7 +417,7 @@ export default class BaseProvider extends ProviderBase {
     }
 
     // emit accountsChanged if anything about the accounts array has changed
-    if (!dequal(this._state.accounts, _accounts)) {
+    if (this.isAccountsChanged(_accounts as string[])) {
       // we should always have the correct accounts even before eth_accounts
       // returns
       if (isEthAccounts && this._state.accounts !== null) {
@@ -435,6 +439,10 @@ export default class BaseProvider extends ProviderBase {
         this.emit('accountsChanged', _accounts);
       }
     }
+  }
+
+  override isAccountsChanged(_accounts: string[]) {
+    return !dequal(this._state.accounts, _accounts);
   }
 
   /**

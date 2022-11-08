@@ -36,6 +36,7 @@ export type ConnectWalletInfo = {
   };
   providerState: unknown;
 };
+export type IProviderBaseConnectionStatus = 'connected' | 'disconnected';
 
 const METHODS = {
   wallet_getConnectWalletInfo: 'wallet_getConnectWalletInfo',
@@ -201,6 +202,17 @@ abstract class ProviderBase extends CrossEventEmitter {
       method: METHODS.wallet_sendSiteMetadata,
       params: metadata,
     });
+  }
+
+  connectionStatus?: IProviderBaseConnectionStatus;
+  isConnectionStatusChanged(newStatus: IProviderBaseConnectionStatus): boolean {
+    return this.connectionStatus === undefined || newStatus !== this.connectionStatus;
+  }
+  isAccountsChanged(...args: any[]): boolean {
+    throw new Error('isAccountsChanged not implemented');
+  }
+  isNetworkChanged(...args: any[]): boolean {
+    throw new Error('isNetworkChanged not implemented');
   }
 }
 

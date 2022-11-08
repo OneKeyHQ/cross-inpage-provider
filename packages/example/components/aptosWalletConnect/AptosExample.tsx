@@ -75,7 +75,7 @@ export default function App() {
     }
 
     connectorRef.current.on('session_update', (error, payload) => {
-      console.log(`connector.on("session_update")`);
+      console.log(`aptos connector.on("session_update")`, payload);
 
       if (error) {
         throw error;
@@ -126,7 +126,11 @@ export default function App() {
     const bridge = 'https://bridge.walletconnect.org';
 
     // create new connector
-    connectorRef.current = new WalletConnect({ bridge, qrcodeModal: QRCodeModal });
+    connectorRef.current = new WalletConnect({
+      storageId: 'walletconnect_aptos',
+      bridge,
+      qrcodeModal: QRCodeModal,
+    });
 
     // check if already connected
     if (!connectorRef.current.connected) {

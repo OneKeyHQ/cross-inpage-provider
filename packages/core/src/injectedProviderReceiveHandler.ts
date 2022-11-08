@@ -22,7 +22,10 @@ function injectedProviderReceiveHandler(payload: IJsBridgeMessagePayload, bridge
     .concat(providerHub[providerName] as ProviderBase)
     .filter(Boolean);
   if (!providers || !providers.length) {
-    consoleErrorInDev(`[${providerName as string}] provider is NOT injected to document or bridge.`);
+    consoleErrorInDev(
+      `[${providerName as string}] provider is NOT injected to document or bridge.`,
+      payloadData,
+    );
     return;
   }
 

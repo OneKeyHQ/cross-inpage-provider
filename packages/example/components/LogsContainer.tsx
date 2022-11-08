@@ -3,6 +3,7 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import { Console, Hook, Unhook } from 'console-feed';
 import { JsBridgeBase } from '@onekeyfe/cross-inpage-provider-core';
+import { isString } from 'lodash';
 
 const loggers: Record<string, boolean> = {};
 
@@ -28,7 +29,31 @@ export const LogsContainer = ({ bridge }: { bridge?: JsBridgeBase } = {}) => {
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    Hook(window.console, (log) => setLogs((currLogs) => [...currLogs, log]), false);
+    Hook(
+      window.console,
+      (...logs) => {
+        setLogs((currLogs) => {
+          const newLogs = [...(currLogs || []), ...(logs || [])];
+          newLogs.forEach((item) => {
+            item.data = (item.data || []).map((content: any, index: number) => {
+              try {
+                // second console.log params should be string type
+                if (index > 0 && !isString(content)) {
+                  return JSON.stringify(content);
+                }
+              } catch (error) {
+                // noop
+                return `LogsContainer: JSON.stringify error` || 'LogsContainer:  ERROR';
+              }
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+              return content;
+            });
+          });
+          return newLogs;
+        });
+      },
+      false,
+    );
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return () => void Unhook(window.console);

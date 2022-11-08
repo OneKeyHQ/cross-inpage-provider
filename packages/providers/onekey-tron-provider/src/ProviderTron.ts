@@ -165,6 +165,9 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
     });
   }
 
+  override isAccountsChanged(accounts: string[]) {
+    return !dequal(this._accounts, accounts);
+  }
   private _handleAccountsChanged(accounts: string[]) {
     let _accounts = accounts;
 
@@ -184,7 +187,7 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
       }
     }
 
-    if (!dequal(this._accounts, _accounts)) {
+    if (this.isAccountsChanged(_accounts)) {
       this._accounts = _accounts;
       const address = _accounts[0];
 
@@ -244,10 +247,13 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
     window.dispatchEvent(new Event(event));
   }
 
+  override isNetworkChanged(nodes: Nodes) {
+    return !dequal(nodes, this._nodes);
+  }
   private _handleNodesChanged(nodes: Nodes) {
     if (isEmpty(nodes)) return;
 
-    if (!dequal(nodes, this._nodes)) {
+    if (this.isNetworkChanged(nodes)) {
       this._nodes = nodes;
 
       this.tronWeb?.setFullNode(nodes.fullNode ?? nodes.fullHost);

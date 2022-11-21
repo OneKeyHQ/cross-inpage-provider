@@ -8,3 +8,4 @@ export const JS_BRIDGE_MESSAGE_DIRECTION = {
 export const EXT_PORT_CS_TO_BG = 'onekey@EXT_PORT_CS_TO_BG';
 export const EXT_PORT_UI_TO_BG = 'onekey@EXT_PORT_UI_TO_BG';
 export const DEBUG_LOGGER_STORAGE_KEY = '$$ONEKEY_DEBUG_LOGGER';
+export const WALLET_INFO_LOACAL_KEY = 'onekey_wallet_info_local_key'

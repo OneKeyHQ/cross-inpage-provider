@@ -5,6 +5,14 @@ import {
 
 import { IInpageProviderConfig, ProviderBase } from '@onekeyfe/cross-inpage-provider-core';
 
+const PROVIDER_EVENTS = {
+  'message_low_level': 'message_low_level',
+} as const;
+
+const METHODS = {
+  wallet_getConnectWalletInfo: 'wallet_getConnectWalletInfo',
+};
+
 class ProviderPrivate extends ProviderBase {
   constructor(props: IInpageProviderConfig) {
     super(props);
@@ -17,6 +25,21 @@ class ProviderPrivate extends ProviderBase {
       void this.sendSiteMetadataDomReady();
     } catch (error) {
       console.error(error);
+    }
+    this._registerEvents();
+  }
+
+  private _registerEvents() {
+    // platform check
+    const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);
+    const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
+    if (!walletInfoLocal || (walletInfoLocal && walletInfoLocal.platformEnv.isExtension)) {
+      this.on(PROVIDER_EVENTS.message_low_level, (payload) => {
+        const { method } = payload;
+        if (method === METHODS.wallet_getConnectWalletInfo) {
+          void this.getConnectWalletInfo();
+        }
+      });
     }
   }
 

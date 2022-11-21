@@ -12,6 +12,7 @@ import {
 import siteMetadata from './siteMetadata';
 import { fakeLogger, fakeDebugLogger, consoleErrorInDev } from './loggers';
 import versionInfo from './versionInfo';
+import { WALLET_INFO_LOACAL_KEY } from './consts';
 
 export type IBridgeRequestCallback = (
   error: Error | null,
@@ -52,6 +53,7 @@ abstract class ProviderBase extends CrossEventEmitter {
     this.config = config;
     this.bridge = config.bridge;
     this.logger = config.logger || fakeLogger;
+
     // TODO init this.debugLogger first, and enable debug config after extension connect
     this.debugLogger = this.bridge?.debugLogger || fakeDebugLogger;
     this.bridge?.debugLogger?._attachExternalLogger(this.logger);
@@ -59,7 +61,6 @@ abstract class ProviderBase extends CrossEventEmitter {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       this.bridge.attachProviderInstance(this as any);
     }, 0);
-
     // call sendSiteMetadataDomReady/getConnectWalletInfo in ProviderPrivate, dont need here
     // void this.sendSiteMetadataDomReady();
     // void this.getConnectWalletInfo();
@@ -110,6 +111,7 @@ abstract class ProviderBase extends CrossEventEmitter {
           window.$onekey = window.$onekey || {};
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           window.$onekey.$walletInfo = result.walletInfo;
+          localStorage.setItem(WALLET_INFO_LOACAL_KEY, JSON.stringify(result.walletInfo));
         }
         if (result) {
           resolve(result);

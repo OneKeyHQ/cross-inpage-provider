@@ -4,6 +4,9 @@ import {
 } from '@onekeyfe/cross-inpage-provider-types';
 
 import { IInpageProviderConfig, ProviderBase } from '@onekeyfe/cross-inpage-provider-core';
+import { consts } from '@onekeyfe/cross-inpage-provider-core';
+
+const { WALLET_INFO_LOACAL_KEY } = consts;
 
 const PROVIDER_EVENTS = {
   'message_low_level': 'message_low_level',

@@ -35,9 +35,12 @@ class ProviderPrivate extends ProviderBase {
   private _registerEvents() {
     // platform check
     const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (!walletInfoLocal || (walletInfoLocal && walletInfoLocal.platformEnv.isExtension)) {
       this.on(PROVIDER_EVENTS.message_low_level, (payload) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const { method } = payload;
         if (method === METHODS.wallet_getConnectWalletInfo) {
           void this.getConnectWalletInfo();

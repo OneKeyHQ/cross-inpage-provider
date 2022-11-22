@@ -102,6 +102,8 @@ function injectWeb3Provider(): unknown {
     sollet: null,
   };
 
+  defineWindowProperty('$onekey', $onekey);
+
   const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);
   const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
   if (walletInfoLocal && walletInfoLocal.platformEnv.isExtension && walletInfoLocal.disableExt) {
@@ -119,10 +121,10 @@ function injectWeb3Provider(): unknown {
     },
   });
 
-  defineWindowProperty('$onekey', $onekey);
   defineWindowProperty('ethereum', ethereum);
   defineWindowProperty('solana', solana);
   defineWindowProperty('phantom', { solana });
+  defineWindowProperty('starcoin', starcoin);
   defineWindowProperty('aptos', martian);
   defineWindowProperty('martian', martianProxy);
   defineWindowProperty('conflux', conflux);

@@ -13,7 +13,7 @@ const PROVIDER_EVENTS = {
 } as const;
 
 const METHODS = {
-  wallet_getConnectWalletInfo: 'wallet_getConnectWalletInfo',
+  wallet_events_ext_switch_changed: 'wallet_events_ext_switch_changed',
 };
 
 class ProviderPrivate extends ProviderBase {
@@ -33,19 +33,27 @@ class ProviderPrivate extends ProviderBase {
   }
 
   private _registerEvents() {
-    // platform check
-    const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (!walletInfoLocal || (walletInfoLocal && walletInfoLocal.platformEnv.isExtension)) {
-      this.on(PROVIDER_EVENTS.message_low_level, (payload) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const { method } = payload;
-        if (method === METHODS.wallet_getConnectWalletInfo) {
-          void this.getConnectWalletInfo();
-        }
-      });
+    try {
+      // platform check
+      const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (!walletInfoLocal || (walletInfoLocal && walletInfoLocal.platformEnv.isExtension)) {
+        this.on(PROVIDER_EVENTS.message_low_level, (payload) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          const { method, params } = payload;
+          if (method === METHODS.wallet_events_ext_switch_changed) {
+            try {
+              localStorage.setItem(WALLET_INFO_LOACAL_KEY, JSON.stringify(params));
+            } catch (e) {
+              console.error(e);
+            }
+          }
+        });
+      }
+    } catch (e) {
+      console.error(e);
     }
   }
 

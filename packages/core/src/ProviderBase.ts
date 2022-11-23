@@ -111,7 +111,11 @@ abstract class ProviderBase extends CrossEventEmitter {
           window.$onekey = window.$onekey || {};
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           window.$onekey.$walletInfo = result.walletInfo;
-          localStorage.setItem(WALLET_INFO_LOACAL_KEY, JSON.stringify(result.walletInfo));
+          try {
+            localStorage.setItem(WALLET_INFO_LOACAL_KEY, JSON.stringify(result.walletInfo));
+          } catch (e) {
+            console.error(e);
+          }
         }
         if (result) {
           resolve(result);

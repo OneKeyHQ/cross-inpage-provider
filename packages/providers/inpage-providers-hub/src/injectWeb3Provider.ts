@@ -104,11 +104,15 @@ function injectWeb3Provider(): unknown {
 
   defineWindowProperty('$onekey', $onekey);
 
-  const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);
-  const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
-  if (walletInfoLocal && walletInfoLocal.platformEnv.isExtension && walletInfoLocal.disableExt) {
-    // disable onekey ext stop inject
-    return;
+  try {
+    const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);
+    const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
+    if (walletInfoLocal && walletInfoLocal.platformEnv.isExtension && walletInfoLocal.disableExt) {
+      // disable onekey ext stop inject
+      return;
+    }
+  } catch (e) {
+    console.error(e);
   }
 
   const martianProxy = new Proxy(martian, {

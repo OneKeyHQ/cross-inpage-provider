@@ -53,11 +53,11 @@ export default function App() {
 
   const rpcProvider = useMemo(() => {
     if (network.toLowerCase() === 'testnet') {
-      return new JsonRpcProvider('https://faucet.testnet.sui.io', {
+      return new JsonRpcProvider('https://fullnode.testnet.sui.io', {
         faucetURL: 'https://faucet.testnet.sui.io/gas',
       });
     } else {
-      return new JsonRpcProvider('https://faucet.devnet.sui.io', {
+      return new JsonRpcProvider('https://fullnode.devnet.sui.io', {
         faucetURL: 'https://faucet.devnet.sui.io/gas',
       });
     }

@@ -13,6 +13,7 @@ declare global {
     tronLink: any;
     tronWeb: any;
     sunWeb: any;
+    suiWallet: any;
     $onekey: any;
     ReactNativeWebView?: {
       postMessage: (payload: string) => void;
@@ -43,6 +44,7 @@ export enum IInjectedProviderNames {
   aptos = 'aptos',
   martian = 'martian',
   algo = 'algo',
+  sui = 'sui',
   $private = '$private',
   $hardware_sdk = '$hardware_sdk',
 }

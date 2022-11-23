@@ -9,6 +9,7 @@ import { ProviderStarcoin } from '@onekeyfe/onekey-starcoin-provider';
 import { ProviderAptos, ProviderAptosMartian } from '@onekeyfe/onekey-aptos-provider';
 import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
 import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
+import { ProviderSui } from '@onekeyfe/onekey-sui-provider';
 import './connectButtonHack';
 // import Web3 from 'web3'; // cause build error
 
@@ -21,6 +22,7 @@ export type IWindowOneKeyHub = {
   starcoin?: any;
   aptos?: ProviderAptos;
   martian?: ProviderAptosMartian;
+  suiWallet?: ProviderSui;
   $private?: ProviderPrivate;
   $walletInfo?: {
     buildNumber: string;
@@ -67,6 +69,10 @@ function injectWeb3Provider(): unknown {
     bridge,
   });
 
+  const sui = new ProviderSui({
+    bridge,
+  });
+
   // providerHub
   const $onekey = {
     ...window.$onekey,
@@ -79,6 +85,7 @@ function injectWeb3Provider(): unknown {
     conflux,
     tron,
     sollet: null,
+    sui,
   };
   window.$onekey = $onekey;
 
@@ -112,6 +119,8 @@ function injectWeb3Provider(): unknown {
   window.conflux = conflux;
 
   window.tronLink = tron;
+
+  window.suiWallet = sui;
 
   // ** shim or inject real web3
   //

@@ -199,6 +199,12 @@ const data: ITreeNodeData[] = [
         href: '/tron',
         icon: 'https://onekey-asset.com/assets/trx/trx.png',
       },
+      {
+        id: uuid.v4(),
+        name: 'Sui',
+        href: '/sui',
+        icon: 'https://onekey-asset.com/assets/sui/sui.png',
+      },
     ],
   },
 ];

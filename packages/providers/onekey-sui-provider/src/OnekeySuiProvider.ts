@@ -1,3 +1,4 @@
+/* eslint-disable tsdoc/syntax */
 import type { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { ProviderSuiBase } from './ProviderSuiBase';

@@ -9,9 +9,12 @@ import { ProviderStarcoin } from '@onekeyfe/onekey-starcoin-provider';
 import { ProviderAptos, ProviderAptosMartian } from '@onekeyfe/onekey-aptos-provider';
 import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
 import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
+import { consts } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderSui } from '@onekeyfe/onekey-sui-provider';
 import './connectButtonHack';
 // import Web3 from 'web3'; // cause build error
+
+const { WALLET_INFO_LOACAL_KEY } = consts;
 
 export type IWindowOneKeyHub = {
   debugLogger?: any;
@@ -27,6 +30,7 @@ export type IWindowOneKeyHub = {
   $walletInfo?: {
     buildNumber: string;
     isLegacy: boolean;
+    disableExt?: boolean;
     platform: string;
     version: string;
     platformEnv: {
@@ -37,10 +41,27 @@ export type IWindowOneKeyHub = {
   };
 };
 
+function defineWindowProperty(property: string, provider: unknown) {
+  try {
+    Object.defineProperty(window, property, {
+      get() {
+        return provider;
+      },
+      set(val) {
+        // skip the assignment
+        return;
+      },
+    });
+  } catch (ex) {
+    console.error(ex);
+  }
+}
+
 function injectWeb3Provider(): unknown {
   if (!window?.$onekey?.jsBridge) {
     throw new Error('OneKey jsBridge not found.');
   }
+
   const bridge: JsBridgeBase = window?.$onekey?.jsBridge;
 
   const ethereum = new ProviderEthereum({
@@ -87,25 +108,21 @@ function injectWeb3Provider(): unknown {
     sollet: null,
     sui,
   };
-  window.$onekey = $onekey;
 
-  // ** EVM
-  // TODO conflict with MetaMask
-  window.ethereum = ethereum;
+  defineWindowProperty('$onekey', $onekey);
 
-  // ** SOL
-  window.solana = solana;
-  window.phantom = { solana };
-  // sim multiple providers may cause opensea.io prompts Connection twice.
-  // window.solflare = solana;
-  // window.glowSolana = solana;
+  try {
+    const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);
+    const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
+    if (walletInfoLocal && walletInfoLocal.platformEnv.isExtension && walletInfoLocal.disableExt) {
+      // disable onekey ext stop inject
+      return;
+    }
+  } catch (e) {
+    console.error(e);
+  }
 
-  // ** STC
-  window.starcoin = starcoin;
-
-  // ** Aptos
-  window.aptos = martian;
-  window.martian = new Proxy(martian, {
+  const martianProxy = new Proxy(martian, {
     get: (target, property, ...args) => {
       if (property === 'aptosProviderType') {
         return 'martian';
@@ -115,10 +132,47 @@ function injectWeb3Provider(): unknown {
     },
   });
 
-  // ** Conflux
-  window.conflux = conflux;
+  defineWindowProperty('ethereum', ethereum);
+  defineWindowProperty('solana', solana);
+  defineWindowProperty('phantom', { solana });
+  defineWindowProperty('starcoin', starcoin);
+  defineWindowProperty('aptos', martian);
+  defineWindowProperty('martian', martianProxy);
+  defineWindowProperty('conflux', conflux);
+  defineWindowProperty('tronLink', tron);
 
-  window.tronLink = tron;
+  // window.$onekey = $onekey;
+
+  // ** EVM
+  // TODO conflict with MetaMask
+  // window.ethereum = ethereum;
+
+  // ** SOL
+  // window.solana = solana;
+  // window.phantom = { solana };
+  // sim multiple providers may cause opensea.io prompts Connection twice.
+  // window.solflare = solana;
+  // window.glowSolana = solana;
+
+  // ** STC
+  // window.starcoin = starcoin;
+
+  // ** Aptos
+  // window.aptos = martian;
+  // window.martian = new Proxy(martian, {
+  //   get: (target, property, ...args) => {
+  //     if (property === 'aptosProviderType') {
+  //       return 'martian';
+  //     }
+  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  //     return Reflect.get(target, property, ...args);
+  //   },
+  // });
+
+  // ** Conflux
+  // window.conflux = conflux;
+
+  // window.tronLink = tron;
 
   window.suiWallet = sui;
 

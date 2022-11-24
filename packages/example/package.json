@@ -13,9 +13,11 @@
     "swap-lock-registry": "npx swap-lock-registry --yarn --parallel --url https://registry.yarnpkg.com yarn.lock"
   },
   "dependencies": {
+    "@emotion/react": "^11.10.5",
     "@ethersproject/bytes": "^5.0.6",
     "@metamask/onboarding": "^1.0.1",
-    "@mysten/sui.js": "^0.17.1",
+    "@mysten/wallet-adapter-all-wallets": "^0.3.3",
+    "@mysten/wallet-adapter-react-ui": "^0.2.6",
     "@onekeyfe/cross-inpage-provider-core": "1.1.8",
     "@onekeyfe/cross-inpage-provider-types": "1.1.8",
     "@onekeyfe/onekey-aptos-provider": "1.1.8",

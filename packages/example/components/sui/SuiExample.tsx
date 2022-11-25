@@ -4,7 +4,8 @@ import { ProviderSui } from '@onekeyfe/onekey-sui-provider';
 
 import { DAppList } from '../dappList/DAppList';
 import { dapps } from './dapps.config';
-import { Coin, JsonRpcProvider, SignableTransaction, SUI_TYPE_ARG, GetObjectDataResponse, getObjectId, MoveCallTransaction, LocalTxnDataSerializer, Base64DataBuffer } from '@mysten/sui.js';
+import { Coin, JsonRpcProvider, SUI_TYPE_ARG, GetObjectDataResponse, getObjectId, MoveCallTransaction, LocalTxnDataSerializer, Base64DataBuffer } from '@mysten/sui.js';
+import { buildTransfer, buildTransferPay } from './utils';
 
 declare global {
   interface Window {
@@ -29,8 +30,6 @@ const useProvider = () => {
 
   return provider;
 };
-
-const DEFAULT_GAS_BUDGET_FOR_PAY = 150;
 
 const INIT_MOVE_CALL: MoveCallTransaction = {
   packageObjectId: '0x0000000000000000000000000000000000000002',
@@ -185,134 +184,9 @@ export default function App() {
     }
   };
 
-  const computeGasBudgetForPay = (
-    coins: GetObjectDataResponse[],
-    amount: string,
-  ) => {
-    const numInputCoins = Coin.selectCoinSetWithCombinedBalanceGreaterThanOrEqual(
-      coins,
-      BigInt(amount),
-    );
-    return DEFAULT_GAS_BUDGET_FOR_PAY * Math.max(2, Math.min(100, numInputCoins.length / 2));
-  }
-
-  const buildTransfer = async (
-    to: string,
-    amount: string,
-    argType?: string,
-  ): Promise<SignableTransaction> => {
-    const recipient = to;
-    const sender = address;
-    const isSuiTransfer = argType == null || argType === '';
-
-    const typeArg = isSuiTransfer ? SUI_TYPE_ARG : argType;
-    const readyCoins = await rpcProvider.getCoinBalancesOwnedByAddress(
-      sender,
-      typeArg,
-    );
-    const totalBalance = Coin.totalBalance(readyCoins);
-    const gasBudget = computeGasBudgetForPay(readyCoins, amount);
-
-    let amountAndGasBudget = isSuiTransfer
-      ? BigInt(amount) + BigInt(gasBudget)
-      : BigInt(amount);
-    if (amountAndGasBudget > totalBalance) {
-      amountAndGasBudget = totalBalance;
-    }
-
-    const inputCoins = Coin.selectCoinSetWithCombinedBalanceGreaterThanOrEqual(
-      readyCoins,
-      amountAndGasBudget,
-    ) as GetObjectDataResponse[];
-
-    const selectCoinIds = inputCoins.map((object) => getObjectId(object));
-
-    const txCommon = {
-      inputCoins: selectCoinIds,
-      recipients: [recipient],
-      amounts: [parseInt(amount)],
-      gasBudget,
-    };
-
-    let encodedTx: SignableTransaction;
-    if (isSuiTransfer) {
-      encodedTx = {
-        kind: 'paySui',
-        data: {
-          ...txCommon,
-        },
-      };
-    } else {
-      // Get native coin objects
-      const gasFeeCoins = await rpcProvider.selectCoinsWithBalanceGreaterThanOrEqual(
-        sender,
-        BigInt(gasBudget),
-        SUI_TYPE_ARG,
-      );
-
-      const gasCoin = Coin.selectCoinWithBalanceGreaterThanOrEqual(
-        gasFeeCoins,
-        BigInt(gasBudget),
-      ) as GetObjectDataResponse | undefined;
-
-      if (!gasCoin) {
-        console.log(`[error] gas coin not found`);
-        return null
-      }
-
-      encodedTx = {
-        kind: 'pay',
-        data: {
-          ...txCommon,
-          gasPayment: getObjectId(gasCoin),
-        },
-      };
-    }
-
-    return encodedTx;
-  }
-
-  const buildTransferPay = async (
-    to: string,
-    amount: string
-  ): Promise<SignableTransaction> => {
-    const recipient = to;
-    const sender = address;
-
-    const typeArg = SUI_TYPE_ARG;
-    const readyCoins = await rpcProvider.getCoinBalancesOwnedByAddress(
-      sender,
-      typeArg,
-    );
-    const totalBalance = Coin.totalBalance(readyCoins);
-    const gasBudget = computeGasBudgetForPay(readyCoins, amount);
-
-    let amountAndGasBudget = BigInt(amount) + BigInt(gasBudget)
-    if (amountAndGasBudget > totalBalance) {
-      amountAndGasBudget = totalBalance;
-    }
-
-    const inputCoins = Coin.selectCoinSetWithCombinedBalanceGreaterThanOrEqual(
-      readyCoins,
-      amountAndGasBudget,
-    ) as GetObjectDataResponse[];
-
-    const selectCoinIds = inputCoins.map((object) => getObjectId(object));
-
-    return {
-      kind: 'pay',
-      data: {
-        inputCoins: selectCoinIds,
-        recipients: [recipient],
-        amounts: [parseInt(amount)],
-        gasBudget,
-      }
-    }
-  }
-
   const signAndExecuteTransaction = async (hasBytes = false) => {
     try {
-      const transfer = hasBytes ? (await buildTransferPay(address, '100000')) : (await buildTransfer(address, '100000'));
+      const transfer = hasBytes ? (await buildTransferPay(rpcProvider, address, address, '100000')) : (await buildTransfer(rpcProvider, address, address, '100000'));
 
       let res: unknown = null
       if (hasBytes) {

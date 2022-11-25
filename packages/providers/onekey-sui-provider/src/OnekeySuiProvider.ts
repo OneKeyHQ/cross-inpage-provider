@@ -86,7 +86,7 @@ export interface IProviderSui {
   executeSerializedMoveCall(transaction: string | Uint8Array): Promise<SuiTransactionResponse>;
 }
 
-type OneKeySuiProviderProps = IInpageProviderConfig & {
+export type OneKeySuiProviderProps = IInpageProviderConfig & {
   timeout?: number;
 };
 

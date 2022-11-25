@@ -201,6 +201,12 @@ const data: ITreeNodeData[] = [
       },
       {
         id: uuid.v4(),
+        name: 'Sui Standard (Recommend)',
+        href: '/suiStandard',
+        icon: 'https://onekey-asset.com/assets/sui/sui.png',
+      },
+      {
+        id: uuid.v4(),
         name: 'Sui',
         href: '/sui',
         icon: 'https://onekey-asset.com/assets/sui/sui.png',

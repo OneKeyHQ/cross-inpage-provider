@@ -10,7 +10,7 @@ import { ProviderAptos, ProviderAptosMartian } from '@onekeyfe/onekey-aptos-prov
 import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
 import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
 import { consts } from '@onekeyfe/cross-inpage-provider-core';
-import { ProviderSui } from '@onekeyfe/onekey-sui-provider';
+import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import './connectButtonHack';
 // import Web3 from 'web3'; // cause build error
 
@@ -186,6 +186,8 @@ function injectWeb3Provider(): unknown {
 
   // TODO use initializeInpageProvider.ts
   window.dispatchEvent(new Event('ethereum#initialized'));
+
+  registerSuiWallet(sui);
 
   return $onekey;
 }

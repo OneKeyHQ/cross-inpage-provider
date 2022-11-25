@@ -6,9 +6,9 @@ import { dapps } from './dapps.config';
 import { JsonRpcProvider, LocalTxnDataSerializer, Base64DataBuffer } from '@mysten/sui.js';
 import { WalletProvider, useWallet } from "@mysten/wallet-adapter-react";
 import { WalletStandardAdapterProvider } from "@mysten/wallet-adapter-all-wallets";
-import { ConnectWalletModal } from "@mysten/wallet-adapter-react-ui";
 import { buildTransfer, buildTransferPay } from '../sui/utils';
-import { createTheme, ThemeProvider } from "@mui/material"
+import { Box, Modal, Text, Image, Pressable, VStack } from 'native-base';
+
 
 function DappTest() {
   const [network, setNetwork] = useState<string>('TestNet');
@@ -130,23 +130,91 @@ function DappTest() {
   );
 }
 
-export default function App() {
-  const theme = createTheme({
-    typography: {
-      "fontFamily": `"IBM Plex Sans", sans-serif`,
-    }
-  })
+function ConnectWalletModal() {
+  const { connected } = useWallet();
 
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+
+  // eslint-disable-next-line @typescript-eslint/unbound-method
+  const { wallets, wallet, select, connecting } = useWallet();
+
+  const handleConnect = (walletName: string) => {
+    select(walletName);
+  };
+
+  useEffect(() => {
+    if (connected && !connecting) {
+      setOpen(false);
+    }
+  }, [connecting, connected])
+
+  return (
+    <>
+      {!connected && (
+        <>
+          <button onClick={handleClickOpen}>
+            Connect To Wallet
+          </button>
+          <Modal isOpen={open} onClose={handleClose}>
+            <Modal.Content marginBottom="auto"
+              marginTop={0}>
+              <Modal.CloseButton />
+              <Modal.Header>Select Wallet</Modal.Header>
+              <Modal.Body>
+                <>
+                  {!connecting && (
+                    <Box >
+                      <VStack space={2}>
+                        {wallets.map((wallet) => (
+                          <Pressable onPress={() => handleConnect(wallet.name)}>
+                            <Box flexDirection='row' justifyContent='space-between' alignItems='center' bg="green.100" borderRadius={20} px={4} minH={60}>
+                              <Text>{wallet.name}</Text>
+                              <Image size='10' source={{
+                                uri: wallet.icon
+                              }} />
+                            </Box>
+                          </Pressable>
+                        ))}
+                      </VStack>
+                    </Box>
+                  )}
+                  {connecting && (
+                    <Box>
+                      <Text
+                      >
+                        Connecting to {wallet ? wallet.name : "Wallet"}
+                      </Text>
+                      <progress />
+                    </Box>
+                  )}
+                </>
+              </Modal.Body>
+            </Modal.Content>
+          </Modal>
+        </>
+      )}
+    </>
+  );
+}
+
+export default function App() {
   const walletAdapters = useMemo(
     () => [new WalletStandardAdapterProvider()], []
   );
 
   return (
-    <ThemeProvider theme={theme}>
-      <WalletProvider adapters={walletAdapters}>
-        <DappTest />
-        <ConnectWalletModal />
-      </WalletProvider >
-    </ThemeProvider>
+    <WalletProvider adapters={walletAdapters}>
+      <DappTest />
+      <ConnectWalletModal />
+    </WalletProvider >
   )
 }

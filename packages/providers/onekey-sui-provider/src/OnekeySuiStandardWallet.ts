@@ -14,8 +14,7 @@ import {
     type EventsOnMethod,
     type EventsListeners,
 } from '@mysten/wallet-standard';
-import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
-import { OneKeySuiProviderProps, ProviderSui } from './OnekeySuiProvider';
+import {  ProviderSui } from './OnekeySuiProvider';
 import { ALL_PERMISSION_TYPES, LOGO_BASE64, PermissionType } from './types';
 
 type WalletEventsMap = {
@@ -109,7 +108,7 @@ class OnekeySuiStandardWallet implements Wallet{
                 // TODO: Expose public key instead of address:
                 publicKey: new Uint8Array(),
                 chains: SUI_CHAINS,
-                features: ['sui:signAndExecuteTransaction'],
+                features: [Feature.SUI__SIGN_AND_EXECUTE_TRANSACTION],
             });
             this.#events.emit('change', { accounts: this.accounts });
         }

@@ -35,14 +35,14 @@ enum Feature {
 
 class OnekeySuiStandardWallet implements Wallet{
   readonly version = '1.0.0' as const;
-  readonly #name = 'OneKey Wallet' as const;
-  readonly #provider:ProviderSui;
+  readonly _name = 'OneKey Wallet' as const;
+  readonly provider:ProviderSui;
 
-  #events: Emitter<WalletEventsMap>;
-  #account: ReadonlyWalletAccount | null;
+  _events: Emitter<WalletEventsMap>;
+  _account: ReadonlyWalletAccount | null;
 
   get name() {
-    return this.#name;
+    return this._name;
   }
 
   get icon() {
@@ -56,88 +56,88 @@ class OnekeySuiStandardWallet implements Wallet{
   }
 
   get accounts() {
-    return this.#account ? [this.#account] : [];
+    return this._account ? [this._account] : [];
   }
 
   get features(): Features {
     return {
       [Feature.STANDARD__CONNECT]: {
         version: '1.0.0',
-        connect: this.#connect,
+        connect: this.$connect,
       },
       [Feature.STANDARD__DISCONNECT]: {
         version: '1.0.0',
-        disconnect: this.#disconnect,
+        disconnect: this.$disconnect,
       },
       [Feature.STANDARD__EVENTS]: {
         version: '1.0.0',
-        on: this.#on,
+        on: this.$on,
       },
       [Feature.SUI__SIGN_AND_EXECUTE_TRANSACTION]: {
         version: '1.0.0',
-        signAndExecuteTransaction: this.#signAndExecuteTransaction,
+        signAndExecuteTransaction: this.$signAndExecuteTransaction,
       },
     };
   }
  
   constructor(provider: ProviderSui) {
-    this.#provider = provider;
-    this.#events = mitt();
-    this.#account = null;
-    void this.#connected();
+    this.provider = provider;
+    this._events = mitt();
+    this._account = null;
+    void this.$connected();
   }
 
-  #on: EventsOnMethod = (event, listener) => {
-    this.#events.on(event, listener);
-    return () => this.#events.off(event, listener);
+  $on: EventsOnMethod = (event, listener) => {
+    this._events.on(event, listener);
+    return () => this._events.off(event, listener);
   };
 
-  #connected = async () => {
-    if (!(await this.#hasPermissions(['viewAccount']))) {
+  $connected = async () => {
+    if (!(await this.$hasPermissions(['viewAccount']))) {
       return;
     }
-    const accounts =await this.#provider.getAccounts()
+    const accounts =await this.provider.getAccounts()
 
     const [address] = accounts;
 
     if (address) {
-        const account = this.#account;
+        const account = this._account;
         if (!account || account.address !== address) {
-            this.#account = new ReadonlyWalletAccount({
+            this._account = new ReadonlyWalletAccount({
                 address,
                 // TODO: Expose public key instead of address:
                 publicKey: new Uint8Array(),
                 chains: SUI_CHAINS,
                 features: [Feature.SUI__SIGN_AND_EXECUTE_TRANSACTION],
             });
-            this.#events.emit('change', { accounts: this.accounts });
+            this._events.emit('change', { accounts: this.accounts });
         }
     }
   };
 
-  #connect: ConnectMethod = async (input) => {
+  $connect: ConnectMethod = async (input) => {
     if (!input?.silent) {
-      await this.#provider.requestPermissions();
+      await this.provider.requestPermissions();
     }
 
-    await this.#connected();
+    await this.$connected();
 
     return { accounts: this.accounts };
   };
 
-  #disconnect: DisconnectMethod = async () => {
-    await this.#provider.disconnect();
-    this.#account = null;
-    this.#events.all.clear();
+  $disconnect: DisconnectMethod = async () => {
+    await this.provider.disconnect();
+    this._account = null;
+    this._events.all.clear();
   };
 
 
-  #hasPermissions(permissions: readonly PermissionType[] = ALL_PERMISSION_TYPES) {
-    return  this.#provider.hasPermissions(permissions);
+  $hasPermissions(permissions: readonly PermissionType[] = ALL_PERMISSION_TYPES) {
+    return  this.provider.hasPermissions(permissions);
   }
 
-  #signAndExecuteTransaction: SuiSignAndExecuteTransactionMethod = async (input) => {
-    return this.#provider.signAndExecuteTransaction(input.transaction);
+  $signAndExecuteTransaction: SuiSignAndExecuteTransactionMethod = async (input) => {
+    return this.provider.signAndExecuteTransaction(input.transaction);
   };
 }
 

@@ -39,6 +39,8 @@ export default function App() {
   const [network, setNetwork] = useState<string>('');
   const [connected, setConnected] = useState<boolean>(false);
   const [address, setAddress] = useState<string | null>(null);
+  const [collectionName, setCollectionName] = useState<string>('OneKey-Collection');
+  const [nftTokenName, setNftTokenName] = useState<string>('OneKey-NFT-1');
 
   useEffect(() => {
     if (!provider) return;
@@ -174,9 +176,8 @@ export default function App() {
   };
 
   const createCollection = async () => {
-    const number = random(1, 100000, false);
     const res = await provider.createCollection(
-      `ColName-${number}`,
+      collectionName,
       'CollectionDescription',
       'https://aptos.dev',
     );
@@ -184,10 +185,9 @@ export default function App() {
   };
 
   const createToken = async () => {
-    const number = random(1, 100000, false);
     const res = await provider.createToken(
-      `ColName-${number}`,
-      'TokenName',
+      collectionName,
+      nftTokenName,
       'TokenDescription',
       1,
       'https://aptos.dev/img/nyan.jpeg',
@@ -257,8 +257,6 @@ export default function App() {
               Generate Sign&Send Transaction{' '}
             </button>
             <button onClick={signMessage}>Sign Message</button>
-            <button onClick={createCollection}>Create Collection</button>
-            <button onClick={createToken}>Create Token</button>
             <button onClick={getTransactions}>Get Transactions</button>
             <button onClick={getTransaction}>Get Transaction</button>
             <button onClick={getAccountTransactions}>Get Account Transaction</button>
@@ -267,6 +265,35 @@ export default function App() {
             <button onClick={getChainId}>Get ChainId</button>
             <button onClick={getLedgerInfo}>Get LedgerInfo</button>
             <button onClick={() => disconnectWallet()}>Disconnect</button>
+
+            <br />
+            <br />
+            <div style={{ border: '1px solid #cccccc', flexDirection: 'column' }}>
+              <pre>Collection Name: <input
+                type="text"
+                placeholder="Collection Name"
+                value={collectionName}
+                onChange={(e) => setCollectionName(e.target.value)}
+              /> 不能重名，要改名字。</pre>
+              <pre><button onClick={createCollection}>Create Collection</button></pre>
+            </div>
+
+            <br />
+            <div style={{ border: '1px solid #cccccc', flexDirection: 'column' }}>
+              <pre>Collection Name: <input
+                type="text"
+                placeholder="Collection Name"
+                value={collectionName}
+                onChange={(e) => setCollectionName(e.target.value)}
+              /> 指定链上已经存在的 Collection Name。</pre>
+              <pre>NFT Name: <input
+                type="text"
+                placeholder="Token Name"
+                value={nftTokenName}
+                onChange={(e) => setNftTokenName(e.target.value)}
+              /> NFT Name 不能重名，要改名字。</pre>
+              <pre><button onClick={createToken}>Create Token</button></pre>
+            </div>
           </>
         ) : (
           <>

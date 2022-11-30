@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
-import { AptosClient, BCS, Types, MaybeHexString } from 'aptos';
+import { Types, MaybeHexString } from 'aptos';
 import { TxnPayload, TxnOptions } from './types';
 import type * as TypeUtils from './type-utils';
 import { AptosProviderType, ProviderAptos } from './OnekeyAptosProvider';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
 
-type AnyNumber =  bigint | number
+type AnyNumber = bigint | number;
 
 export type AptosRequestMartian = {
   'martianSignAndSubmitTransaction': (transactions: string) => Promise<string>;
@@ -44,6 +45,35 @@ export type AptosRequestMartian = {
     property_values: Array<string>,
     property_types: Array<string>,
   ) => Promise<string>;
+
+  // RPC proxy
+  'generateTransaction': (
+    sender: string,
+    payload: TxnPayload,
+    options?: TxnOptions,
+  ) => Promise<string>;
+
+  'submitTransaction': (transaction: string) => Promise<string>;
+
+  'getTransactions': (query?: { start?: string; limit?: number }) => Promise<Types.Transaction[]>;
+
+  'getTransaction': (txnHash: string) => Promise<Types.Transaction>;
+
+  'getAccountTransactions': (
+    accountAddress: string,
+    query?: { start?: string; limit?: number },
+  ) => Promise<Types.Transaction[]>;
+
+  'getAccountResources': (
+    accountAddress: string,
+    query?: { ledgerVersion?: string },
+  ) => Promise<Types.MoveResource[]>;
+
+  'getAccount': (accountAddress: string) => Promise<Types.AccountData>;
+
+  'getChainId': () => Promise<{ chainId: number }>;
+
+  'getLedgerInfo': () => Promise<Types.IndexResponse>;
 };
 
 type JsBridgeRequest = {
@@ -76,10 +106,6 @@ class ProviderAptosMartian extends ProviderAptos {
     });
 
     window.dispatchEvent(new Event('martian#initialized'));
-  }
-
-  private async getClient() {
-    return new AptosClient(await this.getNetworkURL());
   }
 
   private _callMartianBridge<T extends keyof JsBridgeRequest>(params: {
@@ -207,69 +233,120 @@ class ProviderAptosMartian extends ProviderAptos {
     payload: TxnPayload,
     options?: TxnOptions,
   ): Promise<string> {
-    const client = await this.getClient();
-    const rawTx = await client.generateTransaction(sender, payload, options);
-    const serializer = new BCS.Serializer();
-    rawTx.serialize(serializer);
-    return serializer.getBytes().toString();
+    return this._callMartianBridge({
+      method: 'generateTransaction',
+      // @ts-expect-error
+      params: {
+        sender,
+        payload,
+        options,
+      },
+    });
   }
 
   private _convertStringToUint8Array(array: string): Uint8Array {
     return new Uint8Array(array.split(',').map((item) => parseInt(item, 10)));
   }
 
-  async submitTransaction(transaction: Uint8Array | string): Promise<string> {
-    const signedTxn =
-      typeof transaction === 'string' ? this._convertStringToUint8Array(transaction) : transaction;
+  private _convertMaybeHexStringTostring(hexString: MaybeHexString): string {
+    if (typeof hexString === 'string') {
+      return hexString;
+    } else {
+      return hexString.toString();
+    }
+  }
 
-    const client = await this.getClient();
-    const res = await client.submitTransaction(signedTxn);
-    return res.hash;
+  private _convertAnyNumberToString(number: AnyNumber): string {
+    if (typeof number === 'string') {
+      return number;
+    } else {
+      return number.toString();
+    }
+  }
+
+  async submitTransaction(transaction: Uint8Array | string): Promise<string> {
+    const txraw = typeof transaction === 'string' ?  this._convertStringToUint8Array(transaction) : transaction;
+    return this._callMartianBridge({
+      method: 'submitTransaction',
+      params: Buffer.from(txraw).toString('hex'),
+    });
   }
 
   async getTransactions(query?: {
     start?: AnyNumber;
     limit?: number;
   }): Promise<Types.Transaction[]> {
-    const client = await this.getClient();
-    return client.getTransactions(query);
+    return this._callMartianBridge({
+      method: 'getTransactions',
+      params: {
+        ...query,
+        start: query?.start ? this._convertAnyNumberToString(query.start) : undefined,
+      },
+    });
   }
 
   async getTransaction(txnHash: string): Promise<Types.Transaction> {
-    const client = await this.getClient();
-    return client.getTransactionByHash(txnHash);
+    return this._callMartianBridge({
+      method: 'getTransaction',
+      params: txnHash,
+    });
   }
 
   async getAccountTransactions(
     accountAddress: MaybeHexString,
     query?: { start?: AnyNumber; limit?: number },
   ): Promise<Types.Transaction[]> {
-    const client = await this.getClient();
-    return client.getAccountTransactions(accountAddress, query);
+    return this._callMartianBridge({
+      method: 'getAccountTransactions',
+      // @ts-expect-error
+      params: {
+        accountAddress: this._convertMaybeHexStringTostring(accountAddress),
+        query: {
+          ...query,
+          start: query?.start ? this._convertAnyNumberToString(query.start) : undefined,
+        },
+      },
+    });
   }
 
   async getAccountResources(
     accountAddress: MaybeHexString,
     query?: { ledgerVersion?: AnyNumber },
   ): Promise<Types.MoveResource[]> {
-    const client = await this.getClient();
-    return client.getAccountResources(accountAddress, query);
+    return this._callMartianBridge({
+      method: 'getAccountResources',
+      // @ts-expect-error
+      params: {
+        accountAddress: this._convertMaybeHexStringTostring(accountAddress),
+        query: {
+          ...query,
+          ledgerVersion: query?.ledgerVersion
+            ? this._convertAnyNumberToString(query.ledgerVersion)
+            : undefined,
+        },
+      },
+    });
   }
 
   async getAccount(accountAddress: MaybeHexString): Promise<Types.AccountData> {
-    const client = await this.getClient();
-    return client.getAccount(accountAddress);
+    return this._callMartianBridge({
+      method: 'getAccount',
+      params: this._convertMaybeHexStringTostring(accountAddress),
+    });
   }
 
   async getChainId(): Promise<{ chainId: number }> {
-    const client = await this.getClient();
-    const chainId = await client.getChainId();
-    return { chainId };
+    return this._callMartianBridge({
+      method: 'getChainId',
+      params: undefined,
+    });
   }
 
   async getLedgerInfo(): Promise<Types.IndexResponse> {
-    const client = await this.getClient();
-    return client.getLedgerInfo();
+    return this._callMartianBridge({
+      method: 'getLedgerInfo',
+      params: undefined,
+    });
   }
 }
 

@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import React from 'react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import WalletConnect from '@walletconnect/client';
 import QRCodeModal from '@walletconnect/qrcode-modal';
 import { IInternalEvent } from '@walletconnect/types';
@@ -102,7 +103,7 @@ export default function App() {
       onConnect(payload);
     });
 
-    connectorRef.current.on('disconnect', (error, payload) => {
+    connectorRef.current.on('disconnect', (error) => {
       console.log(`connector.on("disconnect")`);
 
       if (error) {

@@ -44,16 +44,14 @@ export type IWindowOneKeyHub = {
 function defineWindowProperty(property: string, provider: unknown) {
   try {
     Object.defineProperty(window, property, {
+      configurable: false, // prevent redefined
       get() {
         return provider;
-      },
-      set(val) {
-        // skip the assignment
-        return;
       },
     });
   } catch (ex) {
     console.error(ex);
+    (window as any)[property] = provider;
   }
 }
 
@@ -140,41 +138,7 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('martian', martianProxy);
   defineWindowProperty('conflux', conflux);
   defineWindowProperty('tronLink', tron);
-
-  // window.$onekey = $onekey;
-
-  // ** EVM
-  // TODO conflict with MetaMask
-  // window.ethereum = ethereum;
-
-  // ** SOL
-  // window.solana = solana;
-  // window.phantom = { solana };
-  // sim multiple providers may cause opensea.io prompts Connection twice.
-  // window.solflare = solana;
-  // window.glowSolana = solana;
-
-  // ** STC
-  // window.starcoin = starcoin;
-
-  // ** Aptos
-  // window.aptos = martian;
-  // window.martian = new Proxy(martian, {
-  //   get: (target, property, ...args) => {
-  //     if (property === 'aptosProviderType') {
-  //       return 'martian';
-  //     }
-  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  //     return Reflect.get(target, property, ...args);
-  //   },
-  // });
-
-  // ** Conflux
-  // window.conflux = conflux;
-
-  // window.tronLink = tron;
-
-  window.suiWallet = sui;
+  defineWindowProperty('suiWallet', sui);
 
   // ** shim or inject real web3
   //

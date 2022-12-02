@@ -51,7 +51,7 @@ function defineWindowProperty(property: string, provider: unknown) {
     });
   } catch (ex) {
     console.error(ex);
-    window.property = provider;
+    window[property] = provider;
   }
 }
 

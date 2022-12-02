@@ -44,14 +44,14 @@ export type IWindowOneKeyHub = {
 function defineWindowProperty(property: string, provider: unknown) {
   try {
     Object.defineProperty(window, property, {
-      configurable: false,  // prevent redefined
+      configurable: false, // prevent redefined
       get() {
         return provider;
       },
     });
   } catch (ex) {
     console.error(ex);
-    window[property] = provider;
+    (window as any)[property] = provider;
   }
 }
 

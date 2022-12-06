@@ -38,6 +38,7 @@
     "@onekeyfe/onekey-starcoin-provider": "1.1.11",
     "@onekeyfe/onekey-sui-provider": "1.1.11",
     "@onekeyfe/onekey-tron-provider": "1.1.11",
+    "@onekeyfe/onekey-cardano-provider": "1.1.11",
     "web3": "^1.7.3"
   }
 }

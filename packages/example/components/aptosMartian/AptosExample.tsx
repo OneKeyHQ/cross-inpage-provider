@@ -28,7 +28,6 @@ const useProvider = () => {
         // use mock api provider bridge for development
         // bridge: new CustomBridge(),
       });
-    window.martian = aptosProvider;
     setProvider(aptosProvider);
   }, []);
 

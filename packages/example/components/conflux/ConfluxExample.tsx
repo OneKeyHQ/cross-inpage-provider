@@ -16,7 +16,6 @@ const useProvider = () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const injectedProvider = window.conflux as ProviderConflux;
     const confluxProvider = injectedProvider || new ProviderConflux({});
-    window.conflux = confluxProvider;
     setProvider(confluxProvider);
   }, []);
 

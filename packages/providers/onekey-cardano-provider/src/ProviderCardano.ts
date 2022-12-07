@@ -9,6 +9,7 @@ import * as TypeUtils from './type-utils'
 
 
 export type CardanoRequest = WalletApi & {
+  connect: () => Promise<{ account: string }>
   // override the type of the request method
   getUtxos: (params: {amount?: Cbor, paginate?: Paginate}) => Promise<Cbor[] | undefined>
   signTx: (params: {tx: Cbor, partialSign?: boolean}) => Promise<Cbor>
@@ -31,9 +32,9 @@ const PROVIDER_EVENTS = {
 } as const;
 
 type CardanoProviderEventsMap = {
-  [PROVIDER_EVENTS.connect]: () => void;
+  [PROVIDER_EVENTS.connect]: (account: string) => void;
   [PROVIDER_EVENTS.disconnect]: () => void;
-  [PROVIDER_EVENTS.accountChanged]: (account: null) => void;
+  [PROVIDER_EVENTS.accountChanged]: (account: string | null) => void;
   [PROVIDER_EVENTS.message_low_level]: (payload: IJsonRpcRequest) => void;
 };
 
@@ -50,8 +51,14 @@ type OneKeyCardanoProviderProps = IInpageProviderConfig & {
 };
 
 class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
+  private _account: string | null = null
+
+  get account() {
+    return this._account
+  }
+
 	get isConnected() {
-		return true
+		return this._account !== null
 	}
 
   get onekey() {
@@ -94,6 +101,15 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
 		return this._callBridge(param);
 	}
 
+  private _handleConnected(account: string, options: {emit: boolean})  {
+    this._account = account
+    if (options.emit && this.isConnectionStatusChanged('connected')) {
+      this.connectionStatus = 'connected'
+      this.emit('connect', account)
+      this.emit('accountChanged', account)
+    }
+  }
+
 	private _handleDisconnected(options: { emit: boolean } = { emit: true }) {
     if (options.emit && this.isConnectionStatusChanged('disconnected')) {
       this.connectionStatus = 'disconnected';
@@ -132,7 +148,8 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
   }
 
   async enable() {
-    return Promise.resolve({
+    console.log('onekey wallet enable')
+    const API = {
       getNetworkId: () => this.getNetworkId(),
       getUtxos:  (amount?: Cbor, paginate?: Paginate) => this.getUtxos(amount, paginate),
       getCollateral: (params?: {amount?: Cbor}) => this.getCollateral(params),
@@ -149,7 +166,17 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
       signData: (addr: Cbor, payload: Bytes) => this.signData(addr, payload),
     
       submitTx: (tx: Cbor) => this.submitTx(tx)
-    })
+    }
+
+    if (!this.account) {
+      const result = await this._callBridge({
+        method: 'connect',
+        params: undefined 
+      })
+      this._handleConnected(result.account, {emit: true})
+      return API 
+    }
+    return Promise.resolve(API)
   }
 
   // CIP30 Dapp API 👇

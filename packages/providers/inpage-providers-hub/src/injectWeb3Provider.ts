@@ -135,7 +135,7 @@ function injectWeb3Provider(): unknown {
     sui,
   };
 
-  defineWindowProperty('$onekey', $onekey);
+  window.$onekey = $onekey;
 
   try {
     const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);

@@ -41,14 +41,42 @@ export type IWindowOneKeyHub = {
   };
 };
 
-function defineWindowProperty(property: string, provider: unknown) {
+function checkEnableDefineProperty() {
   try {
-    Object.defineProperty(window, property, {
-      configurable: false, // prevent redefined
-      get() {
-        return provider;
-      },
-    });
+    const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);
+    const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
+    return !!walletInfoLocal?.platformEnv.isExtension;
+  } catch (e) {
+    console.error(e);
+  }
+  return false;
+}
+
+function defineWindowProperty(property: string, provider: unknown) {
+  const enable = checkEnableDefineProperty();
+  const proxyProvider = new Proxy(provider as object, {
+    defineProperty(target, property, attributes) {
+      // skip define Prevent overwriting
+      return true;
+    },
+  });
+  try {
+    if (enable) {
+      Object.keys(provider as object).forEach((key) => {
+        ((window as any)[property] ?? {})[key] = (proxyProvider as any)[key];
+      });
+      Object.defineProperty(window, property, {
+        configurable: false, // prevent redefined
+        get() {
+          return proxyProvider;
+        },
+        set(val) {
+          // skip set
+        },
+      });
+    } else {
+      (window as any)[property] = provider;
+    }
   } catch (ex) {
     console.error(ex);
     (window as any)[property] = provider;

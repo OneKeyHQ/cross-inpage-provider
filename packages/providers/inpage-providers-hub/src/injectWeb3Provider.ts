@@ -54,20 +54,24 @@ function checkEnableDefineProperty() {
 
 function defineWindowProperty(property: string, provider: unknown) {
   const enable = checkEnableDefineProperty();
+  const proxyProvider = new Proxy(provider as object, {
+    defineProperty(target, property, attributes) {
+      // skip define Prevent overwriting
+      return true;
+    },
+  });
   try {
     if (enable) {
       Object.keys(provider as object).forEach((key) => {
-        ((window as any)[property] ?? {})[key] = (provider as any)[key];
+        ((window as any)[property] ?? {})[key] = (proxyProvider as any)[key];
       });
       Object.defineProperty(window, property, {
         configurable: false, // prevent redefined
         get() {
-          return provider;
+          return proxyProvider;
         },
         set(val) {
-          if (val !== provider) {
-            // skip set
-          }
+          // skip set
         },
       });
     } else {

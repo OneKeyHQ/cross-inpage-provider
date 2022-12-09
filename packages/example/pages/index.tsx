@@ -211,6 +211,12 @@ const data: ITreeNodeData[] = [
         href: '/sui',
         icon: 'https://onekey-asset.com/assets/sui/sui.png',
       },
+      {
+        id: uuid.v4(),
+        name: 'Cardano',
+        href: '/cardano',
+        icon: 'https://onekey-asset.com/assets/ada/ada.png',
+      },
     ],
   },
 ];

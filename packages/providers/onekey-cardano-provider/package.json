@@ -1,9 +1,9 @@
 {
-  "name": "@onekeyfe/onekey-solana-provider",
+  "name": "@onekeyfe/onekey-cardano-provider",
   "version": "1.1.13",
   "keywords": [
     "cross-inpage-provider",
-    "solona"
+    "cardano"
   ],
   "author": "dev-fe@onekey.so",
   "repository": "https://github.com/OneKeyHQ/cross-inpage-provider",
@@ -29,14 +29,10 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "1.1.13",
-    "@onekeyfe/cross-inpage-provider-errors": "1.1.13",
-    "@onekeyfe/cross-inpage-provider-types": "1.1.13",
-    "@onekeyfe/extension-bridge-injected": "1.1.13",
-    "@solana/web3.js": "^1.41.3",
-    "bs58": "^5.0.0"
-  },
-  "devDependencies": {
-    "@types/bs58": "^4.0.1"
+    "@onekeyfe/cross-inpage-provider-core": "1.1.11",
+    "@onekeyfe/cross-inpage-provider-errors": "1.1.11",
+    "@onekeyfe/cross-inpage-provider-types": "1.1.11",
+    "@onekeyfe/extension-bridge-injected": "1.1.11",
+    "@onekeyfe/onekey-cardano-provider": "1.1.11"
   }
 }

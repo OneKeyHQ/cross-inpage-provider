@@ -9,6 +9,7 @@ import { ProviderStarcoin } from '@onekeyfe/onekey-starcoin-provider';
 import { ProviderAptos, ProviderAptosMartian } from '@onekeyfe/onekey-aptos-provider';
 import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
 import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
+import { ProviderCardano } from '@onekeyfe/onekey-cardano-provider';
 import { consts } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import './connectButtonHack';
@@ -26,6 +27,7 @@ export type IWindowOneKeyHub = {
   aptos?: ProviderAptos;
   martian?: ProviderAptosMartian;
   suiWallet?: ProviderSui;
+  cardano?: ProviderCardano;
   $private?: ProviderPrivate;
   $walletInfo?: {
     buildNumber: string;
@@ -120,6 +122,10 @@ function injectWeb3Provider(): unknown {
     bridge,
   });
 
+  const cardano = new ProviderCardano({
+    bridge
+  })
+
   // providerHub
   const $onekey = {
     ...window.$onekey,
@@ -133,6 +139,7 @@ function injectWeb3Provider(): unknown {
     tron,
     sollet: null,
     sui,
+    cardano
   };
 
   defineWindowProperty('$onekey', $onekey);
@@ -167,6 +174,7 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('conflux', conflux);
   defineWindowProperty('tronLink', tron);
   defineWindowProperty('suiWallet', sui);
+  defineWindowProperty('cardano', cardano);
 
   // ** shim or inject real web3
   //

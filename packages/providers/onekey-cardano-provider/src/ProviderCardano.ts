@@ -17,7 +17,7 @@ export type CardanoRequest = WalletApi & {
 }
 
 export type JsBridgeRequest = {
-	[K in keyof CardanoRequest]: (params: Parameters<CardanoRequest[K]>[0]) => Promise<TypeUtils.WireStringified<TypeUtils.ResolvePromise<ReturnType<CardanoRequest[K]>>>>
+  [K in keyof CardanoRequest]: (params: Parameters<CardanoRequest[K]>[0]) => Promise<TypeUtils.WireStringified<TypeUtils.ResolvePromise<ReturnType<CardanoRequest[K]>>>>
 }
 
 type JsBridgeRequestParams<T extends keyof JsBridgeRequest> = Parameters<JsBridgeRequest[T]>[0]
@@ -39,11 +39,11 @@ type CardanoProviderEventsMap = {
 };
 
 interface IProviderCardano extends ProviderBase {
-	isConnected: boolean;
+  isConnected: boolean;
 
   onekey: Cip30Wallet;
 
-	getNetworkId(): Promise<NetworkId>;
+  getNetworkId(): Promise<NetworkId>;
 }
 
 type OneKeyCardanoProviderProps = IInpageProviderConfig & {
@@ -59,9 +59,9 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
     return this._account
   }
 
-	get isConnected() {
-		return this._account !== null
-	}
+  get isConnected() {
+    return this._account !== null
+  }
 
   get onekey() {
     return this.walletInfo()
@@ -80,7 +80,7 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
     this._registerEvents();
   }
 
-	private _registerEvents() {
+  private _registerEvents() {
     window.addEventListener('onekey_bridge_disconnect', () => {
       this._handleDisconnected();
     });
@@ -94,17 +94,17 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
 
   }
 
-	private _callBridge<T extends keyof JsBridgeRequest>(params: {
-		method: T;
-		params: JsBridgeRequestParams<T>;
-	}): JsBridgeRequestResponse<T> {
-		return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
-	}
+  private _callBridge<T extends keyof JsBridgeRequest>(params: {
+    method: T;
+    params: JsBridgeRequestParams<T>;
+  }): JsBridgeRequestResponse<T> {
+    return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
+  }
 
-	private postMessage(param: any) {
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-		return this._callBridge(param);
-	}
+  private postMessage(param: any) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    return this._callBridge(param);
+  }
 
   private _handleConnected(account: string, options: {emit: boolean})  {
     this._account = account
@@ -115,7 +115,7 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
     }
   }
 
-	private _handleDisconnected(options: { emit: boolean } = { emit: true }) {
+  private _handleDisconnected(options: { emit: boolean } = { emit: true }) {
     if (options.emit && this.isConnectionStatusChanged('disconnected')) {
       this.connectionStatus = 'disconnected';
       this.emit('disconnect');
@@ -127,7 +127,7 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
     return address !==  this._account
   }
 
-	private _handleAccountChange(payload: CardanoAccount) {
+  private _handleAccountChange(payload: CardanoAccount) {
     const account = payload.accounts.address
     if (this.isAccountsChanged(account)) {
       this.emit('accountChanged', account || null);
@@ -139,9 +139,9 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
     if (account) {
       this._handleConnected(account, { emit: false });
     }
-	}
+  }
 
-	on<E extends keyof CardanoProviderEventsMap>(
+  on<E extends keyof CardanoProviderEventsMap>(
     event: E,
     listener: CardanoProviderEventsMap[E],
   ): this {
@@ -201,9 +201,9 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
 
   async getNetworkId(): Promise<NetworkId> {
     return this._callBridge({
-			method: 'getNetworkId',
-			params: undefined
-		})
+      method: 'getNetworkId',
+      params: undefined
+    })
 	}
 
   async getUtxos(amount?: Cbor, paginate?: Paginate) {
@@ -229,9 +229,9 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
 
   async getUsedAddresses(): Promise<Cbor[]> {
     return this._callBridge({
-			method: 'getUsedAddresses',
-			params: undefined
-		})
+      method: 'getUsedAddresses',
+      params: undefined
+    })
   }
 
   async getUnUsedAddress() {

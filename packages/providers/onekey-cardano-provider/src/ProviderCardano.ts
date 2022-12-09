@@ -159,7 +159,7 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
   walletInfo(): Cip30Wallet {
     return {
       apiVersion: '0.1.0',
-      name: 'oneKey',
+      name: 'OneKey',
       icon: 'https://theme.zdassets.com/theme_assets/10237731/cd8f795ce97bdd7657dd4fb4b19fde3f32b50349.png',
       isEnabled: () => Promise.resolve(true),
       enable: () => this.enable() 

@@ -50,6 +50,8 @@ type OneKeyCardanoProviderProps = IInpageProviderConfig & {
   timeout?: number;
 };
 
+type CardanoAccount = { accounts: {address: string} }
+
 class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
   private _account: string | null = null
 
@@ -81,9 +83,8 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
 
     this.on(PROVIDER_EVENTS.message_low_level, (payload) => {
       const { method, params } = payload;
-
       if (isWalletEventMethodMatch(method, PROVIDER_EVENTS.accountChanged)) {
-        this._handleAccountChange(params);
+        this._handleAccountChange(params as CardanoAccount);
       }
     });
 
@@ -118,8 +119,22 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
     }
   }
 
-	private _handleAccountChange(payload: any) {
-		// TODO: handle account change
+  override isAccountsChanged(address: string): boolean {
+    return address !==  this._account
+  }
+
+	private _handleAccountChange(payload: CardanoAccount) {
+    const account = payload.accounts.address
+    if (this.isAccountsChanged(account)) {
+      this.emit('accountChanged', account || null);
+    }
+    if (!account) {
+      this._handleDisconnected();
+      return;
+    }
+    if (account) {
+      this._handleConnected(account, { emit: false });
+    }
 	}
 
 	on<E extends keyof CardanoProviderEventsMap>(
@@ -148,11 +163,10 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
   }
 
   async enable() {
-    console.log('onekey wallet enable')
     const API = {
       getNetworkId: () => this.getNetworkId(),
       getUtxos:  (amount?: Cbor, paginate?: Paginate) => this.getUtxos(amount, paginate),
-      getCollateral: (params?: {amount?: Cbor}) => this.getCollateral(params),
+      getCollateral: () => this.getCollateral(),
       getBalance: () => this.getBalance(),
       getUsedAddresses: () => this.getUsedAddresses(),
       getUnusedAddresses: () => this.getUnUsedAddress(), 
@@ -198,13 +212,8 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
     })
   }
 
-  async getCollateral(params?: { amount?: Cbor }) {
-    return this._callBridge({
-      method: 'getCollateral',
-      params: {
-        amount: params?.amount
-      }
-    }) 
+  async getCollateral() {
+    return Promise.resolve(null)
   }
 
   async getBalance() {

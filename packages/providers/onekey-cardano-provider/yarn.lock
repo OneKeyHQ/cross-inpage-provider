@@ -39,6 +39,14 @@
     "@onekeyfe/cross-inpage-provider-core" "1.1.11"
     "@onekeyfe/cross-inpage-provider-types" "1.1.11"
 
+"@onekeyfe/onekey-cardano-provider@file:.yalc/@onekeyfe/onekey-cardano-provider":
+  version "1.1.11"
+  dependencies:
+    "@onekeyfe/cross-inpage-provider-core" "1.1.11"
+    "@onekeyfe/cross-inpage-provider-errors" "1.1.11"
+    "@onekeyfe/cross-inpage-provider-types" "1.1.11"
+    "@onekeyfe/extension-bridge-injected" "1.1.11"
+
 events@^3.3.0:
   version "3.3.0"
   resolved "https://registry.yarnpkg.com/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"

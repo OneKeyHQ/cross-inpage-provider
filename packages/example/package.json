@@ -20,6 +20,7 @@
     "@onekeyfe/cross-inpage-provider-core": "1.1.11",
     "@onekeyfe/cross-inpage-provider-types": "1.1.11",
     "@onekeyfe/onekey-aptos-provider": "1.1.11",
+    "@onekeyfe/onekey-cardano-provider": "1.1.11",
     "@onekeyfe/onekey-conflux-provider": "1.1.11",
     "@onekeyfe/onekey-near-provider": "1.1.11",
     "@onekeyfe/onekey-solana-provider": "1.1.11",

@@ -67,6 +67,10 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
     return this.walletInfo()
   }
 
+  get nami() {
+    return this.walletInfo()
+  }
+
   constructor(props: OneKeyCardanoProviderProps) {
     super({
       ...props,

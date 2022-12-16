@@ -22,6 +22,7 @@
     "@onekeyfe/onekey-aptos-provider": "1.1.13",
     "@onekeyfe/onekey-cardano-provider": "1.1.13",
     "@onekeyfe/onekey-conflux-provider": "1.1.13",
+    "@onekeyfe/onekey-cosmos-provider": "1.1.13",
     "@onekeyfe/onekey-near-provider": "1.1.13",
     "@onekeyfe/onekey-solana-provider": "1.1.13",
     "@onekeyfe/onekey-sui-provider": "1.1.13",

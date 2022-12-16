@@ -1,6 +1,5 @@
-
 {
-  "name": "@onekeyfe/inpage-providers-hub",
+  "name": "@onekeyfe/onekey-cosmos-provider",
   "version": "1.1.13",
   "keywords": [
     "cross-inpage-provider"
@@ -29,18 +28,13 @@
     "start": "tsc --watch"
   },
   "dependencies": {
+    "@noble/hashes": "^1.1.4",
     "@onekeyfe/cross-inpage-provider-core": "1.1.13",
+    "@onekeyfe/cross-inpage-provider-errors": "1.1.13",
     "@onekeyfe/cross-inpage-provider-types": "1.1.13",
-    "@onekeyfe/onekey-aptos-provider": "1.1.13",
-    "@onekeyfe/onekey-cardano-provider": "1.1.13",
-    "@onekeyfe/onekey-cosmos-provider": "1.1.13",
-    "@onekeyfe/onekey-conflux-provider": "1.1.13",
-    "@onekeyfe/onekey-eth-provider": "1.1.13",
-    "@onekeyfe/onekey-private-provider": "1.1.13",
-    "@onekeyfe/onekey-solana-provider": "1.1.13",
-    "@onekeyfe/onekey-starcoin-provider": "1.1.13",
-    "@onekeyfe/onekey-sui-provider": "1.1.13",
-    "@onekeyfe/onekey-tron-provider": "1.1.13",
-    "web3": "^1.7.3"
+    "@onekeyfe/extension-bridge-injected": "1.1.13",
+    "eth-rpc-errors": "^4.0.3",
+    "long": "^5.2.1",
+    "mitt": "^3.0.0"
   }
 }

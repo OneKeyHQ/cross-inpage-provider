@@ -32,9 +32,9 @@ type SuiProviderEventsMap = {
 };
 
 export type SuiRequest = {
-  'hasPermissions'(permissions: readonly PermissionType[]): Promise<boolean>;
+  'hasPermissions': (permissions: readonly PermissionType[]) => Promise<boolean>;
 
-  'requestPermissions'(permissions: readonly PermissionType[]): Promise<boolean>;
+  'requestPermissions': (permissions: readonly PermissionType[]) => Promise<boolean>;
 
   'disconnect': () => Promise<void>;
 

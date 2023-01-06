@@ -261,7 +261,10 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
   }
 
   isAccountsChanged(account: Key | undefined) {
-    return account?.pubKey !== this._account?.pubKey;
+    if(!account) return false;
+    if(!this._account) return true;
+
+    return bytesToHex(account.pubKey) !== bytesToHex(this._account.pubKey);
   }
 
   // trigger by bridge account change event

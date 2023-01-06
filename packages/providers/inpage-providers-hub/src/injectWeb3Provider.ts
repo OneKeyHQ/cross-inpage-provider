@@ -45,7 +45,8 @@ export type IWindowOneKeyHub = {
   };
 };
 
-function checkEnableDefineProperty() {
+function checkEnableDefineProperty(property: string) {
+  if (property === '$onekey') return false;
   try {
     const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);
     const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
@@ -57,7 +58,7 @@ function checkEnableDefineProperty() {
 }
 
 function defineWindowProperty(property: string, provider: unknown) {
-  const enable = checkEnableDefineProperty();
+  const enable = checkEnableDefineProperty(property);
   const proxyProvider = new Proxy(provider as object, {
     defineProperty(target, property, attributes) {
       // skip define Prevent overwriting
@@ -125,12 +126,12 @@ function injectWeb3Provider(): unknown {
   });
 
   const cardano = new ProviderCardano({
-    bridge
-  })
-  
+    bridge,
+  });
+
   const cosmos = new ProviderCosmos({
-    bridge
-  })
+    bridge,
+  });
 
   // providerHub
   const $onekey = {
@@ -146,7 +147,7 @@ function injectWeb3Provider(): unknown {
     sollet: null,
     sui,
     cardano,
-    cosmos
+    cosmos,
   };
 
   defineWindowProperty('$onekey', $onekey);

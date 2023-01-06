@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/extension-bridge-injected",
-  "version": "1.1.13",
+  "version": "1.1.14",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -28,7 +28,7 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "1.1.13",
-    "@onekeyfe/cross-inpage-provider-types": "1.1.13"
+    "@onekeyfe/cross-inpage-provider-core": "1.1.14",
+    "@onekeyfe/cross-inpage-provider-types": "1.1.14"
   }
 }

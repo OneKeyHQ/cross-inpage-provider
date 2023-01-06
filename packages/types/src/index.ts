@@ -15,6 +15,7 @@ declare global {
     sunWeb: any;
     suiWallet: any;
     cardano: any;
+    keplr: any;
     $onekey: any;
     ReactNativeWebView?: {
       postMessage: (payload: string) => void;
@@ -47,6 +48,7 @@ export enum IInjectedProviderNames {
   algo = 'algo',
   sui = 'sui',
   cardano = 'cardano',
+  cosmos = 'cosmos',
   $private = '$private',
   $hardware_sdk = '$hardware_sdk',
 }

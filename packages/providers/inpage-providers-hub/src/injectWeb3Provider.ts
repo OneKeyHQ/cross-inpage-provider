@@ -10,6 +10,7 @@ import { ProviderAptos, ProviderAptosMartian } from '@onekeyfe/onekey-aptos-prov
 import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
 import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
 import { ProviderCardano } from '@onekeyfe/onekey-cardano-provider';
+import { ProviderCosmos } from '@onekeyfe/onekey-cosmos-provider';
 import { consts } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import './connectButtonHack';
@@ -28,6 +29,7 @@ export type IWindowOneKeyHub = {
   martian?: ProviderAptosMartian;
   suiWallet?: ProviderSui;
   cardano?: ProviderCardano;
+  keplr?: ProviderCosmos;
   $private?: ProviderPrivate;
   $walletInfo?: {
     buildNumber: string;
@@ -125,6 +127,10 @@ function injectWeb3Provider(): unknown {
   const cardano = new ProviderCardano({
     bridge
   })
+  
+  const cosmos = new ProviderCosmos({
+    bridge
+  })
 
   // providerHub
   const $onekey = {
@@ -139,7 +145,8 @@ function injectWeb3Provider(): unknown {
     tron,
     sollet: null,
     sui,
-    cardano
+    cardano,
+    cosmos
   };
 
   defineWindowProperty('$onekey', $onekey);
@@ -175,6 +182,12 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('tronLink', tron);
   defineWindowProperty('suiWallet', sui);
   defineWindowProperty('cardano', cardano);
+
+  // cosmos keplr
+  defineWindowProperty('keplr', cosmos);
+  defineWindowProperty('getOfflineSigner', cosmos.getOfflineSigner.bind(cosmos));
+  defineWindowProperty('getOfflineSignerOnlyAmino', cosmos.getOfflineSignerOnlyAmino.bind(cosmos));
+  defineWindowProperty('getOfflineSignerAuto', cosmos.getOfflineSignerAuto.bind(cosmos));
 
   // ** shim or inject real web3
   //

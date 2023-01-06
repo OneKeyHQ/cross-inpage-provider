@@ -217,6 +217,12 @@ const data: ITreeNodeData[] = [
         href: '/cardano',
         icon: 'https://onekey-asset.com/assets/ada/ada.png',
       },
+      {
+        id: uuid.v4(),
+        name: 'Cosmos',
+        href: '/cosmos',
+        icon: 'https://onekey-asset.com/assets/cosmos/cosmos.png',
+      },
     ],
   },
 ];

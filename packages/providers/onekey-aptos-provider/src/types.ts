@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type AptosAccountInfo = {
   publicKey: string;
   address: string;

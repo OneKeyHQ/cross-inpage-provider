@@ -1,4 +1,4 @@
-import Long from 'long';
+
 
 export declare enum BroadcastMode {
   /** Return after tx commit */
@@ -27,6 +27,7 @@ export interface StdFee {
 
 export interface Msg {
   readonly type: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly value: any;
 }
 
@@ -92,11 +93,11 @@ export type SignDocHex =  {
 };
 
 /**
- * This is the same as Algo from @cosmjs/launchpad but those might diverge in the future.
+ * This is the same as Algo from cosmjs/launchpad but those might diverge in the future.
  */
 export declare type Algo = 'secp256k1' | 'ed25519' | 'sr25519';
 /**
- * This is the same as AccountData from @cosmjs/launchpad but those might diverge in the future.
+ * This is the same as AccountData from cosmjs/launchpad but those might diverge in the future.
  */
 export interface AccountData {
   /** A printable address (typically bech32 encoded) */

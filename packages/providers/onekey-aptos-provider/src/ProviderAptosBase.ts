@@ -1,4 +1,4 @@
-import { IInjectedProviderNames, IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
+import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 
 import { ProviderBase, IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 

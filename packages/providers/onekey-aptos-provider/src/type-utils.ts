@@ -1,4 +1,3 @@
-import { AptosAccountInfo as AccountInfo, SignMessagePayload, SignMessageResponse } from './types';
 
 export type WireStringified<T> = T extends Array<infer P>
   ? Array<WireStringified<P>>

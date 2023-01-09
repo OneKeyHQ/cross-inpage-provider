@@ -1,3 +1,4 @@
+import { WALLET_CONNECT_INFO } from './../../inpage-providers-hub/src/connectButtonHack/consts';
 import mitt, { Emitter } from 'mitt';
 import { registerWallet } from '@mysten/wallet-standard';
 import {
@@ -15,7 +16,7 @@ import {
     type EventsListeners,
 } from '@mysten/wallet-standard';
 import {  ProviderSui } from './OnekeySuiProvider';
-import { ALL_PERMISSION_TYPES, LOGO_BASE64, PermissionType } from './types';
+import { ALL_PERMISSION_TYPES,  PermissionType } from './types';
 
 type WalletEventsMap = {
     [E in keyof EventsListeners]: Parameters<EventsListeners[E]>[0];
@@ -46,8 +47,8 @@ class OnekeySuiStandardWallet implements Wallet{
   }
 
   get icon() {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return LOGO_BASE64 as any;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any
+    return WALLET_CONNECT_INFO.onekey.icon as any;
   }
 
   get chains() {

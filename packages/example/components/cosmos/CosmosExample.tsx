@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { ProviderCosmos } from '@onekeyfe/onekey-cosmos-provider';
+import { Key, ProviderCosmos } from '@onekeyfe/onekey-cosmos-provider';
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
 
 import { DAppList } from '../dappList/DAppList';
@@ -39,10 +39,10 @@ export default function App() {
 
   useEffect(() => {
     if (!provider) return;
-    provider.on('connect', (address: string) => {
+    provider.on('connect', (address: Key) => {
       setConnected(true);
-      setAddress(address);
-      console.log(`aptos.on [connect] ${address}`);
+      setAddress(bytesToHex(address.address));
+      console.log(`aptos.on [connect] ${bytesToHex(address.address)}`);
     });
     provider.on('disconnect', () => {
       setAddress(null);

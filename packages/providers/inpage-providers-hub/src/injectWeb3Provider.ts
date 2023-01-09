@@ -14,6 +14,7 @@ import { ProviderCosmos } from '@onekeyfe/onekey-cosmos-provider';
 import { consts } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import './connectButtonHack';
+import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
 // import Web3 from 'web3'; // cause build error
 
 const { WALLET_INFO_LOACAL_KEY } = consts;
@@ -201,7 +202,10 @@ function injectWeb3Provider(): unknown {
   // TODO use initializeInpageProvider.ts
   window.dispatchEvent(new Event('ethereum#initialized'));
 
-  registerSuiWallet(sui);
+  // Sui Standard Wallet
+  registerSuiWallet(sui, {
+    logo: WALLET_CONNECT_INFO.onekey.icon,
+  });
 
   return $onekey;
 }

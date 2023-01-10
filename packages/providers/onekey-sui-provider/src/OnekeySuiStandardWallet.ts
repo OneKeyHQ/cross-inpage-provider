@@ -1,4 +1,3 @@
-import { WALLET_CONNECT_INFO } from './../../inpage-providers-hub/src/connectButtonHack/consts';
 import mitt, { Emitter } from 'mitt';
 import { registerWallet } from '@mysten/wallet-standard';
 import {
@@ -16,7 +15,7 @@ import {
     type EventsListeners,
 } from '@mysten/wallet-standard';
 import {  ProviderSui } from './OnekeySuiProvider';
-import { ALL_PERMISSION_TYPES,  PermissionType } from './types';
+import { ALL_PERMISSION_TYPES,  PermissionType, WalletInfo } from './types';
 
 type WalletEventsMap = {
     [E in keyof EventsListeners]: Parameters<EventsListeners[E]>[0];
@@ -37,18 +36,19 @@ enum Feature {
 class OnekeySuiStandardWallet implements Wallet{
   readonly version = '1.0.0' as const;
   readonly _name = 'OneKey Wallet' as const;
-  readonly provider:ProviderSui;
+  readonly provider: ProviderSui;
+  readonly options?: WalletInfo;
 
   _events: Emitter<WalletEventsMap>;
   _account: ReadonlyWalletAccount | null;
 
   get name() {
-    return this._name;
+    return this.options?.name ?? this._name;
   }
 
   get icon() {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any
-    return WALLET_CONNECT_INFO.onekey.icon as any;
+    return (this.options?.logo || '') as any;
   }
 
   get chains() {
@@ -81,10 +81,11 @@ class OnekeySuiStandardWallet implements Wallet{
     };
   }
  
-  constructor(provider: ProviderSui) {
+  constructor(provider: ProviderSui, options?:WalletInfo) {
     this.provider = provider;
     this._events = mitt();
     this._account = null;
+    this.options = options;
     void this.$connected();
   }
 
@@ -142,9 +143,9 @@ class OnekeySuiStandardWallet implements Wallet{
   };
 }
 
-export function registerSuiWallet(provider: ProviderSui){
+export function registerSuiWallet(provider: ProviderSui, options?:WalletInfo){
   try {
-    registerWallet(new OnekeySuiStandardWallet(provider));  
+    registerWallet(new OnekeySuiStandardWallet(provider, options));
   } catch (error) {
     console.error(error);
   }

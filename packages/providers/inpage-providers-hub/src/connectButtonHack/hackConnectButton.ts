@@ -2,7 +2,11 @@ import { throttle, ThrottleSettings } from 'lodash';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import type { IWindowOneKeyHub } from '../injectWeb3Provider';
 
-function checkIfInjectedProviderConnected({ providerName }: { providerName: IInjectedProviderNames }) {
+function checkIfInjectedProviderConnected({
+  providerName,
+}: {
+  providerName: IInjectedProviderNames;
+}) {
   const hub = window.$onekey as IWindowOneKeyHub;
   if (providerName === IInjectedProviderNames.ethereum) {
     // dapp disconnect won't remove accounts in wallet, so this check won't working
@@ -22,6 +26,15 @@ export async function detectQrcodeFromSvg({
   img: HTMLImageElement | Element;
 }): Promise<string> {
   // https://unpkg.com/qr-scanner@1.4.1/qr-scanner.umd.min.js
+
+  // Firefox does not support drawing SVG images to canvas
+  // Unless the svg file has width/height attributes on the root <svg> element
+  try {
+    img.setAttribute('width', img.clientWidth.toString());
+    img.setAttribute('height', img.clientHeight.toString());
+  } catch {
+    //pass
+  }
 
   const serialized = new XMLSerializer().serializeToString(img);
   const encodedData = window.btoa(serialized);
@@ -256,7 +269,9 @@ function hackConnectButton({
           if (!isUrlMatched()) {
             return;
           }
-          if (providers.find((providerName) => checkIfInjectedProviderConnected({ providerName }))) {
+          if (
+            providers.find((providerName) => checkIfInjectedProviderConnected({ providerName }))
+          ) {
             return;
           }
           if (process.env.NODE_ENV !== 'production') {

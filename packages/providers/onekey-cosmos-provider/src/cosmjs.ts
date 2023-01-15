@@ -68,7 +68,7 @@ export class CosmJSOfflineSigner
     return await this.service.signDirect(this.chainId, signerAddress, {
       bodyBytes: signDoc.bodyBytes,
       authInfoBytes: signDoc.authInfoBytes,
-      accountNumber: Long.fromString(signDoc.accountNumber),
+      accountNumber: Long.fromValue(signDoc.accountNumber),
       chainId: signDoc.chainId,
     });
   }

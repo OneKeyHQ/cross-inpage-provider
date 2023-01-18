@@ -38,6 +38,7 @@ export type IWindowOneKeyHub = {
     disableExt?: boolean;
     platform: string;
     version: string;
+    walletSwitchConfig: { enable: string[]; disable: [] };
     platformEnv: {
       isExtension: boolean;
       isDesktop: boolean;
@@ -45,6 +46,25 @@ export type IWindowOneKeyHub = {
     };
   };
 };
+
+function checkWalletSwitchEnable(property: string) {
+  try {
+    const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);
+    const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
+    if (walletInfoLocal && walletInfoLocal.walletSwitchConfig) {
+      const { enable, disable } = walletInfoLocal.walletSwitchConfig;
+      const enableList: string[] = enable || [];
+      const disableList: string[] = disable || [];
+      return (
+        (enableList.includes(property) && !disableList.includes(property)) ||
+        (!enableList.includes(property) && !disableList.includes(property))
+      );
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return true;
+}
 
 function checkEnableDefineProperty(property: string) {
   if (property === '$onekey') return false;
@@ -59,6 +79,7 @@ function checkEnableDefineProperty(property: string) {
 }
 
 function defineWindowProperty(property: string, provider: unknown) {
+  if (!checkWalletSwitchEnable(property)) return;
   const enable = checkEnableDefineProperty(property);
   const proxyProvider = new Proxy(provider as object, {
     defineProperty(target, property, attributes) {
@@ -152,17 +173,6 @@ function injectWeb3Provider(): unknown {
   };
 
   defineWindowProperty('$onekey', $onekey);
-
-  try {
-    const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);
-    const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
-    if (walletInfoLocal && walletInfoLocal.platformEnv.isExtension && walletInfoLocal.disableExt) {
-      // disable onekey ext stop inject
-      return;
-    }
-  } catch (e) {
-    console.error(e);
-  }
 
   const martianProxy = new Proxy(martian, {
     get: (target, property, ...args) => {

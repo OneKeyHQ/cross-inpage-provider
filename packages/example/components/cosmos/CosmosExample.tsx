@@ -37,25 +37,25 @@ export default function App() {
   const [connected, setConnected] = useState<boolean>(false);
   const [address, setAddress] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!provider) return;
-    provider.on('connect', (address: Key) => {
-      setConnected(true);
-      setAddress(bytesToHex(address.address));
-      console.log(`aptos.on [connect] ${bytesToHex(address.address)}`);
-    });
-    provider.on('disconnect', () => {
-      setAddress(null);
-      setConnected(false);
-      console.log('aptos.on [disconnect] 👋');
-    });
-    provider.on('keplr_keystorechange', () => {
-      console.log(`aptos.on [keplr_keystorechange] `);
-    });
-    return () => {
-      void provider.disconnect();
-    };
-  }, [provider]);
+  // useEffect(() => {
+  //   if (!provider) return;
+  //   provider.on('connect', (address: Key) => {
+  //     setConnected(true);
+  //     setAddress(bytesToHex(address.address));
+  //     console.log(`cosmoshub.on [connect] ${bytesToHex(address.address)}`);
+  //   });
+  //   provider.on('disconnect', () => {
+  //     setAddress(null);
+  //     setConnected(false);
+  //     console.log('cosmoshub.on [disconnect] 👋');
+  //   });
+  //   provider.on('keplr_keystorechange', () => {
+  //     console.log(`cosmoshub.on [keplr_keystorechange] `);
+  //   });
+  //   return () => {
+  //     void provider.disconnect();
+  //   };
+  // }, [provider]);
 
   if (!provider) {
     return <h2>Could not find a provider</h2>;

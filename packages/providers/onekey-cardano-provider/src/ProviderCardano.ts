@@ -63,13 +63,10 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
     return this._account !== null
   }
 
-  get onekey() {
-    return this.walletInfo()
-  }
+  onekey: Cip30Wallet
 
-  get nami() {
-    return this.walletInfo()
-  }
+  nami: Cip30Wallet
+
 
   constructor(props: OneKeyCardanoProviderProps) {
     super({
@@ -78,6 +75,14 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
     });
 
     this._registerEvents();
+
+    this.nami = {
+      ...this.walletInfo(),
+      name: 'Nami',
+    }
+    this.onekey = {
+      ...this.walletInfo()
+    }
   }
 
   private _registerEvents() {
@@ -91,7 +96,6 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
         this._handleAccountChange(params as CardanoAccount);
       }
     });
-
   }
 
   private _callBridge<T extends keyof JsBridgeRequest>(params: {

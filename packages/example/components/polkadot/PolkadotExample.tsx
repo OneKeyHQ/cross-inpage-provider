@@ -8,13 +8,6 @@ import type { InjectedExtension, Unsubcall } from '@polkadot/extension-inject/ty
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { hexToU8a, stringToHex } from '@polkadot/util';
 
-declare global {
-  interface Window {
-    // @ts-expect-error
-    suiWallet: ProviderSui;
-  }
-}
-
 export default function App() {
   const [connected, setConnected] = useState<boolean>(false);
   const [address, setAddress] = useState<string | null>(null);

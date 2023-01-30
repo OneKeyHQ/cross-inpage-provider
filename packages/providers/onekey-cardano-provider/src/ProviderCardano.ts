@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import { ProviderBase } from '@onekeyfe/cross-inpage-provider-core'
 import { ProviderCardanoBase } from './ProviderCardanoBase'
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
@@ -7,6 +10,8 @@ import { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 import { Cbor, Bytes, Cip30DataSignature, Cip30Wallet, NetworkId, Paginate, WalletApi } from './types'
 import * as TypeUtils from './type-utils'
 
+
+export const NAMI_TARGET = 'nami-wallet';
 
 export type CardanoRequest = WalletApi & {
   connect: () => Promise<{ account: string }>
@@ -63,13 +68,10 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
     return this._account !== null
   }
 
-  get onekey() {
-    return this.walletInfo()
-  }
+  onekey: Cip30Wallet
 
-  get nami() {
-    return this.walletInfo()
-  }
+  nami: Cip30Wallet
+
 
   constructor(props: OneKeyCardanoProviderProps) {
     super({
@@ -78,6 +80,14 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
     });
 
     this._registerEvents();
+
+    this.nami = {
+      ...this.walletInfo(),
+      name: 'Nami',
+    }
+    this.onekey = {
+      ...this.walletInfo()
+    }
   }
 
   private _registerEvents() {
@@ -91,7 +101,6 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
         this._handleAccountChange(params as CardanoAccount);
       }
     });
-
   }
 
   private _callBridge<T extends keyof JsBridgeRequest>(params: {
@@ -183,7 +192,13 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
     
       signData: (addr: Cbor, payload: Bytes) => this.signData(addr, payload),
     
-      submitTx: (tx: Cbor) => this.submitTx(tx)
+      submitTx: (tx: Cbor) => this.submitTx(tx),
+
+      experimental: {
+        on: (eventName: string, callback: (detail: any) => void) => this.namiOn(eventName, callback),
+        off: () => this.namiOff(),
+        getCollateral: () => this.getCollateral(),
+      },
     }
 
     if (!this.account) {
@@ -280,6 +295,26 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
       method: 'submitTx',
       params: tx
     })
+  }
+
+  /**
+   * @param {string} eventName
+   * @param {Function} callback
+   */
+  namiOn(eventName: string, callback: (detail: any) => void) {
+    const handler = (event: any) => callback(event.detail);
+
+    // @ts-ignore
+    const events = window.cardano.nami._events[eventName] || [];
+
+    // @ts-ignore
+    window.cardano.nami._events[eventName] = [...events, [callback, handler]];
+
+    window.addEventListener(`${NAMI_TARGET}${eventName}`, handler);
+  }
+
+  namiOff() {
+    // empty
   }
 }
 

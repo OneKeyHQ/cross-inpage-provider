@@ -9,7 +9,7 @@ import { ProviderStarcoin } from '@onekeyfe/onekey-starcoin-provider';
 import { ProviderAptos, ProviderAptosMartian } from '@onekeyfe/onekey-aptos-provider';
 import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
 import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
-import { ProviderCardano } from '@onekeyfe/onekey-cardano-provider';
+import { ProviderCardano, defineWindowCardanoProperty } from '@onekeyfe/onekey-cardano-provider';
 import { ProviderCosmos } from '@onekeyfe/onekey-cosmos-provider';
 import { consts } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
@@ -193,7 +193,8 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('conflux', conflux);
   defineWindowProperty('tronLink', tron);
   defineWindowProperty('suiWallet', sui);
-  defineWindowProperty('cardano', cardano);
+
+  defineWindowCardanoProperty('cardano', cardano)
 
   // cosmos keplr
   defineWindowProperty('keplr', cosmos);

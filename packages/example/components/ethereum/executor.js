@@ -101,6 +101,7 @@ export function useExecutor() {
     const signTypedDataV3Verify = document.getElementById('signTypedDataV3Verify');
     const signTypedDataV3VerifyResult = document.getElementById('signTypedDataV3VerifyResult');
     const signTypedDataV4 = document.getElementById('signTypedDataV4');
+    const signTypedDataV4ChainId = document.getElementById('signTypedDataV4ChainId');
     const signTypedDataV4Result = document.getElementById('signTypedDataV4Result');
     const signTypedDataV4Verify = document.getElementById('signTypedDataV4Verify');
     const signTypedDataV4VerifyResult = document.getElementById('signTypedDataV4VerifyResult');
@@ -988,8 +989,7 @@ export function useExecutor() {
        * Sign Typed Data V4
        */
       signTypedDataV4.onclick = async () => {
-        const networkId = parseInt(networkDiv.innerHTML, 10);
-        const chainId = parseInt(chainIdDiv.innerHTML, 16) || networkId;
+        const chainId = signTypedDataV4ChainId.value;
         const msgParams = {
           domain: {
             chainId: chainId.toString(),
@@ -1144,6 +1144,7 @@ export function useExecutor() {
 
       function handleNewChain(chainId) {
         chainIdDiv.innerHTML = chainId;
+        signTypedDataV4ChainId.value = parseInt(chainId, 16);
 
         if (chainId === '0x1') {
           warningDiv.classList.remove('warning-invisible');

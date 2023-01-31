@@ -515,6 +515,11 @@ export default function EVMExample() {
               <div className="card-body">
                 <h4>Sign Typed Data V4</h4>
 
+                <div className="form-group">
+                  <label>Chain ID</label>
+                  <input className="form-control" type="text" id="signTypedDataV4ChainId" />
+                </div>
+
                 <button
                   className="btn btn-primary btn-lg btn-block mb-3"
                   id="signTypedDataV4"

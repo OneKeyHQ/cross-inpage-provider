@@ -11,6 +11,7 @@ import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
 import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
 import { ProviderCardano, defineWindowCardanoProperty } from '@onekeyfe/onekey-cardano-provider';
 import { ProviderCosmos } from '@onekeyfe/onekey-cosmos-provider';
+import { ProviderPolkadot, registerPolkadot } from '@onekeyfe/onekey-polkadot-provider';
 import { consts } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import './connectButtonHack';
@@ -154,6 +155,10 @@ function injectWeb3Provider(): unknown {
   const cosmos = new ProviderCosmos({
     bridge,
   });
+  
+  const polkadot = new ProviderPolkadot({
+    bridge,
+  });
 
   // providerHub
   const $onekey = {
@@ -217,6 +222,7 @@ function injectWeb3Provider(): unknown {
   registerSuiWallet(sui, {
     logo: WALLET_CONNECT_INFO.onekey.icon,
   });
+  registerPolkadot(polkadot);
 
   return $onekey;
 }

@@ -49,6 +49,7 @@ export enum IInjectedProviderNames {
   sui = 'sui',
   cardano = 'cardano',
   cosmos = 'cosmos',
+  polkadot = 'polkadot',
   $private = '$private',
   $hardware_sdk = '$hardware_sdk',
 }

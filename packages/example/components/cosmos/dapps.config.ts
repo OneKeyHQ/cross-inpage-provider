@@ -4,7 +4,7 @@ export const dapps = [
     url: 'https://app.osmosis.zone/',
   },
   {
-    name: 'Sui Names',
-    url: 'https://sui-names.com/',
+    name: 'JunoSwap',
+    url: 'https://junoswap.com/',
   },
 ];

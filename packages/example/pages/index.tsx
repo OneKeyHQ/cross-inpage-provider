@@ -222,6 +222,11 @@ const data: ITreeNodeData[] = [
         name: 'Cosmos',
         href: '/cosmos',
         icon: 'https://onekey-asset.com/assets/cosmos/cosmos.png',
+      },{
+        id: uuid.v4(),
+        name: 'Polkadot',
+        href: '/polkadot',
+        icon: 'https://onekey-asset.com/assets/polkadot/polkadot.png',
       },
     ],
   },

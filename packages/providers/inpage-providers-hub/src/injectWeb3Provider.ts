@@ -199,7 +199,10 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('tronLink', tron);
   defineWindowProperty('suiWallet', sui);
 
-  defineWindowCardanoProperty('cardano', cardano)
+  // Cardano chain provider injection is handled independently.
+  if (checkWalletSwitchEnable('cardano')) {
+    defineWindowCardanoProperty('cardano', cardano)
+  }
 
   // cosmos keplr
   defineWindowProperty('keplr', cosmos);

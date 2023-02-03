@@ -1,7 +1,12 @@
 import dequal from 'fast-deep-equal';
 import TronWeb, { UnsignedTransaction, SignedTransaction } from 'tronweb';
+import SunWeb from 'sunweb';
 import { isEmpty } from 'lodash';
-import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
+import {
+  IInpageProviderConfig,
+  checkWalletSwitchEnable,
+  defineWindowProperty,
+} from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
 
@@ -20,6 +25,13 @@ import { isWalletEventMethodMatch } from './utils';
 type OneKeyTronProviderProps = IInpageProviderConfig & {
   timeout?: number;
 };
+
+export const CONTRACT_ADDRESS = {
+  MAIN: 'TL9q7aDAHYbW5KdPCwk8oJR3bCDhRwegFf',
+  SIDE: 'TGKotco6YoULzbYisTBuP6DWXDjEgJSpYz',
+};
+
+export const SIDE_CHAIN_ID = '41E209E4DE650F0150788E8EC5CAFA240A23EB8EB7';
 
 class OneKeyTronWeb extends TronWeb {
   constructor(props: any, provider: IProviderTron) {
@@ -42,7 +54,7 @@ class OneKeyTronWeb extends TronWeb {
 class ProviderTron extends ProviderTronBase implements IProviderTron {
   public readonly isTronLink = true;
   public tronWeb: TronWeb | null = null;
-  public sunWeb = {};
+  public sunWeb: SunWeb | null = null;
   public ready = false;
 
   private _initialized = false;
@@ -71,12 +83,14 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
 
     this._log = props.logger ?? window.console;
 
-    this._registerEvents();
+    if (checkWalletSwitchEnable('tronLink')) {
+      this._registerEvents();
 
-    void this._initialize();
+      void this._initialize();
+    }
   }
 
-  private _registerTronWeb(nodes: Nodes): TronWeb | null {
+  private _registerTronWeb(nodes: Nodes): { tronWeb: TronWeb; sunWeb: SunWeb } | null {
     if (isEmpty(nodes)) return null;
 
     const tronWeb: TronWeb = new OneKeyTronWeb(
@@ -86,28 +100,29 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
       this,
     );
 
-    tronWeb.getFullnodeVersion();
-
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
-    Object.defineProperty(tronWeb, 'defaultAddress', {
-      get() {
-        if (!self._connected) {
-          self._log.warn(
-            'OneKey: We recommend that DApp developers use tronLink.request({method: "tron_requestAccounts"}) to request users’ account information at the earliest time possible in order to get a complete TronWeb injection.',
-          );
-          void self.request({
-            method: 'tron_requestAccounts',
-          });
-        }
-        return self._defaultAddress;
+    const tronWeb1: TronWeb = new OneKeyTronWeb(
+      {
+        ...nodes,
       },
-      set(value) {
-        self._defaultAddress = value as TronWeb['defaultAddress'];
-      },
-    });
+      this,
+    );
 
-    return tronWeb;
+    const tronWeb2: TronWeb = new OneKeyTronWeb(
+      {
+        ...nodes,
+      },
+      this,
+    );
+
+    const sunWeb: SunWeb = new SunWeb(
+      tronWeb1,
+      tronWeb2,
+      CONTRACT_ADDRESS.MAIN,
+      CONTRACT_ADDRESS.SIDE,
+      SIDE_CHAIN_ID,
+    );
+
+    return { tronWeb, sunWeb };
   }
 
   private async _initialize() {
@@ -119,9 +134,11 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
         method: 'tron_getProviderState',
       });
 
-      const tronWeb = this._registerTronWeb(nodes);
+      const resp = this._registerTronWeb(nodes);
 
-      if (!tronWeb) return;
+      if (!resp) return;
+
+      const { sunWeb, tronWeb } = resp;
 
       if (window.tronWeb !== undefined) {
         this._log.warn(
@@ -129,15 +146,41 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
         );
       }
 
-      window.tronWeb = this.tronWeb = tronWeb;
-      // some DApp also check if the sunWeb object exists before requesting accounts
-      window.sunWeb = {};
+      if (window.sunWeb !== undefined) {
+        this._log.warn(
+          'OneKey: TronWeb is already initiated. Onekey will overwrite the current instance',
+        );
+      }
 
-      this._initialized = true;
+      this.tronWeb = tronWeb;
+      this.sunWeb = sunWeb;
+
+      defineWindowProperty('tronWeb', tronWeb);
+
+      defineWindowProperty('sunWeb', sunWeb);
+
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
+      const self = this;
+      Object.defineProperty(tronWeb, 'defaultAddress', {
+        get() {
+          if (!self._connected) {
+            self._log.warn(
+              'OneKey: We recommend that DApp developers use tronLink.request({method: "tron_requestAccounts"}) to request users’ account information at the earliest time possible in order to get a complete TronWeb injection.',
+            );
+            void self.request({
+              method: 'tron_requestAccounts',
+            });
+          }
+          return self._defaultAddress;
+        },
+        set(value) {
+          self._defaultAddress = value as TronWeb['defaultAddress'];
+        },
+      });
 
       this._handleAccountsChanged(accounts);
-
       this._dispatch('tronLink#initialized');
+      this._initialized = true;
     } catch (error) {
       this._log.error('OneKey: Failed to get initial state. Please report this bug.', error);
     }
@@ -191,30 +234,30 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
       this._accounts = _accounts;
       const address = _accounts[0];
 
+      const tronWeb = this.tronWeb as TronWeb;
+
+      if (tronWeb.isAddress(address)) {
+        tronWeb.setAddress(address);
+        tronWeb.ready = true;
+        this.ready = true;
+        this._handleConnected();
+      } else {
+        tronWeb.defaultAddress = {
+          hex: false,
+          base58: false,
+        };
+        tronWeb.ready = false;
+        this.ready = false;
+        this.__handleDisconnected();
+      }
+
       if (this._initialized) {
-        this._postMessage(ProviderEvents.ACCOUNTS_CHANGED, {
-          address,
-        });
         this._postMessage(ProviderEvents.SET_ACCOUNT, {
           address,
         });
-
-        const tronWeb = this.tronWeb as TronWeb;
-
-        if (tronWeb.isAddress(address)) {
-          tronWeb.setAddress(address);
-          tronWeb.ready = true;
-          this.ready = true;
-          this._handleConnected();
-        } else {
-          tronWeb.defaultAddress = {
-            hex: false,
-            base58: false,
-          };
-          tronWeb.ready = false;
-          this.ready = false;
-          this.__handleDisconnected();
-        }
+        this._postMessage(ProviderEvents.ACCOUNTS_CHANGED, {
+          address,
+        });
       }
     }
   }

@@ -5,7 +5,8 @@ export * from './injectJsBridge';
 export * from './injectedProviderReceiveHandler';
 export * from './JsBridgeSimple';
 export * from './JsBridgeIframe';
-export * from './CrossEventEmitter'
+export * from './CrossEventEmitter';
+export * from './walletProperty';
 import * as consts from './consts';
 export { consts };
 

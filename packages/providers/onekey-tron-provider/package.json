@@ -33,6 +33,7 @@
     "@onekeyfe/cross-inpage-provider-types": "1.1.21",
     "@onekeyfe/extension-bridge-injected": "1.1.21",
     "querystring": "^0.2.1",
-    "tronweb": "^4.4.0"
+    "tronweb": "^4.4.0",
+    "sunweb": "^1.0.7"
   }
 }

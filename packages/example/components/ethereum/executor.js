@@ -97,6 +97,7 @@ export function useExecutor() {
     const signTypedDataVerify = document.getElementById('signTypedDataVerify');
     const signTypedDataVerifyResult = document.getElementById('signTypedDataVerifyResult');
     const signTypedDataV3 = document.getElementById('signTypedDataV3');
+    const signTypedDataV3ChainId = document.getElementById('signTypedDataV3ChainId');
     const signTypedDataV3Result = document.getElementById('signTypedDataV3Result');
     const signTypedDataV3Verify = document.getElementById('signTypedDataV3Verify');
     const signTypedDataV3VerifyResult = document.getElementById('signTypedDataV3VerifyResult');
@@ -868,8 +869,7 @@ export function useExecutor() {
        * Sign Typed Data Version 3 Test
        */
       signTypedDataV3.onclick = async () => {
-        const networkId = parseInt(networkDiv.innerHTML, 10);
-        const chainId = parseInt(chainIdDiv.innerHTML, 16) || networkId;
+        const chainId = signTypedDataV3ChainId.value;
 
         const msgParams = {
           types: {
@@ -1145,6 +1145,7 @@ export function useExecutor() {
       function handleNewChain(chainId) {
         chainIdDiv.innerHTML = chainId;
         signTypedDataV4ChainId.value = parseInt(chainId, 16);
+        signTypedDataV3ChainId.value = parseInt(chainId, 16);
 
         if (chainId === '0x1') {
           warningDiv.classList.remove('warning-invisible');

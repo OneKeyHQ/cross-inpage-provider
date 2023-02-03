@@ -236,6 +236,10 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
 
       const tronWeb = this.tronWeb as TronWeb;
 
+      if (!tronWeb) {
+        return;
+      }
+
       if (tronWeb.isAddress(address)) {
         tronWeb.setAddress(address);
         tronWeb.ready = true;

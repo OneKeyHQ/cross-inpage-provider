@@ -52,10 +52,15 @@ type ISignedTransaction = IUnsignedTransaction & {
 
 type Callback = false | ((err: Error | null, info: any) => any);
 
+type HttpProvider = {
+  new (host: string): HttpProvider;
+  request(endpoint: string, payload: unknown, method = 'get'): Promise<any>;
+};
+
 declare module 'tronweb' {
   export class TronWeb {
     ready: boolean;
-    constructor(e: any);
+    constructor(options: any);
 
     defaultAddress: {
       hex: string | false;
@@ -63,19 +68,31 @@ declare module 'tronweb' {
     };
 
     isAddress(address: string): boolean;
-    setAddress(address: string): void;
-    setFullNode(node: string): void;
-    setSolidityNode(node: string): void;
-    setEventServer(node: string): void;
     request<T>(args): Promise<T>;
     getFullnodeVersion(): void;
+    setPrivateKey(): any;
+    setAddress(address: string): void;
+    setFullNode(node: string): any;
+    setSolidityNode(node: string): any;
+    setEventServer(node: string): any;
+    setHeader(header: any): any;
 
     contract: () => {
       at: (address: string) => Promise<ITokenContract>;
     };
 
     fullNode: {
+      request: (string, any?, string?) => Promise<any> | undefined;
+      configure: (node) => void;
+    };
+    solidityNode: {
       request: (string, any?, string?) => Promise<any>;
+      configure: (node) => void;
+    };
+
+    eventServer: {
+      request: (string, any?, string?) => Promise<any>;
+      configure: (node) => void;
     };
 
     trx: {
@@ -115,6 +132,12 @@ declare module 'tronweb' {
     static address: {
       fromHex: (string) => string;
     };
+
+    static providers: {
+      HttpProvider: HttpProvider;
+    };
+
+    [index: string]: any;
   }
 
   export type UnsignedTransaction = IUnsignedTransaction;

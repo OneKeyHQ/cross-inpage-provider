@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { JsBridgeBase, ProviderBase } from '@onekeyfe/cross-inpage-provider-core';
-import { IInjectedProviderNames, IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
+import { JsBridgeBase } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderEthereum, shimWeb3 } from '@onekeyfe/onekey-eth-provider';
 import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
 import { ProviderSolana } from '@onekeyfe/onekey-solana-provider';
@@ -12,13 +11,14 @@ import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
 import { ProviderCardano, defineWindowCardanoProperty } from '@onekeyfe/onekey-cardano-provider';
 import { ProviderCosmos } from '@onekeyfe/onekey-cosmos-provider';
 import { ProviderPolkadot, registerPolkadot } from '@onekeyfe/onekey-polkadot-provider';
-import { consts } from '@onekeyfe/cross-inpage-provider-core';
+import {
+  defineWindowProperty,
+  checkWalletSwitchEnable,
+} from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import './connectButtonHack';
 import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
 // import Web3 from 'web3'; // cause build error
-
-const { WALLET_INFO_LOACAL_KEY } = consts;
 
 export type IWindowOneKeyHub = {
   debugLogger?: any;
@@ -47,69 +47,6 @@ export type IWindowOneKeyHub = {
     };
   };
 };
-
-function checkWalletSwitchEnable(property: string) {
-  try {
-    const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);
-    const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
-    if (walletInfoLocal && walletInfoLocal.walletSwitchConfig) {
-      const { enable, disable } = walletInfoLocal.walletSwitchConfig;
-      const enableList: string[] = enable || [];
-      const disableList: string[] = disable || [];
-      return (
-        (enableList.includes(property) && !disableList.includes(property)) ||
-        (!enableList.includes(property) && !disableList.includes(property))
-      );
-    }
-  } catch (e) {
-    console.error(e);
-  }
-  return true;
-}
-
-function checkEnableDefineProperty(property: string) {
-  if (property === '$onekey') return false;
-  try {
-    const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);
-    const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
-    return !!walletInfoLocal?.platformEnv.isExtension;
-  } catch (e) {
-    console.error(e);
-  }
-  return false;
-}
-
-function defineWindowProperty(property: string, provider: unknown) {
-  if (!checkWalletSwitchEnable(property)) return;
-  const enable = checkEnableDefineProperty(property);
-  const proxyProvider = new Proxy(provider as object, {
-    defineProperty(target, property, attributes) {
-      // skip define Prevent overwriting
-      return true;
-    },
-  });
-  try {
-    if (enable) {
-      Object.keys(provider as object).forEach((key) => {
-        ((window as any)[property] ?? {})[key] = (proxyProvider as any)[key];
-      });
-      Object.defineProperty(window, property, {
-        configurable: false, // prevent redefined
-        get() {
-          return proxyProvider;
-        },
-        set(val) {
-          // skip set
-        },
-      });
-    } else {
-      (window as any)[property] = provider;
-    }
-  } catch (ex) {
-    console.error(ex);
-    (window as any)[property] = provider;
-  }
-}
 
 function injectWeb3Provider(): unknown {
   if (!window?.$onekey?.jsBridge) {
@@ -155,7 +92,7 @@ function injectWeb3Provider(): unknown {
   const cosmos = new ProviderCosmos({
     bridge,
   });
-  
+
   const polkadot = new ProviderPolkadot({
     bridge,
   });
@@ -201,7 +138,7 @@ function injectWeb3Provider(): unknown {
 
   // Cardano chain provider injection is handled independently.
   if (checkWalletSwitchEnable('cardano')) {
-    defineWindowCardanoProperty('cardano', cardano)
+    defineWindowCardanoProperty('cardano', cardano);
   }
 
   // cosmos keplr

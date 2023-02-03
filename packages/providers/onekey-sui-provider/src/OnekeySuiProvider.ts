@@ -14,6 +14,7 @@ import type {
 } from '@mysten/sui.js';
 import { ALL_PERMISSION_TYPES } from './types';
 import type { PermissionType } from './types';
+import { SuiChain } from '@mysten/wallet-standard';
 
 const PROVIDER_EVENTS = {
   'connect': 'connect',
@@ -37,6 +38,8 @@ export type SuiRequest = {
   'requestPermissions': (permissions: readonly PermissionType[]) => Promise<boolean>;
 
   'disconnect': () => Promise<void>;
+
+  'getActiveChain': () => Promise<SuiChain | undefined>;
 
   'getAccounts': () => Promise<SuiAddress[]>;
 
@@ -215,6 +218,13 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
     }
     this._handleConnected(accounts[0]);
     return accounts;
+  }
+
+  async getActiveChain(){
+    return this._callBridge({
+      method: 'getActiveChain',
+      params: undefined,
+    });
   }
 
   async signAndExecuteTransaction(transaction: SignableTransaction) {

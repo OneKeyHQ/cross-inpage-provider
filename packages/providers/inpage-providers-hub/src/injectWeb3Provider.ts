@@ -162,6 +162,15 @@ function injectWeb3Provider(): unknown {
   registerSuiWallet(sui, {
     logo: WALLET_CONNECT_INFO.onekey.icon,
   });
+
+  // Override the SuiWallet Standard Wallet
+  if (checkWalletSwitchEnable('suiWallet')) {
+    registerSuiWallet(sui, {
+      name: 'Sui Wallet',
+      logo: WALLET_CONNECT_INFO.onekey.icon,
+    });
+  }
+
   registerPolkadot(polkadot);
 
   return $onekey;

@@ -14,10 +14,10 @@
   resolved "https://registry.npmjs.org/@mysten/bcs/-/bcs-0.5.0.tgz"
   integrity sha512-FjGnXZfR4dY01Q1l3xjgaU+ruIlVomXZk8vzgsQXPFOv7O4pNiOOpJyMEMUnWcyUiktk4R9MxoJJrygOtdxaUw==
 
-"@mysten/sui.js@0.25.0":
-  version "0.25.0"
-  resolved "https://registry.yarnpkg.com/@mysten/sui.js/-/sui.js-0.25.0.tgz#dc784564d2df796b4ae5c1eaae16314418cbc460"
-  integrity sha512-q4Ue5epgjM58x/D3Sr7QYugcXWmthJktowyXMlcxipypwX629PLENN15MDuUIqtHLRWvbCu9VLxL6qvLFFExzg==
+"@mysten/sui.js@0.26.0":
+  version "0.26.0"
+  resolved "https://registry.yarnpkg.com/@mysten/sui.js/-/sui.js-0.26.0.tgz#450daf21ff530f98af1a944cf2ee96481c59c086"
+  integrity sha512-HuGeCN+WYkcFwWM7ON2KMl8e4eTMIaYv18mxtEC4AQ+uNm29yvETNrrxxQBCqUB37mvptLJwlHDT0C8pcBnnIw==
   dependencies:
     "@mysten/bcs" "0.5.0"
     "@noble/hashes" "^1.1.5"
@@ -33,12 +33,12 @@
     superstruct "^1.0.3"
     tweetnacl "^1.0.3"
 
-"@mysten/wallet-standard@^0.2.11":
-  version "0.2.11"
-  resolved "https://registry.yarnpkg.com/@mysten/wallet-standard/-/wallet-standard-0.2.11.tgz#98b7d87432cf8bf1f9d857045fdbf9352fba259c"
-  integrity sha512-OwP6GeanU7KQaEhsHaqbaeR9TlrMpQK7Fym1Eyjg74UwkwEajV4iA/QA91lOmY8cLNjBRQQwPqAYnHMRRyHSwg==
+"@mysten/wallet-standard@^0.3.00":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@mysten/wallet-standard/-/wallet-standard-0.3.0.tgz#3dade02a645ed86b56e6f41b8ba230ddc0c651b3"
+  integrity sha512-nbtKcqa59EiXNFvdbO9C6DuM3nnShYr9RnSrqcvJ3rYbtKXKtDYpwiDaQ+Nj7O90UqgIts2+k+PzW8qiyXjNlw==
   dependencies:
-    "@mysten/sui.js" "0.25.0"
+    "@mysten/sui.js" "0.26.0"
     "@wallet-standard/core" "1.0.1"
 
 "@noble/hashes@^1.1.5", "@noble/hashes@~1.2.0":

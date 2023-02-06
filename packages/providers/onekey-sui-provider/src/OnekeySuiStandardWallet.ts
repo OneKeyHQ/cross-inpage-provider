@@ -75,7 +75,7 @@ class OnekeySuiStandardWallet implements Wallet{
         on: this.$on,
       },
       [Feature.SUI__SIGN_AND_EXECUTE_TRANSACTION]: {
-        version: '1.0.0',
+        version: '1.1.0',
         signAndExecuteTransaction: this.$signAndExecuteTransaction,
       },
     };
@@ -143,7 +143,7 @@ class OnekeySuiStandardWallet implements Wallet{
   }
 
   $signAndExecuteTransaction: SuiSignAndExecuteTransactionMethod = async (input) => {
-    return this.provider.signAndExecuteTransaction(input.transaction);
+    return this.provider.signAndExecuteTransaction(input);
   };
 }
 

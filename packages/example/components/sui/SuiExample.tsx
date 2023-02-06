@@ -202,11 +202,15 @@ export default function App() {
         if (!tnx) throw new Error('tnx is null')
 
         res = await provider.signAndExecuteTransaction({
-          kind: 'bytes',
-          data: tnx.getData()
+          transaction: {
+            kind: 'bytes',
+            data: tnx.getData()
+          }
         });
       } else {
-        res = await provider.signAndExecuteTransaction(transfer);
+        res = await provider.signAndExecuteTransaction({
+          transaction: transfer,
+        });
       }
 
       console.log('[signAndExecuteTransaction]', res);

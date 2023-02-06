@@ -8,12 +8,12 @@ import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
 
 import type {
   MoveCallTransaction,
-  SignableTransaction,
   SuiAddress,
   SuiTransactionResponse,
 } from '@mysten/sui.js';
 import { ALL_PERMISSION_TYPES } from './types';
 import type { PermissionType } from './types';
+import { SuiChain, SuiSignAndExecuteTransactionInput } from '@mysten/wallet-standard';
 
 const PROVIDER_EVENTS = {
   'connect': 'connect',
@@ -38,10 +38,12 @@ export type SuiRequest = {
 
   'disconnect': () => Promise<void>;
 
+  'getActiveChain': () => Promise<SuiChain | undefined>;
+
   'getAccounts': () => Promise<SuiAddress[]>;
 
   'signAndExecuteTransaction': (
-    transaction: SignableTransaction,
+    input: SuiSignAndExecuteTransactionInput,
   ) => Promise<SuiTransactionResponse>;
 
   'executeMoveCall': (transaction: MoveCallTransaction) => Promise<SuiTransactionResponse>;
@@ -79,7 +81,7 @@ export interface IProviderSui {
    */
   getAccounts(): Promise<SuiAddress[]>;
 
-  signAndExecuteTransaction(transaction: SignableTransaction): Promise<SuiTransactionResponse>;
+  signAndExecuteTransaction(input: SuiSignAndExecuteTransactionInput): Promise<SuiTransactionResponse>;
 
   executeMoveCall(transaction: MoveCallTransaction): Promise<SuiTransactionResponse>;
 
@@ -217,10 +219,17 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
     return accounts;
   }
 
-  async signAndExecuteTransaction(transaction: SignableTransaction) {
+  async getActiveChain(){
+    return this._callBridge({
+      method: 'getActiveChain',
+      params: undefined,
+    });
+  }
+
+  async signAndExecuteTransaction(input: SuiSignAndExecuteTransactionInput) {
     return this._callBridge({
       method: 'signAndExecuteTransaction',
-      params: transaction,
+      params: input,
     });
   }
 

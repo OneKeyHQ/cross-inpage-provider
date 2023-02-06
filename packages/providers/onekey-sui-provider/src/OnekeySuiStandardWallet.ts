@@ -75,7 +75,7 @@ class OnekeySuiStandardWallet implements Wallet{
         on: this.$on,
       },
       [Feature.SUI__SIGN_AND_EXECUTE_TRANSACTION]: {
-        version: '1.0.0',
+        version: '1.1.0',
         signAndExecuteTransaction: this.$signAndExecuteTransaction,
       },
     };
@@ -95,6 +95,7 @@ class OnekeySuiStandardWallet implements Wallet{
   };
 
   $connected = async () => {
+    const activeChain = await this.$getActiveChain();
     if (!(await this.$hasPermissions(['viewAccount']))) {
       return;
     }
@@ -109,7 +110,7 @@ class OnekeySuiStandardWallet implements Wallet{
                 address,
                 // TODO: Expose public key instead of address:
                 publicKey: new Uint8Array(),
-                chains: SUI_CHAINS,
+                chains: activeChain ? [activeChain] : [],
                 features: [Feature.SUI__SIGN_AND_EXECUTE_TRANSACTION],
             });
             this._events.emit('change', { accounts: this.accounts });
@@ -133,13 +134,16 @@ class OnekeySuiStandardWallet implements Wallet{
     this._events.all.clear();
   };
 
-
+  $getActiveChain(){
+    return this.provider.getActiveChain() ?? 'sui:unknown';
+  }
+  
   $hasPermissions(permissions: readonly PermissionType[] = ALL_PERMISSION_TYPES) {
     return  this.provider.hasPermissions(permissions);
   }
 
   $signAndExecuteTransaction: SuiSignAndExecuteTransactionMethod = async (input) => {
-    return this.provider.signAndExecuteTransaction(input.transaction);
+    return this.provider.signAndExecuteTransaction(input);
   };
 }
 

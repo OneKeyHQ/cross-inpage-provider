@@ -404,6 +404,14 @@ export default function EVMExample() {
                   Sign
                 </button>
 
+                <button
+                  className="btn btn-primary btn-lg btn-block mb-3"
+                  id="personalSignUntilResolved"
+                  disabled
+                >
+                  Sign Until Resolved
+                </button>
+
                 <p className="info-text alert alert-warning">
                   Result: <span id="personalSignResult" />
                 </p>

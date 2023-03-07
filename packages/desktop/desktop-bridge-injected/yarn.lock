@@ -18,6 +18,35 @@
     global-agent "^3.0.0"
     global-tunnel-ng "^2.7.1"
 
+"@onekeyfe/cross-inpage-provider-core@1.1.23":
+  version "1.1.23"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-core/-/cross-inpage-provider-core-1.1.23.tgz#7edd8f2086032c5350f95840a5b2c1895e54765b"
+  integrity sha512-JJ1M0qmFiBt430Qd5mlvZNYWdvnL2ojFJIqr9OTlmbiXC9fH/WqF0BuY45FV7yfz2L+TFmiHM6Yds3PUUlch5A==
+  dependencies:
+    "@onekeyfe/cross-inpage-provider-errors" "1.1.23"
+    "@onekeyfe/cross-inpage-provider-events" "1.1.23"
+    "@onekeyfe/cross-inpage-provider-types" "1.1.23"
+    events "^3.3.0"
+    lodash "^4.17.21"
+    ms "^2.1.3"
+
+"@onekeyfe/cross-inpage-provider-errors@1.1.23":
+  version "1.1.23"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-1.1.23.tgz#0b5557871de7442e270654842af456db12840d8c"
+  integrity sha512-F1P+HPVb8qaoPzXmmAekzvCSu7qW6Er3s74v5UtB93hK893HkCbLYmwWz2A9RVCP27lz39ZmOa7yDFaGqh0s2A==
+  dependencies:
+    fast-safe-stringify "^2.1.1"
+
+"@onekeyfe/cross-inpage-provider-events@1.1.23":
+  version "1.1.23"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-events/-/cross-inpage-provider-events-1.1.23.tgz#ebe6d52a41f417270cae9945f27ee3e1a35213b3"
+  integrity sha512-WiUDlKTg6PcApVgjfntzG95RKSRtRbSoXAtlIxmuaN00g5dWJ3/hTGLj/suDBRgoW74l7VG7gh1YagS/5Xyr3Q==
+
+"@onekeyfe/cross-inpage-provider-types@1.1.23":
+  version "1.1.23"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-types/-/cross-inpage-provider-types-1.1.23.tgz#2f027cee5e7c884d17c654ce20770078afff8520"
+  integrity sha512-yOigECuty8wV6042bSb04scTAPG7nBO8wU7ukGa953Lyh4g5dbZd7e7j1HULSDfBiEnkB9/4iuLkgDkEzo9e6g==
+
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
@@ -172,6 +201,11 @@ escape-string-regexp@^4.0.0:
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-4.0.0.tgz#14ba83a5d373e3d311e5afca29cf5bfad965bf34"
   integrity sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA==
 
+events@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
+  integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
+
 extract-zip@^1.0.3:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/extract-zip/-/extract-zip-1.7.0.tgz#556cc3ae9df7f452c493a0cfb51cc30277940927"
@@ -181,6 +215,11 @@ extract-zip@^1.0.3:
     debug "^2.6.9"
     mkdirp "^0.5.4"
     yauzl "^2.10.0"
+
+fast-safe-stringify@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.1.1.tgz#c406a83b6e70d9e35ce3b30a81141df30aeba884"
+  integrity sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==
 
 fd-slicer@~1.1.0:
   version "1.1.0"
@@ -307,7 +346,7 @@ keyv@^3.0.0:
   dependencies:
     json-buffer "3.0.0"
 
-lodash@^4.17.10:
+lodash@^4.17.10, lodash@^4.17.21:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
@@ -342,9 +381,9 @@ mimic-response@^1.0.0, mimic-response@^1.0.1:
   integrity sha512-j5EctnkH7amfV/q5Hgmoal1g2QHFJRraOtmx0JpIqkxhBhI/lJSl1nMpQ45hVarwNETOoWEimndZ4QK0RHxuxQ==
 
 minimist@^1.2.5:
-  version "1.2.6"
-  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.6.tgz#8637a5b759ea0d6e98702cfb3a9283323c93af44"
-  integrity sha512-Jsjnk4bw3YJqYzbdyBiNsPWHPfO++UGG749Cxs6peCu5Xg4nrena6OVxOYxrQTqww0Jmwt+Ref8rggumkTLz9Q==
+  version "1.2.8"
+  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.8.tgz#c1a464e7693302e082a075cee0c057741ac4772c"
+  integrity sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==
 
 mkdirp@^0.5.4:
   version "0.5.5"
@@ -362,6 +401,11 @@ ms@2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
+
+ms@^2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
+  integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
 normalize-url@^4.1.0:
   version "4.5.1"

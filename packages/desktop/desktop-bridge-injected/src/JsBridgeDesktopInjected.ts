@@ -18,6 +18,22 @@ class JsBridgeDesktopInjected extends JsBridgeBase {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       window?.$onekey?.jsBridge?.receive?.(data);
     });
+
+    // 这段代码将Webview中的alert()、confirm()和prompt()方法覆盖为自定义的函数，
+    // 并使用Electron的ipcRenderer模块将事件发送给主进程进行处理。
+    // alert()函数仅发送消息，而confirm()和prompt()函数通过ipcRenderer.sendSync()方法发送消息，
+    // 并等待主进程返回结果。
+    window.alert = function (message) {
+      ipcRenderer.send('webview_alert', message);
+    };
+
+    window.confirm = function (message) {
+      return ipcRenderer.sendSync('webview_confirm', message);
+    };
+
+    window.prompt = function (message, defaultValue) {
+      return ipcRenderer.sendSync('webview_prompt', message, defaultValue);
+    };
   }
 
   sendAsString = true;

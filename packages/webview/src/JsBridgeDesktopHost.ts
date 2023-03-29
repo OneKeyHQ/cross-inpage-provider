@@ -1,5 +1,3 @@
-import React from 'react';
-
 import {
   IElectronWebView,
   IJsBridgeConfig,
@@ -9,19 +7,18 @@ import { IWebViewWrapperRef } from './useWebViewBridge';
 
 import {
   JsBridgeBase,
-  injectedFactory,
-  appDebugLogger,
 } from '@onekeyfe/cross-inpage-provider-core';
+import { RefObject } from 'react';
 
-class JsBridgeDesktopHost extends JsBridgeBase {
+export class JsBridgeDesktopHost extends JsBridgeBase {
   constructor(config: IJsBridgeConfig) {
     super(config);
-    this.webviewRef = config.webviewRef as React.RefObject<IElectronWebView>;
+    this.webviewRef = config.webviewRef as RefObject<IElectronWebView>;
   }
 
   sendAsString = true;
 
-  webviewRef?: React.RefObject<IElectronWebView>;
+  webviewRef?: RefObject<IElectronWebView>;
 
   webviewWrapper?: IWebViewWrapperRef;
 
@@ -43,5 +40,3 @@ class JsBridgeDesktopHost extends JsBridgeBase {
     }
   }
 }
-
-export { JsBridgeDesktopHost };

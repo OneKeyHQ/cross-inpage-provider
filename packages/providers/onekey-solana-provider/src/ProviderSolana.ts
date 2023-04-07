@@ -1,4 +1,4 @@
-import { PublicKey } from '@solana/web3.js';
+import { PublicKey, VersionedTransaction } from '@solana/web3.js';
 import type { SendOptions, Transaction } from '@solana/web3.js';
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
@@ -97,21 +97,25 @@ interface IProviderSolana extends ProviderSolanaBase {
    * Sign multiple transactions
    * @returns Transaction[]
    */
-  signAllTransactions(transactions: Transaction[]): Promise<Transaction[]>;
+  signAllTransactions(
+    transactions: (Transaction | VersionedTransaction)[],
+  ): Promise<(Transaction | VersionedTransaction)[]>;
 
   /**
    * @deprecated
    * Sign one transaction
    * @returns Transaction
    */
-  signTransaction(transaction: Transaction): Promise<Transaction>;
+  signTransaction(
+    transaction: Transaction | VersionedTransaction,
+  ): Promise<Transaction | VersionedTransaction>;
 
   /**
    * Sign and send a transaction
    * @returns {Object} Signature and public key
    */
   signAndSendTransaction(
-    transaction: Transaction,
+    transaction: Transaction | VersionedTransaction,
     options?: SendOptions,
   ): Promise<{
     publicKey: string;
@@ -253,7 +257,7 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
   }
 
   async signAndSendTransaction(
-    transaction: Transaction,
+    transaction: Transaction | VersionedTransaction,
     options?: Partial<SendOptions>,
   ): Promise<{
     publicKey: string;
@@ -273,7 +277,9 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
     return result;
   }
 
-  async signTransaction(transaction: Transaction): Promise<Transaction> {
+  async signTransaction(
+    transaction: Transaction | VersionedTransaction,
+  ): Promise<Transaction | VersionedTransaction> {
     return this._handleSignTransaction({
       message: encodeTransaction(transaction),
     });
@@ -287,7 +293,9 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
     return decodeSignedTransaction(result);
   }
 
-  async signAllTransactions(transactions: Transaction[]): Promise<Transaction[]> {
+  async signAllTransactions(
+    transactions: (Transaction | VersionedTransaction)[],
+  ): Promise<(Transaction | VersionedTransaction)[]> {
     return this._handleSignAllTransactions({
       message: transactions.map(encodeTransaction),
     });

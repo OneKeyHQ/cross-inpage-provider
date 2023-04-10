@@ -15,8 +15,7 @@
   "dependencies": {
     "@ethersproject/bytes": "^5.0.6",
     "@metamask/onboarding": "^1.0.1",
-    "@mysten/wallet-adapter-all-wallets": "^0.3.3",
-    "@mysten/wallet-adapter-react": "^8.0.1",
+    "@mysten/wallet-kit": "^0.4.1",
     "@onekeyfe/cross-inpage-provider-core": "1.1.24",
     "@onekeyfe/cross-inpage-provider-types": "1.1.24",
     "@onekeyfe/onekey-aptos-provider": "1.1.24",

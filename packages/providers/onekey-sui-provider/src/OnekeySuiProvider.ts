@@ -1,3 +1,4 @@
+import { bytesToHex } from '@noble/hashes/utils';
 /* eslint-disable tsdoc/syntax */
 import type { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
@@ -6,14 +7,17 @@ import type * as TypeUtils from './type-utils';
 import type { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
 
-import type {
-  MoveCallTransaction,
-  SuiAddress,
-  SuiTransactionResponse,
-} from '@mysten/sui.js';
-import { ALL_PERMISSION_TYPES } from './types';
+import { ALL_PERMISSION_TYPES, AccountInfo } from './types';
 import type { PermissionType } from './types';
-import { SuiChain, SuiSignAndExecuteTransactionInput } from '@mysten/wallet-standard';
+import {
+  IdentifierString,
+  SuiSignAndExecuteTransactionBlockInput,
+  SuiSignAndExecuteTransactionBlockOutput,
+  SuiSignMessageInput,
+  SuiSignMessageOutput,
+  SuiSignTransactionBlockInput,
+  SuiSignTransactionBlockOutput,
+} from '@mysten/wallet-standard';
 
 const PROVIDER_EVENTS = {
   'connect': 'connect',
@@ -31,6 +35,13 @@ type SuiProviderEventsMap = {
   [PROVIDER_EVENTS.message_low_level]: (payload: IJsonRpcRequest) => void;
 };
 
+type SignAndExecuteTransactionBlockInput = SuiSignAndExecuteTransactionBlockInput & {
+  blockSerialize: string;
+  walletSerialize: string;
+};
+type SignTransactionBlockInput = SuiSignTransactionBlockInput & { blockSerialize: string, walletSerialize: string };
+type SignMessageInput = SuiSignMessageInput & { messageSerialize: string, walletSerialize: string };
+
 export type SuiRequest = {
   'hasPermissions': (permissions: readonly PermissionType[]) => Promise<boolean>;
 
@@ -38,19 +49,19 @@ export type SuiRequest = {
 
   'disconnect': () => Promise<void>;
 
-  'getActiveChain': () => Promise<SuiChain | undefined>;
+  'getActiveChain': () => Promise<IdentifierString | undefined>;
 
-  'getAccounts': () => Promise<SuiAddress[]>;
+  'getAccounts': () => Promise<AccountInfo[]>;
 
-  'signAndExecuteTransaction': (
-    input: SuiSignAndExecuteTransactionInput,
-  ) => Promise<SuiTransactionResponse>;
+  'signAndExecuteTransactionBlock': (
+    input: SignAndExecuteTransactionBlockInput,
+  ) => Promise<SuiSignAndExecuteTransactionBlockOutput>;
 
-  'executeMoveCall': (transaction: MoveCallTransaction) => Promise<SuiTransactionResponse>;
+  'signTransactionBlock': (
+    input: SignTransactionBlockInput,
+  ) => Promise<SuiSignTransactionBlockOutput>;
 
-  'executeSerializedMoveCall': (
-    transaction: string | Uint8Array,
-  ) => Promise<SuiTransactionResponse>;
+  'signMessage': (input: SignMessageInput) => Promise<SuiSignMessageOutput>;
 };
 
 type JsBridgeRequest = {
@@ -79,13 +90,7 @@ export interface IProviderSui {
    * Connect wallet, and get wallet info
    * @emits `connect` on success
    */
-  getAccounts(): Promise<SuiAddress[]>;
-
-  signAndExecuteTransaction(input: SuiSignAndExecuteTransactionInput): Promise<SuiTransactionResponse>;
-
-  executeMoveCall(transaction: MoveCallTransaction): Promise<SuiTransactionResponse>;
-
-  executeSerializedMoveCall(transaction: string | Uint8Array): Promise<SuiTransactionResponse>;
+  getAccounts(): Promise<AccountInfo[]>;
 }
 
 export type OneKeySuiProviderProps = IInpageProviderConfig & {
@@ -97,7 +102,7 @@ function isWalletEventMethodMatch({ method, name }: { method: string; name: stri
 }
 
 class ProviderSui extends ProviderSuiBase implements IProviderSui {
-  protected _account: SuiAddress | null = null;
+  protected _account: AccountInfo | null = null;
 
   constructor(props: OneKeySuiProviderProps) {
     super({
@@ -117,7 +122,7 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
       const { method, params } = payload;
 
       if (isWalletEventMethodMatch({ method, name: PROVIDER_EVENTS.accountChanged })) {
-        this._handleAccountChange(params as SuiAddress);
+        this._handleAccountChange(params as AccountInfo);
       }
 
       if (isWalletEventMethodMatch({ method, name: PROVIDER_EVENTS.networkChange })) {
@@ -133,13 +138,13 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
     return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
   }
 
-  private _handleConnected(account: SuiAddress, options: { emit: boolean } = { emit: true }) {
+  private _handleConnected(account: AccountInfo, options: { emit: boolean } = { emit: true }) {
     this._account = account;
     if (options.emit && this.isConnectionStatusChanged('connected')) {
       this.connectionStatus = 'connected';
       const address = account ?? null;
-      this.emit('connect', address);
-      this.emit('accountChanged', address);
+      this.emit('connect', address.address);
+      this.emit('accountChanged', address.address);
     }
   }
 
@@ -153,15 +158,15 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
     }
   }
 
-  isAccountsChanged(account: SuiAddress | undefined) {
-    return account !== this._account;
+  isAccountsChanged(account: AccountInfo | undefined) {
+    return account?.address !== this._account?.address;
   }
 
   // trigger by bridge account change event
-  private _handleAccountChange(payload: SuiAddress) {
+  private _handleAccountChange(payload: AccountInfo) {
     const account = payload;
     if (this.isAccountsChanged(account)) {
-      this.emit('accountChanged', account || null);
+      this.emit('accountChanged', account.address || null);
     }
     if (!account) {
       this._handleDisconnected();
@@ -219,31 +224,47 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
     return accounts;
   }
 
-  async getActiveChain(){
+  async getActiveChain() {
     return this._callBridge({
       method: 'getActiveChain',
       params: undefined,
     });
   }
 
-  async signAndExecuteTransaction(input: SuiSignAndExecuteTransactionInput) {
+  async signAndExecuteTransactionBlock(
+    input: SuiSignAndExecuteTransactionBlockInput,
+  ): Promise<SuiSignAndExecuteTransactionBlockOutput> {
     return this._callBridge({
-      method: 'signAndExecuteTransaction',
-      params: input,
+      method: 'signAndExecuteTransactionBlock',
+      params: {
+        ...input,
+        walletSerialize: JSON.stringify(input.account),
+        blockSerialize: input.transactionBlock.serialize(),
+      },
+    }) as Promise<SuiSignAndExecuteTransactionBlockOutput>;
+  }
+
+  async signTransactionBlock(
+    input: SuiSignTransactionBlockInput,
+  ): Promise<SuiSignTransactionBlockOutput> {
+    return this._callBridge({
+      method: 'signTransactionBlock',
+      params: {
+        ...input,
+        walletSerialize: JSON.stringify(input.account),
+        blockSerialize: input.transactionBlock.serialize(),
+      },
     });
   }
 
-  async executeMoveCall(transaction: MoveCallTransaction) {
+  async signMessage(input: SuiSignMessageInput): Promise<SuiSignMessageOutput> {
     return this._callBridge({
-      method: 'executeMoveCall',
-      params: transaction,
-    });
-  }
-
-  async executeSerializedMoveCall(transaction: string | Uint8Array) {
-    return this._callBridge({
-      method: 'executeSerializedMoveCall',
-      params: transaction,
+      method: 'signMessage',
+      params: {
+        ...input,
+        walletSerialize: JSON.stringify(input.account),
+        messageSerialize: bytesToHex(input.message),
+      },
     });
   }
 

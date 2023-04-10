@@ -28,7 +28,7 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@mysten/wallet-standard": "^0.3.00",
+    "@mysten/wallet-standard": "^0.5.1",
     "@onekeyfe/cross-inpage-provider-core": "1.1.24",
     "@onekeyfe/cross-inpage-provider-errors": "1.1.24",
     "@onekeyfe/cross-inpage-provider-types": "1.1.24",

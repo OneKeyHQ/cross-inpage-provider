@@ -173,7 +173,7 @@ export default function App() {
 
       const signed = await provider.signTransaction(transaction);
       console.log('Signed transaction: ', base58.encode(signed.serialize()));
-      console.info('Verify signature: ', signed.verifySignatures());
+      // console.info('Verify signature: ', signed.verifySignatures());
 
       // // Send Transaction
       // const signature = await connection.sendRawTransaction(signed.serialize());
@@ -196,7 +196,7 @@ export default function App() {
       if (transaction1 && transaction2) {
         const txns = await provider.signAllTransactions([transaction1, transaction2]);
         console.log('signMultipleTransactions txns: ', txns);
-        txns.forEach((tx) => console.info('Verify signature: ', tx.verifySignatures()));
+        // txns.forEach((tx) => console.info('Verify signature: ', tx.verifySignatures()));
       }
     } catch (err) {
       console.warn(err);

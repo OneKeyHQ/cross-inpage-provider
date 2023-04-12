@@ -1,25 +1,42 @@
 import { dapps } from './dapps.config';
 import {
-  Coin,
   JsonRpcProvider,
-  SignableTransaction,
   SUI_TYPE_ARG,
-  GetObjectDataResponse,
-  getObjectId,
-  MoveCallTransaction,
-  LocalTxnDataSerializer,
-  Base64DataBuffer,
+  TransactionBlock,
+  SuiAddress,
+  CoinStruct,
+  PaginatedCoins,
 } from '@mysten/sui.js';
 
-const DEFAULT_GAS_BUDGET_FOR_PAY = 150;
+const MAX_COINS_PER_REQUEST = 50;
 
-const computeGasBudgetForPay = (coins: GetObjectDataResponse[], amount: string) => {
-  const numInputCoins = Coin.selectCoinSetWithCombinedBalanceGreaterThanOrEqual(
-    coins,
-    BigInt(amount),
-  );
-  return DEFAULT_GAS_BUDGET_FOR_PAY * Math.max(2, Math.min(100, numInputCoins.length / 2));
-};
+export const getAllCoins = async(
+  provider: JsonRpcProvider,
+  address: SuiAddress,
+  coinType: string | null,
+): Promise<CoinStruct[]> => {
+  let cursor: string | null = null;
+  const allData: CoinStruct[] = [];
+  do {
+  
+    const { data, nextCursor }: PaginatedCoins = await provider.getCoins({
+      owner: address,
+      coinType,
+      cursor,
+      limit: MAX_COINS_PER_REQUEST,
+    });
+  
+    if (!data || !data.length) {
+      break;
+    }
+
+
+    allData.push(...data);
+    cursor = nextCursor;
+  } while (cursor);
+
+  return allData;
+}
 
 export const buildTransfer = async (
   provider: JsonRpcProvider,
@@ -27,140 +44,47 @@ export const buildTransfer = async (
   to: string,
   amount: string,
   argType?: string,
-): Promise<SignableTransaction> => {
+): Promise<TransactionBlock> => {
   const recipient = to;
   const isSuiTransfer = argType == null || argType === '';
 
   const typeArg = isSuiTransfer ? SUI_TYPE_ARG : argType;
-  const readyCoins = await provider.getCoinBalancesOwnedByAddress(sender, typeArg);
-  const totalBalance = Coin.totalBalance(readyCoins);
-  const gasBudget = computeGasBudgetForPay(readyCoins, amount);
 
-  let amountAndGasBudget = isSuiTransfer ? BigInt(amount) + BigInt(gasBudget) : BigInt(amount);
-  if (amountAndGasBudget > totalBalance) {
-    amountAndGasBudget = totalBalance;
-  }
+  const coinsData = await getAllCoins(provider, sender, typeArg);
 
-  const inputCoins = Coin.selectCoinSetWithCombinedBalanceGreaterThanOrEqual(
-    readyCoins,
-    amountAndGasBudget,
-  ) as GetObjectDataResponse[];
+  const coins = coinsData?.filter(({ lockedUntilEpoch: lock }) => !lock);
 
-  const selectCoinIds = inputCoins.map((object) => getObjectId(object));
+  const tx = new TransactionBlock();
 
-  const txCommon = {
-    inputCoins: selectCoinIds,
-    recipients: [recipient],
-    amounts: [parseInt(amount)],
-    gasBudget,
-  };
-
-  let encodedTx: SignableTransaction;
-  if (isSuiTransfer) {
-    encodedTx = {
-      kind: 'paySui',
-      data: {
-        ...txCommon,
-      },
-    };
-  } else {
-    // Get native coin objects
-    const gasFeeCoins = await provider.selectCoinsWithBalanceGreaterThanOrEqual(
-      sender,
-      BigInt(gasBudget),
-      SUI_TYPE_ARG,
-    );
-
-    const gasCoin = Coin.selectCoinWithBalanceGreaterThanOrEqual(gasFeeCoins, BigInt(gasBudget)) as
-      | GetObjectDataResponse
-      | undefined;
-
-    if (!gasCoin) {
-      console.log(`[error] gas coin not found`);
-      return null;
-    }
-
-    encodedTx = {
-      kind: 'pay',
-      data: {
-        ...txCommon,
-        gasPayment: getObjectId(gasCoin),
-      },
-    };
-  }
-
-  return encodedTx;
-};
-
-export const buildTransferPay = async (
-  provider: JsonRpcProvider,
-  sender: string,
-  to: string,
-  amount: string,
-): Promise<SignableTransaction> => {
-  const recipient = to;
-
-  const typeArg = SUI_TYPE_ARG;
-  const readyCoins = await provider.getCoinBalancesOwnedByAddress(sender, typeArg);
-  const totalBalance = Coin.totalBalance(readyCoins);
-  const gasBudget = computeGasBudgetForPay(readyCoins, amount);
-
-  let amountAndGasBudget = BigInt(amount) + BigInt(gasBudget);
-  if (amountAndGasBudget > totalBalance) {
-    amountAndGasBudget = totalBalance;
-  }
-
-  const inputCoins = Coin.selectCoinSetWithCombinedBalanceGreaterThanOrEqual(
-    readyCoins,
-    amountAndGasBudget,
-  ) as GetObjectDataResponse[];
-
-  const selectCoinIds = inputCoins.map((object) => getObjectId(object));
-
-  return {
-    kind: 'pay',
-    data: {
-      inputCoins: selectCoinIds,
-      recipients: [recipient],
-      amounts: [parseInt(amount)],
-      gasBudget,
-    },
-  };
-};
-
-export const buildMoveCall = async (
-  provider: JsonRpcProvider,
-  sender: string,
-): Promise<MoveCallTransaction> => {
-  const gasBudget = 2000;
-
-  // Get native coin objects
-  const gasFeeCoins = await provider.selectCoinsWithBalanceGreaterThanOrEqual(
-    sender,
-    BigInt(gasBudget),
-    SUI_TYPE_ARG,
+  tx.transferObjects([tx.gas], tx.pure(recipient));
+  tx.setGasPayment(
+    coins
+      .filter((coin) => coin.coinType === typeArg)
+      .map((coin) => ({
+        objectId: coin.coinObjectId,
+        digest: coin.digest,
+        version: coin.version,
+      })),
   );
 
-  const gasCoin = Coin.selectCoinWithBalanceGreaterThanOrEqual(gasFeeCoins, BigInt(gasBudget)) as
-    | GetObjectDataResponse
-    | undefined;
+  const [primaryCoin, ...mergeCoins] = coins.filter(
+    (coin) => coin.coinType === typeArg,
+  );
 
-  if (!gasCoin) {
-    console.log(`[error] gas coin not found`);
-    return null;
+  if (typeArg === SUI_TYPE_ARG) {
+    const coin = tx.splitCoins(tx.gas, [tx.pure(amount)]);
+    tx.transferObjects([coin], tx.pure(to));
+  } else {
+    const primaryCoinInput = tx.object(primaryCoin.coinObjectId);
+    if (mergeCoins.length) {
+      tx.mergeCoins(
+        primaryCoinInput,
+        mergeCoins.map((coin) => tx.object(coin.coinObjectId)),
+      );
+    }
+    const coin = tx.splitCoins(primaryCoinInput, [tx.pure(amount)]);
+    tx.transferObjects([coin], tx.pure(to));
   }
 
-  return {
-    packageObjectId: '0x0000000000000000000000000000000000000002',
-    module: 'devnet_nft',
-    function: 'mint',
-    typeArguments: [],
-    arguments: [
-      'Example NFT',
-      'An NFT created by Sui Wallet',
-      'ipfs://QmZPWWy5Si54R3d26toaqRiqvCH7HkGdXkxwUgCm2oKKM2?filename=img-sq-01.png',
-    ],
-    gasPayment: getObjectId(gasCoin),
-    gasBudget,
-  };
+  return tx;
 };

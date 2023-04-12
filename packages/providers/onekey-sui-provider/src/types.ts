@@ -10,3 +10,8 @@ export type WalletInfo = {
 };
 
 export type SuiChainType = SuiChain;
+
+export interface AccountInfo {
+  address: string;
+  publicKey: string;
+}

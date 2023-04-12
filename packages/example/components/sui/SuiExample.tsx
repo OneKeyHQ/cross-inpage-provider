@@ -4,8 +4,12 @@ import { ProviderSui } from '@onekeyfe/onekey-sui-provider';
 
 import { DAppList } from '../dappList/DAppList';
 import { dapps } from './dapps.config';
-import { Coin, JsonRpcProvider, SUI_TYPE_ARG, GetObjectDataResponse, getObjectId, MoveCallTransaction, LocalTxnDataSerializer, Base64DataBuffer } from '@mysten/sui.js';
-import { buildTransfer, buildTransferPay } from './utils';
+import {
+  JsonRpcProvider,
+  MoveCallTransaction,
+  Connection,
+} from '@mysten/sui.js';
+import { buildTransfer } from './utils';
 
 declare global {
   interface Window {
@@ -32,13 +36,11 @@ const useProvider = () => {
 };
 
 const INIT_MOVE_CALL: MoveCallTransaction = {
-  packageObjectId: '0x0000000000000000000000000000000000000002',
-  module: 'devnet_nft',
-  function: 'mint',
+  kind: 'MoveCall',
+  target: `0x0000000000000000000000000000000000000002::devnet_nft::mint`,
   typeArguments: [],
-  arguments: ["Example NFT", "An NFT created by Sui Wallet", "ipfs://QmZPWWy5Si54R3d26toaqRiqvCH7HkGdXkxwUgCm2oKKM2?filename=img-sq-01.png"],
-  gasBudget: 2000,
-}
+  arguments: [],
+};
 
 export default function App() {
   const provider = useProvider();
@@ -49,18 +51,23 @@ export default function App() {
 
   const [moveCall, setMoveCall] = useState<MoveCallTransaction>(INIT_MOVE_CALL);
 
-
   const rpcProvider = useMemo(() => {
     if (network.toLowerCase() === 'testnet') {
-      return new JsonRpcProvider('https://fullnode.testnet.sui.io', {
-        faucetURL: 'https://faucet.testnet.sui.io/gas',
-      });
+      return new JsonRpcProvider(
+        new Connection({
+          fullnode: 'https://fullnode.testnet.sui.io',
+          faucet: 'https://faucet.testnet.sui.io/gas',
+        }),
+      );
     } else {
-      return new JsonRpcProvider('https://fullnode.devnet.sui.io', {
-        faucetURL: 'https://faucet.devnet.sui.io/gas',
-      });
+      return new JsonRpcProvider(
+        new Connection({
+          fullnode: 'https://fullnode.devnet.sui.io',
+          faucet: 'https://faucet.devnet.sui.io/gas',
+        }),
+      );
     }
-  }, [network])
+  }, [network]);
 
   useEffect(() => {
     if (!provider) return;
@@ -99,7 +106,7 @@ export default function App() {
     try {
       provider.on('accountChanged', (address: string) => {
         setAddress(address);
-        setConnected(address ? true : false);
+        setConnected(!!address);
         console.log(`suiWallet.on [accountChange] ${address}`);
       });
     } catch (e) {
@@ -128,7 +135,7 @@ export default function App() {
     try {
       const has = await provider.requestPermissions();
       console.log('[requestPermissions]', has);
-      return has
+      return has;
     } catch (err) {
       console.warn(err);
       console.log(`[error] requestPermissions: ${JSON.stringify(err)}`);
@@ -139,7 +146,7 @@ export default function App() {
     try {
       const accounts = await provider.getAccounts();
       console.log('[getAccounts]', accounts);
-      return accounts
+      return accounts;
     } catch (err) {
       console.warn(err);
       console.log(`[error] getAccounts: ${JSON.stringify(err)}`);
@@ -150,7 +157,7 @@ export default function App() {
     try {
       const has = await requestPermissions();
       if (has) {
-        const accounts = await getAccounts()
+        const accounts = await getAccounts();
         setAddress(accounts[0]);
         setNetwork(network);
         setConnected(true);
@@ -173,7 +180,7 @@ export default function App() {
       console.warn(err);
       console.log(`[error] requestSuiFromFaucet: ${JSON.stringify(err)}`);
     }
-  }
+  };
 
   const disconnectWallet = async () => {
     try {
@@ -184,155 +191,19 @@ export default function App() {
     }
   };
 
-  const signAndExecuteTransaction = async (hasBytes = false) => {
+  const signAndExecuteTransaction = async () => {
     try {
-      const transfer = hasBytes ? (await buildTransferPay(rpcProvider, address, address, '100000')) : (await buildTransfer(rpcProvider, address, address, '100000'));
+      const transfer = await buildTransfer(rpcProvider, address, address, '100000');
+      // const res: unknown = await provider.signAndExecuteTransactionBlock({
+      //   transactionBlock: transfer,
+      // });
 
-      let res: unknown = null
-      if (hasBytes) {
-        const serializer = new LocalTxnDataSerializer(rpcProvider)
-
-        let tnx: Base64DataBuffer = null
-        if (transfer.kind === 'paySui') {
-          tnx = await serializer.newPaySui(address, transfer.data)
-        } else if (transfer.kind === 'pay') {
-          tnx = await serializer.newPay(address, transfer.data)
-        }
-
-        if (!tnx) throw new Error('tnx is null')
-
-        res = await provider.signAndExecuteTransaction({
-          kind: 'bytes',
-          data: tnx.getData()
-        });
-      } else {
-        res = await provider.signAndExecuteTransaction(transfer);
-      }
-
-      console.log('[signAndExecuteTransaction]', res);
+      // console.log('[signAndExecuteTransaction]', res);
     } catch (err) {
       console.warn(err);
       console.log(`[error] signAndExecuteTransaction: ${JSON.stringify(err)}`);
     }
-  };
-
-  const buildMoveCall = async (): Promise<MoveCallTransaction> => {
-    const gasBudget = 2000;
-    const sender = address;
-
-    // Get native coin objects
-    const gasFeeCoins = await rpcProvider.selectCoinsWithBalanceGreaterThanOrEqual(
-      sender,
-      BigInt(gasBudget),
-      SUI_TYPE_ARG,
-    );
-
-    const gasCoin = Coin.selectCoinWithBalanceGreaterThanOrEqual(
-      gasFeeCoins,
-      BigInt(gasBudget),
-    ) as GetObjectDataResponse | undefined;
-
-    if (!gasCoin) {
-      console.log(`[error] gas coin not found`);
-      return null
-    }
-
-    return {
-      packageObjectId: '0x0000000000000000000000000000000000000002',
-      module: 'devnet_nft',
-      function: 'mint',
-      typeArguments: [],
-      arguments: ["Example NFT", "An NFT created by Sui Wallet", "ipfs://QmZPWWy5Si54R3d26toaqRiqvCH7HkGdXkxwUgCm2oKKM2?filename=img-sq-01.png"],
-      gasPayment: getObjectId(gasCoin),
-      gasBudget,
-    }
   }
-
-  const buildCustomMoveCall = async (): Promise<MoveCallTransaction> => {
-    const gasBudget = moveCall.gasBudget;
-    const sender = address;
-
-    // Get native coin objects
-    const gasFeeCoins = await rpcProvider.selectCoinsWithBalanceGreaterThanOrEqual(
-      sender,
-      BigInt(gasBudget),
-      SUI_TYPE_ARG,
-    );
-
-    const gasCoin = Coin.selectCoinWithBalanceGreaterThanOrEqual(
-      gasFeeCoins,
-      BigInt(gasBudget),
-    ) as GetObjectDataResponse | undefined;
-
-    if (!gasCoin) {
-      console.log(`[error] gas coin not found`);
-      return null
-    }
-
-    return {
-      ...moveCall,
-      gasPayment: getObjectId(gasCoin),
-    }
-  }
-
-  const executeMoveCall = async () => {
-    try {
-      const moveCall = await buildMoveCall()
-      const tx = await provider.executeMoveCall(moveCall);
-
-      console.log('[executeMoveCall]', tx);
-    } catch (err) {
-      console.warn(err);
-      console.log(`[error] executeMoveCall: ${JSON.stringify(err)}`);
-    }
-  }
-
-  const customExecuteMoveCall = async () => {
-    try {
-      const moveCall = await buildCustomMoveCall()
-      const tx = await provider.executeMoveCall(moveCall);
-
-      console.log('[executeMoveCall]', tx);
-    } catch (err) {
-      console.warn(err);
-      console.log(`[error] executeMoveCall: ${JSON.stringify(err)}`);
-    }
-  }
-
-  const executeSerializedMoveCall = async () => {
-    try {
-      const moveCall = await buildMoveCall()
-
-      const serializer = new LocalTxnDataSerializer(rpcProvider)
-
-      const tnx = await serializer.newMoveCall(address, moveCall)
-
-      const tx = await provider.executeSerializedMoveCall(tnx.toString());
-
-      console.log('[executeSerializedMoveCall]', tx);
-    } catch (err) {
-      console.warn(err);
-      console.log(`[error] executeSerializedMoveCall: ${JSON.stringify(err)}`);
-    }
-  }
-
-  const customExecuteSerializedMoveCall = async () => {
-    try {
-      const moveCall = await buildCustomMoveCall()
-
-      const serializer = new LocalTxnDataSerializer(rpcProvider)
-
-      const tnx = await serializer.newMoveCall(address, moveCall)
-
-      const tx = await provider.executeSerializedMoveCall(tnx.toString());
-
-      console.log('[executeSerializedMoveCall]', tx);
-    } catch (err) {
-      console.warn(err);
-      console.log(`[error] executeSerializedMoveCall: ${JSON.stringify(err)}`);
-    }
-  }
-
 
   return (
     <div>
@@ -346,10 +217,13 @@ export default function App() {
         {provider && connected ? (
           <>
             <div>
-              <pre>Network: <select value={network} onChange={(e) => setNetwork(e.target.value)}>
-                <option value="TestNet">TestNet</option>
-                <option value="DevNet">DevNet</option>
-              </select></pre>
+              <pre>
+                Network:{' '}
+                <select value={network} onChange={(e) => setNetwork(e.target.value)}>
+                  <option value="TestNet">TestNet</option>
+                  <option value="DevNet">DevNet</option>
+                </select>
+              </pre>
               <pre>Connected as: {address}</pre>
               <button onClick={requestSuiFromFaucet}>Faucet SUI</button>
             </div>
@@ -358,23 +232,34 @@ export default function App() {
             <button onClick={hasPermissions}>Has Permissions</button>
             <button onClick={requestPermissions}>Request Permissions</button>
             <button onClick={getAccounts}>Get Accounts</button>
-            <button onClick={async () => await signAndExecuteTransaction()}>Sign & Execute Transaction</button>
-            <button onClick={async () => await signAndExecuteTransaction(true)}>Sign & Execute Transaction (Bytes)</button>
-            <button onClick={executeMoveCall}>Execute MoveCall (DevNet Mint Nft)</button>
-            <button onClick={executeSerializedMoveCall}>Execute Serialized MoveCall (DevNet Mint Nft)</button>
+            <button onClick={async () => await signAndExecuteTransaction()}>
+              Sign & Execute Transaction
+            </button>
+            <button onClick={async () => await signAndExecuteTransaction()}>
+              Sign & Execute Transaction (Bytes)
+            </button>
+            {/*<button onClick={executeMoveCall}>Execute MoveCall (DevNet Mint Nft)</button>*/}
+            {/*<button onClick={executeSerializedMoveCall}>*/}
+            {/*  Execute Serialized MoveCall (DevNet Mint Nft)*/}
+            {/*</button>*/}
             <button onClick={() => disconnectWallet()}>Disconnect</button>
 
             <br />
             <br />
             <div style={{ border: '1px solid #cccccc', flexDirection: 'column' }}>
-              <pre><button onClick={customExecuteMoveCall}>Custom Execute MoveCall</button><button onClick={customExecuteSerializedMoveCall}>Custom Execute Serialized MoveCall</button></pre>
+              <pre>
+                {/*<button onClick={customExecuteMoveCall}>Custom Execute MoveCall</button>*/}
+                {/*<button onClick={customExecuteSerializedMoveCall}>*/}
+                {/*  Custom Execute Serialized MoveCall*/}
+                {/*</button>*/}
+              </pre>
               <textarea
                 rows={12}
                 cols={80}
                 value={JSON.stringify(moveCall, null, 4)}
                 onChange={(e) => {
                   try {
-                    setMoveCall(JSON.parse(e.target.value) as MoveCallTransaction)
+                    setMoveCall(JSON.parse(e.target.value) as MoveCallTransaction);
                   } catch (error) {
                     console.log('[input] Custom Execute MoveCall error');
                   }

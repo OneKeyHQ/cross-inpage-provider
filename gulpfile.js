@@ -1,3 +1,24 @@
+const dotenv = require('dotenv');
+function setupDotEnv() {
+  const results = [
+    dotenv.config({
+      path: path.resolve(__dirname, '../.env'),
+    }),
+    dotenv.config({
+      path: path.resolve(__dirname, '../.env.version'),
+    }),
+    dotenv.config({
+      path: path.resolve(__dirname, '../.env.expo'),
+    }),
+  ];
+  const errorResult = results.find((result) => result.error);
+
+  if (errorResult) {
+    throw errorResult.error;
+  }
+}
+setupDotEnv();
+
 const gulp = require('gulp');
 const { execSync, exec } = require('child_process');
 

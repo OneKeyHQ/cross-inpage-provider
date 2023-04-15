@@ -1,9 +1,6 @@
 {
   "version": "independent",
-  "packages": [
-    "packages/*",
-    "packages/*/*"
-  ],
+  "useWorkspaces": true,
   "npmClient": "yarn",
   "ignoreChanges": ["**/*.md", "**/*.spec.ts"]
 }

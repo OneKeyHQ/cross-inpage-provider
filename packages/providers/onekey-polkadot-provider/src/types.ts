@@ -93,5 +93,5 @@ export interface SignerResult {
   /**
    * @description The resulting signature in hex
    */
-  signature: string;
+  signature: `0x${string}`;
 }

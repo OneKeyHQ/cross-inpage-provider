@@ -43,7 +43,7 @@ function buildInjected(cb) {
     'echo "\t Manually update app-monorepo WebView.js comment hash in code make iOS hot-reload take effect."',
   );
   execCmd(
-    'echo "\t Manually update app-monorepo content-script.ts comment hash in code make EXT hot-reload take effect."',
+    'echo "\t Manually update app-monorepo content-script.ts comment hash in code make EXT hot-reload take effect. Or use content-script reload button to force reload extension."',
   );
   execCmd('echo ">>>>>>>>>>>>>>>  "');
   cb();

@@ -6,11 +6,8 @@ syncFiles() {
     appPath=$APP_MONOREPO_LOCAL_PATH
     workingPath=$CURRENT_WORKING_PATH
 
-
     echo "**********************" $workingPath
     echo "**********************" $appPath
-
-    exit
 
     rsync -avz --exclude node_modules \
               $workingPath/packages/events/   \

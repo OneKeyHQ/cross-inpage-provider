@@ -4,11 +4,7 @@ import { ProviderSui } from '@onekeyfe/onekey-sui-provider';
 
 import { DAppList } from '../dappList/DAppList';
 import { dapps } from './dapps.config';
-import {
-  JsonRpcProvider,
-  MoveCallTransaction,
-  Connection,
-} from '@mysten/sui.js';
+import { JsonRpcProvider, MoveCallTransaction, Connection } from '@mysten/sui.js';
 import { buildTransfer } from './utils';
 
 declare global {
@@ -158,7 +154,7 @@ export default function App() {
       const has = await requestPermissions();
       if (has) {
         const accounts = await getAccounts();
-        setAddress(accounts[0]);
+        setAddress(accounts[0]?.address ?? null);
         setNetwork(network);
         setConnected(true);
 
@@ -203,7 +199,7 @@ export default function App() {
       console.warn(err);
       console.log(`[error] signAndExecuteTransaction: ${JSON.stringify(err)}`);
     }
-  }
+  };
 
   return (
     <div>

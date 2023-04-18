@@ -3,12 +3,12 @@
   "version": "1.1.26",
   "private": true,
   "scripts": {
-    "postinstall": "patch-package",
-    "dev": "next dev",
-    "start": "next dev",
-    "build": "next build && next export",
-    "start-web": "next start",
-    "lint": "next lint",
+    "postinstall-bak": "patch-package",
+    "dev": "patch-package && next dev",
+    "start": "patch-package && next dev",
+    "build": "patch-package && next build && next export",
+    "start-web": "patch-package && next start",
+    "lint": "patch-package && next lint",
     "clean": "rm -rf ./node_modules && rm -rf ./.next && rm -rf ./out",
     "swap-lock-registry": "npx swap-lock-registry --yarn --parallel --url https://registry.yarnpkg.com yarn.lock"
   },

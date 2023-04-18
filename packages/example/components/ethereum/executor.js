@@ -84,6 +84,7 @@ export function useExecutor() {
     const ethSign = document.getElementById('ethSign');
     const ethSignResult = document.getElementById('ethSignResult');
     const personalSign = document.getElementById('personalSign');
+    const personalSignUntilResolved = document.getElementById('personalSignUntilResolved');
     const personalSignResult = document.getElementById('personalSignResult');
     const personalSignVerify = document.getElementById('personalSignVerify');
     const personalSignVerifySigUtilResult = document.getElementById(
@@ -234,6 +235,7 @@ export function useExecutor() {
           deployFailingButton.disabled = false;
           createToken.disabled = false;
           personalSign.disabled = false;
+          personalSignUntilResolved.disabled = false;
           signTypedData.disabled = false;
           getEncryptionKeyButton.disabled = false;
           ethSign.disabled = false;
@@ -744,22 +746,37 @@ export function useExecutor() {
       /**
        * Personal Sign
        */
-      personalSign.onclick = async () => {
+
+      const personalSignRequest = async () => {
         const exampleMessage = 'Example `personal_sign` message';
+        const from = accounts[0];
+        const msg = `0x${Buffer.from(exampleMessage, 'utf8').toString('hex')}`;
+        const sign = await ethereum.request({
+          method: 'personal_sign',
+          params: [msg, from, 'Example password'],
+        });
+        personalSignResult.innerHTML = sign;
+        personalSignVerify.disabled = false;
+      };
+
+      const handlePersonalSignUntilResolved = async () => {
         try {
-          const from = accounts[0];
-          const msg = `0x${Buffer.from(exampleMessage, 'utf8').toString('hex')}`;
-          const sign = await ethereum.request({
-            method: 'personal_sign',
-            params: [msg, from, 'Example password'],
-          });
-          personalSignResult.innerHTML = sign;
-          personalSignVerify.disabled = false;
+          await personalSignRequest();
+        } catch {
+          await handlePersonalSignUntilResolved();
+        }
+      };
+
+      personalSign.onclick = async () => {
+        try {
+          await personalSignRequest();
         } catch (err) {
           console.error(err);
           personalSign.innerHTML = `Error: ${err.message}`;
         }
       };
+
+      personalSignUntilResolved.onclick = handlePersonalSignUntilResolved;
 
       /**
        * Personal Sign Verify

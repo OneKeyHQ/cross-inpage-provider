@@ -18,20 +18,21 @@ export const getAllCoins = async(
   let cursor: string | null = null;
   const allData: CoinStruct[] = [];
   do {
-  
+
     const { data, nextCursor }: PaginatedCoins = await provider.getCoins({
       owner: address,
       coinType,
       cursor,
       limit: MAX_COINS_PER_REQUEST,
     });
-  
+
     if (!data || !data.length) {
       break;
     }
 
 
     allData.push(...data);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     cursor = nextCursor;
   } while (cursor);
 

@@ -2,21 +2,20 @@ import messagePort from './extensionMessagePort';
 import { IJsBridgeConfig, IJsBridgeMessagePayload } from '@onekeyfe/cross-inpage-provider-types';
 
 import { JsBridgeBase, consts } from '@onekeyfe/cross-inpage-provider-core';
+
 import utils from './utils';
 
-const { EXT_PORT_UI_TO_BG } = consts;
+const { EXT_PORT_OFFSCREEN_TO_BG } = consts;
 
-export type IJsBridgeExtUiConfig = IJsBridgeConfig & {
+export type IJsBridgeExtOffscreenConfig = IJsBridgeConfig & {
   onPortConnect: (port0: chrome.runtime.Port) => void;
 };
 
-class JsBridgeExtUi extends JsBridgeBase {
-  constructor(config: IJsBridgeExtUiConfig) {
+class JsBridgeExtOffscreen extends JsBridgeBase {
+  constructor(config: IJsBridgeExtOffscreenConfig) {
     super(config as IJsBridgeConfig);
     this.setupMessagePortConnect(config);
   }
-
-  isExtUi = true;
 
   sendAsString = false;
 
@@ -28,14 +27,14 @@ class JsBridgeExtUi extends JsBridgeBase {
     }
   }
 
-  setupMessagePortConnect(config: IJsBridgeExtUiConfig) {
+  setupMessagePortConnect(config: IJsBridgeExtOffscreenConfig) {
     messagePort.connect({
-      name: EXT_PORT_UI_TO_BG,
-      // #### background -> ui
+      name: EXT_PORT_OFFSCREEN_TO_BG,
+      // #### background -> offscreen
       onMessage: (payload: any, port0: chrome.runtime.Port) => {
         let origin = utils.getOriginFromPort(port0) || '';
 
-        // in ext ui, port.sender?.origin is always empty,
+        // in ext offscreen, port.sender?.origin is always empty,
         //    so we trust remote (background) origin
         origin = origin || (payload as IJsBridgeMessagePayload).origin || '';
 
@@ -44,7 +43,7 @@ class JsBridgeExtUi extends JsBridgeBase {
         jsBridge.receive(payload as IJsBridgeMessagePayload, {
           origin,
           // trust message from background
-          internal: port0.name === EXT_PORT_UI_TO_BG,
+          internal: port0.name === EXT_PORT_OFFSCREEN_TO_BG,
         });
       },
       onConnect: (port) => {
@@ -60,4 +59,4 @@ class JsBridgeExtUi extends JsBridgeBase {
   }
 }
 
-export { JsBridgeExtUi };
+export { JsBridgeExtOffscreen };

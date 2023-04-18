@@ -80,7 +80,7 @@ export type IJsBridgeMessagePayload = {
   id?: number;
   data?: unknown | IJsonRpcRequest;
   error?: unknown;
-  remoteId?: number | string | null;
+  remoteId?: number | string | null; // remote port id
   type?: IJsBridgeMessageTypesStrings;
   scope?: IInjectedProviderNamesStrings;
   origin?: string;

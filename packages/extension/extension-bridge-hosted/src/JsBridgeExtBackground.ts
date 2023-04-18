@@ -9,7 +9,7 @@ import {
 
 import { JsBridgeBase, consts } from '@onekeyfe/cross-inpage-provider-core';
 
-const { EXT_PORT_CS_TO_BG, EXT_PORT_UI_TO_BG } = consts;
+const { EXT_PORT_OFFSCREEN_TO_BG, EXT_PORT_CS_TO_BG, EXT_PORT_UI_TO_BG } = consts;
 
 class JsBridgeExtBackground extends JsBridgeBase {
   constructor(config: IJsBridgeConfig) {
@@ -20,8 +20,25 @@ class JsBridgeExtBackground extends JsBridgeBase {
   sendAsString = false;
 
   public ports: Record<number | string, chrome.runtime.Port> = {};
+  public offscreenPort: chrome.runtime.Port | undefined;
+  public offscreenPortId: number | undefined;
 
   private portIdIndex = 1;
+
+  addPort({ portId, port }: { portId: number; port: chrome.runtime.Port }) {
+    this.ports[portId] = port;
+    if (port.name === EXT_PORT_OFFSCREEN_TO_BG) {
+      this.offscreenPort = port;
+      this.offscreenPortId = portId;
+    }
+  }
+  removePort({ portId, port }: { portId: number; port: chrome.runtime.Port }) {
+    delete this.ports[portId];
+    if (port.name === EXT_PORT_OFFSCREEN_TO_BG) {
+      this.offscreenPort = undefined;
+      this.offscreenPortId = undefined;
+    }
+  }
 
   sendPayload(payload0: IJsBridgeMessagePayload | string): void {
     const payload = payload0 as IJsBridgeMessagePayload;
@@ -43,6 +60,7 @@ class JsBridgeExtBackground extends JsBridgeBase {
     }
   }
 
+  // TODO use utils
   _getOriginFromPort(port: chrome.runtime.Port) {
     // chrome
     let origin = port?.sender?.origin || '';
@@ -68,10 +86,17 @@ class JsBridgeExtBackground extends JsBridgeBase {
                   url: "https://app.uniswap.org/#/swap"
              */
       // content-script may be multiple
-      if (port.name === EXT_PORT_CS_TO_BG || port.name === EXT_PORT_UI_TO_BG) {
+      if (
+        port.name === EXT_PORT_CS_TO_BG ||
+        port.name === EXT_PORT_UI_TO_BG ||
+        port.name === EXT_PORT_OFFSCREEN_TO_BG
+      ) {
         this.portIdIndex += 1;
         const portId = this.portIdIndex;
-        this.ports[portId] = port;
+        this.addPort({
+          portId,
+          port,
+        });
         const onMessage = (payload: IJsBridgeMessagePayload, port0: chrome.runtime.Port) => {
           const origin = this._getOriginFromPort(port0);
           payload.remoteId = portId;
@@ -82,8 +107,9 @@ class JsBridgeExtBackground extends JsBridgeBase {
           // - receive
           jsBridge.receive(payload, {
             origin,
-            // only trust message from UI, but NOT from content-script(dapp)
-            internal: port.name === EXT_PORT_UI_TO_BG,
+            // TODO trust origin
+            // only trust message from UI/Offscreen, but NOT from content-script(dapp)
+            internal: port.name === EXT_PORT_UI_TO_BG || port.name === EXT_PORT_OFFSCREEN_TO_BG,
           });
         };
         // #### content-script -> background
@@ -91,13 +117,23 @@ class JsBridgeExtBackground extends JsBridgeBase {
 
         // TODO onDisconnect remove ports cache
         const onDisconnect = () => {
-          delete this.ports[portId];
           port.onMessage.removeListener(onMessage);
           port.onDisconnect.removeListener(onDisconnect);
+          this.removePort({
+            portId,
+            port,
+          });
         };
         port.onDisconnect.addListener(onDisconnect);
       }
     });
+  }
+
+  requestToOffscreen(data: unknown) {
+    if (!this.offscreenPort) {
+      throw new Error('offscreenPort not ready.');
+    }
+    return this.request({ data, remoteId: this.offscreenPortId });
   }
 
   requestToAllCS(scope: IInjectedProviderNamesStrings, data: unknown) {

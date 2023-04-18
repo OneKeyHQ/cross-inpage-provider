@@ -10,3 +10,4 @@ yarn-error.log
 .watchman-*
 package.json.lerna_backup
 lerna-debug.log
+.env

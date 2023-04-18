@@ -3,7 +3,7 @@
   "version": "1.1.26",
   "private": true,
   "scripts": {
-    "postinstall": "patch-package",
+    "postinstall-bak": "patch-package",
     "dev": "next dev",
     "start": "next dev",
     "build": "next build && next export",

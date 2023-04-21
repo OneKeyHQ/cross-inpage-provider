@@ -13,6 +13,7 @@ export enum ProviderEvents {
   NODES_CHANGED = 'nodesChanged',
   MESSAGE = 'message',
   MESSAGE_LOW_LEVEL = 'message_low_level',
+  CHAIN_CHANGED = 'chainChanged',
 }
 
 export interface Nodes {

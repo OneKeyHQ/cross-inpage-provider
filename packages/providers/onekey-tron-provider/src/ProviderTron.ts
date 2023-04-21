@@ -200,7 +200,7 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
 
       if (isWalletEventMethodMatch(method, ProviderEvents.NODES_CHANGED)) {
         if (this._initialized) {
-          this._handleNodesChanged(payload.params as Nodes);
+          this._handleNodesChanged(payload.params as { nodes: Nodes; chainId: string });
         } else {
           void this._initialize();
         }
@@ -211,6 +211,7 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
   override isAccountsChanged(accounts: string[]) {
     return !dequal(this._accounts, accounts);
   }
+
   private _handleAccountsChanged(accounts: string[]) {
     let _accounts = accounts;
 
@@ -297,7 +298,7 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
   override isNetworkChanged(nodes: Nodes) {
     return !dequal(nodes, this._nodes);
   }
-  private _handleNodesChanged(nodes: Nodes) {
+  private _handleNodesChanged({ nodes, chainId }: { nodes: Nodes; chainId: string }) {
     if (isEmpty(nodes)) return;
 
     if (this.isNetworkChanged(nodes)) {
@@ -309,6 +310,14 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
 
       this._postMessage(ProviderEvents.NODES_CHANGED, {
         ...nodes,
+      });
+
+      this._postMessage(ProviderEvents.SET_NODE, {
+        ...nodes,
+        node: {
+          chainId,
+          chain: '_',
+        },
       });
     }
   }

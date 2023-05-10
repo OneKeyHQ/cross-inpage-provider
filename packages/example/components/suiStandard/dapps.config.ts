@@ -1,10 +1,14 @@
 export const dapps = [
   {
-    name: 'Kee Psake',
-    url: 'https://keepsake.gg//',
+    name: 'Cetus',
+    url: 'https://app.cetus.zone/',
   },
   {
-    name: 'Gotbeef',
-    url: 'https://gotbeef.app/',
+    name: 'SuiSwap',
+    url: 'https://suiswap.app/',
+  },
+  {
+    name: 'Sui Names',
+    url: 'https://sui-names.com/',
   },
 ];

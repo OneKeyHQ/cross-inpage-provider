@@ -39,8 +39,11 @@ type SignAndExecuteTransactionBlockInput = SuiSignAndExecuteTransactionBlockInpu
   blockSerialize: string;
   walletSerialize: string;
 };
-type SignTransactionBlockInput = SuiSignTransactionBlockInput & { blockSerialize: string, walletSerialize: string };
-type SignMessageInput = SuiSignMessageInput & { messageSerialize: string, walletSerialize: string };
+type SignTransactionBlockInput = SuiSignTransactionBlockInput & {
+  blockSerialize: string;
+  walletSerialize: string;
+};
+type SignMessageInput = SuiSignMessageInput & { messageSerialize: string; walletSerialize: string };
 
 export type SuiRequest = {
   'hasPermissions': (permissions: readonly PermissionType[]) => Promise<boolean>;
@@ -122,7 +125,7 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
       const { method, params } = payload;
 
       if (isWalletEventMethodMatch({ method, name: PROVIDER_EVENTS.accountChanged })) {
-        this._handleAccountChange(params as AccountInfo);
+        this._handleAccountChange(params as AccountInfo | undefined);
       }
 
       if (isWalletEventMethodMatch({ method, name: PROVIDER_EVENTS.networkChange })) {
@@ -163,10 +166,10 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
   }
 
   // trigger by bridge account change event
-  private _handleAccountChange(payload: AccountInfo) {
+  private _handleAccountChange(payload: AccountInfo | undefined) {
     const account = payload;
     if (this.isAccountsChanged(account)) {
-      this.emit('accountChanged', account.address || null);
+      this.emit('accountChanged', account?.address || null);
     }
     if (!account) {
       this._handleDisconnected();

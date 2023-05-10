@@ -189,7 +189,7 @@ export default function App() {
 
   const signAndExecuteTransaction = async () => {
     try {
-      const transfer = await buildTransfer(rpcProvider, address, address, '100000');
+      const transfer = await buildTransfer(rpcProvider, address, "0xe40a5a0133cac4e9059f58f9d2074a3386d631390e40eadb43d2606e8975f3eb", '100000');
       // const res: unknown = await provider.signAndExecuteTransactionBlock({
       //   transactionBlock: transfer,
       // });
@@ -231,13 +231,6 @@ export default function App() {
             <button onClick={async () => await signAndExecuteTransaction()}>
               Sign & Execute Transaction
             </button>
-            <button onClick={async () => await signAndExecuteTransaction()}>
-              Sign & Execute Transaction (Bytes)
-            </button>
-            {/*<button onClick={executeMoveCall}>Execute MoveCall (DevNet Mint Nft)</button>*/}
-            {/*<button onClick={executeSerializedMoveCall}>*/}
-            {/*  Execute Serialized MoveCall (DevNet Mint Nft)*/}
-            {/*</button>*/}
             <button onClick={() => disconnectWallet()}>Disconnect</button>
 
             <br />

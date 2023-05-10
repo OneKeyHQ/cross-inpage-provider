@@ -1,12 +1,11 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useState, useEffect, useMemo } from 'react';
-
+import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
 import { DAppList } from '../dappList/DAppList';
 import { dapps } from './dapps.config';
 import { JsonRpcProvider, Connection } from '@mysten/sui.js';
 import { buildTransfer } from '../sui/utils';
-import { Box, Modal, Text, Image, Pressable, VStack } from 'native-base';
-import { WalletKitProvider,ConnectButton, useWalletKit } from '@mysten/wallet-kit';
+import { WalletKitProvider, ConnectButton, useWalletKit } from '@mysten/wallet-kit';
 
 function DappTest() {
   const [network, setNetwork] = useState<string>('TestNet');
@@ -39,8 +38,8 @@ function DappTest() {
     } else {
       return new JsonRpcProvider(
         new Connection({
-          fullnode: 'https://fullnode.devnet.sui.io',
-          faucet: 'https://faucet.devnet.sui.io/gas',
+          fullnode: 'https://fullnode.mainnet.sui.io',
+          faucet: 'https://faucet.testnet.sui.io/gas',
         }),
       );
     }
@@ -57,14 +56,14 @@ function DappTest() {
     }
   };
 
-  const _getAccounts = () => {
+  const _getAccounts = useCallback(() => {
     try {
       console.log('[getAccounts] accounts:', accounts);
     } catch (err) {
       console.warn(err);
       console.log(`[error] getAccounts: ${JSON.stringify(err)}`);
     }
-  };
+  }, [accounts]);
 
   const disconnectWallet = async () => {
     try {
@@ -78,10 +77,51 @@ function DappTest() {
   const signAndExecuteTransaction = async () => {
     try {
       const address = accounts[0].address;
-      const transfer = await buildTransfer(rpcProvider, address, address, '100000');
+      const transfer = await buildTransfer(
+        rpcProvider,
+        address,
+        '0xe40a5a0133cac4e9059f58f9d2074a3386d631390e40eadb43d2606e8975f3eb',
+        '100000',
+      );
       const res: unknown = await signAndExecuteTransactionBlock({
         transactionBlock: transfer,
-        chain: network.toLowerCase() === 'sui:testnet' ? 'sui:testnet' : 'sui:devnet',
+        chain: network.toLowerCase() === 'sui:testnet' ? 'sui:testnet' : 'sui:mainnet',
+        account: currentAccount,
+      });
+
+      console.log('[signAndExecuteTransaction]', res);
+    } catch (err) {
+      console.warn(err);
+      console.log(`[error] signAndExecuteTransaction: ${JSON.stringify(err)}`);
+    }
+  };
+
+  const signTransaction = async () => {
+    try {
+      const address = accounts[0].address;
+      const transfer = await buildTransfer(
+        rpcProvider,
+        address,
+        '0xe40a5a0133cac4e9059f58f9d2074a3386d631390e40eadb43d2606e8975f3eb',
+        '100000',
+      );
+      const res: unknown = await signTransactionBlock({
+        transactionBlock: transfer,
+        chain: network.toLowerCase() === 'sui:testnet' ? 'sui:testnet' : 'sui:mainnet',
+        account: currentAccount,
+      });
+
+      console.log('[signTransaction]', res);
+    } catch (err) {
+      console.warn(err);
+      console.log(`[error] signTransaction: ${JSON.stringify(err)}`);
+    }
+  };
+
+  const signMessageAction = async () => {
+    try {
+      const res: unknown = await signMessage({
+        message: hexToBytes('010203'),
         account: currentAccount,
       });
 
@@ -103,7 +143,7 @@ function DappTest() {
               Network:{' '}
               <select value={network} onChange={(e) => setNetwork(e.target.value)}>
                 <option value="TestNet">TestNet</option>
-                <option value="DevNet">DevNet</option>
+                <option value="MainNet">MainNet</option>
               </select>
             </pre>
             <pre>Connected as: {address}</pre>
@@ -115,9 +155,8 @@ function DappTest() {
           <button onClick={async () => await signAndExecuteTransaction()}>
             Sign & Execute Transaction
           </button>
-          <button onClick={async () => await signAndExecuteTransaction()}>
-            Sign & Execute Transaction (Bytes)
-          </button>
+          <button onClick={async () => await signTransaction()}>Sign Transaction</button>
+          <button onClick={async () => await signMessageAction()}>Sign Message</button>
           <button onClick={() => disconnectWallet()}>Disconnect</button>
         </>
       )}
@@ -126,10 +165,8 @@ function DappTest() {
 }
 
 export default function App() {
-
-
   return (
-    <WalletKitProvider features={["sui:signTransactionBlock"]} enableUnsafeBurner>
+    <WalletKitProvider features={['sui:signTransactionBlock']} enableUnsafeBurner>
       <ConnectButton />
       <DappTest />
     </WalletKitProvider>

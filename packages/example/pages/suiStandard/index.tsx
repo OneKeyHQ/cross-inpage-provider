@@ -6,17 +6,7 @@ import Link from 'next/link';
 import { LogsContainer } from '../../components/LogsContainer';
 
 // injected provider works only if nextjs ssr disabled
-// const SuiExample = dynamic(() => import('../../components/suiStandard/SuiExample'), { ssr: false });
-
-const SuiExample = () => (
-  <div>
-    <h1>TODO SuiExample build failed.</h1>
-    <pre>
-      Attempted import error: 'useSyncExternalStore' is not exported from 'react' (imported as
-      'useSyncExternalStore').
-    </pre>
-  </div>
-);
+const SuiExample = dynamic(() => import('../../components/suiStandard/SuiExample'), { ssr: false });
 
 export default function () {
   // TODO <Layout />

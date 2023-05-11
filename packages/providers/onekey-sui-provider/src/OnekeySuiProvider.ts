@@ -122,6 +122,7 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
     });
 
     this.on(PROVIDER_EVENTS.message_low_level, (payload) => {
+      if (!payload) return;
       const { method, params } = payload;
 
       if (isWalletEventMethodMatch({ method, name: PROVIDER_EVENTS.accountChanged })) {

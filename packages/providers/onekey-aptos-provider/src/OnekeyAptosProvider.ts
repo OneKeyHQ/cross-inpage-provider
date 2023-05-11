@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  IInpageProviderConfig
-} from '@onekeyfe/cross-inpage-provider-core';
+import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { ProviderAptosBase } from './ProviderAptosBase';
 import { AptosAccountInfo, SignMessagePayload, SignMessageResponse } from './types';
@@ -130,6 +128,7 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     });
 
     this.on(PROVIDER_EVENTS.message_low_level, (payload) => {
+      if (!payload) return;
       const { method, params } = payload;
 
       if (isWalletEventMethodMatch({ method, name: PROVIDER_EVENTS.accountChanged })) {

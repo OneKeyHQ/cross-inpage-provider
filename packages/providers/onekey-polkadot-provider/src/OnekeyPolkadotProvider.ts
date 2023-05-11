@@ -6,12 +6,7 @@ import { ProviderPolkadotBase } from './ProviderPolkadotBase';
 import type * as TypeUtils from './type-utils';
 import type { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 
-import {
-  InjectedAccountWithMeta,
-  Unsubcall,
-  Injected,
-  InjectedAccount,
-} from '@polkadot/extension-inject/types';
+import { Unsubcall, Injected, InjectedAccount } from '@polkadot/extension-inject/types';
 import { injectExtension } from '@polkadot/extension-inject';
 import { SignerPayloadJSON, SignerPayloadRaw, SignerResult } from './types';
 
@@ -95,10 +90,17 @@ class ProviderPolkadot extends ProviderPolkadotBase implements IProviderPolkadot
     });
 
     this.on(PROVIDER_EVENTS.message_low_level, (payload) => {
+      if (!payload) return;
       const { method, params } = payload;
 
       if (isWalletEventMethodMatch({ method, name: PROVIDER_EVENTS.accountChanged })) {
-        this._handleAccountChange(params as string);
+        let temp: InjectedAccount | undefined = undefined;
+        if (typeof params === 'string') {
+          temp = JSON.parse(params) as InjectedAccount;
+        } else if (typeof params === 'object') {
+          temp = params as InjectedAccount | undefined;
+        }
+        this._handleAccountChange(temp);
       }
     });
   }
@@ -131,8 +133,8 @@ class ProviderPolkadot extends ProviderPolkadotBase implements IProviderPolkadot
   }
 
   // trigger by bridge account change event
-  private _handleAccountChange(payload: string) {
-    const account = JSON.parse(payload) as InjectedAccount[];
+  private _handleAccountChange(payload: InjectedAccount | undefined) {
+    const account = payload ? [payload] : [];
     this.emit('accountChanged', account);
     if (!account) {
       this._handleDisconnected();

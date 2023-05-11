@@ -57,24 +57,13 @@ export const buildTransfer = async (
 
   const tx = new TransactionBlock();
 
-  tx.transferObjects([tx.gas], tx.pure(recipient));
-  tx.setGasPayment(
-    coins
-      .filter((coin) => coin.coinType === typeArg)
-      .map((coin) => ({
-        objectId: coin.coinObjectId,
-        digest: coin.digest,
-        version: coin.version,
-      })),
-  );
-
   const [primaryCoin, ...mergeCoins] = coins.filter(
     (coin) => coin.coinType === typeArg,
   );
 
   if (typeArg === SUI_TYPE_ARG) {
     const coin = tx.splitCoins(tx.gas, [tx.pure(amount)]);
-    tx.transferObjects([coin], tx.pure(to));
+    tx.transferObjects([coin], tx.pure(recipient));
   } else {
     const primaryCoinInput = tx.object(primaryCoin.coinObjectId);
     if (mergeCoins.length) {
@@ -84,8 +73,7 @@ export const buildTransfer = async (
       );
     }
     const coin = tx.splitCoins(primaryCoinInput, [tx.pure(amount)]);
-    tx.transferObjects([coin], tx.pure(to));
+    tx.transferObjects([coin], tx.pure(recipient));
   }
-
   return tx;
 };

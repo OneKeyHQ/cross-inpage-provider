@@ -21,17 +21,23 @@ const nextConfig = {
   // https://nextjs.org/docs/api-reference/next.config.js/custom-page-extensions#including-non-page-files-in-the-pages-directory
   pageExtensions: ['page.tsx', 'page.ts', 'page.jsx', 'page.js'],
   // **** custom pageExtensions not working with native-base
+  webpack: (config) => {
+    config.plugins.push(
+      new webpack.ProvidePlugin({
+        React: 'react',
+      })
+    );
+
+    // You can add more custom webpack configurations here
+    return config;
+  },
 };
 
 module.exports = withPlugins(
   [
     withTM,
-    [withFonts, { projectRoot: __dirname }],
-    [withExpo, { projectRoot: __dirname }],
-    // your plugins go here.
-    new webpack.ProvidePlugin({
-      React: 'react',
-    }),
+    withFonts,
+    withExpo,
   ],
   nextConfig,
 );

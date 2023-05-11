@@ -207,7 +207,7 @@ const data: ITreeNodeData[] = [
       },
       {
         id: uuid.v4(),
-        name: 'Sui',
+        name: 'Sui (Deprecated)',
         href: '/sui',
         icon: 'https://onekey-asset.com/assets/sui/sui.png',
       },

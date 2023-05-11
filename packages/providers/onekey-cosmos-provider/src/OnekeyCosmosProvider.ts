@@ -225,10 +225,11 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
     });
 
     this.on(PROVIDER_EVENTS.message_low_level, (payload) => {
+      if (!payload) return;
       const { method, params } = payload;
 
       if (isWalletEventMethodMatch({ method, name: PROVIDER_EVENTS.accountChanged })) {
-        this._handleAccountChange(params as Key);
+        this._handleAccountChange(params as Key | undefined);
       }
     });
   }
@@ -261,14 +262,14 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
   }
 
   isAccountsChanged(account: Key | undefined) {
-    if(!account) return false;
-    if(!this._account) return true;
+    if (!account) return false;
+    if (!this._account) return true;
 
     return bytesToHex(account.pubKey) !== bytesToHex(this._account.pubKey);
   }
 
   // trigger by bridge account change event
-  private _handleAccountChange(payload: Key) {
+  private _handleAccountChange(payload: Key | undefined) {
     const account = payload;
     if (this.isAccountsChanged(account)) {
       this.emit('keplr_keystorechange');

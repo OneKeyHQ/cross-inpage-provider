@@ -32,7 +32,7 @@
   "devDependencies": {
     "babel-loader": "^8.2.3",
     "babel-plugin-lodash": "^3.3.4",
-    "electron": "^17.2.0",
+    "electron": "^18.3.7",
     "ts-loader": "^9.2.6",
     "webpack": "^5.69.1",
     "webpack-cli": "^4.9.2",

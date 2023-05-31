@@ -108,6 +108,23 @@ export function useExecutor() {
     const signTypedDataV4Verify = document.getElementById('signTypedDataV4Verify');
     const signTypedDataV4VerifyResult = document.getElementById('signTypedDataV4VerifyResult');
 
+    const signTypedDataV4WithFakeMessagesChainId = document.getElementById(
+      'signTypedDataV4WithFakeMessagesChainId',
+    );
+    const signTypedDataV4WithFakeMessages = document.getElementById(
+      'signTypedDataV4WithFakeMessages',
+    );
+    const signTypedDataV4WithFakeMessagesResult = document.getElementById(
+      'signTypedDataV4WithFakeMessagesResult',
+    );
+
+    const signTypedDataV4WithFakeMessagesVerify = document.getElementById(
+      'signTypedDataV4WithFakeMessagesVerify',
+    );
+    const signTypedDataV4WithFakeMessagesVerifyResult = document.getElementById(
+      'signTypedDataV4WithFakeMessagesVerifyResult',
+    );
+
     // Send form section
     const fromDiv = document.getElementById('fromInput');
     const toDiv = document.getElementById('toInput');
@@ -193,6 +210,8 @@ export function useExecutor() {
         signTypedDataV3Verify,
         signTypedDataV4,
         signTypedDataV4Verify,
+        signTypedDataV4WithFakeMessages,
+        signTypedDataV4WithFakeMessagesVerify,
       ];
 
       const isMetaMaskConnected = () => accounts && accounts.length > 0;
@@ -243,6 +262,7 @@ export function useExecutor() {
           signTypedData.disabled = false;
           signTypedDataV3.disabled = false;
           signTypedDataV4.disabled = false;
+          signTypedDataV4WithFakeMessages.disabled = false;
         }
 
         if (isMetaMaskInstalled()) {
@@ -1146,6 +1166,104 @@ export function useExecutor() {
         }
       };
 
+      /**
+       * Sign Typed Data V4 with fake messages
+       */
+      signTypedDataV4WithFakeMessages.onclick = async () => {
+        const chainId = signTypedDataV4WithFakeMessagesChainId.value;
+        const msgParams = {
+          'types': {
+            'EIP712Domain': [
+              { 'name': 'name', 'type': 'string' },
+              { 'name': 'version', 'type': 'string' },
+              { 'name': 'verifyingContract', 'type': 'address' },
+              { 'name': 'chainId', 'type': 'uint256' },
+            ],
+            'RelayRequest': [
+              { 'name': 'target', 'type': 'address' },
+              { 'name': 'message', 'type': 'string' },
+            ],
+          },
+          'domain': {
+            'name': 'EIP-712 Test - Relayed Transaction',
+            'version': '1',
+            chainId,
+            'verifyingContract': '0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef',
+          },
+          'primaryType': 'RelayRequest',
+          'message': {
+            '': {
+              'target': 'THIS IS THE FAKE TARGET',
+              'message': 'THIS IS A FAKE MESSAGE',
+            },
+            'target': '0x0101010101010101010101010101010101010101',
+            'message': 'Howdy',
+          },
+        };
+        try {
+          const from = accounts[0];
+          const sign = await ethereum.request({
+            method: 'eth_signTypedData_v4',
+            params: [from, JSON.stringify(msgParams)],
+          });
+          signTypedDataV4WithFakeMessagesResult.innerHTML = sign;
+          signTypedDataV4WithFakeMessagesVerify.disabled = false;
+        } catch (err) {
+          console.error(err);
+          signTypedDataV4WithFakeMessagesResult.innerHTML = `Error: ${err.message}`;
+        }
+      };
+
+      /**
+       *  Sign Typed Data V4 with fake messages Verification
+       */
+      signTypedDataV4WithFakeMessagesVerify.onclick = async () => {
+        const networkId = parseInt(networkDiv.innerHTML, 10);
+        const chainId = parseInt(chainIdDiv.innerHTML, 16) || networkId;
+        const msgParams = {
+          'types': {
+            'EIP712Domain': [
+              { 'name': 'name', 'type': 'string' },
+              { 'name': 'version', 'type': 'string' },
+              { 'name': 'verifyingContract', 'type': 'address' },
+              { 'name': 'chainId', 'type': 'uint256' },
+            ],
+            'RelayRequest': [
+              { 'name': 'target', 'type': 'address' },
+              { 'name': 'message', 'type': 'string' },
+            ],
+          },
+          'domain': {
+            'name': 'EIP-712 Test - Relayed Transaction',
+            'version': '1',
+            chainId,
+            'verifyingContract': '0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef',
+          },
+          'primaryType': 'RelayRequest',
+          'message': {
+            'target': '0x0101010101010101010101010101010101010101',
+            'message': 'Howdy',
+          },
+        };
+        try {
+          const from = accounts[0];
+          const sign = signTypedDataV4WithFakeMessagesResult.innerHTML;
+          const recoveredAddr = recoverTypedSignatureV4({
+            data: msgParams,
+            sig: sign,
+          });
+          if (toChecksumAddress(recoveredAddr) === toChecksumAddress(from)) {
+            console.log(`Successfully verified signer as ${recoveredAddr}`);
+            signTypedDataV4WithFakeMessagesVerifyResult.innerHTML = recoveredAddr;
+          } else {
+            console.log(`Failed to verify signer when comparing ${recoveredAddr} to ${from}`);
+          }
+        } catch (err) {
+          console.error(err);
+          signTypedDataV4WithFakeMessagesVerifyResult.innerHTML = `Error: ${err.message}`;
+        }
+      };
+
       function handleNewAccounts(newAccounts) {
         accounts = newAccounts;
         accountsDiv.innerHTML = accounts;
@@ -1163,6 +1281,7 @@ export function useExecutor() {
         chainIdDiv.innerHTML = chainId;
         signTypedDataV4ChainId.value = parseInt(chainId, 16);
         signTypedDataV3ChainId.value = parseInt(chainId, 16);
+        signTypedDataV4WithFakeMessagesChainId.value = parseInt(chainId, 16);
 
         if (chainId === '0x1') {
           warningDiv.classList.remove('warning-invisible');

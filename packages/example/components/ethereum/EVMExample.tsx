@@ -561,6 +561,69 @@ export default function EVMExample() {
               </div>
             </div>
           </div>
+          <div
+            className="
+            col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12
+            d-flex
+            align-items-stretch
+          "
+          >
+            <div className="card full-width">
+              <div className="card-body">
+                <h4>Sign Typed Data V4 with fake messages</h4>
+
+                <div className="form-group">
+                  <label>Chain ID</label>
+                  <input
+                    className="form-control"
+                    type="text"
+                    id="signTypedDataV4WithFakeMessagesChainId"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="">Messages</label>
+                  <pre>
+                    {`
+                  'message': {
+                      '': {
+                        'target': 'THIS IS THE FAKE TARGET',
+                        'message': 'THIS IS A FAKE MESSAGE',
+                      },
+                      'target': '0x0101010101010101010101010101010101010101',
+                      'message': 'Howdy',
+                    }`}
+                  </pre>
+                </div>
+
+                <button
+                  className="btn btn-primary btn-lg btn-block mb-3"
+                  id="signTypedDataV4WithFakeMessages"
+                  disabled
+                >
+                  Sign
+                </button>
+
+                <p className="info-text alert alert-warning">
+                  Result:
+                  <span id="signTypedDataV4WithFakeMessagesResult" />
+                </p>
+
+                <button
+                  className="btn btn-primary btn-lg btn-block mb-3"
+                  id="signTypedDataV4WithFakeMessagesVerify"
+                  disabled
+                >
+                  Verify
+                </button>
+
+                <p className="info-text alert alert-warning">
+                  Recovery result:
+                  <span id="signTypedDataV4WithFakeMessagesVerifyResult" />
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
       <section>

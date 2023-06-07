@@ -5,10 +5,25 @@ import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injec
 import { ProviderPolkadotBase } from './ProviderPolkadotBase';
 import type * as TypeUtils from './type-utils';
 import type { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
+import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 
-import { Unsubcall, Injected, InjectedAccount } from '@polkadot/extension-inject/types';
+import {
+  Unsubcall,
+  Injected,
+  InjectedAccount,
+  ProviderList,
+  ProviderMeta,
+} from '@polkadot/extension-inject/types';
 import { injectExtension } from '@polkadot/extension-inject';
-import { SignerPayloadJSON, SignerPayloadRaw, SignerResult } from './types';
+import {
+  RequestRpcSend,
+  RequestRpcSubscribe,
+  RequestRpcUnsubscribe,
+  SignerPayloadJSON,
+  SignerPayloadRaw,
+  SignerResult,
+} from './types';
+import OneKeyInjected from './inject/Injected';
 
 const PROVIDER_EVENTS = {
   'connect': 'connect',
@@ -16,6 +31,17 @@ const PROVIDER_EVENTS = {
   'accountChanged': 'accountChanged',
   'message_low_level': 'message_low_level',
 } as const;
+
+interface IMessagePayload {
+  request?: unknown;
+  response?: unknown;
+  error?: string;
+}
+
+interface IPostMessage extends IMessagePayload {
+  id: number;
+  origin: string;
+}
 
 type CosmosProviderEventsMap = {
   [PROVIDER_EVENTS.connect]: (account: string) => void;
@@ -34,6 +60,21 @@ export type PolkadotRequest = {
   'web3SignPayload': (payload: SignerPayloadJSON) => Promise<SignerResult>;
 
   'web3SignRaw': (payload: SignerPayloadRaw) => Promise<SignerResult>;
+
+  'web3RpcSubscribe': (
+    payload: RequestRpcSubscribe,
+    cb: (cb: JsonRpcResponse<unknown>) => void,
+  ) => Promise<string | number>;
+
+  'web3RpcUnSubscribe': () => Promise<boolean>;
+
+  'web3RpcSubscribeConnected': (cb: (connected: boolean) => void) => boolean;
+
+  'web3RpcSend': (payload: RequestRpcSend) => Promise<JsonRpcResponse<unknown>>;
+
+  'web3RpcListProviders': () => Promise<ProviderList>;
+
+  'web3RpcStartProvider': (payload: string) => Promise<ProviderMeta>;
 };
 
 type JsBridgeRequest = {
@@ -60,6 +101,21 @@ export interface IProviderPolkadot {
   web3SignPayload: (payload: SignerPayloadJSON) => Promise<SignerResult>;
 
   web3SignRaw: (payload: SignerPayloadRaw) => Promise<SignerResult>;
+
+  web3RpcSubscribe: (
+    payload: RequestRpcSubscribe,
+    cb: (accounts: JsonRpcResponse<unknown>) => void,
+  ) => Promise<string | number>;
+
+  web3RpcUnSubscribe: (payload: RequestRpcUnsubscribe) => Promise<boolean>;
+
+  web3RpcSubscribeConnected: (cb: (connected: boolean) => void) => boolean;
+
+  web3RpcSend: (payload: RequestRpcSend) => Promise<JsonRpcResponse<unknown>>;
+
+  web3RpcListProviders: () => Promise<ProviderList>;
+
+  web3RpcStartProvider: (payload: string) => Promise<ProviderMeta>;
 }
 
 export type OneKeyPolkadotProviderProps = IInpageProviderConfig & {
@@ -165,6 +221,41 @@ class ProviderPolkadot extends ProviderPolkadotBase implements IProviderPolkadot
     return super.emit(event, ...args);
   }
 
+  private createMessage(payload: IMessagePayload): IPostMessage {
+    return {
+      id: 2,
+      origin: 'OneKey Polkadot Provider',
+      ...payload,
+    };
+  }
+
+  private _postMessage(payload: IMessagePayload) {
+    try {
+      const message = this.createMessage(payload);
+      window.postMessage(message);
+    } catch (error) {
+      // ignore
+    }
+  }
+
+  postRequest(payload: any) {
+    this._postMessage({
+      request: payload,
+    });
+  }
+
+  postResponse(payload: any) {
+    this._postMessage({
+      response: payload,
+    });
+  }
+
+  postError(payload: string) {
+    this._postMessage({
+      error: payload,
+    });
+  }
+
   web3Enable(dappName: string): Promise<boolean> {
     return this._callBridge({
       method: 'web3Enable',
@@ -186,53 +277,105 @@ class ProviderPolkadot extends ProviderPolkadotBase implements IProviderPolkadot
     };
   }
 
-  web3SignPayload(payload: SignerPayloadJSON): Promise<SignerResult> {
+  async web3SignPayload(payload: SignerPayloadJSON): Promise<SignerResult> {
+    try {
+      this.postRequest(payload);
+
+      const result = await this._callBridge({
+        method: 'web3SignPayload',
+        params: payload,
+      });
+
+      this.postResponse({
+        id: 1,
+        origin: 'OneKey Polkadot Provider',
+        signature: result.signature,
+      });
+
+      return result;
+    } catch (error) {
+      this.postError('Cancelled');
+      return Promise.reject('Cancelled');
+    }
+  }
+
+  async web3SignRaw(payload: SignerPayloadRaw): Promise<SignerResult> {
+    try {
+      this.postRequest(payload);
+
+      const result = await this._callBridge({
+        method: 'web3SignRaw',
+        params: payload,
+      });
+
+      this.postResponse({
+        id: 1,
+        origin: 'OneKey Polkadot Provider',
+        signature: result.signature,
+      });
+
+      return result;
+    } catch (error) {
+      this.postError('Cancelled');
+      return Promise.reject('Cancelled');
+    }
+  }
+
+  web3RpcSubscribe(
+    payload: RequestRpcSubscribe,
+    cb: (accounts: JsonRpcResponse<unknown>) => void,
+  ): Promise<string | number> {
     return this._callBridge({
-      method: 'web3SignPayload',
+      method: 'web3RpcSubscribe',
       params: payload,
     });
   }
 
-  web3SignRaw(payload: SignerPayloadRaw): Promise<SignerResult> {
+  web3RpcUnSubscribe(): Promise<boolean> {
+    super.removeAllListeners();
     return this._callBridge({
-      method: 'web3SignRaw',
+      method: 'web3RpcUnSubscribe',
+      params: undefined,
+    });
+  }
+
+  web3RpcSubscribeConnected(cb: (connected: boolean) => void): boolean {
+    cb(this.isConnected());
+    super.on(PROVIDER_EVENTS.connect, cb);
+    super.on(PROVIDER_EVENTS.disconnect, cb);
+    return true;
+  }
+
+  web3RpcSend(payload: RequestRpcSend): Promise<JsonRpcResponse<unknown>> {
+    return this._callBridge({
+      method: 'web3RpcSend',
+      params: payload,
+    });
+  }
+
+  web3RpcListProviders(): Promise<ProviderList> {
+    return this._callBridge({
+      method: 'web3RpcListProviders',
+      params: undefined,
+    });
+  }
+
+  web3RpcStartProvider(payload: string): Promise<ProviderMeta> {
+    return this._callBridge({
+      method: 'web3RpcStartProvider',
       params: payload,
     });
   }
 }
 
-const registerPolkadot = (provider: ProviderPolkadot) => {
+const registerPolkadot = (provider: ProviderPolkadot, name = 'OneKey', version = '1.0.0') => {
   try {
-    const enableFn = (originName: string): Promise<Injected> => {
-      return provider.web3Enable(originName).then((res) => {
-        if (!res) {
-          throw new Error('not support');
-        }
-
-        return {
-          accounts: {
-            get: (anyType?: boolean): Promise<InjectedAccount[]> => {
-              return provider.web3Accounts(anyType);
-            },
-            subscribe: (cb: (accounts: InjectedAccount[]) => void | Promise<void>): Unsubcall => {
-              return provider.web3AccountsSubscribe(cb);
-            },
-          },
-          metadata: undefined,
-          provider: undefined,
-          signer: {
-            signPayload: (message: SignerPayloadJSON): Promise<SignerResult> => {
-              return provider.web3SignPayload(message);
-            },
-            signRaw: (message: SignerPayloadRaw): Promise<SignerResult> => {
-              return provider.web3SignRaw(message);
-            },
-          },
-        };
-      });
+    const enableFn = async (originName: string): Promise<Injected> => {
+      await provider.web3Enable(originName);
+      return new OneKeyInjected(provider);
     };
 
-    injectExtension(enableFn, { name: 'OneKey', version: '1.0.0' });
+    injectExtension(enableFn, { name: name ?? 'OneKey', version: version ?? '1.0.0' });
   } catch (error) {
     console.error(error);
   }

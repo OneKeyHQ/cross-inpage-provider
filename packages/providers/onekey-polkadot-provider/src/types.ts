@@ -95,3 +95,18 @@ export interface SignerResult {
    */
   signature: `0x${string}`;
 }
+
+export interface RequestRpcSend {
+  method: string;
+  params: unknown[];
+}
+
+export interface RequestRpcSubscribe extends RequestRpcSend {
+  type: string;
+}
+
+export interface RequestRpcUnsubscribe {
+  type: string;
+  method: string;
+  id: string;
+}

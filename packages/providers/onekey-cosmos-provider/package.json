@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/onekey-cosmos-provider",
-  "version": "1.1.28",
+  "version": "1.1.29",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -28,11 +28,11 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@noble/hashes": "^1.1.4",
-    "@onekeyfe/cross-inpage-provider-core": "1.1.28",
-    "@onekeyfe/cross-inpage-provider-errors": "1.1.28",
-    "@onekeyfe/cross-inpage-provider-types": "1.1.28",
-    "@onekeyfe/extension-bridge-injected": "1.1.28",
+    "@noble/hashes": "^1.3.0",
+    "@onekeyfe/cross-inpage-provider-core": "1.1.29",
+    "@onekeyfe/cross-inpage-provider-errors": "1.1.29",
+    "@onekeyfe/cross-inpage-provider-types": "1.1.29",
+    "@onekeyfe/extension-bridge-injected": "1.1.29",
     "eth-rpc-errors": "^4.0.3",
     "long": "^5.2.1",
     "mitt": "^3.0.0"

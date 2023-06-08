@@ -52,43 +52,6 @@
   resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.3.0.tgz#085fd70f6d7d9d109671090ccae1d3bec62554a1"
   integrity sha512-ilHEACi9DwqJB0pw7kv+Apvh50jiiSyR/cQ3y4W7lOR5mhvn/50FLUfsnfJz0BDZtl/RR16kXvptiv6q1msYZg==
 
-"@onekeyfe/cross-inpage-provider-core@1.1.27":
-  version "1.1.27"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-core/-/cross-inpage-provider-core-1.1.27.tgz#b2855448c8a794c62bd34af1d8c37de46c20199d"
-  integrity sha512-KMQoFe2P3xABDmd8ic+yc54GP99toCgtrBxywOTWYFfBcu7MaVkVT9d2J8NIobQXnftR2wp3lswFBwO8b0ZFVA==
-  dependencies:
-    "@onekeyfe/cross-inpage-provider-errors" "1.1.27"
-    "@onekeyfe/cross-inpage-provider-events" "1.1.27"
-    "@onekeyfe/cross-inpage-provider-types" "1.1.27"
-    events "^3.3.0"
-    lodash "^4.17.21"
-    ms "^2.1.3"
-
-"@onekeyfe/cross-inpage-provider-errors@1.1.27":
-  version "1.1.27"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-1.1.27.tgz#5d64f2b3a0de1bda99dc6d29b96c84bbafc0d538"
-  integrity sha512-8rYwFqEHDuS/IOHgPr7Nd1EOy4x8EJPQ5GliDDSKR/zJ0LO0TFe0UBUOt9yfVobSVhcBLixOMaPJCbuPXhQPDA==
-  dependencies:
-    fast-safe-stringify "^2.1.1"
-
-"@onekeyfe/cross-inpage-provider-events@1.1.27":
-  version "1.1.27"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-events/-/cross-inpage-provider-events-1.1.27.tgz#6ff57fc3f7e70fd549a31c94b7ac954eef2c0d58"
-  integrity sha512-AUWbxxjy7QR24JjB/utK1rBbwdNlaqGvKv45QPxUkPQAgiCfD3icXrE3j9mOGXcJDsAEHBkFifEbw5i8gDiuJQ==
-
-"@onekeyfe/cross-inpage-provider-types@1.1.27":
-  version "1.1.27"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-types/-/cross-inpage-provider-types-1.1.27.tgz#e32ac7d06bd82a91ec6647a040c4d7318587ec5e"
-  integrity sha512-vfBaY7wD7xquGBzlLdZa8G1vNDUiGtrNVlxia1ZhfkkVxXnb8PGGbspIXwlTxZUiS+lc3B0hzRKBcvh55twYww==
-
-"@onekeyfe/extension-bridge-injected@1.1.27":
-  version "1.1.27"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/extension-bridge-injected/-/extension-bridge-injected-1.1.27.tgz#9ab80e795646e8d9ad7e193ee39daed348b745ee"
-  integrity sha512-VqUfidP0V/aPKD3ThKD5A/Kd8AiBuFKh3DnBYi9KtuvEqTKvlfiH1c6811aNnQExHdLjo9vggE6rtng0J2gUdg==
-  dependencies:
-    "@onekeyfe/cross-inpage-provider-core" "1.1.27"
-    "@onekeyfe/cross-inpage-provider-types" "1.1.27"
-
 "@scure/base@~1.1.0":
   version "1.1.1"
   resolved "https://registry.npmjs.org/@scure/base/-/base-1.1.1.tgz"
@@ -237,17 +200,12 @@ eventemitter3@^4.0.7:
   resolved "https://registry.npmjs.org/eventemitter3/-/eventemitter3-4.0.7.tgz"
   integrity sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==
 
-events@^3.3.0:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
-  integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
-
 eyes@^0.1.8:
   version "0.1.8"
   resolved "https://registry.npmjs.org/eyes/-/eyes-0.1.8.tgz"
   integrity sha512-GipyPsXO1anza0AOZdy69Im7hGFCNB7Y/NGjDlZGJ3GJJLtwNSb2vrzYrTYJRrRloVx7pl+bhUaTB8yiccPvFQ==
 
-fast-safe-stringify@^2.0.6, fast-safe-stringify@^2.1.1:
+fast-safe-stringify@^2.0.6:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.1.1.tgz#c406a83b6e70d9e35ce3b30a81141df30aeba884"
   integrity sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==
@@ -285,20 +243,10 @@ jsonparse@^1.2.0:
   resolved "https://registry.npmjs.org/jsonparse/-/jsonparse-1.3.1.tgz"
   integrity sha512-POQXvpdL69+CluYsillJ7SUhKvytYjW9vG/GKpnf+xP8UWgYEM/RaMzHHofbALDiKbbP1W8UEYmgGl39WkPZsg==
 
-lodash@^4.17.21:
-  version "4.17.21"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
-  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
-
 mitt@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/mitt/-/mitt-3.0.0.tgz#69ef9bd5c80ff6f57473e8d89326d01c414be0bd"
   integrity sha512-7dX2/10ITVyqh4aOSVI9gdape+t9l2/8QxHrFmUXu4EEUpdlxl6RudZUPZoc+zuY2hk1j7XxVroIVIan/pD/SQ==
-
-ms@^2.1.3:
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
-  integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
 node-gyp-build@^4.3.0:
   version "4.5.0"

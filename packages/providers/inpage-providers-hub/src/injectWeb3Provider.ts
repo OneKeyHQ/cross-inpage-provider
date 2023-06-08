@@ -173,6 +173,9 @@ function injectWeb3Provider(): unknown {
 
   registerPolkadot(polkadot);
 
+  if (checkWalletSwitchEnable('polkadot-js')) {
+    registerPolkadot(polkadot, 'polkadot-js', '0.44.1');
+  }
   return $onekey;
 }
 export { injectWeb3Provider };

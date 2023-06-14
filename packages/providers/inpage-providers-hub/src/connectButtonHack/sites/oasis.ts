@@ -15,14 +15,17 @@ hackConnectButton({
       icon: string;
       text: string;
     }) => {
-      const arrows = Array.from(document.querySelectorAll('button .connect-wallet-arrow'));
-      const arrow = arrows.find(
-        (item) => (item.previousSibling as HTMLElement | undefined)?.innerHTML === findName,
+      const spans = Array.from(
+        window.document
+          ?.querySelector('onboard-v2')
+          ?.shadowRoot?.querySelectorAll('.wallets-container .wallet-button-container .name') ?? [],
       );
-      const span = arrow?.previousSibling as HTMLElement | undefined;
+      const span = spans.find((item) => item.innerHTML === findName);
       if (span) {
         span.innerHTML = text;
-        const imgContainer = span.parentNode?.previousSibling as HTMLElement | undefined;
+        const imgContainer = span.previousElementSibling?.querySelector('div') as
+          | HTMLElement
+          | undefined;
         if (imgContainer) {
           createNewImageToContainer({
             container: imgContainer,

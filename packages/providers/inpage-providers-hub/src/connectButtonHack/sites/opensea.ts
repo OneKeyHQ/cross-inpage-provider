@@ -15,7 +15,7 @@ hackConnectButton({
       icon: string;
       text: string;
     }) => {
-      const listDom = window.document.querySelector('.ConnectCompatibleWallet--wallet-list')
+      const listDom = window.document.querySelector('div[data-testid="wallet-modal"] ul')
         ?.childNodes as HTMLElement[] | undefined;
       if (!listDom || !listDom.length) {
         return;

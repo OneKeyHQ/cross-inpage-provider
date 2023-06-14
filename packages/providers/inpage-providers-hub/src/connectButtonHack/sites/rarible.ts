@@ -17,7 +17,9 @@ hackConnectButton({
       text: string;
     }) => {
       const spans = Array.from(
-        document.querySelectorAll('.ScrollbarsCustom ~ div > div > button > span '),
+        document.querySelectorAll(
+          '.ScrollbarsCustom ~ div > div > button > span > span > span > span',
+        ),
       );
       const span = spans.find((item) => item.innerHTML === findName);
       if (span) {

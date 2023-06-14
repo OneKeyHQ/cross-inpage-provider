@@ -15,7 +15,7 @@ hackConnectButton({
       icon: string;
       text: string;
     }) => {
-      const buttonList = Array.from(document.querySelectorAll('div[role=menu] div[role=menuitem]'));
+      const buttonList = Array.from(document.querySelectorAll('body header button'));
       const btn = buttonList.find((item) => item.innerHTML.includes(findName));
       if (btn) {
         const childNodes = Array.from(btn.childNodes);

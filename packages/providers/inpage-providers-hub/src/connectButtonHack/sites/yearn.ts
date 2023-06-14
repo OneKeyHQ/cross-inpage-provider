@@ -18,29 +18,15 @@ hackConnectButton({
       icon: string;
       text: string;
     }) => {
-      const modalDom = document.querySelector('aside.bn-onboard-modal');
+      const modalDom = document.querySelector('.yearn--modalLogin');
       if (!modalDom) {
         return;
       }
-      const img = modalDom.querySelector(`li>button>div>img[alt="${findIcon || ''}"]`) as
-        | HTMLImageElement
-        | undefined;
-      const svg = modalDom.querySelector('li>button>div>svg') as HTMLOrSVGImageElement | undefined;
-      if (img && img.src && utilsDomNodes.isNotReplaced(img)) {
-        img.src = icon;
-        img.srcset = icon;
-        utilsDomNodes.setIsReplaced(img);
-        const span = (img?.parentNode as HTMLElement | undefined)?.nextElementSibling as
-          | HTMLElement
-          | undefined;
-        if (span && utilsDomNodes.isInnerContentMatch(span, findName)) {
-          span.childNodes[0].nodeValue = text;
-          utilsDomNodes.setIsReplaced(span);
-        }
-      }
-      // WalletConnect is svg
-      if (svg) {
-        const svgContainer = svg.parentElement;
+      const names = Array.from(modalDom.querySelectorAll('.yearn--modalLogin-card>b'));
+      const name = names.find((item) => utilsDomNodes.isInnerContentMatch(item, findName));
+      if (name) {
+        const svg = name.previousElementSibling?.querySelector('svg');
+        const svgContainer = svg?.parentElement;
         const span = svgContainer?.nextElementSibling;
         if (utilsDomNodes.isReplaced(svgContainer)) {
           return;

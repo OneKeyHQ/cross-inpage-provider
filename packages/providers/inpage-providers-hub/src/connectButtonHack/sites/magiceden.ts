@@ -18,7 +18,7 @@ hackConnectButton({
       text: string;
     }) => {
       const img = document.querySelector(
-        `#headlessui-portal-root li > button > img[alt="${findIconText}"]`,
+        `#headlessui-portal-root li > button > div > img[alt="${findIconText}"]`,
       ) as HTMLImageElement | undefined;
       if (img && img.src) {
         img.src = icon;

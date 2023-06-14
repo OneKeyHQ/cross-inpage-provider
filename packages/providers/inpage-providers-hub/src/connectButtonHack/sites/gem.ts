@@ -3,7 +3,7 @@ import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
 hackConnectButton({
-  urls: ['gem.xyz', 'www.gem.xyz'],
+  urls: ['gem.xyz', 'www.gem.xyz', 'pro.opensea.io'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {
     const replaceFunc = ({
@@ -16,13 +16,14 @@ hackConnectButton({
       icon: string;
       text: string;
     }) => {
-      const modalHeaders = Array.from(document.querySelectorAll('div.font-semibold'));
-      const header = modalHeaders.find((item) => item.innerHTML.includes('Choose your wallet'));
+      const header = document.querySelector('#rk_connect_title');
       if (!header) {
         return;
       }
       const containers = Array.from(
-        header?.parentNode?.parentNode?.querySelectorAll('div > span') ?? [],
+        (header?.parentNode?.parentNode?.nextSibling as HTMLElement)?.querySelectorAll(
+          'div > button > div > div > div + div',
+        ) ?? [],
       );
       const span = containers.find((item) => item.innerHTML.includes(findName));
       if (span) {

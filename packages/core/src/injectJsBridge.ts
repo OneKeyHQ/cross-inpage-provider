@@ -4,18 +4,21 @@
 import { JsBridgeBase } from './JsBridgeBase';
 import { DEBUG_LOGGER_STORAGE_KEY } from './consts';
 
-function fixGlobalShim() {
-  // FIX errors in ReactNative
-  //    ReferenceError: Can't find variable: global
-  // @ts-ignore
-  window.global = window.global || window || window.globalThis;
+// function fixGlobalShim() {
+//   // FIX errors in ReactNative
+//   //    ReferenceError: Can't find variable: global
+//   // @ts-ignore
+//   window.global = window.global || window || window.globalThis;
 
-  // @ts-ignore
-  window.global = window.global || window || window.globalThis;
-}
+//   // @ts-ignore
+//   window.global = window.global || window || window.globalThis;
+// }
 
 function injectJsBridge(bridgeCreator: () => JsBridgeBase | unknown): JsBridgeBase {
-  fixGlobalShim();
+  // remove fixGlobalShim, 
+  // because fixGlobalShim make some website not work properly 
+  //  make cloudfare dead loop and make zhihu.com search functionally down
+  // fixGlobalShim();
 
   if (!window?.$onekey?.jsBridge) {
     window.$onekey = window.$onekey || {};

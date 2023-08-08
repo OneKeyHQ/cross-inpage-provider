@@ -26,6 +26,7 @@
     "@onekeyfe/onekey-solana-provider": "1.1.31",
     "@onekeyfe/onekey-sui-provider": "1.1.31",
     "@onekeyfe/onekey-tron-provider": "1.1.31",
+    "@onekeyfe/onekey-webln-provider": "1.1.31",
     "@polkadot/api": "^9.11.3",
     "@polkadot/extension-dapp": "^0.44.8",
     "@solana/web3.js": "^1.41.3",

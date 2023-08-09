@@ -1,6 +1,6 @@
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderWeblnBase } from './ProviderWeblnBase'
-import { WeblnProviderEventsMap, GetInfoResponse, IProviderWebln, JsBridgeRequest, JsBridgeRequestParams, JsBridgeRequestResponse  } from './types';
+import { WeblnProviderEventsMap, GetInfoResponse, IProviderWebln, JsBridgeRequest, JsBridgeRequestParams, JsBridgeRequestResponse, RequestInvoiceArgs, RequestInvoiceResponse, verifyMessageArgs  } from './types';
 
 class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
 	enabled: boolean;
@@ -48,7 +48,41 @@ class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
 	}
 
 	async getInfo(): Promise<GetInfoResponse> {
+		if (!this.enabled) {
+      throw new Error("Please allow the connection request of webln before calling the getInfo method");
+		}
 		return this._callBridge({ method: 'getInfo' })
+	}
+
+	async makeInvoice(args: RequestInvoiceArgs): Promise<RequestInvoiceResponse> {
+		if (!this.enabled) {
+			throw new Error("Please allow the connection request of webln before calling the makeInvoice method");
+		}
+		return this._callBridge({method: 'makeInvoice', params: args})
+	}
+
+	async sendPayment(paymentRequest: string) {
+		if (!this.enabled) {
+			throw new Error("Please allow the connection request of webln before calling the sendPayment method");
+		}
+		return this._callBridge({ method: 'sendPayment', params: paymentRequest })
+	}
+
+	// @ts-expect-error
+	signMessage() {
+		throw new Error('Method not implemented.')
+	}
+
+	// @ts-expect-error
+	verifyMessage() {
+		throw new Error('Method not implemented.')
+	}
+
+	async lnurl(lnurlString: string) {
+		if (!this.enabled) {
+			throw new Error("Please allow the connection request of webln before calling the lnurl method");
+		}
+		return this._callBridge({ method: 'lnurl', params: lnurlString })
 	}
 }
 

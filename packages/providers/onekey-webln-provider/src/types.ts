@@ -22,11 +22,70 @@ export interface GetInfoResponse {
   methods: string[]; 
 }
 
+export interface RequestInvoiceArgs {
+  amount?: string | number;
+  defaultAmount?: string | number;
+  minimumAmount?: string | number;
+  maximumAmount?: string | number;
+  defaultMemo?: string;
+}
+
+interface SendPaymentResponse {
+  preimage: string;
+}
+
+export interface RequestInvoiceResponse {
+  paymentRequest: string;
+}
+
+export interface SignMessageResponse {
+  message: string;
+  signature: string;
+}
+
+export interface verifyMessageArgs {
+  signature: string;
+  message: string
+}
+
+export type LNURLResponse =
+  | {
+      status: "OK";
+      data?: unknown
+    }
+  | { status: "ERROR"; reason: string };
+
+// type LNURLPayResponse =
+//   | {
+//       status: "OK";
+//       data: { 
+//         preimage: string, 
+//         paymentHash: string, 
+//         paymentRequest: string
+//       }
+//     }
+//   | { status: "ERROR"; reason: string };
+
+// type LNURLAuthResponse =
+//   | {
+//       status: "OK";
+//       data: { 
+//         message: string, 
+//         signature: string
+//       }
+//     }
+//   | { status: "ERROR"; reason: string };
+
 export type IProviderWebln = ProviderWeblnBase & WeblnRequeset
 
 export type WeblnRequeset = {
   enable: () => Promise<EnableResponse>
   getInfo: () => Promise<GetInfoResponse>
+  makeInvoice: (args: RequestInvoiceArgs)=> Promise<RequestInvoiceResponse>
+  sendPayment: (paymentRequest: string) => Promise<SendPaymentResponse>
+  signMessage: (message: string) => Promise<SignMessageResponse>
+  verifyMessage: (args: verifyMessageArgs) => Promise<void>
+  lnurl: (lnurl: string) => Promise<LNURLResponse>
 }
 
 export type JsBridgeRequest = {

@@ -45,7 +45,7 @@ export interface SignMessageResponse {
   signature: string;
 }
 
-export interface verifyMessageArgs {
+export interface VerifyMessageArgs {
   signature: string;
   message: string
 }
@@ -78,7 +78,9 @@ export type LNURLResponse =
 //     }
 //   | { status: "ERROR"; reason: string };
 
-export type IProviderWebln = ProviderWeblnBase & WeblnRequeset
+export type IProviderWebln = ProviderWeblnBase & Omit<WeblnRequeset, 'verifyMessage'> & {
+  verifyMessage: (signature: string, message: string) => Promise<void>
+}
 
 export type WeblnRequeset = {
   enable: () => Promise<EnableResponse>
@@ -86,7 +88,7 @@ export type WeblnRequeset = {
   makeInvoice: (args: RequestInvoiceArgs)=> Promise<RequestInvoiceResponse>
   sendPayment: (paymentRequest: string) => Promise<SendPaymentResponse>
   signMessage: (message: string) => Promise<SignMessageResponse>
-  verifyMessage: (args: verifyMessageArgs) => Promise<void>
+  verifyMessage: (args: VerifyMessageArgs) => Promise<void>
   lnurl: (lnurl: string) => Promise<LNURLResponse>
 }
 

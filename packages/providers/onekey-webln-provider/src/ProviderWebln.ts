@@ -1,6 +1,6 @@
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderWeblnBase } from './ProviderWeblnBase'
-import { WeblnProviderEventsMap, GetInfoResponse, IProviderWebln, JsBridgeRequest, JsBridgeRequestParams, JsBridgeRequestResponse, RequestInvoiceArgs, RequestInvoiceResponse, verifyMessageArgs  } from './types';
+import { WeblnProviderEventsMap, GetInfoResponse, IProviderWebln, JsBridgeRequest, JsBridgeRequestParams, JsBridgeRequestResponse, RequestInvoiceArgs, RequestInvoiceResponse, VerifyMessageArgs  } from './types';
 
 class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
 	enabled: boolean;
@@ -68,14 +68,18 @@ class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
 		return this._callBridge({ method: 'sendPayment', params: paymentRequest })
 	}
 
-	// @ts-expect-error
-	signMessage() {
-		throw new Error('Method not implemented.')
+	async signMessage(message: string) {
+		if (!this.enabled) {
+			throw new Error("Please allow the connection request of webln before calling the sendPayment method");
+		}
+		return this._callBridge({ method: 'signMessage', params: message })
 	}
 
-	// @ts-expect-error
-	verifyMessage() {
-		throw new Error('Method not implemented.')
+	verifyMessage(signature: string, message: string) {
+		if (!this.enabled) {
+			throw new Error("Please allow the connection request of webln before calling the sendPayment method");
+		}
+		return this._callBridge({ method: 'verifyMessage', params: {signature, message} })
 	}
 
 	async lnurl(lnurlString: string) {

@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderWeblnBase } from './ProviderWeblnBase'
-import { WeblnProviderEventsMap, GetInfoResponse, IProviderWebln, JsBridgeRequest, JsBridgeRequestParams, JsBridgeRequestResponse, RequestInvoiceArgs, RequestInvoiceResponse, VerifyMessageArgs, EnableResponse  } from './types';
+import { WeblnProviderEventsMap, GetInfoResponse, IProviderWebln, JsBridgeRequest, JsBridgeRequestParams, JsBridgeRequestResponse, RequestInvoiceArgs, RequestInvoiceResponse, VerifyMessageArgs, EnableResponse, BalanceResponse  } from './types';
 
 class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
 	enabled: boolean;
@@ -84,6 +84,13 @@ class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
 			throw new Error("Please allow the connection request of webln before calling the sendPayment method");
 		}
 		return this._callBridge({ method: 'verifyMessage', params: {signature, message} })
+	}
+
+	getBalance() {
+		if (!this.enabled) {
+			throw new Error("Please allow the connection request of webln before calling the getBalance method");
+		}
+		return this._callBridge({method: 'getBalance', params: undefined})
 	}
 
 	async lnurl(lnurlString: string) {

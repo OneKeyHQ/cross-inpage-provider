@@ -56,27 +56,11 @@ export type LNURLResponse =
       data?: unknown
     }
   | { status: "ERROR"; reason: string };
-
-// type LNURLPayResponse =
-//   | {
-//       status: "OK";
-//       data: { 
-//         preimage: string, 
-//         paymentHash: string, 
-//         paymentRequest: string
-//       }
-//     }
-//   | { status: "ERROR"; reason: string };
-
-// type LNURLAuthResponse =
-//   | {
-//       status: "OK";
-//       data: { 
-//         message: string, 
-//         signature: string
-//       }
-//     }
-//   | { status: "ERROR"; reason: string };
+  
+export type BalanceResponse = {
+  balance: number;
+  currency?: "sats" | "EUR" | "USD"
+}
 
 export type IProviderWebln = ProviderWeblnBase & Omit<WeblnRequeset, 'verifyMessage'> & {
   verifyMessage: (signature: string, message: string) => Promise<void>
@@ -90,6 +74,7 @@ export type WeblnRequeset = {
   signMessage: (message: string) => Promise<SignMessageResponse>
   verifyMessage: (args: VerifyMessageArgs) => Promise<void>
   lnurl: (lnurl: string) => Promise<LNURLResponse>
+  getBalance: () => Promise<BalanceResponse>
 }
 
 export type JsBridgeRequest = {

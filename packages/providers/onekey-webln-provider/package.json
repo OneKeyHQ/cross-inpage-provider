@@ -1,5 +1,5 @@
 {
-  "name": "@onekeyfe/cross-inpage-provider-types",
+  "name": "@onekeyfe/onekey-webln-provider",
   "version": "1.1.32",
   "keywords": [
     "cross-inpage-provider"
@@ -26,5 +26,11 @@
     "prebuild": "rm -rf dist",
     "build": "tsc && tsc --project tsconfig.cjs.json",
     "start": "tsc --watch"
+  },
+  "dependencies": {
+    "@onekeyfe/cross-inpage-provider-core": "1.1.32",
+    "@onekeyfe/cross-inpage-provider-errors": "1.1.32",
+    "@onekeyfe/cross-inpage-provider-types": "1.1.32",
+    "@onekeyfe/extension-bridge-injected": "1.1.32"
   }
 }

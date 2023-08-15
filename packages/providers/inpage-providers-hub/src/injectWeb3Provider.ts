@@ -16,6 +16,7 @@ import {
   checkWalletSwitchEnable,
 } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
+import { ProviderWebln } from '@onekeyfe/onekey-webln-provider';
 import './connectButtonHack';
 import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
 // import Web3 from 'web3'; // cause build error
@@ -32,6 +33,7 @@ export type IWindowOneKeyHub = {
   suiWallet?: ProviderSui;
   cardano?: ProviderCardano;
   keplr?: ProviderCosmos;
+  webln?: ProviderWebln;
   $private?: ProviderPrivate;
   $walletInfo?: {
     buildNumber: string;
@@ -97,6 +99,10 @@ function injectWeb3Provider(): unknown {
     bridge,
   });
 
+  const webln = new ProviderWebln({
+    bridge
+  })
+
   // providerHub
   const $onekey = {
     ...window.$onekey,
@@ -112,6 +118,7 @@ function injectWeb3Provider(): unknown {
     sui,
     cardano,
     cosmos,
+    webln,
   };
 
   defineWindowProperty('$onekey', $onekey);
@@ -146,6 +153,9 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('getOfflineSigner', cosmos.getOfflineSigner.bind(cosmos));
   defineWindowProperty('getOfflineSignerOnlyAmino', cosmos.getOfflineSignerOnlyAmino.bind(cosmos));
   defineWindowProperty('getOfflineSignerAuto', cosmos.getOfflineSignerAuto.bind(cosmos));
+
+  // webln
+  defineWindowProperty('webln', webln);
 
   // ** shim or inject real web3
   //

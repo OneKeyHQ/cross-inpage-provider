@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderWeblnBase } from './ProviderWeblnBase'
-import { WeblnProviderEventsMap, GetInfoResponse, IProviderWebln, JsBridgeRequest, JsBridgeRequestParams, JsBridgeRequestResponse, RequestInvoiceArgs, RequestInvoiceResponse, VerifyMessageArgs  } from './types';
+import { WeblnProviderEventsMap, GetInfoResponse, IProviderWebln, JsBridgeRequest, JsBridgeRequestParams, JsBridgeRequestResponse, RequestInvoiceArgs, RequestInvoiceResponse, VerifyMessageArgs, EnableResponse  } from './types';
 
 class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
 	enabled: boolean;
@@ -12,6 +15,7 @@ class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
     this.enabled = false;
     this.isEnabled = false; // seems some webln implementations use webln.isEnabled and some use webln.enabled
     this.executing = false;
+		this.handlerLnurl()
   }
 
 	on<E extends keyof WeblnProviderEventsMap>(
@@ -87,6 +91,68 @@ class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
 			throw new Error("Please allow the connection request of webln before calling the lnurl method");
 		}
 		return this._callBridge({ method: 'lnurl', params: lnurlString })
+	}
+
+	handlerLnurl() {
+		if (document) {
+			window.addEventListener('click', (ev) => {
+				const target = ev.composedPath()[0] as HTMLElement;
+				if (!target || !target.closest) {
+					return;
+				}
+				const lightningLink = target.closest('[href^="lightning:" i]');
+				const lnurlLink = target.closest('[href^="lnurl" i]');
+				const bitcoinLinkWithLighting = target.closest(
+					'[href*="lightning=ln" i]'
+				);
+				let href;
+				let paymentRequest: string | null | undefined;
+				let lnurl: string | undefined;
+	
+				if (!lightningLink && !bitcoinLinkWithLighting && !lnurlLink) {
+					return;
+				}
+				ev.preventDefault();
+
+				if (lightningLink) {
+					href = lightningLink.getAttribute("href")?.toLowerCase();
+					paymentRequest = href?.replace("lightning:", "");
+				} else if (bitcoinLinkWithLighting) {
+					href = bitcoinLinkWithLighting.getAttribute("href")?.toLowerCase();
+					const url = new URL(href ?? '');
+					const query = new URLSearchParams(url.search);
+					paymentRequest = query.get("lightning");
+				} else if (lnurlLink) {
+					href = lnurlLink.getAttribute("href")?.toLowerCase();
+					lnurl = href?.replace(/^lnurl[pwc]:/i, "");
+				}
+
+				if (!paymentRequest && !lnurl) {
+					return;
+				}
+
+				if (paymentRequest && paymentRequest.startsWith("lnurl")) {
+					lnurl = paymentRequest.replace(/^lnurl[pwc]:/i, "");
+				}
+
+				if (paymentRequest && paymentRequest.match(/(\S+@\S+)/)) {
+					lnurl = paymentRequest.match?.(/(\S+@\S+)/)?.[1];
+				}
+
+				window.webln.enable().then((response: EnableResponse) => {
+					if (!response.enabled) {
+						return
+					}
+					if (lnurl) {
+						return window.webln.lnurl(lnurl)
+					}
+
+					if (paymentRequest) {
+						return window.webln.sendPayment(paymentRequest)
+					}
+				})
+			})
+		}
 	}
 }
 

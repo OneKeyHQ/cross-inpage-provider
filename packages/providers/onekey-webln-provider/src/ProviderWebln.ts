@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderWeblnBase } from './ProviderWeblnBase'
-import { WeblnProviderEventsMap, GetInfoResponse, IProviderWebln, JsBridgeRequest, JsBridgeRequestParams, JsBridgeRequestResponse, RequestInvoiceArgs, RequestInvoiceResponse, VerifyMessageArgs, EnableResponse, BalanceResponse  } from './types';
+import { WeblnProviderEventsMap, GetInfoResponse, IProviderWebln, JsBridgeRequest, JsBridgeRequestParams, JsBridgeRequestResponse, RequestInvoiceArgs, RequestInvoiceResponse, EnableResponse  } from './types';
 
 class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
 	enabled: boolean;

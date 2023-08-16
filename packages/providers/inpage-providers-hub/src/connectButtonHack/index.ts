@@ -1,4 +1,4 @@
-import './sites/walletconnect';
+// import './sites/walletconnect';
 // ---------
 import './sites/opensea';
 import './sites/magiceden';

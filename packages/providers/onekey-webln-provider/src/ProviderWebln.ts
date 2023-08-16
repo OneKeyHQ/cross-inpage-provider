@@ -16,15 +16,13 @@ import {
 } from "./types";
 
 class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
-  enabled: boolean;
-  isEnabled: boolean;
-  executing: boolean;
+  private states = {
+    enabled: false,
+    executing: false 
+  }
 
   constructor(props: IInpageProviderConfig) {
     super(props);
-    this.enabled = false;
-    this.isEnabled = false; // seems some webln implementations use webln.isEnabled and some use webln.enabled
-    this.executing = false;
     this.handlerLnurl();
   }
 
@@ -50,19 +48,18 @@ class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
   }
 
   async enable() {
-    if (this.enabled) {
+    if (this.states.enabled) {
       return { enabled: true };
     }
     const result = await this._callBridge({ method: "enable" });
     if (typeof result.enabled === "boolean") {
-      this.enabled = result.enabled;
-      this.isEnabled = result.enabled;
+      this.states.enabled = true
     }
     return result;
   }
 
   async getInfo(): Promise<GetInfoResponse> {
-    if (!this.enabled) {
+    if (!this.states.enabled) {
       throw new Error(
         "Please allow the connection request of webln before calling the getInfo method"
       );
@@ -71,7 +68,7 @@ class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
   }
 
   async makeInvoice(args: RequestInvoiceArgs): Promise<RequestInvoiceResponse> {
-    if (!this.enabled) {
+    if (!this.states.enabled) {
       throw new Error(
         "Please allow the connection request of webln before calling the makeInvoice method"
       );
@@ -80,7 +77,7 @@ class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
   }
 
   async sendPayment(paymentRequest: string) {
-    if (!this.enabled) {
+    if (!this.states.enabled) {
       throw new Error(
         "Please allow the connection request of webln before calling the sendPayment method"
       );
@@ -89,7 +86,7 @@ class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
   }
 
   async signMessage(message: string) {
-    if (!this.enabled) {
+    if (!this.states.enabled) {
       throw new Error(
         "Please allow the connection request of webln before calling the sendPayment method"
       );
@@ -98,7 +95,7 @@ class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
   }
 
   verifyMessage(signature: string, message: string) {
-    if (!this.enabled) {
+    if (!this.states.enabled) {
       throw new Error(
         "Please allow the connection request of webln before calling the sendPayment method"
       );
@@ -110,7 +107,7 @@ class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
   }
 
   getBalance() {
-    if (!this.enabled) {
+    if (!this.states.enabled) {
       throw new Error(
         "Please allow the connection request of webln before calling the getBalance method"
       );
@@ -119,7 +116,7 @@ class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
   }
 
   async lnurl(lnurlString: string) {
-    if (!this.enabled) {
+    if (!this.states.enabled) {
       throw new Error(
         "Please allow the connection request of webln before calling the lnurl method"
       );
@@ -184,8 +181,8 @@ class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
           if (paymentRequest) {
             return window.webln.sendPayment(paymentRequest);
           }
-        });
-      });
+        })
+      }, { capture: true });
     }
   }
 }

@@ -13,6 +13,7 @@ import {
   RequestInvoiceArgs,
   RequestInvoiceResponse,
   EnableResponse,
+  WeblnRequeset,
 } from "./types";
 
 class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
@@ -24,6 +25,23 @@ class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
   constructor(props: IInpageProviderConfig) {
     super(props);
     this.handlerLnurl();
+  }
+
+  setExecuting(executing: boolean) {
+    this.states.executing = executing
+  }
+
+  private checkEnabled(method: keyof WeblnRequeset) {
+    if (!this.states.enabled) {
+      const message = `Please allow the connection request of webln before calling the ${method} method`
+      alert(message)
+      throw new Error(message);
+    }
+    if (this.states.executing) {
+      const message = `window.webln call already executing`
+      alert(message)
+      throw new Error(message) 
+    }
   }
 
   on<E extends keyof WeblnProviderEventsMap>(
@@ -44,66 +62,86 @@ class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
     method: T;
     params?: JsBridgeRequestParams<T>;
   }): JsBridgeRequestResponse<T> {
-    return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
+    return this.bridgeRequest(params) as JsBridgeRequestResponse<T>
   }
 
   async enable() {
     if (this.states.enabled) {
       return { enabled: true };
     }
-    const result = await this._callBridge({ method: "enable" });
-    if (typeof result.enabled === "boolean") {
-      this.states.enabled = true
+    if (this.states.executing) {
+      const message = `window.webln call already executing`
+      alert(message)
+      throw new Error(message) 
     }
-    return result;
+    try {
+      this.setExecuting(true)
+      const result = await this._callBridge({ method: "enable" });
+      if (typeof result.enabled === "boolean") {
+        this.states.enabled = true
+      }
+      return result;
+    } finally {
+      this.setExecuting(false)
+    }
   }
 
   async getInfo(): Promise<GetInfoResponse> {
-    if (!this.states.enabled) {
-      throw new Error(
-        "Please allow the connection request of webln before calling the getInfo method"
-      );
+    this.checkEnabled('getInfo')
+    try {
+      this.setExecuting(true)
+      const response = await this._callBridge({ method: "getInfo" });
+      return response
+    } finally {
+      this.setExecuting(false)
     }
-    return this._callBridge({ method: "getInfo" });
   }
 
   async makeInvoice(args: RequestInvoiceArgs): Promise<RequestInvoiceResponse> {
-    if (!this.states.enabled) {
-      throw new Error(
-        "Please allow the connection request of webln before calling the makeInvoice method"
-      );
+    this.checkEnabled('makeInvoice')
+    try {
+      this.setExecuting(true)
+      const response = await this._callBridge({ method: "makeInvoice", params: args });
+      return response
+    } finally {
+      this.setExecuting(false)
     }
-    return this._callBridge({ method: "makeInvoice", params: args });
   }
 
   async sendPayment(paymentRequest: string) {
-    if (!this.states.enabled) {
-      throw new Error(
-        "Please allow the connection request of webln before calling the sendPayment method"
-      );
+    this.checkEnabled('sendPayment')
+    try {
+      this.setExecuting(true)
+      const response = await this._callBridge({ method: "sendPayment", params: paymentRequest });
+      return response
+    } finally {
+      this.setExecuting(false)
     }
-    return this._callBridge({ method: "sendPayment", params: paymentRequest });
   }
 
   async signMessage(message: string) {
-    if (!this.states.enabled) {
-      throw new Error(
-        "Please allow the connection request of webln before calling the sendPayment method"
-      );
+    this.checkEnabled('signMessage')
+    try {
+      this.setExecuting(true)
+      const response = await this._callBridge({ method: "signMessage", params: message });
+      return response
+    } finally {
+      this.setExecuting(false)
     }
-    return this._callBridge({ method: "signMessage", params: message });
   }
 
-  verifyMessage(signature: string, message: string) {
-    if (!this.states.enabled) {
-      throw new Error(
-        "Please allow the connection request of webln before calling the sendPayment method"
-      );
+  async verifyMessage(signature: string, message: string) {
+    this.checkEnabled('verifyMessage')
+    try {
+      this.setExecuting(true)
+      const response = await this._callBridge({
+        method: "verifyMessage",
+        params: { signature, message },
+      });
+      return response
+    } finally {
+      this.setExecuting(false)
     }
-    return this._callBridge({
-      method: "verifyMessage",
-      params: { signature, message },
-    });
   }
 
   getBalance() {
@@ -116,12 +154,14 @@ class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
   }
 
   async lnurl(lnurlString: string) {
-    if (!this.states.enabled) {
-      throw new Error(
-        "Please allow the connection request of webln before calling the lnurl method"
-      );
+    this.checkEnabled('lnurl')
+    try {
+      this.setExecuting(true)      
+      const response = await this._callBridge({ method: "lnurl", params: lnurlString });
+      return response
+    } finally {
+      this.setExecuting(false)
     }
-    return this._callBridge({ method: "lnurl", params: lnurlString });
   }
 
   handlerLnurl() {

@@ -2,7 +2,7 @@
   "private": true,
   "name": "cross-inpage-provider",
   "engines": {
-    "node": "^14 || ^16"
+    "node": "^14 || ^16 || ^19"
   },
   "scripts": {
     "bootstrap": "lerna bootstrap",

@@ -17,6 +17,7 @@ import {
 } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import { ProviderWebln } from '@onekeyfe/onekey-webln-provider';
+import { ProviderBtc } from '@onekeyfe/onekey-btc-provider';
 import './connectButtonHack';
 import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
 // import Web3 from 'web3'; // cause build error
@@ -34,6 +35,7 @@ export type IWindowOneKeyHub = {
   cardano?: ProviderCardano;
   keplr?: ProviderCosmos;
   webln?: ProviderWebln;
+  unisat?: ProviderBtc;
   $private?: ProviderPrivate;
   $walletInfo?: {
     buildNumber: string;
@@ -100,8 +102,10 @@ function injectWeb3Provider(): unknown {
   });
 
   const webln = new ProviderWebln({
-    bridge
-  })
+    bridge,
+  });
+
+  const btc = new ProviderBtc({ bridge });
 
   // providerHub
   const $onekey = {
@@ -119,6 +123,7 @@ function injectWeb3Provider(): unknown {
     cardano,
     cosmos,
     webln,
+    btc,
   };
 
   defineWindowProperty('$onekey', $onekey);
@@ -142,6 +147,7 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('conflux', conflux);
   defineWindowProperty('tronLink', tron);
   defineWindowProperty('suiWallet', sui);
+  defineWindowProperty('unisat', btc);
 
   // Cardano chain provider injection is handled independently.
   if (checkWalletSwitchEnable('cardano')) {

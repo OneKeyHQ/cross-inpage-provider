@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/onekey-btc-provider",
-  "version": "1.1.32",
+  "version": "1.1.34",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -28,9 +28,9 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "1.1.32",
-    "@onekeyfe/cross-inpage-provider-errors": "1.1.32",
-    "@onekeyfe/cross-inpage-provider-types": "1.1.32",
-    "@onekeyfe/extension-bridge-injected": "1.1.32"
+    "@onekeyfe/cross-inpage-provider-core": "1.1.34",
+    "@onekeyfe/cross-inpage-provider-errors": "1.1.34",
+    "@onekeyfe/cross-inpage-provider-types": "1.1.34",
+    "@onekeyfe/extension-bridge-injected": "1.1.34"
   }
 }

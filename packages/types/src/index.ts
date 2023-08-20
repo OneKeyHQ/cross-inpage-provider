@@ -37,6 +37,7 @@ export enum IJsBridgeMessageTypes {
 export type IJsBridgeMessageTypesStrings = keyof typeof IJsBridgeMessageTypes;
 
 export enum IInjectedProviderNames {
+  btc = 'btc',
   ethereum = 'ethereum',
   conflux = 'conflux',
   tron = 'tron',

@@ -42,6 +42,7 @@
     "@onekeyfe/onekey-sui-provider": "1.1.34",
     "@onekeyfe/onekey-tron-provider": "1.1.34",
     "@onekeyfe/onekey-webln-provider": "1.1.34",
+    "@onekeyfe/onekey-btc-provider": "1.1.34",
     "web3": "^1.7.3"
   }
 }

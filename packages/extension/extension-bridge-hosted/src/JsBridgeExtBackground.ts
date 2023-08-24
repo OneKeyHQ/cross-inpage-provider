@@ -91,6 +91,7 @@ class JsBridgeExtBackground extends JsBridgeBase {
         port.name === EXT_PORT_UI_TO_BG ||
         port.name === EXT_PORT_OFFSCREEN_TO_BG
       ) {
+        // TODO uuid
         this.portIdIndex += 1;
         const portId = this.portIdIndex;
         this.addPort({

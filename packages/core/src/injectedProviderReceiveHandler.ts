@@ -29,12 +29,15 @@ function injectedProviderReceiveHandler(payload: IJsBridgeMessagePayload, bridge
     return;
   }
 
+  // TODO only matched providers
   // emit events to injected provider
   providers.forEach((provider) => {
     if (provider && provider.emit) {
       provider.emit('message_low_level', payloadData);
     }
   });
+
+  // TODO custom provider receive handler
 }
 
 export { injectedProviderReceiveHandler };

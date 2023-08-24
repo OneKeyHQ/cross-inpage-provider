@@ -303,6 +303,7 @@ abstract class JsBridgeBase extends CrossEventEmitter {
       return;
     }
     const now = Date.now();
+    // TODO for i from 0 to length
     // eslint-disable-next-line @typescript-eslint/no-for-in-array
     for (const id in this.callbacks) {
       const callbackInfo = this.callbacks[id];

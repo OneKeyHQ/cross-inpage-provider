@@ -26,6 +26,7 @@ export type NativeWebViewProps = WebViewProps &
     style?: ViewStyle;
   };
 
+  // TODO rename to NativeWebViewLegacy
 const NativeWebView = forwardRef(
   (
     {

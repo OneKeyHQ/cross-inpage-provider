@@ -320,4 +320,5 @@ const DesktopWebView = forwardRef(
 );
 DesktopWebView.displayName = 'DesktopWebView';
 
+// TODO rename to DesktopWebViewLegacy
 export { DesktopWebView };

@@ -175,9 +175,11 @@ function injectWeb3Provider(): unknown {
   window.dispatchEvent(new Event('ethereum#initialized'));
 
   // Sui Standard Wallet
-  registerSuiWallet(sui, {
-    logo: WALLET_CONNECT_INFO.onekey.icon,
-  });
+  if (checkWalletSwitchEnable('onekey-sui')) {
+    registerSuiWallet(sui, {
+      logo: WALLET_CONNECT_INFO.onekey.icon,
+    });
+  }
 
   // Override the SuiWallet Standard Wallet
   if (checkWalletSwitchEnable('suiWallet')) {
@@ -187,7 +189,9 @@ function injectWeb3Provider(): unknown {
     });
   }
 
-  registerPolkadot(polkadot);
+  if (checkWalletSwitchEnable('onekey-polkadot')) {
+    registerPolkadot(polkadot);
+  }
 
   if (checkWalletSwitchEnable('polkadot-js')) {
     registerPolkadot(polkadot, 'polkadot-js', '0.44.1');

@@ -13,7 +13,7 @@ yarn clean && yarn bootstrap && yarn start
 
 # watch and build `packages/injected`, then rsync local npm packages to app-monorepo
 #   re-build `packages/injected` only, if you change others monorepo code, run `yarn build`
-gulp watch
+yarn gulp-watch
 
 # run dapp example web
 yarn example

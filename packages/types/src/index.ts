@@ -87,6 +87,7 @@ export type IJsBridgeMessagePayload = {
   type?: IJsBridgeMessageTypesStrings;
   scope?: IInjectedProviderNamesStrings;
   origin?: string;
+  peerOrigin?: string;
   resolve?: (value: unknown) => void;
   reject?: (value: unknown) => void;
   created?: number;

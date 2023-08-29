@@ -6,6 +6,8 @@ import {
   IJsBridgeConfig,
   IJsBridgeMessagePayload,
 } from '@onekeyfe/cross-inpage-provider-types';
+import utils from './utils';
+import * as uuid from 'uuid';
 
 import { JsBridgeBase, consts } from '@onekeyfe/cross-inpage-provider-core';
 
@@ -21,18 +23,16 @@ class JsBridgeExtBackground extends JsBridgeBase {
 
   public ports: Record<number | string, chrome.runtime.Port> = {};
   public offscreenPort: chrome.runtime.Port | undefined;
-  public offscreenPortId: number | undefined;
+  public offscreenPortId: number | string | undefined;
 
-  private portIdIndex = 1;
-
-  addPort({ portId, port }: { portId: number; port: chrome.runtime.Port }) {
+  addPort({ portId, port }: { portId: number | string; port: chrome.runtime.Port }) {
     this.ports[portId] = port;
     if (port.name === EXT_PORT_OFFSCREEN_TO_BG) {
       this.offscreenPort = port;
       this.offscreenPortId = portId;
     }
   }
-  removePort({ portId, port }: { portId: number; port: chrome.runtime.Port }) {
+  removePort({ portId, port }: { portId: number | string; port: chrome.runtime.Port }) {
     delete this.ports[portId];
     if (port.name === EXT_PORT_OFFSCREEN_TO_BG) {
       this.offscreenPort = undefined;
@@ -46,6 +46,18 @@ class JsBridgeExtBackground extends JsBridgeBase {
       return;
     }
     const port: chrome.runtime.Port = this.ports[payload.remoteId as string];
+
+    const portOrigin = utils.getOriginFromPort(port);
+    const requestOrigin: string = payload?.peerOrigin || '';
+
+    if (!portOrigin) {
+      throw new Error('port origin not found, maybe its destroyed');
+    }
+
+    if (portOrigin && requestOrigin && portOrigin !== requestOrigin) {
+      throw new Error(`Origin not matched! expected: ${requestOrigin}, actual: ${portOrigin} .`);
+    }
+
     // TODO onDisconnect remove ports cache
     //    try catch error test
     try {
@@ -58,21 +70,6 @@ class JsBridgeExtBackground extends JsBridgeBase {
       }
       throw error;
     }
-  }
-
-  // TODO use utils
-  _getOriginFromPort(port: chrome.runtime.Port) {
-    // chrome
-    let origin = port?.sender?.origin || '';
-    // firefox
-    if (!origin && port?.sender?.url) {
-      const uri = new URL(port?.sender?.url);
-      origin = uri?.origin || '';
-    }
-    if (!origin) {
-      console.error(this?.constructor?.name, 'ERROR: origin not found from port sender', port);
-    }
-    return origin;
   }
 
   setupMessagePortOnConnect() {
@@ -91,14 +88,13 @@ class JsBridgeExtBackground extends JsBridgeBase {
         port.name === EXT_PORT_UI_TO_BG ||
         port.name === EXT_PORT_OFFSCREEN_TO_BG
       ) {
-        this.portIdIndex += 1;
-        const portId = this.portIdIndex;
+        const portId = uuid.v4();
         this.addPort({
           portId,
           port,
         });
         const onMessage = (payload: IJsBridgeMessagePayload, port0: chrome.runtime.Port) => {
-          const origin = this._getOriginFromPort(port0);
+          const origin = utils.getOriginFromPort(port0);
           payload.remoteId = portId;
           // eslint-disable-next-line @typescript-eslint/no-this-alias
           const jsBridge = this;
@@ -141,7 +137,7 @@ class JsBridgeExtBackground extends JsBridgeBase {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     entries(this.ports).forEach(async ([portId, port]) => {
       if (port.name === EXT_PORT_CS_TO_BG) {
-        const origin = this._getOriginFromPort(port);
+        const origin = utils.getOriginFromPort(port);
         if (isFunction(data)) {
           // eslint-disable-next-line no-param-reassign
           data = await data({ origin });

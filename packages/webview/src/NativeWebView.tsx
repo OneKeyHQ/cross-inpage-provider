@@ -26,6 +26,7 @@ export type NativeWebViewProps = WebViewProps &
     style?: ViewStyle;
   };
 
+// TODO rename to NativeWebViewLegacy
 const NativeWebView = forwardRef(
   (
     {
@@ -54,8 +55,13 @@ const NativeWebView = forwardRef(
     const webviewOnMessage = useCallback(
       (event: WebViewMessageEvent) => {
         const { data } = event.nativeEvent;
-        const uri = new URL(event.nativeEvent.url);
-        const origin = uri?.origin || '';
+        let origin = '';
+        try {
+          const uri = new URL(event.nativeEvent.url);
+          origin = uri?.origin || '';
+        } catch (err) {
+          console.error(err);
+        }
         appDebugLogger.webview('onMessage', origin, data);
         // - receive
         jsBridge.receive(data, { origin });

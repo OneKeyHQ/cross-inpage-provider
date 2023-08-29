@@ -115,6 +115,7 @@ abstract class JsBridgeBase extends CrossEventEmitter {
             scope: message.scope,
             remoteId: message.remoteId,
             data: returnValue,
+            peerOrigin: message.origin,
           });
         }
       }
@@ -125,6 +126,7 @@ abstract class JsBridgeBase extends CrossEventEmitter {
           scope: message.scope,
           remoteId: message.remoteId,
           error,
+          peerOrigin: message.origin,
         });
       }
       this.emit(BRIDGE_EVENTS.error, error);
@@ -151,7 +153,7 @@ abstract class JsBridgeBase extends CrossEventEmitter {
 
   public debugLogger: IDebugLogger = appDebugLogger;
 
-  private callbacks: Array<IJsBridgeCallback> = [];
+  private callbacks: IJsBridgeCallback[] = [];
 
   private callbackId = 1;
 
@@ -191,7 +193,16 @@ abstract class JsBridgeBase extends CrossEventEmitter {
     return payload;
   }
 
-  private send({ type, data, error, id, remoteId, sync = false, scope }: IJsBridgeMessagePayload) {
+  private send({
+    type,
+    data,
+    error,
+    id,
+    remoteId,
+    sync = false,
+    scope,
+    peerOrigin,
+  }: IJsBridgeMessagePayload) {
     const executor = (resolve?: (value: unknown) => void, reject?: (value: unknown) => void) => {
       // TODO check resolve when calling without await
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -208,6 +219,7 @@ abstract class JsBridgeBase extends CrossEventEmitter {
             error,
             type,
             origin: globalWindow?.location?.origin || '',
+            peerOrigin,
             remoteId,
             scope,
           },
@@ -303,8 +315,8 @@ abstract class JsBridgeBase extends CrossEventEmitter {
       return;
     }
     const now = Date.now();
-    // eslint-disable-next-line @typescript-eslint/no-for-in-array
-    for (const id in this.callbacks) {
+    const callbacksLength = this.callbacks.length;
+    for (let id = 0; id < callbacksLength; id++) {
       const callbackInfo = this.callbacks[id];
       if (callbackInfo && callbackInfo.created) {
         if (now - callbackInfo.created > this.callbacksExpireTimeout) {
@@ -459,11 +471,13 @@ abstract class JsBridgeBase extends CrossEventEmitter {
     data,
     remoteId,
     scope,
+    peerOrigin,
   }: {
     id: number;
     data: unknown;
     scope?: IInjectedProviderNamesStrings;
     remoteId?: number | string | null;
+    peerOrigin?: string;
   }): void {
     void this.send({
       type: IJsBridgeMessageTypes.RESPONSE,
@@ -472,6 +486,7 @@ abstract class JsBridgeBase extends CrossEventEmitter {
       remoteId,
       scope,
       sync: true,
+      peerOrigin,
     });
   }
 
@@ -481,11 +496,13 @@ abstract class JsBridgeBase extends CrossEventEmitter {
     error,
     scope,
     remoteId,
+    peerOrigin,
   }: {
     id: number;
     error: unknown;
     scope?: IInjectedProviderNamesStrings;
     remoteId?: number | string | null;
+    peerOrigin?: string;
   }): void {
     void this.send({
       type: IJsBridgeMessageTypes.RESPONSE,
@@ -494,6 +511,7 @@ abstract class JsBridgeBase extends CrossEventEmitter {
       remoteId,
       scope,
       sync: true,
+      peerOrigin,
     });
   }
 

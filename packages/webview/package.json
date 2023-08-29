@@ -1,6 +1,6 @@
 {
 	"name": "@onekeyfe/onekey-cross-webview",
-	"version": "1.1.36",
+	"version": "1.1.37",
 	"keywords": [
 		"cross-inpage-provider"
 	],
@@ -28,14 +28,14 @@
 		"start": "tsc --watch"
 	},
 	"peerDependencies": {
-		"electron": "*"
+		"electron": "*",
+		"react-native-webview": "*"
 	},
 	"devDependencies": {
 		"electron": "^17.2.0"
 	},
 	"dependencies": {
-		"@onekeyfe/cross-inpage-provider-core": "1.1.36",
-		"@onekeyfe/cross-inpage-provider-types": "1.1.36",
-		"react-native-webview": "^11.17.2"
+		"@onekeyfe/cross-inpage-provider-core": "1.1.37",
+		"@onekeyfe/cross-inpage-provider-types": "1.1.37"
 	}
 }

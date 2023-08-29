@@ -275,14 +275,24 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
     });
   }
 
-  pushPsbt = async (psbtHex: string) => {
+  async pushPsbt(psbtHex: string) {
     return this._request<string>({
       method: ProviderMethods.PUSH_PSBT,
       params: {
         psbtHex,
       },
     });
-  };
+  }
+
+  async inscribeTransfer(ticker: string, amount: string) {
+    return this._request<string>({
+      method: ProviderMethods.INSCRIBE_TRANSFER,
+      params: {
+        ticker,
+        amount,
+      },
+    });
+  }
 
   on<E extends ProviderEvents>(event: E, listener: ProviderEventsMap[E]): this {
     return super.on(event, listener);

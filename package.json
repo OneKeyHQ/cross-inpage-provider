@@ -17,7 +17,7 @@
     "start-all": "lerna run start --parallel",
     "dev": "yarn bootstrap && yarn start-all",
     "prepack": "yarn build",
-    "watch": "yarn bootstrap && concurrently \"gulp watch\" \"yarn start\" ",
+    "watch": "yarn bootstrap && concurrently  \"yarn start\"  \"sleep 90 && yarn gulp-watch\"   ",
     "gulp-watch": "gulp watch",
     "publish-packages": "lerna publish from-package",
     "example": "cd ./packages/example && yarn dev",

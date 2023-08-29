@@ -22,7 +22,7 @@ function injectedProviderReceiveHandler(payload: IJsBridgeMessagePayload, bridge
   providers = providers.concat(providerHub[providerName] as ProviderBase).filter(Boolean);
   if (!providers || !providers.length) {
     consoleErrorInDev(
-      `[${providerName as string}] provider is NOT injected to document or bridge. 11`,
+      `[${providerName as string}] provider is NOT injected to document or bridge.`,
       payloadData,
     );
     return;
@@ -37,7 +37,7 @@ function injectedProviderReceiveHandler(payload: IJsBridgeMessagePayload, bridge
     }
   });
 
-  // TODO custom provider receive handler ====
+  // TODO custom provider receive handler @@@@@@
   if (providerName === '$private') {
     const privateProvider = providers[0] as { webembedReceiveHandler?: (...args: any) => any };
     if (privateProvider && privateProvider.webembedReceiveHandler) {

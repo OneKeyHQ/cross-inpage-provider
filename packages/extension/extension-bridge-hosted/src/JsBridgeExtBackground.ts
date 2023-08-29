@@ -6,6 +6,7 @@ import {
   IJsBridgeConfig,
   IJsBridgeMessagePayload,
 } from '@onekeyfe/cross-inpage-provider-types';
+import utils from './utils';
 
 import { JsBridgeBase, consts } from '@onekeyfe/cross-inpage-provider-core';
 
@@ -46,6 +47,19 @@ class JsBridgeExtBackground extends JsBridgeBase {
       return;
     }
     const port: chrome.runtime.Port = this.ports[payload.remoteId as string];
+
+    const portOrigin = utils.getOriginFromPort(port);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const requestOrigin: string = payload?.peerOrigin || '';
+
+    if (!portOrigin) {
+      throw new Error('port origin not found, maybe its destroyed');
+    }
+
+    if (portOrigin && requestOrigin && portOrigin !== requestOrigin) {
+      throw new Error(`Origin not matched! expected: ${requestOrigin}, actual: ${portOrigin} .`);
+    }
+
     // TODO onDisconnect remove ports cache
     //    try catch error test
     try {
@@ -58,21 +72,6 @@ class JsBridgeExtBackground extends JsBridgeBase {
       }
       throw error;
     }
-  }
-
-  // TODO use utils
-  _getOriginFromPort(port: chrome.runtime.Port) {
-    // chrome
-    let origin = port?.sender?.origin || '';
-    // firefox
-    if (!origin && port?.sender?.url) {
-      const uri = new URL(port?.sender?.url);
-      origin = uri?.origin || '';
-    }
-    if (!origin) {
-      console.error(this?.constructor?.name, 'ERROR: origin not found from port sender', port);
-    }
-    return origin;
   }
 
   setupMessagePortOnConnect() {
@@ -99,7 +98,7 @@ class JsBridgeExtBackground extends JsBridgeBase {
           port,
         });
         const onMessage = (payload: IJsBridgeMessagePayload, port0: chrome.runtime.Port) => {
-          const origin = this._getOriginFromPort(port0);
+          const origin = utils.getOriginFromPort(port0);
           payload.remoteId = portId;
           // eslint-disable-next-line @typescript-eslint/no-this-alias
           const jsBridge = this;
@@ -142,7 +141,7 @@ class JsBridgeExtBackground extends JsBridgeBase {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     entries(this.ports).forEach(async ([portId, port]) => {
       if (port.name === EXT_PORT_CS_TO_BG) {
-        const origin = this._getOriginFromPort(port);
+        const origin = utils.getOriginFromPort(port);
         if (isFunction(data)) {
           // eslint-disable-next-line no-param-reassign
           data = await data({ origin });

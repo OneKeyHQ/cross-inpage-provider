@@ -10,6 +10,9 @@ function getOriginFromPort(port: chrome.runtime.Port) {
       console.error(error);
     }
   }
+  if (!origin) {
+    console.error('ERROR: origin not found from port sender', port);
+  }
   return origin || '';
 }
 

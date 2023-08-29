@@ -55,6 +55,7 @@ export enum ProviderMethods {
   SIGN_PSBTS = 'signPsbts',
   PUSH_PSBT = 'pushPsbt',
   GET_PROVIDER_STATE = 'getProviderState',
+  INSCRIBE_TRANSFER = 'inscribeTransfer',
 }
 
 export type OneKeyBtcProviderProps = IInpageProviderConfig & {
@@ -103,4 +104,5 @@ export interface IProviderBtc extends ProviderBtcBase {
   signPsbt(psbtHex: string, options?: { autoFinalized: boolean }): Promise<string>;
   signPsbts(psbtHexs: string[], options?: { autoFinalized: boolean }): Promise<string[]>;
   pushPsbt(psbt: string): Promise<string>;
+  inscribeTransfer(ticker: string, amount: string): Promise<string>;
 }

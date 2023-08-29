@@ -23,8 +23,6 @@ class JsBridgeNativeHost extends JsBridgeBase {
       const payloadStr: string = payload as string;
       const inpageReceiveCode = injectedFactory.createCodeJsBridgeReceive(payloadStr);
 
-      // this.webviewRef.current?.$$currentUrl
-      // TODO origin check, remoteId check
       this.webviewRef.current?.injectJavaScript?.(inpageReceiveCode);
     }
   }

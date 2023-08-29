@@ -153,7 +153,7 @@ abstract class JsBridgeBase extends CrossEventEmitter {
 
   public debugLogger: IDebugLogger = appDebugLogger;
 
-  private callbacks: Array<IJsBridgeCallback> = [];
+  private callbacks: IJsBridgeCallback[] = [];
 
   private callbackId = 1;
 
@@ -315,9 +315,8 @@ abstract class JsBridgeBase extends CrossEventEmitter {
       return;
     }
     const now = Date.now();
-    // TODO for i from 0 to length
-    // eslint-disable-next-line @typescript-eslint/no-for-in-array
-    for (const id in this.callbacks) {
+    const callbacksLength = this.callbacks.length;
+    for (let id = 0; id < callbacksLength; id++) {
       const callbackInfo = this.callbacks[id];
       if (callbackInfo && callbackInfo.created) {
         if (now - callbackInfo.created > this.callbacksExpireTimeout) {

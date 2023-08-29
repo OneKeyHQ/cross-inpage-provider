@@ -28,7 +28,6 @@ function injectedProviderReceiveHandler(payload: IJsBridgeMessagePayload, bridge
     return;
   }
 
-  // TODO only matched providers
   // emit events to injected provider
   providers.forEach((provider) => {
     if (provider && provider.emit) {
@@ -37,7 +36,7 @@ function injectedProviderReceiveHandler(payload: IJsBridgeMessagePayload, bridge
     }
   });
 
-  // TODO custom provider receive handler @@@@@@
+  // $private custom provider receive handler
   if (providerName === '$private') {
     const privateProvider = providers[0] as { webembedReceiveHandler?: (...args: any) => any };
     if (privateProvider && privateProvider.webembedReceiveHandler) {

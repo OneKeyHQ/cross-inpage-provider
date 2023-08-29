@@ -7,6 +7,7 @@ import {
   IJsBridgeMessagePayload,
 } from '@onekeyfe/cross-inpage-provider-types';
 import utils from './utils';
+import * as uuid from 'uuid';
 
 import { JsBridgeBase, consts } from '@onekeyfe/cross-inpage-provider-core';
 
@@ -22,18 +23,16 @@ class JsBridgeExtBackground extends JsBridgeBase {
 
   public ports: Record<number | string, chrome.runtime.Port> = {};
   public offscreenPort: chrome.runtime.Port | undefined;
-  public offscreenPortId: number | undefined;
+  public offscreenPortId: number | string | undefined;
 
-  private portIdIndex = 1;
-
-  addPort({ portId, port }: { portId: number; port: chrome.runtime.Port }) {
+  addPort({ portId, port }: { portId: number | string; port: chrome.runtime.Port }) {
     this.ports[portId] = port;
     if (port.name === EXT_PORT_OFFSCREEN_TO_BG) {
       this.offscreenPort = port;
       this.offscreenPortId = portId;
     }
   }
-  removePort({ portId, port }: { portId: number; port: chrome.runtime.Port }) {
+  removePort({ portId, port }: { portId: number | string; port: chrome.runtime.Port }) {
     delete this.ports[portId];
     if (port.name === EXT_PORT_OFFSCREEN_TO_BG) {
       this.offscreenPort = undefined;
@@ -49,7 +48,6 @@ class JsBridgeExtBackground extends JsBridgeBase {
     const port: chrome.runtime.Port = this.ports[payload.remoteId as string];
 
     const portOrigin = utils.getOriginFromPort(port);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const requestOrigin: string = payload?.peerOrigin || '';
 
     if (!portOrigin) {
@@ -90,9 +88,7 @@ class JsBridgeExtBackground extends JsBridgeBase {
         port.name === EXT_PORT_UI_TO_BG ||
         port.name === EXT_PORT_OFFSCREEN_TO_BG
       ) {
-        // TODO uuid
-        this.portIdIndex += 1;
-        const portId = this.portIdIndex;
+        const portId = uuid.v4();
         this.addPort({
           portId,
           port,

@@ -62,7 +62,8 @@ export type BalanceResponse = {
   currency?: "sats" | "EUR" | "USD"
 }
 
-export type IProviderWebln = ProviderWeblnBase & Omit<WeblnRequeset, 'verifyMessage'> & {
+export type IProviderWebln = ProviderWeblnBase & Omit<WeblnRequeset, 'enable' | 'verifyMessage'> & {
+  enable: () => Promise<void>
   verifyMessage: (signature: string, message: string) => Promise<void>
 }
 

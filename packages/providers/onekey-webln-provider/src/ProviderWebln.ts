@@ -65,9 +65,9 @@ class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
     return this.bridgeRequest(params) as JsBridgeRequestResponse<T>
   }
 
-  async enable() {
+  async enable(): Promise<void> {
     if (this.states.enabled) {
-      return { enabled: true };
+      return;
     }
     if (this.states.executing) {
       const message = `window.webln call already executing`
@@ -80,7 +80,6 @@ class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
       if (typeof result.enabled === "boolean") {
         this.states.enabled = true
       }
-      return result;
     } finally {
       this.setExecuting(false)
     }

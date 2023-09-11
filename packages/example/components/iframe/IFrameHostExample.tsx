@@ -66,6 +66,7 @@ export default function IFrameHostExample() {
           style={{ width: '100%', height: '400px' }}
           frameBorder={0}
         />
+        <iframe src="/" style={{ width: '100%', height: '400px' }} />
     </div>
   );
 }

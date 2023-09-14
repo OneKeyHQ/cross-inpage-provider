@@ -12,7 +12,6 @@ import {
   JsBridgeRequestResponse,
   RequestInvoiceArgs,
   RequestInvoiceResponse,
-  EnableResponse,
   WeblnRequeset,
 } from "./types";
 
@@ -209,10 +208,7 @@ class ProviderWebln extends ProviderWeblnBase implements IProviderWebln {
           lnurl = paymentRequest.match?.(/(\S+@\S+)/)?.[1];
         }
 
-        window.webln.enable().then((response: EnableResponse) => {
-          if (!response.enabled) {
-            return;
-          }
+        window.webln.enable().then(() => {
           if (lnurl) {
             return window.webln.lnurl(lnurl);
           }

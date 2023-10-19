@@ -30,7 +30,7 @@ jobs:
         # TODO check published packages injected is minified
         run: |
           git reset --hard
-          NODE_ENV=production yarn publish-packages -y
+          NODE_ENV=production yarn publish-packages -y --no-verify-access
 
       - name: Sleep for 90 seconds
         uses: jakejarvis/wait-action@master

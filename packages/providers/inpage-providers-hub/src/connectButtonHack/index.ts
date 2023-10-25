@@ -17,4 +17,11 @@ import './sites/zapper';
 import './sites/zerion';
 import './sites/aave';
 import './sites/pancake';
+import './sites/unisat';
+import './sites/gamma';
+import './sites/idclub';
+import './sites/ord';
+import './sites/ordinalswallet';
+import './sites/ordinalsmarket';
+import './sites/sating';
 // TODO list ----------------------------------------------

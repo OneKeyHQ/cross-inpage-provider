@@ -47,5 +47,11 @@ hackConnectButton({
       icon: WALLET_CONNECT_INFO.phantom.icon,
       text: WALLET_CONNECT_INFO.phantom.text,
     });
+    replaceFunc({
+      findName: 'Unisat',
+      findIconText: 'Unisat icon',
+      icon: WALLET_CONNECT_INFO.unisat.icon,
+      text: WALLET_CONNECT_INFO.unisat.text,
+    });
   },
 });

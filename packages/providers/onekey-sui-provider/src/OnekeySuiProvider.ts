@@ -15,6 +15,8 @@ import {
   SuiSignAndExecuteTransactionBlockOutput,
   SuiSignMessageInput,
   SuiSignMessageOutput,
+  SuiSignPersonalMessageInput,
+  SuiSignPersonalMessageOutput,
   SuiSignTransactionBlockInput,
   SuiSignTransactionBlockOutput,
 } from '@mysten/wallet-standard';
@@ -45,6 +47,8 @@ type SignTransactionBlockInput = SuiSignTransactionBlockInput & {
 };
 type SignMessageInput = SuiSignMessageInput & { messageSerialize: string; walletSerialize: string };
 
+type SignPersonalMessageInput = SuiSignPersonalMessageInput & { messageSerialize: string; walletSerialize: string };
+
 export type SuiRequest = {
   'hasPermissions': (permissions: readonly PermissionType[]) => Promise<boolean>;
 
@@ -65,6 +69,8 @@ export type SuiRequest = {
   ) => Promise<SuiSignTransactionBlockOutput>;
 
   'signMessage': (input: SignMessageInput) => Promise<SuiSignMessageOutput>;
+
+  'signPersonalMessage': (input: SignPersonalMessageInput) => Promise<SuiSignPersonalMessageOutput>;
 };
 
 type JsBridgeRequest = {
@@ -264,6 +270,17 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
   async signMessage(input: SuiSignMessageInput): Promise<SuiSignMessageOutput> {
     return this._callBridge({
       method: 'signMessage',
+      params: {
+        ...input,
+        walletSerialize: JSON.stringify(input.account),
+        messageSerialize: bytesToHex(input.message),
+      },
+    });
+  }
+
+  async signPersonalMessage(input: SuiSignPersonalMessageInput): Promise<SuiSignPersonalMessageOutput> {
+    return this._callBridge({
+      method: 'signPersonalMessage',
       params: {
         ...input,
         walletSerialize: JSON.stringify(input.account),

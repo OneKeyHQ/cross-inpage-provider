@@ -204,7 +204,7 @@ export default function App() {
 
   const getTransaction = async () => {
     const res = await provider.getTransaction(
-      '0xbeb1f8c4e66bf0f58afca8c83338fd9a54490d46ce25fe9c8674b67f1e7bbd3a',
+      '0x407c189992aa2b5a25b3645a3dc6a8b5c9ec2792d214ab9a04b7acc6b7465a00',
     );
     console.log('[getTransaction]', res);
   };

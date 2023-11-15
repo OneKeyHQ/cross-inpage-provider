@@ -1,14 +1,13 @@
 import React, { useCallback } from 'react';
-import { useState, useEffect, useMemo } from 'react';
-import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
+import { useState, useEffect } from 'react';
+import { hexToBytes } from '@noble/hashes/utils';
 import { DAppList } from '../dappList/DAppList';
 import { dapps } from './dapps.config';
-import { JsonRpcProvider, Connection } from '@mysten/sui.js';
-import { buildTransfer } from '../sui/utils';
+import { TransactionBlock } from '@mysten/sui.js/transactions';
 import { WalletKitProvider, ConnectButton, useWalletKit } from '@mysten/wallet-kit';
 
 function DappTest() {
-  const [network, setNetwork] = useState<string>('TestNet');
+  const [network, setNetwork] = useState<string>('MainNet');
   const [address, setAddress] = useState<string>();
 
   // eslint-disable-next-line @typescript-eslint/unbound-method
@@ -20,41 +19,13 @@ function DappTest() {
     signTransactionBlock,
     signAndExecuteTransactionBlock,
     signMessage,
+    signPersonalMessage,
   } = useWalletKit();
 
   useEffect(() => {
     const [address] = accounts || [];
     if (address) setAddress(address.address);
   }, [accounts]);
-
-  const rpcProvider = useMemo(() => {
-    if (network.toLowerCase() === 'testnet') {
-      return new JsonRpcProvider(
-        new Connection({
-          fullnode: 'https://fullnode.testnet.sui.io',
-          faucet: 'https://faucet.testnet.sui.io/gas',
-        }),
-      );
-    } else {
-      return new JsonRpcProvider(
-        new Connection({
-          fullnode: 'https://fullnode.mainnet.sui.io',
-          faucet: 'https://faucet.testnet.sui.io/gas',
-        }),
-      );
-    }
-  }, [network]);
-
-  const requestSuiFromFaucet = async () => {
-    try {
-      const [address] = accounts;
-      const faucet = await rpcProvider.requestSuiFromFaucet(address.address);
-      console.log('[requestSuiFromFaucet] faucet success:', faucet);
-    } catch (err) {
-      console.warn(err);
-      console.log(`[error] requestSuiFromFaucet: ${JSON.stringify(err)}`);
-    }
-  };
 
   const _getAccounts = useCallback(() => {
     try {
@@ -77,11 +48,13 @@ function DappTest() {
   const signAndExecuteTransaction = async () => {
     try {
       const address = accounts[0].address;
-      const transfer = await buildTransfer(
-        rpcProvider,
-        address,
-        '0xe40a5a0133cac4e9059f58f9d2074a3386d631390e40eadb43d2606e8975f3eb',
-        '100000',
+
+      const transfer = new TransactionBlock();
+      transfer.setSender(address);
+      const [coin] = transfer.splitCoins(transfer.gas, [transfer.pure(100000)]);
+      transfer.transferObjects(
+        [coin],
+        transfer.pure('0xe40a5a0133cac4e9059f58f9d2074a3386d631390e40eadb43d2606e8975f3eb'),
       );
       const res: unknown = await signAndExecuteTransactionBlock({
         transactionBlock: transfer,
@@ -99,12 +72,15 @@ function DappTest() {
   const signTransaction = async () => {
     try {
       const address = accounts[0].address;
-      const transfer = await buildTransfer(
-        rpcProvider,
-        address,
-        '0xe40a5a0133cac4e9059f58f9d2074a3386d631390e40eadb43d2606e8975f3eb',
-        '100000',
+
+      const transfer = new TransactionBlock();
+      transfer.setSender(address);
+      const [coin] = transfer.splitCoins(transfer.gas, [transfer.pure(100000)]);
+      transfer.transferObjects(
+        [coin],
+        transfer.pure('0xe40a5a0133cac4e9059f58f9d2074a3386d631390e40eadb43d2606e8975f3eb'),
       );
+
       const res: unknown = await signTransactionBlock({
         transactionBlock: transfer,
         chain: network.toLowerCase() === 'sui:testnet' ? 'sui:testnet' : 'sui:mainnet',
@@ -125,10 +101,24 @@ function DappTest() {
         account: currentAccount,
       });
 
-      console.log('[signAndExecuteTransaction]', res);
+      console.log('[signMessage]', res);
     } catch (err) {
       console.warn(err);
-      console.log(`[error] signAndExecuteTransaction: ${JSON.stringify(err)}`);
+      console.log(`[error] signMessage: ${JSON.stringify(err)}`);
+    }
+  };
+
+  const signPersonalMessageAction = async () => {
+    try {
+      const res: unknown = await signPersonalMessage({
+        message: hexToBytes('010203'),
+        account: currentAccount,
+      });
+
+      console.log('[signPersonalMessage]', res);
+    } catch (err) {
+      console.warn(err);
+      console.log(`[error] signPersonalMessage: ${JSON.stringify(err)}`);
     }
   };
 
@@ -147,7 +137,6 @@ function DappTest() {
               </select>
             </pre>
             <pre>Connected as: {address}</pre>
-            <button onClick={requestSuiFromFaucet}>Faucet SUI</button>
           </div>
 
           <br />
@@ -157,6 +146,9 @@ function DappTest() {
           </button>
           <button onClick={async () => await signTransaction()}>Sign Transaction</button>
           <button onClick={async () => await signMessageAction()}>Sign Message</button>
+          <button onClick={async () => await signPersonalMessageAction()}>
+            Sign Personal Message
+          </button>
           <button onClick={() => disconnectWallet()}>Disconnect</button>
         </>
       )}

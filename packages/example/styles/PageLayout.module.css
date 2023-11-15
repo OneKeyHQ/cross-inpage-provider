@@ -1,0 +1,31 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.backButton {
+  align-self: flex-start;
+  margin: 1rem 0;
+  padding: 0.5rem 1rem;
+  color: #0070f3; 
+  text-decoration: none;
+  font-weight: bold;
+  font-size: large;
+}
+
+.header {
+  display: flex;
+  align-items: center; 
+  justify-content: start; 
+}
+
+.title {
+  margin: 1rem 0;
+}
+
+.childrenContainer {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 10px;
+}

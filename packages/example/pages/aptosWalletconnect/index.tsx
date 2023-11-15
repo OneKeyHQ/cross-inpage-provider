@@ -1,8 +1,6 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
-import styles from '../../styles/Home.module.css';
-import Link from 'next/link';
-import { LogsContainer } from '../../components/LogsContainer';
+import PageLayout from '../../components/PageLayout';
 
 // injected provider works only if nextjs ssr disabled
 const AptosExample = dynamic(() => import('../../components/aptosWalletConnect/AptosExample'), {
@@ -10,16 +8,9 @@ const AptosExample = dynamic(() => import('../../components/aptosWalletConnect/A
 });
 
 export default function () {
-  // TODO <Layout />
-  // TODO eslint fix: deps order, react close tag
   return (
-    <div>
-      <div className={styles.container}>
-        <Link href={'/'}>← Back</Link>
-        <h2>Aptos Wallet Connect Dapp Example</h2>
-        <AptosExample />
-      </div>
-      <LogsContainer />
-    </div>
+    <PageLayout title={'Aptos Wallet Connect DApp Example'}>
+      <AptosExample />
+    </PageLayout>
   );
 }

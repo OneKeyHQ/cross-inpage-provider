@@ -1,4 +1,4 @@
-function getOriginFromPort(port: chrome.runtime.Port) {
+function getOriginFromPort(port: chrome.runtime.Port, { skipError }: { skipError?: boolean } = {}) {
   // chrome
   let origin = port?.sender?.origin || '';
   // firefox
@@ -10,7 +10,7 @@ function getOriginFromPort(port: chrome.runtime.Port) {
       console.error(error);
     }
   }
-  if (!origin) {
+  if (!origin && !skipError) {
     console.error('ERROR: origin not found from port sender', port);
   }
   return origin || '';

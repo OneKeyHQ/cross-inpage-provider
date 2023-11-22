@@ -33,7 +33,7 @@ class JsBridgeExtUi extends JsBridgeBase {
       name: EXT_PORT_UI_TO_BG,
       // #### background -> ui
       onMessage: (payload: any, port0: chrome.runtime.Port) => {
-        let origin = utils.getOriginFromPort(port0) || '';
+        let origin = utils.getOriginFromPort(port0, { skipError: true }) || '';
 
         // in ext ui, port.sender?.origin is always empty,
         //    so we trust remote (background) origin

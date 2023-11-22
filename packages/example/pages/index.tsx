@@ -7,7 +7,7 @@ import styles from '../styles/Home.module.css';
 import packageJson from '../package.json';
 import { useEffect } from 'react';
 import { Button } from 'native-base';
-import { Tree, NodeApi } from 'react-arborist';
+import { Tree } from 'react-arborist';
 import * as uuid from 'uuid';
 
 // const myImageLoader = ({ src, width, quality }: any) => {
@@ -101,9 +101,8 @@ const data: ITreeNodeData[] = [
       { id: uuid.v4(), name: 'DappList', href: '/dappList' },
       {
         id: uuid.v4(),
-        name: 'Hardware SDK (coming soon)',
-        href: '',
-        icon: 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/microsoft/319/mobile-phone_1f4f1.png',
+        name: 'Hardware SDK',
+        href: 'https://hardware-example.onekeytest.com/',
       },
     ],
   },
@@ -201,14 +200,8 @@ const data: ITreeNodeData[] = [
       },
       {
         id: uuid.v4(),
-        name: 'Sui Standard (Recommend)',
+        name: 'Sui Standard',
         href: '/suiStandard',
-        icon: 'https://onekey-asset.com/assets/sui/sui.png',
-      },
-      {
-        id: uuid.v4(),
-        name: 'Sui (Deprecated)',
-        href: '/sui',
         icon: 'https://onekey-asset.com/assets/sui/sui.png',
       },
       {
@@ -222,7 +215,8 @@ const data: ITreeNodeData[] = [
         name: 'Cosmos',
         href: '/cosmos',
         icon: 'https://onekey-asset.com/assets/cosmos/cosmos.png',
-      },{
+      },
+      {
         id: uuid.v4(),
         name: 'Polkadot',
         href: '/polkadot',
@@ -254,9 +248,11 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-        <Tree initialData={data}>{TreeNode as any}</Tree>
         <Button onPress={() => window.location.reload()}>Refresh</Button>
         <a>EVM-chainId={chainId}</a>
+        <Tree height={900} initialData={data} rowHeight={38} indent={20}>
+          {TreeNode as any}
+        </Tree>
       </main>
 
       <footer className={styles.footer}>

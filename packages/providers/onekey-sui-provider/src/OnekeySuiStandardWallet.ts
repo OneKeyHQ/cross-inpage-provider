@@ -18,6 +18,8 @@ import {
   SuiSignAndExecuteTransactionBlockMethod,
   SuiSignMessageFeature,
   SuiSignMessageMethod,
+  SuiSignPersonalMessageFeature,
+  SuiSignPersonalMessageMethod,
   SuiSignTransactionBlockFeature,
   SuiSignTransactionBlockMethod,
   Wallet,
@@ -34,7 +36,8 @@ type Features = StandardConnectFeature &
   StandardEventsFeature &
   SuiSignAndExecuteTransactionBlockFeature &
   SuiSignTransactionBlockFeature &
-  SuiSignMessageFeature;
+  SuiSignMessageFeature &
+  SuiSignPersonalMessageFeature;
 
 enum Feature {
   STANDARD__CONNECT = 'standard:connect',
@@ -43,6 +46,7 @@ enum Feature {
   SUI__SIGN_AND_EXECUTE_TRANSACTION_BLOCK = 'sui:signAndExecuteTransactionBlock',
   SUI__SIGN_TRANSACTION_BLOCK = 'sui:signTransactionBlock',
   SUI__SIGN_MESSAGE = 'sui:signMessage',
+  SUI__SIGN_PERSONAL_MESSAGE = 'sui:signPersonalMessage',
 }
 
 class OnekeySuiStandardWallet implements Wallet {
@@ -97,6 +101,10 @@ class OnekeySuiStandardWallet implements Wallet {
         version: '1.0.0',
         signMessage: this.$signMessage,
       },
+      [Feature.SUI__SIGN_PERSONAL_MESSAGE]: {
+        version: '1.0.0',
+        signPersonalMessage: this.$signPersonalMessage,
+      },
     };
   }
 
@@ -137,6 +145,7 @@ class OnekeySuiStandardWallet implements Wallet {
           Feature.SUI__SIGN_AND_EXECUTE_TRANSACTION_BLOCK,
           Feature.SUI__SIGN_TRANSACTION_BLOCK,
           Feature.SUI__SIGN_MESSAGE,
+          Feature.SUI__SIGN_PERSONAL_MESSAGE,
         ],
       });
       this._events.emit('change', { accounts: this.accounts });
@@ -160,10 +169,10 @@ class OnekeySuiStandardWallet implements Wallet {
     this._events.all.clear();
   };
 
-  getActiveChain(){
+  getActiveChain() {
     return this.provider.getActiveChain();
   }
-  
+
   $hasPermissions(permissions: readonly PermissionType[] = ALL_PERMISSION_TYPES) {
     return this.provider.hasPermissions(permissions);
   }
@@ -178,6 +187,10 @@ class OnekeySuiStandardWallet implements Wallet {
 
   $signMessage: SuiSignMessageMethod = async (input) => {
     return this.provider.signMessage(input);
+  };
+
+  $signPersonalMessage: SuiSignPersonalMessageMethod = async (input) => {
+    return this.provider.signPersonalMessage(input);
   };
 
   subscribeEventFromBackend() {

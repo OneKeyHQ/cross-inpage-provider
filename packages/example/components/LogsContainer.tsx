@@ -65,7 +65,7 @@ export const LogsContainer = ({ bridge }: { bridge?: JsBridgeBase } = {}) => {
         background: 'black',
         position: 'relative',
         color: 'white',
-        height: 300,
+        height: 340,
         overflow: 'auto',
       }}
     >

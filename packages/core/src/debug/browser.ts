@@ -6,7 +6,7 @@
  */
 
 import { DEBUG_LOGGER_STORAGE_KEY } from '../consts';
-
+import { isNil } from 'lodash';
 import humanize from 'ms';
 const storageKey = DEBUG_LOGGER_STORAGE_KEY;
 
@@ -236,7 +236,11 @@ async function save(namespaces) {
     if (namespaces) {
       await exportsBrowser.storage.setItem(storageKey, namespaces);
     } else {
-      await exportsBrowser.storage.removeItem(storageKey);
+      if (isNil(namespaces)) {
+        await exportsBrowser.storage.removeItem(storageKey);
+      } else {
+        await exportsBrowser.storage.setItem(storageKey, '');
+      }
     }
   } catch (error) {
     // Swallow
@@ -291,7 +295,9 @@ function customLocalStorage() {
       return window.localStorage;
     }
 
-    console.warn('debugLogger init warning, neither `global.$$onekeyAppStorage` nor `window.localStorage` found.')
+    console.warn(
+      'debugLogger init warning, neither `global.$$onekeyAppStorage` nor `window.localStorage` found.',
+    );
     return {
       async getItem() {
         return '';

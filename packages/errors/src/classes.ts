@@ -1,3 +1,4 @@
+// https://github.com/MetaMask/rpc-errors/blob/main/src/classes.ts
 import safeStringify from 'fast-safe-stringify';
 
 export interface SerializedWeb3RpcError {
@@ -13,22 +14,16 @@ export interface SerializedWeb3RpcError {
  * Permits any integer error code.
  */
 export class Web3RpcError<T> extends Error {
-
   public code: number;
 
   public data?: T;
 
   constructor(code: number, message: string, data?: T) {
-
     if (!Number.isInteger(code)) {
-      throw new Error(
-        '"code" must be an integer.',
-      );
+      throw new Error('"code" must be an integer.');
     }
     if (!message || typeof message !== 'string') {
-      throw new Error(
-        '"message" must be a nonempty string.',
-      );
+      throw new Error('"message" must be a nonempty string.');
     }
 
     super(message);
@@ -49,9 +44,12 @@ export class Web3RpcError<T> extends Error {
     if (this.data !== undefined) {
       serialized.data = this.data;
     }
-    if (this.stack) {
-      serialized.stack = this.stack;
-    }
+
+    // TODO read error.stack cause RN hermes app crash
+    // if (this.stack) {
+    //   serialized.stack = this.stack;
+    // }
+
     return serialized;
   }
 
@@ -60,11 +58,7 @@ export class Web3RpcError<T> extends Error {
    * any circular references.
    */
   toString(): string {
-    return safeStringify(
-      this.serialize(),
-      stringifyReplacer,
-      2,
-    );
+    return safeStringify(this.serialize(), stringifyReplacer, 2);
   }
 }
 
@@ -73,17 +67,13 @@ export class Web3RpcError<T> extends Error {
  * Permits integer error codes in the [ 1000 <= 4999 ] range.
  */
 export class Web3ProviderError<T> extends Web3RpcError<T> {
-
   /**
    * Create an Web3 Provider JSON-RPC error.
    * `code` must be an integer in the 1000 <= 4999 range.
    */
   constructor(code: number, message: string, data?: T) {
-
     if (!isValidWeb3ProviderCode(code)) {
-      throw new Error(
-        '"code" must be an integer such that: 1000 <= code <= 4999',
-      );
+      throw new Error('"code" must be an integer such that: 1000 <= code <= 4999');
     }
 
     super(code, message, data);

@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { CrossEventEmitter } from './CrossEventEmitter';
 import isPlainObject from 'lodash/isPlainObject';
 import isString from 'lodash/isString';
+import { CrossEventEmitter } from './CrossEventEmitter';
 import { appDebugLogger, consoleErrorInDev } from './loggers';
 
+import type { Web3ProviderError } from '@onekeyfe/cross-inpage-provider-errors';
+import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
 import {
+  IDebugLogger,
   IInjectedProviderNamesStrings,
   IJsBridgeCallback,
   IJsBridgeConfig,
   IJsBridgeMessagePayload,
   IJsBridgeMessageTypes,
   IJsonRpcResponse,
-  IDebugLogger,
 } from '@onekeyfe/cross-inpage-provider-types';
-import { web3Errors, Web3RpcError } from '@onekeyfe/cross-inpage-provider-errors';
-import type { Web3ProviderError } from '@onekeyfe/cross-inpage-provider-errors';
 import versionInfo from './versionInfo';
 
 function toPlainError(errorInfo: IErrorInfo) {
@@ -29,6 +29,7 @@ function toPlainError(errorInfo: IErrorInfo) {
     key: errorInfo.key, // i18n key
     info: errorInfo.info as unknown, // i18n params
     className: errorInfo.className,
+    autoToast: errorInfo.autoToast,
   };
 }
 
@@ -56,6 +57,7 @@ type IErrorInfo = Error & {
   key?: string;
   info?: any;
   className?: string;
+  autoToast?: boolean;
 };
 
 const BRIDGE_EVENTS = {

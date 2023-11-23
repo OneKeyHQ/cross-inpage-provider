@@ -17,6 +17,7 @@ import {
 } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import { ProviderWebln } from '@onekeyfe/onekey-webln-provider';
+import { ProviderNostr } from '@onekeyfe/onekey-nostr-provider';
 import { ProviderBtc } from '@onekeyfe/onekey-btc-provider';
 import './connectButtonHack';
 import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
@@ -35,6 +36,7 @@ export type IWindowOneKeyHub = {
   cardano?: ProviderCardano;
   keplr?: ProviderCosmos;
   webln?: ProviderWebln;
+  nostr?: ProviderNostr;
   unisat?: ProviderBtc;
   $private?: ProviderPrivate;
   $walletInfo?: {
@@ -105,6 +107,10 @@ function injectWeb3Provider(): unknown {
     bridge,
   });
 
+  const nostr = new ProviderNostr({
+    bridge,
+  });
+
   const btc = new ProviderBtc({ bridge });
 
   // providerHub
@@ -123,6 +129,7 @@ function injectWeb3Provider(): unknown {
     cardano,
     cosmos,
     webln,
+    nostr,
     btc,
   };
 
@@ -160,8 +167,9 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('getOfflineSignerOnlyAmino', cosmos.getOfflineSignerOnlyAmino.bind(cosmos));
   defineWindowProperty('getOfflineSignerAuto', cosmos.getOfflineSignerAuto.bind(cosmos));
 
-  // webln
+  // Lightning Network 
   defineWindowProperty('webln', webln);
+  defineWindowProperty('nostr', nostr);
 
   // ** shim or inject real web3
   //

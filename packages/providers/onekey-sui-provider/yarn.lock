@@ -50,43 +50,6 @@
   resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.3.0.tgz#085fd70f6d7d9d109671090ccae1d3bec62554a1"
   integrity sha512-ilHEACi9DwqJB0pw7kv+Apvh50jiiSyR/cQ3y4W7lOR5mhvn/50FLUfsnfJz0BDZtl/RR16kXvptiv6q1msYZg==
 
-"@onekeyfe/cross-inpage-provider-core@1.1.43":
-  version "1.1.43"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-core/-/cross-inpage-provider-core-1.1.43.tgz#c2661fc606444752c3168b00b7043b180448e000"
-  integrity sha512-Aj+SlRb2wS4U1XTH1UzTFrC7K9+D/TtoaVd4DbfFxpA3fFZDQyFUFDC22yT3erjs/zOuu73b/rx4OxV1Acrrhw==
-  dependencies:
-    "@onekeyfe/cross-inpage-provider-errors" "1.1.43"
-    "@onekeyfe/cross-inpage-provider-events" "1.1.43"
-    "@onekeyfe/cross-inpage-provider-types" "1.1.43"
-    events "^3.3.0"
-    lodash "^4.17.21"
-    ms "^2.1.3"
-
-"@onekeyfe/cross-inpage-provider-errors@1.1.43":
-  version "1.1.43"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-1.1.43.tgz#d8fd19ce785cda2137c121c30462b7639f3c7ad9"
-  integrity sha512-7Xrp0eN+XmODtfWYFBoxf02nrcoiUF6sihlY0f7+n1MGsWR+pCsQiYnDldvb4WxsMoZMnEvbbWwhDVYdYkOQ6g==
-  dependencies:
-    fast-safe-stringify "^2.1.1"
-
-"@onekeyfe/cross-inpage-provider-events@1.1.43":
-  version "1.1.43"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-events/-/cross-inpage-provider-events-1.1.43.tgz#f4aa20e307f765a2055f638f185f2358a5f6f2f8"
-  integrity sha512-H89jxHxIk9lxf8/eoa08lL3jmOVdyh3f46Sv3auwgSF6SZyx1oUviy0gg5Akut8Zc7jZZ1PHL+e9OZUT0umMnQ==
-
-"@onekeyfe/cross-inpage-provider-types@1.1.43":
-  version "1.1.43"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-types/-/cross-inpage-provider-types-1.1.43.tgz#07f543f118a49bb8aac9535c09eabbb18053aa88"
-  integrity sha512-Wgjp0xZEgXDiuNksDGymjjGHvsgSkGooodksGzp6Vx+JAevvFrs/ft6uV8eVJF78MQRTEdeSJ4q8Z+SBrsak+A==
-
-"@onekeyfe/extension-bridge-injected@1.1.43":
-  version "1.1.43"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/extension-bridge-injected/-/extension-bridge-injected-1.1.43.tgz#0facfdc1f04b252c8015e939044f508446a217bc"
-  integrity sha512-MnIKmsWtQzuktHRyhYSm/Ec/YPEgXilCZmxHNhb+kGimc8lmrbgiwni+WVGdDVrfGsDnY8wZG1TJrauaK7TBew==
-  dependencies:
-    "@onekeyfe/cross-inpage-provider-core" "1.1.43"
-    "@onekeyfe/cross-inpage-provider-types" "1.1.43"
-
 "@open-rpc/client-js@^1.8.1":
   version "1.8.1"
   resolved "https://registry.yarnpkg.com/@open-rpc/client-js/-/client-js-1.8.1.tgz#73b5a5bf237f24b14c3c89205b1fca3aea213213"
@@ -189,7 +152,7 @@ events@^3.3.0:
   resolved "https://registry.yarnpkg.com/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
   integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
 
-fast-safe-stringify@^2.0.6, fast-safe-stringify@^2.1.1:
+fast-safe-stringify@^2.0.6:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.1.1.tgz#c406a83b6e70d9e35ce3b30a81141df30aeba884"
   integrity sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==
@@ -207,20 +170,10 @@ isomorphic-ws@^5.0.0:
   resolved "https://registry.yarnpkg.com/isomorphic-ws/-/isomorphic-ws-5.0.0.tgz#e5529148912ecb9b451b46ed44d53dae1ce04bbf"
   integrity sha512-muId7Zzn9ywDsyXgTIafTry2sV3nySZeUDe6YedVd1Hvuuep5AsIlqK+XefWpYTyJG5e503F2xIuT2lcU6rCSw==
 
-lodash@^4.17.21:
-  version "4.17.21"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
-  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
-
 mitt@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/mitt/-/mitt-3.0.0.tgz#69ef9bd5c80ff6f57473e8d89326d01c414be0bd"
   integrity sha512-7dX2/10ITVyqh4aOSVI9gdape+t9l2/8QxHrFmUXu4EEUpdlxl6RudZUPZoc+zuY2hk1j7XxVroIVIan/pD/SQ==
-
-ms@^2.1.3:
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
-  integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
 node-fetch@^2.6.1:
   version "2.7.0"

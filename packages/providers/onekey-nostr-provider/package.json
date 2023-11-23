@@ -1,5 +1,5 @@
 {
-  "name": "@onekeyfe/inpage-providers-hub",
+  "name": "@onekeyfe/onekey-nostr-provider",
   "version": "1.1.44",
   "keywords": [
     "cross-inpage-provider"
@@ -29,21 +29,8 @@
   },
   "dependencies": {
     "@onekeyfe/cross-inpage-provider-core": "1.1.44",
+    "@onekeyfe/cross-inpage-provider-errors": "1.1.44",
     "@onekeyfe/cross-inpage-provider-types": "1.1.44",
-    "@onekeyfe/onekey-aptos-provider": "1.1.44",
-    "@onekeyfe/onekey-btc-provider": "1.1.44",
-    "@onekeyfe/onekey-cardano-provider": "1.1.44",
-    "@onekeyfe/onekey-conflux-provider": "1.1.44",
-    "@onekeyfe/onekey-cosmos-provider": "1.1.44",
-    "@onekeyfe/onekey-eth-provider": "1.1.44",
-    "@onekeyfe/onekey-polkadot-provider": "1.1.44",
-    "@onekeyfe/onekey-private-provider": "1.1.44",
-    "@onekeyfe/onekey-solana-provider": "1.1.44",
-    "@onekeyfe/onekey-starcoin-provider": "1.1.44",
-    "@onekeyfe/onekey-sui-provider": "1.1.44",
-    "@onekeyfe/onekey-tron-provider": "1.1.44",
-    "@onekeyfe/onekey-webln-provider": "1.1.44",
-    "@onekeyfe/onekey-nostr-provider": "1.1.44",
-    "web3": "^1.7.3"
+    "@onekeyfe/extension-bridge-injected": "1.1.44"
   }
 }

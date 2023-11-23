@@ -17,6 +17,7 @@ declare global {
     cardano: any;
     keplr: any;
     webln: any;
+    nostr: any;
     $onekey: any;
     ReactNativeWebView?: {
       postMessage: (payload: string) => void;
@@ -53,6 +54,7 @@ export enum IInjectedProviderNames {
   cosmos = 'cosmos',
   polkadot = 'polkadot',
   webln = 'webln',
+  nostr = 'nostr',
   $private = '$private',
   $hardware_sdk = '$hardware_sdk',
 }

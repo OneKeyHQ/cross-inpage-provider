@@ -28,7 +28,7 @@ export type IRelay = {
 
 export type NostrRequeset = {
   getPublicKey: () => Promise<string>
-  signEvent: () => Promise<Event>
+  signEvent: (args: {event: Event}) => Promise<Event>
   getRelays: () => Promise<IRelay>
   nip04: {
     encrypt: (pubkey: string, plaintext: string) => Promise<string>,
@@ -38,9 +38,10 @@ export type NostrRequeset = {
   decrypt: (args: {pubkey: string; ciphertext: string}) => Promise<string>,
 }
 
-export type IProviderNostr =ProviderNostrBase & Omit<NostrRequeset, 'encrypt' | 'decrypt'> & {
+export type IProviderNostr =ProviderNostrBase & Omit<NostrRequeset, 'encrypt' | 'decrypt' | 'signEvent'> & {
   encrypt: (pubkey: string, plaintext: string) => Promise<string>,
   decrypt: (pubkey: string, ciphertext: string) => Promise<string>,
+  signEvent: (event: Event) => Promise<Event>
 } 
 
 export type JsBridgeRequest = {

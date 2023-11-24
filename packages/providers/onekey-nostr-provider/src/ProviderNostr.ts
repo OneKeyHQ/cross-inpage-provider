@@ -67,8 +67,8 @@ class ProviderNostr extends ProviderNostrBase implements IProviderNostr {
     return result
   }
 
-  async signEvent(): Promise<Event> {
-    const result = await this._callBridge({ method: "signEvent" });  
+  async signEvent(event: Event): Promise<Event> {
+    const result = await this._callBridge({ method: "signEvent", params: { event } });  
     return result
   }
 

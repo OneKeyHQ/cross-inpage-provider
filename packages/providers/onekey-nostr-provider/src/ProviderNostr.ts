@@ -62,6 +62,10 @@ class ProviderNostr extends ProviderNostrBase implements IProviderNostr {
     return this.bridgeRequest(params) as JsBridgeRequestResponse<T>
   }
 
+  async enable(): Promise<boolean> {
+    return Promise.resolve(true)
+  }
+
   async getPublicKey(): Promise<string> {
     const result = await this._callBridge({ method: "getPublicKey" });  
     return result
@@ -96,6 +100,11 @@ class ProviderNostr extends ProviderNostrBase implements IProviderNostr {
       const result = await this._callBridge({ method: "decrypt", params: { pubkey, ciphertext } });  
       return result
     },
+  }
+
+  async signSchnorr(sigHash: string): Promise<string> {
+    const result = await this._callBridge({ method: "signSchnorr", params: sigHash });
+    return result
   }
 }
 

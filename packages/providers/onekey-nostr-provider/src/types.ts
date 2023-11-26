@@ -27,6 +27,7 @@ export type IRelay = {
 
 
 export type NostrRequeset = {
+  enable: () => Promise<boolean>
   getPublicKey: () => Promise<string>
   signEvent: (args: {event: Event}) => Promise<Event>
   getRelays: () => Promise<IRelay>
@@ -36,6 +37,7 @@ export type NostrRequeset = {
   }
   encrypt: (args: {pubkey: string; plaintext: string}) => Promise<string>,
   decrypt: (args: {pubkey: string; ciphertext: string}) => Promise<string>,
+  signSchnorr: (sigHash: string) => Promise<string>
 }
 
 export type IProviderNostr =ProviderNostrBase & Omit<NostrRequeset, 'encrypt' | 'decrypt' | 'signEvent'> & {

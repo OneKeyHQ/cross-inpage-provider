@@ -1,9 +1,9 @@
-import { createNewImageToContainer, hackConnectButton } from '../hackConnectButton';
+import { hackConnectButton } from '../hackConnectButton';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
 hackConnectButton({
-  urls: ['zapper.fi', 'app.zapper.fi', 'www.zapper.fi'],
+  urls: ['zapper.xyz', 'zapper.fi', 'www.zapper.xyz'],
   providers: [IInjectedProviderNames.ethereum],
   mutationObserverOptions: {
     attributes: true, // shadowRoot changed watch required
@@ -22,32 +22,25 @@ hackConnectButton({
       icon: string;
       text: string;
     }) => {
-      // TODO shadowRoot watch
-      //    https://stackoverflow.com/questions/46995421/shadow-dom-know-when-dom-is-rendered-changed
-      const shadowRoot = document.querySelector('onboard-v2')?.shadowRoot;
-      if (shadowRoot) {
-        const buttons = Array.from(shadowRoot.querySelectorAll('.wallets-container button'));
-        const btn = buttons.find((item) => item.innerHTML.includes(findName));
-        if (btn) {
-          const replaceImg = () => {
-            const imgContainer = btn.querySelector('div.icon') as HTMLElement | undefined;
-            if (imgContainer) {
-              createNewImageToContainer({
-                container: imgContainer,
-                icon,
-                removeSvg: true,
-              });
-            }
-          };
-
-          const span = btn.querySelector('span.name');
-          if (span && span.innerHTML === findName) {
-            span.innerHTML = text;
-            // shadowRoot update image, need some delay to replace image
-            setTimeout(replaceImg, 1000);
-          }
-          replaceImg();
+      const buttons: HTMLElement[] = Array.from(
+        document.querySelectorAll(
+          '.ReactModal__Content--after-open div > button > div:first-child',
+        ),
+      );
+      const btnContent = buttons.reverse().find((item) => item.innerText.includes(findName));
+      if (btnContent) {
+        while (btnContent.firstChild) {
+          btnContent.removeChild(btnContent.firstChild);
         }
+
+        const image = document.createElement('img');
+        image.src = icon;
+        image.style.width = '32px';
+        image.style.height = '32px';
+        btnContent.appendChild(image);
+
+        const newText = document.createTextNode(text);
+        btnContent.appendChild(newText);
       }
     };
 

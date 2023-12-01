@@ -402,7 +402,7 @@ function hackConnectButton({
       if (!enabledProviders) {
         return;
       }
-      replaceMethod?.();
+      replaceMethod?.({ providers: enabledProviders });
     } catch (error) {
       // noop
     } finally {

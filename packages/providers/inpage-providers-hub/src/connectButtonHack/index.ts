@@ -8,6 +8,7 @@ import './sites/uniswap';
 import './sites/sushi';
 import './sites/1inch';
 import './sites/dydx';
+import './sites/dydxv4';
 import './sites/compound';
 import './sites/oasis';
 import './sites/synthetix';

@@ -4,8 +4,12 @@ import { WALLET_CONNECT_INFO } from '../consts';
 
 hackConnectButton({
   urls: ['magiceden.io', 'www.magiceden.io'],
-  providers: [IInjectedProviderNames.ethereum, IInjectedProviderNames.solana],
-  replaceMethod() {
+  providers: [
+    IInjectedProviderNames.ethereum,
+    IInjectedProviderNames.solana,
+    IInjectedProviderNames.btc,
+  ],
+  replaceMethod(options) {
     const replaceFunc = ({
       findName,
       findIconText,
@@ -18,7 +22,7 @@ hackConnectButton({
       text: string;
     }) => {
       const img = document.querySelector(
-        `#headlessui-portal-root li > button > div > img[alt="${findIconText}"]`,
+        `#headlessui-portal-root div > button > div > img[alt="${findIconText}"]`,
       ) as HTMLImageElement | undefined;
       if (img && img.src) {
         img.src = icon;
@@ -29,29 +33,43 @@ hackConnectButton({
       }
     };
 
-    replaceFunc({
-      findName: 'MetaMask',
-      findIconText: 'MetaMask icon',
-      icon: WALLET_CONNECT_INFO.metamask.icon,
-      text: WALLET_CONNECT_INFO.metamask.text,
-    });
-    replaceFunc({
-      findName: 'WalletConnect',
-      findIconText: 'WalletConnect icon',
-      icon: WALLET_CONNECT_INFO.walletconnect.icon,
-      text: WALLET_CONNECT_INFO.walletconnect.text,
-    });
-    replaceFunc({
-      findName: 'Phantom',
-      findIconText: 'Phantom icon',
-      icon: WALLET_CONNECT_INFO.phantom.icon,
-      text: WALLET_CONNECT_INFO.phantom.text,
-    });
-    replaceFunc({
-      findName: 'Unisat',
-      findIconText: 'Unisat icon',
-      icon: WALLET_CONNECT_INFO.unisat.icon,
-      text: WALLET_CONNECT_INFO.unisat.text,
-    });
+    if (options?.providers?.includes(IInjectedProviderNames.ethereum)) {
+      replaceFunc({
+        findName: 'MetaMask',
+        findIconText: 'MetaMask icon',
+        icon: WALLET_CONNECT_INFO.metamask.icon,
+        text: WALLET_CONNECT_INFO.metamask.text,
+      });
+      // The magiceden bug will probably be fixed later
+      replaceFunc({
+        findName: 'MetaMask',
+        findIconText: 'MetaMask  icon',
+        icon: WALLET_CONNECT_INFO.metamask.icon,
+        text: WALLET_CONNECT_INFO.metamask.text,
+      });
+      replaceFunc({
+        findName: 'WalletConnect',
+        findIconText: 'WalletConnect icon',
+        icon: WALLET_CONNECT_INFO.walletconnect.icon,
+        text: WALLET_CONNECT_INFO.walletconnect.text,
+      });
+    }
+
+    if (options?.providers?.includes(IInjectedProviderNames.solana)) {
+      replaceFunc({
+        findName: 'Phantom',
+        findIconText: 'Phantom icon',
+        icon: WALLET_CONNECT_INFO.phantom.icon,
+        text: WALLET_CONNECT_INFO.phantom.text,
+      });
+    }
+    if (options?.providers?.includes(IInjectedProviderNames.btc)) {
+      replaceFunc({
+        findName: 'Unisat',
+        findIconText: 'Unisat icon',
+        icon: WALLET_CONNECT_INFO.unisat.icon,
+        text: WALLET_CONNECT_INFO.unisat.text,
+      });
+    }
   },
 });

@@ -5,7 +5,7 @@ import { WALLET_CONNECT_INFO } from '../consts';
 hackConnectButton({
   urls: ['opensea.io', 'www.opensea.io'],
   providers: [IInjectedProviderNames.ethereum, IInjectedProviderNames.solana],
-  replaceMethod() {
+  replaceMethod(options) {
     const replaceFunc = ({
       findName,
       icon,
@@ -41,20 +41,25 @@ hackConnectButton({
       }
     };
 
-    replaceFunc({
-      findName: 'MetaMask',
-      icon: WALLET_CONNECT_INFO.metamask.icon,
-      text: WALLET_CONNECT_INFO.metamask.text,
-    });
-    replaceFunc({
-      findName: 'Phantom',
-      icon: WALLET_CONNECT_INFO.phantom.icon,
-      text: WALLET_CONNECT_INFO.phantom.text,
-    });
-    replaceFunc({
-      findName: 'WalletConnect',
-      icon: WALLET_CONNECT_INFO.walletconnect.icon,
-      text: WALLET_CONNECT_INFO.walletconnect.text,
-    });
+    if (options?.providers?.includes(IInjectedProviderNames.ethereum)) {
+      replaceFunc({
+        findName: 'MetaMask',
+        icon: WALLET_CONNECT_INFO.metamask.icon,
+        text: WALLET_CONNECT_INFO.metamask.text,
+      });
+      replaceFunc({
+        findName: 'WalletConnect',
+        icon: WALLET_CONNECT_INFO.walletconnect.icon,
+        text: WALLET_CONNECT_INFO.walletconnect.text,
+      });
+    }
+
+    if (options?.providers?.includes(IInjectedProviderNames.solana)) {
+      replaceFunc({
+        findName: 'Phantom',
+        icon: WALLET_CONNECT_INFO.phantom.icon,
+        text: WALLET_CONNECT_INFO.phantom.text,
+      });
+    }
   },
 });

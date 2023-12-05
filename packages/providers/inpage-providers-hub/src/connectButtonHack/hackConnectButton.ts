@@ -1,3 +1,7 @@
+import {
+  ISpecialPropertyProviderNamesReflection,
+  checkWalletSwitchEnable,
+} from '@onekeyfe/cross-inpage-provider-core';
 import { throttle, ThrottleSettings } from 'lodash';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import type { IWindowOneKeyHub } from '../injectWeb3Provider';
@@ -18,6 +22,58 @@ function checkIfInjectedProviderConnected({
     return Boolean(hub?.solana?.publicKey);
   }
   return false;
+}
+
+/**
+ * Checks if the given key is a valid key of the `ISpecialPropertyProviderNamesReflection` enum.
+ * This function acts as a type guard, verifying if a string is one of the keys in the `ISpecialPropertyProviderNamesReflection` enum.
+ *
+ * @param key - The key to be checked against the `ISpecialPropertyProviderNamesReflection` enum.
+ * @returns Returns `true` if the key is a valid enum key, otherwise returns `false`.
+ */
+function isKeyOfISpecialPropertyProviderNamesReflection(
+  key: string,
+): key is keyof typeof ISpecialPropertyProviderNamesReflection {
+  return key in ISpecialPropertyProviderNamesReflection;
+}
+
+/**
+ * Checks if the provided blockchain provider is enabled.
+ * This function determines the status of a blockchain provider by mapping its name to a special property name (if applicable) and then checking if the wallet switch for that property is enabled.
+ *
+ * @param param - An object containing the name of the blockchain provider.
+ * @param providerName - The name of the provider to check. This should be a member of the `IInjectedProviderNames` enum.
+ * @returns Returns `true` if the provider is enabled, otherwise returns `false`.
+ */
+function checkIfInjectedProviderEnable({ providerName }: { providerName: IInjectedProviderNames }) {
+  let property: string;
+  if (isKeyOfISpecialPropertyProviderNamesReflection(providerName)) {
+    property = ISpecialPropertyProviderNamesReflection[providerName];
+  } else {
+    property = providerName;
+  }
+
+  const result = checkWalletSwitchEnable(property);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('checkIfInjectedProviderEnable', property, result);
+  }
+  return result;
+}
+
+/**
+ * Retrieves an array of enabled provider names.
+ *
+ * @param providers - An array of provider names to check.
+ * @returns Returns an array containing the names of all enabled providers.
+ */
+function getEnabledProviders({
+  providers,
+}: {
+  providers: IInjectedProviderNames[];
+}): IInjectedProviderNames[] {
+  return providers.filter((providerName) => {
+    return checkIfInjectedProviderEnable({ providerName });
+  });
 }
 
 export async function detectQrcodeFromSvg({
@@ -231,7 +287,7 @@ function hackConnectButton({
   callbackDelay = 10,
 }: {
   urls: string[];
-  replaceMethod: () => void;
+  replaceMethod: (options?: { providers: IInjectedProviderNames[] }) => void;
   providers: IInjectedProviderNames[];
   /*
     In mutationObserver config, at least one of attributes, characterData, or childList needs to be set true.
@@ -247,6 +303,26 @@ function hackConnectButton({
   callbackDelay?: number;
 }) {
   const isUrlMatched = () => Boolean(urls.includes(window.location.hostname) || urls.includes('*'));
+
+  const getEnabledInjectedProviders = () => {
+    if (!isUrlMatched()) {
+      return;
+    }
+    if (providers.find((providerName) => checkIfInjectedProviderConnected({ providerName }))) {
+      return;
+    }
+    const enabledProviders = getEnabledProviders({ providers });
+    if (!enabledProviders || enabledProviders.length === 0) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('inject Provider disabled, skip hackConnectButton (DEV only log)');
+      }
+      return;
+    }
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('mutation triggered: hackConnectButton (DEV only log)');
+    }
+    return enabledProviders;
+  };
 
   const run = () => {
     // ignore web site run in iframe
@@ -266,20 +342,13 @@ function hackConnectButton({
     const callback: MutationCallback = throttle(
       (mutationList, observer: MutationObserver) => {
         setTimeout(() => {
-          if (!isUrlMatched()) {
-            return;
-          }
-          if (
-            providers.find((providerName) => checkIfInjectedProviderConnected({ providerName }))
-          ) {
-            return;
-          }
-          if (process.env.NODE_ENV !== 'production') {
-            console.log('mutation triggered: hackConnectButton (DEV only log)');
-          }
           try {
+            const enabledProviders = getEnabledInjectedProviders();
             observer?.disconnect?.();
-            replaceMethod?.();
+            if (!enabledProviders) {
+              return;
+            }
+            replaceMethod?.({ providers: enabledProviders });
           } catch (error) {
             if (process.env.NODE_ENV !== 'production') {
               console.error('hackConnectButton mutation ERROR (DEV only log):  ', error);
@@ -329,7 +398,11 @@ function hackConnectButton({
 
   setTimeout(() => {
     try {
-      replaceMethod?.();
+      const enabledProviders = getEnabledInjectedProviders();
+      if (!enabledProviders) {
+        return;
+      }
+      replaceMethod?.({ providers: enabledProviders });
     } catch (error) {
       // noop
     } finally {

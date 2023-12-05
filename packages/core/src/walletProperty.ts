@@ -3,6 +3,18 @@
 
 import { WALLET_INFO_LOACAL_KEY } from './consts';
 
+/**
+ * An enumeration mapping specific blockchain provider names to their corresponding blockchain identifiers.
+ *
+ * These mappings are used to handle special cases where the provider name needs to be translated into a specific blockchain identifier for various operations.
+ *
+ */
+export enum ISpecialPropertyProviderNamesReflection {
+  btc = 'unisat',
+  sui = 'suiWallet',
+  polkadot = 'polkadot-js',
+}
+
 export function checkWalletSwitchEnable(property: string) {
   try {
     const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);

@@ -6,7 +6,7 @@ hackConnectButton({
   urls: ['rarible.com', 'www.rarible.com'],
   providers: [IInjectedProviderNames.ethereum, IInjectedProviderNames.solana],
   callbackDelay: 0,
-  replaceMethod() {
+  replaceMethod(options) {
     const replaceFunc = ({
       findName,
       icon,
@@ -31,20 +31,25 @@ hackConnectButton({
       }
     };
 
-    replaceFunc({
-      findName: 'MetaMask',
-      icon: WALLET_CONNECT_INFO.metamask.icon,
-      text: WALLET_CONNECT_INFO.metamask.text,
-    });
-    replaceFunc({
-      findName: 'WalletConnect',
-      icon: WALLET_CONNECT_INFO.walletconnect.icon,
-      text: WALLET_CONNECT_INFO.walletconnect.text,
-    });
-    replaceFunc({
-      findName: 'Phantom',
-      icon: WALLET_CONNECT_INFO.phantom.icon,
-      text: WALLET_CONNECT_INFO.phantom.text,
-    });
+    if (options?.providers?.includes(IInjectedProviderNames.ethereum)) {
+      replaceFunc({
+        findName: 'MetaMask',
+        icon: WALLET_CONNECT_INFO.metamask.icon,
+        text: WALLET_CONNECT_INFO.metamask.text,
+      });
+      replaceFunc({
+        findName: 'WalletConnect',
+        icon: WALLET_CONNECT_INFO.walletconnect.icon,
+        text: WALLET_CONNECT_INFO.walletconnect.text,
+      });
+    }
+
+    if (options?.providers?.includes(IInjectedProviderNames.solana)) {
+      replaceFunc({
+        findName: 'Phantom',
+        icon: WALLET_CONNECT_INFO.phantom.icon,
+        text: WALLET_CONNECT_INFO.phantom.text,
+      });
+    }
   },
 });

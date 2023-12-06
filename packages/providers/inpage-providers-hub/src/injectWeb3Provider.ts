@@ -183,9 +183,11 @@ function injectWeb3Provider(): unknown {
   window.dispatchEvent(new Event('ethereum#initialized'));
 
   // Solana Standard Wallet
-  registerSolanaWallet(solana, {
-    icon: WALLET_CONNECT_INFO.onekey.icon as WalletIcon,
-  });
+  if (checkWalletSwitchEnable('onekey-solana')) {
+    registerSolanaWallet(solana, {
+      icon: WALLET_CONNECT_INFO.onekey.icon as WalletIcon,
+    });
+  }
 
   // Sui Standard Wallet
   if (checkWalletSwitchEnable('onekey-sui')) {

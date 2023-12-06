@@ -3,7 +3,7 @@
 import { JsBridgeBase } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderEthereum, shimWeb3 } from '@onekeyfe/onekey-eth-provider';
 import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
-import { ProviderSolana } from '@onekeyfe/onekey-solana-provider';
+import { ProviderSolana, registerSolanaWallet, WalletIcon } from '@onekeyfe/onekey-solana-provider';
 import { ProviderStarcoin } from '@onekeyfe/onekey-starcoin-provider';
 import { ProviderAptos, ProviderAptosMartian } from '@onekeyfe/onekey-aptos-provider';
 import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
@@ -167,7 +167,7 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('getOfflineSignerOnlyAmino', cosmos.getOfflineSignerOnlyAmino.bind(cosmos));
   defineWindowProperty('getOfflineSignerAuto', cosmos.getOfflineSignerAuto.bind(cosmos));
 
-  // Lightning Network 
+  // Lightning Network
   defineWindowProperty('webln', webln);
   defineWindowProperty('nostr', nostr);
 
@@ -181,6 +181,11 @@ function injectWeb3Provider(): unknown {
 
   // TODO use initializeInpageProvider.ts
   window.dispatchEvent(new Event('ethereum#initialized'));
+
+  // Solana Standard Wallet
+  registerSolanaWallet(solana, {
+    icon: WALLET_CONNECT_INFO.onekey.icon as WalletIcon,
+  });
 
   // Sui Standard Wallet
   if (checkWalletSwitchEnable('onekey-sui')) {

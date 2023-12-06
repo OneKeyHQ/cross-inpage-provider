@@ -1,5 +1,3 @@
-// This is copied with modification from @wallet-standard/wallet
-
 import {
   SolanaSignAndSendTransaction,
   SolanaSignMessage,

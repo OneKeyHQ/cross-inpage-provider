@@ -1,5 +1,3 @@
-// This is copied from @wallet-standard/wallet
-
 import type {
   DEPRECATED_WalletsWindow,
   Wallet,

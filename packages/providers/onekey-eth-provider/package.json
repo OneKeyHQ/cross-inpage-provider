@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/onekey-eth-provider",
-  "version": "1.1.47",
+  "version": "1.1.48",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -28,10 +28,10 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "1.1.47",
-    "@onekeyfe/cross-inpage-provider-errors": "1.1.47",
-    "@onekeyfe/cross-inpage-provider-types": "1.1.47",
-    "@onekeyfe/extension-bridge-injected": "1.1.47",
+    "@onekeyfe/cross-inpage-provider-core": "1.1.48",
+    "@onekeyfe/cross-inpage-provider-errors": "1.1.48",
+    "@onekeyfe/cross-inpage-provider-types": "1.1.48",
+    "@onekeyfe/extension-bridge-injected": "1.1.48",
     "eth-rpc-errors": "^4.0.3"
   }
 }

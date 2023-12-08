@@ -3,7 +3,7 @@ import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
 hackConnectButton({
-  urls: ['unisat.io', 'www.unisat.io'],
+  urls: ['unisat.io', 'hk.unisat.io', 'www.unisat.io'],
   providers: [IInjectedProviderNames.btc],
   replaceMethod() {
     const replaceFunc = ({

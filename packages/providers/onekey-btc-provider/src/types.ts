@@ -22,6 +22,14 @@ export type InscriptionInfo = {
   offset: number;
 };
 
+export type SignInputs = {
+  index: number;
+  address: string;
+  publicKey?: string;
+  sighashTypes?: number[];
+  disableTweakSigner?: boolean;
+};
+
 export type ProviderState = {
   accounts: string[] | null;
   isConnected: boolean;
@@ -40,6 +48,7 @@ export enum ProviderEvents {
 }
 
 export enum ProviderMethods {
+  REQUEST_ACCOUNTS_SATS_CONNECT = 'requestAccountsSatsConnect',
   REQUEST_ACCOUNTS = 'requestAccounts',
   GET_ACCOUNTS = 'getAccounts',
   GET_NETWORK = 'getNetwork',
@@ -62,6 +71,12 @@ export type OneKeyBtcProviderProps = IInpageProviderConfig & {
   timeout?: number;
 };
 
+export type OnekeyAccount = {
+  address: string;
+  pubkey: string;
+  purpose: string;
+};
+
 export interface RequestArguments {
   id?: number | string;
   method: string;
@@ -80,6 +95,7 @@ export interface ProviderEventsMap {
 export interface IProviderBtc extends ProviderBtcBase {
   readonly isOneKey: boolean;
 
+  requestAccountsSatsConnect(purposes: string[]): Promise<OnekeyAccount[] | undefined>;
   requestAccounts(): Promise<string[]>;
   getAccounts(): Promise<string[]>;
   getNetwork(): Promise<string>;
@@ -101,8 +117,14 @@ export interface IProviderBtc extends ProviderBtcBase {
   ): Promise<string>;
   signMessage(message: string, type?: MessageType): Promise<string>;
   pushTx(rawTx: string): Promise<string>;
-  signPsbt(psbtHex: string, options?: { autoFinalized: boolean }): Promise<string>;
-  signPsbts(psbtHexs: string[], options?: { autoFinalized: boolean }): Promise<string[]>;
+  signPsbt(
+    psbtHex: string,
+    options?: { autoFinalized?: boolean; toSignInputs?: SignInputs[] },
+  ): Promise<string>;
+  signPsbts(
+    psbtHexs: string[],
+    options?: { autoFinalized?: boolean; toSignInputs?: SignInputs[] }[],
+  ): Promise<string[]>;
   pushPsbt(psbt: string): Promise<string>;
   inscribeTransfer(ticker: string, amount: string): Promise<string>;
 }

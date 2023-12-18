@@ -18,7 +18,12 @@ import {
 import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import { ProviderWebln } from '@onekeyfe/onekey-webln-provider';
 import { ProviderNostr } from '@onekeyfe/onekey-nostr-provider';
-import { ProviderBtc } from '@onekeyfe/onekey-btc-provider';
+import {
+  ProviderBtc,
+  registerSatoshiWallet,
+  registerSatsConnectWallet,
+  ProviderBtcSatsConnect,
+} from '@onekeyfe/onekey-btc-provider';
 import './connectButtonHack';
 import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
 // import Web3 from 'web3'; // cause build error
@@ -156,6 +161,22 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('suiWallet', sui);
   defineWindowProperty('unisat', btc);
 
+  if (checkWalletSwitchEnable('onekey-btc')) {
+    registerSatoshiWallet(btc, {
+      name: 'OneKey',
+      logo: WALLET_CONNECT_INFO.onekey.icon,
+    });
+  }
+
+  const satsConnectProvider = new ProviderBtcSatsConnect(btc);
+
+  registerSatsConnectWallet(satsConnectProvider, {
+    name: 'OneKey Connect',
+    logo: WALLET_CONNECT_INFO.onekey.icon,
+  });
+
+  defineWindowProperty('BitcoinProvider', satsConnectProvider);
+
   // Cardano chain provider injection is handled independently.
   if (checkWalletSwitchEnable('cardano')) {
     defineWindowCardanoProperty('cardano', cardano);
@@ -211,6 +232,7 @@ function injectWeb3Provider(): unknown {
   if (checkWalletSwitchEnable('polkadot-js')) {
     registerPolkadot(polkadot, 'polkadot-js', '0.44.1');
   }
+
   return $onekey;
 }
 export { injectWeb3Provider };

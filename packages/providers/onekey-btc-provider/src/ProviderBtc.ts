@@ -14,6 +14,8 @@ import {
   MessageType,
   BalanceInfo,
   InscriptionInfo,
+  SignInputs,
+  OnekeyAccount,
 } from './types';
 import { isWalletEventMethodMatch } from './utils';
 
@@ -167,6 +169,15 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
     });
   }
 
+  async requestAccountsSatsConnect(
+    purposes: string[] | undefined,
+  ): Promise<OnekeyAccount[] | undefined> {
+    return this._request<OnekeyAccount[] | undefined>({
+      method: ProviderMethods.REQUEST_ACCOUNTS_SATS_CONNECT,
+      params: { purposes },
+    });
+  }
+
   async getAccounts() {
     return this._request<string[]>({
       method: ProviderMethods.GET_ACCOUNTS,
@@ -233,6 +244,17 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
     });
   }
 
+  async _signMessageSatsConnect(message: string, address: string, type: MessageType = 'ecdsa') {
+    return this._request<string>({
+      method: ProviderMethods.SIGN_MESSAGE,
+      params: {
+        message,
+        address,
+        type
+      },
+    });
+  }
+
   async signMessage(message: string, type: MessageType = 'ecdsa') {
     return this._request<string>({
       method: ProviderMethods.SIGN_MESSAGE,
@@ -252,7 +274,10 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
     });
   }
 
-  async signPsbt(psbtHex: string, options: { autoFinalized: boolean } = { autoFinalized: true }) {
+  async signPsbt(
+    psbtHex: string,
+    options: { autoFinalized?: boolean; toSignInputs?: SignInputs[] } = { autoFinalized: true },
+  ) {
     return this._request<string>({
       method: ProviderMethods.SIGN_PSBT,
       params: {
@@ -264,13 +289,18 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
 
   async signPsbts(
     psbtHexs: string[],
-    options: { autoFinalized: boolean } = { autoFinalized: true },
+    options: { autoFinalized?: boolean; toSignInputs?: SignInputs[] }[],
   ) {
+    const processedOptions = options.map((opt) => ({
+      autoFinalized: true,
+      ...opt,
+    }));
+
     return this._request<string[]>({
       method: ProviderMethods.SIGN_PSBTS,
       params: {
         psbtHexs,
-        options,
+        options: processedOptions,
       },
     });
   }

@@ -4,11 +4,7 @@ import { WALLET_CONNECT_INFO } from '../consts';
 
 hackConnectButton({
   urls: ['magiceden.io', 'www.magiceden.io'],
-  providers: [
-    IInjectedProviderNames.ethereum,
-    IInjectedProviderNames.solana,
-    IInjectedProviderNames.btc,
-  ],
+  providers: [IInjectedProviderNames.ethereum, IInjectedProviderNames.solana],
   replaceMethod(options) {
     const replaceFunc = ({
       findName,

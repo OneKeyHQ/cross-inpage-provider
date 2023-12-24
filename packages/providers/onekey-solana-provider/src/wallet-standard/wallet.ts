@@ -230,7 +230,7 @@ export class OneKeySolanaStandardWallet implements Wallet {
 
           const signedTransaction = await this.#provider.signTransaction(VersionedTransaction.deserialize(transaction));
 
-          outputs.push({ signedTransaction: signedTransaction.serialize() });
+          outputs.push({ signedTransaction: signedTransaction.serialize({ requireAllSignatures:false }) });
       } else if (inputs.length > 1) {
           let chain: SolanaChain | undefined = undefined;
           for (const input of inputs) {
@@ -250,7 +250,7 @@ export class OneKeySolanaStandardWallet implements Wallet {
           const signedTransactions = await this.#provider.signAllTransactions(transactions);
 
           outputs.push(
-              ...signedTransactions.map((signedTransaction) => ({ signedTransaction: signedTransaction.serialize() }))
+              ...signedTransactions.map((signedTransaction) => ({ signedTransaction: signedTransaction.serialize({ requireAllSignatures: false }) }))
           );
       }
 

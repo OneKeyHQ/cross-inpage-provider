@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { JsBridgeBase } from '@onekeyfe/cross-inpage-provider-core';
-import { ProviderEthereum, shimWeb3 } from '@onekeyfe/onekey-eth-provider';
+import { ProviderEthereum, shimWeb3, registerEIP6963Provider } from '@onekeyfe/onekey-eth-provider';
 import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
 import { ProviderSolana, registerSolanaWallet, WalletIcon } from '@onekeyfe/onekey-solana-provider';
 import { ProviderStarcoin } from '@onekeyfe/onekey-starcoin-provider';
@@ -146,6 +146,11 @@ function injectWeb3Provider(): unknown {
   });
 
   defineWindowProperty('ethereum', ethereum);
+  registerEIP6963Provider({
+    image: WALLET_CONNECT_INFO.onekey.icon,
+    provider: ethereum,
+  });
+
   defineWindowProperty('solana', solana);
   defineWindowProperty('phantom', { solana });
   defineWindowProperty('starcoin', starcoin);

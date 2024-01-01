@@ -2,6 +2,48 @@
 # yarn lockfile v1
 
 
+"@onekeyfe/cross-inpage-provider-core@1.1.50":
+  version "1.1.50"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-core/-/cross-inpage-provider-core-1.1.50.tgz#6f80a13b748cc1aa00436ff02b47fd2d5edf90cc"
+  integrity sha512-JNZeMgGidPjqOXGX3qfprZ83ELmS22biWCoVvE1iBLvcRzCpbpjfHzCqAehE32EkQd2RwCmW9JTr/EdzPcK/lQ==
+  dependencies:
+    "@onekeyfe/cross-inpage-provider-errors" "1.1.50"
+    "@onekeyfe/cross-inpage-provider-events" "1.1.50"
+    "@onekeyfe/cross-inpage-provider-types" "1.1.50"
+    events "^3.3.0"
+    lodash "^4.17.21"
+    ms "^2.1.3"
+
+"@onekeyfe/cross-inpage-provider-errors@1.1.50":
+  version "1.1.50"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-1.1.50.tgz#b0b5e7707ef08c1ea41efdf2278786095d109ad7"
+  integrity sha512-10zaE7u5Hsh1YdEDKbpTLQHLCyL04nRsbLJHEv2lycuTPq9xxkKqvVMRKaSzOlx6RlF7JSvhzHejXJioSVfA4g==
+  dependencies:
+    fast-safe-stringify "^2.1.1"
+
+"@onekeyfe/cross-inpage-provider-events@1.1.50":
+  version "1.1.50"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-events/-/cross-inpage-provider-events-1.1.50.tgz#888174bd8279787186dbd92c17f9532a218c1d4b"
+  integrity sha512-hOeAbsnvN8DUNxSOn0zJM47f+0lyOC6c+h/klcCvwLVyumjz/myqWeWBnSFk9aArCOIXR7HxJkFJYfkz0nAcYQ==
+
+"@onekeyfe/cross-inpage-provider-types@1.1.50":
+  version "1.1.50"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-types/-/cross-inpage-provider-types-1.1.50.tgz#6055a81303e4653e3130d8219c49e432f38638f6"
+  integrity sha512-vHz8b1BvFpYjy+JGxJWwd9r/FUQF54lAyAo7pDJAcsJ4CaDX6KCbKN6MwfFY/3mCN76vs1wkBbtc/s/PMivEQg==
+
+"@onekeyfe/extension-bridge-injected@1.1.50":
+  version "1.1.50"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/extension-bridge-injected/-/extension-bridge-injected-1.1.50.tgz#1812ccc97f161dcc485a016f39d28b71aa217119"
+  integrity sha512-8bCQta1UOM9NJCCby0bdagFqtgDdj2+aFyaKZ58NC9EHCwQdg8ksQDSjIY7FcTYQV6K0X7ep2aXPRKZYjS3egQ==
+  dependencies:
+    "@onekeyfe/cross-inpage-provider-core" "1.1.50"
+    "@onekeyfe/cross-inpage-provider-types" "1.1.50"
+
+"@types/uuid@^8.3.0":
+  version "8.3.4"
+  resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-8.3.4.tgz#bd86a43617df0594787d38b735f55c805becf1bc"
+  integrity sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==
+
 eth-rpc-errors@^4.0.3:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/eth-rpc-errors/-/eth-rpc-errors-4.0.3.tgz#6ddb6190a4bf360afda82790bb7d9d5e724f423a"
@@ -9,7 +51,27 @@ eth-rpc-errors@^4.0.3:
   dependencies:
     fast-safe-stringify "^2.0.6"
 
-fast-safe-stringify@^2.0.6:
+events@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
+  integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
+
+fast-safe-stringify@^2.0.6, fast-safe-stringify@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.1.1.tgz#c406a83b6e70d9e35ce3b30a81141df30aeba884"
   integrity sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==
+
+lodash@^4.17.21:
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
+  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
+
+ms@^2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
+  integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
+
+uuid@^8.3.0:
+  version "8.3.2"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
+  integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==

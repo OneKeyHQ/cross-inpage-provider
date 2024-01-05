@@ -31,6 +31,7 @@ export type IWindowOneKeyHub = {
   phantom?: { solana?: ProviderSolana };
   starcoin?: any;
   aptos?: ProviderAptos;
+  petra?: ProviderAptos;
   martian?: ProviderAptosMartian;
   suiWallet?: ProviderSui;
   cardano?: ProviderCardano;
@@ -155,6 +156,7 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('phantom', { solana });
   defineWindowProperty('starcoin', starcoin);
   defineWindowProperty('aptos', martian);
+  defineWindowProperty('petra', martian);
   defineWindowProperty('martian', martianProxy);
   defineWindowProperty('conflux', conflux);
   defineWindowProperty('tronLink', tron);

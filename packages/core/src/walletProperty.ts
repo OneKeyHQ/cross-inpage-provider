@@ -61,6 +61,7 @@ export function defineWindowProperty(property: string, provider: unknown) {
         ((window as any)[property] ?? {})[key] = (proxyProvider as any)[key];
       });
       Object.defineProperty(window, property, {
+        enumerable: true,   // Object.keys loop check inject
         configurable: false, // prevent redefined
         get() {
           return proxyProvider;

@@ -179,6 +179,11 @@ const data: ITreeNodeData[] = [
         name: 'Aptos',
         href: '/aptos',
         icon: 'https://onekey-asset.com/assets/apt/apt.png',
+      },{
+        id: uuid.v4(),
+        name: 'AptosWalletAdapter',
+        href: 'https://aptos-labs.github.io/aptos-wallet-adapter/',
+        icon: 'https://onekey-asset.com/assets/apt/apt.png',
       },
       {
         id: uuid.v4(),

@@ -13,6 +13,7 @@
     "swap-lock-registry": "npx swap-lock-registry --yarn --parallel --url https://registry.yarnpkg.com yarn.lock"
   },
   "dependencies": {
+    "@aptos-labs/wallet-adapter-react": "^2.1.6",
     "@ethersproject/bytes": "^5.0.6",
     "@metamask/onboarding": "^1.0.1",
     "@mysten/wallet-kit": "^0.7.2",

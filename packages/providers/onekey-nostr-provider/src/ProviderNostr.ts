@@ -8,11 +8,22 @@ import {
   JsBridgeRequestParams,
   JsBridgeRequestResponse,
   IProviderNostr,
-  NostrRequeset,
   NostrProviderEventsMap,
   Event,
   IRelay
 } from "./types";
+
+function isWalletEventMethodMatch(method: string, name: string) {
+  return method === `metamask_${name}` || method === `wallet_events_${name}`;
+}
+
+const PROVIDER_EVENTS = {
+  'connect': 'connect',
+  'disconnect': 'disconnect',
+  'accountChanged': 'accountChanged',
+  'message_low_level': 'message_low_level',
+} as const;
+
 
 class ProviderNostr extends ProviderNostrBase implements IProviderNostr {
   private states = {
@@ -22,23 +33,31 @@ class ProviderNostr extends ProviderNostrBase implements IProviderNostr {
 
   constructor(props: IInpageProviderConfig) {
     super(props);
+    this._registerEvents()
   }
 
-  setExecuting(executing: boolean) {
-    this.states.executing = executing
+  private _registerEvents() {
+    window.addEventListener('onekey_bridge_disconnect', () => {
+      this._handleDisconnected();
+    });
+
+    this.on(PROVIDER_EVENTS.message_low_level, (payload) => {
+      const { method } = payload;
+      if (isWalletEventMethodMatch(method, PROVIDER_EVENTS.accountChanged)) {
+        this._handleAccountChange();
+      }
+    });
   }
 
-  private checkEnabled(method: keyof NostrRequeset) {
-    if (!this.states.enabled) {
-      const message = `Please allow the connection request of webln before calling the ${method} method`
-      alert(message)
-      throw new Error(message);
+  private _handleDisconnected(options: { emit: boolean } = { emit: true }) {
+    if (options.emit && this.isConnectionStatusChanged('disconnected')) {
+      this.emit('disconnect');
+      this.emit('accountChanged');
     }
-    if (this.states.executing) {
-      const message = `window.webln call already executing`
-      alert(message)
-      throw new Error(message) 
-    }
+  }
+
+  private _handleAccountChange() {
+    this.emit('accountChanged');
   }
 
   on<E extends keyof NostrProviderEventsMap>(
@@ -46,6 +65,13 @@ class ProviderNostr extends ProviderNostrBase implements IProviderNostr {
     listener: NostrProviderEventsMap[E]
   ): this {
     return super.on(event, listener);
+  }
+
+  off<E extends keyof NostrProviderEventsMap>(
+    event: E,
+    listener: NostrProviderEventsMap[E]
+  ): this {
+    return super.off(event, listener);
   }
 
   emit<E extends keyof NostrProviderEventsMap>(

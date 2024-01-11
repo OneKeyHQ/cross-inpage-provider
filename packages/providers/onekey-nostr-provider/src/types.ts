@@ -66,6 +66,6 @@ const PROVIDER_EVENTS = {
 export type NostrProviderEventsMap = {
   [PROVIDER_EVENTS.connect]: (account: string) => void;
   [PROVIDER_EVENTS.disconnect]: () => void;
-  [PROVIDER_EVENTS.accountChanged]: (account: string | null) => void;
+  [PROVIDER_EVENTS.accountChanged]: () => void;
   [PROVIDER_EVENTS.message_low_level]: (payload: IJsonRpcRequest) => void;
 };

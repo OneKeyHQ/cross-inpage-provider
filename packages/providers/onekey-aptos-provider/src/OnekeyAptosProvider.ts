@@ -268,6 +268,31 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     });
   }
 
+  async getNetwork(): Promise<{
+    name: string;
+    url: string;
+    chainId: number;
+  }> {
+    const name = await this._callBridge({
+      method: 'network',
+      params: undefined,
+    });
+
+    const url = await this._callBridge({
+      method: 'getNetworkURL',
+      params: undefined,
+    });
+
+    // see more chainID https://aptos.dev/nodes/networks
+    const chainId = name === 'Mainnet' ? 1 : 2;
+
+    return {
+      name,
+      url,
+      chainId,
+    };
+  }
+
   getNetworkURL(): Promise<string> {
     return this._callBridge({
       method: 'getNetworkURL',

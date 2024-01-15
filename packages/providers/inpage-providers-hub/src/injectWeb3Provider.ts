@@ -134,7 +134,7 @@ function injectWeb3Provider(): unknown {
     btc,
   };
 
-  defineWindowProperty('$onekey', $onekey);
+  defineWindowProperty('$onekey', $onekey, { enumerable: true });
 
   const martianProxy = new Proxy(martian, {
     get: (target, property, ...args) => {
@@ -156,7 +156,7 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('phantom', { solana });
   defineWindowProperty('starcoin', starcoin);
   defineWindowProperty('aptos', martian);
-  defineWindowProperty('petra', martian);
+  defineWindowProperty('petra', martian, { enumerable: true });
   defineWindowProperty('martian', martianProxy);
   defineWindowProperty('conflux', conflux);
   defineWindowProperty('tronLink', tron);

@@ -123,7 +123,7 @@ export default function App() {
           {
             "type": "cosmos-sdk/MsgSend",
             "value": {
-              "from_address": "cosmos1l8va6sd7caxkgk4vsnazaxavqn644ayqcn9sst",
+              "from_address": address,
               "to_address": "cosmos19c2m35cfae5lj89x9025plknhjlhe6raj3ma9t",
               "amount": [
                 {
@@ -162,7 +162,7 @@ export default function App() {
           {
             "type": "cosmos-sdk/MsgSend",
             "value": {
-              "from_address": "cosmos1l8va6sd7caxkgk4vsnazaxavqn644ayqcn9sst",
+              "from_address": address,
               "to_address": "cosmos19c2m35cfae5lj89x9025plknhjlhe6raj3ma9t",
               "amount": [
                 {

@@ -61,6 +61,10 @@ export function useExecutor() {
     // Send Eth Section
     const sendButton = document.getElementById('sendButton');
     const sendEIP1559Button = document.getElementById('sendEIP1559Button');
+    const sendEIP1559IntervalTimeInput = document.getElementById('sendEIP1559IntervalTimeInput');
+    const sendEIP1559IntervalStatusInput = document.getElementById(
+      'sendEIP1559IntervalStatusInput',
+    );
 
     // Send Tokens Section
     const tokenAddress = document.getElementById('tokenAddress');
@@ -85,6 +89,10 @@ export function useExecutor() {
     const ethSignResult = document.getElementById('ethSignResult');
     const personalSign = document.getElementById('personalSign');
     const personalSignUntilResolved = document.getElementById('personalSignUntilResolved');
+    const personalSignIntervalTimeInput = document.getElementById('personalSignIntervalTimeInput');
+    const personalSignIntervalStatusInput = document.getElementById(
+      'personalSignIntervalStatusInput',
+    );
     const personalSignResult = document.getElementById('personalSignResult');
     const personalSignVerify = document.getElementById('personalSignVerify');
     const personalSignVerifySigUtilResult = document.getElementById(
@@ -498,6 +506,35 @@ export function useExecutor() {
           console.log(result);
         };
 
+        let sendEIP1559Interval;
+        sendEIP1559IntervalStatusInput.onchange = async (event) => {
+          const { checked } = event.target;
+          if (!checked) {
+            if (sendEIP1559Interval) clearInterval(sendEIP1559Interval);
+            return;
+          }
+          sendEIP1559Interval = setInterval(() => {
+            console.log('call sendEIP1559 with interval');
+            ethereum
+              .request({
+                method: 'eth_sendTransaction',
+                params: [
+                  {
+                    from: accounts[0],
+                    to: accounts[0],
+                    value: '0x0',
+                    gasLimit: '0x5028',
+                    maxFeePerGas: '0x2540be400',
+                    maxPriorityFeePerGas: '0x3b9aca00',
+                  },
+                ],
+              })
+              .then((result) => {
+                console.log(result);
+              });
+          }, sendEIP1559IntervalTimeInput.value * 1000);
+        };
+
         /**
          * ERC20 Token
          */
@@ -797,6 +834,25 @@ export function useExecutor() {
       };
 
       personalSignUntilResolved.onclick = handlePersonalSignUntilResolved;
+
+      let personalSignInterval;
+      const handlePersonalSignInterval = async (event) => {
+        const { checked } = event.target;
+        try {
+          if (!checked) {
+            console.log('stop interval');
+            if (personalSignInterval) clearInterval(personalSignInterval);
+            return;
+          }
+          personalSignInterval = setInterval(async () => {
+            console.log('call personalSign with interval');
+            personalSignRequest();
+          }, personalSignIntervalTimeInput.value * 1000);
+        } catch (err) {
+          console.error('Error: Interval failed', err);
+        }
+      };
+      personalSignIntervalStatusInput.onchange = handlePersonalSignInterval;
 
       /**
        * Personal Sign Verify

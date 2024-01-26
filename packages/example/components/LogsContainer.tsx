@@ -24,6 +24,7 @@ loadLoggersConfig();
 
 export const LogsContainer = ({ bridge }: { bridge?: JsBridgeBase } = {}) => {
   const [logs, setLogs] = useState([]);
+  const [show, setShow] = useState(false);
 
   // run once!
   useEffect(() => {
@@ -65,13 +66,12 @@ export const LogsContainer = ({ bridge }: { bridge?: JsBridgeBase } = {}) => {
         background: 'black',
         position: 'relative',
         color: 'white',
-        height: 340,
         overflow: 'auto',
       }}
     >
       <div
         style={{
-          fontSize: 12,
+          fontSize: 11,
           position: 'sticky',
           top: 0,
           right: 0,
@@ -80,6 +80,7 @@ export const LogsContainer = ({ bridge }: { bridge?: JsBridgeBase } = {}) => {
           background: '#333',
         }}
       >
+        <button onClick={() => setShow(!show)}>{show ? 'Hidden' : 'Show'}</button>{' '}
         <button onClick={() => setLogs([])}>Clear</button>{' '}
         {['jsBridge', 'providerBase', 'extInjected'].map((name) => {
           return (
@@ -106,7 +107,16 @@ export const LogsContainer = ({ bridge }: { bridge?: JsBridgeBase } = {}) => {
           );
         })}
       </div>
-      <Console logs={logs} variant="dark" />
+      {show && (
+        <div
+          style={{
+            height: 320,
+            overflow: 'auto',
+          }}
+        >
+          <Console logs={logs} variant="dark" />
+        </div>
+      )}
     </div>
   );
 };

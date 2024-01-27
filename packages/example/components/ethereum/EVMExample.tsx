@@ -139,6 +139,29 @@ export default function EVMExample() {
                 >
                   Send EIP 1559 Transaction
                 </button>
+                <div className="  p-2">
+                  <hr />
+                  <h5>Interval Send EIP 1559 Transaction</h5>
+                  <div className="row">
+                    <div className="form-group col-10">
+                      <label>Interval time (s)</label>
+                      <input
+                        className="form-control"
+                        type="text"
+                        id="sendEIP1559IntervalTimeInput"
+                        value={10}
+                      />
+                    </div>
+                    <div className="form-group col-2">
+                      <label>Activate</label>
+                      <input
+                        className="form-control"
+                        type="checkbox"
+                        id="sendEIP1559IntervalStatusInput"
+                      />
+                    </div>
+                  </div>
+                </div>
                 <hr />
                 <h4 className="card-title">Contract</h4>
 
@@ -395,7 +418,6 @@ export default function EVMExample() {
             <div className="card full-width">
               <div className="card-body">
                 <h4>Personal Sign</h4>
-
                 <button
                   className="btn btn-primary btn-lg btn-block mb-3"
                   id="personalSign"
@@ -404,6 +426,31 @@ export default function EVMExample() {
                   Sign
                 </button>
 
+                <div className="  p-2">
+                  <hr />
+                  <h5>Interval Personal Sign</h5>
+                  <div className="row">
+                    <div className="form-group col-10">
+                      <label>Interval time (s)</label>
+                      <input
+                        className="form-control"
+                        type="text"
+                        id="personalSignIntervalTimeInput"
+                        value={10}
+                      />
+                    </div>
+                    <div className="form-group col-2">
+                      <label>Activate</label>
+                      <input
+                        className="form-control"
+                        type="checkbox"
+                        id="personalSignIntervalStatusInput"
+                      />
+                    </div>
+                  </div>
+                  <hr />
+                </div>
+
                 <button
                   className="btn btn-primary btn-lg btn-block mb-3"
                   id="personalSignUntilResolved"
@@ -411,11 +458,9 @@ export default function EVMExample() {
                 >
                   Sign Until Resolved
                 </button>
-
                 <p className="info-text alert alert-warning">
                   Result: <span id="personalSignResult" />
                 </p>
-
                 <button
                   className="btn btn-primary btn-lg btn-block mb-3"
                   id="personalSignVerify"
@@ -423,7 +468,6 @@ export default function EVMExample() {
                 >
                   Verify
                 </button>
-
                 <p className="info-text alert alert-warning">
                   eth-sig-util recovery result:
                   <span id="personalSignVerifySigUtilResult" />

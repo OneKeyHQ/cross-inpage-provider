@@ -95,6 +95,7 @@ export type IJsBridgeMessagePayload = {
   created?: number;
   sync?: boolean;
   internal?: boolean;
+  isWalletConnectRequest?: boolean;
 };
 
 export type IDebugLogger = {

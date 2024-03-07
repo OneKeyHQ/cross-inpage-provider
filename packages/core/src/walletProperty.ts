@@ -80,10 +80,11 @@ export function defineWindowProperty(
       (window as any)[property] = provider;
     }
   } catch (ex) {
+    console.error(ex);
     try {
       (window as any)[property] = provider;
     } catch (error) {
-      console.error(ex);
+      console.error(error);
     }
   }
 }

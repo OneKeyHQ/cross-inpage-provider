@@ -2,7 +2,7 @@
   "private": true,
   "name": "cross-inpage-provider",
   "engines": {
-    "node": "^14 || ^16 || ^19"
+    "node": "^16 || ^18 || ^20"
   },
   "scripts": {
     "bootstrap": "lerna bootstrap",
@@ -13,7 +13,7 @@
     "test": "jest",
     "build": "lerna run build --ignore @onekeyfe/cross-inpage-provider-example",
     "prestart": "yarn build",
-    "start": "lerna run start --parallel --ignore @onekeyfe/cross-inpage-provider-example",
+    "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider lerna run start --parallel --ignore @onekeyfe/cross-inpage-provider-example",
     "start-all": "lerna run start --parallel",
     "dev": "yarn bootstrap && yarn start-all",
     "prepack": "yarn build",
@@ -37,6 +37,7 @@
     "@typescript-eslint/eslint-plugin": "^5.7.0",
     "@typescript-eslint/parser": "^5.7.0",
     "concurrently": "^7.1.0",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.0.3",
     "eslint": "^8.4.1",
     "eslint-plugin-react": "^7.29.4",

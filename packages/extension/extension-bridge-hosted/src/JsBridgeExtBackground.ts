@@ -142,8 +142,6 @@ class JsBridgeExtBackground extends JsBridgeBase {
           // eslint-disable-next-line no-param-reassign
           data = await data({ origin });
         }
-        console.log(`notify to content-script port: ${portId}`, data, origin, targetOrigin);
-
         // Send a notification to the port of the specified origin
         if (!targetOrigin || targetOrigin === origin) {
           // TODO check ports disconnected

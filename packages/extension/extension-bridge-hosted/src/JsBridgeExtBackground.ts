@@ -132,7 +132,7 @@ class JsBridgeExtBackground extends JsBridgeBase {
     return this.request({ data, remoteId: this.offscreenPortId });
   }
 
-  requestToAllCS(scope: IInjectedProviderNamesStrings, data: unknown) {
+  requestToAllCS(scope: IInjectedProviderNamesStrings, data: unknown, targetOrigin?: string) {
     // TODO optimize rename: broadcastRequest
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     entries(this.ports).forEach(async ([portId, port]) => {
@@ -142,13 +142,17 @@ class JsBridgeExtBackground extends JsBridgeBase {
           // eslint-disable-next-line no-param-reassign
           data = await data({ origin });
         }
-        console.log(`notify to content-script port: ${portId}`, data);
-        // TODO check ports disconnected
-        this.requestSync({
-          data,
-          scope,
-          remoteId: portId,
-        });
+        console.log(`notify to content-script port: ${portId}`, data, origin, targetOrigin);
+
+        // Send a notification to the port of the specified origin
+        if (!targetOrigin || targetOrigin === origin) {
+          // TODO check ports disconnected
+          this.requestSync({
+            data,
+            scope,
+            remoteId: portId,
+          });
+        }
       }
       void 0;
     });

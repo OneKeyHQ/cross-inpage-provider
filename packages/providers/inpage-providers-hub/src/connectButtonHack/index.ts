@@ -27,4 +27,5 @@ import './sites/ordinalsmarket';
 import './sites/sating';
 import './sites/lidofi';
 import './sites/eigenlayer';
+import './sites/rocketpool';
 // TODO list ----------------------------------------------

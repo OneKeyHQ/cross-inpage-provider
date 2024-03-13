@@ -26,4 +26,5 @@ import './sites/ordinalswallet';
 import './sites/ordinalsmarket';
 import './sites/sating';
 import './sites/lidofi';
+import './sites/eigenlayer';
 // TODO list ----------------------------------------------

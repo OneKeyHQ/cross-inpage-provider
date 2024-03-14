@@ -23,6 +23,7 @@ class ProviderPrivate extends ProviderBase {
       void this.getConnectWalletInfo();
     } catch (error) {
       console.error(error);
+      console.log('======>>>>>>>Private API')
     }
     try {
       void this.sendSiteMetadataDomReady();

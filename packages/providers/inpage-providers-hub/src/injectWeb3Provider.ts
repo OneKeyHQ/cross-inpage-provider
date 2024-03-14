@@ -20,6 +20,7 @@ import { ProviderWebln } from '@onekeyfe/onekey-webln-provider';
 import { ProviderNostr } from '@onekeyfe/onekey-nostr-provider';
 import { ProviderBtc } from '@onekeyfe/onekey-btc-provider';
 import './connectButtonHack';
+import './detectRiskWebsite';
 import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
 // import Web3 from 'web3'; // cause build error
 

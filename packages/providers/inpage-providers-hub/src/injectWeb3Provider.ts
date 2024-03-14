@@ -62,7 +62,6 @@ function injectWeb3Provider(): unknown {
   }
 
   const bridge: JsBridgeBase = window?.$onekey?.jsBridge;
-  console.log('Bridgeeeeeee');
 
   const ethereum = new ProviderEthereum({
     bridge,
@@ -223,4 +222,3 @@ function injectWeb3Provider(): unknown {
   return $onekey;
 }
 export { injectWeb3Provider };
-console.log('injectWeb3Provider.ts: end')

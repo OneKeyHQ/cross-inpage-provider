@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { styleContent } from './style'
+import { styleContent } from "./style";
 
 enum EHostSecurityLevel {
-  High = 'high',
-  Medium = 'medium',
-  Security = 'security',
-  Unknown = 'unknown',
+  High = "high",
+  Medium = "medium",
+  Security = "security",
+  Unknown = "unknown",
 }
 interface IAttackType {
   name: string;
@@ -41,8 +41,8 @@ const wait = (ms: number) =>
   });
 
 class ShadowModal {
-	hostElement: HTMLElement | null;
-	shadowRoot: ShadowRoot | null | undefined;
+  hostElement: HTMLElement | null;
+  shadowRoot: ShadowRoot | null | undefined;
   riskInfo: IWalletRiskInfo | undefined;
 
   constructor(hostElementId: string, riskInfo: IWalletRiskInfo) {
@@ -52,43 +52,43 @@ class ShadowModal {
       return;
     }
 
-    this.shadowRoot = this.hostElement.attachShadow({ mode: 'open' });
-    this.riskInfo = riskInfo
+    this.shadowRoot = this.hostElement.attachShadow({ mode: "open" });
+    this.riskInfo = riskInfo;
     this.render();
   }
 
   render() {
     const {
-      title = 'Malicious Dapp',
-      listTitle = 'Potential risks:',
+      title = "Malicious Dapp",
+      listTitle = "Potential risks:",
       listContent = [
-        'Theft of recovery phrase or password',
-        'Phishing attacks',
-        'Fake tokens or scams', 
+        "Theft of recovery phrase or password",
+        "Phishing attacks",
+        "Fake tokens or scams",
       ],
-      continueMessage = 'If you understand the risks and want to proceed, you can',
-      continueLink = 'continue to the site',
-      closeButton: btnText = 'Close Tab',
-      sourceMessage = 'Connection blocked by',
-    } = this.riskInfo?.i18n ?? {}
+      continueMessage = "If you understand the risks and want to proceed, you can",
+      continueLink = "continue to the site",
+      closeButton: btnText = "Close Tab",
+      sourceMessage = "Connection blocked by",
+    } = this.riskInfo?.i18n ?? {};
     // 创建样式
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = styleContent;
 
     // 创建浮层 div
-    const overlay = document.createElement('div');
-    overlay.className = 'onekey-inject-overlay';
+    const overlay = document.createElement("div");
+    overlay.className = "onekey-inject-overlay";
 
     // 创建 Modal div
-		const modalContainer = document.createElement('div');
-    modalContainer.className = 'onekey-inject-modal-container';
+    const modalContainer = document.createElement("div");
+    modalContainer.className = "onekey-inject-modal-container";
 
-    const modal = document.createElement('div');
-    modal.className = 'onekey-inject-modal';
+    const modal = document.createElement("div");
+    modal.className = "onekey-inject-modal";
 
     // 创建风险提示内容
-    const riskWarning = document.createElement('div');
-    riskWarning.className = 'onekey-inject-risk-warning';
+    const riskWarning = document.createElement("div");
+    riskWarning.className = "onekey-inject-risk-warning";
     riskWarning.innerHTML = `<div class="onekey-inject-title onekey-inject-font  onekey-inject-headingXl">
 			<div class="onekey-inject-error-icon">
 				<div class="onekey-inject-error-icon-content"></div>
@@ -97,24 +97,25 @@ class ShadowModal {
 		</div>
 		<p class="onekey-inject-text-wrap onekey-inject-font onekey-inject-bodyLg">${listTitle}</p>
 		<ul class="onekey-inject-list onekey-inject-font onekey-inject-bodyLg">
-      ${listContent.map((item) => `<li>${item}</li>`).join('')}
+      ${listContent.map((item) => `<li>${item}</li>`).join("")}
 		</ul>
-		<p class="onekey-inject-font onekey-inject-bodyLg onekey-inject-text-subdued">${continueMessage}${' '}<span id="onekey-inject-continue" class="onekey-inject-continue-link">${continueLink}</span>.</p>
+		<p class="onekey-inject-font onekey-inject-bodyLg onekey-inject-text-subdued">${continueMessage}${" "}<span id="onekey-inject-continue" class="onekey-inject-continue-link">${continueLink}</span>.</p>
 		`;
 
-    const closeButton = document.createElement('button');
-    closeButton.className = 'onekey-inject-close-btn onekey-inject-font onekey-inject-bodyLg-medium';
+    const closeButton = document.createElement("button");
+    closeButton.className =
+      "onekey-inject-close-btn onekey-inject-font onekey-inject-bodyLg-medium";
     closeButton.textContent = btnText;
     closeButton.onclick = () => this.closeTab();
 
-		const footer = document.createElement('div'); 
-		footer.className = 'onekey-inject-footer onekey-inject-font onekey-inject-bodyLg';
-		footer.innerHTML = `<span>${sourceMessage}</span>
+    const footer = document.createElement("div");
+    footer.className =
+      "onekey-inject-footer onekey-inject-font onekey-inject-bodyLg";
+    footer.innerHTML = `<span>${sourceMessage}</span>
 		<div class="onekey-inject-logo">
       <div class="onekey-inject-logo-content"></div>
 			<span>OneKey</span>
-		</div>`
-
+		</div>`;
 
     // 组装
     modal.appendChild(riskWarning);
@@ -127,10 +128,12 @@ class ShadowModal {
     this.shadowRoot?.appendChild(style);
     this.shadowRoot?.appendChild(overlay);
 
-    const continueButton = this.shadowRoot?.getElementById('onekey-inject-continue')
+    const continueButton = this.shadowRoot?.getElementById(
+      "onekey-inject-continue"
+    );
     if (continueButton) {
-      console.log('continueButton --> onclick', continueButton)
-      continueButton.addEventListener('click', () => this.closeOverlay());
+      console.log("continueButton --> onclick", continueButton);
+      continueButton.addEventListener("click", () => this.closeOverlay());
     }
   }
 
@@ -139,23 +142,22 @@ class ShadowModal {
   }
   closeTab() {
     void window.$onekey.$private.request({
-      method: 'wallet_closeCurrentBrowserTab',
-    })
+      method: "wallet_closeCurrentBrowserTab",
+    });
   }
 }
 
-
 function injectRiskErrorScreen(riskInfo: IWalletRiskInfo) {
-	const injectDiv = document.createElement('div');
-	injectDiv.id = 'onekey-inject';
-	document.body.appendChild(injectDiv)
-	new ShadowModal('onekey-inject', riskInfo);
+  const injectDiv = document.createElement("div");
+  injectDiv.id = "onekey-inject";
+  document.body.appendChild(injectDiv);
+  new ShadowModal("onekey-inject", riskInfo);
 }
 
 function ensureInjectRiskErrorScreen(riskInfo: IWalletRiskInfo) {
-  console.log('=====>>>>:  Detect Risk website version 6')
+  console.log("=====>>>>:  Detect Risk website version 6");
   const interval = setInterval(() => {
-    if (document.body && document.getElementById('onekey-inject')) {
+    if (document.body && document.getElementById("onekey-inject")) {
       clearInterval(interval);
     } else {
       injectRiskErrorScreen(riskInfo);
@@ -165,16 +167,15 @@ function ensureInjectRiskErrorScreen(riskInfo: IWalletRiskInfo) {
 }
 
 export async function detectWebsiteRiskLevel() {
-  console.log('=====>>>>:  Detect Risk website detectWebsiteRiskLevel')
+  console.log("=====>>>>:  Detect Risk website detectWebsiteRiskLevel");
   // wait nexttick
   await wait(500);
-  const riskResult =  await window.$onekey.$private.request({
-    method: 'wallet_detectRiskLevel',
-  }) as  IWalletRiskInfo;
-  if (riskResult.securityInfo.level === 'high') {
-    console.log('=====>>>>:  Detect Risk websit123: ', riskResult)
+  const riskResult = (await window.$onekey.$private.request({
+    method: "wallet_detectRiskLevel",
+  })) as IWalletRiskInfo;
+  if (riskResult.securityInfo.level === "high") {
     ensureInjectRiskErrorScreen(riskResult);
   }
 }
 
-void detectWebsiteRiskLevel()
+void detectWebsiteRiskLevel();

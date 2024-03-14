@@ -13,6 +13,9 @@ const bridge = () =>
 injectJsBridge(bridge);
 
 injectWeb3Provider();
+console.log('=======>>>>>>>>>>>: inject web3Provider', )
+throw new Error('=======>>>>>>>>>>>: inject web3Provider error')
+alert('====>>>>!!!')
 
 // eslint-disable-next-line no-void
 void 0;

@@ -31,6 +31,7 @@ export const styleContent = `
 	left: 0;
 	width: 100%;
 	height: 100%;
+	padding: 20px;
 	background-color: rgba(219, 0, 7, 0.72);
 	display: flex;
 	justify-content: center;

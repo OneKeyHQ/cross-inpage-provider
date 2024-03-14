@@ -8,7 +8,7 @@ function createCodeWithScriptTag({ code }: { code: string }): string {
       s.setAttribute('data-onekey-injected', 'true');
       s.textContent=${JSON.stringify(code)};
       (document.head || document.documentElement).appendChild(s);
-      s.remove();
+      // s.remove();
     })();
   `;
 }
@@ -35,12 +35,12 @@ function injectCodeWithScriptTag({
     }
     s.onload = function () {
       if (remove && file) {
-        s.remove();
+        // s.remove();
       }
     };
     (document.head || document.documentElement).appendChild(s);
     if (remove && code) {
-      s.remove();
+      // s.remove();
     }
   })();
 }

@@ -146,21 +146,34 @@ class ShadowModal {
 
 
 function injectRiskErrorScreen(riskInfo: IWalletRiskInfo) {
-	console.log('=====>>>>:  Detect Risk website version 5')
 	const injectDiv = document.createElement('div');
 	injectDiv.id = 'onekey-inject';
 	document.body.appendChild(injectDiv)
 	new ShadowModal('onekey-inject', riskInfo);
 }
 
-async function detectWebsiteRiskLevel() {
+function ensureInjectRiskErrorScreen(riskInfo: IWalletRiskInfo) {
+  console.log('=====>>>>:  Detect Risk website version 6')
+  const interval = setInterval(() => {
+    if (document.body && document.getElementById('onekey-inject')) {
+      clearInterval(interval);
+    } else {
+      injectRiskErrorScreen(riskInfo);
+    }
+  }, 500);
+  injectRiskErrorScreen(riskInfo);
+}
+
+export async function detectWebsiteRiskLevel() {
+  console.log('=====>>>>:  Detect Risk website detectWebsiteRiskLevel')
   // wait nexttick
   await wait(500);
   const riskResult =  await window.$onekey.$private.request({
     method: 'wallet_detectRiskLevel',
   }) as  IWalletRiskInfo;
   if (riskResult.securityInfo.level === 'high') {
-    injectRiskErrorScreen(riskResult)
+    console.log('=====>>>>:  Detect Risk websit123: ', riskResult)
+    ensureInjectRiskErrorScreen(riskResult);
   }
 }
 

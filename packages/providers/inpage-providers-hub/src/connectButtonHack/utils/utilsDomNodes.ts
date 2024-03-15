@@ -50,10 +50,28 @@ function createElementFromHTML(htmlString: string) {
   return div.firstChild || '';
 }
 
+
+function findTextNode(containerSelector: string, text: RegExp) {
+  const container = document.querySelector(containerSelector);
+  if (!container) {
+    return;
+  }
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      if (!node.nodeValue) {
+        return NodeFilter.FILTER_SKIP;
+      }
+      return text.test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+    },
+  });
+  return walker.nextNode();
+}
+
 export default {
   isReplaced,
   isNotReplaced,
   setIsReplaced,
   isInnerContentMatch,
   createElementFromHTML,
+  findTextNode,
 };

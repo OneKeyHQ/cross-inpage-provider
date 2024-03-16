@@ -31,4 +31,5 @@ import './sites/rocketpool';
 import './sites/avocado';
 import './sites/liteInstadapp';
 import './sites/methMantle';
+import './sites/appFraxFinance';
 // TODO list ----------------------------------------------

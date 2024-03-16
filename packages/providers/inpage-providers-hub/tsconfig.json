@@ -1,6 +1,6 @@
 {
   "extends": "../../../tsconfig.json",
-  "include": ["./src", "src/connectButtonHack/sites/.ts"],
+  "include": ["./src", "src/connectButtonHack/sites/balancerFi.ts"],
   "compilerOptions": {
     "outDir": "./dist"
   }

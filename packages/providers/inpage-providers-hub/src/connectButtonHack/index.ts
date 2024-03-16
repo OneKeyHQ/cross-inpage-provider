@@ -33,4 +33,5 @@ import './sites/liteInstadapp';
 import './sites/methMantle';
 import './sites/appFraxFinance';
 import './sites/stakestone';
+import './sites/balancerFi';
 // TODO list ----------------------------------------------

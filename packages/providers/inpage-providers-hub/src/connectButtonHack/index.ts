@@ -32,4 +32,5 @@ import './sites/avocado';
 import './sites/liteInstadapp';
 import './sites/methMantle';
 import './sites/appFraxFinance';
+import './sites/stakestone';
 // TODO list ----------------------------------------------

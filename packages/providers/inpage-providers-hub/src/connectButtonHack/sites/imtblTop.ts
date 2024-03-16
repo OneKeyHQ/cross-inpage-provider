@@ -3,7 +3,7 @@ import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
 hackConnectButton({
-  urls: ['lite.instadapp.io'],
+  urls: ['imtbl.top'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod(options) {
     const replaceFunc = ({
@@ -16,16 +16,15 @@ hackConnectButton({
       text: string;
     }) => {
       const walletBtnList = Array.from(
-        document.querySelectorAll('.modal-content-wrapper ul li'),
+        document.querySelectorAll('body [role="dialog"] button'),
       ) as (HTMLElement | undefined)[];
 
       for (const walletBtn of walletBtnList) {
         if (walletBtn?.innerText === findName) {
-          const textNode = walletBtn?.querySelector('button div span') as HTMLElement | undefined;
-          if (textNode) {
-            textNode.innerText = text;
-          }
-          const imgContainer = walletBtn?.querySelector('button div svg')?.parentNode as
+          const textNode = findTextNode(walletBtn, findName) as HTMLElement | undefined;
+          textNode?.replaceWith(text);
+
+          const imgContainer = walletBtn?.querySelector('svg')?.parentNode as
             | HTMLImageElement
             | undefined;
           if (imgContainer) {
@@ -34,8 +33,8 @@ hackConnectButton({
               icon,
               removeSvg: true,
               onCreated(img) {
-                img.width = 30;
-                img.height = 30;
+                img.width = 35;
+                img.height = 35;
               },
             });
           }
@@ -45,14 +44,9 @@ hackConnectButton({
 
     if (options?.providers?.includes(IInjectedProviderNames.ethereum)) {
       replaceFunc({
-        findName: 'Metamask',
+        findName: 'MetaMask',
         icon: WALLET_CONNECT_INFO.metamask.icon,
         text: WALLET_CONNECT_INFO.metamask.text,
-      });
-      replaceFunc({
-        findName: 'WalletConnect',
-        icon: WALLET_CONNECT_INFO.walletconnect.icon,
-        text: WALLET_CONNECT_INFO.walletconnect.text,
       });
     }
   },

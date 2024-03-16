@@ -34,4 +34,5 @@ import './sites/methMantle';
 import './sites/appFraxFinance';
 import './sites/stakestone';
 import './sites/balancerFi';
+import './sites/imtblTop';
 // TODO list ----------------------------------------------

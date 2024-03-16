@@ -30,4 +30,5 @@ import './sites/eigenlayer';
 import './sites/rocketpool';
 import './sites/avocado';
 import './sites/liteInstadapp';
+import './sites/methMantle';
 // TODO list ----------------------------------------------

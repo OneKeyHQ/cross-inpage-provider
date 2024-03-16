@@ -50,13 +50,15 @@ function createElementFromHTML(htmlString: string) {
   return div.firstChild || '';
 }
 
-
-function findTextNode(containerSelector: string, text: RegExp) {
-  const container = document.querySelector(containerSelector);
-  if (!container) {
+function findTextNode(container: string | HTMLElement, text: RegExp) {
+  const containerEle =
+    typeof container === 'string'
+      ? document.querySelector(container)
+      : container;
+  if (!containerEle) {
     return;
   }
-  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+  const walker = document.createTreeWalker(containerEle, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
       if (!node.nodeValue) {
         return NodeFilter.FILTER_SKIP;

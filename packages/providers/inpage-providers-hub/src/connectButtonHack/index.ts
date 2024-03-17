@@ -37,5 +37,6 @@ import './sites/balancerFi';
 import './sites/imtblTop';
 import './sites/renzoprotocol';
 import './sites/auraFinance';
+import './sites/boringdao';
 
 // TODO list ----------------------------------------------

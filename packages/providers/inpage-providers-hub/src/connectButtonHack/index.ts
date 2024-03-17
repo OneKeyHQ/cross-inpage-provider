@@ -36,7 +36,6 @@ import './sites/stakestone';
 import './sites/balancerFi';
 import './sites/imtblTop';
 import './sites/renzoprotocol';
-
-
+import './sites/auraFinance';
 
 // TODO list ----------------------------------------------

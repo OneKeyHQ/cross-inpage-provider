@@ -35,4 +35,8 @@ import './sites/appFraxFinance';
 import './sites/stakestone';
 import './sites/balancerFi';
 import './sites/imtblTop';
+import './sites/renzoprotocol';
+
+
+
 // TODO list ----------------------------------------------

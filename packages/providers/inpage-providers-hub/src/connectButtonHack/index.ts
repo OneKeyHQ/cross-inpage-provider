@@ -29,4 +29,14 @@ import './sites/lidofi';
 import './sites/eigenlayer';
 import './sites/rocketpool';
 import './sites/avocado';
+import './sites/liteInstadapp';
+import './sites/methMantle';
+import './sites/appFraxFinance';
+import './sites/stakestone';
+import './sites/balancerFi';
+import './sites/imtblTop';
+import './sites/renzoprotocol';
+import './sites/auraFinance';
+import './sites/boringdao';
+
 // TODO list ----------------------------------------------

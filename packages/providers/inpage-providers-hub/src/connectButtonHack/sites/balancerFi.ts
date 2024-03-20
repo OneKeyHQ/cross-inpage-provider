@@ -1,6 +1,7 @@
 import { createNewImageToContainer, hackConnectButton } from '../hackConnectButton';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
+import domUtils from '../utils/utilsDomNodes';
 
 hackConnectButton({
   urls: ['app.balancer.fi'],
@@ -21,7 +22,7 @@ hackConnectButton({
 
       for (const walletBtn of walletBtnList) {
         if (walletBtn?.innerText === findName) {
-          const textNode = findTextNode(walletBtn, findName) as HTMLElement | undefined;
+          const textNode = domUtils.findTextNode(walletBtn, findName) as HTMLElement | undefined;
           textNode?.replaceWith(text);
 
           const img = walletBtn?.querySelector('img') as HTMLImageElement | undefined;
@@ -46,13 +47,3 @@ hackConnectButton({
     }
   },
 });
-
-//find the text node in the container,including descendants
-function findTextNode(container: HTMLElement, text: string) {
-  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
-    acceptNode(node) {
-      return node.nodeValue?.trim() === text ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
-    },
-  });
-  return walker.nextNode();
-}

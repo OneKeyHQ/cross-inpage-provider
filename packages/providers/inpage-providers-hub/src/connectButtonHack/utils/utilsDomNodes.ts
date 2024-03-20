@@ -50,11 +50,9 @@ function createElementFromHTML(htmlString: string) {
   return div.firstChild || '';
 }
 
-function findTextNode(container: string | HTMLElement, text: RegExp) {
+function findTextNode(container: string | HTMLElement, text: RegExp | string) {
   const containerEle =
-    typeof container === 'string'
-      ? document.querySelector(container)
-      : container;
+    typeof container === 'string' ? document.querySelector(container) : container;
   if (!containerEle) {
     return;
   }
@@ -63,7 +61,9 @@ function findTextNode(container: string | HTMLElement, text: RegExp) {
       if (!node.nodeValue) {
         return NodeFilter.FILTER_SKIP;
       }
-      return text.test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+      return (typeof text === 'string' ? node.nodeValue === text : text.test(node.nodeValue))
+        ? NodeFilter.FILTER_ACCEPT
+        : NodeFilter.FILTER_SKIP;
     },
   });
   return walker.nextNode();

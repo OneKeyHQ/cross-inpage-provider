@@ -1,6 +1,7 @@
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 import { hackConnectButton } from '../hackConnectButton';
+import domUtils from '../utils/utilsDomNodes';
 
 hackConnectButton({
   urls: ['app.boringdao.com'],
@@ -16,12 +17,14 @@ hackConnectButton({
       text: string;
     }) => {
       const walletBtnList = Array.from(
-        document.querySelectorAll(`.MuiModal-root .MuiDialog-container .MuiPaper-root > div:nth-child(2) > div`),
+        document.querySelectorAll(
+          `.MuiModal-root .MuiDialog-container .MuiPaper-root > div:nth-child(2) > div`,
+        ),
       ) as (HTMLElement | undefined)[];
 
       for (const walletBtn of walletBtnList) {
         if (walletBtn?.innerText.trim() === findName) {
-          const textNode = findTextNode(walletBtn, findName) as HTMLElement | undefined;
+          const textNode = domUtils.findTextNode(walletBtn, findName) as HTMLElement | undefined;
           textNode?.replaceWith(text);
 
           const img = walletBtn?.querySelector(`img[alt="${findName}"][width="40"]`) as
@@ -49,12 +52,3 @@ hackConnectButton({
   },
 });
 
-//find the text node in the container,including descendants
-function findTextNode(container: HTMLElement, text: string) {
-  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
-    acceptNode(node) {
-      return node.nodeValue?.trim() === text ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
-    },
-  });
-  return walker.nextNode();
-}

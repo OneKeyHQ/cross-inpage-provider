@@ -31,7 +31,7 @@ import bs58 from 'bs58';
 
 import {OneKeySolanaWalletAccount} from './account';
 import {SOLANA_CHAINS, SolanaChain, isSolanaChain} from './solana'
-import { bytesEqual } from '../utils';
+import { bytesEqual, parseToNativeTx } from '../utils';
 
 import {ProviderSolana } from '../ProviderSolana'
 import { WalletInfo } from './types';
@@ -198,7 +198,7 @@ export class OneKeySolanaStandardWallet implements Wallet {
           if (!isSolanaChain(chain)) throw new Error('invalid chain');
 
           const { signature } = await this.#provider.signAndSendTransaction(
-              VersionedTransaction.deserialize(transaction),
+            parseToNativeTx(transaction),
               {
                   preflightCommitment,
                   minContextSlot,
@@ -228,7 +228,7 @@ export class OneKeySolanaStandardWallet implements Wallet {
           if (account !== this.#account) throw new Error('invalid account');
           if (chain && !isSolanaChain(chain)) throw new Error('invalid chain');
 
-          const signedTransaction = await this.#provider.signTransaction(VersionedTransaction.deserialize(transaction));
+          const signedTransaction = await this.#provider.signTransaction(parseToNativeTx(transaction));
 
           outputs.push({ signedTransaction: signedTransaction.serialize({ requireAllSignatures:false }) });
       } else if (inputs.length > 1) {
@@ -245,7 +245,7 @@ export class OneKeySolanaStandardWallet implements Wallet {
               }
           }
 
-          const transactions = inputs.map(({ transaction }) => Transaction.from(transaction));
+          const transactions = inputs.map(({ transaction }) => parseToNativeTx(transaction));
 
           const signedTransactions = await this.#provider.signAllTransactions(transactions);
 

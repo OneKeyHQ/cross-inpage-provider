@@ -42,3 +42,4 @@ import './sites/hope';
 import './sites/mento';
 import './sites/gmx';
 import './sites/hyperliquid';
+import './sites/beets';

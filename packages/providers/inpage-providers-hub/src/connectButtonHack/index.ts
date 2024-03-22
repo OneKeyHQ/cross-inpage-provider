@@ -38,5 +38,5 @@ import './sites/imtblTop';
 import './sites/renzoprotocol';
 import './sites/auraFinance';
 import './sites/boringdao';
-
+import './sites/hope';
 // TODO list ----------------------------------------------

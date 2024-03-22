@@ -48,12 +48,12 @@ hackConnectButton({
         updatedIcon: WALLET_CONNECT_INFO.metamask.icon,
         updatedText: WALLET_CONNECT_INFO.metamask.text,
       });
-      replaceFunc({
-        selector: 'button[data-testid="rk-wallet-option-walletConnect"]',
-        walletName: 'WalletConnect',
-        updatedIcon: WALLET_CONNECT_INFO.walletconnect.icon,
-        updatedText: WALLET_CONNECT_INFO.walletconnect.text,
-      });
+      // replaceFunc({
+      //   selector: 'button[data-testid="rk-wallet-option-walletConnect"]',
+      //   walletName: 'WalletConnect',
+      //   updatedIcon: WALLET_CONNECT_INFO.walletconnect.icon,
+      //   updatedText: WALLET_CONNECT_INFO.walletconnect.text,
+      // });
     }
   },
 });

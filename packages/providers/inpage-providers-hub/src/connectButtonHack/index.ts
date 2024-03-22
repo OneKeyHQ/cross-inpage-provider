@@ -39,4 +39,5 @@ import './sites/renzoprotocol';
 import './sites/auraFinance';
 import './sites/boringdao';
 import './sites/hope';
+import './sites/mento';
 // TODO list ----------------------------------------------

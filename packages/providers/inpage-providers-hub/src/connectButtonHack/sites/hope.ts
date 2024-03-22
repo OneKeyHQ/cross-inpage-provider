@@ -1,6 +1,6 @@
-import { createNewImageToContainer, hackConnectButton } from '../hackConnectButton';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
+import { hackConnectButton } from '../hackConnectButton';
 
 hackConnectButton({
   urls: ['app.hope.money'],
@@ -27,11 +27,11 @@ hackConnectButton({
         icon: WALLET_CONNECT_INFO.metamask.icon,
         text: WALLET_CONNECT_INFO.metamask.text,
       });
-      replaceFunc({
-        id: 'connect-WALLET_CONNECT_V2',
-        icon: WALLET_CONNECT_INFO.walletconnect.icon,
-        text: WALLET_CONNECT_INFO.walletconnect.text,
-      });
+      // replaceFunc({
+      //   id: 'connect-WALLET_CONNECT_V2',
+      //   icon: WALLET_CONNECT_INFO.walletconnect.icon,
+      //   text: WALLET_CONNECT_INFO.walletconnect.text,
+      // });
     }
   },
 });

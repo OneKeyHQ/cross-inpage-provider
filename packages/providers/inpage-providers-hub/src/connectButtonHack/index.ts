@@ -49,3 +49,4 @@ import './sites/mux';
 import './sites/synapseprotocol';
 import './sites/stargateFinance';
 import './sites/link3';
+import './sites/benqi';

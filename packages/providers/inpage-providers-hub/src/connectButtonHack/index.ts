@@ -38,5 +38,15 @@ import './sites/imtblTop';
 import './sites/renzoprotocol';
 import './sites/auraFinance';
 import './sites/boringdao';
-
-// TODO list ----------------------------------------------
+import './sites/hope';
+import './sites/mento';
+import './sites/gmx';
+import './sites/hyperliquid';
+import './sites/beets';
+import './sites/solv';
+import './sites/silo';
+import './sites/mux';
+import './sites/synapseprotocol';
+import './sites/stargateFinance';
+import './sites/link3';
+import './sites/benqi';

@@ -46,3 +46,4 @@ import './sites/beets';
 import './sites/solv';
 import './sites/silo';
 import './sites/mux';
+import './sites/synapseprotocol';

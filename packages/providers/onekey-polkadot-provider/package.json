@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/onekey-polkadot-provider",
-  "version": "1.1.56",
+  "version": "1.1.57",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -29,10 +29,10 @@
   },
   "dependencies": {
     "@noble/hashes": "^1.3.0",
-    "@onekeyfe/cross-inpage-provider-core": "1.1.56",
-    "@onekeyfe/cross-inpage-provider-errors": "1.1.56",
-    "@onekeyfe/cross-inpage-provider-types": "1.1.56",
-    "@onekeyfe/extension-bridge-injected": "1.1.56",
+    "@onekeyfe/cross-inpage-provider-core": "1.1.57",
+    "@onekeyfe/cross-inpage-provider-errors": "1.1.57",
+    "@onekeyfe/cross-inpage-provider-types": "1.1.57",
+    "@onekeyfe/extension-bridge-injected": "1.1.57",
     "@polkadot/extension-inject": "^0.46.3",
     "eth-rpc-errors": "^4.0.3",
     "long": "^5.2.1",

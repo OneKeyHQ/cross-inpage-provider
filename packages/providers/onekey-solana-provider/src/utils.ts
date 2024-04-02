@@ -39,3 +39,11 @@ export function arraysEqual<T>(a: Indexed<T>, b: Indexed<T>): boolean {
 
   return true;
 }
+
+export function parseToNativeTx(txByte: Uint8Array): Transaction | VersionedTransaction {
+  try {
+    return Transaction.from(txByte);
+  } catch (e) {
+    return VersionedTransaction.deserialize(txByte);
+  }
+}

@@ -57,6 +57,7 @@ export enum IInjectedProviderNames {
   nostr = 'nostr',
   $private = '$private',
   $hardware_sdk = '$hardware_sdk',
+  $walletConnect = '$walletConnect' 
 }
 
 export type IInjectedProviderNamesStrings = keyof typeof IInjectedProviderNames;
@@ -95,6 +96,7 @@ export type IJsBridgeMessagePayload = {
   created?: number;
   sync?: boolean;
   internal?: boolean;
+  isWalletConnectRequest?: boolean;
 };
 
 export type IDebugLogger = {

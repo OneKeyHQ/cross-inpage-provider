@@ -43,11 +43,12 @@ export type IWindowOneKeyHub = {
   $private?: ProviderPrivate;
   $walletInfo?: {
     buildNumber: string;
-    isLegacy: boolean;
     disableExt?: boolean;
+    isLegacy: boolean;
+    isDefaultWallet?: boolean;
+    excludeDappList: string[];
     platform: string;
     version: string;
-    walletSwitchConfig: { enable: string[]; disable: [] };
     platformEnv: {
       isExtension: boolean;
       isDesktop: boolean;
@@ -173,7 +174,7 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('unisat', btc);
 
   // Cardano chain provider injection is handled independently.
-  if (checkWalletSwitchEnable('cardano')) {
+  if (checkWalletSwitchEnable()) {
     defineWindowCardanoProperty('cardano', cardano);
   }
 
@@ -199,32 +200,32 @@ function injectWeb3Provider(): unknown {
   window.dispatchEvent(new Event('ethereum#initialized'));
 
   // Solana Standard Wallet
-  if (checkWalletSwitchEnable('onekey-solana')) {
+  if (checkWalletSwitchEnable()) {
     registerSolanaWallet(solana, {
       icon: WALLET_CONNECT_INFO.onekey.icon as WalletIcon,
     });
   }
 
   // Sui Standard Wallet
-  if (checkWalletSwitchEnable('onekey-sui')) {
+  if (checkWalletSwitchEnable()) {
     registerSuiWallet(sui, {
       logo: WALLET_CONNECT_INFO.onekey.icon,
     });
   }
 
   // Override the SuiWallet Standard Wallet
-  if (checkWalletSwitchEnable('suiWallet')) {
+  if (checkWalletSwitchEnable()) {
     registerSuiWallet(sui, {
       name: 'Sui Wallet',
       logo: WALLET_CONNECT_INFO.onekey.icon,
     });
   }
 
-  if (checkWalletSwitchEnable('onekey-polkadot')) {
+  if (checkWalletSwitchEnable()) {
     registerPolkadot(polkadot);
   }
 
-  if (checkWalletSwitchEnable('polkadot-js')) {
+  if (checkWalletSwitchEnable()) {
     registerPolkadot(polkadot, 'polkadot-js', '0.44.1');
   }
   return $onekey;

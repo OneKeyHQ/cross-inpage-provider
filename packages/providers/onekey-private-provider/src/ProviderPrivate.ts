@@ -6,7 +6,7 @@ import {
 import { IInpageProviderConfig, ProviderBase } from '@onekeyfe/cross-inpage-provider-core';
 import { consts } from '@onekeyfe/cross-inpage-provider-core';
 
-const { WALLET_INFO_LOACAL_KEY } = consts;
+const { WALLET_INFO_LOACAL_KEY_V5 } = consts;
 
 const PROVIDER_EVENTS = {
   'message_low_level': 'message_low_level',
@@ -36,7 +36,7 @@ class ProviderPrivate extends ProviderBase {
   private _registerEvents() {
     try {
       // platform check
-      const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);
+      const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY_V5);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -46,7 +46,7 @@ class ProviderPrivate extends ProviderBase {
           const { method, params } = payload;
           if (method === METHODS.wallet_events_ext_switch_changed) {
             try {
-              localStorage.setItem(WALLET_INFO_LOACAL_KEY, JSON.stringify(params));
+              localStorage.setItem(WALLET_INFO_LOACAL_KEY_V5, JSON.stringify(params));
             } catch (e) {
               console.error(e);
             }

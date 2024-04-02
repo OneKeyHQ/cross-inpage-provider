@@ -53,7 +53,7 @@ function checkIfInjectedProviderEnable({ providerName }: { providerName: IInject
     property = providerName;
   }
 
-  const result = checkWalletSwitchEnable(property);
+  const result = checkWalletSwitchEnable();
   if (process.env.NODE_ENV !== 'production') {
     console.log('checkIfInjectedProviderEnable', property, result);
   }

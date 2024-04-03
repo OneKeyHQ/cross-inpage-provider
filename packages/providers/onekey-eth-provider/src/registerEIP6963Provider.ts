@@ -4,7 +4,7 @@ import type { ProviderEthereum } from './ProviderEthereum';
 export function registerEIP6963Provider({
   uuid = uuidV4(),
   name = 'OneKey',
-  rdns = 'so.onekey.wallet',
+  rdns = 'so.onekey.app.wallet',
   image,
   provider,
 }: {

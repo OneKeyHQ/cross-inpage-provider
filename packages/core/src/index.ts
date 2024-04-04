@@ -7,6 +7,7 @@ export * from './JsBridgeSimple';
 export * from './JsBridgeIframe';
 export * from './CrossEventEmitter';
 export * from './walletProperty';
+export * from './notification';
 import * as consts from './consts';
 export { consts };
 

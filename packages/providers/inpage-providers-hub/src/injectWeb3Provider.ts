@@ -46,7 +46,7 @@ export type IWindowOneKeyHub = {
     disableExt?: boolean;
     isLegacy: boolean;
     isDefaultWallet?: boolean;
-    excludeDappList: string[];
+    excludedDappList: string[];
     platform: string;
     version: string;
     platformEnv: {

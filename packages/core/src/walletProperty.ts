@@ -18,6 +18,10 @@ export enum ISpecialPropertyProviderNamesReflection {
 
 export function checkWalletSwitchEnable() {
   try {
+    const foo = 1
+    if (foo === 1) {
+      return true
+    }
     const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY_V5);
     const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
     console.log('===>: walletInfoLocal: ', walletInfoLocal)
@@ -27,10 +31,10 @@ export function checkWalletSwitchEnable() {
       }
       return false
     }
-    if (Array.isArray(walletInfoLocal?.excludeDappList)) {
+    if (Array.isArray(walletInfoLocal?.excludedDappList)) {
       const currentOrigin = window.location.origin;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      if (walletInfoLocal.excludeDappList.includes(currentOrigin)) {
+      if (walletInfoLocal.excludedDappList.includes(currentOrigin)) {
         if (process.env.NODE_ENV !== 'production') {
           console.log('skip inject web3 provider: ', currentOrigin)
         }

@@ -3,8 +3,39 @@ import {
   IInjectedProviderNamesStrings,
 } from '@onekeyfe/cross-inpage-provider-types';
 
-import { IInpageProviderConfig, ProviderBase } from '@onekeyfe/cross-inpage-provider-core';
+import { IInpageProviderConfig, ProviderBase, switchDefaultWalletNotification } from '@onekeyfe/cross-inpage-provider-core';
 import { consts } from '@onekeyfe/cross-inpage-provider-core';
+
+export interface IOneKeyWalletInfo {
+  enableExtContentScriptReloadButton?: boolean;
+  platform?: string;
+  version?: string;
+  buildNumber?: string;
+  disableExt: boolean;
+  isDefaultWallet?: boolean;
+  excludedDappList: string[];
+  isLegacy: boolean;
+  platformEnv: {
+    isRuntimeBrowser?: boolean;
+    isRuntimeChrome?: boolean;
+    isRuntimeFirefox?: boolean;
+
+    isWeb?: boolean;
+
+    isNative?: boolean;
+    isNativeIOS?: boolean;
+    isNativeAndroid?: boolean;
+
+    isExtension?: boolean;
+    isExtChrome?: boolean;
+    isExtFirefox?: boolean;
+
+    isDesktop?: boolean;
+    isDesktopWin?: boolean;
+    isDesktopLinux?: boolean;
+    isDesktopMac?: boolean;
+  };
+}
 
 const { WALLET_INFO_LOACAL_KEY_V5 } = consts;
 
@@ -46,7 +77,9 @@ class ProviderPrivate extends ProviderBase {
           const { method, params } = payload;
           if (method === METHODS.wallet_events_ext_switch_changed) {
             try {
+              console.log('wallet_events_ext_switch_changed: ===>>>>>>:===$######', params);
               localStorage.setItem(WALLET_INFO_LOACAL_KEY_V5, JSON.stringify(params));
+              this.notifyDefaultWalletChanged(params as IOneKeyWalletInfo)
             } catch (e) {
               console.error(e);
             }
@@ -62,6 +95,13 @@ class ProviderPrivate extends ProviderBase {
 
   request(data: unknown) {
     return this.bridgeRequest(data);
+  }
+
+  notifyDefaultWalletChanged(params: IOneKeyWalletInfo) {
+    let isDefaultWallet = params.isDefaultWallet
+    const isExcludedWebsite = params.excludedDappList.some(i => i.startsWith(window.location.origin));
+    isDefaultWallet = !isExcludedWebsite;
+    switchDefaultWalletNotification(isDefaultWallet);
   }
 }
 

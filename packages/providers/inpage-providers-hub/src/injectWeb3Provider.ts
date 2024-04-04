@@ -154,13 +154,15 @@ function injectWeb3Provider(): unknown {
     provider: ethereum,
   });
 
-  registerEIP6963Provider({
-    uuid: '7677b54f-3486-46e2-4e37-bf8747814f',
-    name: 'MetaMask',
-    rdns: 'io.metamask',
-    image: WALLET_CONNECT_INFO.metamask.icon,
-    provider: ethereum,
-  });
+  if (checkWalletSwitchEnable()) {
+    registerEIP6963Provider({
+      uuid: '7677b54f-3486-46e2-4e37-bf8747814f',
+      name: 'MetaMask',
+      rdns: 'io.metamask',
+      image: WALLET_CONNECT_INFO.metamask.icon,
+      provider: ethereum,
+    });
+  }
 
   defineWindowProperty('solana', solana);
   defineWindowProperty('phantom', { solana });

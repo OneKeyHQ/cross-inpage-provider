@@ -1,5 +1,5 @@
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
-import { WALLET_CONNECT_INFO } from '../consts';
+import { WALLET_CONNECT_INFO, WALLET_NAMES } from '../consts';
 import { replaceIcon } from './imgUtils';
 import { findIconAndNameInShadowRoot } from './shadowRoot';
 import { FindResultType, Selector } from './type';
@@ -7,25 +7,30 @@ import { getConnectWalletModalByTitle, getWalletListByBtn } from './utils';
 import { findIconAndNameDirectly } from './findIconAndName';
 
 export const basicWalletInfo = {
-  metamask: {
+  [WALLET_NAMES.metamask]: {
     updatedIcon: WALLET_CONNECT_INFO.metamask.icon,
     updatedName: WALLET_CONNECT_INFO.metamask.text,
     name: /^meta\s*mask$/i,
   },
-  walletconnect: {
+  [WALLET_NAMES.walletconnect]: {
     updatedIcon: WALLET_CONNECT_INFO.walletconnect.icon,
     updatedName: WALLET_CONNECT_INFO.walletconnect.text,
     name: /^wallet\s*connect$/i,
   },
-  suiwallet: {
+  [WALLET_NAMES.suiwallet]: {
     updatedIcon: WALLET_CONNECT_INFO.suiwallet.icon,
     updatedName: WALLET_CONNECT_INFO.suiwallet.text,
     name: /^(sui|Sui\s?Wallet)$/i,
   },
-  phantom: {
+  [WALLET_NAMES.phantom]: {
     updatedIcon: WALLET_CONNECT_INFO.phantom.icon,
     updatedName: WALLET_CONNECT_INFO.phantom.text,
     name: /^phantom$/i,
+  },
+  [WALLET_NAMES.unisat]: {
+    updatedIcon: WALLET_CONNECT_INFO.unisat.icon,
+    updatedName: WALLET_CONNECT_INFO.unisat.text,
+    name: /^(unisat|Unisat Wallet)$/i,
   },
 } as const;
 
@@ -33,7 +38,7 @@ export const basicWalletInfo = {
  *  used to the following conditions:
  *    - wallet icon and name both exists
  *    - only one icon and only one name element
- * 
+ *
  * wallet icon and name locate strategy:
  *  step1: if icon and name elements have uniq and stable class name ,
  *     - then use function `findIconAndName()` to return them directly
@@ -68,7 +73,6 @@ export type WalletInfo = {
    * 5. the container must be a selector or a function for it should be called when mutation happens
    */
   container?: Selector | (() => HTMLElement | null);
-
 
   /**
    *  custom method used when
@@ -358,7 +362,7 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
-  
+
   {
     urls: ['defi.instadapp.io'],
     walletsForProvider: {
@@ -373,7 +377,78 @@ export const sitesConfig: SitesInfo[] = [
           container: '#WEB3_CONNECT_MODAL_ID .web3modal-modal-card',
         },
       ],
-      
+    },
+  },
+  {
+    urls: ['crosschain.bifi.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            return findIconAndNameDirectly(
+              '.MuiPaper-root.MuiPaper-elevation a img[src*="icon-metamask"]',
+              (icon: HTMLElement) => icon.parentElement?.parentElement,
+              name,
+            );
+          },
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          findIconAndName({ name }) {
+            return findIconAndNameDirectly(
+              '.MuiPaper-root.MuiPaper-elevation a img[src*="icon-walletconnect"]',
+              (icon: HTMLElement) => icon.parentElement?.parentElement,
+              name,
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['bitstable.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => getConnectWalletModalByTitle('div[role="dialog"]', 'Connect Wallet'),
+        },
+      ],
+      [IInjectedProviderNames.btc]: [
+        {
+          ...basicWalletInfo['unisat'],
+          findIconAndName({ name }) {
+            return findIconAndNameDirectly(
+              '.MuiStack-root button img[alt="Unisat"]',
+              (icon: HTMLElement) => icon.parentElement?.parentElement?.parentElement,
+              name,
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['merlinchain.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.btc]: [
+        {
+          ...basicWalletInfo['unisat'],
+          container: () => {
+            return getConnectWalletModalByTitle(
+              'div.fixed[role="dialog"][id*="radix-"]',
+              'Connect Wallet',
+              (e) => {
+                return (
+                  window.getComputedStyle(e).pointerEvents != 'none' &&
+                  e.innerText.includes('BTC wallets')
+                );
+              },
+            );
+          },
+        },
+      ],
     },
   },
 ];

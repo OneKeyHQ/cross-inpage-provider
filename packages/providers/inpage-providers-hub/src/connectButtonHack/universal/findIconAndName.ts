@@ -1,7 +1,7 @@
 import { findWalletIconByParent, isWalletIcon } from './imgUtils';
 import { findWalletText } from './textUtils';
 import { FindResultType, Selector } from './type';
-import { dbg, isClickable, isInExternalLink } from './utils';
+import { dbg, isClickable, isInExternalLink, isProd } from './utils';
 
 /**
  *
@@ -47,8 +47,8 @@ export function findIconAndNameByParent(
 }
 
 export function findIconAndNameDirectly(
-  iconSelector: Selector | (() => HTMLElement),
-  textSelector: Selector | (() => HTMLElement),
+  iconSelector: Selector | (() => HTMLElement | null | undefined),
+  textSelector: Selector | ((icon: HTMLElement) => HTMLElement | null | undefined),
   name: RegExp,
   container = document,
 ): FindResultType | undefined {
@@ -56,12 +56,22 @@ export function findIconAndNameDirectly(
     typeof iconSelector === 'string'
       ? container.querySelector<HTMLElement>(iconSelector)
       : iconSelector();
+
+  if (!isProd) {
+    if (typeof iconSelector === 'string' && container.querySelectorAll(iconSelector).length > 1) {
+      console.error(
+        '[universal]: attention there are more one wallet icon ,please check the selector',
+      );
+    }
+  }
+  
   const textElement =
     typeof textSelector === 'string'
       ? container.querySelector<HTMLElement>(textSelector)
-      : textSelector();
+      : iconElement && textSelector(iconElement);
   const textNode = textElement && findWalletText(textElement, name);
   if (!iconElement || !textNode) {
+    dbg('one is missing', iconElement, textNode);
     return undefined;
   }
   return {
@@ -69,4 +79,3 @@ export function findIconAndNameDirectly(
     textNode,
   };
 }
-

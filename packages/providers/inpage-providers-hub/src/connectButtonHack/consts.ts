@@ -1,4 +1,4 @@
-enum WALLET_NAMES {
+export enum WALLET_NAMES {
   metamask = 'metamask',
   unisat = 'unisat',
   phantom = 'phantom',

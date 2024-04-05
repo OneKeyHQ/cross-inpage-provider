@@ -32,6 +32,11 @@ export const basicWalletInfo = {
     updatedName: WALLET_CONNECT_INFO.unisat.text,
     name: /^(unisat|Unisat Wallet)$/i,
   },
+  [WALLET_NAMES.tronlink]: {
+    updatedIcon: WALLET_CONNECT_INFO.tronlink.icon,
+    updatedName: WALLET_CONNECT_INFO.tronlink.text,
+    name: /^tronlink$/i,
+  },
 } as const;
 
 /**
@@ -445,6 +450,22 @@ export const sitesConfig: SitesInfo[] = [
                   e.innerText.includes('BTC wallets')
                 );
               },
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.justlend.org'],
+    walletsForProvider: {
+      [IInjectedProviderNames.btc]: [
+        {
+          ...basicWalletInfo['tronlink'],
+          container: () => {
+            return getConnectWalletModalByTitle(
+              'div.connect-modal-v2.entry-modal-v2',
+              'Connect Wallet',
             );
           },
         },

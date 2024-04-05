@@ -1,5 +1,5 @@
 import { ICON_MAX_SIZE, ICON_MIN_SIZE } from './consts';
-import { dbg, isAlign, isClickable } from './utils';
+import { dbg, isClickable } from './utils';
 
 export function replaceIcon(originalNode: HTMLElement, newIconSrc: string) {
   if (originalNode instanceof HTMLImageElement) {

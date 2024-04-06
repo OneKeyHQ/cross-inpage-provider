@@ -8,18 +8,19 @@ export const switchDefaultWalletNotification = (isDefaultWallet: boolean) => {
     instance.hide();
     instance = null;
   }
+  const text = isDefaultWallet ? 'OneKey is your default wallet now.' : 'OneKey Default Canceled';
   instance = notification({
     closeable: true,
     timeout: 0,
     className: "onekey-notice-default-wallet",
-    content: `<div style="display: flex; align-items: center; gap: 12px; color: #13141A;">
-      <img style="width: 28px;" src="${IconLogo}"/>
-      <div style="color: #13141A;">
-        <div style="color: #13141A;"><span style="font-weight: bold; color: #13141A;">OneKey</span> is ${isDefaultWallet ? '' : 'not'} your default wallet now. </div>
-        <div style="color: #13141A;">
+    content: `<div style="display: flex; align-items: center; gap: 8px;">
+      <img style="width: 32px;" src="${IconLogo}"/>
+      <div>
+        <div style="color: rgba(0, 0, 0, 0.88); font-size: 13px;"><span style="line-height: 19px; font-weight: ${isDefaultWallet ? '500' : '700'};">${text}</span></div>
+        <div style="font-size: 13px; line-height: 18px; color: rgba(0, 0, 0, 0.61);">
         Please <a
           href="javascript:window.location.reload();"
-          style="color: #8697FF; text-decoration: underline;">refresh the web page</a> 
+          style="color: #0091FF; text-decoration: underline;">refresh the web page</a> 
         and retry
         </div>
       </div>

@@ -54,10 +54,12 @@ class Notification {
 
     // close button
     if (this.options.closeable) {
-      this.closeButton = document.createElement("img");
-      const src = `data:image/svg+xml;utf8,${encodeURIComponent(IconClose)}`;
-      this.closeButton.setAttribute("src", src);
-      this.closeButton.className = "onekey-notice-close";
+      this.closeButton = document.createElement("div");
+      this.closeButton.className = "onekey-notice-close-wrapper";
+      const closeBtnImg = document.createElement("img");
+      closeBtnImg.setAttribute("src", IconClose);
+      closeBtnImg.className = "onekey-notice-close";
+      this.closeButton.appendChild(closeBtnImg);
       this.el.appendChild(this.closeButton);
     }
 
@@ -112,22 +114,21 @@ const styles = `
       min-width: 230px;
       min-height: 44px;
       background: #FFFFFF;
-      border: 1px solid #8697FF;
-      border: 1.5px solid #8697FF;
+      border: 1px solid rgba(0, 0, 0, 0.08);
       box-sizing: border-box;
-      box-shadow: 0px 24px 40px rgba(134, 151, 255, 0.12);
-      border-radius: 6px;
+      box-shadow: 0px 4px 12px 0px rgba(0, 0, 0, 0.10);
+      border-radius: 8px;
       display: flex;
       align-items: center;
 
       font-family: 'Arial', sans-serif;
       font-style: normal;
-      font-weight: 400;
-      font-size: 14px;
-      line-height: 16px;
-      color: #13141A;
+      font-weight: 500;
+      font-size: 13px;
+      line-height: 19px;
+      color: rgba(0, 0, 0, 0.88);
 
-      padding: 12px;
+      padding: 16px;
       gap: 8px;
 
       opacity: 1;
@@ -148,26 +149,29 @@ const styles = `
     .onekey-notice-icon {
       width: 20px;
     }
+    .onekey-notice-close-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+    }
     .onekey-notice-close {
       flex-shrink: 0;
-      margin-left: 16px;
-      width: 16px;
-      height: 16px;
-      cursor: pointer;
+      width: 24px;
+      height: 24px;
     }
     .onekey-strong {
       font-weight: bold;
       color: #13141A;
     }
     .onekey-notice-default-wallet {
-      border-radius: 12px;
-      height: 64px;
-      padding-left: 16px;
-      padding-right: 20px;
+      border-radius: 8px;
+      height: 71px;
 
       font-size: 12px;
       line-height: 16px;
-
       color: #13141A;
     }
   `;

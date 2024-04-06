@@ -98,9 +98,11 @@ class ProviderPrivate extends ProviderBase {
   }
 
   notifyDefaultWalletChanged(params: IOneKeyWalletInfo) {
-    let isDefaultWallet = params.isDefaultWallet
-    const isExcludedWebsite = params.excludedDappList.some(i => i.startsWith(window.location.origin));
-    isDefaultWallet = !isExcludedWebsite;
+    let isDefaultWallet = !!params.isDefaultWallet
+    if (isDefaultWallet) {
+      const isExcludedWebsite = params.excludedDappList.some(i => i.startsWith(window.location.origin));
+      isDefaultWallet = !isExcludedWebsite;
+    }
     switchDefaultWalletNotification(isDefaultWallet);
   }
 }

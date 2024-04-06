@@ -37,6 +37,21 @@ export const basicWalletInfo = {
     updatedName: WALLET_CONNECT_INFO.tronlink.text,
     name: /^tronlink$/i,
   },
+  [WALLET_NAMES.petra]: {
+    updatedIcon: WALLET_CONNECT_INFO.petra.icon,
+    updatedName: WALLET_CONNECT_INFO.petra.text,
+    name: /^Petra$/i,
+  },
+  [WALLET_NAMES.keplr]: {
+    updatedIcon: WALLET_CONNECT_INFO.keplr.icon,
+    updatedName: WALLET_CONNECT_INFO.keplr.text,
+    name: /^Keplr$/i,
+  },
+  [WALLET_NAMES.polkadot]: {
+    updatedIcon: WALLET_CONNECT_INFO.polkadot.icon,
+    updatedName: WALLET_CONNECT_INFO.polkadot.text,
+    name: /^(Polkadot|polkadot\.js)$/i,
+  },
 } as const;
 
 /**
@@ -466,6 +481,227 @@ export const sitesConfig: SitesInfo[] = [
             return getConnectWalletModalByTitle(
               'div.connect-modal-v2.entry-modal-v2',
               'Connect Wallet',
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['sun.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.btc]: [
+        {
+          ...basicWalletInfo['tronlink'],
+          container: () => {
+            return getConnectWalletModalByTitle('div.wallet-modal', 'Connect Wallet');
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['www.team.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => {
+            return getConnectWalletModalByTitle('.fixed[role="dialog"]', 'Select wallet');
+          },
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: () => {
+            return getConnectWalletModalByTitle('.fixed[role="dialog"]', 'Select wallet');
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.thala.fi'],
+    walletsForProvider: {
+      [IInjectedProviderNames.aptos]: [
+        {
+          ...basicWalletInfo['petra'],
+          container: () => {
+            return getConnectWalletModalByTitle('div.chakra-modal__body', 'Welcome to Thala');
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.kinza.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button[data-testid="rk-wallet-option-metaMask"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[data-testid="rk-wallet-option-walletConnect"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.osmosis.zone'],
+    walletsForProvider: {
+      [IInjectedProviderNames.cosmos]: [
+        {
+          ...basicWalletInfo['keplr'],
+          findIconAndName({ name }) {
+            return findIconAndNameDirectly(
+              '.ReactModalPortal button img[alt="Wallet logo"][src*="keplr"]',
+              (icon: HTMLElement) => icon.parentElement,
+              name,
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.gearbox.fi'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button[data-testid="wallet-select-dialog-wallet-metamask"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[data-testid="wallet-select-dialog-wallet-walletconnect"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['blur.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button[id="METAMASK"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[id="WALLETCONNECT"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.stride.zone'],
+    walletsForProvider: {
+      [IInjectedProviderNames.cosmos]: [
+        {
+          ...basicWalletInfo['keplr'],
+          container: () => {
+            return getConnectWalletModalByTitle('div[role="dialog"]', 'Select a wallet');
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.manta.network'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            return findIconAndNameDirectly(
+              '.relative.rounded-2xl.text-default svg.rounded-full',
+              (icon: HTMLElement) => icon.parentElement,
+              name,
+            );
+          },
+        },
+      ],
+      [IInjectedProviderNames.polkadot]: [
+        {
+          ...basicWalletInfo['polkadot'],
+          findIconAndName: ({ name }) => {
+            return findIconAndNameDirectly(
+              '.relative.rounded-2xl.text-default img[alt="Polkadotjs Logo"]',
+              (icon: HTMLElement) => icon.parentElement,
+              name,
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['www.metapool.app'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button[data-testid="rk-wallet-option-metaMask"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[data-testid="rk-wallet-option-walletConnect"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.arrakis.fi'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button[data-testid="rk-wallet-option-metaMask"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[data-testid="rk-wallet-option-walletConnect"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['tectonic.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => getConnectWalletModalByTitle('#headlessui-dialog-1', 'Connect Wallet'),
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: () => getConnectWalletModalByTitle('#headlessui-dialog-1', 'Connect Wallet'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['quickswap.exchange'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            return findIconAndNameDirectly(
+              '#connect-METAMASK img',
+              '#connect-METAMASK div.optionHeader',
+              name,
+            );
+          },
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          findIconAndName({ name }) {
+            return findIconAndNameDirectly(
+              '#connect-WALLET_CONNECT img',
+              '#connect-WALLET_CONNECT div.optionHeader',
+              name,
             );
           },
         },

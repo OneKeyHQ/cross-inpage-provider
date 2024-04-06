@@ -26,7 +26,7 @@ export const getConnectWalletModalByTitle = (
 ) => {
   const eles = Array.from(document.querySelectorAll<HTMLElement>(modalSelector));
   for (const ele of eles) {
-    if (filter ? filter(ele) : true && ele.innerText.includes(title)) {
+    if (isVisible(ele) && filter ? filter(ele) : true && ele.innerText.includes(title)) {
       return ele;
     }
   }
@@ -42,4 +42,8 @@ export function isInExternalLink(element: HTMLElement, container: HTMLElement) {
     element = element.parentNode as HTMLElement;
   }
   return false;
+}
+export function isVisible(ele: HTMLElement) {
+  const style = window.getComputedStyle(ele);
+  return style.visibility !== 'hidden' && style.display !== 'none';
 }

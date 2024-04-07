@@ -54,7 +54,6 @@ class ProviderPrivate extends ProviderBase {
       void this.getConnectWalletInfo();
     } catch (error) {
       console.error(error);
-      console.log('======>>>>>>>Private API')
     }
     try {
       void this.sendSiteMetadataDomReady();
@@ -77,7 +76,6 @@ class ProviderPrivate extends ProviderBase {
           const { method, params } = payload;
           if (method === METHODS.wallet_events_ext_switch_changed) {
             try {
-              console.log('wallet_events_ext_switch_changed: ===>>>>>>:===$######', params);
               localStorage.setItem(WALLET_INFO_LOACAL_KEY_V5, JSON.stringify(params));
               this.notifyDefaultWalletChanged(params as IOneKeyWalletInfo)
             } catch (e) {

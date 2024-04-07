@@ -18,10 +18,6 @@ export enum ISpecialPropertyProviderNamesReflection {
 
 export function checkWalletSwitchEnable() {
   try {
-    const foo = 1
-    if (foo === 1) {
-      return true
-    }
     const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY_V5);
     const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
     console.log('===>: walletInfoLocal: ', walletInfoLocal)

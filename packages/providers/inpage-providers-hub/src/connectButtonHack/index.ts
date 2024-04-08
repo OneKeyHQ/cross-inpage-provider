@@ -50,3 +50,4 @@ import './sites/synapseprotocol';
 import './sites/stargateFinance';
 import './sites/link3';
 import './sites/benqi';
+import './universal/index';

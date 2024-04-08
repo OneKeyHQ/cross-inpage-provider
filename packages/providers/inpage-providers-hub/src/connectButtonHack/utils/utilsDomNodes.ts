@@ -50,7 +50,15 @@ function createElementFromHTML(htmlString: string) {
   return div.firstChild || '';
 }
 
-function findTextNode(container: string | HTMLElement, text: RegExp | string) {
+/**
+ * @description:
+ * only find the first text node match the text
+ */
+function findTextNode(
+  container: string | HTMLElement,
+  text: RegExp | string,
+  type: 'all' | 'first' = 'first',
+): Text | Text[] | undefined | null {
   const containerEle =
     typeof container === 'string' ? document.querySelector(container) : container;
   if (!containerEle) {
@@ -58,15 +66,26 @@ function findTextNode(container: string | HTMLElement, text: RegExp | string) {
   }
   const walker = document.createTreeWalker(containerEle, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
-      if (!node.nodeValue) {
+      if (!node.nodeValue || node.parentElement instanceof SVGElement) {
         return NodeFilter.FILTER_SKIP;
       }
-      return (typeof text === 'string' ? node.nodeValue === text : text.test(node.nodeValue))
+      return (
+        typeof text === 'string'
+          ? node.nodeValue.trim() === text.trim()
+          : text.test(node.nodeValue.trim())
+      )
         ? NodeFilter.FILTER_ACCEPT
         : NodeFilter.FILTER_SKIP;
     },
   });
-  return walker.nextNode();
+  if (type === 'all') {
+    const textNodes: Text[] = [];
+    while (walker.nextNode()) {
+      textNodes.push(walker.currentNode as Text);
+    }
+    return textNodes;
+  }
+  return walker.nextNode() as Text | null;
 }
 
 export default {

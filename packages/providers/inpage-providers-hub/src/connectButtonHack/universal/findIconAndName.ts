@@ -1,3 +1,4 @@
+import { MAX_LEVELS } from './consts';
 import { findWalletIconByParent, isWalletIcon } from './imgUtils';
 import { findWalletText } from './textUtils';
 import { FindResultType, Selector } from './type';
@@ -15,7 +16,7 @@ export function findIconAndNameByParent(
 ): FindResultType | undefined {
   const textNode = findWalletText(containerElement, walletName);
   if (!textNode || !textNode.parentElement) {
-    dbg(`===>not find wallet name text node`);
+    dbg(`===>no wallet name text node found`);
     return;
   }
   if (
@@ -25,12 +26,12 @@ export function findIconAndNameByParent(
     dbg(`===>it is not clickable or is in external link`);
     return;
   }
-  dbg(`===>find wallet name text node`);
 
   let parent: HTMLElement | null = textNode.parentElement;
   let iconNode: HTMLImageElement | HTMLElement | undefined = undefined;
 
-  while (parent && parent !== containerElement?.parentElement) {
+  let level = 0;
+  while (parent && parent !== containerElement?.parentElement && level++ < MAX_LEVELS) {
     const walletIcon = findWalletIconByParent(parent, textNode);
     if (!walletIcon) {
       parent = parent.parentElement;
@@ -40,6 +41,7 @@ export function findIconAndNameByParent(
     break;
   }
   if (!iconNode) {
+    dbg(`===>no wallet icon node found`);
     return;
   }
   // make sure the icon and text are both existed
@@ -64,7 +66,7 @@ export function findIconAndNameDirectly(
       );
     }
   }
-  
+
   const textElement =
     typeof textSelector === 'string'
       ? container.querySelector<HTMLElement>(textSelector)

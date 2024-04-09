@@ -1,5 +1,5 @@
 import notification, { isInSameOriginIframe } from "./notification";
-import {IconLogo} from './icon'
+import { IconLogo } from './icon'
 
 let instance: ReturnType<typeof notification> | null;
 
@@ -8,14 +8,14 @@ export const switchDefaultWalletNotification = (isDefaultWallet: boolean) => {
     return;
   }
   if (instance) {
-    instance.hide();
+    instance.dismiss();
     instance = null;
   }
   const text = isDefaultWallet ? 'OneKey is your default wallet now.' : 'OneKey Default Canceled';
   instance = notification({
-    closeable: true,
-    timeout: 0,
-    className: "onekey-notice-default-wallet",
+    dismissible: true,
+    duration: 0,
+    customClass: "onekey-alert-default-wallet",
     content: `<div style="display: flex; align-items: center; gap: 8px;">
       <img style="width: 32px;" src="${IconLogo}"/>
       <div>

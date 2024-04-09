@@ -1,116 +1,115 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IconClose } from './icon'
+import { IconDismiss } from './icon'
 
-interface Options {
+interface NotificationSettings {
   content: string;
-  closeButton: HTMLElement | string;
-  container: HTMLElement;
-  timeout: number;
-  onHide?: () => void;
-  className?: string;
-  closeable: boolean;
+  triggerElement: HTMLElement | string;
+  hostElement: HTMLElement;
+  duration: number;
+  onDismiss?: () => void;
+  customClass?: string;
+  dismissible: boolean;
 }
 class Notification {
-  options: Options;
-  el: HTMLDivElement | null;
-  events: Record<string, (...args: any) => void>;
+  settings: NotificationSettings;
+  element: HTMLDivElement | null;
+  eventHandlers: Record<string, (...args: any) => void>;
 
-  closeButton?: HTMLElement;
+  dismissButton?: HTMLElement;
 
-  timer?: number | null;
+  dismissalTimer?: number | null;
 
-  constructor(options: Options) {
-    this.options = options;
-    this.el = document.createElement("div");
-    this.el.className = `onekey-notice ${
-      this.options.className ? this.options.className : ""
+  constructor(settings: NotificationSettings) {
+    this.settings = settings;
+    this.element = document.createElement("div");
+    this.element.className = `onekey-alert-message ${
+      this.settings.customClass ? this.settings.customClass : ""
     }`;
 
-    // initial events
-    this.events = {};
+    // initialize event handlers
+    this.eventHandlers = {};
 
-    // inner element
+    // add inner content
     this.insert();
 
-    // auto hide animation
-    if (this.options.timeout) {
-      this.startTimer();
+    // start auto-dismiss timer
+    if (this.settings.duration) {
+      this.initiateTimer();
     }
 
-    // mouse events
-    this.registerEvents();
+    // mouse interaction events
+    this.bindEvents();
   }
 
   insert() {
-    if (!this.el) {
+    if (!this.element) {
       return;
     }
 
-    // main
-    const elMain = document.createElement("div");
-    elMain.className = "onekey-notice-content";
-    elMain.innerHTML = this.options.content;
-    this.el?.appendChild(elMain);
+    // content container
+    const contentContainer = document.createElement("div");
+    contentContainer.className = "onekey-alert-message-body";
+    contentContainer.innerHTML = this.settings.content;
+    this.element?.appendChild(contentContainer);
 
-    // close button
-    if (this.options.closeable) {
-      this.closeButton = document.createElement("div");
-      this.closeButton.className = "onekey-notice-close-wrapper";
-      const closeBtnImg = document.createElement("img");
-      closeBtnImg.setAttribute("src", IconClose);
-      closeBtnImg.className = "onekey-notice-close";
-      this.closeButton.appendChild(closeBtnImg);
-      this.el.appendChild(this.closeButton);
+    // dismiss button
+    if (this.settings.dismissible) {
+      this.dismissButton = document.createElement("div");
+      this.dismissButton.className = "onekey-alert-message-dismiss";
+      const dismissIcon = document.createElement("img");
+      dismissIcon.setAttribute("src", IconDismiss);
+      dismissIcon.className = "onekey-alert-close-icon";
+      this.dismissButton.appendChild(dismissIcon);
+      this.element.appendChild(this.dismissButton);
     }
 
-    this.options.container.appendChild(this.el);
+    this.settings.hostElement.appendChild(this.element);
   }
 
-  registerEvents() {
-    this.events.hide = () => this.hide();
+  bindEvents() {
+    this.eventHandlers.dismiss = () => this.dismiss();
 
-    this.closeButton?.addEventListener("click", this.events.hide, false);
+    this.dismissButton?.addEventListener("click", this.eventHandlers.dismiss, false);
   }
 
-  startTimer(timeout = this.options.timeout) {
-    this.timer = setTimeout(() => {
-      this.hide();
-    }, timeout) as unknown as number;
+  initiateTimer(duration = this.settings.duration) {
+    this.dismissalTimer = setTimeout(() => {
+      this.dismiss();
+    }, duration) as unknown as number;
   }
 
-  stopTimer() {
-    if (this.timer) {
-      clearTimeout(this.timer);
-      this.timer = null;
+  cancelTimer() {
+    if (this.dismissalTimer) {
+      clearTimeout(this.dismissalTimer);
+      this.dismissalTimer = null;
     }
   }
 
-  hide() {
-    if (!this.el) {
+  dismiss() {
+    if (!this.element) {
       return;
     }
-    this.el.classList.add(".onekey-notice-is-hide");
-    // setTimeout(() => {
-    this.options.container.removeChild(this.el);
-    this.el = null;
-    if (this.options.onHide) {
-      this.options.onHide();
+    this.element.classList.add(".onekey-alert-message-hidden");
+    this.settings.hostElement.removeChild(this.element);
+    this.element = null;
+    if (this.settings.onDismiss) {
+      this.settings.onDismiss();
     }
-    this.stopTimer();
-    // }, 300);
+    this.cancelTimer();
   }
 }
+
 let container: HTMLDivElement | null = null;
 let style: HTMLStyleElement | null = null;
 
 const styles = `
-    .onekey-notice-container {
+    .onekey-alert-container {
       position: fixed;
       z-index: 99999;
       top: 60px;
       right: 42px;
     }
-    .onekey-notice {
+    .onekey-alert-message {
       min-width: 230px;
       min-height: 44px;
       background: #FFFFFF;
@@ -133,23 +132,20 @@ const styles = `
 
       opacity: 1;
     }
-    .onekey-notice + .onekey-notice {
+    .onekey-alert-message + .onekey-alert-message {
       margin-top: 30px;
     }
-    .onekey-notice-content {
+    .onekey-alert-message-body {
       display: flex;
       align-items: center;
       color: #13141A;
     }
-    .onekey-notice-is-hide {
+    .onekey-alert-message-hidden {
       opacity: 0;
       transition: 0.3s;
     }
 
-    .onekey-notice-icon {
-      width: 20px;
-    }
-    .onekey-notice-close-wrapper {
+    .onekey-alert-message-dismiss {
       display: flex;
       justify-content: center;
       align-items: center;
@@ -157,7 +153,7 @@ const styles = `
       height: 32px;
       cursor: pointer;
     }
-    .onekey-notice-close {
+    .onekey-alert-close-icon-close {
       flex-shrink: 0;
       width: 24px;
       height: 24px;
@@ -166,7 +162,7 @@ const styles = `
       font-weight: bold;
       color: #13141A;
     }
-    .onekey-notice-default-wallet {
+    .onekey-alert-default-wallet {
       border-radius: 8px;
       height: 71px;
 
@@ -176,14 +172,13 @@ const styles = `
     }
   `;
 
-function notification(options: Partial<Options>) {
+function notification(options: Partial<NotificationSettings>) {
   const {
     content = "",
-    // timeout = 3000,
-    timeout = 0,
-    closeButton = "×",
-    className = "",
-    closeable = false,
+    duration = 0,
+    triggerElement = "×",
+    customClass = "",
+    dismissible = false,
   } = options || {};
 
   if (!container) {
@@ -191,7 +186,7 @@ function notification(options: Partial<Options>) {
     hostElement.id = 'onekey-notification-center';
     const shadowRoot = hostElement.attachShadow({ mode: 'open' })
     container = document.createElement("div");
-    container.classList.add("onekey-notice-container");
+    container.classList.add("onekey-alert-container");
     style = document.createElement("style");
     style.innerHTML = styles;
     shadowRoot.appendChild(style);
@@ -201,12 +196,12 @@ function notification(options: Partial<Options>) {
 
   return new Notification({
     content,
-    timeout,
-    closeButton,
-    container,
-    className,
-    closeable,
-    onHide: () => {
+    duration,
+    triggerElement,
+    hostElement: container,
+    customClass,
+    dismissible,
+    onDismiss: () => {
       if (container && !container?.hasChildNodes()) {
         const rootNode = container.getRootNode()
         if (rootNode instanceof ShadowRoot) {

@@ -1,9 +1,12 @@
-import notification from "./notification";
+import notification, { isInSameOriginIframe } from "./notification";
 import {IconLogo} from './icon'
 
 let instance: ReturnType<typeof notification> | null;
 
 export const switchDefaultWalletNotification = (isDefaultWallet: boolean) => {
+  if (isInSameOriginIframe()) {
+    return;
+  }
   if (instance) {
     instance.hide();
     instance = null;

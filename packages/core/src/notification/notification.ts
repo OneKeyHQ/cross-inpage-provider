@@ -187,12 +187,16 @@ function notification(options: Partial<Options>) {
   } = options || {};
 
   if (!container) {
+    const hostElement = document.createElement('div');
+    hostElement.id = 'onekey-notification-center';
+    const shadowRoot = hostElement.attachShadow({ mode: 'open' })
     container = document.createElement("div");
     container.classList.add("onekey-notice-container");
     style = document.createElement("style");
     style.innerHTML = styles;
-    document.body.appendChild(style);
-    document.body.appendChild(container);
+    shadowRoot.appendChild(style);
+    shadowRoot.appendChild(container);
+    document.body.appendChild(hostElement);
   }
 
   return new Notification({
@@ -204,8 +208,12 @@ function notification(options: Partial<Options>) {
     closeable,
     onHide: () => {
       if (container && !container?.hasChildNodes()) {
-        document.body.removeChild(container);
-        style && document.body.removeChild(style);
+        const rootNode = container.getRootNode()
+        if (rootNode instanceof ShadowRoot) {
+          document.body.removeChild(rootNode.host);
+        } else {
+          document.body.removeChild(rootNode)
+        }
         style = null;
         container = null;
       }

@@ -47,22 +47,33 @@ export function findIconNodesByParent(parent: HTMLElement) {
 export function findWalletIconByParent(parent: HTMLElement, textNode: Text) {
   const iconNodes = findIconNodesByParent(parent);
   if (iconNodes.length > 1) {
+    universalLog(`===>more than one icon node found`, iconNodes.length, iconNodes);
     return;
   }
   const icon = iconNodes[0];
-  if (!icon || !textNode.parentElement || !isWalletIcon(icon, textNode.parentElement)) {
-    universalLog.debug(`===>${icon?.tagName || ''} it is not a wallet icon`);
+  if (!icon || !textNode.parentElement || !isWalletIcon(icon)) {
+    universalLog.debug(`===>it is not a wallet icon`, icon, icon && isWalletIcon(icon));
     return;
   }
   return icon;
 }
 
-export function isWalletIcon(walletIcon: HTMLElement, textNode: HTMLElement) {
+export function isWalletIcon(walletIcon: HTMLElement) {
   const { width, height } = walletIcon.getBoundingClientRect();
   const isSizeMatch =
     width < ICON_MAX_SIZE &&
     width > ICON_MIN_SIZE &&
     height < ICON_MAX_SIZE &&
     height > ICON_MIN_SIZE;
+    universalLog.debug(`===>isSizeMatch`, isSizeMatch, width, height, walletIcon);
+  const {
+    width: width2,
+    height: height2,
+    display,
+    visibility,
+  } = window.getComputedStyle(walletIcon);
+  universalLog.debug(`===>isSizeMatch2`, width2, height2, display, visibility, walletIcon);
+
+  universalLog.debug(`===>isClickable`, isClickable(walletIcon), walletIcon);
   return isClickable(walletIcon) && isSizeMatch;
 }

@@ -6,6 +6,7 @@ import { replaceIcon as defaultReplaceIcon } from './imgUtils';
 import { replaceText as defaultReplaceText } from './textUtils';
 import { FindResultType } from './type';
 import { universalLog } from './utils';
+import { noop } from 'lodash';
 
 function hackWalletConnectButton(sites: SitesInfo[]) {
   for (const site of sites) {
@@ -31,6 +32,7 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                 container,
                 updateIcon = defaultReplaceIcon,
                 updateName = defaultReplaceText,
+                update,
               } = wallet;
               try {
                 const walletId = `${provider}-${updatedName.replace(/[\s&]/g, '').toLowerCase()}`;
@@ -39,8 +41,12 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                 if (hasReplaced) {
                   continue;
                 }
-                let result: FindResultType | undefined;
-                if (findIconAndName) {
+                let result: FindResultType | null = null;
+                if (update) {
+                  const newIconElement = update(wallet);
+                  newIconElement?.classList.add(walletId);
+                  continue;
+                } else if (findIconAndName) {
                   result = findIconAndName.call(null, wallet);
                 } else if (container) {
                   const isSelector = typeof container === 'string';

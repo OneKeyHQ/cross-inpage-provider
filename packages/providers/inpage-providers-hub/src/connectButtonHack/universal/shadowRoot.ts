@@ -5,14 +5,14 @@ export function findIconAndNameInShadowRoot(
   hostSelector: Selector,
   containerSelector: Selector,
   walletName: RegExp,
-): FindResultType | undefined {
+): FindResultType | null {
   const shadowRoot = document.querySelector(hostSelector)?.shadowRoot;
   if (!shadowRoot) {
-    return;
+    return null;
   }
   const containerElement = shadowRoot.querySelector(containerSelector) as HTMLElement | undefined;
   if (!containerElement) {
-    return;
+    return null;
   }
   return findIconAndNameByParent(containerElement, walletName);
 }

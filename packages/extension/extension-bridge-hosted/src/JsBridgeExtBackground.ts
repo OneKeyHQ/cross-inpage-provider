@@ -160,7 +160,6 @@ class JsBridgeExtBackground extends JsBridgeBase {
     // TODO optimize
     entries(this.ports).forEach(([portId, port]) => {
       if (port.name === EXT_PORT_UI_TO_BG) {
-        console.log(`notify to ui port: ${portId}`);
         // TODO check ports disconnected
         this.requestSync({
           data,

@@ -1,8 +1,8 @@
 import { MAX_LEVELS } from './consts';
-import { findWalletIconByParent } from './imgUtils';
+import { findWalletIconByParent, isWalletIconSizeMatch } from './imgUtils';
 import { findWalletText } from './textUtils';
 import { FindResultType, Selector } from './type';
-import { universalLog, getConnectWalletModalByTitle, isClickable, isInExternalLink } from './utils';
+import { universalLog, isClickable, isInExternalLink } from './utils';
 /**
  *
  * @description:
@@ -13,7 +13,7 @@ export function findIconAndNameByParent(
   containerElement: HTMLElement,
   walletName: RegExp,
 ): FindResultType | null {
-  const textNode = findWalletText(containerElement, walletName);
+  const textNode = findWalletText(containerElement, walletName, [isClickable]);
   if (!textNode || !textNode.parentElement) {
     universalLog.debug(`===>no wallet name ${walletName.toString()} text node found`);
     return;
@@ -31,7 +31,10 @@ export function findIconAndNameByParent(
 
   let level = 0;
   while (parent && parent !== containerElement?.parentElement && level++ < MAX_LEVELS) {
-    const walletIcon = findWalletIconByParent(parent, textNode);
+    const walletIcon = findWalletIconByParent(parent, textNode, [
+      isWalletIconSizeMatch,
+      isClickable,
+    ]);
     if (!walletIcon) {
       parent = parent.parentElement;
       continue;
@@ -70,7 +73,7 @@ export function findIconAndNameDirectly(
     typeof textSelector === 'string'
       ? container.querySelector<HTMLElement>(textSelector)
       : iconElement && textSelector(iconElement);
-  const textNode = textElement && findWalletText(textElement, name);
+  const textNode = textElement && findWalletText(textElement, name, []);
   if (!iconElement || !textNode) {
     universalLog.debug('one is missing', iconElement, textNode);
     return null;

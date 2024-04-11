@@ -1,4 +1,5 @@
 import { ICON_MAX_SIZE, ICON_MIN_SIZE } from './consts';
+import { ConstraintFn } from './type';
 import { universalLog, isClickable } from './utils';
 
 export function replaceIcon(originalNode: HTMLElement, newIconSrc: string) {
@@ -44,36 +45,31 @@ export function findIconNodesByParent(parent: HTMLElement) {
  * @description:
  * make sure that there is only one icon node match walletIcon to ignore hidden icon and other icon
  */
-export function findWalletIconByParent(parent: HTMLElement, textNode: Text) {
+export function findWalletIconByParent(
+  parent: HTMLElement,
+  textNode: Text,
+  constraints: ConstraintFn[],
+) {
   const iconNodes = findIconNodesByParent(parent);
   if (iconNodes.length > 1) {
-    universalLog(`===>more than one icon node found`, iconNodes.length, iconNodes);
-    return;
+    universalLog.debug(`===>more than one icon node found`, iconNodes.length, iconNodes);
+    return null;
   }
   const icon = iconNodes[0];
-  if (!icon || !textNode.parentElement || !isWalletIcon(icon)) {
-    universalLog.debug(`===>it is not a wallet icon`, icon, icon && isWalletIcon(icon));
-    return;
+  if (!icon || !textNode.parentElement || constraints.some((e) => !e(icon))) {
+    universalLog.debug(`===>it is not a wallet icon`, icon);
+    return null;
   }
   return icon;
 }
 
-export function isWalletIcon(walletIcon: HTMLElement) {
+export function isWalletIconSizeMatch(walletIcon: HTMLElement) {
   const { width, height } = walletIcon.getBoundingClientRect();
-  const isSizeMatch =
+  const isMatch =
     width < ICON_MAX_SIZE &&
     width > ICON_MIN_SIZE &&
     height < ICON_MAX_SIZE &&
     height > ICON_MIN_SIZE;
-    universalLog.debug(`===>isSizeMatch`, isSizeMatch, width, height, walletIcon);
-  const {
-    width: width2,
-    height: height2,
-    display,
-    visibility,
-  } = window.getComputedStyle(walletIcon);
-  universalLog.debug(`===>isSizeMatch2`, width2, height2, display, visibility, walletIcon);
-
-  universalLog.debug(`===>isClickable`, isClickable(walletIcon), walletIcon);
-  return isClickable(walletIcon) && isSizeMatch;
+    universalLog.debug('===>wallet icon size match: ', isMatch);
+  return isMatch;
 }

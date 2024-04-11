@@ -1,10 +1,11 @@
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO, WALLET_NAMES } from '../consts';
 import { findIconAndNameDirectly } from './findIconAndName';
-import { replaceIcon } from './imgUtils';
+import { findWalletIconByParent, replaceIcon } from './imgUtils';
 import { findIconAndNameInShadowRoot } from './shadowRoot';
 import { FindResultType, Selector } from './type';
 import { getConnectWalletModalByTitle, getWalletListByBtn } from './utils';
+import { findWalletText } from './textUtils';
 
 export const basicWalletInfo = {
   [WALLET_NAMES.metamask]: {
@@ -45,7 +46,7 @@ export const basicWalletInfo = {
   [WALLET_NAMES.keplr]: {
     updatedIcon: WALLET_CONNECT_INFO.keplr.icon,
     updatedName: WALLET_CONNECT_INFO.keplr.text,
-    name: /^(Keplr)$/i,
+    name: /^Keplr$/i,
   },
   [WALLET_NAMES.polkadot]: {
     updatedIcon: WALLET_CONNECT_INFO.polkadot.icon,
@@ -104,10 +105,10 @@ export type WalletInfo = {
    *  1. icon and name have a uniq selector(id selector,uniq class etc)
    *  2. other special cases,like shadowRoot
    * **/
-  findIconAndName?: (wallet: WalletInfo) => FindResultType | null;
+  findIconAndName?: (this: void, wallet: WalletInfo) => FindResultType | null;
 
-  updateIcon?: (img: HTMLElement, iconStr: string) => HTMLImageElement;
-  updateName?: (textNode: Text, text: string) => void;
+  updateIcon?: (this: void, img: HTMLElement, iconStr: string) => HTMLImageElement;
+  updateName?: (this: void, textNode: Text, text: string) => void;
 
   /**
    * used when there is only one icon or name element(not both) and other special cases
@@ -776,37 +777,6 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
-  //NOTE: pc和移动不一样，不可点击且没有unqie stable selector
-  // {
-  //   urls: ['app.ariesmarkets.xyz'],
-  //   walletsForProvider: {
-  //     [IInjectedProviderNames.aptos]: [
-  //       {
-  //         ...basicWalletInfo['petra'],
-  //         findIconAndName({ name }) {
-  //           const container = document.querySelector<HTMLDivElement>('div.mantine-Modal-modal');
-  //           if (!container?.innerText.startsWith('Select Wallet')) {
-  //             return undefined;
-  //           }
-  //           const textNode = findWalletText(container, name);
-  //           const containerParent = textNode?.parentElement?.parentElement?.parentElement;
-  //           const iconNode =
-  //             containerParent && textNode && findWalletIconByParent(containerParent, textNode);
-  //           if (!iconNode || !textNode) {
-  //             console.log('iconNode', iconNode);
-  //             console.log('textNode', textNode);
-  //             return;
-  //           }
-
-  //           return {
-  //             iconNode: iconNode,
-  //             textNode: textNode,
-  //           };
-  //         },
-  //       },
-  //     ],
-  //   },
-  // },
   {
     urls: ['go.liquidloans.io'],
     walletsForProvider: {
@@ -912,5 +882,160 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
+  {
+    urls: ['dapp.chainge.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => getConnectWalletModalByTitle('div[style*="right:"]', 'Connect Wallet'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.bancor.network'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => getConnectWalletModalByTitle('div[role="dialog"]', 'Connect Wallet'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.carbondefi.xyz'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle(
+              'div[data-testid="modal-container"]',
+              'Connect Wallet',
+            );
+            return (
+              modal &&
+              findIconAndNameDirectly(
+                'img[src*="assets/metamask"]',
+                (icon) => icon.parentElement,
+                name,
+                modal,
+              )
+            );
+          },
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle(
+              'div[data-testid="modal-container"]',
+              'Connect Wallet',
+            );
+            const text = modal && findWalletText(modal, name, []);
+            const icon =
+              text && text.parentElement?.parentElement
+                ? findWalletIconByParent(text.parentElement.parentElement, text, [])
+                : null;
+            return (
+              text &&
+              icon && {
+                iconNode: icon,
+                textNode: text,
+              }
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.alexlab.co'],
+    walletsForProvider: {
+      [IInjectedProviderNames.btc]: [
+        {
+          ...basicWalletInfo['unisat'],
+          container: () => getConnectWalletModalByTitle('div.fixed > .absolute', 'Bitcoin Chain'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['www.benddao.xyz'],
+    walletsForProvider: {
+      [IInjectedProviderNames.btc]: [
+        {
+          ...basicWalletInfo['unisat'],
+          container: 'button#unisat-btc',
+        },
+      ],
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button#metamask',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['pro.apex.exchange'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: '.x-dialog-view .step-choose-wallet .step-wallets',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.aevo.xyz'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => getConnectWalletModalByTitle('div#connectWallet', 'Select Your Wallet'),
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: () => getConnectWalletModalByTitle('div#connectWallet', 'Select Your Wallet'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['www.stfil.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = document.querySelector<HTMLElement>('div.connectWalletModel');
+            const text = modal && findWalletText(modal, name, []);
+            const icon = text?.parentElement?.parentElement?.parentElement?.querySelector(
+              'img[src*="metamask"]',
+            ) as HTMLElement | null;
+            return (
+              text &&
+              icon && {
+                textNode: text,
+                iconNode: icon,
+              }
+            );
+          },
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          findIconAndName({ name }) {
+            return findIconAndNameDirectly(
+              'div.connectWalletModel img[src*="walletconnect"]',
+              (e) => e.parentElement?.parentElement,
+              name,
+            );
+          },
+        },
+      ],
+    },
+  },
 ];
-//app.ariesmarkets.xyz

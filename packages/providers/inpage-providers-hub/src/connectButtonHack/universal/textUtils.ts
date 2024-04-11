@@ -1,5 +1,5 @@
 import domUtils from '../utils/utilsDomNodes';
-import { dbg } from './utils';
+import { universalLog } from './utils';
 
 export function makeTextEllipse(textNode: HTMLElement) {
   textNode.style.whiteSpace = 'nowrap';
@@ -17,7 +17,7 @@ export function replaceText(textNode: Text, newText: string) {
 export function findWalletText(container: HTMLElement, walletName: RegExp): Text | null {
   const textNodes = domUtils.findTextNode(container, walletName, 'all') as Text[] | null;
   if (!textNodes || textNodes?.length > 1) {
-    dbg(`===>find none or more than one text node for wallet name`);
+    universalLog.debug(`===>find none or more than one text node for wallet name`);
     return null;
   }
   return textNodes[0];

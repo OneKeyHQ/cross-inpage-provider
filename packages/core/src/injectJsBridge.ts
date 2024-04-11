@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { JsBridgeBase } from './JsBridgeBase';
-import { DEBUG_LOGGER_STORAGE_KEY } from './consts';
+import { commonLogger } from './loggerConsole';
 
 // function fixGlobalShim() {
 //   // FIX errors in ReactNative
@@ -15,17 +15,15 @@ import { DEBUG_LOGGER_STORAGE_KEY } from './consts';
 // }
 
 function injectJsBridge(bridgeCreator: () => JsBridgeBase | unknown): JsBridgeBase {
-  // remove fixGlobalShim, 
-  // because fixGlobalShim make some website not work properly 
+  // remove fixGlobalShim,
+  // because fixGlobalShim make some website not work properly
   //  make cloudfare dead loop and make zhihu.com search functionally down
   // fixGlobalShim();
 
   if (!window?.$onekey?.jsBridge) {
     window.$onekey = window.$onekey || {};
     window.$onekey.jsBridge = bridgeCreator();
-    if (typeof localStorage !== 'undefined' && localStorage.getItem(DEBUG_LOGGER_STORAGE_KEY)) {
-      console.log('===== jsBridge injected success! >>>>> ', performance.now());
-    }
+    commonLogger.debug('JsBridge injected success!', performance.now());
   }
 
   return window.$onekey.jsBridge as JsBridgeBase;

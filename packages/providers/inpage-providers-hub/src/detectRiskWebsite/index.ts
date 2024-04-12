@@ -170,11 +170,15 @@ export async function detectWebsiteRiskLevel() {
   console.log("=====>>>>:  Detect Risk website detectWebsiteRiskLevel");
   // wait nexttick
   await wait(500);
-  const riskResult = (await window.$onekey.$private.request({
-    method: "wallet_detectRiskLevel",
-  })) as IWalletRiskInfo;
-  if (riskResult.securityInfo.level === "high") {
-    ensureInjectRiskErrorScreen(riskResult);
+  try {
+    const riskResult = (await window.$onekey.$private.request({
+      method: "wallet_detectRiskLevel",
+    })) as IWalletRiskInfo;
+    if (riskResult.securityInfo.level === "high") {
+      ensureInjectRiskErrorScreen(riskResult);
+    }
+  } catch (e) {
+    console.error("Detect Risk website error: ", e);
   }
 }
 

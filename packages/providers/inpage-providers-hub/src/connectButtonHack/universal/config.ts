@@ -46,7 +46,7 @@ export const basicWalletInfo = {
   [WALLET_NAMES.keplr]: {
     updatedIcon: WALLET_CONNECT_INFO.keplr.icon,
     updatedName: WALLET_CONNECT_INFO.keplr.text,
-    name: /^Keplr$/i,
+    name: /^(Keplr|Keplr Mobile)$/i,
   },
   [WALLET_NAMES.polkadot]: {
     updatedIcon: WALLET_CONNECT_INFO.polkadot.icon,
@@ -105,7 +105,7 @@ export type WalletInfo = {
    *  1. icon and name have a uniq selector(id selector,uniq class etc)
    *  2. other special cases,like shadowRoot
    * **/
-  findIconAndName?: (this: void, wallet: WalletInfo) => FindResultType | null;
+  findIconAndName?: (this: null, wallet: WalletInfo) => FindResultType | null;
 
   updateIcon?: (this: void, img: HTMLElement, iconStr: string) => HTMLImageElement;
   updateName?: (this: void, textNode: Text, text: string) => void;
@@ -115,19 +115,23 @@ export type WalletInfo = {
    */
   update?(this: void, wallet: WalletInfo): HTMLImageElement | null;
 };
-
 export type SitesInfo = {
   urls: string[];
   walletsForProvider: {
     [k in IInjectedProviderNames]?: WalletInfo[];
   };
-  locators?: (string | RegExp | [string, { hasText: string }])[]; //test id for test
+  /**
+   * path for connect wallet modal used for testing
+   */
+  testPath?: string[] | { mobile?: string[]; desktop?: string[] };
+  only?: boolean;
+  skip?: boolean | { mobile?: boolean; desktop?: boolean };
 };
 
 export const sitesConfig: SitesInfo[] = [
   {
     urls: ['app.turbos.finance'],
-    locators: ['I accept the', 'Continue', 'Connect Wallet'],
+    testPath: [':text("I accept the")', ':text("Continue")', ':text("Connect Wallet")'],
     walletsForProvider: {
       [IInjectedProviderNames.sui]: [
         {
@@ -139,7 +143,6 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.defisaver.com'],
-    skip: true,
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -167,7 +170,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['haedal.xyz'],
-    locators: ['Launch App'],
+    testPath: [':text("Stake Now")', ':text("Connect Wallet")'],
     walletsForProvider: {
       [IInjectedProviderNames.sui]: [
         {
@@ -231,6 +234,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.uncx.network'],
+    testPath: [':text("Connect")'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -291,6 +295,10 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.stakewise.io'],
+    testPath: [':text("Connect")'],
+    skip: {
+      mobile: true, //NOTE:没有入口?
+    },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -304,36 +312,47 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
+
   {
     urls: ['aerodrome.finance'],
+    skip: {
+      mobile: true, //TODO: mobile site should be refactored (use update function)
+    },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
           ...basicWalletInfo['walletconnect'],
-          container: '.bg-connect button[type="button"]:nth-child(2)',
+          container() {
+            const el = document.querySelector('.bg-connect button[type="button"]')?.parentElement;
+            return el ? el : null;
+          },
         },
       ],
     },
   },
-  {
-    urls: ['lista.org'],
-    walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [
-        {
-          ...basicWalletInfo['metamask'],
-          container: 'div.MuiModal-root[role="presentation"] [class*="walletGroup"]',
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: 'div.MuiModal-root[role="presentation"] [class*="walletGroup"] ',
-        },
-      ],
-    },
-  },
+  //TODO: 全是shadow root
+  // {
+  //   urls: ['lista.org'],
+  //   walletsForProvider: {
+  //     [IInjectedProviderNames.ethereum]: [
+  //       {
+  //         ...basicWalletInfo['metamask'],
+  //         container: 'div.MuiModal-root[role="presentation"] [class*="walletGroup"]',
+  //       },
+  //       {
+  //         ...basicWalletInfo['walletconnect'],
+  //         container: 'div.MuiModal-root[role="presentation"] [class*="walletGroup"] ',
+  //       },
+  //     ],
+  //   },
+  // },
 
   //shadow root
   {
     urls: ['app.prismafinance.com'],
+    skip: {
+      mobile: true, //WARN:没有入口?
+    },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -366,17 +385,32 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['raydium.io'],
+    testPath: [
+      ':text("Launch App")',
+      ':text("I have read")',
+      ':text("Agree and Continue")',
+      ':text("Connect Wallet")',
+    ],
+
     walletsForProvider: {
       [IInjectedProviderNames.solana]: [
         {
           ...basicWalletInfo['phantom'],
-          container: '.Dialog .Card .grid.grid-cols-2',
+          container: () =>
+            getConnectWalletModalByTitle(
+              ['div.fixed[role="dialog"]', 'div.Drawer.fixed'],
+              'Connect your wallet to Raydium',
+            ),
         },
       ],
     },
   },
   {
     urls: ['01.xyz'],
+    testPath: [':text("Connect")', ':text("Continue")'],
+    skip: {
+      mobile: true, //WARN:没有入口?
+    },
     walletsForProvider: {
       [IInjectedProviderNames.solana]: [
         {
@@ -388,6 +422,11 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['francium.io'],
+    testPath: {
+      desktop: [':text("Launch App")', ':text("Connect Wallet")'],
+      mobile: [':text("Launch App")', 'button.wallet-connect'],
+    },
+
     walletsForProvider: {
       [IInjectedProviderNames.solana]: [
         {
@@ -400,6 +439,10 @@ export const sitesConfig: SitesInfo[] = [
 
   {
     urls: ['defi.instadapp.io'],
+    testPath: [':text("Connect")'],
+    skip: {
+      mobile: true, //没有入口
+    },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -443,6 +486,8 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['bitstable.finance'],
+    testPath: [':text("Launch App")', ':text("Connect Wallet")', ':text("USDT")'],
+    skip: true,
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -504,6 +549,10 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['sun.io'],
+    skip: {
+      mobile: true, //WARN: it seems not supported by the site
+    },
+
     walletsForProvider: {
       [IInjectedProviderNames.btc]: [
         {
@@ -517,6 +566,10 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['www.team.finance'],
+    testPath: {
+      desktop: [':text("Connect Wallet")'],
+      mobile: ['main > nav section.z-10.block', ':text("Connect Wallet")'],
+    },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -536,6 +589,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.thala.fi'],
+    testPath: [':text("I agree")', ':text("Connect")'],
     walletsForProvider: {
       [IInjectedProviderNames.aptos]: [
         {
@@ -549,6 +603,13 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.kinza.finance'],
+    testPath: {
+      desktop: [':text("Connect Wallet")'],
+      mobile: ['div.ant-app svg[class*="_menu_icon"]', ':text("Connect Wallet")'],
+    },
+    skip: {
+      mobile: true, //WARN:没有连接钱包弹窗，点击链接钱包后会自动连接默认钱包
+    },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -564,10 +625,12 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.osmosis.zone'],
+
     walletsForProvider: {
       [IInjectedProviderNames.cosmos]: [
         {
           ...basicWalletInfo['keplr'],
+          name: /^(Keplr|Keplr Mobile)$/i,
           findIconAndName({ name }) {
             return findIconAndNameDirectly(
               '.ReactModalPortal button img[alt="Wallet logo"][src*="keplr"]',
@@ -596,6 +659,10 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['blur.io'],
+    testPath: {
+      mobile: [':text("Connect")', ':text("Connect")'],
+      desktop: [':text("Connect Wallet")', ':text("Connect Wallet")'],
+    },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -611,10 +678,12 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.stride.zone'],
+
     walletsForProvider: {
       [IInjectedProviderNames.cosmos]: [
         {
           ...basicWalletInfo['keplr'],
+          name: /^(Keplr|Keplr Mobile)$/i,
           container: () => {
             return getConnectWalletModalByTitle('div[role="dialog"]', 'Select a wallet');
           },
@@ -624,6 +693,9 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.manta.network'],
+    skip: {
+      mobile: true, //WARN: mobile is not supported by the site
+    },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -653,6 +725,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['www.metapool.app'],
+    testPath: ['.chakra-modal__body', ':text("Start staking")', ':text("Connect your Wallet")'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -668,7 +741,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.arrakis.fi'],
-    locators: ['For Users', 'Connect Wallet'],
+    testPath: [':text("For Users")', ':text("Connect Wallet")'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -684,11 +757,19 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['tectonic.finance'],
+    testPath: {
+      desktop: [':text("Enter App")', ':text("Connect Wallet")'],
+      mobile: [':text("Enter App")', 'nav button > svg', ':text("Connect Wallet")'],
+    },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
           ...basicWalletInfo['metamask'],
-          container: () => getConnectWalletModalByTitle('#headlessui-dialog-1', 'Connect Wallet'),
+          container: () =>
+            getConnectWalletModalByTitle(
+              ['div.fixed[role="dialog"]', '#headlessui-dialog-1'],
+              'Connect Wallet',
+            ),
         },
         {
           ...basicWalletInfo['walletconnect'],
@@ -699,6 +780,12 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['quickswap.exchange'],
+    testPath: [
+      ':nth-match(div.MuiBox-root input[type="checkbox"],1)',
+      ':nth-match(div.MuiBox-root input[type="checkbox"],2)',
+      ':text-is("Confirm")',
+      ':text-is("Connect Wallet")',
+    ],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -726,6 +813,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['www.saucerswap.finance'],
+    skip: true, //TODO:暂时不支持滚动
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -738,6 +826,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['fin.kujira.network'],
+    testPath: ['.modal__header svg', ':text("Connect Wallet")'],
     walletsForProvider: {
       [IInjectedProviderNames.cosmos]: [
         {
@@ -771,6 +860,15 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.astroport.fi'],
+    testPath: [
+      'p:text("I have read and understood")',
+      'p:text("I acknowledge")',
+      'button:text("Confirm")',
+      'button:text("Accept All Cookies")',
+      'button:text("No")',
+      ':text("Connect Wallet")',
+    ],
+
     walletsForProvider: {
       [IInjectedProviderNames.cosmos]: [
         {
@@ -801,6 +899,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['bifrost.app'],
+
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -852,6 +951,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.kava.io'],
+
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -877,6 +977,10 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['www.ankr.com'],
+    testPath: [':text("Sign in")', ':text("Continue with ETH Wallet")'],
+    skip: {
+      mobile: true, //WARN: mobile is not supported by the site .
+    },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -889,11 +993,14 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['dapp.chainge.finance'],
+    skip: {
+      mobile: true, //WARN: mobile is not supported by the site
+    },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
           ...basicWalletInfo['metamask'],
-          container: () => getConnectWalletModalByTitle('div[style*="right:"]', 'Connect Wallet'),
+          container: () => getConnectWalletModalByTitle('div[style*="right:"]', 'Connect a wallet'),
         },
       ],
     },
@@ -911,6 +1018,8 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.carbondefi.xyz'],
+    testPath: ['button:text("Accept All Cookies")', 'button:text("Connect Wallet")'],
+    skip: true, //TODO:bug:未触发弹窗
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -957,6 +1066,8 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.alexlab.co'],
+    testPath: [':text("Accept")', ':text("Connect stacks wallet")'],
+
     walletsForProvider: {
       [IInjectedProviderNames.btc]: [
         {
@@ -968,10 +1079,12 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['www.benddao.xyz'],
+    testPath: ['button.sc-bdvvtL.oDzIq'],
+    skip: true, //TODO:bug: onekey injected provider 没有运行
     walletsForProvider: {
       [IInjectedProviderNames.btc]: [
         {
-          ...basicWalletInfo['unisat'],
+          ...basicWalletInfo['unisat'], //WARN:已经下线了
           container: 'button#unisat-btc',
         },
       ],
@@ -985,6 +1098,9 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['pro.apex.exchange'],
+    skip: {
+      mobile: true, //TODO: not supported by the site
+    },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -996,6 +1112,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.aevo.xyz'],
+
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {

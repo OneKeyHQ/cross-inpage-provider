@@ -27,15 +27,10 @@ export function findWalletText(
   }
   if (
     !textNodes[0] ||
-    constraints.some((e) => !textNodes[0].parentElement || !e(textNodes[0].parentElement))
+    constraints.some((f) => !textNodes[0].parentElement || !f(textNodes[0].parentElement))
   ) {
     return null;
   }
-  if (
-    !textNodes[0] ||
-    constraints.some((e) => !textNodes[0].parentElement || !e(textNodes[0].parentElement))
-  ) {
-    return null;
-  }
+
   return textNodes[0];
 }

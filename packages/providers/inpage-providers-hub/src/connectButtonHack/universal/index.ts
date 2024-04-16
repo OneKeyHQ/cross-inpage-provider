@@ -5,7 +5,7 @@ import { findIconAndNameByParent as defaultFindIconAndName } from './findIconAnd
 import { replaceIcon as defaultReplaceIcon } from './imgUtils';
 import { replaceText as defaultReplaceText } from './textUtils';
 import { FindResultType } from './type';
-import { universalLog } from './utils';
+import { universalLog, getWalletId } from './utils';
 import { noop } from 'lodash';
 
 function hackWalletConnectButton(sites: SitesInfo[]) {
@@ -35,9 +35,8 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                 update,
               } = wallet;
               try {
-                const walletId = `${provider}-${updatedName.replace(/[\s&]/g, '').toLowerCase()}`;
+                const walletId = getWalletId(provider, updatedName);
                 const hasReplaced = !!document.querySelector(`.${walletId}`);
-                universalLog.debug('walletId', walletId);
                 if (hasReplaced) {
                   continue;
                 }
@@ -59,7 +58,7 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                   result = defaultFindIconAndName(containerElement, name);
                 }
                 if (!result) {
-                  universalLog.debug('no result found');
+                  universalLog.debug('==>warn: no result found');
                   continue;
                 }
                 const { textNode, iconNode } = result;

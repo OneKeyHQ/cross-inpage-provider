@@ -16,13 +16,10 @@ export function findIconAndNameByParent(
   const textNode = findWalletText(containerElement, walletName, [isClickable]);
   if (!textNode || !textNode.parentElement) {
     universalLog.debug(`===>no wallet name ${walletName.toString()} text node found`);
-    return;
+    return null;
   }
-  if (
-    !isClickable(textNode.parentElement) ||
-    isInExternalLink(textNode.parentElement, containerElement)
-  ) {
-    universalLog.debug(`===>${walletName.toString()} is not clickable or is in external link`);
+  if (isInExternalLink(textNode.parentElement, containerElement)) {
+    universalLog.debug(`===>${walletName.toString()} is in external link`);
     return null;
   }
 

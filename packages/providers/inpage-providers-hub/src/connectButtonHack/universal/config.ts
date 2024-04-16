@@ -121,11 +121,13 @@ export type SitesInfo = {
   walletsForProvider: {
     [k in IInjectedProviderNames]?: WalletInfo[];
   };
+  locators?: (string | RegExp | [string, { hasText: string }])[]; //test id for test
 };
 
 export const sitesConfig: SitesInfo[] = [
   {
     urls: ['app.turbos.finance'],
+    locators: ['I accept the', 'Continue', 'Connect Wallet'],
     walletsForProvider: {
       [IInjectedProviderNames.sui]: [
         {
@@ -137,6 +139,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.defisaver.com'],
+    skip: true,
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -164,6 +167,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['haedal.xyz'],
+    locators: ['Launch App'],
     walletsForProvider: {
       [IInjectedProviderNames.sui]: [
         {
@@ -664,6 +668,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.arrakis.fi'],
+    locators: ['For Users', 'Connect Wallet'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {

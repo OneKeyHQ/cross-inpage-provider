@@ -1,11 +1,7 @@
+import { Logger } from '@onekeyfe/cross-inpage-provider-core';
 import { Selector } from './type';
 
-export const isProd = process.env.NODE_ENV === 'production';
-export const dbg = (...args: unknown[]) => {
-  if (!isProd) {
-    console.log('[universal]:', ...args);
-  }
-};
+export const universalLog = new Logger('universal');
 
 export function isClickable(ele: HTMLElement) {
   return ele && window.getComputedStyle(ele).cursor === 'pointer';
@@ -14,7 +10,7 @@ export function isClickable(ele: HTMLElement) {
 export const getWalletListByBtn = (anyButtonSelector: Selector) => {
   const ele = document.querySelector(anyButtonSelector);
   if (!ele || !ele.parentElement) {
-    dbg(`can not find the wallet button list`);
+    universalLog.debug(`can not find the wallet button list`);
     return null;
   }
   return ele.parentElement;
@@ -30,7 +26,7 @@ export const getConnectWalletModalByTitle = (
       return ele;
     }
   }
-  dbg('can not find the connect wallet modal');
+  universalLog.debug('can not find the connect wallet modal');
   return null;
 };
 

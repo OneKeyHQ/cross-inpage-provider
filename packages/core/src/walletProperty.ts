@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import { WALLET_INFO_LOACAL_KEY } from './consts';
+import { commonLogger } from './loggerConsole';
 
 /**
  * An enumeration mapping specific blockchain provider names to their corresponding blockchain identifiers.
@@ -29,7 +30,7 @@ export function checkWalletSwitchEnable(property: string) {
       );
     }
   } catch (e) {
-    console.error(e);
+    commonLogger.warn(e);
   }
   return true;
 }
@@ -41,7 +42,7 @@ export function checkEnableDefineProperty(property: string) {
     const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
     return !!walletInfoLocal?.platformEnv.isExtension;
   } catch (e) {
-    console.error(e);
+    commonLogger.warn(e);
   }
   return false;
 }
@@ -80,11 +81,11 @@ export function defineWindowProperty(
       (window as any)[property] = provider;
     }
   } catch (ex) {
-    console.error(ex);
+    commonLogger.error(ex);
     try {
       (window as any)[property] = provider;
     } catch (error) {
-      console.error(error);
+      commonLogger.warn(error);
     }
   }
 }

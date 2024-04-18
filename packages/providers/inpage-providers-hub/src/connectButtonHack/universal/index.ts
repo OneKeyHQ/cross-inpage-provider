@@ -5,7 +5,7 @@ import { findIconAndNameByParent as defaultFindIconAndName } from './findIconAnd
 import { replaceIcon as defaultReplaceIcon } from './imgUtils';
 import { replaceText as defaultReplaceText } from './textUtils';
 import { FindResultType } from './type';
-import { dbg } from './utils';
+import { universalLog } from './utils';
 
 function hackWalletConnectButton(sites: SitesInfo[]) {
   for (const site of sites) {
@@ -35,7 +35,7 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
               try {
                 const walletId = `${provider}-${updatedName.replace(/[\s&]/g, '').toLowerCase()}`;
                 const hasReplaced = !!document.querySelector(`.${walletId}`);
-                dbg('walletId', walletId);
+                universalLog.debug('walletId', walletId);
                 if (hasReplaced) {
                   continue;
                 }
@@ -53,7 +53,7 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                   result = defaultFindIconAndName(containerElement, name);
                 }
                 if (!result) {
-                  dbg('no result found');
+                  universalLog.debug('no result found');
                   continue;
                 }
                 const { textNode, iconNode } = result;
@@ -61,11 +61,11 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                   updateName(textNode, updatedName);
                   const newIconElement = updateIcon(iconNode, updatedIcon);
                   newIconElement.classList.add(walletId);
-                  dbg('textNode', textNode);
-                  dbg('iconNode', iconNode);
+                  universalLog.debug('textNode', textNode);
+                  universalLog.debug('iconNode', iconNode);
                 }
               } catch (e) {
-                dbg(e);
+                universalLog.debug(e);
               }
             }
           }
@@ -78,5 +78,5 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
 try {
   hackWalletConnectButton(sitesConfig);
 } catch (e) {
-  console.log(e);
+  universalLog.warn(e);
 }

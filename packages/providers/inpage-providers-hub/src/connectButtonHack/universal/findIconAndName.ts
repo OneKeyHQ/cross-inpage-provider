@@ -2,8 +2,7 @@ import { MAX_LEVELS } from './consts';
 import { findWalletIconByParent, isWalletIcon } from './imgUtils';
 import { findWalletText } from './textUtils';
 import { FindResultType, Selector } from './type';
-import { dbg, isClickable, isInExternalLink, isProd } from './utils';
-
+import { universalLog, isClickable, isInExternalLink } from './utils';
 /**
  *
  * @description:
@@ -16,14 +15,14 @@ export function findIconAndNameByParent(
 ): FindResultType | undefined {
   const textNode = findWalletText(containerElement, walletName);
   if (!textNode || !textNode.parentElement) {
-    dbg(`===>no wallet name text node found`);
+    universalLog.debug(`===>no wallet name text node found`);
     return;
   }
   if (
     !isClickable(textNode.parentElement) ||
     isInExternalLink(textNode.parentElement, containerElement)
   ) {
-    dbg(`===>it is not clickable or is in external link`);
+    universalLog.debug(`===>it is not clickable or is in external link`);
     return;
   }
 
@@ -41,7 +40,7 @@ export function findIconAndNameByParent(
     break;
   }
   if (!iconNode) {
-    dbg(`===>no wallet icon node found`);
+    universalLog.debug(`===>no wallet icon node found`);
     return;
   }
   // make sure the icon and text are both existed
@@ -59,9 +58,9 @@ export function findIconAndNameDirectly(
       ? container.querySelector<HTMLElement>(iconSelector)
       : iconSelector();
 
-  if (!isProd) {
+  if (process.env.NODE_ENV !== 'production') {
     if (typeof iconSelector === 'string' && container.querySelectorAll(iconSelector).length > 1) {
-      console.error(
+      universalLog.error(
         '[universal]: attention there are more one wallet icon ,please check the selector',
       );
     }
@@ -73,7 +72,7 @@ export function findIconAndNameDirectly(
       : iconElement && textSelector(iconElement);
   const textNode = textElement && findWalletText(textElement, name);
   if (!iconElement || !textNode) {
-    dbg('one is missing', iconElement, textNode);
+    universalLog.debug('one is missing', iconElement, textNode);
     return undefined;
   }
   return {

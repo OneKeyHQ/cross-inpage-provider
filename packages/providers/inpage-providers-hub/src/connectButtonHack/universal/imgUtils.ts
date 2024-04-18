@@ -1,5 +1,5 @@
 import { ICON_MAX_SIZE, ICON_MIN_SIZE } from './consts';
-import { dbg, isClickable } from './utils';
+import { universalLog, isClickable } from './utils';
 
 export function replaceIcon(originalNode: HTMLElement, newIconSrc: string) {
   if (originalNode instanceof HTMLImageElement) {
@@ -51,7 +51,7 @@ export function findWalletIconByParent(parent: HTMLElement, textNode: Text) {
   }
   const icon = iconNodes[0];
   if (!icon || !textNode.parentElement || !isWalletIcon(icon, textNode.parentElement)) {
-    dbg(`===>${icon?.tagName || ''} it is not a wallet icon`);
+    universalLog.debug(`===>${icon?.tagName || ''} it is not a wallet icon`);
     return;
   }
   return icon;

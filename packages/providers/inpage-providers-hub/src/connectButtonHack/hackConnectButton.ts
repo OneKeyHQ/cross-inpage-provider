@@ -1,11 +1,13 @@
 import {
   ISpecialPropertyProviderNamesReflection,
+  Logger,
   checkWalletSwitchEnable,
 } from '@onekeyfe/cross-inpage-provider-core';
 import { throttle, ThrottleSettings } from 'lodash';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import type { IWindowOneKeyHub } from '../injectWeb3Provider';
 
+const hackButtonLogger = new Logger('hackButton');
 function checkIfInjectedProviderConnected({
   providerName,
 }: {
@@ -54,9 +56,7 @@ function checkIfInjectedProviderEnable({ providerName }: { providerName: IInject
   }
 
   const result = checkWalletSwitchEnable(property);
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('checkIfInjectedProviderEnable', property, result);
-  }
+  hackButtonLogger.log('checkIfInjectedProviderEnable', property, result);
   return result;
 }
 
@@ -313,14 +313,10 @@ function hackConnectButton({
     }
     const enabledProviders = getEnabledProviders({ providers });
     if (!enabledProviders || enabledProviders.length === 0) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('inject Provider disabled, skip hackConnectButton (DEV only log)');
-      }
+      hackButtonLogger.debug('inject Provider disabled, skip hackConnectButton (DEV only log)');
       return;
     }
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('mutation triggered: hackConnectButton (DEV only log)');
-    }
+    hackButtonLogger.debug('mutation triggered: hackConnectButton (DEV only log)');
     return enabledProviders;
   };
 
@@ -350,9 +346,7 @@ function hackConnectButton({
             }
             replaceMethod?.({ providers: enabledProviders });
           } catch (error) {
-            if (process.env.NODE_ENV !== 'production') {
-              console.error('hackConnectButton mutation ERROR (DEV only log):  ', error);
-            }
+            hackButtonLogger.debug('hackConnectButton mutation ERROR (DEV only log):  ', error);
           } finally {
             observer?.observe?.(targetNode, config);
           }

@@ -6,6 +6,7 @@ import { findIconAndNameInShadowRoot } from './shadowRoot';
 import { FindResultType, Selector } from './type';
 import { getConnectWalletModalByTitle, getWalletListByBtn } from './utils';
 import { findWalletText } from './textUtils';
+import domUtils from '../utils/utilsDomNodes';
 
 export const basicWalletInfo = {
   [WALLET_NAMES.metamask]: {
@@ -1050,7 +1051,7 @@ export const sitesConfig: SitesInfo[] = [
             const text = modal && findWalletText(modal, name, []);
             const icon =
               text && text.parentElement?.parentElement
-                ? findWalletIconByParent(text.parentElement.parentElement, text, [])
+                ? findWalletIconByParent(text.parentElement.parentElement, [])
                 : null;
             return (
               text &&
@@ -1155,6 +1156,34 @@ export const sitesConfig: SitesInfo[] = [
               (e) => e.parentElement?.parentElement,
               name,
             );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['www.stakedao.org'],
+    only: true,
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          update({ updatedIcon }) {
+            const modal = domUtils.findTextNode('div.MuiContainer-root', 'Connect Wallet') as Text;
+            const icon = modal?.parentElement?.parentElement?.querySelector<HTMLImageElement>(
+              'img[alt="metamask wallet logo"][src*="metamask.svg"]',
+            );
+            return icon ? replaceIcon(icon, updatedIcon) : null;
+          },
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          update({ updatedIcon }) {
+            const modal = domUtils.findTextNode('div.MuiContainer-root', 'Connect Wallet') as Text;
+            const icon = modal?.parentElement?.parentElement?.querySelector<HTMLImageElement>(
+              'img[alt="walletconnect wallet logo"][src*="walletconnect.svg"]',
+            );
+            return icon ? replaceIcon(icon, updatedIcon) : null;
           },
         },
       ],

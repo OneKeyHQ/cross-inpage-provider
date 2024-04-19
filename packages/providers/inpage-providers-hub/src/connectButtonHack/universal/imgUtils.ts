@@ -41,22 +41,19 @@ export function findIconNodesByParent(parent: HTMLElement) {
   }
   return matchingNodes;
 }
+
 /**
  * @description:
  * make sure that there is only one icon node match walletIcon to ignore hidden icon and other icon
  */
-export function findWalletIconByParent(
-  parent: HTMLElement,
-  textNode: Text,
-  constraints: ConstraintFn[],
-) {
+export function findWalletIconByParent(parent: HTMLElement, constraints: ConstraintFn[]) {
   const iconNodes = findIconNodesByParent(parent);
   if (iconNodes.length > 1) {
     universalLog.warn(`===>more than one icon node found`, iconNodes.length, iconNodes);
     return null;
   }
   const icon = iconNodes[0];
-  if (!icon || !textNode.parentElement || constraints.some((f) => !f(icon))) {
+  if (!icon || constraints.some((f) => !f(icon))) {
     universalLog.warn(`===>it is not a wallet icon`, icon);
     return null;
   }
@@ -70,6 +67,6 @@ export function isWalletIconSizeMatch(walletIcon: HTMLElement) {
     width > ICON_MIN_SIZE &&
     height < ICON_MAX_SIZE &&
     height > ICON_MIN_SIZE;
-    universalLog.log('===>wallet icon size match: ', isMatch);
+  universalLog.log('===>wallet icon size match: ', isMatch);
   return isMatch;
 }

@@ -28,10 +28,7 @@ export function findIconAndNameByParent(
 
   let level = 0;
   while (parent && parent !== containerElement?.parentElement && level++ < MAX_LEVELS) {
-    const walletIcon = findWalletIconByParent(parent, textNode, [
-      isWalletIconSizeMatch,
-      isClickable,
-    ]);
+    const walletIcon = findWalletIconByParent(parent, [isWalletIconSizeMatch, isClickable]);
     if (!walletIcon) {
       parent = parent.parentElement;
       continue;

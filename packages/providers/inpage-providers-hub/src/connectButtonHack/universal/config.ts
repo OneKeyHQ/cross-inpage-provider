@@ -1163,7 +1163,6 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['www.stakedao.org'],
-    only: true,
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -1184,6 +1183,24 @@ export const sitesConfig: SitesInfo[] = [
               'img[alt="walletconnect wallet logo"][src*="walletconnect.svg"]',
             );
             return icon ? replaceIcon(icon, updatedIcon) : null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.sommelier.finance'],
+    only: true,
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName(wallet) {
+            return findIconAndNameDirectly(
+              '[id*="popover-body"] img[src*="metamask.svg"][alt="wallet logo"]',
+              (icon) => icon.parentElement?.parentElement,
+              wallet.name,
+            );
           },
         },
       ],

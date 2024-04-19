@@ -67,11 +67,14 @@ export function findIconAndNameDirectly(
     typeof textSelector === 'string'
       ? container.querySelector<HTMLElement>(textSelector)
       : iconElement && textSelector(iconElement);
-  const textNode = textElement && findWalletText(textElement, name, []);
+  const textNode = textElement && findWalletText(textElement, name, [isClickable]);
+  
   if (!iconElement || !textNode) {
     universalLog.warn('one is missing', iconElement, textNode);
     return null;
   }
+  
+  
   return {
     iconNode: iconElement,
     textNode,

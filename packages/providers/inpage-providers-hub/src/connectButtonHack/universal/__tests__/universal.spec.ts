@@ -15,7 +15,6 @@ async function dbg(locator: Locator) {
 test.describe('Connect Button Hack', () => {
   const startWebSite = 'www.saucerswap.finance';
   const startIdx = sitesConfig.findIndex((e) => e.urls.includes(startWebSite)) || 0;
-  console.log('===>[dbg]: startIdx:', startIdx);
   const availableSites = sitesConfig.slice(startIdx);
   const sitesOnly = availableSites.filter((e) => e.only);
   const sites = sitesOnly.length > 0 ? sitesOnly : availableSites;

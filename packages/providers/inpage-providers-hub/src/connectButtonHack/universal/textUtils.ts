@@ -22,7 +22,7 @@ export function findWalletText(
 ): Text | null {
   const textNodes = domUtils.findTextNode(container, walletName, 'all') as Text[] | null;
   if (!textNodes || textNodes?.length > 1) {
-    universalLog.debug(`===>find none or more than one text node for wallet name`);
+    universalLog.warn(`===>find none or more than one text node for wallet name`);
     return null;
   }
   if (

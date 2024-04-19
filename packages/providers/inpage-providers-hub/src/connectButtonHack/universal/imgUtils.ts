@@ -52,12 +52,12 @@ export function findWalletIconByParent(
 ) {
   const iconNodes = findIconNodesByParent(parent);
   if (iconNodes.length > 1) {
-    universalLog.debug(`===>more than one icon node found`, iconNodes.length, iconNodes);
+    universalLog.warn(`===>more than one icon node found`, iconNodes.length, iconNodes);
     return null;
   }
   const icon = iconNodes[0];
   if (!icon || !textNode.parentElement || constraints.some((f) => !f(icon))) {
-    universalLog.debug(`===>it is not a wallet icon`, icon);
+    universalLog.warn(`===>it is not a wallet icon`, icon);
     return null;
   }
   return icon;
@@ -70,6 +70,6 @@ export function isWalletIconSizeMatch(walletIcon: HTMLElement) {
     width > ICON_MIN_SIZE &&
     height < ICON_MAX_SIZE &&
     height > ICON_MIN_SIZE;
-    universalLog.debug('===>wallet icon size match: ', isMatch);
+    universalLog.log('===>wallet icon size match: ', isMatch);
   return isMatch;
 }

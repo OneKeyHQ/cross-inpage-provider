@@ -11,7 +11,7 @@ export function isClickable(ele: HTMLElement) {
 export const getWalletListByBtn = (anyButtonSelector: Selector) => {
   const ele = document.querySelector(anyButtonSelector);
   if (!ele || !ele.parentElement) {
-    universalLog.debug(`can not find the wallet button list`);
+    universalLog.warn(`can not find the wallet button list`);
     return null;
   }
   return ele.parentElement;
@@ -31,7 +31,7 @@ export const getConnectWalletModalByTitle = (
       return ele;
     }
   }
-  universalLog.debug('can not find the connect wallet modal');
+  universalLog.warn('can not find the connect wallet modal');
   return null;
 };
 

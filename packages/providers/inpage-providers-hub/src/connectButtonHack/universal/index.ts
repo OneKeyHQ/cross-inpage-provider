@@ -58,7 +58,7 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                   result = defaultFindIconAndName(containerElement, name);
                 }
                 if (!result) {
-                  universalLog.debug('==>warn: no result found');
+                  universalLog.warn('==>warn: no result found');
                   continue;
                 }
                 const { textNode, iconNode } = result;
@@ -66,11 +66,11 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                   updateName(textNode, updatedName);
                   const newIconElement = updateIcon(iconNode, updatedIcon);
                   newIconElement.classList.add(walletId);
-                  universalLog.debug('textNode', textNode);
-                  universalLog.debug('iconNode', iconNode);
+                  universalLog.log('textNode', textNode);
+                  universalLog.log('iconNode', iconNode);
                 }
               } catch (e) {
-                universalLog.debug(e);
+                universalLog.log(e);
               }
             }
           }

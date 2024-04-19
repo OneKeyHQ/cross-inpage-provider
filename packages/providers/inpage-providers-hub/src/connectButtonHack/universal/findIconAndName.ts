@@ -15,11 +15,11 @@ export function findIconAndNameByParent(
 ): FindResultType | null {
   const textNode = findWalletText(containerElement, walletName, [isClickable]);
   if (!textNode || !textNode.parentElement) {
-    universalLog.debug(`===>no wallet name ${walletName.toString()} text node found`);
+    universalLog.log(`===>no wallet name ${walletName.toString()} text node found`);
     return null;
   }
   if (isInExternalLink(textNode.parentElement, containerElement)) {
-    universalLog.debug(`===>${walletName.toString()} is in external link`);
+    universalLog.log(`===>${walletName.toString()} is in external link`);
     return null;
   }
 
@@ -40,7 +40,7 @@ export function findIconAndNameByParent(
     break;
   }
   if (!iconNode) {
-    universalLog.debug(`===>no wallet ${walletName.toString()} icon node found`);
+    universalLog.log(`===>no wallet ${walletName.toString()} icon node found`);
     return null;
   }
   // make sure the icon and text are both existed
@@ -60,7 +60,7 @@ export function findIconAndNameDirectly(
 
   if (process.env.NODE_ENV !== 'production') {
     if (typeof iconSelector === 'string' && container.querySelectorAll(iconSelector).length > 1) {
-      universalLog.error(
+      universalLog.warn(
         '[universal]: attention there are more one wallet icon ,please check the selector',
       );
     }
@@ -72,7 +72,7 @@ export function findIconAndNameDirectly(
       : iconElement && textSelector(iconElement);
   const textNode = textElement && findWalletText(textElement, name, []);
   if (!iconElement || !textNode) {
-    universalLog.debug('one is missing', iconElement, textNode);
+    universalLog.warn('one is missing', iconElement, textNode);
     return null;
   }
   return {

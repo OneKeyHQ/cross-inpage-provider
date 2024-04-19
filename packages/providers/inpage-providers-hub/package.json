@@ -25,6 +25,8 @@
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "tsc && tsc --project tsconfig.cjs.json",
+    "test": "npx playwright test",
+    "test:report": "npx playwright show-report reports",
     "start": "tsc --watch"
   },
   "dependencies": {
@@ -45,5 +47,10 @@
     "@onekeyfe/onekey-tron-provider": "1.1.57",
     "@onekeyfe/onekey-webln-provider": "1.1.57",
     "web3": "^1.7.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.43.1",
+    "playwright": "^1.43.1",
+    "@types/node": "^20.12.7"
   }
 }

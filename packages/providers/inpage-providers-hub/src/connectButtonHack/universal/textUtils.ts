@@ -1,4 +1,5 @@
 import domUtils from '../utils/utilsDomNodes';
+import { ConstraintFn } from './type';
 import { universalLog } from './utils';
 
 export function makeTextEllipse(textNode: HTMLElement) {
@@ -14,11 +15,22 @@ export function replaceText(textNode: Text, newText: string) {
  * @description:
  * make sure there is only one text node match walletName to ignore hidden text and other text
  */
-export function findWalletText(container: HTMLElement, walletName: RegExp): Text | null {
+export function findWalletText(
+  container: HTMLElement,
+  walletName: RegExp,
+  constraints: ConstraintFn[],
+): Text | null {
   const textNodes = domUtils.findTextNode(container, walletName, 'all') as Text[] | null;
   if (!textNodes || textNodes?.length > 1) {
-    universalLog.debug(`===>find none or more than one text node for wallet name`);
+    universalLog.warn(`===>find none or more than one text node for wallet name`);
     return null;
   }
+  if (
+    !textNodes[0] ||
+    constraints.some((f) => !textNodes[0].parentElement || !f(textNodes[0].parentElement))
+  ) {
+    return null;
+  }
+
   return textNodes[0];
 }

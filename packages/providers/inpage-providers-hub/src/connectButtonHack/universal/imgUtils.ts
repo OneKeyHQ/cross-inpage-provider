@@ -1,4 +1,5 @@
 import { ICON_MAX_SIZE, ICON_MIN_SIZE } from './consts';
+import { ConstraintFn } from './type';
 import { universalLog, isClickable } from './utils';
 
 export function replaceIcon(originalNode: HTMLElement, newIconSrc: string) {
@@ -44,25 +45,31 @@ export function findIconNodesByParent(parent: HTMLElement) {
  * @description:
  * make sure that there is only one icon node match walletIcon to ignore hidden icon and other icon
  */
-export function findWalletIconByParent(parent: HTMLElement, textNode: Text) {
+export function findWalletIconByParent(
+  parent: HTMLElement,
+  textNode: Text,
+  constraints: ConstraintFn[],
+) {
   const iconNodes = findIconNodesByParent(parent);
   if (iconNodes.length > 1) {
-    return;
+    universalLog.warn(`===>more than one icon node found`, iconNodes.length, iconNodes);
+    return null;
   }
   const icon = iconNodes[0];
-  if (!icon || !textNode.parentElement || !isWalletIcon(icon, textNode.parentElement)) {
-    universalLog.debug(`===>${icon?.tagName || ''} it is not a wallet icon`);
-    return;
+  if (!icon || !textNode.parentElement || constraints.some((f) => !f(icon))) {
+    universalLog.warn(`===>it is not a wallet icon`, icon);
+    return null;
   }
   return icon;
 }
 
-export function isWalletIcon(walletIcon: HTMLElement, textNode: HTMLElement) {
+export function isWalletIconSizeMatch(walletIcon: HTMLElement) {
   const { width, height } = walletIcon.getBoundingClientRect();
-  const isSizeMatch =
+  const isMatch =
     width < ICON_MAX_SIZE &&
     width > ICON_MIN_SIZE &&
     height < ICON_MAX_SIZE &&
     height > ICON_MIN_SIZE;
-  return isClickable(walletIcon) && isSizeMatch;
+    universalLog.log('===>wallet icon size match: ', isMatch);
+  return isMatch;
 }

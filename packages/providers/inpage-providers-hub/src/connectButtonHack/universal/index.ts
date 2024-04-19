@@ -5,7 +5,8 @@ import { findIconAndNameByParent as defaultFindIconAndName } from './findIconAnd
 import { replaceIcon as defaultReplaceIcon } from './imgUtils';
 import { replaceText as defaultReplaceText } from './textUtils';
 import { FindResultType } from './type';
-import { universalLog } from './utils';
+import { universalLog, getWalletId } from './utils';
+import { noop } from 'lodash';
 
 function hackWalletConnectButton(sites: SitesInfo[]) {
   for (const site of sites) {
@@ -31,16 +32,20 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                 container,
                 updateIcon = defaultReplaceIcon,
                 updateName = defaultReplaceText,
+                update,
               } = wallet;
               try {
-                const walletId = `${provider}-${updatedName.replace(/[\s&]/g, '').toLowerCase()}`;
+                const walletId = getWalletId(provider, updatedName);
                 const hasReplaced = !!document.querySelector(`.${walletId}`);
-                universalLog.debug('walletId', walletId);
                 if (hasReplaced) {
                   continue;
                 }
-                let result: FindResultType | undefined;
-                if (findIconAndName) {
+                let result: FindResultType | null = null;
+                if (update) {
+                  const newIconElement = update(wallet);
+                  newIconElement?.classList.add(walletId);
+                  continue;
+                } else if (findIconAndName) {
                   result = findIconAndName.call(null, wallet);
                 } else if (container) {
                   const isSelector = typeof container === 'string';
@@ -53,7 +58,7 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                   result = defaultFindIconAndName(containerElement, name);
                 }
                 if (!result) {
-                  universalLog.debug('no result found');
+                  universalLog.warn('==>warn: no result found');
                   continue;
                 }
                 const { textNode, iconNode } = result;
@@ -61,11 +66,11 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                   updateName(textNode, updatedName);
                   const newIconElement = updateIcon(iconNode, updatedIcon);
                   newIconElement.classList.add(walletId);
-                  universalLog.debug('textNode', textNode);
-                  universalLog.debug('iconNode', iconNode);
+                  universalLog.log('textNode', textNode);
+                  universalLog.log('iconNode', iconNode);
                 }
               } catch (e) {
-                universalLog.debug(e);
+                universalLog.log(e);
               }
             }
           }

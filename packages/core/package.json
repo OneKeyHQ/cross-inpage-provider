@@ -33,7 +33,10 @@
     "@onekeyfe/cross-inpage-provider-events": "1.1.57",
     "@onekeyfe/cross-inpage-provider-types": "1.1.57",
     "events": "^3.3.0",
-    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
     "ms": "^2.1.3"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "^4.17.12"
   }
 }

@@ -63,8 +63,16 @@ export function getWalletId(provider: IInjectedProviderNames, updatedName: strin
     'onekey-',
   );
 }
+export function getWalletIdSelector(walletId: string) {
+  return `img[data-wallet-id="${walletId}"]`;
+}
+export function isWalletUpdate(walletId: string) {
+  return !!document.querySelector(getWalletIdSelector(walletId));
+}
+export function setWalletUpdateId(ele: HTMLElement, walletId: string) {
+  ele.dataset.walletId = walletId;
+}
 
 export function arrayify<T>(ele: T | T[]): T[] {
   return Array.isArray(ele) ? ele : [ele];
 }
-

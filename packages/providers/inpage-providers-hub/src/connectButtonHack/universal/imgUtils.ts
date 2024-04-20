@@ -4,6 +4,7 @@ import { universalLog } from './utils';
 
 export function replaceIcon(originalNode: HTMLElement, newIconSrc: string) {
   const computedstyle = window.getComputedStyle(originalNode);
+  universalLog.log('===>ok: replace icon');
 
   if (originalNode instanceof HTMLImageElement) {
     originalNode.src = newIconSrc;

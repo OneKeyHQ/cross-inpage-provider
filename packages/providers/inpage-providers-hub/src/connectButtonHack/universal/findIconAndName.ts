@@ -1,7 +1,7 @@
 import { MAX_LEVELS } from './consts';
 import { findWalletIconByParent, isWalletIconSizeMatch } from './imgUtils';
 import { findWalletTextByParent } from './textUtils';
-import { FindResultType, Selector } from './type';
+import { ConstraintFn, FindResultType, Selector } from './type';
 import { universalLog, isClickable, isInExternalLink, isVisible, arrayify } from './utils';
 /**
  *
@@ -97,17 +97,23 @@ export function findIconAndNameDirectly(
   };
 }
 
-export function findTextByImg(img: HTMLElement, walletName: RegExp, containerLimit: HTMLElement) {
+export function findTextByImg(
+  img: HTMLElement,
+  walletName: RegExp,
+  containerLimit: HTMLElement,
+  constraints: ConstraintFn[] = [],
+) {
   let text: null | Text = null;
   let parent: HTMLElement | null = img;
   let level = 0;
 
   while (parent && parent != containerLimit && level++ < MAX_LEVELS) {
-    text = findWalletTextByParent(parent, walletName, [isClickable]);
+    text = findWalletTextByParent(parent, walletName, constraints);
     if (text) {
       return text;
     }
     parent = parent.parentElement;
   }
+  universalLog.error('can not find the text node by img', level);
   return null;
 }

@@ -114,7 +114,7 @@ export type WalletInfo = {
   /**
    * used when there is only one icon or name element(not both) and other special cases
    */
-  update?(this: void, wallet: WalletInfo): HTMLImageElement | null;
+  update?: (this: void, wallet: WalletInfo) => HTMLImageElement | null;
 };
 export type SitesInfo = {
   urls: string[];
@@ -1181,7 +1181,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['www.stakedao.org'],
-    
+
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -1216,7 +1216,7 @@ export const sitesConfig: SitesInfo[] = [
           findIconAndName(wallet) {
             return findIconAndNameDirectly(
               '[id*="popover-body"] img[src*="metamask.svg"][alt="wallet logo"]',
-              (icon) => icon.parentElement?.parentElement,
+              'auto-search-text',
               wallet.name,
             );
           },
@@ -1307,7 +1307,7 @@ export const sitesConfig: SitesInfo[] = [
                     'section[id*="popover-content"] img[src*="Metamask.png"]',
                   ),
                 ).filter((e) => isVisible(e))?.[0],
-              (icon) => icon.parentElement,
+              'auto-search-text',
               wallet.name,
             );
           },
@@ -1318,6 +1318,7 @@ export const sitesConfig: SitesInfo[] = [
   {
     urls: ['moonwell.fi'],
     testPath: [':text("Launch App")', ':text("Connect Wallet")'],
+
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -1331,7 +1332,7 @@ export const sitesConfig: SitesInfo[] = [
               modal &&
               findIconAndNameDirectly(
                 'img[src*="metamask"]',
-                (icon) => icon.parentElement,
+                'auto-search-text',
                 wallet.name,
                 modal,
               )
@@ -1349,7 +1350,7 @@ export const sitesConfig: SitesInfo[] = [
               modal &&
               findIconAndNameDirectly(
                 'img[src*="walletconnect"]',
-                (icon) => icon.parentElement,
+                'auto-search-text',
                 wallet.name,
                 modal,
               )
@@ -1377,37 +1378,27 @@ export const sitesConfig: SitesInfo[] = [
       [IInjectedProviderNames.ethereum]: [
         {
           ...basicWalletInfo['metamask'],
-          findIconAndName(wallet) {
+          findIconAndName({ name }) {
             const modal = getConnectWalletModalByTitle(
               '#rlogin-connect-modal',
               'Connect your wallet',
             );
             return (
               modal &&
-              findIconAndNameDirectly(
-                'img[alt="MetaMask"]',
-                (icon) => icon.parentElement?.parentElement,
-                wallet.name,
-                modal,
-              )
+              findIconAndNameDirectly('img[alt="MetaMask"]', 'auto-search-text', name, modal)
             );
           },
         },
         {
           ...basicWalletInfo['walletconnect'],
-          findIconAndName(wallet) {
+          findIconAndName({ name }) {
             const modal = getConnectWalletModalByTitle(
               '#rlogin-connect-modal',
               'Connect your wallet',
             );
             return (
               modal &&
-              findIconAndNameDirectly(
-                'img[alt="WalletConnect"]',
-                (icon) => icon.parentElement?.parentElement,
-                wallet.name,
-                modal,
-              )
+              findIconAndNameDirectly('img[alt="WalletConnect"]', 'auto-search-text', name, modal)
             );
           },
         },
@@ -1602,7 +1593,6 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.frax.finance'],
-    only: true,  
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -1616,5 +1606,88 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
-  
+  {
+    urls: ['beets.fi'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button[data-testid="rk-wallet-option-metaMask"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[data-testid="rk-wallet-option-walletConnect"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.gmx.io'],
+
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container:
+            ':is(button[data-testid="rk-wallet-option-io.metamask"],button[data-testid="rk-wallet-option-metaMask"])',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[data-testid="rk-wallet-option-walletConnect"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['link3.to'],
+
+    skip: {
+      mobile: true, //WARN: mobile is not supported by the site
+    },
+    testPath: [':text("Login")', ':text("Connect Wallet")'],
+
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container:
+            ':is(button[data-testid="rk-wallet-option-metaMask"],button[data-testid="rk-wallet-option-io.metamask"])',
+        },
+        // {
+        //   ...basicWalletInfo['walletconnect'],
+        //   container: 'button[data-testid="rk-wallet-option-walletConnect"]',
+        // },
+      ],
+    },
+  },
+  {
+    urls: ['app.mento.org'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button[data-testid="rk-wallet-option-metaMask"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[data-testid="rk-wallet-option-walletConnect"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['synapseprotocol.com'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button[data-testid="rk-wallet-option-metaMask"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[data-testid="rk-wallet-option-walletConnect"]',
+        },
+      ],
+    },
+  },
 ];

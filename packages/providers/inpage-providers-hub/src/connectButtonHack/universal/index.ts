@@ -6,15 +6,18 @@ import { replaceIcon as defaultReplaceIcon } from './imgUtils';
 import { replaceText as defaultReplaceText } from './textUtils';
 import { FindResultType } from './type';
 import { universalLog, getWalletId } from './utils';
-import { noop } from 'lodash';
 
 function hackWalletConnectButton(sites: SitesInfo[]) {
   for (const site of sites) {
-    const { urls, walletsForProvider } = site;
+    const { urls, walletsForProvider, mutationObserverOptions } = site;
     const providers = Object.keys(walletsForProvider) as IInjectedProviderNames[];
+    if (!urls.includes(window.location.hostname)) {
+      continue;
+    }
     hackConnectButton({
       urls,
       providers,
+      mutationObserverOptions,
       replaceMethod(
         { providers: enabledProviders }: { providers: IInjectedProviderNames[] } = {
           providers: [],
@@ -40,6 +43,7 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                 if (hasReplaced) {
                   continue;
                 }
+                universalLog.log(`===>[replaceMethod] ${urls[0]} begin to run for ${walletId}`);
                 let result: FindResultType | null = null;
                 if (update) {
                   const newIconElement = update(wallet);
@@ -66,8 +70,6 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                   updateName(textNode, updatedName);
                   const newIconElement = updateIcon(iconNode, updatedIcon);
                   newIconElement.classList.add(walletId);
-                  universalLog.log('textNode', textNode);
-                  universalLog.log('iconNode', iconNode);
                 }
               } catch (e) {
                 universalLog.log(e);
@@ -83,5 +85,5 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
 try {
   hackWalletConnectButton(sitesConfig);
 } catch (e) {
-  universalLog.warn(e);
+  universalLog.error(e);
 }

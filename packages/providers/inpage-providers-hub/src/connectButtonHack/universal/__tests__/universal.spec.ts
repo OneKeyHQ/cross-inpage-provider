@@ -13,9 +13,9 @@ async function dbg(locator: Locator) {
   });
 }
 test.describe('Connect Button Hack', () => {
-  const startWebSite = 'www.saucerswap.finance';
-  const startIdx = sitesConfig.findIndex((e) => e.urls.includes(startWebSite)) || 0;
-  const availableSites = sitesConfig.slice(startIdx);
+  const startWebSite = 'xxx';
+  const startIdx = sitesConfig.findIndex((e) => e.urls.includes(startWebSite)) ;
+  const availableSites = sitesConfig.slice(startIdx==-1?0:startIdx);
   const sitesOnly = availableSites.filter((e) => e.only);
   const sites = sitesOnly.length > 0 ? sitesOnly : availableSites;
   const sitesWithoutSkip = sites.filter((e) => (typeof e.skip === 'boolean' ? !e.skip : true));

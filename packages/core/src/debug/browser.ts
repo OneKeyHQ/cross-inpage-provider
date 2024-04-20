@@ -11,7 +11,6 @@ import humanize from 'ms';
 const storageKey = DEBUG_LOGGER_STORAGE_KEY;
 
 const exportsBrowser = {};
-l
 exportsBrowser.formatArgs = formatArgs;
 exportsBrowser.save = save;
 exportsBrowser.load = load;

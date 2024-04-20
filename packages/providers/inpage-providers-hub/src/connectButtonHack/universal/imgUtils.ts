@@ -1,17 +1,21 @@
 import { ICON_MAX_SIZE, ICON_MIN_SIZE } from './consts';
 import { ConstraintFn } from './type';
-import { universalLog, isClickable } from './utils';
+import { universalLog } from './utils';
 
 export function replaceIcon(originalNode: HTMLElement, newIconSrc: string) {
+  const computedstyle = window.getComputedStyle(originalNode);
+
   if (originalNode instanceof HTMLImageElement) {
     originalNode.src = newIconSrc;
     originalNode.removeAttribute('srcset');
+    originalNode.style.width = computedstyle.width;
+    originalNode.style.height = computedstyle.height;
+    originalNode.classList.add(...Array.from(originalNode.classList));
     return originalNode;
   } else {
     const imgNode = createImageEle(newIconSrc);
-    const style = window.getComputedStyle(originalNode);
-    imgNode.style.width = style.width;
-    imgNode.style.height = style.height;
+    imgNode.style.width = computedstyle.width;
+    imgNode.style.height = computedstyle.height;
     imgNode.classList.add(...Array.from(originalNode.classList));
     originalNode.replaceWith(imgNode);
     return imgNode;

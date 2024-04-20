@@ -318,7 +318,6 @@ export const sitesConfig: SitesInfo[] = [
 
   {
     urls: ['aerodrome.finance'],
-    only: true,
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -1182,6 +1181,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['www.stakedao.org'],
+    
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -1585,4 +1585,21 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
+  {
+    urls: ['app.aura.finance'],
+    only: true,  
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button[data-testid="rk-wallet-option-metaMask"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[data-testid="rk-wallet-option-walletConnect"]',
+        },
+      ],
+    },
+  },
+  
 ];

@@ -2,10 +2,49 @@
 # yarn lockfile v1
 
 
+"@onekeyfe/cross-inpage-provider-errors@1.1.57":
+  version "1.1.57"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-1.1.57.tgz#e231378d5179bacdd03070b213f5d6025143807c"
+  integrity sha512-ivir3bJECaWFsN07bvqbu1YgeN/JCcq1QxoBLMy9itYSz8plJoMotaG4P04wUxPXgV62WKrjA8jqXpTYTGr3vQ==
+  dependencies:
+    fast-safe-stringify "^2.1.1"
+
+"@onekeyfe/cross-inpage-provider-events@1.1.57":
+  version "1.1.57"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-events/-/cross-inpage-provider-events-1.1.57.tgz#89589cd2737ba7aca1a39b053c67ed2e5e5f2c18"
+  integrity sha512-t77yUfxxuvTE9mqRe0yKgNhOVjcqRDv/xmgcXY+eCoTYrg9JZIkt2h7+nAuqMTO4YwEUhuqP+JpEhMgsySXDZQ==
+
+"@onekeyfe/cross-inpage-provider-types@1.1.57":
+  version "1.1.57"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-types/-/cross-inpage-provider-types-1.1.57.tgz#c4d9324a0fdc42c4ce51e883ea5f6177bcb5dd27"
+  integrity sha512-EscRyc3xF4MUOimBkbLUEtxkIjLDuz0EiZO3xNKEewTPJ7H61YikVu3FCifAVig2nvaf0GwZh0ytFh8lcWmmUw==
+
+"@types/lodash-es@^4.17.12":
+  version "4.17.12"
+  resolved "https://registry.yarnpkg.com/@types/lodash-es/-/lodash-es-4.17.12.tgz#65f6d1e5f80539aa7cfbfc962de5def0cf4f341b"
+  integrity sha512-0NgftHUcV4v34VhXm8QBSftKVXtbkBG3ViCjs6+eJ5a6y6Mi/jiFGPc1sC7QK+9BFhWrURE3EOggmWaSxL9OzQ==
+  dependencies:
+    "@types/lodash" "*"
+
+"@types/lodash@*":
+  version "4.17.0"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.0.tgz#d774355e41f372d5350a4d0714abb48194a489c3"
+  integrity sha512-t7dhREVv6dbNj0q17X12j7yDG4bD/DHYX7o5/DbDxobP0HnGPgpRz2Ej77aL7TZT3DSw13fqUTj8J4mMnqa7WA==
+
 events@^3.3.0:
   version "3.3.0"
   resolved "https://registry.yarnpkg.com/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
   integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
+
+fast-safe-stringify@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.1.1.tgz#c406a83b6e70d9e35ce3b30a81141df30aeba884"
+  integrity sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==
+
+lodash-es@^4.17.21:
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.21.tgz#43e626c46e6591b7750beb2b50117390c609e3ee"
+  integrity sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==
 
 lodash@^4.17.21:
   version "4.17.21"

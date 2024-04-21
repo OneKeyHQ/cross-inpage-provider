@@ -4,8 +4,9 @@ import { findIconAndNameDirectly } from './findIconAndName';
 import { findWalletIconByParent, replaceIcon } from './imgUtils';
 import { findIconAndNameInShadowRoot } from './shadowRoot';
 import { FindResultType, Selector } from './type';
-import { getConnectWalletModalByTitle, getWalletListByBtn } from './utils';
-import { findWalletText } from './textUtils';
+import { getConnectWalletModalByTitle, getWalletListByBtn, isVisible } from './utils';
+import { findWalletTextByParent } from './textUtils';
+import domUtils from '../utils/utilsDomNodes';
 
 export const basicWalletInfo = {
   [WALLET_NAMES.metamask]: {
@@ -113,13 +114,15 @@ export type WalletInfo = {
   /**
    * used when there is only one icon or name element(not both) and other special cases
    */
-  update?(this: void, wallet: WalletInfo): HTMLImageElement | null;
+  update?: (this: void, wallet: WalletInfo) => HTMLImageElement | null;
 };
 export type SitesInfo = {
   urls: string[];
   walletsForProvider: {
     [k in IInjectedProviderNames]?: WalletInfo[];
   };
+
+  mutationObserverOptions?: MutationObserverInit;
   /**
    * path for connect wallet modal used for testing
    */
@@ -315,16 +318,16 @@ export const sitesConfig: SitesInfo[] = [
 
   {
     urls: ['aerodrome.finance'],
-    skip: {
-      mobile: true, //TODO: mobile site should be refactored (use update function)
-    },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
           ...basicWalletInfo['walletconnect'],
-          container() {
-            const el = document.querySelector('.bg-connect button[type="button"]')?.parentElement;
-            return el ? el : null;
+          findIconAndName({ name }) {
+            return findIconAndNameDirectly(
+              '.bg-connect button[type="button"] img[src*="connect-walletConnect.svg"]',
+              'auto-search-text',
+              name,
+            );
           },
         },
       ],
@@ -361,12 +364,28 @@ export const sitesConfig: SitesInfo[] = [
           findIconAndName: ({ container, name }) => {
             return findIconAndNameInShadowRoot('onboard-v2', container as string, name);
           },
+          updateIcon(icon, iconSrc) {
+            const res = replaceIcon(icon, iconSrc);
+            res.style.width = '32px';
+            res.style.height = '32px';
+            res.style.maxWidth = '32px';
+            res.style.maxHeight = '32px';
+            return res;
+          },
         },
         {
           ...basicWalletInfo['walletconnect'],
           container: '.modal .outer-container div.wallets-container ',
           findIconAndName: ({ container, name }) => {
             return findIconAndNameInShadowRoot('onboard-v2', container as string, name);
+          },
+          updateIcon(icon, iconSrc) {
+            const res = replaceIcon(icon, iconSrc);
+            res.style.width = '32px';
+            res.style.height = '32px';
+            res.style.maxWidth = '32px';
+            res.style.maxHeight = '32px';
+            return res;
           },
         },
       ],
@@ -1047,10 +1066,10 @@ export const sitesConfig: SitesInfo[] = [
               'div[data-testid="modal-container"]',
               'Connect Wallet',
             );
-            const text = modal && findWalletText(modal, name, []);
+            const text = modal && findWalletTextByParent(modal, name, []);
             const icon =
               text && text.parentElement?.parentElement
-                ? findWalletIconByParent(text.parentElement.parentElement, text, [])
+                ? findWalletIconByParent(text.parentElement.parentElement, [])
                 : null;
             return (
               text &&
@@ -1134,7 +1153,7 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['metamask'],
           findIconAndName({ name }) {
             const modal = document.querySelector<HTMLElement>('div.connectWalletModel');
-            const text = modal && findWalletText(modal, name, []);
+            const text = modal && findWalletTextByParent(modal, name, []);
             const icon = text?.parentElement?.parentElement?.parentElement?.querySelector(
               'img[src*="metamask"]',
             ) as HTMLElement | null;
@@ -1156,6 +1175,517 @@ export const sitesConfig: SitesInfo[] = [
               name,
             );
           },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['www.stakedao.org'],
+
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          update({ updatedIcon }) {
+            const modal = domUtils.findTextNode('div.MuiContainer-root', 'Connect Wallet') as Text;
+            const icon = modal?.parentElement?.parentElement?.querySelector<HTMLImageElement>(
+              'img[alt="metamask wallet logo"][src*="metamask.svg"]',
+            );
+            return icon ? replaceIcon(icon, updatedIcon) : null;
+          },
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          update({ updatedIcon }) {
+            const modal = domUtils.findTextNode('div.MuiContainer-root', 'Connect Wallet') as Text;
+            const icon = modal?.parentElement?.parentElement?.querySelector<HTMLImageElement>(
+              'img[alt="walletconnect wallet logo"][src*="walletconnect.svg"]',
+            );
+            return icon ? replaceIcon(icon, updatedIcon) : null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.sommelier.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName(wallet) {
+            return findIconAndNameDirectly(
+              '[id*="popover-body"] img[src*="metamask.svg"][alt="wallet logo"]',
+              'auto-search-text',
+              wallet.name,
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['www.tokensets.com'],
+    testPath: [':text("Sign in")'],
+    skip: {
+      mobile: true, //WARN: 没有连接钱包弹窗
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => getConnectWalletModalByTitle('div.ui.page.modals', 'Sign In'),
+        },
+      ],
+    },
+  },
+  // {
+  //   urls: ['syncswap.xyz'],
+  //   testPath: [':text("Sign in")'],
+  //   skip: {
+  //     mobile: true, //WARN: 没有连接钱包弹窗
+  //   },
+  //   walletsForProvider: {
+  //     [IInjectedProviderNames.ethereum]: [
+  //       {
+  //         ...basicWalletInfo['walletconnect'],
+  //         container: () => getConnectWalletModalByTitle('div.ui.page.modals', 'Sign In'),
+  //       },
+  //     ],
+  //   },
+  // },
+  {
+    urls: ['app.init.capital'],
+    testPath: [':text("Do not show")', ':text("Continue")', ':text("Connect Wallet")'],
+    skip: true, //TODO:点不动
+
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button[data-testid="rk-wallet-option-metaMask"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[data-testid="rk-wallet-option-walletConnect"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['www.dx.app'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button[data-testid="rk-wallet-option-metaMask"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[data-testid="rk-wallet-option-walletConnect"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['www.inverse.finance'],
+    testPath: [':text("Enter App")', ':text("Connect")'],
+    mutationObserverOptions: {
+      childList: true,
+      subtree: true,
+      attributes: true,
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName(wallet) {
+            return findIconAndNameDirectly(
+              () =>
+                Array.from(
+                  document.querySelectorAll<HTMLElement>(
+                    'section[id*="popover-content"] img[src*="Metamask.png"]',
+                  ),
+                ).filter((e) => isVisible(e))?.[0],
+              'auto-search-text',
+              wallet.name,
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['moonwell.fi'],
+    testPath: [':text("Launch App")', ':text("Connect Wallet")'],
+
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName(wallet) {
+            const modal = getConnectWalletModalByTitle(
+              'div[id*="headlessui-dialog-panel"]',
+              'Connect a wallet',
+            );
+            return (
+              modal &&
+              findIconAndNameDirectly(
+                'img[src*="metamask"]',
+                'auto-search-text',
+                wallet.name,
+                modal,
+              )
+            );
+          },
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          findIconAndName(wallet) {
+            const modal = getConnectWalletModalByTitle(
+              'div[id*="headlessui-dialog-panel"]',
+              'Connect a wallet',
+            );
+            return (
+              modal &&
+              findIconAndNameDirectly(
+                'img[src*="walletconnect"]',
+                'auto-search-text',
+                wallet.name,
+                modal,
+              )
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['sovryn.app'],
+    testPath: [':text("Get started")', ':text("Browser Wallet")'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: '[data-layout-id="dapp-onboard-metamask"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['dapp.moneyonchain.com'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle(
+              '#rlogin-connect-modal',
+              'Connect your wallet',
+            );
+            return (
+              modal &&
+              findIconAndNameDirectly('img[alt="MetaMask"]', 'auto-search-text', name, modal)
+            );
+          },
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle(
+              '#rlogin-connect-modal',
+              'Connect your wallet',
+            );
+            return (
+              modal &&
+              findIconAndNameDirectly('img[alt="WalletConnect"]', 'auto-search-text', name, modal)
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.extrafi.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button[data-testid="rk-wallet-option-metaMask"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[data-testid="rk-wallet-option-walletConnect"]',
+        },
+      ],
+    },
+  },
+  //TODO:放在弹窗iframe内的。
+  // {
+  //   urls: ['app.degate.com'],
+  //   walletsForProvider: {
+  //     [IInjectedProviderNames.ethereum]: [
+  //       {
+  //         ...basicWalletInfo['metamask'],
+  //         findIconAndName(wallet) {
+  //           const modal = getConnectWalletModalByTitle(
+  //             'section.mantine-Modal-content',
+  //             'Connect Wallet',
+  //           );
+  //           return (
+  //             modal &&
+  //             findIconAndNameDirectly(
+  //               'img[src*="metamask"]',
+  //               (icon) => icon.parentElement?.parentElement,
+  //               wallet.name,
+  //               modal,
+  //             )
+  //           );
+  //         },
+  //       },
+  //       {
+  //         ...basicWalletInfo['walletconnect'],
+  //         findIconAndName(wallet) {
+  //           const modal = getConnectWalletModalByTitle('section.mantine-Modal-content', 'Connect Wallet');
+  //           return (
+  //             modal &&
+  //             findIconAndNameDirectly(
+  //               'img[src*="walletConnect"]',
+  //               (icon) => icon.parentElement?.parentElement,
+  //               wallet.name,
+  //               modal,
+  //             )
+  //           );
+  //         },
+  //       },
+  //     ],
+  //   },
+  // },
+  {
+    urls: ['tranchess.com'],
+    testPath: {
+      desktop: [':text("Liquid Staking")', ':text("Ethereum")', ':text("Connect Wallet")'],
+      mobile: ['button.header--mobile-menu-toggle', ':text("Connect Wallet")'],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'div.wallet-provider-modal--item.meta-mask',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'div.wallet-provider-modal--item.wallet-connect',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.alpacafinance.org'],
+    testPath: [':text("Connect to Wallet")'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName(wallet) {
+            const modal = getConnectWalletModalByTitle('div.ant-modal-content', 'Select a wallet');
+            return (
+              modal &&
+              findIconAndNameDirectly(
+                'img[src*="metamask"]',
+                'auto-search-text',
+                wallet.name,
+                modal,
+              )
+            );
+          },
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('div.ant-modal-content', 'Select a wallet');
+            return (
+              modal &&
+              findIconAndNameDirectly(
+                'img[src*="wallet-connect.svg"]',
+                'auto-search-text',
+                name,
+                modal,
+              )
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app-v2.alpacafinance.org'],
+    testPath: [':text("Connect Wallet")'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName(wallet) {
+            const modal = getConnectWalletModalByTitle(
+              'div.chakra-modal__content-container',
+              'Select a wallet',
+            );
+            return (
+              modal &&
+              findIconAndNameDirectly('img[alt="MetaMask"]', 'auto-search-text', wallet.name, modal)
+            );
+          },
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle(
+              'div.chakra-modal__content-container',
+              'Select a wallet',
+            );
+            return (
+              modal &&
+              findIconAndNameDirectly('img[alt="WalletConnect"]', 'auto-search-text', name, modal)
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['exchange.idex.io'],
+    testPath: {
+      desktop: [':text("Get Started")', ':text("Connect Wallet")'],
+      mobile: [':text("Get Started")', ':text("Connect")'],
+    },
+    mutationObserverOptions: {
+      childList: true,
+      subtree: true,
+      attributes: true,
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'ul[class*="UnlockCore__ListWrap"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'ul[class*="UnlockCore__ListWrap"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.aura.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button[data-testid="rk-wallet-option-metaMask"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[data-testid="rk-wallet-option-walletConnect"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.frax.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button[data-testid="rk-wallet-option-metaMask"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[data-testid="rk-wallet-option-walletConnect"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['beets.fi'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button[data-testid="rk-wallet-option-metaMask"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[data-testid="rk-wallet-option-walletConnect"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.gmx.io'],
+
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container:
+            ':is(button[data-testid="rk-wallet-option-io.metamask"],button[data-testid="rk-wallet-option-metaMask"])',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[data-testid="rk-wallet-option-walletConnect"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['link3.to'],
+
+    skip: {
+      mobile: true, //WARN: mobile is not supported by the site
+    },
+    testPath: [':text("Login")', ':text("Connect Wallet")'],
+
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container:
+            ':is(button[data-testid="rk-wallet-option-metaMask"],button[data-testid="rk-wallet-option-io.metamask"])',
+        },
+        // {
+        //   ...basicWalletInfo['walletconnect'],
+        //   container: 'button[data-testid="rk-wallet-option-walletConnect"]',
+        // },
+      ],
+    },
+  },
+  {
+    urls: ['app.mento.org'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button[data-testid="rk-wallet-option-metaMask"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[data-testid="rk-wallet-option-walletConnect"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['synapseprotocol.com'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button[data-testid="rk-wallet-option-metaMask"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[data-testid="rk-wallet-option-walletConnect"]',
         },
       ],
     },

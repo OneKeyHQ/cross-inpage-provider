@@ -59,33 +59,38 @@ function findTextNode(
   text: RegExp | string,
   type: 'all' | 'first' = 'first',
 ): Text | Text[] | undefined | null {
-  const containerEle =
-    typeof container === 'string' ? document.querySelector(container) : container;
-  if (!containerEle) {
-    return;
+  const selectAll = type === 'all';
+  const containerEles =
+    typeof container === 'string' ? Array.from(document.querySelectorAll(container)) : [container];
+  if (containerEles.length === 0) {
+    return null;
   }
-  const walker = document.createTreeWalker(containerEle, NodeFilter.SHOW_TEXT, {
-    acceptNode(node) {
-      if (!node.nodeValue || node.parentElement instanceof SVGElement) {
-        return NodeFilter.FILTER_SKIP;
+  const result: Text[] = [];
+  for (const containerEle of containerEles) {
+    const walker = document.createTreeWalker(containerEle, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        if (!node.nodeValue || node.parentElement instanceof SVGElement) {
+          return NodeFilter.FILTER_SKIP;
+        }
+        return (
+          typeof text === 'string'
+            ? node.nodeValue.trim() === text.trim()
+            : text.test(node.nodeValue.trim())
+        )
+          ? NodeFilter.FILTER_ACCEPT
+          : NodeFilter.FILTER_SKIP;
+      },
+    });
+    
+    if (selectAll) {
+      while (walker.nextNode()) {
+        result.push(walker.currentNode as Text);
       }
-      return (
-        typeof text === 'string'
-          ? node.nodeValue.trim() === text.trim()
-          : text.test(node.nodeValue.trim())
-      )
-        ? NodeFilter.FILTER_ACCEPT
-        : NodeFilter.FILTER_SKIP;
-    },
-  });
-  if (type === 'all') {
-    const textNodes: Text[] = [];
-    while (walker.nextNode()) {
-      textNodes.push(walker.currentNode as Text);
+    } else {
+      return walker.nextNode() as Text | null;
     }
-    return textNodes;
   }
-  return walker.nextNode() as Text | null;
+  return result.filter(Boolean);
 }
 
 export default {

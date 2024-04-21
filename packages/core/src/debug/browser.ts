@@ -6,12 +6,11 @@
  */
 
 import { DEBUG_LOGGER_STORAGE_KEY } from '../consts';
-import { isNil } from 'lodash';
+import { isNil } from 'lodash-es';
 import humanize from 'ms';
 const storageKey = DEBUG_LOGGER_STORAGE_KEY;
 
 const exportsBrowser = {};
-
 exportsBrowser.formatArgs = formatArgs;
 exportsBrowser.save = save;
 exportsBrowser.load = load;

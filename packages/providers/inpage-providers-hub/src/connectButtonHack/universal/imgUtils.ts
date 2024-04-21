@@ -1,17 +1,22 @@
 import { ICON_MAX_SIZE, ICON_MIN_SIZE } from './consts';
 import { ConstraintFn } from './type';
-import { universalLog, isClickable } from './utils';
+import { universalLog } from './utils';
 
 export function replaceIcon(originalNode: HTMLElement, newIconSrc: string) {
+  const computedstyle = window.getComputedStyle(originalNode);
+  universalLog.log('===>ok: replace icon');
+
   if (originalNode instanceof HTMLImageElement) {
     originalNode.src = newIconSrc;
     originalNode.removeAttribute('srcset');
+    originalNode.style.width = computedstyle.width;
+    originalNode.style.height = computedstyle.height;
+    originalNode.classList.add(...Array.from(originalNode.classList));
     return originalNode;
   } else {
     const imgNode = createImageEle(newIconSrc);
-    const style = window.getComputedStyle(originalNode);
-    imgNode.style.width = style.width;
-    imgNode.style.height = style.height;
+    imgNode.style.width = computedstyle.width;
+    imgNode.style.height = computedstyle.height;
     imgNode.classList.add(...Array.from(originalNode.classList));
     originalNode.replaceWith(imgNode);
     return imgNode;
@@ -41,22 +46,19 @@ export function findIconNodesByParent(parent: HTMLElement) {
   }
   return matchingNodes;
 }
+
 /**
  * @description:
  * make sure that there is only one icon node match walletIcon to ignore hidden icon and other icon
  */
-export function findWalletIconByParent(
-  parent: HTMLElement,
-  textNode: Text,
-  constraints: ConstraintFn[],
-) {
+export function findWalletIconByParent(parent: HTMLElement, constraints: ConstraintFn[]) {
   const iconNodes = findIconNodesByParent(parent);
   if (iconNodes.length > 1) {
     universalLog.warn(`===>more than one icon node found`, iconNodes.length, iconNodes);
     return null;
   }
   const icon = iconNodes[0];
-  if (!icon || !textNode.parentElement || constraints.some((f) => !f(icon))) {
+  if (!icon || constraints.some((f) => !f(icon))) {
     universalLog.warn(`===>it is not a wallet icon`, icon);
     return null;
   }
@@ -70,6 +72,6 @@ export function isWalletIconSizeMatch(walletIcon: HTMLElement) {
     width > ICON_MIN_SIZE &&
     height < ICON_MAX_SIZE &&
     height > ICON_MIN_SIZE;
-    universalLog.log('===>wallet icon size match: ', isMatch);
+  universalLog.log('===>wallet icon size match: ', isMatch);
   return isMatch;
 }

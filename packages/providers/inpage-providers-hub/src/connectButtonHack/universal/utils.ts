@@ -1,6 +1,7 @@
 import { Logger } from '@onekeyfe/cross-inpage-provider-core';
 import { Selector } from './type';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
+import { find } from 'lodash';
 
 export const universalLog = new Logger('universal');
 
@@ -26,13 +27,21 @@ export const getConnectWalletModalByTitle = (
   for (const selector of selectors) {
     eles.push(...Array.from(document.querySelectorAll<HTMLElement>(selector)));
   }
+  const res: HTMLElement[] = [];
   for (const ele of eles) {
     if (isVisible(ele) && filter ? filter(ele) : true && ele.innerText.includes(title)) {
-      return ele;
+      res.push(ele);
     }
   }
-  universalLog.warn('can not find the connect wallet modal');
-  return null;
+  if (res.length === 0) {
+    universalLog.warn('can not find the connect wallet modal');
+    return null;
+  }
+  if (res.length === 1) {
+    return res[0];
+  }
+  universalLog.warn('find more than one connect wallet modal');
+  return res[res.length - 1];
 };
 
 export function isInExternalLink(element: HTMLElement, container: HTMLElement) {
@@ -53,6 +62,15 @@ export function getWalletId(provider: IInjectedProviderNames, updatedName: strin
     /onekey/i,
     'onekey-',
   );
+}
+export function getWalletIdSelector(walletId: string) {
+  return `img[data-wallet-id="${walletId}"]`;
+}
+export function isWalletUpdate(walletId: string) {
+  return !!document.querySelector(getWalletIdSelector(walletId));
+}
+export function setWalletUpdateId(ele: HTMLElement, walletId: string) {
+  ele.dataset.walletId = walletId;
 }
 
 export function arrayify<T>(ele: T | T[]): T[] {

@@ -316,7 +316,7 @@ function hackConnectButton({
       hackButtonLogger.debug('inject Provider disabled, skip hackConnectButton (DEV only log)');
       return;
     }
-    hackButtonLogger.debug('mutation triggered: hackConnectButton (DEV only log)');
+    // hackButtonLogger.debug('mutation triggered: hackConnectButton (DEV only log)');
     return enabledProviders;
   };
 

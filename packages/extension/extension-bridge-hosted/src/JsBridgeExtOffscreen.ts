@@ -32,7 +32,7 @@ class JsBridgeExtOffscreen extends JsBridgeBase {
       name: EXT_PORT_OFFSCREEN_TO_BG,
       // #### background -> offscreen
       onMessage: (payload: any, port0: chrome.runtime.Port) => {
-        let origin = utils.getOriginFromPort(port0) || '';
+        let origin = utils.getOriginFromPort(port0, { skipError: true }) || '';
 
         // in ext offscreen, port.sender?.origin is always empty,
         //    so we trust remote (background) origin

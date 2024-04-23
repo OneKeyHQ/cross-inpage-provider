@@ -27,9 +27,6 @@ hackConnectButton({
         return undefined;
       });
 
-      console.log('====findButton', findButton);
-      
-
       if (findButton) {
         // change button text
         const span = findButton.querySelector('div') as HTMLElement | undefined;

@@ -1,6 +1,7 @@
 export * from './JsBridgeBase';
 export * from './ProviderBase';
 export * from './loggers';
+export * from './loggerConsole';
 export * from './injectJsBridge';
 export * from './injectedProviderReceiveHandler';
 export * from './JsBridgeSimple';

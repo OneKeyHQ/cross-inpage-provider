@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment,@typescript-eslint/ban-ts-comment */
-import isFunction from 'lodash/isFunction';
+import { isFunction } from 'lodash-es';
 import { CrossEventEmitter } from './CrossEventEmitter';
 
 import { JsBridgeBase } from './JsBridgeBase';

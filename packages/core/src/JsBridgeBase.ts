@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import isPlainObject from 'lodash/isPlainObject';
-import isString from 'lodash/isString';
+import { isPlainObject, isString } from 'lodash-es';
 import { CrossEventEmitter } from './CrossEventEmitter';
 import { appDebugLogger, consoleErrorInDev } from './loggers';
 

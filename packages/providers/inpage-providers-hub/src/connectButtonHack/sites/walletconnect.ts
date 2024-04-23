@@ -7,6 +7,7 @@ import {
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 import type { IWindowOneKeyHub } from '../../injectWeb3Provider';
+import { commonLogger } from '@onekeyfe/cross-inpage-provider-core';
 
 const onekeyBtnBg = 'rgb(0, 184, 18)';
 function setOnClickToConnectWallet({ element, uri }: { element: HTMLElement; uri: string }) {
@@ -98,7 +99,7 @@ hackConnectButton({
             ) as HTMLAnchorElement | undefined;
           } catch (error) {
             // noop
-            console.error(error);
+            commonLogger.error(error);
           }
         }
         if (!firstItem || !iconsContainer) {

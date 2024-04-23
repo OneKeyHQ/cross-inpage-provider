@@ -9,6 +9,7 @@ import { ProviderAptos, ProviderAptosMartian } from '@onekeyfe/onekey-aptos-prov
 import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
 import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
 import { ProviderCardano, defineWindowCardanoProperty } from '@onekeyfe/onekey-cardano-provider';
+import { ProviderPrivateExternalAccount } from "@onekeyfe/onekey-private-external-account-provider";
 import { ProviderCosmos } from '@onekeyfe/onekey-cosmos-provider';
 import { ProviderPolkadot, registerPolkadot } from '@onekeyfe/onekey-polkadot-provider';
 import {
@@ -116,11 +117,14 @@ function injectWeb3Provider(): unknown {
 
   const btc = new ProviderBtc({ bridge });
 
+  const $privateExternalAccount = new ProviderPrivateExternalAccount({ bridge })
+
   // providerHub
   const $onekey = {
     ...window.$onekey,
     jsBridge: bridge,
     $private,
+    $privateExternalAccount,
     ethereum,
     solana,
     starcoin,

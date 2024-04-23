@@ -44,6 +44,7 @@
     "@onekeyfe/onekey-sui-provider": "2.0.0-alpha.2",
     "@onekeyfe/onekey-tron-provider": "2.0.0-alpha.2",
     "@onekeyfe/onekey-webln-provider": "2.0.0-alpha.2",
+    "@onekeyfe/onekey-private-external-account-provider": "2.0.0-alpha.2",
     "web3": "^1.7.3"
   }
 }

@@ -1,9 +1,9 @@
-import path from 'node:path';
-import { sitesConfig } from '../config';
-import { expect, test } from './fixtures';
-import { createWalletId, getWalletId, getWalletIdSelector } from '../utils';
-import { Locator } from 'playwright/test';
 import { type IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
+import path from 'node:path';
+import { Locator } from 'playwright/test';
+import { sitesConfig } from '../config';
+import { createWalletId } from '../utils';
+import { expect, test } from './fixtures';
 
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
@@ -13,9 +13,9 @@ async function dbg(locator: Locator) {
   });
 }
 test.describe('Connect Button Hack', () => {
-  const startWebSite = 'www.stakedao.org';
-  const startIdx = sitesConfig.findIndex((e) => e.urls.includes(startWebSite)) ;
-  const availableSites = sitesConfig.slice(startIdx==-1?0:startIdx);
+  const startWebSite = 'ambient.finance';
+  const startIdx = sitesConfig.findIndex((e) => e.urls.includes(startWebSite));
+  const availableSites = sitesConfig.slice(startIdx == -1 ? 0 : startIdx);
   const sitesOnly = availableSites.filter((e) => e.only);
   const sites = sitesOnly.length > 0 ? sitesOnly : availableSites;
   const sitesWithoutSkip = sites.filter((e) => (typeof e.skip === 'boolean' ? !e.skip : true));
@@ -26,8 +26,9 @@ test.describe('Connect Button Hack', () => {
       walletsForProvider,
       testPath = [":text-matches('Connect Wallet|Connect','i')"],
       skip,
+      testUrls,
     } = site;
-    for (const url of urls) {
+    for (const url of testUrls || urls) {
       test(url, async ({ page }, { project: { name } }) => {
         const device = name.includes('Mobile') ? 'mobile' : 'desktop';
         if (typeof skip === 'object' && skip !== null && skip[device] === true) {

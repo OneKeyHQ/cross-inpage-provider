@@ -5,6 +5,7 @@ import { find } from 'lodash';
 
 export const universalLog = new Logger('universal');
 
+//TODO:how to detect cursor status when hover
 export function isClickable(ele: HTMLElement) {
   return ele && window.getComputedStyle(ele).cursor === 'pointer';
 }
@@ -75,7 +76,6 @@ export function createWalletId(provider: IInjectedProviderNames, updatedName: st
     },
   };
 }
-
 
 export function arrayify<T>(ele: T | T[]): T[] {
   return Array.isArray(ele) ? ele : [ele];

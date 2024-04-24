@@ -9,7 +9,7 @@ import { createWalletId, universalLog } from './utils';
 
 function hackWalletConnectButton(sites: SitesInfo[]) {
   for (const site of sites) {
-    const { urls, walletsForProvider, mutationObserverOptions } = site;
+    const { urls, walletsForProvider, mutationObserverOptions, constraintMap } = site;
     const providers = Object.keys(walletsForProvider) as IInjectedProviderNames[];
     if (!urls.includes(window.location.hostname)) {
       continue;
@@ -36,6 +36,7 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                 updateIcon = defaultReplaceIcon,
                 updateName = defaultReplaceText,
                 update,
+                afterUpdate,
               } = wallet;
               try {
                 const walletId = createWalletId(provider, updatedName);
@@ -60,7 +61,7 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                   if (!containerElement) {
                     continue;
                   }
-                  result = defaultFindIconAndName(containerElement, name);
+                  result = defaultFindIconAndName(containerElement, name, constraintMap);
                 }
                 if (!result) {
                   universalLog.warn('==>warn: no result found');
@@ -68,9 +69,10 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                 }
                 const { textNode, iconNode } = result;
                 if (textNode && iconNode) {
-                  updateName(textNode, updatedName);
+                  const newText = updateName(textNode, updatedName);
                   const newIconElement = updateIcon(iconNode, updatedIcon);
                   walletId.updateFlag(newIconElement);
+                  afterUpdate?.(newText, newIconElement)
                 }
               } catch (e) {
                 universalLog.error(e);

@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { sitesConfig } from '../config';
 import { expect, test } from './fixtures';
-import { getWalletId, getWalletIdSelector } from '../utils';
+import { createWalletId, getWalletId, getWalletIdSelector } from '../utils';
 import { Locator } from 'playwright/test';
 import { type IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 
@@ -47,12 +47,12 @@ test.describe('Connect Button Hack', () => {
 
         for (const [provider, wallets = []] of Object.entries(walletsForProvider)) {
           for (const wallet of wallets) {
-            const walletId = getWalletId(provider as IInjectedProviderNames, wallet.updatedName);
-            const locator = page.locator(getWalletIdSelector(walletId)).first();
+            const walletId = createWalletId(provider as IInjectedProviderNames, wallet.updatedName);
+            const locator = page.locator(walletId.walletIdSelector).first();
             await dbg(locator);
             const existed = await locator.evaluate((el) => !!el && el.tagName === 'IMG');
             expect(existed).toBeTruthy();
-            console.log('===>[dbg]:', walletId, 'is found');
+            console.log('===>[dbg]:', walletId.walletId, 'is found');
           }
         }
       });

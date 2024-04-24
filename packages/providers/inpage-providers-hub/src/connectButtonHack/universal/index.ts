@@ -5,7 +5,7 @@ import { findIconAndNameByParent as defaultFindIconAndName } from './findIconAnd
 import { replaceIcon as defaultReplaceIcon } from './imgUtils';
 import { replaceText as defaultReplaceText } from './textUtils';
 import { FindResultType } from './type';
-import { universalLog, getWalletId, isWalletUpdate, setWalletUpdateId } from './utils';
+import { createWalletId, universalLog } from './utils';
 
 function hackWalletConnectButton(sites: SitesInfo[]) {
   for (const site of sites) {
@@ -38,15 +38,17 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                 update,
               } = wallet;
               try {
-                const walletId = getWalletId(provider, updatedName);
-                if (isWalletUpdate(walletId)) {
+                const walletId = createWalletId(provider, updatedName);
+                if (walletId.isUpdated) {
                   continue;
                 }
-                universalLog.log(`===>[replaceMethod] ${urls[0]} begin to run for ${walletId}`);
+                universalLog.log(
+                  `===>[replaceMethod] ${urls[0]} begin to run for ${walletId.walletId}`,
+                );
                 let result: FindResultType | null = null;
                 if (update) {
                   const newIconElement = update(wallet);
-                  newIconElement && setWalletUpdateId(newIconElement, walletId);
+                  newIconElement && walletId.updateFlag(newIconElement);
                   continue;
                 } else if (findIconAndName) {
                   result = findIconAndName.call(null, wallet);
@@ -68,7 +70,7 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                 if (textNode && iconNode) {
                   updateName(textNode, updatedName);
                   const newIconElement = updateIcon(iconNode, updatedIcon);
-                  setWalletUpdateId(newIconElement, walletId);
+                  walletId.updateFlag(newIconElement);
                 }
               } catch (e) {
                 universalLog.error(e);

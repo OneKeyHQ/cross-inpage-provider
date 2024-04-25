@@ -39,6 +39,7 @@ export type IWindowOneKeyHub = {
   webln?: ProviderWebln;
   nostr?: ProviderNostr;
   unisat?: ProviderBtc;
+  btcWallet?: ProviderBtc;
   $private?: ProviderPrivate;
   $walletInfo?: {
     buildNumber: string;
@@ -132,6 +133,7 @@ function injectWeb3Provider(): unknown {
     webln,
     nostr,
     btc,
+    btcWallet: btc,
   };
 
   defineWindowProperty('$onekey', $onekey, { enumerable: true });
@@ -172,6 +174,7 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('tronLink', tron);
   defineWindowProperty('suiWallet', sui);
   defineWindowProperty('unisat', btc);
+  defineWindowProperty('btcWallet', btc);
 
   // Cardano chain provider injection is handled independently.
   if (checkWalletSwitchEnable('cardano')) {

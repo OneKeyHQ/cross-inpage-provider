@@ -59,7 +59,7 @@ export function findWalletIconByParent(parent: HTMLElement, constraints: Constra
   }
   const icon = iconNodes[0];
   if (!icon || constraints.some((f) => !f(icon))) {
-    universalLog.warn(`===>it is not a wallet icon`, icon);
+    universalLog.warn(`===>it doesnt satisfy the constraints`, icon);
     return null;
   }
   return icon;

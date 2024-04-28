@@ -5,11 +5,11 @@ import { findIconAndNameByParent as defaultFindIconAndName } from './findIconAnd
 import { replaceIcon as defaultReplaceIcon } from './imgUtils';
 import { replaceText as defaultReplaceText } from './textUtils';
 import { FindResultType } from './type';
-import { universalLog, getWalletId, isWalletUpdate, setWalletUpdateId } from './utils';
+import { createWalletId, universalLog } from './utils';
 
 function hackWalletConnectButton(sites: SitesInfo[]) {
   for (const site of sites) {
-    const { urls, walletsForProvider, mutationObserverOptions } = site;
+    const { urls, walletsForProvider, mutationObserverOptions, constraintMap } = site;
     const providers = Object.keys(walletsForProvider) as IInjectedProviderNames[];
     if (!urls.includes(window.location.hostname)) {
       continue;
@@ -36,17 +36,20 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                 updateIcon = defaultReplaceIcon,
                 updateName = defaultReplaceText,
                 update,
+                afterUpdate,
               } = wallet;
               try {
-                const walletId = getWalletId(provider, updatedName);
-                if (isWalletUpdate(walletId)) {
+                const walletId = createWalletId(provider, updatedName);
+                if (walletId.isUpdated) {
                   continue;
                 }
-                universalLog.log(`===>[replaceMethod] ${urls[0]} begin to run for ${walletId}`);
+                universalLog.log(
+                  `===>[replaceMethod] ${urls[0]} begin to run for ${walletId.walletId}`,
+                );
                 let result: FindResultType | null = null;
                 if (update) {
                   const newIconElement = update(wallet);
-                  newIconElement && setWalletUpdateId(newIconElement, walletId);
+                  newIconElement && walletId.updateFlag(newIconElement);
                   continue;
                 } else if (findIconAndName) {
                   result = findIconAndName.call(null, wallet);
@@ -58,7 +61,7 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                   if (!containerElement) {
                     continue;
                   }
-                  result = defaultFindIconAndName(containerElement, name);
+                  result = defaultFindIconAndName(containerElement, name, constraintMap);
                 }
                 if (!result) {
                   universalLog.warn('==>warn: no result found');
@@ -66,9 +69,10 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                 }
                 const { textNode, iconNode } = result;
                 if (textNode && iconNode) {
-                  updateName(textNode, updatedName);
+                  const newText = updateName(textNode, updatedName);
                   const newIconElement = updateIcon(iconNode, updatedIcon);
-                  setWalletUpdateId(newIconElement, walletId);
+                  walletId.updateFlag(newIconElement);
+                  afterUpdate?.(newText, newIconElement)
                 }
               } catch (e) {
                 universalLog.error(e);

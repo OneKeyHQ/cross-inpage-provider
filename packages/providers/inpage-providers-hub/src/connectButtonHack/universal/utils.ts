@@ -5,6 +5,7 @@ import { find } from 'lodash';
 
 export const universalLog = new Logger('universal');
 
+//TODO:how to detect cursor status when hover
 export function isClickable(ele: HTMLElement) {
   return ele && window.getComputedStyle(ele).cursor === 'pointer';
 }
@@ -57,20 +58,23 @@ export function isVisible(ele: HTMLElement) {
   const style = window.getComputedStyle(ele);
   return style.visibility !== 'hidden' && style.display !== 'none';
 }
-export function getWalletId(provider: IInjectedProviderNames, updatedName: string) {
-  return `${provider}-${updatedName.replace(/[\s&.]/g, '').toLowerCase()}`.replace(
+
+export function createWalletId(provider: IInjectedProviderNames, updatedName: string) {
+  const walletId = `${provider}-${updatedName.replace(/[\s&.]/g, '').toLowerCase()}`.replace(
     /onekey/i,
     'onekey-',
   );
-}
-export function getWalletIdSelector(walletId: string) {
-  return `img[data-wallet-id="${walletId}"]`;
-}
-export function isWalletUpdate(walletId: string) {
-  return !!document.querySelector(getWalletIdSelector(walletId));
-}
-export function setWalletUpdateId(ele: HTMLElement, walletId: string) {
-  ele.dataset.walletId = walletId;
+  const walletIdSelector = `[data-wallet-id="${walletId}"]`;
+  return {
+    walletId,
+    walletIdSelector,
+    get isUpdated() {
+      return !!document.querySelector(walletIdSelector);
+    },
+    updateFlag(ele: HTMLElement) {
+      ele.dataset.walletId = walletId;
+    },
+  };
 }
 
 export function arrayify<T>(ele: T | T[]): T[] {

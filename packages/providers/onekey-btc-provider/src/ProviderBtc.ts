@@ -14,8 +14,6 @@ import {
   MessageType,
   BalanceInfo,
   InscriptionInfo,
-  Fees,
-  UTXO,
 } from './types';
 import { isWalletEventMethodMatch } from './utils';
 
@@ -143,7 +141,7 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
     this._emit(ProviderEvents.ACCOUNTS_CHANGED, accounts);
   }
 
-  private async _request<T>(args: RequestArguments): Promise<T> {
+  protected async _request<T>(args: RequestArguments): Promise<T> {
     const { method, params } = args;
 
     if (!method || typeof method !== 'string' || method.length === 0) {
@@ -195,14 +193,10 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
     });
   }
 
-  async getBalance() {
-    const result = await this._request<BalanceInfo>({
+  async getBalance(): Promise<BalanceInfo | number> {
+    return this._request<BalanceInfo>({
       method: ProviderMethods.GET_BALANCE,
     });
-    if (this._state.isBtcWalletProvider) {
-      return result.confirmed
-    }
-    return result
   }
 
   async getInscriptions(cursor = 0, size = 20) {
@@ -311,49 +305,6 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
 
   emit<E extends ProviderEvents>(event: E, ...args: unknown[]): boolean {
     return super.emit(event, ...args);
-  }
-
-  // For Babylon method
-  async connectWallet(): Promise<this> {
-    await this.requestAccounts();
-    this._state.isBtcWalletProvider = true
-    return this
-  } 
-
-  getWalletProviderName(): Promise<string> {
-    this._state.isBtcWalletProvider = true
-    return Promise.resolve('OneKey') 
-  }
-
-  async getAddress(): Promise<string> {
-    this._state.isBtcWalletProvider = true
-    const addresses = await this.requestAccounts();      
-    return addresses?.[0] ?? 0
-  }
-
-  getPublicKeyHex(): Promise<string> {
-    return this.getPublicKey()
-  }
-
-  signMessageBIP322(message: string): Promise<string> {
-    return this.signMessage(message, 'bip322-simple')
-  }
-
-  getNetworkFees(): Promise<Fees> {
-    this._state.isBtcWalletProvider = true
-    return this._request<Fees>({
-      method: ProviderMethods.GET_NETWORK_FEES,
-    });
-  }
-
-  getUtxos(address: string, amount: number): Promise<UTXO[]> {
-    return this._request<UTXO[]>({
-      method: ProviderMethods.GET_UTXOS,
-      params: {
-        address,
-        amount,
-      },
-    });
   }
 }
 

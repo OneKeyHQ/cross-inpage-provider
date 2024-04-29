@@ -136,10 +136,13 @@ export interface IProviderBtc extends ProviderBtcBase {
   signPsbts(psbtHexs: string[], options?: { autoFinalized: boolean }): Promise<string[]>;
   pushPsbt(psbt: string): Promise<string>;
   inscribeTransfer(ticker: string, amount: string): Promise<string>;
+}
 
-  /**
-   * Add support for the Babylon BTC wallet provider.
-   */
+
+/**
+ * Add support for the Babylon BTC wallet provider.
+ */
+export interface IProviderBtcWallet extends IProviderBtc {
   connectWallet(): Promise<this>;
   getWalletProviderName(): Promise<string>;
   getAddress(): Promise<string>;

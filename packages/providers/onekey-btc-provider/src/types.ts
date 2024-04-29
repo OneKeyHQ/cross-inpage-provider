@@ -28,6 +28,7 @@ export type ProviderState = {
   isUnlocked: boolean;
   initialized: boolean;
   isPermanentlyDisconnected: boolean;
+  isBtcWalletProvider: boolean;
 };
 
 export enum ProviderEvents {
@@ -56,6 +57,12 @@ export enum ProviderMethods {
   PUSH_PSBT = 'pushPsbt',
   GET_PROVIDER_STATE = 'getProviderState',
   INSCRIBE_TRANSFER = 'inscribeTransfer',
+
+  /**
+   * Add support for the Babylon BTC wallet provider.
+   */
+  GET_NETWORK_FEES = 'getNetworkFees',
+  GET_UTXOS = 'getUtxos',
 }
 
 export type OneKeyBtcProviderProps = IInpageProviderConfig & {
@@ -77,6 +84,30 @@ export interface ProviderEventsMap {
   [ProviderEvents.MESSAGE_LOW_LEVEL]: (payload: IJsonRpcRequest) => void;
 }
 
+export type Fees = {
+  // fee for inclusion in the next block
+  fastestFee: number;
+  // fee for inclusion in a block in 30 mins
+  halfHourFee: number;
+  // fee for inclusion in a block in 1 hour
+  hourFee: number;
+  // economy fee: inclusion not guaranteed
+  economyFee: number;
+  // minimum fee: the minimum fee of the network
+  minimumFee: number;
+};
+
+export interface UTXO {
+  // hash of transaction that holds the UTXO
+  txid: string;
+  // index of the output in the transaction
+  vout: number;
+  // amount of satoshis the UTXO holds
+  value: number;
+  // the script that the UTXO contains
+  scriptPubKey: string;
+}
+
 export interface IProviderBtc extends ProviderBtcBase {
   readonly isOneKey: boolean;
 
@@ -85,7 +116,7 @@ export interface IProviderBtc extends ProviderBtcBase {
   getNetwork(): Promise<string>;
   switchNetwork(network: NetworkType): Promise<void>;
   getPublicKey(): Promise<string>;
-  getBalance(): Promise<BalanceInfo>;
+  getBalance(): Promise<BalanceInfo | number>;
   getInscriptions(
     cursor?: number,
     size?: number,
@@ -105,4 +136,18 @@ export interface IProviderBtc extends ProviderBtcBase {
   signPsbts(psbtHexs: string[], options?: { autoFinalized: boolean }): Promise<string[]>;
   pushPsbt(psbt: string): Promise<string>;
   inscribeTransfer(ticker: string, amount: string): Promise<string>;
+}
+
+
+/**
+ * Add support for the Babylon BTC wallet provider.
+ */
+export interface IProviderBtcWallet extends IProviderBtc {
+  connectWallet(): Promise<this>;
+  getWalletProviderName(): Promise<string>;
+  getAddress(): Promise<string>;
+  getPublicKeyHex(): Promise<string>;
+  signMessageBIP322(message: string): Promise<string>;
+  getNetworkFees(): Promise<Fees>;
+  getUtxos(address: string, amount: number): Promise<UTXO[]>;
 }

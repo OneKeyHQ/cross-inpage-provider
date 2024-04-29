@@ -31,7 +31,6 @@ import './sites/rocketpool';
 import './sites/avocado';
 import './sites/liteInstadapp';
 import './sites/methMantle';
-import './sites/stakestone';
 import './sites/balancerFi';
 import './sites/imtblTop';
 import './sites/renzoprotocol';

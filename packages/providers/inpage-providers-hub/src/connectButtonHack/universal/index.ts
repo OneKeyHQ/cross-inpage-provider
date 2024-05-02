@@ -3,7 +3,7 @@ import { hackConnectButton } from '../hackConnectButton';
 import { SitesInfo, sitesConfig } from './config';
 import { findIconAndNameByParent as defaultFindIconAndName } from './findIconAndName';
 import { replaceIcon as defaultReplaceIcon } from './imgUtils';
-import { replaceText as defaultReplaceText } from './textUtils';
+import { replaceText as defaultReplaceText, makeTextEllipse } from './textUtils';
 import { FindResultType } from './type';
 import { createWalletId, universalLog } from './utils';
 
@@ -72,6 +72,7 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                   const newText = updateName(textNode, updatedName);
                   const newIconElement = updateIcon(iconNode, updatedIcon);
                   walletId.updateFlag(newIconElement);
+                  makeTextEllipse(newText.parentElement as HTMLElement);
                   afterUpdate?.(newText, newIconElement)
                 }
               } catch (e) {

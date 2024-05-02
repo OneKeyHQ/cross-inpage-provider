@@ -53,13 +53,17 @@ export function findIconNodesByParent(parent: HTMLElement) {
  */
 export function findWalletIconByParent(parent: HTMLElement, constraints: ConstraintFn[]) {
   const iconNodes = findIconNodesByParent(parent);
+  if (iconNodes.length === 0) {
+    universalLog.warn(`===>no icon node found`, parent);
+    return null;
+  }
   if (iconNodes.length > 1) {
     universalLog.warn(`===>more than one icon node found`, iconNodes.length, iconNodes);
     return null;
   }
   const icon = iconNodes[0];
-  if (!icon || constraints.some((f) => !f(icon))) {
-    universalLog.warn(`===>it doesnt satisfy the constraints`, icon);
+  if (constraints.some((f) => !f(icon))) {
+    universalLog.warn('===>it doesnt satisfy the constraints');
     return null;
   }
   return icon;

@@ -1,22 +1,25 @@
 import { ICON_MAX_SIZE, ICON_MIN_SIZE } from './consts';
 import { ConstraintFn } from './type';
 import { universalLog } from './utils';
-
+/**
+ *  @note: lazy loading image  with  width and height 0
+ */
 export function replaceIcon(originalNode: HTMLElement, newIconSrc: string) {
   const computedstyle = window.getComputedStyle(originalNode);
-  universalLog.log('===>ok: replace icon');
-
+  universalLog.log('===>ok: replace icon', originalNode);
+  const width = parseFloat(computedstyle.width) ? computedstyle.width : 'auto';
+  const height = parseFloat(computedstyle.height) ? computedstyle.height : 'auto';
   if (originalNode instanceof HTMLImageElement) {
     originalNode.src = newIconSrc;
     originalNode.removeAttribute('srcset');
-    originalNode.style.width = computedstyle.width;
-    originalNode.style.height = computedstyle.height;
+    originalNode.style.width = width;
+    originalNode.style.height = height;
     originalNode.classList.add(...Array.from(originalNode.classList));
     return originalNode;
   } else {
     const imgNode = createImageEle(newIconSrc);
-    imgNode.style.width = computedstyle.width;
-    imgNode.style.height = computedstyle.height;
+    imgNode.style.width = width;
+    imgNode.style.height = height;
     imgNode.classList.add(...Array.from(originalNode.classList));
     originalNode.replaceWith(imgNode);
     return imgNode;
@@ -63,12 +66,12 @@ export function findWalletIconByParent(parent: HTMLElement, constraints: Constra
   }
   const icon = iconNodes[0];
   if (constraints.some((f) => !f(icon))) {
-    universalLog.warn('===>it doesnt satisfy the constraints');
+    universalLog.warn('it doesnt satisfy the constraints');
     return null;
   }
   return icon;
 }
-
+//TODO:  deal with lazy loading image
 export function isWalletIconSizeMatch(walletIcon: HTMLElement) {
   const { width, height } = walletIcon.getBoundingClientRect();
   const isMatch =
@@ -76,6 +79,6 @@ export function isWalletIconSizeMatch(walletIcon: HTMLElement) {
     width > ICON_MIN_SIZE &&
     height < ICON_MAX_SIZE &&
     height > ICON_MIN_SIZE;
-  universalLog.log('===>wallet icon size match: ', isMatch);
+  !isMatch && universalLog.log('===>wallet icon size doesnot match: ', width, height);
   return isMatch;
 }

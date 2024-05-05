@@ -1,6 +1,6 @@
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO, WALLET_NAMES } from '../consts';
-import { findIconAndNameDirectly } from './findIconAndName';
+import { findIconAndNameByParent, findIconAndNameDirectly } from './findIconAndName';
 import { findWalletIconByParent, isWalletIconSizeMatch, replaceIcon } from './imgUtils';
 import { findIconAndNameInShadowRoot } from './shadowRoot';
 import { ConstraintFn, FindResultType, Selector } from './type';
@@ -58,6 +58,11 @@ export const basicWalletInfo = {
     updatedIcon: WALLET_CONNECT_INFO.martian.icon,
     updatedName: WALLET_CONNECT_INFO.martian.text,
     name: /^Martian$/i,
+  },
+  [WALLET_NAMES.nami]: {
+    updatedIcon: WALLET_CONNECT_INFO.nami.icon,
+    updatedName: WALLET_CONNECT_INFO.nami.text,
+    name: /^(Nami Wallet|Nami)$/i,
   },
 } as const;
 
@@ -2001,61 +2006,83 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
-  // {
-  //   urls: ['www.staderlabs.com'],
-  //   only: true,
-  //   testUrls: ['www.staderlabs.com/eth/stake/'],
-  //   constraintMap: { icon: [isWalletIconSizeMatch], text: [] },
-  //   walletsForProvider: {
-  //     [IInjectedProviderNames.ethereum]: [
-  //       {
-  //         ...basicWalletInfo['metamask'],
-  //         findIconAndName({ name }) {
-  //           const modal = getConnectWalletModalByTitle('.chakra-modal__content-container', 'Select wallet')
-  //           return (
-  //             modal &&
-  //             findIconAndNameDirectly(
-  //               'img[src*="media/mm"][alt="metaMask Logo"]',
-  //               'auto-search-text',
-  //               name,
-  //               modal,
-  //               { text: [], icon: [] },
-  //               6
-  //             )
-  //           );
-  //         },
-  //         afterUpdate(text, icon) {
-  //           icon.style.minHeight = '40px'
-  //           icon.style.height = '40px'
-  //           icon.style.width = '40px'
-  //           icon.style.minWidth = '40px'
-  //         }
-  //       },
-  //       {
-  //         ...basicWalletInfo['walletconnect'],
-  //         findIconAndName({ name }) {
-  //           const modal = getConnectWalletModalByTitle('.chakra-modal__content-container', 'Select wallet')
-  //           return (
-  //             modal &&
-  //             findIconAndNameDirectly(
-  //               'img[src*="media/wc"][alt="walletConnect Logo"]',
-  //               'auto-search-text',
-  //               name,
-  //               modal, { text: [], icon: [] },
-  //               6
-  //             )
-  //           );
-  //         },
-  //         afterUpdate(text, icon) {
-  //           icon.style.minHeight = '40px'
-  //           icon.style.height = '40px'
-  //           icon.style.width = '40px'
-  //           icon.style.minWidth = '40px'
-  //         }
-  //       },
-  //     ],
-  //   },
-  // },
+  {
+    urls: ['www.staderlabs.com'],
+    skip: {
+      mobile: true, //tmp skip for lack walletconnet
+    },
+    testUrls: ['www.staderlabs.com/eth/stake/'],
+    constraintMap: { icon: [isWalletIconSizeMatch], text: [] },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+
+          findIconAndName({ name }) {
+            const modal =
+              getConnectWalletModalByTitle('.chakra-modal__content-container', 'Select wallet') ||
+              getConnectWalletModalByTitle('#__CONNECTKIT__', 'Connect Wallet');
+            if (!modal) {
+              return null;
+            }
+            return (
+              findIconAndNameByParent(modal, name, {
+                text: [],
+                icon: [],
+              }) ||
+              findIconAndNameDirectly(
+                'img[src*="media/mm"][alt="metaMask Logo"]',
+                'auto-search-text',
+                name,
+                modal,
+                { text: [], icon: [] },
+                5,
+              )
+            );
+          },
+          afterUpdate(text, icon) {
+            const parent = text.parentElement?.parentElement;
+            const imgContainer = parent?.firstChild as HTMLDivElement;
+            if (parent && imgContainer) {
+              imgContainer.style.display = 'flex';
+              imgContainer.style.alignItems = 'center';
+              imgContainer.style.borderRadius = '0';
+              imgContainer.style.flexShrink = '0';
+            }
+          },
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          findIconAndName({ name }) {
+            const modal =
+              getConnectWalletModalByTitle('.chakra-modal__content-container', 'Select wallet') ||
+              getConnectWalletModalByTitle('#__CONNECTKIT__', 'Connect Wallet');
+            if (!modal) {
+              return null;
+            }
+            return findIconAndNameDirectly(
+              'img[alt="walletConnect Logo"]',
+              'auto-search-text',
+              name,
+              modal,
+              { text: [], icon: [] },
+              5,
+            );
+          },
+          afterUpdate(text, icon) {
+            const parent = text.parentElement?.parentElement;
+            const imgContainer = parent?.firstChild as HTMLDivElement;
+            if (parent && imgContainer) {
+              imgContainer.style.display = 'flex';
+              imgContainer.style.alignItems = 'center';
+              imgContainer.style.borderRadius = '0';
+              imgContainer.style.flexShrink = '0';
+            }
+          },
+        },
+      ],
+    },
+  },
   {
     urls: ['stake.solblaze.org'],
     testPath: [':text("Agree")', ':text("Connect Wallet")'],
@@ -2077,6 +2104,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['buzz.bsquared.network'],
+    skip: true, //temp skip
 
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
@@ -2183,6 +2211,7 @@ export const sitesConfig: SitesInfo[] = [
   // },
   {
     urls: ['app.radiant.capital'],
+    testPath: [':text("Continue")', ':text("Connect Wallet")'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         // {
@@ -2201,16 +2230,137 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.ariesmarkets.xyz'],
-    testPath: [':text("I agree")', ':text("Connect")'],
+    testUrls: ['app.ariesmarkets.xyz/lending'],
+    // mutationObserverOptions: {
+    //   childList: true,
+    //   subtree: true,
+    //   attributes: true,
+    // },
+    //TODO: mobile version
+    constraintMap: { icon: [isWalletIconSizeMatch], text: [] },
     walletsForProvider: {
       [IInjectedProviderNames.aptos]: [
         {
           ...basicWalletInfo['petra'],
           container: () => {
-            return getConnectWalletModalByTitle('div.mantine-Paper-root', 'Select Wallet');
+            const pc = getConnectWalletModalByTitle('div.mantine-Paper-root', 'Select Wallet');
+            const mobileTitle =
+              (domUtils.findTextNode('#root', 'Select Wallet', 'first') as Text) || null;
+            return (
+              pc || mobileTitle?.parentElement?.parentElement?.parentElement?.parentElement || null
+            );
           },
         },
       ],
     },
-  }
+  },
+  {
+    urls: ['app.indigoprotocol.io'],
+    // testPath: [':text("I agree")', ':text("Connect")'],
+    constraintMap: { icon: [], text: [] },
+    walletsForProvider: {
+      [IInjectedProviderNames.cardano]: [
+        {
+          ...basicWalletInfo['nami'],
+          container: () => {
+            return getConnectWalletModalByTitle('#modal-connect-wallet', 'Connect Wallet');
+          },
+        },
+      ],
+    },
+  },
+
+  {
+    urls: ['app.minswap.org'],
+    testPath: {
+      desktop: [':text("Connect Wallet")'],
+      mobile: ['header.flex > button>svg', ':text("Connect Wallet")'],
+    },
+    skip: true, //temp skip
+
+    walletsForProvider: {
+      [IInjectedProviderNames.cardano]: [
+        {
+          ...basicWalletInfo['nami'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle(
+              'div.dialog-connect-wallet',
+              'Connect wallet',
+            );
+            return (
+              modal &&
+              findIconAndNameDirectly(
+                'img[src*="nami.svg"][alt="Nami"]',
+                'auto-search-text',
+                name,
+                modal,
+                { text: [], icon: [] },
+                6,
+              )
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['pancakeswap.finance', 'app.pancakeswap.finance', 'www.pancakeswap.finance'],
+    skip: {
+      mobile: true, //temp skip for lack walletconnect
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('#portal-root', 'Connect Wallet');
+            return (
+              modal &&
+              findIconAndNameDirectly(
+                'img[src*="wallets/metamask.png"]',
+                'auto-search-text',
+                name,
+                modal,
+                { text: [], icon: [] },
+                5,
+              )
+            );
+          },
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('#portal-root', 'Connect Wallet');
+            return (
+              modal &&
+              findIconAndNameDirectly(
+                'img[src*="wallets/walletconnect.png"]',
+                'auto-search-text',
+                name,
+                modal,
+                { text: [], icon: [] },
+                5,
+              )
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['www.nucleon.space'],
+    testUrls: ['www.nucleon.space/#/data/stake'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => getConnectWalletModalByTitle('div.ant-modal-content', 'Select a Wallet'),
+          afterUpdate(textNode, icon) {
+            icon.style.height = '28px';
+            icon.style.width = 'auto';
+          },
+        },
+      ],
+    },
+  },
 ];

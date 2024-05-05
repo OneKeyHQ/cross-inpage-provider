@@ -24,7 +24,7 @@ export function findWalletTextByParent(
   constraints: ConstraintFn[],
 ): Text | null {
   if (!(container instanceof HTMLElement)) {
-    universalLog.warn('arg is wrong. container is not a HTMLElement');
+    universalLog.warn('arg is wrong. container is not a HTMLElement', container);
     return null;
   }
   const textNodes = domUtils.findTextNode(container, walletName, 'all') as Text[] | null;

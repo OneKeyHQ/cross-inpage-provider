@@ -73,10 +73,10 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                   const newIconElement = updateIcon(iconNode, updatedIcon);
                   walletId.updateFlag(newIconElement);
                   makeTextEllipse(newText.parentElement as HTMLElement);
-                  afterUpdate?.(newText, newIconElement)
+                  afterUpdate?.(newText, newIconElement);
                 }
               } catch (e) {
-                universalLog.error(e);
+                universalLog.warn(e);
               }
             }
           }
@@ -89,5 +89,5 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
 try {
   hackWalletConnectButton(sitesConfig);
 } catch (e) {
-  universalLog.error(e);
+  universalLog.warn(e);
 }

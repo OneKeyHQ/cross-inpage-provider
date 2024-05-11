@@ -21,6 +21,9 @@ export function checkWalletSwitchEnable() {
   try {
     const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY_V5);
     const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
+    if (!walletInfoLocal) {
+      return true;
+    }
     if (!walletInfoLocal?.isDefaultWallet) {
       if (process.env.NODE_ENV !== 'production') {
         console.log('OneKey is not default wallet')

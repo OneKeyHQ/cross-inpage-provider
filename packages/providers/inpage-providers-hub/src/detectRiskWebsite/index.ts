@@ -26,10 +26,10 @@ interface IWalletRiskInfo {
   isExtension: boolean | undefined;
   i18n: {
     title: string;
-    listTitle: string;
-    listContent: string[];
+    description: string;
     continueMessage: string;
     continueLink: string;
+    addToWhiteListLink: string;
     closeButton: string;
     sourceMessage: string;
   };
@@ -60,16 +60,12 @@ class ShadowModal {
   render() {
     const {
       title = "Malicious Dapp",
-      listTitle = "Potential risks:",
-      listContent = [
-        "Theft of recovery phrase or password",
-        "Phishing attacks",
-        "Fake tokens or scams",
-      ],
+      description = "The current website may be malicious. Continue visiting could result in loss of assets.",
       continueMessage = "If you understand the risks and want to proceed, you can",
-      continueLink = "continue to the site",
+      continueLink = "dismiss",
+      addToWhiteListLink = "add to whitelist",
       closeButton: btnText = "Close Tab",
-      sourceMessage = "Connection blocked by",
+      sourceMessage = "Powered by",
     } = this.riskInfo?.i18n ?? {};
     // 创建样式
     const style = document.createElement("style");
@@ -95,11 +91,8 @@ class ShadowModal {
 			</div>
 		${title}
 		</div>
-		<p class="onekey-inject-text-wrap onekey-inject-font onekey-inject-bodyLg">${listTitle}</p>
-		<ul class="onekey-inject-list onekey-inject-font onekey-inject-bodyLg">
-      ${listContent.map((item) => `<li>${item}</li>`).join("")}
-		</ul>
-		<p class="onekey-inject-font onekey-inject-bodyLg onekey-inject-text-subdued">${continueMessage}${" "}<span id="onekey-inject-continue" class="onekey-inject-continue-link">${continueLink}</span>.</p>
+		<p class="onekey-inject-text-wrap onekey-inject-font onekey-inject-bodyLg">${description}</p>
+		<p class="onekey-inject-font onekey-inject-bodyLg onekey-inject-text-subdued">${continueMessage}${" "}<span id="onekey-inject-continue" class="onekey-inject-continue-link">${continueLink}</span>${" or "}<span id="onekey-inject-addToWhiteList" class="onekey-inject-continue-link">${addToWhiteListLink}</span>.</p>
 		`;
 
     const closeButton = document.createElement("button");
@@ -131,14 +124,27 @@ class ShadowModal {
     const continueButton = this.shadowRoot?.getElementById(
       "onekey-inject-continue"
     );
+    const addToWhiteListButton = this.shadowRoot?.getElementById(
+      "onekey-inject-addToWhiteList"
+    );
     if (continueButton) {
       console.log("continueButton --> onclick", continueButton);
       continueButton.addEventListener("click", () => this.closeOverlay());
+    }
+    if (addToWhiteListButton) {
+      console.log("addToWhiteListButton --> onclick", addToWhiteListButton);
+      addToWhiteListButton.addEventListener("click", this.addToWhiteList.bind(this));
     }
   }
 
   closeOverlay() {
     this.hostElement?.remove();
+  }
+  async addToWhiteList() {
+    await window.$onekey.$private.request({
+      method: "wallet_addBrowserUrlToRiskWhiteList",
+    });
+    this.closeOverlay();
   }
   closeTab() {
     void window.$onekey.$private.request({
@@ -181,5 +187,3 @@ export async function detectWebsiteRiskLevel() {
     console.error("Detect Risk website error: ", e);
   }
 }
-
-void detectWebsiteRiskLevel();

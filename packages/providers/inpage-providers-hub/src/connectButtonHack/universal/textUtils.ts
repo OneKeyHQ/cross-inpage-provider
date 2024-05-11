@@ -30,15 +30,18 @@ export function findWalletTextByParent(
   const textNodes = domUtils.findTextNode(container, walletName, 'all') as Text[] | null;
   const length = textNodes?.length || 0;
   if (length === 0 || !textNodes) {
-    universalLog.warn(`===>find  none for wallet name ${walletName.toString()}`);
+    universalLog.warn(
+      `find  none for wallet name ${walletName.toString()},container is `,
+      container,
+    );
     return null;
   }
   if (length > 1) {
-    universalLog.warn(`===>find  more than one text node for wallet name ${walletName.toString()}`);
+    universalLog.warn(`find  more than one text node for wallet name ${walletName.toString()}`);
     return null;
   }
   if (constraints.some((f) => !textNodes[0].parentElement || !f(textNodes[0].parentElement))) {
-    universalLog.warn('===>it doesnot satisfy the constraints');
+    universalLog.warn('it doesnot satisfy the constraints');
     return null;
   }
 

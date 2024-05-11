@@ -44,7 +44,7 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                   continue;
                 }
                 universalLog.log(
-                  `===>[replaceMethod] ${urls[0]} begin to run for ${walletId.walletId}`,
+                  `[replaceMethod] ${urls[0]} begin to run for ${walletId.walletId}`,
                 );
                 let result: FindResultType | null = null;
                 if (update) {

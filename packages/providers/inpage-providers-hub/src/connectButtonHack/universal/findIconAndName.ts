@@ -19,11 +19,11 @@ export function findIconAndNameByParent(
 ): FindResultType | null {
   const textNode = findWalletTextByParent(containerElement, walletName, constraints.text);
   if (!textNode || !textNode.parentElement) {
-    universalLog.log(`===>no wallet name ${walletName.toString()} text node found`);
+    universalLog.log(`no wallet name ${walletName.toString()} text node found`);
     return null;
   }
   if (isInExternalLink(textNode.parentElement, containerElement)) {
-    universalLog.log(`===>${walletName.toString()} is in external link`);
+    universalLog.log(`${walletName.toString()} is in external link`);
     return null;
   }
 
@@ -42,7 +42,7 @@ export function findIconAndNameByParent(
     break;
   }
   if (!iconNode) {
-    universalLog.log(`===>no wallet ${walletName.toString()} icon node found`);
+    universalLog.log(`no wallet ${walletName.toString()} icon node found`);
     return null;
   }
   // make sure the icon and text are both existed

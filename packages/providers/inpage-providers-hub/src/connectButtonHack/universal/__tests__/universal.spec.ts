@@ -9,7 +9,7 @@ import { expect, test } from './fixtures';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 async function dbg(locator: Locator) {
   return locator?.evaluate((el) => {
-    console.log('===>[dbg] element:', el.tagName, el.classList, el.textContent?.slice(0, 40));
+    console.log('[dbg] element:', el.tagName, el.classList, el.textContent?.slice(0, 40));
   });
 }
 test.describe('Connect Button Hack', () => {
@@ -53,7 +53,7 @@ test.describe('Connect Button Hack', () => {
             await dbg(locator);
             const existed = await locator.evaluate((el) => !!el && el.tagName === 'IMG');
             expect(existed).toBeTruthy();
-            console.log('===>[dbg]:', walletId.walletId, 'is found');
+            console.log('[dbg]:', walletId.walletId, 'is found');
           }
         }
       });

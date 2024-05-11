@@ -6,7 +6,7 @@ import { universalLog } from './utils';
  */
 export function replaceIcon(originalNode: HTMLElement, newIconSrc: string) {
   const computedstyle = window.getComputedStyle(originalNode);
-  universalLog.log('===>ok: replace icon', originalNode);
+  universalLog.log('ok: replace icon', originalNode);
   const width = parseFloat(computedstyle.width) ? computedstyle.width : 'auto';
   const height = parseFloat(computedstyle.height) ? computedstyle.height : 'auto';
   if (originalNode instanceof HTMLImageElement) {
@@ -57,11 +57,11 @@ export function findIconNodesByParent(parent: HTMLElement) {
 export function findWalletIconByParent(parent: HTMLElement, constraints: ConstraintFn[]) {
   const iconNodes = findIconNodesByParent(parent);
   if (iconNodes.length === 0) {
-    universalLog.warn(`===>no icon node found`, parent);
+    universalLog.warn(`no icon node found`, parent);
     return null;
   }
   if (iconNodes.length > 1) {
-    universalLog.warn(`===>more than one icon node found`, iconNodes.length, iconNodes);
+    universalLog.warn(`more than one icon node found`, iconNodes.length, iconNodes);
     return null;
   }
   const icon = iconNodes[0];
@@ -79,6 +79,6 @@ export function isWalletIconSizeMatch(walletIcon: HTMLElement) {
     width > ICON_MIN_SIZE &&
     height < ICON_MAX_SIZE &&
     height > ICON_MIN_SIZE;
-  !isMatch && universalLog.log('===>wallet icon size doesnot match: ', width, height);
+  !isMatch && universalLog.log('wallet icon size doesnot match: ', width, height);
   return isMatch;
 }

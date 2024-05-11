@@ -133,7 +133,7 @@ class ShadowModal {
     }
     if (addToWhiteListButton) {
       console.log("addToWhiteListButton --> onclick", addToWhiteListButton);
-      addToWhiteListButton.addEventListener("click", this.addToWhiteList.bind(this));
+      addToWhiteListButton.addEventListener("click", async () => this.addToWhiteList.bind(this));
     }
   }
 

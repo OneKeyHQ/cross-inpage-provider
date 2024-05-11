@@ -234,7 +234,7 @@ function injectWeb3Provider(): unknown {
   if (checkWalletSwitchEnable()) {
     registerPolkadot(polkadot, 'polkadot-js', '0.44.1');
   }
-  setTimeout(detectWebsiteRiskLevel, 500);
+  setTimeout(() => void detectWebsiteRiskLevel(), 500);
   return $onekey;
 }
 export { injectWeb3Provider };

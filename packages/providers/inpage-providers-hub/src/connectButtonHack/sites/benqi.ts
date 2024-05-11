@@ -3,7 +3,7 @@ import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 import domUtils from '../utils/utilsDomNodes';
 
-hackConnectButton({
+export default () => hackConnectButton({
   urls: ['staking.benqi.fi'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod(options) {

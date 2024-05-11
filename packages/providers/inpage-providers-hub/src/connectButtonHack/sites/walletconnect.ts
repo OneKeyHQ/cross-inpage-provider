@@ -22,7 +22,7 @@ function setOnClickToConnectWallet({ element, uri }: { element: HTMLElement; uri
   };
 }
 
-hackConnectButton({
+export default () => hackConnectButton({
   urls: ['*'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {

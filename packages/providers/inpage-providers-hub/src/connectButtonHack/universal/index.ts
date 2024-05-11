@@ -81,8 +81,10 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
   }
 }
 
-try {
-  hackWalletConnectButton(sitesConfig);
-} catch (e) {
-  universalLog.error(e);
+export default () => {
+  try {
+    hackWalletConnectButton(sitesConfig);
+  } catch (e) {
+    universalLog.error(e);
+  }
 }

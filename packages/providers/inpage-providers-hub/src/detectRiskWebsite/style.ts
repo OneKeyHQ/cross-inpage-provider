@@ -94,12 +94,9 @@ export const styleContent = `
 	margin-top: 20px;
 }
 .onekey-inject-text-subdued {
-	margin: 0;
+  margin-top: 8px;
+	margin-bottom: 20px;
 	color: rgba(0, 0, 0, 0.61);
-}
-.onekey-inject-list {
-	padding-left: 20px;
-	margin: 8px 0;
 }
 .onekey-inject-continue-link {
 	text-decoration: underline;

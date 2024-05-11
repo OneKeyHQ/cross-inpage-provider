@@ -6,7 +6,7 @@ import { WALLET_CONNECT_INFO } from '../consts';
 - small screen with ext or desktop, dapp walletconnect switch to `desktop` error
  */
 
-hackConnectButton({
+export default () => hackConnectButton({
   urls: ['1inch.io', 'app.1inch.io', 'www.1inch.io'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {

@@ -2,7 +2,7 @@ import { createNewImageToContainer, hackConnectButton } from '../hackConnectButt
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
-hackConnectButton({
+export default () => hackConnectButton({
   urls: ['gem.xyz', 'www.gem.xyz', 'pro.opensea.io'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {

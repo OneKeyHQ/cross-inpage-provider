@@ -3,7 +3,7 @@ import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 import { last } from 'lodash';
 
-hackConnectButton({
+export default () => hackConnectButton({
   urls: ['aave.com', 'app.aave.com', 'www.aave.com'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {

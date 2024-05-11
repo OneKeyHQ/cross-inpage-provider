@@ -20,7 +20,7 @@ import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import { ProviderWebln } from '@onekeyfe/onekey-webln-provider';
 import { ProviderNostr } from '@onekeyfe/onekey-nostr-provider';
 import { ProviderBtc } from '@onekeyfe/onekey-btc-provider';
-import './connectButtonHack';
+import { hackAllConnectButtons } from './connectButtonHack';
 import { detectWebsiteRiskLevel } from './detectRiskWebsite';
 import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
 // import Web3 from 'web3'; // cause build error
@@ -234,7 +234,10 @@ function injectWeb3Provider(): unknown {
   if (checkWalletSwitchEnable()) {
     registerPolkadot(polkadot, 'polkadot-js', '0.44.1');
   }
-  setTimeout(() => void detectWebsiteRiskLevel(), 500);
+  setTimeout(() => {
+    void detectWebsiteRiskLevel();
+    void hackAllConnectButtons();
+  }, 500);
   return $onekey;
 }
 export { injectWeb3Provider };

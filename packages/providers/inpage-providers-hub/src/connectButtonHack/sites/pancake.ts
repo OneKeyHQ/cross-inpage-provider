@@ -3,7 +3,7 @@ import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 import utilsDomNodes from '../utils/utilsDomNodes';
 
-hackConnectButton({
+export default () => hackConnectButton({
   urls: ['pancakeswap.finance', 'app.pancakeswap.finance', 'www.pancakeswap.finance'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {

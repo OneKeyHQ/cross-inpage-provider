@@ -2351,4 +2351,64 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
+  {
+    urls: ['agni.finance'],
+    only: true,
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal =
+              getConnectWalletModalByTitle('div.inside', 'Connect Wallet') ||
+              getConnectWalletModalByTitle('div[role="dialog"]', 'Start by connecting with one');
+            return (
+              modal &&
+              findIconAndNameDirectly('img[src*="metamask.png"]', 'auto-search-text', name, modal)
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['liquidswap.com'],
+    testPath: [
+      ':text("I accept the")',
+      ':text("Continue")',
+      ':text("Connect Wallet")',
+      ':text("Other Wallets")',
+    ],
+    walletsForProvider: {
+      [IInjectedProviderNames.aptos]: [
+        {
+          ...basicWalletInfo['petra'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('div.p-dialog', 'Connect a Wallet');
+            return (
+              modal &&
+              findIconAndNameDirectly('img[alt="Petra Wallet"]', 'auto-search-text', name, modal)
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['stbt.matrixdock.com'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            // const modal = getConnectWalletModalByTitle('div.inside', 'Connect Wallet');
+            // return (
+            //   modal &&
+            //   findIconAndNameDirectly('img[src*="metamask.png"]', 'auto-search-text', name, modal)
+            // );
+          },
+        },
+      ],
+    },
+  },
 ];

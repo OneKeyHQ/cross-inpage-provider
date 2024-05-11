@@ -1843,19 +1843,7 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
-  {
-    urls: ['app.hubbleprotocol.io'],
-    walletsForProvider: {
-      [IInjectedProviderNames.solana]: [
-        {
-          ...basicWalletInfo['phantom'],
-          container() {
-            return getConnectWalletModalByTitle('div.ant-modal-content', 'Select your wallet');
-          },
-        },
-      ],
-    },
-  },
+
   {
     urls: ['app.wagmi.com'],
     constraintMap: { icon: [isWalletIconSizeMatch], text: [] },

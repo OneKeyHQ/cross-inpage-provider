@@ -17,7 +17,6 @@ import './sites/yearn';
 import './sites/zapper';
 import './sites/zerion';
 import './sites/aave';
-import './sites/pancake';
 import './sites/unisat';
 import './sites/gamma';
 import './sites/idclub';

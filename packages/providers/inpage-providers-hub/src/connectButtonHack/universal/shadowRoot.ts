@@ -12,7 +12,7 @@ export function findIconAndNameInShadowRoot(
     .map((e) => e.shadowRoot) as ShadowRoot[]
 
   if (shadowRoots.length === 0) {
-    universalLog.error('findIconAndNameInShadowRoot,shadowRoots.length=0')
+    universalLog.warn('findIconAndNameInShadowRoot,shadowRoots.length=0')
     return null;
   }
   const containerElements = shadowRoots
@@ -22,7 +22,7 @@ export function findIconAndNameInShadowRoot(
 
   const length = containerElements.length;
   if (length === 0 || length > 1) {
-    universalLog.error('findIconAndNameInShadowRoot,length=', length)
+    universalLog.warn('findIconAndNameInShadowRoot,length=', length)
     return null;
   }
   return findIconAndNameByParent(containerElements[0], walletName);

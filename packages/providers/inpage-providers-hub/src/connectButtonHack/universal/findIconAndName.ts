@@ -33,6 +33,7 @@ export function findIconAndNameByParent(
   let level = 0;
   while (parent && parent !== containerElement?.parentElement && level++ < MAX_LEVELS) {
     const walletIcon = findWalletIconByParent(parent, constraints.icon);
+    //TODO: unnecessary to traverse the parent node if the icon have more than one
     if (!walletIcon) {
       parent = parent.parentElement;
       continue;
@@ -64,9 +65,8 @@ export function findIconAndNameDirectly(
       ? container.querySelectorAll<HTMLElement>(iconSelector)
       : arrayify(iconSelector());
 
-  universalLog.log('iconElements', iconElements);
   if (iconElements.length > 1) {
-    universalLog.error('more one wallet icon found ,please check the selector');
+    universalLog.warn('more one wallet icon found ,please check the selector');
     return null;
   }
 
@@ -82,7 +82,7 @@ export function findIconAndNameDirectly(
       Boolean,
     );
     if (textContainer?.length > 1) {
-      universalLog.error('more one wallet text found ,please check the selector');
+      universalLog.warn('more one wallet text found ,please check the selector');
       return null;
     }
     textNode = findWalletTextByParent(textContainer[0], name, constraints.text);
@@ -93,7 +93,7 @@ export function findIconAndNameDirectly(
         ? findWalletTextByParent(containerEle, name, constraints.text)
         : null;
   } else {
-    universalLog.error('textSelector is wrong');
+    universalLog.warn('textSelector is wrong');
     return null;
   }
 
@@ -126,6 +126,6 @@ export function findTextByImg(
     }
     parent = parent.parentElement;
   }
-  universalLog.error('can not find the text node by img', level);
+  universalLog.warn('can not find the text node by img', level);
   return null;
 }

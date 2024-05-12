@@ -1,7 +1,6 @@
 import { Logger } from '@onekeyfe/cross-inpage-provider-core';
-import { Selector } from './type';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
-import { find } from 'lodash';
+import { Selector } from './type';
 
 export const universalLog = new Logger('universal');
 

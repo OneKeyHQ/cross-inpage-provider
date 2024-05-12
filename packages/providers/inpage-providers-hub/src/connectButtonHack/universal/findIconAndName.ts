@@ -126,6 +126,6 @@ export function findTextByImg(
     }
     parent = parent.parentElement;
   }
-  universalLog.warn('can not find the text node by img', level);
+  universalLog.warn('can not find the text node by img ', level);
   return null;
 }

@@ -31,7 +31,7 @@ export function findWalletTextByParent(
   const length = textNodes?.length || 0;
   if (length === 0 || !textNodes) {
     universalLog.warn(
-      `find  none for wallet name ${walletName.toString()},container is `,
+      `find  none for wallet name ${walletName.toString()}, container is `,
       container,
     );
     return null;

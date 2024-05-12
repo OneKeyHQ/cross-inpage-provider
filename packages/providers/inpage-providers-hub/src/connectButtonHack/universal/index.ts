@@ -59,12 +59,13 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                     ? document.querySelector(container)
                     : container();
                   if (!containerElement) {
+                    universalLog.warn('containerElement is null, container=',container);
                     continue;
                   }
                   result = defaultFindIconAndName(containerElement, name, constraintMap);
                 }
                 if (!result) {
-                  universalLog.warn('==>warn: no result found');
+                  universalLog.warn('no result found');
                   continue;
                 }
                 const { textNode, iconNode } = result;

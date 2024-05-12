@@ -42,7 +42,7 @@ export const basicWalletInfo = {
   [WALLET_NAMES.petra]: {
     updatedIcon: WALLET_CONNECT_INFO.petra.icon,
     updatedName: WALLET_CONNECT_INFO.petra.text,
-    name: /^Petra$/i,
+    name: /^(Petra|Petra Wallet)$/i,
   },
   [WALLET_NAMES.keplr]: {
     updatedIcon: WALLET_CONNECT_INFO.keplr.icon,
@@ -121,6 +121,11 @@ export type WalletInfo = {
    * used when there is only one icon or name element(not both) and other special cases
    */
   update?: (this: void, wallet: WalletInfo) => HTMLImageElement | null;
+
+  /**
+   * skip testing
+   */
+  skip?: boolean | { mobile?: boolean; desktop?: boolean };
 };
 export type SitesInfo = {
   urls: string[];
@@ -2353,7 +2358,6 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['agni.finance'],
-    only: true,
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -2373,6 +2377,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['liquidswap.com'],
+
     testPath: [
       ':text("I accept the")',
       ':text("Continue")',
@@ -2396,17 +2401,248 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['stbt.matrixdock.com'],
+
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
           ...basicWalletInfo['metamask'],
           findIconAndName({ name }) {
-            // const modal = getConnectWalletModalByTitle('div.inside', 'Connect Wallet');
-            // return (
-            //   modal &&
-            //   findIconAndNameDirectly('img[src*="metamask.png"]', 'auto-search-text', name, modal)
-            // );
+            const modal = getConnectWalletModalByTitle('div.inside', 'Connect Wallet');
+            return (
+              modal &&
+              findIconAndNameDirectly('img[src*="metamask.png"]', 'auto-search-text', name, modal)
+            );
           },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['spooky.fi'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'div[data-testid="wallet-modal"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'div[data-testid="wallet-modal"]',
+          skip: { mobile: true },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['usyc.hashnote.com'],
+    testPath: [':text("Connect your wallet")'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const shadowRoot = document.querySelector(
+              'div[data-testid="dynamic-modal-shadow"]',
+            )?.shadowRoot;
+            if (!shadowRoot) {
+              return null;
+            }
+            const parent = shadowRoot.querySelector('div.wallet-list__container');
+            return (
+              parent &&
+              findIconAndNameDirectly(
+                'img[data-testid="wallet-icon-metamask"]',
+                'auto-search-text',
+                name,
+                parent as HTMLElement,
+              )
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['polygon.tangible.store'],
+    testPath: {
+      mobile: ['header button img'],
+      desktop: [':text("Connect")'],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('div[role="dialog"]', 'Connect wallet');
+            return (
+              modal &&
+              findIconAndNameDirectly(
+                'img[src*="metamask.svg"][alt="MetaMask icon"]',
+                'auto-search-text',
+                name,
+                modal,
+              )
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['apps.acala.network'],
+    walletsForProvider: {
+      [IInjectedProviderNames.polkadot]: [
+        {
+          ...basicWalletInfo['polkadot'],
+          findIconAndName() {
+            const modal = getConnectWalletModalByTitle('div[role="dialog"]', 'Connect Wallet');
+            return (
+              modal &&
+              findIconAndNameDirectly(
+                'img[alt="Polkadotjs Logo"]',
+                'auto-search-text',
+                /^Polkadot/,
+                modal,
+              )
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.rhino.fi'],
+    testPath: [':text("Allow All")', ':text("connect wallet")'],
+    constraintMap: { icon: [], text: [] },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: '#metamask',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: '#walletConnect',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.zero.button.finance'],
+    testPath: { mobile: ['header button svg', ':text("Connect")'], desktop: [':text("Connect")'] },
+
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'ul.bn-onboard-modal-select-wallets',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['blast.io'],
+    testUrls: ['blast.io/zh-CN/bridge'],
+    testPath: [':text("GOLD JACKPOT")', 'body', ":text('连接钱包')"],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'div[aria-label="选择要连接的钱包"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.ichi.org'],
+    skip: true, //TODO:loading too slow ,and  no response to click
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button[data-testid="rk-wallet-option-metaMask"]',
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'button[data-testid="rk-wallet-option-walletConnect"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['klayswap.com'],
+
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'div.SelectWalletModal',
+          afterUpdate(textNode, icon) {
+            if (textNode.parentElement) {
+              textNode.parentElement.style.flexShrink = '0';
+              textNode.parentElement.style.width = '100%';
+            }
+            icon.style.height = 'auto';
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['dojo.trading'],
+
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('div[role="dialog"]', 'Connect Wallet');
+            return (
+              modal &&
+              findIconAndNameDirectly(
+                'img[src*="metamask.svg"][alt="Metamask"]',
+                'auto-search-text',
+                name,
+                modal,
+              )
+            );
+          },
+          afterUpdate(textNode, icon) {
+            icon.style.marginRight = '12px';
+          },
+        },
+      ],
+      [IInjectedProviderNames.cosmos]: [
+        {
+          ...basicWalletInfo['keplr'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('div[role="dialog"]', 'Connect Wallet');
+            return (
+              modal &&
+              findIconAndNameDirectly(
+                'img[src*="keplr.svg"][alt="Keplr"]',
+                'auto-search-text',
+                name,
+                modal,
+              )
+            );
+          },
+          afterUpdate(textNode, icon) {
+            icon.style.marginRight = '12px';
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['gains.trade'],
+    testUrls:['gains.trade/trading#BTC-USD'],
+    testPath: [ 'button:has-text("Agree")', ':text("Connect Wallet")'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'button[data-testid="rk-wallet-option-metaMask"]',
         },
       ],
     },

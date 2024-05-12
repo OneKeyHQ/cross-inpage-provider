@@ -47,8 +47,12 @@ test.describe('Connect Button Hack', () => {
         }
 
         for (const [provider, wallets = []] of Object.entries(walletsForProvider)) {
-          for (const wallet of wallets) {
-            const walletId = createWalletId(provider as IInjectedProviderNames, wallet.updatedName);
+          for (const { updatedName, skip } of wallets) {
+            const skipThisWalletOnDevice = typeof skip === 'object' && skip !== null && skip[device] === true
+            if (skipThisWalletOnDevice || skip) {
+              continue;
+            }
+            const walletId = createWalletId(provider as IInjectedProviderNames, updatedName);
             const locator = page.locator(walletId.walletIdSelector).first();
             await dbg(locator);
             const existed = await locator.evaluate((el) => !!el && el.tagName === 'IMG');

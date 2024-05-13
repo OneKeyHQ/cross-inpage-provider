@@ -13,7 +13,7 @@ async function dbg(locator: Locator) {
   });
 }
 test.describe('Connect Button Hack', () => {
-  const startWebSite = 'www.staderlabs.com';
+  const startWebSite = 'agni.finance';
   const startIdx = sitesConfig.findIndex((e) => e.urls.includes(startWebSite));
   const availableSites = sitesConfig.slice(startIdx == -1 ? 0 : startIdx);
   const sitesOnly = availableSites.filter((e) => e.only);

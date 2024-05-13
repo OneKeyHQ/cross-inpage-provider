@@ -63,6 +63,7 @@ export enum ProviderMethods {
    */
   GET_NETWORK_FEES = 'getNetworkFees',
   GET_UTXOS = 'getUtxos',
+  GET_BTC_TIP_HEIGHT = 'getBTCTipHeight',
 }
 
 export type OneKeyBtcProviderProps = IInpageProviderConfig & {

@@ -100,6 +100,13 @@ class ProviderBtcWallet extends ProviderBtc implements IProviderBtcWallet {
       },
     });
   }
+
+  getBTCTipHeight(): Promise<number> {
+    return this._request<number>({
+      method: ProviderMethods.GET_BTC_TIP_HEIGHT,
+      params: undefined,
+    });
+  }
 }
 
 export { ProviderBtcWallet };

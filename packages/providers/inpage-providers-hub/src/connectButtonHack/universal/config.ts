@@ -2222,26 +2222,53 @@ export const sitesConfig: SitesInfo[] = [
     },
   },
   {
-    urls: ['app.ariesmarkets.xyz'],
+    //mobile version is redirected to app-mobile.ariesmarkets.xyz. check next item
+    urls: ['app.ariesmarkets.xyz'], 
     testUrls: ['app.ariesmarkets.xyz/lending'],
-    // mutationObserverOptions: {
-    //   childList: true,
-    //   subtree: true,
-    //   attributes: true,
-    // },
-    //TODO: mobile version
+
     constraintMap: { icon: [isWalletIconSizeMatch], text: [] },
     walletsForProvider: {
       [IInjectedProviderNames.aptos]: [
         {
           ...basicWalletInfo['petra'],
-          container: () => {
-            const pc = getConnectWalletModalByTitle('div.mantine-Paper-root', 'Select Wallet');
+          container:()=>getConnectWalletModalByTitle('div.mantine-Paper-root', 'Select Wallet'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app-mobile.ariesmarkets.xyz'],
+    constraintMap: { icon: [isWalletIconSizeMatch], text: [] },
+    walletsForProvider: {
+      [IInjectedProviderNames.aptos]: [
+        {
+          ...basicWalletInfo['petra'],
+          findIconAndName({ name }) {
             const mobileTitle =
               (domUtils.findTextNode('#root', 'Select Wallet', 'first') as Text) || null;
-            return (
-              pc || mobileTitle?.parentElement?.parentElement?.parentElement?.parentElement || null
+            const modal =
+              mobileTitle?.parentElement?.parentElement?.parentElement?.parentElement || null;
+            if (!modal) {
+              return null;
+            }    
+            //there is multiple wallet icons, so we need to find the correct one manually
+            const text = domUtils.findTextNode(modal, name, 'first') as Text;
+            const imgs = Array.from(
+              text.parentElement?.parentElement?.parentElement?.querySelectorAll<HTMLImageElement>(
+                'div[style*="background-image"]',
+              ) || [],
             );
+            if (imgs.length > 1 || imgs.length === 0) {
+              return null;
+            }
+            const img = imgs[0];
+            if (!text || !img) {
+              return null;
+            }
+            return {
+              iconNode: img,
+              textNode: text,
+            };
           },
         },
       ],

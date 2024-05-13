@@ -2223,7 +2223,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     //mobile version is redirected to app-mobile.ariesmarkets.xyz. check next item
-    urls: ['app.ariesmarkets.xyz'], 
+    urls: ['app.ariesmarkets.xyz'],
     testUrls: ['app.ariesmarkets.xyz/lending'],
 
     constraintMap: { icon: [isWalletIconSizeMatch], text: [] },
@@ -2231,7 +2231,7 @@ export const sitesConfig: SitesInfo[] = [
       [IInjectedProviderNames.aptos]: [
         {
           ...basicWalletInfo['petra'],
-          container:()=>getConnectWalletModalByTitle('div.mantine-Paper-root', 'Select Wallet'),
+          container: () => getConnectWalletModalByTitle('div.mantine-Paper-root', 'Select Wallet'),
         },
       ],
     },
@@ -2250,7 +2250,7 @@ export const sitesConfig: SitesInfo[] = [
               mobileTitle?.parentElement?.parentElement?.parentElement?.parentElement || null;
             if (!modal) {
               return null;
-            }    
+            }
             //there is multiple wallet icons, so we need to find the correct one manually
             const text = domUtils.findTextNode(modal, name, 'first') as Text;
             const imgs = Array.from(
@@ -2426,24 +2426,24 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
-  {
-    urls: ['stbt.matrixdock.com'],
+  // {
+  //   urls: ['stbt.matrixdock.com'],
 
-    walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [
-        {
-          ...basicWalletInfo['metamask'],
-          findIconAndName({ name }) {
-            const modal = getConnectWalletModalByTitle('div.inside', 'Connect Wallet');
-            return (
-              modal &&
-              findIconAndNameDirectly('img[src*="metamask.png"]', 'auto-search-text', name, modal)
-            );
-          },
-        },
-      ],
-    },
-  },
+  //   walletsForProvider: {
+  //     [IInjectedProviderNames.ethereum]: [
+  //       {
+  //         ...basicWalletInfo['metamask'],
+  //         findIconAndName({ name }) {
+  //           const modal = getConnectWalletModalByTitle('div.inside', 'Connect Wallet');
+  //           return (
+  //             modal &&
+  //             findIconAndNameDirectly('img[src*="metamask.png"]', 'auto-search-text', name, modal)
+  //           );
+  //         },
+  //       },
+  //     ],
+  //   },
+  // },
   {
     urls: ['spooky.fi'],
     walletsForProvider: {
@@ -2517,6 +2517,8 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['apps.acala.network'],
+    only: true,
+    
     walletsForProvider: {
       [IInjectedProviderNames.polkadot]: [
         {
@@ -2570,7 +2572,7 @@ export const sitesConfig: SitesInfo[] = [
   {
     urls: ['blast.io'],
     testUrls: ['blast.io/zh-CN/bridge'],
-    testPath: [':text("GOLD JACKPOT")', 'body', ":text('连接钱包')"],
+    testPath: [':text("Jackpot deck")', ":text('连接钱包')"],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -2582,7 +2584,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.ichi.org'],
-    skip: true, //TODO:loading too slow ,and  no response to click
+    skip: true, //TODO:loading is too slow ,and no response to click
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -2598,7 +2600,6 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['klayswap.com'],
-
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -2663,8 +2664,8 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['gains.trade'],
-    testUrls:['gains.trade/trading#BTC-USD'],
-    testPath: [ 'button:has-text("Agree")', ':text("Connect Wallet")'],
+    testUrls: ['gains.trade/trading#BTC-USD'],
+    testPath: ['button:has-text("Agree")', ':text("Connect Wallet")'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {

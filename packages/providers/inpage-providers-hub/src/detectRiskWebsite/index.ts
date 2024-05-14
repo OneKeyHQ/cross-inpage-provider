@@ -30,7 +30,6 @@ interface IWalletRiskInfo {
     continueMessage: string;
     continueLink: string;
     addToWhiteListLink: string;
-    closeButton: string;
     sourceMessage: string;
   };
 }
@@ -64,7 +63,6 @@ class ShadowModal {
       continueMessage = "If you understand the risks and want to proceed, you can",
       continueLink = "dismiss",
       addToWhiteListLink = "add to whitelist",
-      closeButton: btnText = "Close Tab",
       sourceMessage = "Powered by",
     } = this.riskInfo?.i18n ?? {};
     // 创建样式
@@ -87,19 +85,12 @@ class ShadowModal {
     riskWarning.className = "onekey-inject-risk-warning";
     riskWarning.innerHTML = `<div class="onekey-inject-title onekey-inject-font  onekey-inject-headingXl">
 			<div class="onekey-inject-error-icon">
-				<div class="onekey-inject-error-icon-content"></div>
 			</div>
 		${title}
 		</div>
 		<p class="onekey-inject-text-wrap onekey-inject-font onekey-inject-bodyLg">${description}</p>
 		<p class="onekey-inject-font onekey-inject-bodyLg onekey-inject-text-subdued">${continueMessage}${" "}<span id="onekey-inject-continue" class="onekey-inject-continue-link">${continueLink}</span>${" or "}<span id="onekey-inject-addToWhiteList" class="onekey-inject-continue-link">${addToWhiteListLink}</span>.</p>
 		`;
-
-    const closeButton = document.createElement("button");
-    closeButton.className =
-      "onekey-inject-close-btn onekey-inject-font onekey-inject-bodyLg-medium";
-    closeButton.textContent = btnText;
-    closeButton.onclick = () => this.closeTab();
 
     const footer = document.createElement("div");
     footer.className =
@@ -112,9 +103,6 @@ class ShadowModal {
 
     // 组装
     modal.appendChild(riskWarning);
-    if (!this.riskInfo?.isExtension) {
-      modal.appendChild(closeButton);
-    }
     modalContainer.appendChild(modal);
     modalContainer.appendChild(footer);
     overlay.appendChild(modalContainer);

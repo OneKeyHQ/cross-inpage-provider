@@ -6,13 +6,36 @@ import Link from 'next/link';
 import styles from '../styles/Home.module.css';
 import packageJson from '../package.json';
 import { useEffect } from 'react';
-import { Button } from 'native-base';
 import { Tree } from 'react-arborist';
 import * as uuid from 'uuid';
+import { Button } from '../components/ui/button';
+import { registeredChains, registeredChainsWithWalletConnect } from '@/components/chains';
 
-// const myImageLoader = ({ src, width, quality }: any) => {
-//   return src as string;
-// };
+const data: ITreeNodeData[] = [
+  {
+    id: uuid.v4(),
+    name: 'General',
+    children: [
+      { id: uuid.v4(), name: 'iframe', href: '/iframe' },
+      { id: uuid.v4(), name: 'DeepLink', href: '/deeplink' },
+      {
+        id: uuid.v4(),
+        name: 'Hardware SDK',
+        href: 'https://hardware-example.onekeytest.com/',
+      },
+    ],
+  },
+  {
+    id: uuid.v4(),
+    name: 'WalletConnect',
+    children: registeredChainsWithWalletConnect as ITreeNodeData[],
+  },
+  {
+    id: uuid.v4(),
+    name: 'Networks & Chains',
+    children: registeredChains as ITreeNodeData[],
+  },
+];
 
 type ITreeNodeInfo = {
   isLeaf: boolean;
@@ -30,6 +53,7 @@ type ITreeNodeData = {
   target?: string;
   children?: ITreeNodeData[];
 };
+
 type ITreeNodeProps = {
   node: ITreeNodeInfo;
   style: unknown;
@@ -37,24 +61,28 @@ type ITreeNodeProps = {
 };
 function TreeNode({ node, style, dragHandle }: ITreeNodeProps) {
   const { href, target, name, icon } = node.data;
+
   const link = useMemo(() => {
-    if (target && href) {
-      return (
-        <a href={href} target={target}>
-          {`${name} →`}
-        </a>
-      );
-    }
     if (href) {
-      return <Link href={href}>{`${name} →`}</Link>;
+      if (target) {
+        return (
+          <a href={href} target={target} className="text-black font-normal hover:underline">
+            {`${name} →`}
+          </a>
+        );
+      } else {
+        return (
+          <Link href={href} className="text-black font-normal hover:underline">{`${name} →`}</Link>
+        );
+      }
     }
-    return <span>{name}</span>;
-  }, [href, name, target]);
+
+    return <span className="text-lg font-medium">{name}</span>;
+  }, [name, target, href]);
+
   const imgIcon = useMemo(() => {
     if (icon) {
-      return (
-        <img alt={icon} src={icon} style={{ width: '14px', height: '14px', borderRadius: '50%' }} />
-      );
+      return <img alt={icon} src={icon} className="w-6 h-6 rounded-full" />;
     }
     if (node.isInternal) {
       if (node.isClosed) {
@@ -64,198 +92,51 @@ function TreeNode({ node, style, dragHandle }: ITreeNodeProps) {
     }
     return '👉';
   }, [icon, node.isClosed, node.isInternal]);
+
   return (
-    <div style={style} ref={dragHandle} onClick={() => node.toggle()}>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          cursor: node.isInternal ? 'pointer' : undefined,
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            minWidth: '16px',
-            marginRight: '8px',
-          }}
-        >
-          {imgIcon}
-        </div>
-        {link}
-      </div>
+    <div
+      style={style}
+      ref={dragHandle}
+      onClick={() => node.toggle()}
+      className="flex flex-row items-center cursor-pointer"
+    >
+      <div className="flex flex-row items-center min-w-4 mr-2">{imgIcon}</div>
+      {link}
     </div>
   );
 }
-
-const data: ITreeNodeData[] = [
-  {
-    id: uuid.v4(),
-    name: 'General',
-    children: [
-      { id: uuid.v4(), name: 'iframe', href: '/iframe' },
-      { id: uuid.v4(), name: 'DeepLink', href: '/deeplink' },
-      { id: uuid.v4(), name: 'DappList', href: '/dappList' },
-      {
-        id: uuid.v4(),
-        name: 'Hardware SDK',
-        href: 'https://hardware-example.onekeytest.com/',
-      },
-    ],
-  },
-  {
-    id: uuid.v4(),
-    name: 'WalletConnect',
-    // icon: 'https://example.walletconnect.org/favicon.ico',
-    children: [
-      {
-        id: uuid.v4(),
-        name: 'WalletConnect V1',
-        href: 'https://example.walletconnect.org',
-        target: 'WalletConnectExampleV1',
-        icon: 'https://example.walletconnect.org/favicon.ico',
-      },
-      {
-        id: uuid.v4(),
-        name: 'WalletConnect V2',
-        href: 'https://react-app.walletconnect.com',
-        target: 'WalletConnectExampleV2',
-        icon: 'https://example.walletconnect.org/favicon.ico',
-      },
-      {
-        id: uuid.v4(),
-        name: 'Aptos WalletConnect',
-        href: '/aptosWalletconnect',
-        icon: 'https://uni.onekey-asset.com/static/chain/apt.png',
-      },
-      {
-        id: uuid.v4(),
-        name: 'Algo WalletConnect',
-        href: '/algoWalletConnect',
-        icon: 'https://uni.onekey-asset.com/static/chain/algo.png',
-      },
-    ],
-  },
-  {
-    id: uuid.v4(),
-    name: 'Networks',
-    children: [
-      {
-        id: uuid.v4(),
-        name: 'EVM',
-        href: '/ethereum',
-        icon: 'https://uni.onekey-asset.com/static/chain/eth.png',
-      },
-      {
-        id: uuid.v4(),
-        name: 'Solana',
-        href: '/solana',
-        icon: 'https://uni.onekey-asset.com/static/chain/sol.png',
-      },
-      {
-        id: uuid.v4(),
-        name: 'NEAR',
-        href: '/near',
-        icon: 'https://uni.onekey-asset.com/static/chain/near.png',
-      },
-      {
-        id: uuid.v4(),
-        name: 'NEAR ref-ui',
-        href: 'https://dapp-near-ref-ui.onekeytest.com',
-        target: '_blank',
-        icon: 'https://uni.onekey-asset.com/static/chain/near.png',
-      },
-      {
-        id: uuid.v4(),
-        name: 'Starcoin',
-        href: '/starcoin',
-        icon: 'https://uni.onekey-asset.com/static/chain/stc.png',
-      },
-      {
-        id: uuid.v4(),
-        name: 'Aptos',
-        href: '/aptos',
-        icon: 'https://uni.onekey-asset.com/static/chain/apt.png',
-      },{
-        id: uuid.v4(),
-        name: 'AptosWalletAdapter',
-        href: 'https://aptos-labs.github.io/aptos-wallet-adapter/',
-        icon: 'https://uni.onekey-asset.com/static/chain/apt.png',
-      },
-      {
-        id: uuid.v4(),
-        name: 'Aptos Martian',
-        href: '/aptosMartian',
-        icon: 'https://uni.onekey-asset.com/static/chain/apt.png',
-      },
-      {
-        id: uuid.v4(),
-        name: 'Conflux',
-        href: '/conflux',
-        icon: 'https://uni.onekey-asset.com/static/chain/cfx.png',
-      },
-      {
-        id: uuid.v4(),
-        name: 'Tron',
-        href: '/tron',
-        icon: 'https://uni.onekey-asset.com/static/chain/filled_trx.png',
-      },
-      {
-        id: uuid.v4(),
-        name: 'Sui Standard',
-        href: '/suiStandard',
-        icon: 'https://uni.onekey-asset.com/static/chain/sui.png',
-      },
-      {
-        id: uuid.v4(),
-        name: 'Cardano',
-        href: '/cardano',
-        icon: 'https://uni.onekey-asset.com/static/chain/ada.png',
-      },
-      {
-        id: uuid.v4(),
-        name: 'Cosmos',
-        href: '/cosmos',
-        icon: 'https://uni.onekey-asset.com/static/chain/cosmos.png',
-      },
-      {
-        id: uuid.v4(),
-        name: 'Polkadot',
-        href: '/polkadot',
-        icon: 'https://uni.onekey-asset.com/static/chain/polkadot.png',
-      },
-    ],
-  },
-];
 
 const Home: NextPage = () => {
   useEffect(() => {
     void fetch(`/api/hello?_=${Date.now()}`);
   }, []);
-  const [chainId, setChainId] = useState('');
-  useEffect(() => {
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    global?.$onekey?.ethereum?.request({ method: 'net_version' }).then((res: any) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      setChainId(res);
-    });
-  }, []);
+  // const [chainId, setChainId] = useState('');
+  // useEffect(() => {
+  //   // @ts-ignore
+  //   // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+  //   global?.$onekey?.ethereum?.request({ method: 'net_version' }).then((res: any) => {
+  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  //     setChainId(res);
+  //   });
+  // }, []);
+
   return (
-    <div className={styles.container}>
+    <div className="container mx-auto p-2">
       <Head>
         <title>Dapp Example - OneKey</title>
         <meta name="description" content="Generated by create next app" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        <Button onPress={() => window.location.reload()}>Refresh</Button>
-        <a>EVM-chainId={chainId}</a>
-        <Tree height={900} initialData={data} rowHeight={38} indent={20}>
+      <header className="flex flex-row items-center justify-between">
+        <h2 className="text-2xl font-bold">Dapp Example - OneKey</h2>
+        <Button onClick={() => window.location.reload()} variant="outline">
+          Refresh Page
+        </Button>
+      </header>
+
+      <main className="main flex flex-col items-center py-6">
+        <Tree height={1200} initialData={data} rowHeight={42} indent={30}>
           {TreeNode as any}
         </Tree>
       </main>

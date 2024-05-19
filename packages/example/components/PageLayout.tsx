@@ -1,25 +1,52 @@
-import Link from 'next/link';
-import styles from '../styles/PageLayout.module.css';
-import { LogsContainer } from './LogsContainer';
+import ChangeChain from './ChangeChain';
+import DappList from './DAppList';
+import { LogsContainer } from './LogsLayout';
+import { WalletProvider } from './connect/WalletContext';
+import { Button } from './ui/button';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './ui/resizable';
 
-export type PageLayoutProps = {
+export type IDappBookMark = {
+  name: string;
+  url: string;
+};
+
+export type IPageLayoutProps = {
   children?: React.ReactNode;
   title: string;
 };
 
-function PageLayout({ children, title }: PageLayoutProps) {
+function PageLayout({ children, title }: IPageLayoutProps) {
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <Link href={'/'} className={styles.backButton}>
-          ← Back
-        </Link>
-        <h3 className={styles.title}>{title}</h3>
+    <div className="flex min-h-screen flex-col">
+      <div className="p-2 shadow-lg">
+        <div className="mx-auto flex items-center justify-between">
+          <Button
+            variant="link"
+            onClick={() => window.history.back()}
+            className="text-lg font-semibold hover:underline"
+          >
+            {`< Back`}
+          </Button>
+          <h3 className="text-xl font-bold ml-2">{title}</h3>
+          <ChangeChain />
+        </div>
       </div>
-      <div className={styles.childrenContainer}>{children}</div>
-      <div className={styles.logsContainer}>
-        <LogsContainer />
-      </div>
+
+      <ResizablePanelGroup direction="vertical" className="flex-grow">
+        <ResizablePanel className="overflow-auto flex">
+          <WalletProvider>
+            <div className="flex flex-col flex-grow p-3 gap-3">
+              {children}
+            </div>
+          </WalletProvider>
+        </ResizablePanel>
+        <ResizableHandle withHandle />
+        <ResizablePanel defaultSize={5} className="overflow-auto flex">
+          <div className=" bg-black flex-grow">
+            <LogsContainer />
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }

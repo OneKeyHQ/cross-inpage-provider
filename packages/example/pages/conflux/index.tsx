@@ -2,7 +2,7 @@ import React from 'react';
 import dynamic from 'next/dynamic';
 import PageLayout from '../../components/PageLayout';
 
-const ConfluxExample = dynamic(() => import('../../components/conflux/ConfluxExample'), {
+const ConfluxExample = dynamic(() => import('../../components/chains/conflux/example'), {
   ssr: false,
 });
 

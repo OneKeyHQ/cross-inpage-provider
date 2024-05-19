@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import PageLayout from '../../components/PageLayout';
 
 // injected provider works only if nextjs ssr disabled
-const AptosExample = dynamic(() => import('../../components/aptosWalletConnect/AptosExample'), {
+const AptosExample = dynamic(() => import('../../components/chains/aptosWalletConnect/AptosExample'), {
   ssr: false,
 });
 

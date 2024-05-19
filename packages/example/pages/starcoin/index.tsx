@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import PageLayout from '../../components/PageLayout';
 
 // injected provider works only if nextjs ssr disabled
-const STCExample = dynamic(() => import('../../components/starcoin/STCExample'), { ssr: false });
+const STCExample = dynamic(() => import('../../components/chains/starcoin/example'), { ssr: false });
 
 export default function () {
   return (

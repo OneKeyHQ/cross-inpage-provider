@@ -32,6 +32,7 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
     isUnlocked: false,
     initialized: false,
     isPermanentlyDisconnected: false,
+    isBtcWalletProvider: false
   };
 
   private readonly _log: ConsoleLike;
@@ -140,7 +141,7 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
     this._emit(ProviderEvents.ACCOUNTS_CHANGED, accounts);
   }
 
-  private async _request<T>(args: RequestArguments): Promise<T> {
+  protected async _request<T>(args: RequestArguments): Promise<T> {
     const { method, params } = args;
 
     if (!method || typeof method !== 'string' || method.length === 0) {
@@ -192,7 +193,7 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
     });
   }
 
-  async getBalance() {
+  async getBalance(): Promise<BalanceInfo | number> {
     return this._request<BalanceInfo>({
       method: ProviderMethods.GET_BALANCE,
     });

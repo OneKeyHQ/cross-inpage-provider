@@ -19,7 +19,7 @@ import {
 import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import { ProviderWebln } from '@onekeyfe/onekey-webln-provider';
 import { ProviderNostr } from '@onekeyfe/onekey-nostr-provider';
-import { ProviderBtc } from '@onekeyfe/onekey-btc-provider';
+import { ProviderBtc, ProviderBtcWallet } from '@onekeyfe/onekey-btc-provider';
 import { hackAllConnectButtons } from './connectButtonHack';
 import { detectWebsiteRiskLevel } from './detectRiskWebsite';
 import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
@@ -41,6 +41,7 @@ export type IWindowOneKeyHub = {
   webln?: ProviderWebln;
   nostr?: ProviderNostr;
   unisat?: ProviderBtc;
+  btcwallet?: ProviderBtcWallet;
   $private?: ProviderPrivate;
   $walletInfo?: {
     buildNumber: string;
@@ -116,6 +117,7 @@ function injectWeb3Provider(): unknown {
   });
 
   const btc = new ProviderBtc({ bridge });
+  const btcWallet = new ProviderBtcWallet({ bridge });
 
   const $privateExternalAccount = new ProviderPrivateExternalAccount({ bridge })
 
@@ -138,6 +140,7 @@ function injectWeb3Provider(): unknown {
     webln,
     nostr,
     btc,
+    btcwallet: btcWallet,
   };
 
   defineWindowProperty('$onekey', $onekey, { enumerable: true });
@@ -178,6 +181,7 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('tronLink', tron);
   defineWindowProperty('suiWallet', sui);
   defineWindowProperty('unisat', btc);
+  defineWindowProperty('btcwallet', btcWallet);
 
   // Cardano chain provider injection is handled independently.
   if (checkWalletSwitchEnable()) {

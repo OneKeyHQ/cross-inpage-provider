@@ -17,7 +17,6 @@ import yearn from './sites/yearn';
 import zapper from './sites/zapper';
 import zerion from './sites/zerion';
 import aave from './sites/aave';
-import pancake from './sites/pancake';
 import unisat from './sites/unisat';
 import gamma from './sites/gamma';
 import idclub from './sites/idclub';
@@ -31,7 +30,6 @@ import rocketpool from './sites/rocketpool';
 import avocado from './sites/avocado';
 import liteInstadapp from './sites/liteInstadapp';
 import methMantle from './sites/methMantle';
-import stakestone from './sites/stakestone';
 import balancerFi from './sites/balancerFi';
 import imtblTop from './sites/imtblTop';
 import renzoprotocol from './sites/renzoprotocol';
@@ -63,7 +61,6 @@ function hackAllConnectButtons() {
   zapper()
   zerion()
   aave()
-  pancake()
   unisat()
   gamma()
   idclub()
@@ -77,7 +74,6 @@ function hackAllConnectButtons() {
   avocado()
   liteInstadapp()
   methMantle()
-  stakestone()
   balancerFi()
   imtblTop()
   renzoprotocol()

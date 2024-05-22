@@ -20,12 +20,8 @@
     "incremental": true,
     "strictNullChecks": false,
     "paths": {
-      "@/components/*": [
-        "./components/*"
-      ],
-      "@/lib/*": [
-        "./lib/*"
-      ]
+      "components": ["./components"],
+      "lib": ["./lib"]
     }
   },
   "include": [

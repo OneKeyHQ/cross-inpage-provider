@@ -1,24 +1,51 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
-import ConnectButton from '@/components/connect/ConnectButton';
-import { useRef, useState } from 'react';
-import { bytesToHex } from '@noble/hashes/utils';
-import { get } from 'lodash';
+import ConnectButton from '../../../components/connect/ConnectButton';
+import { useEffect, useRef, useState } from 'react';
+import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
+import { SignMode } from 'cosmjs-types/cosmos/tx/signing/v1beta1/signing';
+import { get } from 'lodash-es';
+
+import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
+import Long from 'long';
+import { MsgSend } from 'cosmjs-types/cosmos/bank/v1beta1/tx';
+import { PubKey } from 'cosmjs-types/cosmos/crypto/ed25519/keys';
+import { Any } from 'cosmjs-types/google/protobuf/any';
+import { AuthInfo, Fee, SignerInfo, TxBody, TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+
 import { IProviderApi, IProviderInfo } from './types';
-import { ApiPayload, ApiGroup } from '@/components/ApisContainer';
-import { useWallet } from '@/components/connect/WalletContext';
-import type { IKnownWallet } from '@/components/connect/types';
-import DappList from '@/components/DAppList';
-import InfoLayout from '@/components/InfoLayout';
+import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
+import { useWallet } from '../../../components/connect/WalletContext';
+import type { IKnownWallet } from '../../../components/connect/types';
+import DappList from '../../../components/DAppList';
+import InfoLayout from '../../../components/InfoLayout';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '../../../components/ui/select';
+import params, { networks } from './params';
+import { CosmosNodeClient } from './rpc';
 
-const networks = ['cosmoshub-4'];
+function removeNull(obj: any): any {
+  if (obj !== null && typeof obj === 'object') {
+    return Object.entries(obj)
+      .filter(([, v]) => v != null)
+      .reduce(
+        (acc, [k, v]) => ({
+          ...acc,
+          [k]: v === Object(v) && !Array.isArray(v) ? removeNull(v) : v,
+        }),
+        {},
+      );
+  }
+
+  return obj;
+}
 
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -34,9 +61,20 @@ export default function Example() {
     },
   ]);
 
-  const { provider } = useWallet<IProviderApi>();
+  const { provider, account } = useWallet<IProviderApi>();
+  const [nodeClient, setNodeClient] = useState<CosmosNodeClient | null>(null);
 
-  const [network, setNetwork] = useState<string>(networks[0]);
+  const [network, setNetwork] = useState<{
+    name: string;
+    id: string;
+    rest: string;
+    denom: string;
+  }>(networks[0]);
+
+  useEffect(() => {
+    if (network?.rest === '') return;
+    setNodeClient(new CosmosNodeClient(network.rest));
+  }, [network?.rest]);
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -47,29 +85,35 @@ export default function Example() {
 
     const provider = get(window, providerDetail.inject) as IProviderApi | undefined;
 
-    
-    await provider?.enable(network);
+    await provider?.enable(network.id);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, no-unsafe-optional-chaining
-    const { bech32Address } = await provider?.getKey(network);
+    const { bech32Address, pubKey } = await provider?.getKey(network.id);
 
     return {
       provider,
       address: bech32Address,
+      publicKey: bytesToHex(pubKey),
     };
   };
 
   return (
     <>
       <InfoLayout title="Base Info">
-        <Select defaultValue={network} onValueChange={setNetwork}>
+        <Select
+          defaultValue={network.id}
+          onValueChange={() => {
+            const net = networks.find((item) => item.id === network.id);
+            if (net) setNetwork(net);
+          }}
+        >
           <SelectTrigger className="w-full">
             <SelectValue className="text-base font-medium" placeholder="选择参数" />
           </SelectTrigger>
           <SelectContent>
             {networks.map((item) => {
               return (
-                <SelectItem key={item} value={item} className="text-base font-medium">
-                  {item}
+                <SelectItem key={item.id} value={item.id} className="text-base font-medium">
+                  {item.name}
                 </SelectItem>
               );
             })}
@@ -93,10 +137,182 @@ export default function Example() {
 
       <ApiGroup title="Basics">
         <ApiPayload
+          title="enable"
+          description="enable"
+          presupposeParams={params.enable}
+          onExecute={async (request: string) => {
+            const obj = JSON.parse(request);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            const res = await provider?.enable(obj);
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
           title="getKey"
           description="获取账户权限"
           onExecute={async (request: string) => {
-            const res = await provider?.getKey(network);
+            const res = await provider?.getKey(network.id);
+            return JSON.stringify(res);
+          }}
+        />
+      </ApiGroup>
+
+      <ApiGroup title="Sign Message">
+        <ApiPayload
+          title="signArbitrary"
+          description="signArbitrary"
+          presupposeParams={params.signArbitrary}
+          onExecute={async (request: string) => {
+            const res = await provider?.signArbitrary(network.id, account.address, request);
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="verifyArbitrary"
+          description="verifyArbitrary"
+          presupposeParams={params.signArbitrary}
+          onExecute={async (request: string) => {
+            const res = await provider?.signArbitrary(network.id, account.address, request);
+            const verifyRes = await provider?.verifyArbitrary(
+              network.id,
+              account.address,
+              request,
+              res,
+            );
+            return JSON.stringify(verifyRes);
+          }}
+        />
+      </ApiGroup>
+
+      <ApiGroup title="Transfer">
+        <ApiPayload
+          title="signAmino"
+          description="signAmino"
+          presupposeParams={params.signAmino(account?.address, account?.address, network.denom)}
+          onExecute={async (request: string) => {
+            if (!nodeClient) return JSON.stringify({ error: 'nodeClient is null' });
+            if (!account) return JSON.stringify({ error: 'account is null' });
+
+            const accountInfo = await nodeClient.getAccountInfo(account?.address);
+
+            const obj = JSON.parse(request);
+
+            const requestObj = {
+              chain_id: network.id,
+              account_number: accountInfo?.account_number,
+              sequence: accountInfo?.sequence,
+              fee: obj.fee,
+              memo: obj.memo,
+              msgs: obj.msgs,
+            };
+
+            const res = await provider?.signAmino(network.id, account.address, requestObj);
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="signDirect"
+          description="signDirect"
+          presupposeParams={params.signDirect(account?.address, account?.address, network.denom)}
+          onExecute={async (request: string) => {
+            const accountInfo = await nodeClient.getAccountInfo(account?.address);
+
+            const obj = JSON.parse(request);
+
+            const pubKeyAny = Any.fromPartial({
+              typeUrl: '/cosmos.crypto.secp256k1.PubKey',
+              value: Uint8Array.from(
+                PubKey.encode(
+                  PubKey.fromPartial({
+                    key: hexToBytes(account.publicKey),
+                  }),
+                ).finish(),
+              ),
+            });
+
+            const msgs:
+              | {
+                  typeUrl: string;
+                  value: Uint8Array;
+                }[]
+              | undefined = obj.msgs?.map((msg: { type: string; value: any }) => {
+              const value = msg.value;
+              if (msg.type === '/cosmos.bank.v1beta1.MsgSend') {
+                return {
+                  typeUrl: '/cosmos.bank.v1beta1.MsgSend',
+                  value: MsgSend.encode(
+                    MsgSend.fromPartial({
+                      fromAddress: value.from_address,
+                      toAddress: value.to_address,
+                      amount: value.amount?.map((amount: any) => ({
+                        amount: amount.amount,
+                        denom: amount.denom,
+                      })),
+                    }),
+                  ).finish(),
+                };
+              } else if (msg.type === '/cosmwasm.wasm.v1.MsgExecuteContract') {
+                return {
+                  typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+                  value: MsgExecuteContract.encode(
+                    MsgExecuteContract.fromPartial({
+                      sender: value.sender,
+                      contract: value.contract,
+                      msg: Buffer.from(JSON.stringify(removeNull(value.msg))),
+                      funds: value.funds?.map((amount: any) => ({
+                        amount: amount.amount,
+                        denom: amount.denom,
+                      })),
+                    }),
+                  ).finish(),
+                };
+              }
+            });
+
+            if (!msgs) return JSON.stringify({ error: 'msgs is null' });
+
+            const bodyBytes = TxBody.encode(
+              TxBody.fromPartial({
+                messages: msgs?.map((msg) => ({
+                  typeUrl: msg.typeUrl,
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                  value: msg.value,
+                })),
+                memo: obj.memo,
+              }),
+            ).finish();
+
+            console.log('bodyBytes', bodyBytes);
+            const authInfoBytes = AuthInfo.encode({
+              signerInfos: [
+                SignerInfo.fromPartial({
+                  publicKey: pubKeyAny,
+                  modeInfo: {
+                    single: {
+                      mode: SignMode.SIGN_MODE_DIRECT,
+                    },
+                  },
+                  sequence: BigInt(accountInfo?.sequence),
+                }),
+              ],
+              fee: Fee.fromPartial({
+                amount: obj.fee.amount.map((amount: any) => ({
+                  amount: amount.amount,
+                  denom: amount.denom,
+                })),
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                gasLimit: BigInt(get<string>(obj, 'fee.gas', '0')),
+              }),
+            }).finish();
+
+            console.log('authInfoBytes', authInfoBytes);
+
+            const res = await provider?.signDirect(network.id, account.address, {
+              bodyBytes: bodyBytes,
+              authInfoBytes: authInfoBytes,
+              chainId: network.id,
+              accountNumber: Long.fromString(accountInfo?.account_number),
+            });
             return JSON.stringify(res);
           }}
         />

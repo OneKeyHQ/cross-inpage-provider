@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
-import ConnectButton from '@/components/connect/ConnectButton';
+import ConnectButton from '../../../components/connect/ConnectButton';
 import { useRef, useState } from 'react';
 import { get } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
-import { ApiPayload, ApiGroup } from '@/components/ApisContainer';
-import { useWallet } from '@/components/connect/WalletContext';
-import type { IKnownWallet } from '@/components/connect/types';
-import DappList from '@/components/DAppList';
+import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
+import { useWallet } from '../../../components/connect/WalletContext';
+import type { IKnownWallet } from '../../../components/connect/types';
+import DappList from '../../../components/DAppList';
+import params from './params';
 
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -83,9 +84,45 @@ export default function Example() {
         />
         <ApiPayload
           title="getUsedAddresses"
-          description="签名消息"
+          description="获取地址列表"
+          presupposeParams={params.signData}
           onExecute={async (request: string) => {
             const res = await walletApi?.getUsedAddresses();
+            return JSON.stringify(res);
+          }}
+        />
+
+        <ApiPayload
+          title="signData"
+          description="签名消息"
+          presupposeParams={params.signData}
+          onExecute={async (request: string) => {
+            const [address] = await walletApi?.getUsedAddresses();
+            const res = await walletApi?.signData(
+              address,
+              Buffer.from(request, 'utf8').toString('hex'),
+            );
+            return JSON.stringify(res);
+          }}
+        />
+      </ApiGroup>
+
+      <ApiGroup title="Transafer">
+        <ApiPayload
+          title="signTx"
+          description="签署交易"
+          presupposeParams={params.signTx}
+          onExecute={async (request: string) => {
+            const res = await walletApi?.signTx(request, true);
+            setWalletApi(res);
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="submitTx"
+          description="广播交易"
+          onExecute={async (request: string) => {
+            const res = await walletApi?.submitTx(request, true);
             return JSON.stringify(res);
           }}
         />

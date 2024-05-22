@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
-import ConnectButton from '@/components/connect/ConnectButton';
+import ConnectButton from '../../../components/connect/ConnectButton';
 import { useEffect, useRef } from 'react';
 import { get } from 'lodash';
 import { IEIP6963AnnounceProviderEvent, IEIP6963ProviderDetail, IEthereumProvider } from './types';
-import { ApiPayload, ApiGroup } from '@/components/ApisContainer';
-import { useWallet } from '@/components/connect/WalletContext';
-import type { IKnownWallet } from '@/components/connect/types';
-import DappList from '@/components/DAppList';
+import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
+import { useWallet } from '../../../components/connect/WalletContext';
+import type { IKnownWallet } from '../../../components/connect/types';
+import DappList from '../../../components/DAppList';
 import params from './params';
 
 export default function Example() {
@@ -116,7 +116,6 @@ export default function Example() {
             return JSON.stringify(res);
           }}
         />
-
         <ApiPayload
           title="RequestAccounts"
           description="获取账户"
@@ -131,7 +130,7 @@ export default function Example() {
 
         <ApiPayload
           title="RevokePermissions"
-          description="删除权限"
+          description="删除权限，暂时不支持"
           presupposeParams={params.revokePermissions}
           onExecute={async () => {
             const res = await provider?.request({
@@ -156,7 +155,6 @@ export default function Example() {
             return JSON.stringify(res);
           }}
         />
-
         <ApiPayload
           title="SwitchEthereumChain"
           description="切换 Chain"
@@ -169,12 +167,48 @@ export default function Example() {
             return JSON.stringify(res);
           }}
         />
+        <ApiPayload
+          title="WatchAsset"
+          description="添加 Token"
+          presupposeParams={params.watchAsset}
+          onExecute={async (request) => {
+            const res = await provider?.request({
+              'method': 'wallet_watchAsset',
+              'params': [JSON.parse(request)],
+            });
+            return JSON.stringify(res);
+          }}
+        />
       </ApiGroup>
 
       <ApiGroup title="Sign Message">
         <ApiPayload
+          title="GetEncryptionPublicKey"
+          description="获取公钥"
+          onExecute={async () => {
+            const res = await provider?.request({
+              'method': 'eth_getEncryptionPublicKey',
+              'params': [account.address],
+            });
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="eth_decrypt"
+          description="ethDecrypt"
+          presupposeParams={params.ethDecrypt}
+          onExecute={async (request: string) => {
+            const res = await provider?.request({
+              'method': 'eth_decrypt',
+              'params': [request, account.address],
+            });
+            return JSON.stringify(res);
+          }}
+        />
+
+        <ApiPayload
           title="eth_sign"
-          description="添加 Chain"
+          description="eth_sign 存在严重安全风险，已经废弃"
           presupposeParams={params.ethSign}
           onExecute={async (request: string) => {
             const res = await provider?.request({
@@ -187,7 +221,7 @@ export default function Example() {
 
         <ApiPayload
           title="personal_sign"
-          description="切换 Chain"
+          description="personal_sign"
           presupposeParams={params.personalSign}
           onExecute={async (request) => {
             const res = await provider?.request({
@@ -200,7 +234,7 @@ export default function Example() {
 
         <ApiPayload
           title="eth_signTypedData"
-          description="切换 Chain"
+          description="SignTypedData v1"
           presupposeParams={params.signTypedData}
           onExecute={async (request) => {
             const res = await provider?.request({
@@ -213,7 +247,7 @@ export default function Example() {
 
         <ApiPayload
           title="signTypedDataV3"
-          description="切换 Chain"
+          description="SignTypedData V3"
           presupposeParams={params.signTypedDataV3}
           onExecute={async (request) => {
             const res = await provider?.request({
@@ -226,7 +260,7 @@ export default function Example() {
 
         <ApiPayload
           title="signTypedDataV4"
-          description="切换 Chain"
+          description="SignTypedData V4"
           presupposeParams={params.signTypedDataV4}
           onExecute={async (request) => {
             const res = await provider?.request({

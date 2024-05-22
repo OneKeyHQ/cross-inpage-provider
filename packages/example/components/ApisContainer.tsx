@@ -53,6 +53,7 @@ export function ApiPayload({
   const { provider } = useWallet<IEthereumProvider>();
 
   const existsPresupposeParams = presupposeParams && presupposeParams.length > 0;
+  const showPresupposeParams = presupposeParams && presupposeParams.length > 1;
 
   const setFormRequest = useCallback((request: string) => {
     try {
@@ -85,7 +86,7 @@ export function ApiPayload({
 
       <CardContent>
         <div className="flex flex-col gap-3">
-          {existsPresupposeParams && (
+          {showPresupposeParams && (
             <div className="flex flex-col gap-2">
               <span className="text-base font-medium">预设参数</span>
               <Select
@@ -113,7 +114,7 @@ export function ApiPayload({
             </div>
           )}
 
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 mt-3">
             <span className="text-base font-medium">请求 (可以手动编辑)</span>
             <AutoHeightTextarea
               className="min-h-12"
@@ -136,8 +137,9 @@ export function ApiPayload({
                   console.log('onExecute result:', res);
                   setFormResult(res ?? 'success');
                 })
-                ?.catch((err) => {
-                  setFormResult('error');
+                ?.catch((err: any) => {
+                  const message: string = err?.message ?? 'error';
+                  setFormResult(`error: ${message}`);
                   console.log('onExecute error:', JSON.stringify(err));
                 });
             }}

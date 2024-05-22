@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import { Tree } from 'react-arborist';
 import * as uuid from 'uuid';
 import { Button } from '../components/ui/button';
-import { registeredChains, registeredChainsWithWalletConnect } from '@/components/chains';
+import { registeredChains, thirdPartyChains } from '../components/chains';
 
 const data: ITreeNodeData[] = [
   {
@@ -17,6 +17,7 @@ const data: ITreeNodeData[] = [
     name: 'General',
     children: [
       { id: uuid.v4(), name: 'iframe', href: '/iframe' },
+      { id: uuid.v4(), name: 'Multichain', href: '/multichain' },
       { id: uuid.v4(), name: 'DeepLink', href: '/deeplink' },
       {
         id: uuid.v4(),
@@ -27,13 +28,13 @@ const data: ITreeNodeData[] = [
   },
   {
     id: uuid.v4(),
-    name: 'WalletConnect',
-    children: registeredChainsWithWalletConnect as ITreeNodeData[],
+    name: 'Networks & Chains',
+    children: registeredChains as ITreeNodeData[],
   },
   {
     id: uuid.v4(),
-    name: 'Networks & Chains',
-    children: registeredChains as ITreeNodeData[],
+    name: 'ThirdParty Example',
+    children: thirdPartyChains as ITreeNodeData[],
   },
 ];
 

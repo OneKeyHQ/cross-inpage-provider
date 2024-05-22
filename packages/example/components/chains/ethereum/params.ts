@@ -66,11 +66,59 @@ export default {
       }),
     },
   ],
+  watchAsset: [
+    {
+      'id': 'watchAsset erc20',
+      'name': '添加 ERC20 资产',
+      'description': '添加 ERC20 资产',
+      'value': JSON.stringify({
+        'type': 'ERC20',
+        'options': {
+          'address': '0xb60e8dd61c5d32be8058bb8eb970870f07233155',
+          'symbol': 'FOO',
+          'decimals': 18,
+          'image': 'https://foo.io/token-image.svg',
+        },
+      }),
+    },
+    {
+      'id': 'watchAsset ERC721',
+      'name': '添加 ERC721 资产',
+      'description': '暂时不支持',
+      'value': JSON.stringify({
+        'type': 'ERC721',
+        'options': {
+          'address': '0x123456789abcdef0123456789abcdef01234567',
+          'tokenId': '42',
+        },
+      }),
+    },
+    {
+      'id': 'watchAsset ERC1155',
+      'name': '资产 ERC1155 资产',
+      'description': '暂时不支持',
+      'value': JSON.stringify({
+        'type': 'ERC1155',
+        'options': {
+          'address': '0xabcdef0123456789abcdef0123456789abcdef01',
+          'tokenId': '1337',
+        },
+      }),
+    },
+  ],
   ethSign: [
     {
       'id': 'eth_sign_1',
       'name': 'eth_sign 1',
       'description': 'eth_sign 有安全风险，硬件不支持',
+      'value': '0x1',
+    },
+  ],
+  ethDecrypt: [
+    {
+      'id': 'ethDecrypt',
+      'name': 'ethDecrypt 1',
+      'description': 'ethDecrypt',
       'value': '0x1',
     },
   ],
@@ -149,7 +197,7 @@ export default {
     {
       'id': 'signTypedDataV4',
       'name': 'signTypedDataV4',
-      'description': 'signTypedDataV4',
+      'description': 'SignTypedDataV4 Normal',
       'value': JSON.stringify({
         domain: {
           chainId: chainIdInt.toString(),
@@ -203,12 +251,177 @@ export default {
         },
       }),
     },
+    {
+      'id': 'signTypedDataV4-bigdata',
+      'name': 'signTypedDataV4 BigData',
+      'description': 'SignTypedDataV4 BigData',
+      'value': JSON.stringify({
+        'domain': {
+          'name': 'Franklin',
+          'version': '0.0.1',
+          'chainId': 1,
+          'verifyingContract': '0x0000000000000000000000000000000000000000',
+        },
+        'primaryType': 'ForwardRequest',
+        'types': {
+          'EIP712Domain': [
+            {
+              'name': 'name',
+              'type': 'string',
+            },
+            {
+              'name': 'version',
+              'type': 'string',
+            },
+            {
+              'name': 'chainId',
+              'type': 'uint256',
+            },
+            {
+              'name': 'verifyingContract',
+              'type': 'address',
+            },
+          ],
+          'ForwardRequest': [
+            {
+              'name': 'from',
+              'type': 'address',
+            },
+            {
+              'name': 'to',
+              'type': 'address',
+            },
+            {
+              'name': 'value',
+              'type': 'uint256',
+            },
+            {
+              'name': 'gas',
+              'type': 'uint256',
+            },
+            {
+              'name': 'nonce',
+              'type': 'uint256',
+            },
+            {
+              'name': 'data',
+              'type': 'bytes',
+            },
+          ],
+          'VerifyWallet': [
+            {
+              'name': 'contents',
+              'type': 'string',
+            },
+          ],
+        },
+        'message': {
+          'from': '0x0000000000000000000000000000000000000000',
+          'to': '0x0000000000000000000000000000000000000000',
+          'value': 0,
+          'gas': 275755,
+          'nonce': 3,
+          'data': `0x${'01'.repeat(3150)}`,
+        },
+      }),
+    },
+    {
+      'id': 'signTypedDataV4-Nested-array',
+      'name': 'signTypedDataV4 Nested Array',
+      'description': 'SignTypedDataV4 Nested Array',
+      'value': JSON.stringify({
+        'types': {
+          'EIP712Domain': [
+            {
+              'name': 'name',
+              'type': 'string',
+            },
+          ],
+          'NestedArray': [
+            {
+              'name': 'items',
+              'type': 'SingleItem[2]',
+            },
+          ],
+          'SingleItem': [
+            {
+              'name': 'id',
+              'type': 'uint256',
+            },
+            {
+              'name': 'value',
+              'type': 'string',
+            },
+          ],
+        },
+        'primaryType': 'NestedArray',
+        'domain': {
+          'name': 'NestedArrayTest',
+        },
+        'message': {
+          'nestedItems': [
+            [
+              {
+                'items': [
+                  {
+                    'id': 1,
+                    'value': 'Item1-1',
+                  },
+                  {
+                    'id': 2,
+                    'value': 'Item1-2',
+                  },
+                ],
+              },
+              {
+                'items': [
+                  {
+                    'id': 3,
+                    'value': 'Item2-1',
+                  },
+                  {
+                    'id': 4,
+                    'value': 'Item2-2',
+                  },
+                ],
+              },
+            ],
+            [
+              {
+                'items': [
+                  {
+                    'id': 5,
+                    'value': 'Item3-1',
+                  },
+                  {
+                    'id': 6,
+                    'value': 'Item3-2',
+                  },
+                ],
+              },
+              {
+                'items': [
+                  {
+                    'id': 7,
+                    'value': 'Item4-1',
+                  },
+                  {
+                    'id': 8,
+                    'value': 'Item4-2',
+                  },
+                ],
+              },
+            ],
+          ],
+        },
+      }),
+    },
   ],
   sendTransaction: (from: string, to: string) => {
     return [
       {
         'id': 'sendTransaction',
-        'name': 'sendTransaction',
+        'name': 'SendTransaction',
         'description': 'sendTransaction',
         'value': JSON.stringify({
           from: from,
@@ -220,7 +433,7 @@ export default {
       },
       {
         'id': 'sendTransaction-eip1559',
-        'name': 'sendTransaction EIP1559',
+        'name': 'SendTransaction EIP1559',
         'description': 'sendTransaction',
         'value': JSON.stringify({
           from: from,
@@ -229,6 +442,49 @@ export default {
           gasLimit: '0x5028',
           maxFeePerGas: '0x2540be400',
           maxPriorityFeePerGas: '0x3b9aca00',
+        }),
+      },{
+        'id': 'sendTransaction-eip1559-bigdata',
+        'name': 'SendTransaction EIP1559 BigData',
+        'description': 'sendTransaction',
+        'value': JSON.stringify({
+          from: from,
+          to: to,
+          value: '0x0',
+          'data': `0x${'01'.repeat(3150)}`,
+          gasLimit: '0x5028',
+          maxFeePerGas: '0x2540be400',
+          maxPriorityFeePerGas: '0x3b9aca00',
+        }),
+      },
+      {
+        'id': 'sendERC20',
+        'name': 'Send ERC20',
+        'description': '发送 ERC20 USDC Token',
+        'value': JSON.stringify({
+          from: from,
+          to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+          data: `0xa9059cbb${to.substring(2).padStart(64, '0')}${BigInt(1000)
+            .toString(16)
+            .padStart(64, '0')}`, // Assumes amount is a decimal string
+          value: '0x0',
+          gasLimit: '0x186a0', // 100000 in hexadecimal
+          gasPrice: '0xbebc200', // example gas price
+        }),
+      },
+      {
+        'id': 'approveERC20',
+        'name': 'Approve ERC20',
+        'description': '授权合约使用 USDC',
+        'value': JSON.stringify({
+          from: from,
+          to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+          data: `0x095ea7b3${'0x3b95bc951ee0f553ba487327278cac44f29715e5' // spender address
+            .substring(2)
+            .padStart(64, '0')}${BigInt(1000).toString(16).padStart(64, '0')}`,
+          value: '0x0',
+          gasLimit: '0x30d40', // 200000 in hexadecimal
+          gasPrice: '0xbebc200', // example gas price
         }),
       },
     ];

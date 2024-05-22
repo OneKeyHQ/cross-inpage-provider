@@ -2,41 +2,31 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 require('@solana/wallet-adapter-react-ui/styles.css');
 import { dapps } from './dapps.config';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { hexToBytes } from '@noble/hashes/utils';
-import { get } from 'lodash';
-import { IProviderApi, IProviderInfo } from './types';
-import { ApiPayload, ApiGroup } from '@/components/ApisContainer';
-import { useWallet } from '@/components/connect/WalletContext';
-import type { IKnownWallet } from '@/components/connect/types';
-import DappList from '@/components/DAppList';
-import params from './params';
+import { useEffect, useMemo } from 'react';
+import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
+import { useWallet } from '../../../components/connect/WalletContext';
+import DappList from '../../../components/DAppList';
+import params from '../solana/params';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
-import { UnsafeBurnerWalletAdapter } from '@solana/wallet-adapter-wallets';
-import {
-  WalletModalProvider,
-  WalletDisconnectButton,
-  WalletMultiButton,
-} from '@solana/wallet-adapter-react-ui';
+import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useConnection, useWallet as useSolWallet } from '@solana/wallet-adapter-react';
-import InfoLayout from '@/components/InfoLayout';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { clusterApiUrl } from '@solana/web3.js';
+import InfoLayout from '../../../components/InfoLayout';
+import { PublicKey, clusterApiUrl } from '@solana/web3.js';
+import { createTransferTransaction } from '../solana/builder';
 
 function Example() {
-  const [network, setNetwork] = useState<string>('MainNet');
-
   const { setProvider } = useWallet();
 
   const { connection } = useConnection();
-  const { connected, publicKey,signMessage } = useSolWallet();
+  const {
+    connected,
+    publicKey,
+    signMessage,
+    signTransaction,
+    signAllTransactions,
+    sendTransaction,
+  } = useSolWallet();
 
   useEffect(() => {
     if (connected) {
@@ -54,12 +44,86 @@ function Example() {
         {publicKey && <p>PublicKey: {publicKey.toBase58()}</p>}{' '}
       </InfoLayout>
 
-      <ApiGroup title="Basics">
+      <ApiGroup title="Sign Message">
         <ApiPayload
           title="signMessage"
           description="签名消息"
+          presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
-            const res = await signMessage(hexToBytes(request));
+            const res = await signMessage(Buffer.from(request, 'utf8'));
+            return JSON.stringify(res);
+          }}
+        />
+      </ApiGroup>
+      <ApiGroup title="Transfer">
+        <ApiPayload
+          title="signAndSendTransaction"
+          description="签署并发送交易"
+          presupposeParams={params.signAndSendTransaction(publicKey?.toBase58() || '')}
+          onExecute={async (request: string) => {
+            const {
+              toPubkey,
+              amount,
+            }: {
+              toPubkey: string;
+              amount: number;
+            } = JSON.parse(request);
+            const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+            const transafe = createTransferTransaction(
+              publicKey,
+              toPubkey,
+              recentBlockhash,
+              amount,
+            );
+            const res = await sendTransaction(transafe, connection);
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="signTransaction"
+          description="签署交易"
+          presupposeParams={params.signAndSendTransaction(publicKey?.toBase58() || '')}
+          onExecute={async (request: string) => {
+            const {
+              toPubkey,
+              amount,
+            }: {
+              toPubkey: string;
+              amount: number;
+            } = JSON.parse(request);
+            const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+            const transafe = createTransferTransaction(
+              publicKey,
+              toPubkey,
+              recentBlockhash,
+              amount,
+            );
+            const res = await signTransaction(transafe);
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="signMultipleTransactions"
+          description="签署多个交易"
+          presupposeParams={params.signMultipleTransaction(publicKey?.toBase58() || '')}
+          onExecute={async (request: string) => {
+            const params: {
+              toPubkey: string;
+              amount: number;
+            }[] = JSON.parse(request);
+            const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+            const trans = params.map((param) => {
+              return createTransferTransaction(
+                publicKey,
+                param.toPubkey,
+                recentBlockhash,
+                param.amount,
+              );
+            });
+            const res = await signAllTransactions(trans);
             return JSON.stringify(res);
           }}
         />
@@ -74,7 +138,7 @@ export default function App() {
   const network = WalletAdapterNetwork.Mainnet;
 
   // You can also provide a custom RPC endpoint.
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  const endpoint = useMemo(() => 'https://node.onekey.so/sol', [network]);
 
   const wallets = useMemo(
     () => [],

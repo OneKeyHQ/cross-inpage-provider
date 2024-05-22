@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
-import ConnectButton from '@/components/connect/ConnectButton';
+import ConnectButton from '../../../components/connect/ConnectButton';
 import { useRef } from 'react';
 import { get } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
-import { ApiPayload, ApiGroup } from '@/components/ApisContainer';
-import { useWallet } from '@/components/connect/WalletContext';
-import type { IKnownWallet } from '@/components/connect/types';
-import DappList from '@/components/DAppList';
+import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
+import { useWallet } from '../../../components/connect/WalletContext';
+import type { IKnownWallet } from '../../../components/connect/types';
+import DappList from '../../../components/DAppList';
+import params from './params';
 
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -23,7 +24,7 @@ export default function Example() {
     },
   ]);
 
-  const { provider } = useWallet<IProviderApi>();
+  const { provider, account } = useWallet<IProviderApi>();
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -35,11 +36,12 @@ export default function Example() {
     const provider = get(window, providerDetail.inject) as IProviderApi | undefined;
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, no-unsafe-optional-chaining
-    const address = await provider?.getPublicKey();
+    const publicKey = await provider?.getPublicKey();
 
     return {
       provider,
-      address,
+      address: '',
+      publicKey: publicKey,
     };
   };
 
@@ -51,7 +53,7 @@ export default function Example() {
             walletsRef.current.map((wallet) => {
               return {
                 id: wallet.uuid,
-                name: wallet.inject ? wallet.name : `${wallet.name} (EIP6963)`,
+                name: wallet.name,
               };
             }),
           );
@@ -66,6 +68,47 @@ export default function Example() {
           onExecute={async (request: string) => {
             const res = await provider?.getPublicKey();
             return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="signEvent"
+          description="signEvent"
+          presupposeParams={params.signEvent}
+          onExecute={async (request: string) => {
+            const obj = JSON.parse(request);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            const res = await provider?.signEvent(obj);
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="signSchnorr"
+          description="signSchnorr"
+          presupposeParams={params.signSchnorr}
+          onExecute={async (request: string) => {
+            const res = await provider?.signSchnorr(request);
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="nip04.encrypt and nip04.decrypt"
+          description="nip04.encrypt"
+          presupposeParams={params.nip04encrypt}
+          onExecute={async (request: string) => {
+            const pubkey = account?.publicKey;
+            const encrypted = await provider.nip04.encrypt(pubkey, request);
+            const decrypted = await provider.nip04.decrypt(pubkey, encrypted);
+            return JSON.stringify(decrypted);
+          }}
+        />
+        <ApiPayload
+          title="nip04.encrypt "
+          description="nip04.encrypt"
+          presupposeParams={params.nip04encrypt}
+          onExecute={async (request: string) => {
+            const pubkey = account?.publicKey;
+            const encrypted = await provider.nip04.encrypt(pubkey, request);
+            return JSON.stringify(encrypted);
           }}
         />
       </ApiGroup>

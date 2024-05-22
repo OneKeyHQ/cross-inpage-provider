@@ -1,3 +1,7 @@
+import { SignClient } from '@walletconnect/sign-client';
+
+export type IProviderApi = typeof SignClient;
+
 export interface IResult {
   method: string;
   body: Array<

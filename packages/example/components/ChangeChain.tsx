@@ -1,13 +1,11 @@
-import { registeredChains, registeredChainsWithWalletConnect } from './chains';
+import { registeredChains } from './chains';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 type IChangeChainProps = {
   defaultChainId?: string;
 };
 
 export default function ChangeChain({ defaultChainId }: IChangeChainProps) {
-  const supportChains = registeredChains
-    .concat(registeredChainsWithWalletConnect)
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const supportChains = registeredChains.sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <Select

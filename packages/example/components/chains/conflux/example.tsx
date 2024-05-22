@@ -1,14 +1,14 @@
 /* eslint-disable no-unsafe-optional-chaining */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
-import ConnectButton from '@/components/connect/ConnectButton';
+import ConnectButton from '../../../components/connect/ConnectButton';
 import { useEffect, useRef } from 'react';
 import { get } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
-import { ApiPayload, ApiGroup } from '@/components/ApisContainer';
-import { useWallet } from '@/components/connect/WalletContext';
-import type { IKnownWallet } from '@/components/connect/types';
-import DappList from '@/components/DAppList';
+import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
+import { useWallet } from '../../../components/connect/WalletContext';
+import type { IKnownWallet } from '../../../components/connect/types';
+import DappList from '../../../components/DAppList';
 import params from './params';
 
 export default function BTCExample() {
@@ -25,7 +25,7 @@ export default function BTCExample() {
     },
   ]);
 
-  const { provider } = useWallet<IProviderApi>();
+  const { provider, account } = useWallet<IProviderApi>();
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -81,13 +81,91 @@ export default function BTCExample() {
             return JSON.stringify(res);
           }}
         />
-
         <ApiPayload
           title="GetAccounts"
           description="获取账户"
           onExecute={async () => {
             const res = await provider?.request<string[]>({
               method: 'cfx_accounts',
+            });
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="AddConfluxChain"
+          description="添加 Chain"
+          presupposeParams={params.addConfluxChain}
+          onExecute={async (request) => {
+            const res = await provider?.request({
+              'method': 'wallet_addConfluxChain',
+              'params': [JSON.parse(request)],
+            });
+            return JSON.stringify(res);
+          }}
+        />{' '}
+        <ApiPayload
+          title="switchConfluxChain"
+          description="切换 Chain"
+          presupposeParams={params.addConfluxChain}
+          onExecute={async (request) => {
+            const res = await provider?.request({
+              'method': 'wallet_switchConfluxChain',
+              'params': [JSON.parse(request)],
+            });
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="WatchAsset"
+          description="添加 Token"
+          presupposeParams={params.watchAsset}
+          onExecute={async (request) => {
+            const res = await provider?.request({
+              'method': 'wallet_watchAsset',
+              'params': [JSON.parse(request)],
+            });
+            return JSON.stringify(res);
+          }}
+        />
+      </ApiGroup>
+
+      <ApiGroup title="Sign Message">
+        <ApiPayload
+          title="personal_sign"
+          description="personal_sign"
+          presupposeParams={params.personalSign}
+          onExecute={async (request) => {
+            const res = await provider?.request({
+              'method': 'personal_sign',
+              'params': [request, account.address, 'Example password'],
+            });
+            return JSON.stringify(res);
+          }}
+        />
+
+        <ApiPayload
+          title="signTypedDataV4"
+          description="signTypedDataV4"
+          presupposeParams={params.signTypedDataV4}
+          onExecute={async (request) => {
+            const res = await provider?.request({
+              'method': 'cfx_signTypedData_v4',
+              'params': [account.address, request],
+            });
+            return JSON.stringify(res);
+          }}
+        />
+      </ApiGroup>
+
+      <ApiGroup title="Transaction">
+        <ApiPayload
+          title="SendTransaction"
+          description="发送交易"
+          presupposeParams={params.sendTransaction(account?.address ?? '', account?.address ?? '')}
+          onExecute={async (request: string) => {
+            const res = await provider?.request({
+              'method': 'cfx_sendTransaction',
+              'params': [JSON.parse(request)],
             });
             return JSON.stringify(res);
           }}

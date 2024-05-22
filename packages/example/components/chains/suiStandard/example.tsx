@@ -5,20 +5,22 @@ import { useEffect, useRef, useState } from 'react';
 import { hexToBytes } from '@noble/hashes/utils';
 import { get } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
-import { ApiPayload, ApiGroup } from '@/components/ApisContainer';
-import { useWallet } from '@/components/connect/WalletContext';
-import type { IKnownWallet } from '@/components/connect/types';
-import DappList from '@/components/DAppList';
+import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
+import { useWallet } from '../../../components/connect/WalletContext';
+import type { IKnownWallet } from '../../../components/connect/types';
+import DappList from '../../../components/DAppList';
 import params from './params';
 import { ConnectButton, WalletKitProvider, useWalletKit } from '@mysten/wallet-kit';
-import InfoLayout from '@/components/InfoLayout';
+import InfoLayout from '../../../components/InfoLayout';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '../../../components/ui/select';
+
+import { TransactionBlock } from '@mysten/sui.js/transactions';
 
 function Example() {
   const [network, setNetwork] = useState<string>('MainNet');
@@ -36,12 +38,12 @@ function Example() {
   } = useWalletKit();
 
   useEffect(() => {
-    if (isConnected) {
+    if (isConnected && currentAccount) {
       setProvider(true);
     } else {
       setProvider(false);
     }
-  }, [isConnected, setProvider]);
+  }, [currentAccount, isConnected, setProvider]);
 
   return (
     <>
@@ -69,13 +71,84 @@ function Example() {
         {currentAccount && <p>ChainId:{currentAccount.chains}</p>}
       </InfoLayout>
 
-      <ApiGroup title="Basics">
+      <ApiGroup title="SignMessage">
         <ApiPayload
-          title="signPersonalMessage"
+          title="SignMessage"
+          description="签名消息, 不安全已经弃用"
+          presupposeParams={params.signMessage}
+          onExecute={async (request: string) => {
+            const res = await signMessage({
+              message: hexToBytes(request),
+              account: currentAccount,
+            });
+            return JSON.stringify(res);
+          }}
+        />
+
+        <ApiPayload
+          title="SignPersonalMessage"
           description="签名消息"
+          presupposeParams={params.signPersonalMessage}
           onExecute={async (request: string) => {
             const res = await signPersonalMessage({
               message: hexToBytes(request),
+              account: currentAccount,
+            });
+            return JSON.stringify(res);
+          }}
+        />
+      </ApiGroup>
+      <ApiGroup title="Transaction">
+        <ApiPayload
+          title="SignTransaction"
+          description="签名交易"
+          presupposeParams={params.signTransaction(currentAccount?.address ?? '')}
+          onExecute={async (request: string) => {
+            const {
+              from,
+              to,
+              amount,
+            }: {
+              from: string;
+              to: string;
+              amount: number;
+            } = JSON.parse(request);
+
+            const transfer = new TransactionBlock();
+            transfer.setSender(from);
+            const [coin] = transfer.splitCoins(transfer.gas, [transfer.pure(amount)]);
+            transfer.transferObjects([coin], transfer.pure(to));
+            const res: unknown = await signTransactionBlock({
+              transactionBlock: transfer,
+              chain: network.toLowerCase() === 'sui:testnet' ? 'sui:testnet' : 'sui:mainnet',
+              account: currentAccount,
+            });
+            return JSON.stringify(res);
+          }}
+        />
+
+        <ApiPayload
+          title="SignAndExecuteTransactionBlock"
+          description="签名并执行交易"
+          presupposeParams={params.signTransaction(currentAccount?.address ?? '')}
+          onExecute={async (request: string) => {
+            const {
+              from,
+              to,
+              amount,
+            }: {
+              from: string;
+              to: string;
+              amount: number;
+            } = JSON.parse(request);
+
+            const transfer = new TransactionBlock();
+            transfer.setSender(from);
+            const [coin] = transfer.splitCoins(transfer.gas, [transfer.pure(amount)]);
+            transfer.transferObjects([coin], transfer.pure(to));
+            const res: unknown = await signAndExecuteTransactionBlock({
+              transactionBlock: transfer,
+              chain: network.toLowerCase() === 'sui:testnet' ? 'sui:testnet' : 'sui:mainnet',
               account: currentAccount,
             });
             return JSON.stringify(res);

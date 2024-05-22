@@ -8,7 +8,13 @@ export type IChainInfo = {
   target?: string;
 };
 
-export const registeredChainsWithWalletConnect: IChainInfo[] = [
+export const thirdPartyChains: IChainInfo[] = [
+  {
+    id: uuid.v4(),
+    name: 'AptosWalletAdapter',
+    href: 'https://aptos-labs.github.io/aptos-wallet-adapter/',
+    icon: 'https://uni.onekey-asset.com/static/chain/apt.png',
+  },
   {
     id: uuid.v4(),
     name: 'EVM (官方 WalletConnect)',
@@ -18,37 +24,38 @@ export const registeredChainsWithWalletConnect: IChainInfo[] = [
   },
   {
     id: uuid.v4(),
-    name: 'Aptos WalletConnect',
-    href: '/aptosWalletconnect',
-    icon: 'https://uni.onekey-asset.com/static/chain/apt.png',
+    name: 'EVM (Metamask Demo)',
+    href: 'https://metamask.github.io/test-dapp',
+    icon: 'https://uni.onekey-asset.com/static/chain/eth.png',
   },
   {
     id: uuid.v4(),
-    name: 'Algo WalletConnect',
-    href: '/algoWalletConnect',
-    icon: 'https://uni.onekey-asset.com/static/chain/algo.png',
+    name: 'NEAR ref-ui',
+    href: 'https://dapp-near-ref-ui.onekeytest.com',
+    target: '_blank',
+    icon: 'https://uni.onekey-asset.com/static/chain/near.png',
   },
 ];
 
 export const registeredChains: IChainInfo[] = [
   {
     id: uuid.v4(),
+    name: 'Algo WalletConnect',
+    href: '/algoWalletConnect',
+    icon: 'https://uni.onekey-asset.com/static/chain/algo.png',
+  },
+  {
+    id: uuid.v4(),
     name: 'Aptos',
     href: '/aptos',
     icon: 'https://uni.onekey-asset.com/static/chain/apt.png',
   },
-  {
-    id: uuid.v4(),
-    name: 'Aptos Martian',
-    href: '/aptosMartian',
-    icon: 'https://uni.onekey-asset.com/static/chain/apt.png',
-  },
-  {
-    id: uuid.v4(),
-    name: 'AptosWalletAdapter',
-    href: 'https://aptos-labs.github.io/aptos-wallet-adapter/',
-    icon: 'https://uni.onekey-asset.com/static/chain/apt.png',
-  },
+  // {
+  //   id: uuid.v4(),
+  //   name: 'Aptos Martian',
+  //   href: '/aptosMartian',
+  //   icon: 'https://uni.onekey-asset.com/static/chain/apt.png',
+  // },
   {
     id: uuid.v4(),
     name: 'BTC',
@@ -91,23 +98,11 @@ export const registeredChains: IChainInfo[] = [
     href: '/ethereum',
     icon: 'https://uni.onekey-asset.com/static/chain/eth.png',
   },
-  {
-    id: uuid.v4(),
-    name: 'EVM (Metamask)',
-    href: 'https://metamask.github.io/test-dapp',
-    icon: 'https://uni.onekey-asset.com/static/chain/eth.png',
-  },
+
   // {
   //   id: uuid.v4(),
   //   name: 'NEAR',
   //   href: '/near',
-  //   icon: 'https://uni.onekey-asset.com/static/chain/near.png',
-  // },
-  // {
-  //   id: uuid.v4(),
-  //   name: 'NEAR ref-ui',
-  //   href: 'https://dapp-near-ref-ui.onekeytest.com',
-  //   target: '_blank',
   //   icon: 'https://uni.onekey-asset.com/static/chain/near.png',
   // },
   {

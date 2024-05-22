@@ -13,6 +13,30 @@ export interface IProviderApi {
   isOneKey?: boolean;
   enable(): Promise<void>;
   getInfo(): Promise<GetInfoResponse>;
+  signMessage(message: string): Promise<{
+    message: string;
+    signature: string;
+  }>;
+  verifyMessage(signature: string, message: string): Promise<void>;
+  makeInvoice(options: {
+    amount?: string | number;
+    defaultAmount?: string | number;
+    minimumAmount?: string | number;
+    maximumAmount?: string | number;
+    defaultMemo?: string;
+  }): Promise<{
+    paymentRequest: string;
+  }>;
+  sendPayment(invoice: string): Promise<{
+    preimage: string;
+  }>;
+  keysend(options: {
+    destination: string;
+    amount: string | number;
+    customRecords?: Record<string, string>;
+  }): Promise<{
+    preimage: string;
+  }>;
 }
 
 export interface IProviderInfo {

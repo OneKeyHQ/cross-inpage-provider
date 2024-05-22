@@ -5,7 +5,6 @@ export type IKnownWallet = {
 };
 export type IAccountInfo = {
   address: string;
+  publicKey: string;
   chainId: string;
 };
-
-

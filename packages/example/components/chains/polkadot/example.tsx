@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
-import ConnectButton from '@/components/connect/ConnectButton';
+import ConnectButton from '../../../components/connect/ConnectButton';
 import { useEffect, useRef, useState } from 'react';
 import { IProviderApi, IProviderInfo } from './types';
-import { ApiPayload, ApiGroup } from '@/components/ApisContainer';
-import { useWallet } from '@/components/connect/WalletContext';
-import type { IKnownWallet } from '@/components/connect/types';
-import DappList from '@/components/DAppList';
+import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
+import { useWallet } from '../../../components/connect/WalletContext';
+import type { IKnownWallet } from '../../../components/connect/types';
+import DappList from '../../../components/DAppList';
 import {
   web3Accounts,
   web3AccountsSubscribe,
@@ -14,6 +14,8 @@ import {
   web3FromSource,
 } from '@polkadot/extension-dapp';
 import { ApiPromise, WsProvider } from '@polkadot/api';
+import { hexToU8a, stringToHex } from '@polkadot/util';
+import params from './params';
 
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([]);
@@ -74,7 +76,7 @@ export default function Example() {
 
       <ApiGroup title="Basics">
         <ApiPayload
-          title="accounts get"
+          title="Accounts Get"
           description="获取账户权限"
           onExecute={async (request: string) => {
             const res = await provider?.accounts.get();
@@ -82,15 +84,48 @@ export default function Example() {
           }}
         />
         <ApiPayload
-          title="signRaw"
+          title="SignRaw"
           description="签名消息"
+          presupposeParams={params.signRaw}
           onExecute={async (request: string) => {
-            const res = await provider?.signer.signRaw({
-              data: request,
+            const message = stringToHex(request);
+            const [account] = await web3Accounts();
+            const injector = await web3FromSource(account?.meta?.source);
+            const res = await injector.signer.signRaw({
+              data: message,
               address: account.address,
               type: 'bytes',
             });
             return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="SignAndSend"
+          description="签名并发送交易"
+          presupposeParams={params.signAndSend(account?.address || '')}
+          onExecute={async (request: string) => {
+            const {
+              to,
+              value,
+            }: {
+              to: string;
+              value: string;
+            } = JSON.parse(request);
+
+            const [account] = await web3Accounts();
+            const injector = await web3FromSource(account?.meta?.source);
+
+            return new Promise((resolve, reject) => {
+              api.tx.balances
+                .transferKeepAlive(to, value)
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                .signAndSend(account?.address, { signer: injector.signer }, (status) => {
+                  resolve(JSON.stringify(status));
+                })
+                .catch((e) => {
+                  reject(e);
+                });
+            });
           }}
         />
       </ApiGroup>

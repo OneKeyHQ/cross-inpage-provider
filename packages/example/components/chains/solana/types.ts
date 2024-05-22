@@ -1,7 +1,8 @@
-import { PublicKey } from '@solana/web3.js';
+import { PublicKey, Transaction } from '@solana/web3.js';
 
 export interface IProviderApi {
   isOneKey?: boolean;
+  publicKey?: PublicKey;
   connect(): Promise<{
     publicKey: PublicKey;
   }>;
@@ -12,6 +13,11 @@ export interface IProviderApi {
     signature: Uint8Array;
     publicKey: PublicKey;
   }>;
+  signAndSendTransaction(transafe: Transaction): Promise<{
+    signature: Uint8Array;
+  }>;
+  signTransaction(transafe: Transaction): Promise<string>;
+  signAllTransactions(transafe: Transaction[]): Promise<string[]>;
 }
 
 export interface IProviderInfo {

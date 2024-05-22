@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import PageLayout from '../../components/PageLayout';
 
 // injected provider works only if nextjs ssr disabled
-const AlgoExample = dynamic(() => import('../../components/chains/algoWalletConnect/AlgoExample'), {
+const AlgoExample = dynamic(() => import('../../components/chains/algoWalletConnect/example'), {
   ssr: false,
 });
 

@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import {
@@ -28,6 +28,8 @@ export default function ConnectButton<T>({
   onConnect,
   onDisconnect,
 }: ConnectButtonProps<T>) {
+  const connectDialogRef = useRef<any>(null);
+
   const [wallets, setWallets] = useState<IKnownWallet[]>([]);
 
   const { setProvider, setAccount, provider, account } = useWallet();
@@ -49,7 +51,19 @@ export default function ConnectButton<T>({
 
   const connectWalletWithDialog = useCallback(async () => {
     const wallets = await fetchWallets?.();
+
+    if (wallets?.length === 0) {
+      connectDialogRef.current?.click();
+      return;
+    }
+
     if (wallets?.length === 1) {
+      try {
+        connectDialogRef.current?.click();
+      } catch (error) {
+        // ignore
+      }
+
       await connectWallet(wallets[0]);
     } else {
       setWallets(wallets);
@@ -59,12 +73,13 @@ export default function ConnectButton<T>({
   return (
     <Card>
       <CardContent className="flex flex-col flex-wrap gap-3">
-        <div className="flex flex-row justify-between">
+        <div className="flex flex-row flex-wrap justify-between">
           <Dialog>
             <DialogTrigger asChild>
               <Button onClick={connectWalletWithDialog}>Connect Wallet</Button>
             </DialogTrigger>
             <DialogContent>
+              <DialogClose ref={connectDialogRef} />
               <DialogHeader>
                 <DialogTitle>选择钱包开始连接</DialogTitle>
                 {!!wallets &&
@@ -101,9 +116,25 @@ export default function ConnectButton<T>({
           )}
         </div>
         {account && (
-          <div className="flex flex-row gap-4">
-            {account?.address && <span>地址:{account?.address}</span>}
-            {account?.chainId && <span>网络:{account?.chainId}</span>}
+          <div className="flex flex-row flex-wrap gap-4">
+            {account?.address && (
+              <>
+                <span>地址:</span>
+                <span>{account?.address}</span>
+              </>
+            )}
+            {account?.publicKey && (
+              <>
+                <span>公钥:</span>
+                <span>{account?.publicKey}</span>
+              </>
+            )}
+            {account?.chainId && (
+              <>
+                <span>网络:</span>
+                <span>{account?.chainId}</span>
+              </>
+            )}
           </div>
         )}
       </CardContent>

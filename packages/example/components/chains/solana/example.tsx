@@ -1,13 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
-import ConnectButton from '@/components/connect/ConnectButton';
-import { useRef } from 'react';
+import ConnectButton from '../../../components/connect/ConnectButton';
+import { useMemo, useRef } from 'react';
 import { get } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
-import { ApiPayload, ApiGroup } from '@/components/ApisContainer';
-import { useWallet } from '@/components/connect/WalletContext';
-import type { IKnownWallet } from '@/components/connect/types';
-import DappList from '@/components/DAppList';
+import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
+import { useWallet } from '../../../components/connect/WalletContext';
+import type { IKnownWallet } from '../../../components/connect/types';
+import DappList from '../../../components/DAppList';
+import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
+import params from './params';
+import { createTransferTransaction } from './builder';
+
+const NETWORK = clusterApiUrl('mainnet-beta');
 
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -28,7 +33,8 @@ export default function Example() {
     },
   ]);
 
-  const { provider } = useWallet<IProviderApi>();
+  const { provider, account } = useWallet<IProviderApi>();
+  const connection = useMemo(() => new Connection('https://node.onekey.so/sol'), []);
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -44,7 +50,7 @@ export default function Example() {
 
     return {
       provider,
-      address: publicKey.toBase58(),
+      publicKey: publicKey.toBase58(),
     };
   };
 
@@ -56,7 +62,7 @@ export default function Example() {
             walletsRef.current.map((wallet) => {
               return {
                 id: wallet.uuid,
-                name: wallet.inject ? wallet.name : `${wallet.name} (EIP6963)`,
+                name: wallet.name,
               };
             }),
           );
@@ -66,19 +72,96 @@ export default function Example() {
 
       <ApiGroup title="Basics">
         <ApiPayload
-          title="getPublicKey"
-          description="获取账户权限"
+          title="Conenct Wallet"
+          description="连接钱包并获取公钥"
           onExecute={async (request: string) => {
             const res = await provider?.connect();
             return JSON.stringify(res);
           }}
         />
+      </ApiGroup>
+      <ApiGroup title="Sign Message">
         <ApiPayload
           title="signMessage"
           description="签名消息"
+          presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
-            const data = new TextEncoder().encode(request);
-            const res = await provider?.signMessage(data, 'hex');
+            const res = await provider?.signMessage(Buffer.from(request, 'utf8'));
+            return JSON.stringify(res);
+          }}
+        />
+      </ApiGroup>
+      <ApiGroup title="Transfer">
+        <ApiPayload
+          title="signAndSendTransaction"
+          description="签署并发送交易"
+          presupposeParams={params.signAndSendTransaction(account?.publicKey)}
+          onExecute={async (request: string) => {
+            const {
+              toPubkey,
+              amount,
+            }: {
+              toPubkey: string;
+              amount: number;
+            } = JSON.parse(request);
+            const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+            const transafe = createTransferTransaction(
+              new PublicKey(account?.publicKey),
+              toPubkey,
+              recentBlockhash,
+              amount,
+            );
+
+            const res = await provider?.signAndSendTransaction(transafe);
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="signTransaction"
+          description="签署交易"
+          presupposeParams={params.signAndSendTransaction(account?.publicKey)}
+          onExecute={async (request: string) => {
+            const {
+              toPubkey,
+              amount,
+            }: {
+              toPubkey: string;
+              amount: number;
+            } = JSON.parse(request);
+            const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+            const transafe = createTransferTransaction(
+              new PublicKey(account?.publicKey),
+              toPubkey,
+              recentBlockhash,
+              amount,
+            );
+            const res = await provider?.signTransaction(transafe);
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="signMultipleTransactions"
+          description="签署多个交易"
+          presupposeParams={params.signMultipleTransaction(account?.publicKey)}
+          onExecute={async (request: string) => {
+            const params: {
+              toPubkey: string;
+              amount: number;
+            }[] = JSON.parse(request);
+            const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+            const trans = params.map((param) => {
+              return createTransferTransaction(
+                new PublicKey(account?.publicKey),
+                param.toPubkey,
+                recentBlockhash,
+                param.amount,
+              );
+            });
+
+            const res = await provider?.signAllTransactions(trans);
             return JSON.stringify(res);
           }}
         />

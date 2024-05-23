@@ -77,7 +77,7 @@ class ProviderBtcWallet extends ProviderBtc implements IProviderBtcWallet {
     const result = (await this._request<number>({
       method: ProviderMethods.GET_BALANCE,
     })) as unknown as BalanceInfo;
-		return result?.confirmed ?? 0;
+		return Number(result?.confirmed ?? 0);
   }
 
   signMessageBIP322(message: string): Promise<string> {

@@ -50,7 +50,7 @@ export default {
       'id': 'eth_sign',
       'name': 'eth_sign',
       'description': 'personalSign',
-      'value': '0x1',
+      'value': 'personal sign message example',
     },
   ],
   signTypedDataV4: [

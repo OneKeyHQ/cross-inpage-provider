@@ -52,7 +52,7 @@ export default {
     {
       id: 'pushTx',
       name: 'PushTx',
-      value: '0200000000010135bd7d...',
+      value: '0200000000010135bd7d',
     },
   ],
   signPsbt: [

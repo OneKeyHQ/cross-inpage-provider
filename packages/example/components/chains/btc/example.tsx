@@ -9,6 +9,7 @@ import { useWallet } from '../../../components/connect/WalletContext';
 import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
 import params from './params';
+import { verifyMessage } from '@unisat/wallet-utils';
 
 export default function BTCExample() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -64,6 +65,7 @@ export default function BTCExample() {
         <ApiPayload
           title="RequestAccounts"
           description="请求连接 Wallet 获取账户"
+          disableRequestContent
           onExecute={async (request: string) => {
             const res = await provider?.requestAccounts();
             return JSON.stringify(res);
@@ -73,6 +75,7 @@ export default function BTCExample() {
         <ApiPayload
           title="GetAccounts"
           description="获取当前账户地址"
+          disableRequestContent
           onExecute={async () => {
             const res = await provider?.getAccounts();
             return JSON.stringify(res);
@@ -81,14 +84,16 @@ export default function BTCExample() {
         <ApiPayload
           title="GetPublicKey"
           description="获取当前账户公钥"
+          disableRequestContent
           onExecute={async () => {
             const res = await provider?.getPublicKey();
-            return JSON.stringify(res);
+            return res;
           }}
         />
         <ApiPayload
           title="GetBalance"
           description="获取当前账户余额"
+          disableRequestContent
           onExecute={async () => {
             const res = await provider?.getBalance();
             return JSON.stringify(res);
@@ -97,9 +102,10 @@ export default function BTCExample() {
         <ApiPayload
           title="GetNetwork"
           description="获取当前网络"
+          disableRequestContent
           onExecute={async () => {
             const res = await provider?.getNetwork();
-            return JSON.stringify(res);
+            return res;
           }}
         />
         <ApiPayload
@@ -121,7 +127,18 @@ export default function BTCExample() {
           onExecute={async (request: string) => {
             const obj = JSON.parse(request) as { msg: string; type: string | undefined };
             const res = await provider?.signMessage(obj.msg, obj.type);
-            return JSON.stringify(res);
+            return res;
+          }}
+          onValidate={async (request: string, response: string) => {
+            const obj = JSON.parse(request) as { msg: string; type: string | undefined };
+            const publicKey = await provider?.getPublicKey();
+
+            if (!obj.type || obj.type === 'ecdsa') {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+              return verifyMessage(publicKey, obj.msg, response);
+            }
+
+            return 'Unsupported type';
           }}
         />
       </ApiGroup>

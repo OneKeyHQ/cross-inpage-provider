@@ -70,6 +70,7 @@ export default function BTCExample() {
         <ApiPayload
           title="RequestAccounts"
           description="连接钱包"
+          disableRequestContent
           onExecute={async (request: string) => {
             const res = await provider?.request<string[]>({
               method: 'tron_requestAccounts',
@@ -81,6 +82,7 @@ export default function BTCExample() {
         <ApiPayload
           title="GetAccounts"
           description="获取账户"
+          disableRequestContent
           onExecute={async () => {
             const res = await provider?.request<string[]>({
               method: 'tron_accounts',
@@ -124,6 +126,8 @@ export default function BTCExample() {
             const [connectedAddress] = await provider.request<string[]>({
               method: 'tron_accounts',
             });
+
+            
 
             const { to, amount } = JSON.parse(request);
 

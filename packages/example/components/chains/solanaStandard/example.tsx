@@ -12,8 +12,9 @@ import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useConnection, useWallet as useSolWallet } from '@solana/wallet-adapter-react';
 import InfoLayout from '../../../components/InfoLayout';
-import { PublicKey, clusterApiUrl } from '@solana/web3.js';
-import { createTransferTransaction } from '../solana/builder';
+import { createTransferTransaction, createVersionedTransaction } from '../solana/builder';
+import { jsonToUint8Array } from '../../../lib/uint8array';
+import nacl from 'tweetnacl';
 
 function Example() {
   const { setProvider } = useWallet();
@@ -52,6 +53,16 @@ function Example() {
           onExecute={async (request: string) => {
             const res = await signMessage(Buffer.from(request, 'utf8'));
             return JSON.stringify(res);
+          }}
+          onValidate={(request: string, result: string) => {
+            const signatureObj = jsonToUint8Array(result);
+            const isValidSignature = nacl.sign.detached.verify(
+              Buffer.from(request, 'utf8'),
+              signatureObj,
+              publicKey.toBytes(),
+            );
+
+            return Promise.resolve(isValidSignature.toString());
           }}
         />
       </ApiGroup>
@@ -101,6 +112,30 @@ function Example() {
               amount,
             );
             const res = await signTransaction(transafe);
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="signVersionedTransaction"
+          description="签署 Versioned 交易"
+          presupposeParams={params.signAndSendTransaction(publicKey?.toBase58())}
+          onExecute={async (request: string) => {
+            const {
+              toPubkey,
+              amount,
+            }: {
+              toPubkey: string;
+              amount: number;
+            } = JSON.parse(request);
+            const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+            const transfer = createVersionedTransaction(
+              publicKey,
+              toPubkey,
+              recentBlockhash,
+              amount,
+            );
+            const res = await signTransaction(transfer);
             return JSON.stringify(res);
           }}
         />

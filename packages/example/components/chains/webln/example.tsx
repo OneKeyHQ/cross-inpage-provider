@@ -10,6 +10,7 @@ import { useWallet } from '../../../components/connect/WalletContext';
 import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
 import params from './params';
+import { toast } from '../../ui/use-toast';
 
 export default function BTCExample() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -100,7 +101,7 @@ export default function BTCExample() {
           onExecute={async (request: string) => {
             const res = await provider?.signMessage(request);
             await provider?.verifyMessage(res.signature, res.message);
-            return JSON.stringify('success');
+            return 'success';
           }}
         />
       </ApiGroup>
@@ -119,9 +120,14 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="sendPayment"
-          description="支付 invoice，可以通过 makeInvoice 生成 invoice，复制到 request 中"
-          presupposeParams={params.sendPayment}
+          description="支付 invoice，要通过 makeInvoice 生成 invoice，复制 paymentRequest 到 request 中"
           onExecute={async (request: string) => {
+            if (!request) {
+              toast({
+                title: '请通过 makeInvoice 生成 invoice，复制 paymentRequest 到 request 中',
+              });
+              return;
+            }
             const res = await provider?.sendPayment(request);
             return JSON.stringify(res);
           }}

@@ -1,13 +1,10 @@
 /* eslint-disable no-unsafe-optional-chaining */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { hexToBytes } from '@noble/hashes/utils';
-import { get } from 'lodash';
-import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
 import { useWallet } from '../../../components/connect/WalletContext';
-import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
 import params from './params';
 import { ConnectButton, WalletKitProvider, useWalletKit } from '@mysten/wallet-kit';
@@ -21,6 +18,11 @@ import {
 } from '../../../components/ui/select';
 
 import { TransactionBlock } from '@mysten/sui.js/transactions';
+import {
+  verifySignature,
+  verifyPersonalMessage,
+  verifyTransactionBlock,
+} from '@mysten/sui.js/verify';
 
 function Example() {
   const [network, setNetwork] = useState<string>('MainNet');
@@ -30,6 +32,7 @@ function Example() {
     isConnected,
     accounts,
     disconnect,
+    status,
     currentAccount,
     signTransactionBlock,
     signAndExecuteTransactionBlock,
@@ -69,12 +72,13 @@ function Example() {
         {currentAccount && <p>Account:{currentAccount.address}</p>}{' '}
         {currentAccount && <p>PubKey:{currentAccount.publicKey}</p>}{' '}
         {currentAccount && <p>ChainId:{currentAccount.chains}</p>}
+        {status && <p>Status :{status}</p>}
       </InfoLayout>
 
       <ApiGroup title="SignMessage">
         <ApiPayload
           title="SignMessage"
-          description="签名消息, 不安全已经弃用"
+          description="签名消息, 不安全已经弃用, 硬件无法使用"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
             const res = await signMessage({
@@ -82,6 +86,19 @@ function Example() {
               account: currentAccount,
             });
             return JSON.stringify(res);
+          }}
+          onValidate={async (request: string, result: string) => {
+            const {
+              messageBytes,
+              signature,
+            }: {
+              messageBytes: string;
+              signature: string;
+            } = JSON.parse(result);
+
+            const publicKey = await verifySignature(hexToBytes(request), signature);
+
+            return (currentAccount.address === publicKey.toSuiAddress()).toString();
           }}
         />
 
@@ -95,6 +112,19 @@ function Example() {
               account: currentAccount,
             });
             return JSON.stringify(res);
+          }}
+          onValidate={async (request: string, result: string) => {
+            const {
+              bytes,
+              signature,
+            }: {
+              bytes: string;
+              signature: string;
+            } = JSON.parse(result);
+
+            const publicKey = await verifyPersonalMessage(hexToBytes(request), signature);
+
+            return (currentAccount.address === publicKey.toSuiAddress()).toString();
           }}
         />
       </ApiGroup>

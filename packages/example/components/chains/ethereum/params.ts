@@ -111,7 +111,7 @@ export default {
       'id': 'eth_sign_1',
       'name': 'eth_sign 1',
       'description': 'eth_sign 有安全风险，硬件不支持',
-      'value': '0x1',
+      'value': '0x879a053d4800c6354e76c7985a865d2922c82fb5b3f4577b2fe08b998954f2e0',
     },
   ],
   ethDecrypt: [
@@ -119,7 +119,7 @@ export default {
       'id': 'ethDecrypt',
       'name': 'ethDecrypt 1',
       'description': 'ethDecrypt',
-      'value': '0x1',
+      'value': '0x01',
     },
   ],
   personalSign: [
@@ -127,7 +127,7 @@ export default {
       'id': 'eth_sign',
       'name': 'eth_sign',
       'description': 'personalSign',
-      'value': '0x1',
+      'value': '0x01',
     },
   ],
   signTypedData: [
@@ -149,7 +149,7 @@ export default {
       ]),
     },
   ],
-  signTypedDataV3: [
+  signTypedDataV3: (chainId: number) => [
     {
       'id': 'signTypedDataV3',
       'name': 'signTypedDataV3',
@@ -176,7 +176,7 @@ export default {
         domain: {
           name: 'Ether Mail',
           version: '1',
-          chainId: chainIdInt,
+          chainId: chainId,
           verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
         },
         message: {
@@ -193,14 +193,14 @@ export default {
       }),
     },
   ],
-  signTypedDataV4: [
+  signTypedDataV4: (chainId: number) => [
     {
       'id': 'signTypedDataV4',
       'name': 'signTypedDataV4',
       'description': 'SignTypedDataV4 Normal',
       'value': JSON.stringify({
         domain: {
-          chainId: chainIdInt.toString(),
+          chainId: chainId.toString(),
           name: 'Ether Mail',
           verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
           version: '1',
@@ -259,7 +259,7 @@ export default {
         'domain': {
           'name': 'Franklin',
           'version': '0.0.1',
-          'chainId': 1,
+          'chainId': chainId,
           'verifyingContract': '0x0000000000000000000000000000000000000000',
         },
         'primaryType': 'ForwardRequest',
@@ -443,7 +443,8 @@ export default {
           maxFeePerGas: '0x2540be400',
           maxPriorityFeePerGas: '0x3b9aca00',
         }),
-      },{
+      },
+      {
         'id': 'sendTransaction-eip1559-bigdata',
         'name': 'SendTransaction EIP1559 BigData',
         'description': 'sendTransaction',

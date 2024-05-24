@@ -3,7 +3,7 @@ export default {
     {
       id: 'signMessage',
       name: 'signMessage',
-      value: 'hello',
+      value: 'Hello OneKey',
     },
   ],
   signAndSendTransaction: (publicKey: string) => [

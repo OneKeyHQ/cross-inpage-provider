@@ -1,5 +1,9 @@
 export const dapps = [
   {
+    name: 'Bluefin',
+    url: 'https://trade.bluefin.io/',
+  },
+  {
     name: 'Cetus',
     url: 'https://app.cetus.zone/',
   },

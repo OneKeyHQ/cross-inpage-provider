@@ -33,6 +33,7 @@ import { CosmosNodeClient } from './rpc';
 
 function removeNull(obj: any): any {
   if (obj !== null && typeof obj === 'object') {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return Object.entries(obj)
       .filter(([, v]) => v != null)
       .reduce(

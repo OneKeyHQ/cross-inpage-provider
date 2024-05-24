@@ -16,13 +16,6 @@ export default {
       }),
     },
   ],
-  sendPayment: [
-    {
-      id: 'sendPayment',
-      name: 'sendPayment',
-      value: 'lnbc10000',
-    },
-  ],
   keysend: [
     {
       id: 'keysend',

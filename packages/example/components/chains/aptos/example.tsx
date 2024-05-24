@@ -63,6 +63,7 @@ export default function Example() {
         <ApiPayload
           title="connect"
           description="连接 Wallet"
+          disableRequestContent
           onExecute={async (request: string) => {
             const res = await provider?.connect();
             return JSON.stringify(res);
@@ -71,6 +72,7 @@ export default function Example() {
         <ApiPayload
           title="getNetwork"
           description="getNetwork"
+          disableRequestContent
           onExecute={async (request: string) => {
             const res = await provider?.getNetwork();
             return JSON.stringify(res);

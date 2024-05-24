@@ -10,6 +10,7 @@ import { useWallet } from '../../../components/connect/WalletContext';
 import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
 import params from './params';
+import { recoverPersonalSignature } from '@metamask/eth-sig-util';
 
 export default function BTCExample() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -74,6 +75,7 @@ export default function BTCExample() {
         <ApiPayload
           title="RequestAccounts"
           description="连接钱包"
+          disableRequestContent
           onExecute={async (request: string) => {
             const res = await provider?.request<string[]>({
               method: 'cfx_requestAccounts',
@@ -84,6 +86,7 @@ export default function BTCExample() {
         <ApiPayload
           title="GetAccounts"
           description="获取账户"
+          disableRequestContent
           onExecute={async () => {
             const res = await provider?.request<string[]>({
               method: 'cfx_accounts',
@@ -93,7 +96,7 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="AddConfluxChain"
-          description="添加 Chain"
+          description="（不需要支持）添加 Chain"
           presupposeParams={params.addConfluxChain}
           onExecute={async (request) => {
             const res = await provider?.request({
@@ -105,7 +108,7 @@ export default function BTCExample() {
         />{' '}
         <ApiPayload
           title="switchConfluxChain"
-          description="切换 Chain"
+          description="（不需要支持）切换 Chain"
           presupposeParams={params.addConfluxChain}
           onExecute={async (request) => {
             const res = await provider?.request({
@@ -139,7 +142,11 @@ export default function BTCExample() {
               'method': 'personal_sign',
               'params': [request, account.address, 'Example password'],
             });
-            return JSON.stringify(res);
+            return res as string;
+          }}
+          onValidate={async (request: string, response: string) => {
+            const res = recoverPersonalSignature({ data: request, signature: response });
+            return Promise.resolve((res === account.address).toString());
           }}
         />
 

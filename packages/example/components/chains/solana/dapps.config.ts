@@ -4,6 +4,10 @@ export const dapps = [
     url: 'https://magiceden.io/',
   },
   {
+    name: 'Jupiter',
+    url: 'https://jup.ag',
+  },
+  {
     name: 'Mean Finance',
     url: 'https://app.meanfi.com/',
   },
@@ -22,5 +26,9 @@ export const dapps = [
   {
     name: 'Raydium',
     url: 'https://raydium.io/swap/',
+  },
+  {
+    name: '官方测试',
+    url: 'https://r3byv.csb.app/',
   },
 ];

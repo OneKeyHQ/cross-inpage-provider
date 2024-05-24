@@ -49,26 +49,31 @@ export default function ConnectButton<T>({
     setAccount(null);
   }, [onDisconnect, setAccount, setProvider]);
 
-  const connectWalletWithDialog = useCallback(async () => {
-    const wallets = await fetchWallets?.();
-
-    if (wallets?.length === 0) {
-      connectDialogRef.current?.click();
-      return;
-    }
-
-    if (wallets?.length === 1) {
+  const closeDialog = useCallback(() => {
+    setTimeout(() => {
       try {
         connectDialogRef.current?.click();
       } catch (error) {
         // ignore
       }
+    }, 150);
+  }, []);
 
+  const connectWalletWithDialog = useCallback(async () => {
+    const wallets = await fetchWallets?.();
+
+    if (wallets?.length === 0) {
+      closeDialog();
+      return;
+    }
+
+    if (wallets?.length === 1) {
+      closeDialog();
       await connectWallet(wallets[0]);
     } else {
       setWallets(wallets);
     }
-  }, [connectWallet, fetchWallets]);
+  }, [closeDialog, connectWallet, fetchWallets]);
 
   return (
     <Card>

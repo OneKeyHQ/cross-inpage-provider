@@ -2,7 +2,7 @@
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
 import { useMemo, useRef } from 'react';
-import { get } from 'lodash';
+import { get } from 'lodash-es';
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
 import { useWallet } from '../../../components/connect/WalletContext';
@@ -10,7 +10,9 @@ import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
 import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
 import params from './params';
-import { createTransferTransaction } from './builder';
+import { createTransferTransaction, createVersionedTransaction } from './builder';
+import nacl from 'tweetnacl';
+import { jsonToUint8Array } from '../../../lib/uint8array';
 
 const NETWORK = clusterApiUrl('mainnet-beta');
 
@@ -74,6 +76,7 @@ export default function Example() {
         <ApiPayload
           title="Conenct Wallet"
           description="连接钱包并获取公钥"
+          disableRequestContent
           onExecute={async (request: string) => {
             const res = await provider?.connect();
             return JSON.stringify(res);
@@ -83,11 +86,33 @@ export default function Example() {
       <ApiGroup title="Sign Message">
         <ApiPayload
           title="signMessage"
-          description="签名消息"
+          description="签名消息(存在风险，硬件无法使用)"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
             const res = await provider?.signMessage(Buffer.from(request, 'utf8'));
             return JSON.stringify(res);
+          }}
+          onValidate={(request: string, result: string) => {
+            // const message = bs58.decode(request).toString();
+
+            const {
+              signature,
+              publicKey,
+            }: {
+              signature: any;
+              publicKey: string;
+            } = JSON.parse(result);
+
+            const signatureObj = jsonToUint8Array(signature);
+
+            const publicKeyObj = new PublicKey(publicKey);
+            const isValidSignature = nacl.sign.detached.verify(
+              Buffer.from(request, 'utf8'),
+              signatureObj,
+              publicKeyObj.toBytes(),
+            );
+
+            return Promise.resolve(isValidSignature.toString());
           }}
         />
       </ApiGroup>
@@ -132,6 +157,30 @@ export default function Example() {
             const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
             const transafe = createTransferTransaction(
+              new PublicKey(account?.publicKey),
+              toPubkey,
+              recentBlockhash,
+              amount,
+            );
+            const res = await provider?.signTransaction(transafe);
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="signVersionedTransaction"
+          description="签署 Versioned 交易"
+          presupposeParams={params.signAndSendTransaction(account?.publicKey)}
+          onExecute={async (request: string) => {
+            const {
+              toPubkey,
+              amount,
+            }: {
+              toPubkey: string;
+              amount: number;
+            } = JSON.parse(request);
+            const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+            const transafe = createVersionedTransaction(
               new PublicKey(account?.publicKey),
               toPubkey,
               recentBlockhash,

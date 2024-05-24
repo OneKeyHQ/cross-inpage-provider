@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable no-unsafe-optional-chaining */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
@@ -76,6 +79,7 @@ export default function Example() {
         <ApiPayload
           title="enable"
           description="获取账户权限"
+          disableRequestContent
           onExecute={async (request: string) => {
             const res = await provider?.enable();
             setWalletApi(res);
@@ -85,13 +89,41 @@ export default function Example() {
         <ApiPayload
           title="getUsedAddresses"
           description="获取地址列表"
-          presupposeParams={params.signData}
+          disableRequestContent
           onExecute={async (request: string) => {
             const res = await walletApi?.getUsedAddresses();
             return JSON.stringify(res);
           }}
         />
-
+        <ApiPayload
+          title="getUnusedAddresses"
+          description="获取未使用地址"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            const res = await walletApi?.getUnusedAddresses();
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="getChangeAddress"
+          description="获取找零地址"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            const res = await walletApi?.getChangeAddress();
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="getBalance"
+          description="获取余额"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            const res = await walletApi?.getBalance();
+            return JSON.stringify(res);
+          }}
+        />
+      </ApiGroup>
+      <ApiGroup title="Sign Message">
         <ApiPayload
           title="signData"
           description="签名消息"

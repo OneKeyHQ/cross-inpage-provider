@@ -109,7 +109,7 @@ export default function BTCExample() {
 
         <ApiPayload
           title="SignMessage"
-          description="发送普通交易"
+          description="(报错) 签名消息"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
             const tronWeb = provider.tronWeb;

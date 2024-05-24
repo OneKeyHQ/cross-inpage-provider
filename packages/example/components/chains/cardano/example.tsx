@@ -126,7 +126,7 @@ export default function Example() {
       <ApiGroup title="Sign Message">
         <ApiPayload
           title="signData"
-          description="签名消息"
+          description="(报错) 签名消息"
           presupposeParams={params.signData}
           onExecute={async (request: string) => {
             const [address] = await walletApi?.getUsedAddresses();

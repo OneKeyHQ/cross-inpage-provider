@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
-import ConnectButton from '../../../components/connect/ConnectButton';
+import ConnectButton from '../../connect/ConnectButton';
 import { useRef } from 'react';
 import { get } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
-import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
-import { useWallet } from '../../../components/connect/WalletContext';
-import type { IKnownWallet } from '../../../components/connect/types';
-import DappList from '../../../components/DAppList';
+import { ApiPayload, ApiGroup } from '../../ApisContainer';
+import { useWallet } from '../../connect/WalletContext';
+import type { IKnownWallet } from '../../connect/types';
+import DappList from '../../DAppList';
 import params from './params';
 import { verifyMessage } from '@unisat/wallet-utils';
 
@@ -16,12 +16,12 @@ export default function BTCExample() {
     {
       uuid: 'injected',
       name: 'Injected Wallet',
-      inject: 'unisat',
+      inject: 'btcwallet',
     },
     {
       uuid: 'injected-onekey',
       name: 'Injected OneKey',
-      inject: '$onekey.btc',
+      inject: '$onekey.btcwallet',
     },
   ]);
 
@@ -63,6 +63,15 @@ export default function BTCExample() {
 
       <ApiGroup title="Basics">
         <ApiPayload
+          title="connectWallet"
+          description="请求连接 Wallet 获取账户"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            const res = await provider?.connectWallet();
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
           title="RequestAccounts"
           description="请求连接 Wallet 获取账户"
           disableRequestContent
@@ -71,7 +80,6 @@ export default function BTCExample() {
             return JSON.stringify(res);
           }}
         />
-
         <ApiPayload
           title="GetAccounts"
           description="获取当前账户地址"
@@ -79,6 +87,15 @@ export default function BTCExample() {
           onExecute={async () => {
             const res = await provider?.getAccounts();
             return JSON.stringify(res);
+          }}
+        />{' '}
+        <ApiPayload
+          title="GetAddress"
+          description="获取当前账户地址"
+          disableRequestContent
+          onExecute={async () => {
+            const res = await provider?.getAddress();
+            return res;
           }}
         />
         <ApiPayload
@@ -91,12 +108,55 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
+          title="GetPublicKeyHex"
+          description="获取当前账户公钥"
+          disableRequestContent
+          onExecute={async () => {
+            const res = await provider?.getPublicKeyHex();
+            return res;
+          }}
+        />
+        <ApiPayload
           title="GetBalance"
           description="获取当前账户余额"
           disableRequestContent
           onExecute={async () => {
             const res = await provider?.getBalance();
             return res.toString();
+          }}
+        />
+        <ApiPayload
+          title="GetUtxos"
+          description="获取当前账户 UTXO 列表"
+          presupposeParams={params.getUtxos(account?.address ?? '')}
+          onExecute={async (request: string) => {
+            const {
+              address,
+              amount,
+            }: {
+              address: string;
+              amount: number;
+            } = JSON.parse(request);
+            const res = await provider?.getUtxos(address, amount);
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="GetWalletProviderName"
+          description="获取当前钱包提供商名称"
+          disableRequestContent
+          onExecute={async () => {
+            const res = await provider?.getWalletProviderName();
+            return res.toString();
+          }}
+        />
+        <ApiPayload
+          title="GetNetworkFees"
+          description="获取当前网络费用"
+          disableRequestContent
+          onExecute={async () => {
+            const res = await provider?.getNetworkFees();
+            return JSON.stringify(res);
           }}
         />
         <ApiPayload
@@ -140,6 +200,27 @@ export default function BTCExample() {
 
             return 'Unsupported type';
           }}
+        />
+        <ApiPayload
+          title="SignMessageBIP322"
+          description="签名消息 BIP322"
+          presupposeParams={params.signMessageBip322}
+          onExecute={async (request: string) => {
+            const res = await provider?.signMessageBIP322(request);
+            return res;
+          }}
+          // onValidate={async (request: string, response: string) => {
+          //   const pubKeyHex = await provider?.getPublicKeyHex();
+          //   const network = bitcoin;
+          //   const xxx = simulateMessageAsTransaction(
+          //     Buffer.from(request).toString('hex'),
+          //     response,
+          //     pubKeyHex,
+          //     network,
+          //   );
+
+          //   return Promise.resolve(xxx.toString());
+          // }}
         />
       </ApiGroup>
 

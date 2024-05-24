@@ -64,6 +64,12 @@ export const registeredChains: IChainInfo[] = [
   },
   {
     id: uuid.v4(),
+    name: 'BTC Babylon',
+    href: '/btcBabylon',
+    icon: 'https://uni.onekey-asset.com/static/chain/btc.png',
+  },
+  {
+    id: uuid.v4(),
     name: 'BTC Lightning Network',
     href: '/webln',
     icon: 'https://uni.onekey-asset.com/static/chain/lnd.png',

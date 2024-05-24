@@ -13,6 +13,8 @@ import {
   web3Enable,
   web3FromSource,
 } from '@polkadot/extension-dapp';
+import { stringToU8a, u8aToHex, u8aToU8a, u8aWrapBytes } from '@polkadot/util';
+import { signatureVerify } from '@polkadot/util-crypto';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { hexToU8a, stringToHex } from '@polkadot/util';
 import params from './params';
@@ -78,6 +80,7 @@ export default function Example() {
         <ApiPayload
           title="Accounts Get"
           description="获取账户权限"
+          disableRequestContent
           onExecute={async (request: string) => {
             const res = await provider?.accounts.get();
             return JSON.stringify(res);
@@ -97,6 +100,21 @@ export default function Example() {
               type: 'bytes',
             });
             return JSON.stringify(res);
+          }}
+          onValidate={(request: string, result: string) => {
+            const message = stringToU8a(request);
+            const {
+              signature,
+            }: {
+              signature: string;
+            } = JSON.parse(result);
+
+            const { isValid } = signatureVerify(
+              Buffer.from(u8aToU8a(u8aWrapBytes(message))),
+              signature,
+              account.address,
+            );
+            return Promise.resolve(isValid.toString());
           }}
         />
         <ApiPayload

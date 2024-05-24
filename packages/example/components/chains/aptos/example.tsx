@@ -3,13 +3,16 @@ import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
 import { useRef } from 'react';
 import { get } from 'lodash';
-import { IProviderApi, IProviderInfo } from './types';
+import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
+import { IProviderApi, IProviderInfo, SignMessageResponse } from './types';
 import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
 import { useWallet } from '../../../components/connect/WalletContext';
 import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
 import params from './params';
 import { SignMessagePayload } from '@onekeyfe/onekey-aptos-provider/dist/types';
+import nacl from 'tweetnacl';
+import { stripHexPrefix } from 'ethereumjs-util';
 
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -32,13 +35,14 @@ export default function Example() {
     const provider = get(window, providerDetail.inject) as IProviderApi | undefined;
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, no-unsafe-optional-chaining
-    const { address } = await provider?.connect();
+    const { address, publicKey } = await provider?.connect();
 
     const chainId = await provider?.network();
 
     return {
       provider,
       address,
+      publicKey,
       chainId,
     };
   };
@@ -89,6 +93,17 @@ export default function Example() {
             const obj = JSON.parse(request) as SignMessagePayload;
             const res = await provider?.signMessage(obj);
             return JSON.stringify(res);
+          }}
+          onValidate={(request: string, result: string) => {
+            const { fullMessage, signature } = JSON.parse(result) as SignMessageResponse;
+
+            const isValidSignature = nacl.sign.detached.verify(
+              Buffer.from(fullMessage),
+              hexToBytes(signature),
+              hexToBytes(stripHexPrefix(account?.publicKey)),
+            );
+
+            return Promise.resolve(isValidSignature.toString());
           }}
         />
         <ApiPayload

@@ -9,6 +9,8 @@ import { useWallet } from '../../../components/connect/WalletContext';
 import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
 import params from './params';
+// @ts-expect-error
+import Schnorr from 'bcrypto/lib/schnorr';
 
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -87,7 +89,17 @@ export default function Example() {
           presupposeParams={params.signSchnorr}
           onExecute={async (request: string) => {
             const res = await provider?.signSchnorr(request);
-            return JSON.stringify(res);
+            return res;
+          }}
+          onValidate={(request: string, result: string) => {
+            const message = Buffer.from(request, 'hex');
+            const publicKey = Buffer.from(account?.publicKey, 'hex');
+            const signature = Buffer.from(result, 'hex');
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+            const isValid = Schnorr.verify(message, signature, publicKey);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+            return Promise.resolve(isValid.toString());
           }}
         />
         <ApiPayload

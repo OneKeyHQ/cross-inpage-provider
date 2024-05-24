@@ -4,7 +4,8 @@ import { Selector } from './type';
 
 export const universalLog = new Logger('universal');
 
-//TODO:how to detect cursor status when hover
+//TODO:how to detect cursor status when hover 
+//
 export function isClickable(ele: HTMLElement) {
   return ele && window.getComputedStyle(ele).cursor === 'pointer';
 }
@@ -34,7 +35,7 @@ export const getConnectWalletModalByTitle = (
     }
   }
   if (res.length === 0) {
-    universalLog.warn('can not find the connect wallet modal');
+    universalLog.warn('can not find the connect wallet modal', eles);
     return null;
   }
   if (res.length === 1) {

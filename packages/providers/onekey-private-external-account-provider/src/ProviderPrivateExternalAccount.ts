@@ -10,7 +10,6 @@ import {
   PrivateExternalAccountProviderEventsMap,
   IExternalAccount,
   IProviderPrivateExternalAccount,
-  IEncodedTxBtc,
   IBtcNetwork,
   ISignTxRes
 } from "./types";
@@ -91,7 +90,7 @@ class ProviderPrivateExternalAccount extends ProviderPrivateExternalAccountBase 
   }
 
   async btc_signTransaction(params: {
-    encodedTx: IEncodedTxBtc;
+    psbtHex: string;
     network: IBtcNetwork;
   }): Promise<ISignTxRes> {
     const result = await this._callBridge({ method: "btc_signTransaction", params });

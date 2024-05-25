@@ -38,7 +38,7 @@ export type ISignTxRes = { txid: string; rawTx: string; }
 
 export type PrivateExternalAccountRequeset = {
   btc_requestAccount: (network: IBtcNetwork) => Promise<IExternalAccount>;
-  btc_signTransaction: (params: {encodedTx: IEncodedTxBtc; network: IBtcNetwork}) => Promise<ISignTxRes>
+  btc_signTransaction: (params: {psbtHex: string; network: IBtcNetwork}) => Promise<ISignTxRes>
 }
 
 export type IProviderPrivateExternalAccount = ProviderPrivateExternalAccountBase & PrivateExternalAccountRequeset;
@@ -65,43 +65,4 @@ export type PrivateExternalAccountProviderEventsMap = {
   [PROVIDER_EVENTS.disconnect]: () => void;
   [PROVIDER_EVENTS.accountChanged]: () => void;
   [PROVIDER_EVENTS.message_low_level]: (payload: IJsonRpcRequest) => void;
-};
-
-type IBtcInput = {
-  txid: string;
-  vout: number;
-  value: string;
-  address: string;
-  path: string;
-};
-
-type IBtcOutput = {
-  address: string;
-  value: string;
-  payload?: { isCharge?: boolean; bip44Path?: string; opReturn?: string };
-};
-
-type ICoinSelectUTXO = {
-  txId: string;
-  vout: number;
-  value: number;
-  address: string;
-  path: string;
-  forceSelect?: boolean;
-};
-
-type IInputsForCoinSelect = ICoinSelectUTXO[];
-type IOutputsForCoinSelect = {
-  address: string;
-  value?: number;
-  isMax?: boolean;
-  script?: string;
-}[];
-
-export type IEncodedTxBtc = {
-  inputs: IBtcInput[];
-  outputs: IBtcOutput[];
-  inputsForCoinSelect: IInputsForCoinSelect;
-  outputsForCoinSelect: IOutputsForCoinSelect;
-  fee: string;
 };

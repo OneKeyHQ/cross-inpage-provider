@@ -13,7 +13,8 @@ async function dbg(locator: Locator) {
   });
 }
 test.describe('Connect Button Hack', () => {
-  const startWebSite = 'dhedge.org';
+  console.log('total sites:', sitesConfig.length);
+  const startWebSite = 'app.ichi.org';
   const startIdx = sitesConfig.findIndex((e) => e.urls.includes(startWebSite));
   const availableSites = sitesConfig.slice(startIdx == -1 ? 0 : startIdx);
   const sitesOnly = availableSites.filter((e) => e.only);
@@ -29,7 +30,10 @@ test.describe('Connect Button Hack', () => {
       testUrls,
     } = site;
     for (const url of testUrls || urls) {
-      test(url, async ({ page }, { project: { name } }) => {
+      test(url, async ({ page }, testInfo) => {
+        const { project: { name }, } = testInfo;
+        const index = sitesConfig.findIndex((e) => e.urls.includes(url));
+        testInfo['index']=index;
         const device = name.includes('Mobile') ? 'mobile' : 'desktop';
         if (typeof skip === 'object' && skip !== null && skip[device] === true) {
           return;
@@ -46,6 +50,7 @@ test.describe('Connect Button Hack', () => {
           await locator.click();
         }
 
+        const pass:boolean[]=[];
         for (const [provider, wallets = []] of Object.entries(walletsForProvider)) {
           for (const { updatedName, skip } of wallets) {
             const skipThisWalletOnDevice = typeof skip === 'object' && skip !== null && skip[device] === true
@@ -58,16 +63,18 @@ test.describe('Connect Button Hack', () => {
             const existed = await locator.evaluate((el) => !!el && el.tagName === 'IMG');
             expect(existed).toBeTruthy();
             console.log('[dbg]:', walletId.walletId, 'is found');
+            pass.push(existed);
           }
         }
       });
     }
   }
-  test.afterEach(async ({ page }, { project: { name } }) => {
+  //@ts-ignore
+  test.afterEach(async ({ page }, { project: { name },status, index }) => {
     const isMobile = name.includes('Mobile');
     const host = page.url().split('/')[2] || 'passed';
     await page.screenshot({
-      path: `${__dirname}/screenshots/${host}${isMobile ? '-m' : ''}.png`,
+      path: `${__dirname}/screenshots/${index}-${host}-${isMobile ? 'mobile' : 'desktop'}-${status}.png`,
     });
   });
 });

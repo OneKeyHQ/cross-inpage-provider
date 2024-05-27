@@ -1,9 +1,7 @@
 {
   "private": true,
   "name": "cross-inpage-provider",
-  "engines": {
-    "node": "^16 || ^18 || ^20"
-  },
+
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "clean": "lerna clean --yes",

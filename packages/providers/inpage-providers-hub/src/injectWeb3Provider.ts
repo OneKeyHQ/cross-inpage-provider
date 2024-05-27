@@ -141,6 +141,7 @@ function injectWeb3Provider(): unknown {
     nostr,
     btc,
     btcwallet: btcWallet,
+    algorand,
   };
 
   defineWindowProperty('$onekey', $onekey, { enumerable: true });
@@ -182,6 +183,7 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('suiWallet', sui);
   defineWindowProperty('unisat', btc);
   defineWindowProperty('btcwallet', btcWallet);
+  defineWindowProperty('algorand', algorand);
 
   // Cardano chain provider injection is handled independently.
   if (checkWalletSwitchEnable()) {

@@ -1,15 +1,19 @@
-import { CSSProperties } from 'react';
 import domUtils from '../utils/utilsDomNodes';
 import { ConstraintFn } from './type';
 import { universalLog } from './utils';
 
-export function makeTextEllipse(textNode: HTMLElement, option:CSSProperties={}) {
+export function makeTextEllipse(
+  textNode: HTMLElement,
+  option = {} as Partial<CSSStyleDeclaration>,
+) {
   textNode.style.whiteSpace = 'nowrap';
   textNode.style.overflow = 'hidden';
   textNode.style.textOverflow = 'ellipsis';
   Object.assign(textNode.style, option);
 }
-
+export function makeTextWrap(textNode: HTMLElement) {
+  textNode.style.whiteSpace = 'normal';
+}
 
 export function replaceText(textNode: Text, newText: string) {
   const newTextNode = document.createTextNode(newText);

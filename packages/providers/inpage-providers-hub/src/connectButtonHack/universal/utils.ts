@@ -4,7 +4,7 @@ import { Selector } from './type';
 
 export const universalLog = new Logger('universal');
 
-//TODO:how to detect cursor status when hover 
+//TODO:how to detect cursor status when hover
 //
 export function isClickable(ele: HTMLElement) {
   return ele && window.getComputedStyle(ele).cursor === 'pointer';
@@ -79,4 +79,29 @@ export function createWalletId(provider: IInjectedProviderNames, updatedName: st
 
 export function arrayify<T>(ele: T | T[]): T[] {
   return Array.isArray(ele) ? ele : [ele];
+}
+
+export function getCommonParentElement(ele1: HTMLElement, ele2: HTMLElement) {
+  let parent: HTMLElement | null = ele1;
+  while (parent) {
+    if (parent.contains(ele2)) {
+      return parent;
+    }
+    parent = parent.parentElement;
+  }
+  return null;
+}
+export function getMaxWithOfText(textNode: Text, icon: HTMLElement, gap = '8px') {
+  const commonParent = getCommonParentElement(textNode.parentElement as HTMLElement, icon);
+  if (!commonParent) {
+    universalLog.warn('can not find the common parent element');
+    return { defaultVal: 'auto', parentWidth: 'auto', iconWidth: 'auto' };
+  }
+  const parentWidth = window.getComputedStyle(commonParent).width;
+  const iconWidth = window.getComputedStyle(icon).width;
+  return {
+    defaultVal: `calc(${parentWidth} - ${iconWidth} - ${gap})`,
+    parentWidth,
+    iconWidth,
+  };
 }

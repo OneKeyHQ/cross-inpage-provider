@@ -9,7 +9,7 @@ import { ProviderAptos, ProviderAptosMartian } from '@onekeyfe/onekey-aptos-prov
 import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
 import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
 import { ProviderCardano, defineWindowCardanoProperty } from '@onekeyfe/onekey-cardano-provider';
-import { ProviderPrivateExternalAccount } from "@onekeyfe/onekey-private-external-account-provider";
+import { ProviderPrivateExternalAccount } from '@onekeyfe/onekey-private-external-account-provider';
 import { ProviderCosmos } from '@onekeyfe/onekey-cosmos-provider';
 import { ProviderPolkadot, registerPolkadot } from '@onekeyfe/onekey-polkadot-provider';
 import {
@@ -20,6 +20,7 @@ import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import { ProviderWebln } from '@onekeyfe/onekey-webln-provider';
 import { ProviderNostr } from '@onekeyfe/onekey-nostr-provider';
 import { ProviderBtc, ProviderBtcWallet } from '@onekeyfe/onekey-btc-provider';
+import { ProviderAlgo } from '@onekeyfe/onekey-algo-provider';
 import { hackAllConnectButtons } from './connectButtonHack';
 import { detectWebsiteRiskLevel } from './detectRiskWebsite';
 import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
@@ -119,7 +120,9 @@ function injectWeb3Provider(): unknown {
   const btc = new ProviderBtc({ bridge });
   const btcWallet = new ProviderBtcWallet({ bridge });
 
-  const $privateExternalAccount = new ProviderPrivateExternalAccount({ bridge })
+  const algorand = new ProviderAlgo({ bridge });
+
+  const $privateExternalAccount = new ProviderPrivateExternalAccount({ bridge });
 
   // providerHub
   const $onekey = {
@@ -184,6 +187,9 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('unisat', btc);
   defineWindowProperty('btcwallet', btcWallet);
   defineWindowProperty('algorand', algorand);
+  defineWindowProperty('exodus', {
+    algorand,
+  });
 
   // Cardano chain provider injection is handled independently.
   if (checkWalletSwitchEnable()) {

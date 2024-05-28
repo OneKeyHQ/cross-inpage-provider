@@ -3,7 +3,7 @@
 require('@solana/wallet-adapter-react-ui/styles.css');
 import { dapps } from './dapps.config';
 import { useEffect, useMemo } from 'react';
-import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
+import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import { useWallet } from '../../../components/connect/WalletContext';
 import DappList from '../../../components/DAppList';
 import params from '../solana/params';

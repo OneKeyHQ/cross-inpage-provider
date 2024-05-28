@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { dapps } from './dapps.config';
+import { dapps, networks } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
 import { useEffect, useRef, useState } from 'react';
 import { IProviderApi, IProviderInfo } from './types';
-import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
+import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import { useWallet } from '../../../components/connect/WalletContext';
 import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
@@ -14,10 +14,11 @@ import {
   web3FromSource,
 } from '@polkadot/extension-dapp';
 import { stringToU8a, u8aToHex, u8aToU8a, u8aWrapBytes } from '@polkadot/util';
-import { signatureVerify } from '@polkadot/util-crypto';
+import { signatureVerify, base58Decode, checkAddressChecksum } from '@polkadot/util-crypto';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { hexToU8a, stringToHex } from '@polkadot/util';
 import params from './params';
+import { toast } from '../../ui/use-toast';
 
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([]);
@@ -29,11 +30,19 @@ export default function Example() {
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     (async () => {
-      const wsProvider = new WsProvider('wss://rpc.polkadot.io');
+      if (!account?.address) {
+        return;
+      }
+      const decoded = base58Decode(account?.address);
+      const [isValid, endPos, ss58Length, ss58Decoded] = checkAddressChecksum(decoded);
+
+      const networkInfo = networks.find((n) => n.addressPrefix === ss58Decoded);
+
+      const wsProvider = new WsProvider(networkInfo.url);
       const api = await ApiPromise.create({ provider: wsProvider });
       setApi(api);
     })();
-  }, [provider]);
+  }, [account?.address, provider]);
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -43,6 +52,14 @@ export default function Example() {
     }
 
     const provider = providerDetail.provider;
+
+    if (!provider) {
+      toast({
+        title: 'Wallet not found',
+        description: 'Please install the wallet extension',
+      });
+      return;
+    }
 
     const [account] = await provider.accounts.get();
 

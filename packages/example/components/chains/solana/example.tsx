@@ -4,7 +4,7 @@ import ConnectButton from '../../../components/connect/ConnectButton';
 import { useMemo, useRef } from 'react';
 import { get } from 'lodash-es';
 import { IProviderApi, IProviderInfo } from './types';
-import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
+import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import { useWallet } from '../../../components/connect/WalletContext';
 import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
@@ -13,6 +13,7 @@ import params from './params';
 import { createTransferTransaction, createVersionedTransaction } from './builder';
 import nacl from 'tweetnacl';
 import { jsonToUint8Array } from '../../../lib/uint8array';
+import { toast } from '../../ui/use-toast';
 
 const NETWORK = clusterApiUrl('mainnet-beta');
 
@@ -46,6 +47,14 @@ export default function Example() {
     }
 
     const provider = get(window, providerDetail.inject) as IProviderApi | undefined;
+
+    if (!provider) {
+      toast({
+        title: 'Wallet not found',
+        description: 'Please install the wallet extension',
+      });
+      return;
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, no-unsafe-optional-chaining
     const { publicKey } = await provider?.connect();

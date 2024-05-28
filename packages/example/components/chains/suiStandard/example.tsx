@@ -1,44 +1,61 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable no-unsafe-optional-chaining */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { hexToBytes } from '@noble/hashes/utils';
-import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
 import { useWallet } from '../../../components/connect/WalletContext';
 import DappList from '../../../components/DAppList';
 import params from './params';
-import { ConnectButton, WalletKitProvider, useWalletKit } from '@mysten/wallet-kit';
-import InfoLayout from '../../../components/InfoLayout';
+import { getFullnodeUrl } from '@mysten/sui.js/client';
+// import { WalletKitProvider, useWalletKit } from '@mysten/wallet-kit';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../../components/ui/select';
-
+  ConnectButton,
+  useCurrentAccount,
+  useSignTransactionBlock,
+  useSignAndExecuteTransactionBlock,
+  useSignPersonalMessage,
+  useSuiClient,
+  useWallets,
+  useDisconnectWallet,
+  useConnectWallet,
+  useCurrentWallet,
+  useAccounts,
+  WalletProvider,
+  SuiClientProvider,
+  createNetworkConfig,
+} from '@mysten/dapp-kit';
+import InfoLayout from '../../../components/InfoLayout';
+import { SuiObjectRef } from '@mysten/sui.js/client';
 import { TransactionBlock } from '@mysten/sui.js/transactions';
 import {
   verifySignature,
   verifyPersonalMessage,
   verifyTransactionBlock,
 } from '@mysten/sui.js/verify';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import '@mysten/dapp-kit/dist/index.css';
+import { useSignMessage } from './useSignMessage';
+import { ApiGroup, ApiPayload } from '../../ApiActuator';
+import { sponsorTransaction } from './utils';
 
 function Example() {
-  const [network, setNetwork] = useState<string>('MainNet');
-
+  const client = useSuiClient();
   const { setProvider } = useWallet();
-  const {
-    isConnected,
-    accounts,
-    disconnect,
-    status,
-    currentAccount,
-    signTransactionBlock,
-    signAndExecuteTransactionBlock,
-    signMessage,
-    signPersonalMessage,
-  } = useWalletKit();
+
+  const accounts = useAccounts();
+  const wallet = useConnectWallet();
+
+  const currentAccount = useCurrentAccount();
+  const { connectionStatus, isConnected } = useCurrentWallet();
+
+  const { mutateAsync: connect } = useConnectWallet();
+  const { mutateAsync: signTransactionBlock } = useSignTransactionBlock();
+  const { mutateAsync: signAndExecuteTransactionBlock } = useSignAndExecuteTransactionBlock();
+  const { mutateAsync: signPersonalMessage } = useSignPersonalMessage();
+  const { mutateAsync: signMessage } = useSignMessage();
+  const { mutateAsync: disconnect } = useDisconnectWallet();
 
   useEffect(() => {
     if (isConnected && currentAccount) {
@@ -46,39 +63,25 @@ function Example() {
     } else {
       setProvider(false);
     }
-  }, [currentAccount, isConnected, setProvider]);
+  }, [isConnected, currentAccount, setProvider]);
+
+  const signTransactionPresupposeParams = useMemo(() => {
+    return params.signTransaction(currentAccount?.address ?? '');
+  }, [currentAccount?.address]);
 
   return (
     <>
       <InfoLayout title="Base Info">
-        <Select
-          defaultValue={network}
-          onValueChange={(id) => {
-            setNetwork(id);
-          }}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue className="text-base font-medium" placeholder="选择参数" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem key="mainnet" value="MainNet" className="text-base font-medium">
-              MainNet
-            </SelectItem>
-            <SelectItem key="testnet" value="TestNet" className="text-base font-medium">
-              TestNet
-            </SelectItem>
-          </SelectContent>
-        </Select>
-        {currentAccount && <p>Account:{currentAccount.address}</p>}{' '}
-        {currentAccount && <p>PubKey:{currentAccount.publicKey}</p>}{' '}
-        {currentAccount && <p>ChainId:{currentAccount.chains}</p>}
-        {status && <p>Status :{status}</p>}
+        {currentAccount && <p>Account:{currentAccount?.address ?? ''}</p>}
+        {currentAccount && <p>PubKey:{currentAccount?.publicKey ?? ''}</p>}
+        {currentAccount && <p>ChainId:{currentAccount?.chains ?? ''}</p>}
+        {connectionStatus && <p>Status :{connectionStatus}</p>}
       </InfoLayout>
 
       <ApiGroup title="SignMessage">
         <ApiPayload
           title="SignMessage"
-          description="签名消息, 不安全已经弃用, 硬件无法使用"
+          description="签名消息, signMessage 不安全已经弃用, 目前（OneKey、Suiet、Sui Wallet、Martian） signMessage 实际实现已经变成了 signPersonalMessage"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
             const res = await signMessage({
@@ -96,7 +99,13 @@ function Example() {
               signature: string;
             } = JSON.parse(result);
 
-            const publicKey = await verifySignature(hexToBytes(request), signature);
+            try {
+              await verifySignature(hexToBytes(request), signature);
+            } catch (e) {
+              console.log(e);
+            }
+            // const publicKey = await verifySignature(hexToBytes(request), signature);
+            const publicKey = await verifyPersonalMessage(hexToBytes(request), signature);
 
             return (currentAccount.address === publicKey.toSuiAddress()).toString();
           }}
@@ -132,7 +141,7 @@ function Example() {
         <ApiPayload
           title="SignTransaction"
           description="签名交易"
-          presupposeParams={params.signTransaction(currentAccount?.address ?? '')}
+          presupposeParams={signTransactionPresupposeParams}
           onExecute={async (request: string) => {
             const {
               from,
@@ -145,12 +154,20 @@ function Example() {
             } = JSON.parse(request);
 
             const transfer = new TransactionBlock();
-            transfer.setSender(from);
             const [coin] = transfer.splitCoins(transfer.gas, [transfer.pure(amount)]);
             transfer.transferObjects([coin], transfer.pure(to));
+
+            const tx = await sponsorTransaction(
+              client,
+              from,
+              await transfer.build({
+                client,
+                onlyTransactionKind: true,
+              }),
+            );
+
             const res: unknown = await signTransactionBlock({
-              transactionBlock: transfer,
-              chain: network.toLowerCase() === 'sui:testnet' ? 'sui:testnet' : 'sui:mainnet',
+              transactionBlock: tx,
               account: currentAccount,
             });
             return JSON.stringify(res);
@@ -160,7 +177,7 @@ function Example() {
         <ApiPayload
           title="SignAndExecuteTransactionBlock"
           description="签名并执行交易"
-          presupposeParams={params.signTransaction(currentAccount?.address ?? '')}
+          presupposeParams={signTransactionPresupposeParams}
           onExecute={async (request: string) => {
             const {
               from,
@@ -178,7 +195,6 @@ function Example() {
             transfer.transferObjects([coin], transfer.pure(to));
             const res: unknown = await signAndExecuteTransactionBlock({
               transactionBlock: transfer,
-              chain: network.toLowerCase() === 'sui:testnet' ? 'sui:testnet' : 'sui:mainnet',
               account: currentAccount,
             });
             return JSON.stringify(res);
@@ -191,11 +207,31 @@ function Example() {
   );
 }
 
+const queryClient = new QueryClient();
+
+const { networkConfig } = createNetworkConfig({
+  testnet: { url: getFullnodeUrl('testnet') },
+  mainnet: { url: getFullnodeUrl('mainnet') },
+});
+
 export default function App() {
+  const [activeNetwork, setActiveNetwork] = useState('mainnet');
+
   return (
-    <WalletKitProvider features={['sui:signTransactionBlock']} enableUnsafeBurner>
-      <ConnectButton />
-      <Example />
-    </WalletKitProvider>
+    <QueryClientProvider client={queryClient}>
+      <SuiClientProvider
+        networks={networkConfig}
+        // @ts-expect-error
+        network={activeNetwork}
+        onNetworkChange={(network) => {
+          setActiveNetwork(network);
+        }}
+      >
+        <WalletProvider enableUnsafeBurner>
+          <ConnectButton />
+          <Example />
+        </WalletProvider>
+      </SuiClientProvider>
+    </QueryClientProvider>
   );
 }

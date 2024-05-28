@@ -121,9 +121,7 @@ export default {
         'value': JSON.stringify({
           from: from,
           to: to,
-          value: '0x0',
-          gasLimit: '0x5028',
-          gasPrice: '0xbebc200',
+          value: '0x01'
         }),
       },
       {
@@ -133,10 +131,7 @@ export default {
         'value': JSON.stringify({
           from: from,
           to: to,
-          value: '0x0',
-          gasLimit: '0x5028',
-          maxFeePerGas: '0x2540be400',
-          maxPriorityFeePerGas: '0x3b9aca00',
+          value: '0x01',
         }),
       },
     ];

@@ -12,6 +12,8 @@ import {
 } from '../ui/dialog';
 import type { IAccountInfo, IKnownWallet } from './types';
 import { useWallet } from './WalletContext';
+import { toast } from '../ui/use-toast';
+import { get } from 'lodash';
 
 export type ConnectButtonProps<T> = {
   fetchWallets: () => Promise<IKnownWallet[]>;
@@ -36,9 +38,18 @@ export default function ConnectButton<T>({
 
   const connectWallet = useCallback(
     async (wallet: IKnownWallet) => {
-      const { provider: _provider, ...accountInfo } = await onConnect(wallet);
-      setProvider(_provider);
-      setAccount(accountInfo);
+      try {
+        const { provider: _provider, ...accountInfo } = await onConnect(wallet);
+        setProvider(_provider);
+        setAccount(accountInfo);
+      } catch (error) {
+        console.log('connectWallet error', error);
+        
+        toast({
+          title: '连接失败',
+          description: get(error, 'message', ''),
+        });
+      }
     },
     [onConnect, setAccount, setProvider],
   );

@@ -36,9 +36,26 @@ export default {
   ],
   addEthereumChain: [
     {
+      'id': 'addEthereumChain_Sepolia',
+      'name': 'Add Sepolia Test Chain',
+      'description': '添加 Sepolia Chain',
+      'value': JSON.stringify({
+        'chainId': '0xaa36a7',
+        'chainName': 'Sepolia TestNet',
+        'rpcUrls': ['https://rpc.sepolia.org', 'https://1rpc.io/sepolia'],
+        'iconUrls': ['https://chainlist.org/unknown-logo.png'],
+        'nativeCurrency': {
+          'name': 'TETH',
+          'symbol': 'TETH',
+          'decimals': 18,
+        },
+        'blockExplorerUrls': ['https://sepolia.etherscan.io/'],
+      }),
+    },
+    {
       'id': 'addEthereumChain_Gnosis',
-      'name': 'addEthereumChain Gnosis',
-      'description': '添加 Chain Gnosis',
+      'name': 'Add Gnosis Chain',
+      'description': '添加 Gnosis Chain',
       'value': JSON.stringify({
         'chainId': '0x64',
         'chainName': 'Gnosis',
@@ -58,9 +75,17 @@ export default {
   ],
   switchEthereumChain: [
     {
+      'id': 'switchEthereumChain_sepolia',
+      'name': 'Switch Sepolia Test Chain',
+      'description': '切换 Sepolia Chain',
+      'value': JSON.stringify({
+        'chainId': '0xaa36a7',
+      }),
+    },
+    {
       'id': 'switchEthereumChain_Gnosis',
-      'name': 'switchEthereumChain Gnosis',
-      'description': '切换 Chain Gnosis',
+      'name': 'Switch Gnosis Chain',
+      'description': '切换 Gnosis Chain',
       'value': JSON.stringify({
         'chainId': '0x64',
       }),
@@ -432,6 +457,16 @@ export default {
         }),
       },
       {
+        'id': 'sendTransaction-nogas',
+        'name': 'SendTransaction No Gas',
+        'description': 'sendTransaction',
+        'value': JSON.stringify({
+          from: from,
+          to: to,
+          value: '0x0',
+        }),
+      },
+      {
         'id': 'sendTransaction-eip1559',
         'name': 'SendTransaction EIP1559',
         'description': 'sendTransaction',
@@ -440,6 +475,18 @@ export default {
           to: to,
           value: '0x0',
           gasLimit: '0x5028',
+          maxFeePerGas: '0x2540be400',
+          maxPriorityFeePerGas: '0x3b9aca00',
+        }),
+      },
+      {
+        'id': 'sendTransaction-eip1559-nogas',
+        'name': 'SendTransaction EIP1559 No Gas',
+        'description': 'sendTransaction',
+        'value': JSON.stringify({
+          from: from,
+          to: to,
+          value: '0x0',
           maxFeePerGas: '0x2540be400',
           maxPriorityFeePerGas: '0x3b9aca00',
         }),

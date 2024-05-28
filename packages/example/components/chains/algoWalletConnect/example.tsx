@@ -2,7 +2,7 @@
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
 import { IProviderApi, IResult, IWalletTransaction, SignTxnParams } from './types';
-import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
+import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
 import {

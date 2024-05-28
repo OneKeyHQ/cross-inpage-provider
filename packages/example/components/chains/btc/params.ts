@@ -1,5 +1,3 @@
-import { IPresupposeParam } from '../../../components/ApisContainer';
-
 export default {
   switchNetwork: [
     {

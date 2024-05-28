@@ -4,12 +4,13 @@ import ConnectButton from '../../../components/connect/ConnectButton';
 import { useRef } from 'react';
 import { get } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
-import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
+import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import { useWallet } from '../../../components/connect/WalletContext';
 import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
 import params from './params';
 import { verifyMessage } from '@unisat/wallet-utils';
+import { toast } from '../../ui/use-toast';
 
 export default function BTCExample() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -35,6 +36,14 @@ export default function BTCExample() {
     }
 
     const provider = get(window, providerDetail.inject) as IProviderApi | undefined;
+
+    if (!provider) {
+      toast({
+        title: 'Wallet not found',
+        description: 'Please install the wallet extension',
+      });
+      return;
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, no-unsafe-optional-chaining
     const [address] = await provider?.requestAccounts();

@@ -1,4 +1,3 @@
-import { IPresupposeParam } from '../../ApisContainer';
 import BTCParams from '../btc/params';
 
 export default {

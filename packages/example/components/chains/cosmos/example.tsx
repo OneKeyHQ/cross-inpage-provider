@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
 import { SignMode } from 'cosmjs-types/cosmos/tx/signing/v1beta1/signing';
 import { get } from 'lodash-es';
@@ -16,7 +16,7 @@ import { Any } from 'cosmjs-types/google/protobuf/any';
 import { AuthInfo, Fee, SignerInfo, TxBody, TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
 import { IProviderApi, IProviderInfo } from './types';
-import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
+import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import { useWallet } from '../../../components/connect/WalletContext';
 import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
@@ -30,6 +30,7 @@ import {
 } from '../../../components/ui/select';
 import params, { networks } from './params';
 import { CosmosNodeClient } from './rpc';
+import { toast } from '../../ui/use-toast';
 
 function removeNull(obj: any): any {
   if (obj !== null && typeof obj === 'object') {
@@ -77,33 +78,46 @@ export default function Example() {
     setNodeClient(new CosmosNodeClient(network.rest));
   }, [network?.rest]);
 
-  const onConnectWallet = async (selectedWallet: IKnownWallet) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const providerDetail = walletsRef.current?.find((w) => w.uuid === selectedWallet.id);
-    if (!providerDetail) {
-      return Promise.reject('Wallet not found');
-    }
+  const onConnectWallet = useCallback(
+    async (selectedWallet: IKnownWallet) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const providerDetail = walletsRef.current?.find((w) => w.uuid === selectedWallet.id);
+      if (!providerDetail) {
+        return Promise.reject('Wallet not found');
+      }
 
-    const provider = get(window, providerDetail.inject) as IProviderApi | undefined;
+      const provider = get(window, providerDetail.inject) as IProviderApi | undefined;
 
-    await provider?.enable(network.id);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, no-unsafe-optional-chaining
-    const { bech32Address, pubKey } = await provider?.getKey(network.id);
+      if (!provider) {
+        toast({
+          title: 'Wallet not found',
+          description: 'Please install the wallet extension',
+        });
+        return;
+      }
 
-    return {
-      provider,
-      address: bech32Address,
-      publicKey: bytesToHex(pubKey),
-    };
-  };
+      console.log('connect network', network.id);
+
+      await provider?.enable(network.id);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, no-unsafe-optional-chaining
+      const { bech32Address, pubKey } = await provider?.getKey(network.id);
+
+      return {
+        provider,
+        address: bech32Address,
+        publicKey: bytesToHex(pubKey),
+      };
+    },
+    [network.id],
+  );
 
   return (
     <>
       <InfoLayout title="Base Info">
         <Select
           defaultValue={network.id}
-          onValueChange={() => {
-            const net = networks.find((item) => item.id === network.id);
+          onValueChange={(id) => {
+            const net = networks.find((item) => item.id === id);
             if (net) setNetwork(net);
           }}
         >
@@ -151,6 +165,13 @@ export default function Example() {
         <ApiPayload
           title="getKey"
           description="获取账户权限"
+          presupposeParams={[
+            {
+              id: 'getKey',
+              name: 'getKey',
+              value: network.id,
+            },
+          ]}
           onExecute={async (request: string) => {
             const res = await provider?.getKey(network.id);
             return JSON.stringify(res);

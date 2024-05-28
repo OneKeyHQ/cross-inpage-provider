@@ -2,14 +2,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
-import { useEffect, useRef } from 'react';
-import { get } from 'lodash';
+import { use, useEffect, useRef, useState } from 'react';
+import { get, isEmpty } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
-import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
+import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import { useWallet } from '../../../components/connect/WalletContext';
 import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
 import params from './params';
+import { InputWithSave } from '../../InputWithSave';
+import { toast } from '../../ui/use-toast';
 
 export default function BTCExample() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -26,6 +28,7 @@ export default function BTCExample() {
   ]);
 
   const { provider, account } = useWallet<IProviderApi>();
+  const [receiveAddress, setReceiveAddress] = useState<string>('');
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -36,18 +39,48 @@ export default function BTCExample() {
 
     const provider = get(window, providerDetail.inject) as IProviderApi | undefined;
 
-    await provider?.request<string[]>({
-      method: 'tron_requestAccounts',
-    });
+    if (!provider) {
+      toast({
+        title: 'Wallet not found',
+        description: 'Please install the wallet extension',
+      });
+      return;
+    }
 
-    const [address] = await provider.request<string[]>({
-      method: 'tron_accounts',
-    });
+    let tronWeb;
+    // @ts-expect-error
+    if (provider.ready) {
+      tronWeb = provider.tronWeb;
+    } else {
+      const res = await provider.request({ method: 'tron_requestAccounts' });
+      // @ts-expect-error
+      if (res.code === 200) {
+        tronWeb = provider.tronWeb;
+      }
+    }
 
     return {
       provider,
-      address,
+      address: tronWeb.defaultAddress.base58,
     };
+  };
+
+  const checkReceiveAddress = () => {
+    if (!receiveAddress || isEmpty(receiveAddress)) {
+      toast({
+        title: 'Invalid Address',
+        description: '请在 Example 顶部填写接收地址，转账地址不能与发送地址相同',
+      });
+      throw new Error('Invalid Address');
+    }
+
+    if (account.address === receiveAddress) {
+      toast({
+        title: 'Invalid Address',
+        description: '转账地址不能与发送地址相同',
+      });
+      throw new Error('Invalid Address');
+    }
   };
 
   return (
@@ -65,6 +98,13 @@ export default function BTCExample() {
         }}
         onConnect={onConnectWallet}
       />
+      <ApiGroup title="转账地址">
+        <InputWithSave
+          storageKey="tron-receive-address"
+          onChange={setReceiveAddress}
+          defaultValue={account?.address}
+        />
+      </ApiGroup>
 
       <ApiGroup title="Basics">
         <ApiPayload
@@ -92,7 +132,7 @@ export default function BTCExample() {
         />
       </ApiGroup>
 
-      <ApiGroup title="Transfer">
+      <ApiGroup title="资产相关">
         <ApiPayload
           title="Add Token"
           description="添加 TRC20 资产"
@@ -106,28 +146,68 @@ export default function BTCExample() {
             return JSON.stringify(res);
           }}
         />
-
+      </ApiGroup>
+      <ApiGroup title="SignMessage">
         <ApiPayload
           title="SignMessage"
-          description="(报错) 签名消息"
+          description="签名消息存在安全风险，硬件不支持"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
             const tronWeb = provider.tronWeb;
             const signedString = await tronWeb.trx.sign(request);
-            return JSON.stringify(signedString);
+            return signedString as string;
+          }}
+          onValidate={async (request: string, result: string) => {
+            const tronWeb = provider.tronWeb;
+
+            let signedStr = result;
+            const tail = signedStr.substring(128, 130);
+            if (tail == '01') {
+              signedStr = `${signedStr.substring(0, 128)}1c`;
+            } else if (tail == '00') {
+              signedStr = `${signedStr.substring(0, 128)}1b`;
+            }
+
+            // verify the signature
+            const res = await tronWeb.trx.verifyMessage(
+              request,
+              signedStr,
+              tronWeb.defaultAddress.base58,
+            );
+
+            return Promise.resolve(res.toString());
           }}
         />
+        <ApiPayload
+          title="SignMessage V2"
+          description="签名消息"
+          presupposeParams={params.signMessage}
+          onExecute={async (request: string) => {
+            const tronWeb = provider.tronWeb;
+            const signedString = await tronWeb.trx.signMessageV2(request);
+            return signedString as string;
+          }}
+          onValidate={async (request: string, result: string) => {
+            const tronWeb = provider.tronWeb;
 
+            // verify the signature
+            const res = await tronWeb.trx.verifyMessageV2(request, result);
+            const isValid = res === tronWeb.defaultAddress.base58;
+            return Promise.resolve(isValid.toString());
+          }}
+        />
+      </ApiGroup>
+      <ApiGroup title="Transfer">
         <ApiPayload
           title="NativeTransfer"
           description="发送普通交易"
-          presupposeParams={params.nativeTransfer(account?.address ?? '')}
+          presupposeParams={params.nativeTransfer(receiveAddress ?? '')}
           onExecute={async (request: string) => {
+            checkReceiveAddress();
+
             const [connectedAddress] = await provider.request<string[]>({
               method: 'tron_accounts',
             });
-
-            
 
             const { to, amount } = JSON.parse(request);
 
@@ -142,8 +222,10 @@ export default function BTCExample() {
         <ApiPayload
           title="SmartContractTransfer"
           description="发送合约交易"
-          presupposeParams={params.contractTransfer(account?.address ?? '')}
+          presupposeParams={params.contractTransfer(receiveAddress ?? '')}
           onExecute={async (request: string) => {
+            checkReceiveAddress();
+
             const { contractAddress, contractFunction, options, params } = JSON.parse(request);
 
             const tronWeb = provider.tronWeb;

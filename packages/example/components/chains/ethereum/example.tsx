@@ -6,7 +6,7 @@ import ConnectButton from '../../../components/connect/ConnectButton';
 import { useEffect, useRef } from 'react';
 import { get } from 'lodash';
 import { IEIP6963AnnounceProviderEvent, IEIP6963ProviderDetail, IEthereumProvider } from './types';
-import { ApiPayload, ApiGroup } from '../../../components/ApisContainer';
+import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import { useWallet } from '../../../components/connect/WalletContext';
 import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
@@ -17,6 +17,7 @@ import {
   recoverPersonalSignature,
   recoverTypedSignature,
 } from '@metamask/eth-sig-util';
+import { toast } from '../../ui/use-toast';
 
 export default function Example() {
   const walletsRef = useRef<IEIP6963ProviderDetail[]>([
@@ -48,6 +49,14 @@ export default function Example() {
     const provider =
       providerDetail.provider ??
       (get(window, providerDetail.info.inject) as IEthereumProvider | undefined);
+
+    if (!provider) {
+      toast({
+        title: 'Wallet not found',
+        description: 'Please install the wallet extension',
+      });
+      return;
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, no-unsafe-optional-chaining
     const [address] = (await provider?.request({

@@ -9,11 +9,11 @@ import { expect, test } from './fixtures';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 async function dbg(locator: Locator) {
   return locator?.evaluate((el) => {
-    console.log('===>[dbg] element:', el.tagName, el.classList, el.textContent?.slice(0, 40));
+    console.log('[dbg] element:', el.tagName, el.classList, el.textContent?.slice(0, 40));
   });
 }
 test.describe('Connect Button Hack', () => {
-  const startWebSite = 'www.staderlabs.com';
+  const startWebSite = 'agni.finance';
   const startIdx = sitesConfig.findIndex((e) => e.urls.includes(startWebSite));
   const availableSites = sitesConfig.slice(startIdx == -1 ? 0 : startIdx);
   const sitesOnly = availableSites.filter((e) => e.only);
@@ -47,13 +47,17 @@ test.describe('Connect Button Hack', () => {
         }
 
         for (const [provider, wallets = []] of Object.entries(walletsForProvider)) {
-          for (const wallet of wallets) {
-            const walletId = createWalletId(provider as IInjectedProviderNames, wallet.updatedName);
+          for (const { updatedName, skip } of wallets) {
+            const skipThisWalletOnDevice = typeof skip === 'object' && skip !== null && skip[device] === true
+            if (skipThisWalletOnDevice || skip) {
+              continue;
+            }
+            const walletId = createWalletId(provider as IInjectedProviderNames, updatedName);
             const locator = page.locator(walletId.walletIdSelector).first();
             await dbg(locator);
             const existed = await locator.evaluate((el) => !!el && el.tagName === 'IMG');
             expect(existed).toBeTruthy();
-            console.log('===>[dbg]:', walletId.walletId, 'is found');
+            console.log('[dbg]:', walletId.walletId, 'is found');
           }
         }
       });

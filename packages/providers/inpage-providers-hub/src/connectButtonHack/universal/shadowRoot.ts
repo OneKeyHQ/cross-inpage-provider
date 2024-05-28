@@ -1,18 +1,23 @@
-import { FindResultType, Selector } from './type';
+import { ConstraintFn, FindResultType, Selector } from './type';
 import { findIconAndNameByParent } from './findIconAndName';
-import { universalLog } from './utils';
+import { isClickable, universalLog } from './utils';
+import { isWalletIconSizeMatch } from './imgUtils';
 
 export function findIconAndNameInShadowRoot(
   hostSelector: Selector,
   containerSelector: Selector,
   walletName: RegExp,
+  constraints: { text: ConstraintFn[]; icon: ConstraintFn[] } = {
+    text: [isClickable],
+    icon: [isWalletIconSizeMatch, isClickable],
+  },
 ): FindResultType | null {
   const shadowRoots: ShadowRoot[] = Array.from(document.querySelectorAll<HTMLElement>(hostSelector))
     .filter(Boolean)
-    .map((e) => e.shadowRoot) as ShadowRoot[]
+    .map((e) => e.shadowRoot) as ShadowRoot[];
 
   if (shadowRoots.length === 0) {
-    universalLog.warn('findIconAndNameInShadowRoot,shadowRoots.length=0')
+    universalLog.warn('findIconAndNameInShadowRoot,shadowRoots.length=0');
     return null;
   }
   const containerElements = shadowRoots
@@ -22,8 +27,8 @@ export function findIconAndNameInShadowRoot(
 
   const length = containerElements.length;
   if (length === 0 || length > 1) {
-    universalLog.warn('findIconAndNameInShadowRoot,length=', length)
+    universalLog.warn('findIconAndNameInShadowRoot,length=', length);
     return null;
   }
-  return findIconAndNameByParent(containerElements[0], walletName);
+  return findIconAndNameByParent(containerElements[0], walletName, constraints);
 }

@@ -26,6 +26,7 @@ import type {
 import Long from 'long';
 import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from './cosmjs';
 import { isArray } from 'lodash';
+import { JSONUint8Array } from './utils/uint8-array';
 
 const PROVIDER_EVENTS = {
   'connect': 'connect',
@@ -232,6 +233,48 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
         this._handleAccountChange(params as Key | undefined);
       }
     });
+
+    window.addEventListener('message', (e) => {
+      const data = e.data as undefined | {
+        type: string;
+        method: string;
+        args: any[];
+        id: string;
+      };
+      if (data && data.type === 'proxy-request' && data.method) {
+        const method = data.method as 'enable';
+        if (this[method]) {
+          const unwrapedArgs = JSONUint8Array.unwrap(data.args) as object[];
+          (this[method] as (...args: any[]) => Promise<any>)(...unwrapedArgs).then((res) => {
+            window.postMessage({
+              type: 'proxy-request-response',
+              id: data.id,
+              result: JSONUint8Array.wrap({
+                return: res as object,
+              }) as {
+                return: any;
+              },
+            })
+          }).catch((err: { message: string }) => {
+            window.postMessage({
+              type: 'proxy-request-response',
+              id: data.id,
+              result: {
+                error: err.message,
+              }
+            });
+          })
+        } else {
+          window.postMessage({
+            type: 'proxy-request-response',
+            id: data.id,
+            result: {
+              error: true,
+            }
+          })
+        }
+      }
+    })
   }
 
   private _callBridge<T extends keyof JsBridgeRequest>(params: {
@@ -333,6 +376,10 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
       // @ts-expect-error
       address: hexToBytes(key.address),
     };
+  }
+
+  ping(): Promise<void> {
+    return Promise.resolve();
   }
 
   experimentalSuggestChain(chain: any): Promise<void> {

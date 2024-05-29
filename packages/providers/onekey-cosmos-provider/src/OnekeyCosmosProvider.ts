@@ -206,6 +206,8 @@ function isWalletEventMethodMatch({ method, name }: { method: string; name: stri
   return method === `wallet_events_${name}`;
 }
 
+const USING_MESSAGE_SITES = ['https://wallet.keplr.app', 'https://testnet.keplr.app'];
+
 class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
   public readonly mode: KeplrMode = 'extension';
   protected _account: Key | null = null;
@@ -234,47 +236,50 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
       }
     });
 
-    window.addEventListener('message', (e) => {
-      const data = e.data as undefined | {
-        type: string;
-        method: string;
-        args: any[];
-        id: string;
-      };
-      if (data && data.type === 'proxy-request' && data.method) {
-        const method = data.method as 'enable';
-        if (this[method]) {
-          const unwrapedArgs = JSONUint8Array.unwrap(data.args) as object[];
-          (this[method] as (...args: any[]) => Promise<any>)(...unwrapedArgs).then((res) => {
-            window.postMessage({
-              type: 'proxy-request-response',
-              id: data.id,
-              result: JSONUint8Array.wrap({
-                return: res as object,
-              }) as {
-                return: any;
-              },
+    const isUsingMessage = USING_MESSAGE_SITES.includes(window.location.origin);
+    if (isUsingMessage) {
+      window.addEventListener('message', (e) => {
+        const data = e.data as undefined | {
+          type: string;
+          method: string;
+          args: any[];
+          id: string;
+        };
+        if (data && data.type === 'proxy-request' && data.method) {
+          const method = data.method as 'enable';
+          if (this[method]) {
+            const unwrapedArgs = JSONUint8Array.unwrap(data.args) as object[];
+            (this[method] as (...args: any[]) => Promise<any>)(...unwrapedArgs).then((res) => {
+              window.postMessage({
+                type: 'proxy-request-response',
+                id: data.id,
+                result: JSONUint8Array.wrap({
+                  return: res as object,
+                }) as {
+                  return: any;
+                },
+              });
+            }).catch((err: { message: string }) => {
+              window.postMessage({
+                type: 'proxy-request-response',
+                id: data.id,
+                result: {
+                  error: err.message,
+                },
+              });
             })
-          }).catch((err: { message: string }) => {
+          } else {
             window.postMessage({
               type: 'proxy-request-response',
               id: data.id,
               result: {
-                error: err.message,
-              }
+                error: true,
+              },
             });
-          })
-        } else {
-          window.postMessage({
-            type: 'proxy-request-response',
-            id: data.id,
-            result: {
-              error: true,
-            }
-          })
+          }
         }
-      }
-    })
+      });
+    }
   }
 
   private _callBridge<T extends keyof JsBridgeRequest>(params: {

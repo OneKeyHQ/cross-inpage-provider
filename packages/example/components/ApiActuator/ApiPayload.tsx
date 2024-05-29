@@ -3,8 +3,11 @@ import { useWallet } from '../connect/WalletContext';
 import { useApiExecutor } from './useApiExecutor';
 import { IEthereumProvider } from '../chains/ethereum/types';
 import { Card, CardContent, CardDescription, CardHeader } from '../ui/card';
-import { IPresupposeParam, PresupposeParamsSelector } from './PresupposeParamsSelector';
-import { RequestEditor, ResultDisplay } from './RequestEditor';
+import {
+  IPresupposeParamsSelectorProps,
+  PresupposeParamsSelector,
+} from './PresupposeParamsSelector';
+import { IRequestEditorProps, RequestEditor, ResultDisplay } from './RequestEditor';
 import { Button } from '../ui/button';
 import { ApiPayloadProvider, useApiPayload } from './ApiPayloadProvider';
 
@@ -12,11 +15,9 @@ export type IApiPayloadProps = {
   title: string;
   disableRequestContent?: boolean;
   description?: string;
-  presupposeParams?: IPresupposeParam[];
-  onExecute: (request: string) => Promise<string>;
-  onValidate?: (request: string, response: string) => Promise<string>;
-  allowCallWithoutProvider?: boolean;
-};
+} & IApiExecuteProps &
+  IPresupposeParamsSelectorProps &
+  Omit<IRequestEditorProps, 'resetRequest'>;
 
 function ApiPayloadContent({
   title,
@@ -24,6 +25,8 @@ function ApiPayloadContent({
   presupposeParams,
   onExecute,
   onValidate,
+  generateRequestFrom,
+  onGenerateRequest,
   allowCallWithoutProvider,
   disableRequestContent,
 }: IApiPayloadProps) {
@@ -46,6 +49,8 @@ function ApiPayloadContent({
           <PresupposeParamsSelector presupposeParams={presupposeParams} />
 
           <RequestEditor
+            generateRequestFrom={generateRequestFrom}
+            onGenerateRequest={onGenerateRequest}
             disableRequestContent={disableRequestContent}
             resetRequest={() => handleSetRequest(presupposeParams[0]?.value)}
           />
@@ -78,15 +83,13 @@ export function ApiPayload(props: IApiPayloadProps) {
   );
 }
 
-function ApiExecute({
-  allowCallWithoutProvider,
-  onExecute,
-  onValidate,
-}: {
+export type IApiExecuteProps = {
   allowCallWithoutProvider?: boolean;
   onExecute: (request: string) => Promise<string>;
   onValidate?: (request: string, response: string) => Promise<string>;
-}) {
+};
+
+function ApiExecute({ allowCallWithoutProvider, onExecute, onValidate }: IApiExecuteProps) {
   const { provider } = useWallet<IEthereumProvider>();
   const { execute } = useApiExecutor({ onExecute, onValidate });
 
@@ -124,13 +127,7 @@ function ApiExecute({
   );
 }
 
-function ApiExecuteValidate({
-  onExecute,
-  onValidate,
-}: {
-  onExecute: (request: string) => Promise<string>;
-  onValidate?: (request: string, response: string) => Promise<string>;
-}) {
+function ApiExecuteValidate({ onExecute, onValidate }: IApiExecuteProps) {
   const { state, dispatch } = useApiPayload();
   const { request, result } = state;
 

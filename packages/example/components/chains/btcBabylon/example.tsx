@@ -2,7 +2,7 @@
 import { dapps } from './dapps.config';
 import ConnectButton from '../../connect/ConnectButton';
 import { useRef } from 'react';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import { useWallet } from '../../connect/WalletContext';
@@ -11,6 +11,9 @@ import DappList from '../../DAppList';
 import params from './params';
 import { verifyMessage } from '@unisat/wallet-utils';
 import { toast } from '../../ui/use-toast';
+import * as bitcoin from 'bitcoinjs-lib';
+import { Input } from '../../ui/input';
+import { createPSBT } from '../btc/utils';
 
 export default function BTCExample() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -247,8 +250,15 @@ export default function BTCExample() {
         <ApiPayload
           title="pushTx"
           description="广播交易"
-          presupposeParams={params.pushTx}
           onExecute={async (request: string) => {
+            if (!request || isEmpty(request)) {
+              toast({
+                title: 'Error',
+                description: '请填写需要广播的交易信息',
+              });
+              throw new Error('request is empty');
+            }
+
             const res = await provider?.pushTx({
               rawtx: request,
             });
@@ -266,7 +276,45 @@ export default function BTCExample() {
             };
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             const res = await provider?.signPsbt(psbtHex, options);
-            return JSON.stringify(res);
+
+            const psbt = bitcoin.Psbt.fromHex(res);
+            if (!options?.autoFinalized) {
+              psbt.finalizeAllInputs();
+            }
+            return psbt.toHex();
+          }}
+          generateRequestFrom={() => {
+            return (
+              <>
+                <Input
+                  label="转账地址"
+                  type="text"
+                  name="toAddress"
+                  defaultValue={account?.address ?? ''}
+                />
+                <Input label="转账金额" type="number" name="amount" defaultValue="1000" />
+                <Input label="手续费 sat/vB" type="number" name="gasPrice" defaultValue="20" />
+              </>
+            );
+          }}
+          onGenerateRequest={async (fromData: Record<string, any>) => {
+            const toAddress = fromData['toAddress'] as string;
+            const amount = parseInt(fromData['amount'] as string);
+            const gasPrice = parseInt((fromData['gasPrice'] as string) ?? '20');
+
+            if (!toAddress || !amount) {
+              throw new Error('toAddress or amount is required');
+            }
+
+            const psbt = createPSBT(
+              account?.address ?? '',
+              toAddress,
+              amount,
+              gasPrice,
+              bitcoin.networks.bitcoin,
+            );
+
+            return Promise.resolve(psbt);
           }}
         />
         <ApiPayload
@@ -280,16 +328,72 @@ export default function BTCExample() {
             };
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             const res = await provider?.signPsbts(psbtHexs, options);
-            return JSON.stringify(res);
+
+            const result: string[] = [];
+            res.forEach((psbt, index) => {
+              const psbtObj = bitcoin.Psbt.fromHex(psbt);
+              if (!options?.[index]?.autoFinalized) {
+                psbtObj.finalizeAllInputs();
+              }
+              result.push(psbtObj.toHex());
+            });
+
+            return JSON.stringify(result);
+          }}
+          generateRequestFrom={() => {
+            return (
+              <>
+                <Input
+                  label="转账地址"
+                  type="text"
+                  name="toAddress"
+                  defaultValue={account?.address ?? ''}
+                />
+                <Input label="转账金额" type="number" name="amount" defaultValue="1000" />
+                <Input label="手续费 sat/vB" type="number" name="gasPrice" defaultValue="20" />
+              </>
+            );
+          }}
+          onGenerateRequest={async (fromData: Record<string, any>) => {
+            const toAddress = fromData['toAddress'] as string;
+            const amount = parseInt(fromData['amount'] as string);
+            const gasPrice = parseInt((fromData['gasPrice'] as string) ?? '20');
+
+            if (!toAddress || !amount) {
+              throw new Error('toAddress or amount is required');
+            }
+
+            const psbt = await createPSBT(
+              account?.address ?? '',
+              toAddress,
+              amount,
+              gasPrice,
+              bitcoin.networks.bitcoin,
+            );
+
+            const pabtObj = JSON.parse(psbt);
+
+            return Promise.resolve(
+              JSON.stringify({
+                psbtHexs: [pabtObj.psbtHex],
+                options: [pabtObj.options],
+              }),
+            );
           }}
         />
         <ApiPayload
           title="pushPsbt"
           description="pushPsbt"
-          presupposeParams={params.pushPsbt}
           onExecute={async (request: string) => {
+            if (!request || isEmpty(request)) {
+              toast({
+                title: 'Error',
+                description: '请填写需要广播的交易信息',
+              });
+              throw new Error('request is empty');
+            }
             const res = await provider?.pushPsbt(request);
-            return JSON.stringify(res);
+            return res;
           }}
         />
       </ApiGroup>

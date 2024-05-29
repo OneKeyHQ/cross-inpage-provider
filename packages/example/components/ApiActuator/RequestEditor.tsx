@@ -1,14 +1,22 @@
-import { useCallback } from 'react';
+import { FormEvent, useCallback } from 'react';
 import { Button } from '../ui/button';
 import { AutoHeightTextarea } from '../ui/textarea';
 import { useApiPayload } from './ApiPayloadProvider';
 import { toast } from '../ui/use-toast';
+import { get } from 'lodash';
 
 export type IRequestEditorProps = {
-  disableRequestContent: boolean;
   resetRequest: () => void;
+  disableRequestContent?: boolean;
+  generateRequestFrom?: () => React.ReactNode;
+  onGenerateRequest?: (formData: Record<string, any>) => Promise<string>;
 };
-export function RequestEditor({ disableRequestContent, resetRequest }: IRequestEditorProps) {
+export function RequestEditor({
+  disableRequestContent,
+  resetRequest,
+  generateRequestFrom,
+  onGenerateRequest,
+}: IRequestEditorProps) {
   const { state, dispatch } = useApiPayload();
   const { request } = state;
 
@@ -17,6 +25,28 @@ export function RequestEditor({ disableRequestContent, resetRequest }: IRequestE
       dispatch({ type: 'SET_REQUEST', payload: newRequest });
     },
     [dispatch],
+  );
+
+  const handleGenerateRequestSubmit = useCallback(
+    async (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget); // 使用表单引用来创建FormData对象
+      const data: Record<string, any> = {};
+      formData.forEach((value, key) => {
+        data[key] = value; // 将每个表单项添加到一个对象中
+      });
+      try {
+        const newRequest = await onGenerateRequest(data);
+        handleSetRequest(newRequest);
+      } catch (error) {
+        console.log('error', error);
+        toast({
+          title: '生成请求失败',
+          description: get(error, 'message', ''),
+        });
+      }
+    },
+    [handleSetRequest, onGenerateRequest],
   );
 
   return (
@@ -29,6 +59,14 @@ export function RequestEditor({ disableRequestContent, resetRequest }: IRequestE
           Rest 请求
         </Button>
       </div>
+      {onGenerateRequest && (
+        <form onSubmit={handleGenerateRequestSubmit} className="p-2 m-2 gap-1 flex flex-col">
+          {generateRequestFrom?.()}
+          <Button variant="outline" type="submit">
+            生成请求
+          </Button>
+        </form>
+      )}
       {disableRequestContent ? (
         <AutoHeightTextarea className="min-h-4" placeholder="Not Request" readOnly />
       ) : (

@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useApiPayload } from './ApiPayloadProvider';
 
@@ -9,11 +9,11 @@ export type IPresupposeParam = {
   description?: string;
 };
 
-export type IPresupposeParamsSelectorParam = {
-  presupposeParams: IPresupposeParam[];
+export type IPresupposeParamsSelectorProps = {
+  presupposeParams?: IPresupposeParam[];
 };
 
-export function PresupposeParamsSelector({ presupposeParams }: IPresupposeParamsSelectorParam) {
+export function PresupposeParamsSelector({ presupposeParams }: IPresupposeParamsSelectorProps) {
   const { state, dispatch } = useApiPayload();
   const { currentPurposeParamId } = state;
 

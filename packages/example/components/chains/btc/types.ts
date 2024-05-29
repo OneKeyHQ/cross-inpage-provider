@@ -3,7 +3,7 @@ export interface IProviderApi {
   requestAccounts(): Promise<string[]>;
   getAccounts(): Promise<string[]>;
   getNetwork(): Promise<string>;
-  switchNetwork(network: string): Promise<void>;
+  switchNetwork(network: string): Promise<string>;
   getPublicKey(): Promise<string>;
   getBalance(): Promise<{
     confirmed: number;

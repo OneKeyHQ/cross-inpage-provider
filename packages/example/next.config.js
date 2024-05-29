@@ -25,8 +25,13 @@ const nextConfig = {
     config.plugins.push(
       new webpack.ProvidePlugin({
         React: 'react',
-      })
+      }),
     );
+
+    config.experiments = {
+      ...config.experiments,
+      asyncWebAssembly: true,
+    };
 
     // You can add more custom webpack configurations here
     return config;

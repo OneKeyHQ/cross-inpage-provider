@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable no-unsafe-optional-chaining */
@@ -13,6 +14,12 @@ import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
 import params from './params';
 import { toast } from '../../ui/use-toast';
+import { Input } from '../../ui/input';
+import { Blockfrost, Lucid, type SignedMessage } from 'lucid-cardano';
+import { InputWithSave } from '../../InputWithSave';
+
+// https://use-cardano.alangaming.com/
+// https://github.com/spacebudz/lucid
 
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -28,18 +35,34 @@ export default function Example() {
     },
   ]);
 
-  const { provider } = useWallet<IProviderApi>();
+  const { provider, account } = useWallet<IProviderApi>();
+  const projectIdRef = useRef<string | null>(null);
 
   const [walletApi, setWalletApi] = useState<any | null>(null);
+  const [lucid, setLucid] = useState<Lucid | null>(null);
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
+    if (!projectIdRef.current) {
+      toast({
+        title: 'Project ID is required',
+        description: 'Please set the project ID in the input box above',
+      });
+
+      window.open('https://blockfrost.io/dashboard');
+      return;
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const providerDetail = walletsRef.current?.find((w) => w.uuid === selectedWallet.id);
     if (!providerDetail) {
       return Promise.reject('Wallet not found');
     }
 
+    console.log('providerDetail', providerDetail);
+
     const provider = get(window, providerDetail.inject) as IProviderApi | undefined;
+
+    console.log('provider', provider);
 
     if (!provider) {
       toast({
@@ -54,8 +77,24 @@ export default function Example() {
 
     setWalletApi(walletApi);
 
-    const [address] = await walletApi.getUsedAddresses();
-    const chainId = await walletApi.getNetworkId();
+    let chainId;
+    try {
+      chainId = await walletApi.getNetworkId();
+    } catch (error) {
+      console.log('error', error);
+    }
+
+    const lucid = await Lucid.new(
+      // test id
+      new Blockfrost('https://cardano-mainnet.blockfrost.io/api/v0', projectIdRef.current),
+      'Mainnet',
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    lucid.selectWallet(walletApi);
+    setLucid(lucid);
+
+    const address = await lucid.wallet.address();
 
     return {
       provider,
@@ -66,13 +105,42 @@ export default function Example() {
 
   return (
     <>
+      <ApiGroup title="Blockfrost Project ID">
+        <div className="flex flex-col">
+          <p>
+            动态生成交易需要一个公开的 RPC 节点，在这里 https://cardano-mainnet.blockfrost.io
+            创建一个 Project 复制 project_id 粘贴到这里（会自动保存）
+          </p>
+          <InputWithSave
+            storageKey="cardano-wallet-projectid"
+            onChange={(value) => (projectIdRef.current = value)}
+          />
+        </div>
+      </ApiGroup>
       <ConnectButton<IProviderApi>
         fetchWallets={() => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          const wallets = Object.keys(window?.cardano)
+          .filter((name)=>['onekey','lace','nami','yoroi'].includes(name)).map((key) => {
+            return {
+              uuid: key,
+              name: key,
+              inject: `cardano.${key}`,
+            };
+          });
+
+          // walletsRef.current =   walletsRef.current + wallets 保证不会重复
+          wallets.forEach((wallet) => {
+            if (!walletsRef.current.find((w) => w.uuid === wallet.uuid)) {
+              walletsRef.current.push(wallet);
+            }
+          });
+
           return Promise.resolve(
             walletsRef.current.map((wallet) => {
               return {
                 id: wallet.uuid,
-                name: wallet.inject ? wallet.name : `${wallet.name} (EIP6963)`,
+                name: wallet.name,
               };
             }),
           );
@@ -83,7 +151,6 @@ export default function Example() {
           return Promise.resolve();
         }}
       />
-
       <ApiGroup title="Basics">
         <ApiPayload
           title="enable"
@@ -138,25 +205,75 @@ export default function Example() {
           description="(报错) 签名消息"
           presupposeParams={params.signData}
           onExecute={async (request: string) => {
-            const [address] = await walletApi?.getUsedAddresses();
-            const res = await walletApi?.signData(
-              address,
-              Buffer.from(request, 'utf8').toString('hex'),
-            );
+            const res = await lucid.newMessage(account.address, request).sign();
             return JSON.stringify(res);
+          }}
+          onValidate={async (request: string, response: string) => {
+
+            const signedMessage = JSON.parse(response) as SignedMessage
+
+            console.log('signedMessage', signedMessage);
+          
+            const res = lucid.verifyMessage(
+              account.address,
+              request,
+              signedMessage,
+            );
+            return Promise.resolve(JSON.stringify(res));
           }}
         />
       </ApiGroup>
-
       <ApiGroup title="Transafer">
         <ApiPayload
           title="signTx"
           description="签署交易"
-          presupposeParams={params.signTx}
           onExecute={async (request: string) => {
-            const res = await walletApi?.signTx(request, true);
-            setWalletApi(res);
-            return JSON.stringify(res);
+            // const res = await walletApi?.signTx(request, true);
+
+            const signedTx = await lucid.fromTx(request).sign().complete();
+            return signedTx.toString();
+          }}
+          generateRequestFrom={() => {
+            return (
+              <>
+                <Input
+                  label="转账地址"
+                  type="text"
+                  name="toAddress"
+                  defaultValue={account?.address ?? ''}
+                />
+                <Input
+                  label="转账金额(最小值大约 0.96 ADA)"
+                  type="number"
+                  name="amount"
+                  defaultValue="1000000"
+                />
+              </>
+            );
+          }}
+          onGenerateRequest={async (fromData: Record<string, any>) => {
+            const toAddress = fromData['toAddress'] as string;
+            const amount = parseInt(fromData['amount'] as string);
+
+            console.log('toAddress', toAddress);
+            console.log('amount', amount);
+
+            if (!walletApi) {
+              throw new Error('walletApi is required');
+            }
+
+            if (!toAddress || !amount) {
+              throw new Error('toAddress or amount is required');
+            }
+
+            const tx = await lucid
+              .newTx()
+              .payToAddress(toAddress, { lovelace: BigInt(amount) })
+              .complete();
+
+            console.log('tx', tx.toString());
+
+            return Promise.resolve(tx.toString());
           }}
         />
         <ApiPayload
@@ -164,11 +281,10 @@ export default function Example() {
           description="广播交易"
           onExecute={async (request: string) => {
             const res = await walletApi?.submitTx(request, true);
-            return JSON.stringify(res);
+            return res as string;
           }}
         />
       </ApiGroup>
-
       <DappList dapps={dapps} />
     </>
   );

@@ -52,7 +52,7 @@ function ApiPayloadContent({
             generateRequestFrom={generateRequestFrom}
             onGenerateRequest={onGenerateRequest}
             disableRequestContent={disableRequestContent}
-            resetRequest={() => handleSetRequest(presupposeParams[0]?.value)}
+            resetRequest={() => handleSetRequest(presupposeParams?.[0]?.value)}
           />
 
           <ApiExecute

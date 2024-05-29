@@ -1,4 +1,4 @@
-import { FormEvent, useCallback } from 'react';
+import { FormEvent, useCallback, useState } from 'react';
 import { Button } from '../ui/button';
 import { AutoHeightTextarea } from '../ui/textarea';
 import { useApiPayload } from './ApiPayloadProvider';
@@ -19,6 +19,7 @@ export function RequestEditor({
 }: IRequestEditorProps) {
   const { state, dispatch } = useApiPayload();
   const { request } = state;
+  const [generateRequesting, setGenerateRequesting] = useState(false);
 
   const handleSetRequest = useCallback(
     (newRequest: string) => {
@@ -36,6 +37,7 @@ export function RequestEditor({
         data[key] = value; // 将每个表单项添加到一个对象中
       });
       try {
+        setGenerateRequesting(true);
         const newRequest = await onGenerateRequest(data);
         handleSetRequest(newRequest);
       } catch (error) {
@@ -44,6 +46,8 @@ export function RequestEditor({
           title: '生成请求失败',
           description: get(error, 'message', ''),
         });
+      } finally {
+        setGenerateRequesting(false);
       }
     },
     [handleSetRequest, onGenerateRequest],
@@ -62,7 +66,7 @@ export function RequestEditor({
       {onGenerateRequest && (
         <form onSubmit={handleGenerateRequestSubmit} className="p-2 m-2 gap-1 flex flex-col">
           {generateRequestFrom?.()}
-          <Button variant="outline" type="submit">
+          <Button loading={generateRequesting} variant="outline" type="submit">
             生成请求
           </Button>
         </form>

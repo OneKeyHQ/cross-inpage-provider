@@ -3,7 +3,7 @@ export default {
     {
       id: 'signData',
       name: 'signData',
-      value: 'Sample message',
+      value: '010203',
     },
   ],
   signTx: [

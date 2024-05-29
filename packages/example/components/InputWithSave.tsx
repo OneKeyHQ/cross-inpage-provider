@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { debounce } from 'lodash';
 import { Input } from './ui/input';
 
@@ -10,21 +10,24 @@ export type IInputWithSaveProps = {
 
 export function InputWithSave({ storageKey, onChange, defaultValue }: IInputWithSaveProps) {
   const [inputValue, setInputValue] = useState('');
-  const debouncedChangeHandler = debounce((value: string) => {
+
+  // 初始化时从 localStorage 中获取值
+  useEffect(() => {
+    const storedValue = localStorage.getItem(storageKey) || defaultValue || '';
+    setInputValue(storedValue);
+    onChange(storedValue);
+  }, [storageKey, defaultValue, onChange]);
+
+  // 使用 useCallback 来定义 debouncedChangeHandler
+  const debouncedChangeHandler = useCallback(debounce((value: string) => {
     localStorage.setItem(storageKey, value);
     onChange(value);
-  }, 300);
+  }, 300), [storageKey, onChange]);
 
+  // 清除 debounce
   useEffect(() => {
-    const storedValue = localStorage.getItem(storageKey);
-    if (storedValue) {
-      setInputValue(storedValue);
-      onChange(storedValue);
-    } else {
-      setInputValue(defaultValue || '');
-      debouncedChangeHandler(defaultValue || '');
-    }
-  }, [debouncedChangeHandler, defaultValue, onChange, storageKey]);
+    return () => debouncedChangeHandler.cancel();
+  }, [debouncedChangeHandler]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;

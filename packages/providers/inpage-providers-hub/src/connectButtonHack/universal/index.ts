@@ -73,7 +73,6 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                   const newText = updateName(textNode, updatedName);
                   const newIconElement = updateIcon(iconNode, updatedIcon);
                   walletId.updateFlag(newIconElement);
-                  makeTextEllipse(newText.parentElement as HTMLElement);
                   afterUpdate?.(newText, newIconElement);
                 }
               } catch (e) {

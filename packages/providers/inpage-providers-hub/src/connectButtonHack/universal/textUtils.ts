@@ -2,11 +2,17 @@ import domUtils from '../utils/utilsDomNodes';
 import { ConstraintFn } from './type';
 import { universalLog } from './utils';
 
-export function makeTextEllipse(textNode: HTMLElement, mWidth?: string) {
+export function makeTextEllipse(
+  textNode: HTMLElement,
+  option = {} as Partial<CSSStyleDeclaration>,
+) {
   textNode.style.whiteSpace = 'nowrap';
   textNode.style.overflow = 'hidden';
   textNode.style.textOverflow = 'ellipsis';
-  mWidth && (textNode.style.maxWidth = mWidth);
+  Object.assign(textNode.style, option);
+}
+export function makeTextWrap(textNode: HTMLElement) {
+  textNode.style.whiteSpace = 'normal';
 }
 
 export function replaceText(textNode: Text, newText: string) {
@@ -41,7 +47,7 @@ export function findWalletTextByParent(
     return null;
   }
   if (constraints.some((f) => !textNodes[0].parentElement || !f(textNodes[0].parentElement))) {
-    universalLog.warn('it doesnot satisfy the constraints');
+    universalLog.warn('===>it doesnot satisfy the constraints', constraints);
     return null;
   }
 

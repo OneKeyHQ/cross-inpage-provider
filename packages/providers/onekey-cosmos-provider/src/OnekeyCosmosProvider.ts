@@ -232,9 +232,13 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
       const { method, params } = payload;
 
       if (isWalletEventMethodMatch({ method, name: PROVIDER_EVENTS.accountChanged })) {
-        this._handleAccountChange(params as Key | undefined);
+        this._handleAccountChange(params as KeyHex | undefined);
       }
     });
+
+    this.on(PROVIDER_EVENTS.keplr_keystorechange, () => {
+      window.dispatchEvent(new Event(PROVIDER_EVENTS.keplr_keystorechange));
+    })
 
     const isUsingMessage = USING_MESSAGE_SITES.includes(window.location.origin);
     if (isUsingMessage) {
@@ -289,7 +293,7 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
     return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
   }
 
-  private _handleConnected(account: Key, options: { emit: boolean } = { emit: true }) {
+  private _handleConnected(account: KeyHex, options: { emit: boolean } = { emit: true }) {
     this._account = account;
     if (options.emit && this.isConnectionStatusChanged('connected')) {
       this.connectionStatus = 'connected';
@@ -309,18 +313,18 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
     }
   }
 
-  isAccountsChanged(account: Key | undefined) {
+  isAccountsChanged(account: KeyHex | undefined) {
     if (!account) return false;
     if (!this._account) return true;
 
-    return bytesToHex(account.pubKey) !== bytesToHex(this._account.pubKey);
+    return account.pubKey !== this._account.pubKey;
   }
 
   // trigger by bridge account change event
-  private _handleAccountChange(payload: Key | undefined) {
+  private _handleAccountChange(payload: KeyHex | undefined) {
     const account = payload;
     if (this.isAccountsChanged(account)) {
-      this.emit('keplr_keystorechange');
+      this.emit(PROVIDER_EVENTS.keplr_keystorechange);
     }
     if (!account) {
       this._handleDisconnected();

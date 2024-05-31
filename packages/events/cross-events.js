@@ -65,7 +65,7 @@ EventEmitter.prototype._maxListeners = undefined;
 
 // By default EventEmitters will print a warning if more than 10 listeners are
 // added to it. This is a useful default which helps finding memory leaks.
-var defaultMaxListeners = 10;
+var defaultMaxListeners = 50;
 
 function checkListener(listener) {
   if (typeof listener !== 'function') {

@@ -1423,47 +1423,49 @@ export const sitesConfig: SitesInfo[] = [
       [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
     },
   },
-  //TODO:放在弹窗iframe内的。
-  // {
-  //   urls: ['app.degate.com'],
-  //   walletsForProvider: {
-  //     [IInjectedProviderNames.ethereum]: [
-  //       {
-  //         ...basicWalletInfo['metamask'],
-  //         findIconAndName(wallet) {
-  //           const modal = getConnectWalletModalByTitle(
-  //             'section.mantine-Modal-content',
-  //             'Connect Wallet',
-  //           );
-  //           return (
-  //             modal &&
-  //             findIconAndNameDirectly(
-  //               'img[src*="metamask"]',
-  //               (icon) => icon.parentElement?.parentElement,
-  //               wallet.name,
-  //               modal,
-  //             )
-  //           );
-  //         },
-  //       },
-  //       {
-  //         ...basicWalletInfo['walletconnect'],
-  //         findIconAndName(wallet) {
-  //           const modal = getConnectWalletModalByTitle('section.mantine-Modal-content', 'Connect Wallet');
-  //           return (
-  //             modal &&
-  //             findIconAndNameDirectly(
-  //               'img[src*="walletConnect"]',
-  //               (icon) => icon.parentElement?.parentElement,
-  //               wallet.name,
-  //               modal,
-  //             )
-  //           );
-  //         },
-  //       },
-  //     ],
-  //   },
-  // },
+  {
+    urls: ['app.degate.com'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName(wallet) {
+            const modal = getConnectWalletModalByTitle(
+              'section.mantine-Modal-content',
+              'Connect Wallet',
+            );
+            return (
+              modal &&
+              findIconAndNameDirectly(
+                'img[src*="metamask"]',
+                (icon) => icon.parentElement?.parentElement,
+                wallet.name,
+                modal,
+              )
+            );
+          },
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          findIconAndName(wallet) {
+            const modal = getConnectWalletModalByTitle(
+              'section.mantine-Modal-content',
+              'Connect Wallet',
+            );
+            return (
+              modal &&
+              findIconAndNameDirectly(
+                'img[src*="walletConnect"]',
+                (icon) => icon.parentElement?.parentElement,
+                wallet.name,
+                modal,
+              )
+            );
+          },
+        },
+      ],
+    },
+  },
   {
     urls: ['tranchess.com'],
     testPath: {
@@ -2086,22 +2088,7 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
-  //全是shadow dom
-  // {
-  //   urls: ['www.pinksale.finance'],
-  //   walletsForProvider: {
-  //     [IInjectedProviderNames.ethereum]: [
-  //       {
-  //         ...basicWalletInfo['metamask'],
 
-  //       },
-  //       {
-  //         ...basicWalletInfo['walletconnect'],
-
-  //       },
-  //     ],
-  //   },
-  // },
   {
     urls: ['app.radiant.capital'],
     testPath: [':text("Continue")', ':text("Connect Wallet")'],
@@ -2789,37 +2776,52 @@ export const sitesConfig: SitesInfo[] = [
       [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
     },
   },
-  // {
-  //   urls: ['jpegd.io'],
-  //   testUrls: ['jpegd.io/vaults'],
-  //   testPath: ['button:has-text("I agree")', ':text("Connect Wallet")'],
-
-  //   walletsForProvider: {
-  //     [IInjectedProviderNames.ethereum]: [
-  //       {
-  //         ...basicWalletInfo['metamask'],
-  //         name: / Metamask$/,
-  //         // container: 'div[role="presentation"].MuiModal-root',
-  //         update({ updatedName, updatedIcon }) {
-  //           const modal = 'div[role="presentation"].MuiModal-root';
-  //           const modalNode = document.querySelector(modal) as HTMLEmbedElement;
-  //           if (!modalNode) {
-  //             return null;
-  //           }
-  //           const textNodes = domUtils.findTextNode(modal, updatedName, 'all') as Text[];
-  //           textNodes.forEach((textNode) => {
-  //             replaceText(textNode, updatedName);
-  //           });
-  //         },
-  //       },
-  //       {
-  //         ...basicWalletInfo['walletconnect'],
-  //         container: 'div[role="presentation"].MuiModal-root',
-  //         name: / WalletConnect$/,
-  //       },
-  //     ],
-  //   },
-  // },
+  {
+    urls: ['jpegd.io'],
+    testUrls: ['jpegd.io/vaults'],
+    testPath: {
+      desktop: ['button:has-text("I agree")', ':text("Connect Wallet")'],
+      mobile: [
+        'button:has-text("I agree")',
+        'div.ei7w3c12.MuiBox-root svg',
+        ':text("Connect Wallet")',
+      ],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          name: / Metamask$/,
+          // container: 'div[role="presentation"].MuiModal-root',
+          findIconAndName({ name }) {
+            const modal = document.querySelector('div[role="presentation"].MuiModal-root');
+            return modal
+              ? findIconAndNameDirectly(
+                  'img[src*="static/media/1.eb7cbbcbf"]',
+                  'auto-search-text',
+                  name,
+                  modal as HTMLElement,
+                )
+              : null;
+          },
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          findIconAndName({ name }) {
+            const modal = document.querySelector('div[role="presentation"].MuiModal-root');
+            return modal
+              ? findIconAndNameDirectly(
+                  'img[src*="static/media/2.cb9826961cbcd25676"]',
+                  'auto-search-text',
+                  name,
+                  modal as HTMLElement,
+                )
+              : null;
+          },
+        },
+      ],
+    },
+  },
   {
     urls: ['fi.woo.org'],
     testUrls: ['fi.woo.org/swap'],
@@ -2972,7 +2974,6 @@ export const sitesConfig: SitesInfo[] = [
           afterUpdate(textNode, iconNode) {
             iconNode.style.aspectRatio = '1';
             iconNode.style.minWidth = '32px';
-
           },
         },
         {
@@ -3174,7 +3175,6 @@ export const sitesConfig: SitesInfo[] = [
       mobile: ['header [data-testid="settingsMenuBtn"]', ':text("Connect")'],
       desktop: [':text("Connect")'],
     },
-    only: true,
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -3187,6 +3187,146 @@ export const sitesConfig: SitesInfo[] = [
                 'img[src*="metamask"][alt="MetaMask"]',
                 'auto-search-text',
                 wallet.name,
+                modal,
+              )
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['oraidex.io'],
+    skip: { mobile: true },
+    walletsForProvider: {
+      [IInjectedProviderNames.cosmos]: [
+        {
+          ...basicWalletInfo['keplr'],
+          container: () => getConnectWalletModalByTitle('div[role="dialog"]', 'Connect to OraiDEX'),
+        },
+      ],
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => getConnectWalletModalByTitle('div[role="dialog"]', 'Connect to OraiDEX'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['sft.network'],
+    testUrls: ['sft.network/#/stake'],
+    skip: { mobile: true },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () =>
+            getConnectWalletModalByTitle('div[role="dialog"]', 'Connect wallet to continue'),
+          afterUpdate(textNode, icon) {
+            textNode.parentElement && (textNode.parentElement.style.textAlign = 'center');
+          },
+        },
+      ],
+      [IInjectedProviderNames.solana]: [
+        {
+          ...basicWalletInfo['phantom'],
+          container: () =>
+            getConnectWalletModalByTitle('div[role="dialog"]', 'Connect wallet to continue'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['stake.anvm.io'],
+
+    testPath: {
+      desktop: [':text("Connect Wallet")', ':nth-match(button.rounded-full:text("Connect"),2)'],
+      'mobile': [
+        'header.g-container > button',
+        ':text("Connect Wallet")',
+        ':nth-match(button.rounded-full:text("Connect"),2)',
+      ],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.btc]: [
+        {
+          ...basicWalletInfo['unisat'],
+          container: () =>
+            getConnectWalletModalByTitle('div[role="dialog"][id*="headlessui"]', 'Choose Wallet'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['meson.fi'],
+    testPath: {
+      desktop: [':text("AGREE AND CONTINUE")', ':text("CONNECT WALLET")'],
+      mobile: [":text('Connect your wallet')"],
+    },
+    only: true,
+
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => getConnectWalletModalByTitle('div.fixed', 'CONNECT WALLET'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['bsquared.boolbridge.com'],
+    testPath: [':text("Connect Wallet")', '.connect-button:nth-child(1)'],
+    walletsForProvider: {
+      [IInjectedProviderNames.btc]: [
+        {
+          ...basicWalletInfo['unisat'],
+
+          container: () => getConnectWalletModalByTitle('div[role="dialog"]', 'Bitcoin Wallets'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.gyro.finance'],
+    skip: { mobile: true }, //not supported by mobile
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+    },
+  },
+  {
+    urls: ['app.reflexer.finance'],
+    skip: { mobile: true }, //no item in wallet list
+    constraintMap: { icon: [isWalletIconSizeMatch], text: [] },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        { ...basicWalletInfo['metamask'], container: '#connect-METAMASK' },
+      ],
+    },
+  },
+  {
+    urls: ['stusdt.io'],
+    testPath: {
+      desktop: [':text("Connect Wallet")'],
+      mobile: [
+        'div.positive-btn:text("Accept")',
+        '.mobile-header .mobile-category-outer',
+        ':text("Connect Wallet")',
+      ],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('div.ant-modal-content', 'Connect Wallet');
+            return (
+              modal &&
+              findIconAndNameDirectly(
+                'img[src*="static/media/metamask"]',
+                'auto-search-text',
+                name,
                 modal,
               )
             );

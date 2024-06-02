@@ -5,7 +5,6 @@ import { Selector } from './type';
 export const universalLog = new Logger('universal');
 
 //TODO:how to detect cursor status when hover
-//
 export function isClickable(ele: HTMLElement) {
   return ele && window.getComputedStyle(ele).cursor === 'pointer';
 }

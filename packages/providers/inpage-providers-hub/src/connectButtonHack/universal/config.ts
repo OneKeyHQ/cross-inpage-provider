@@ -63,7 +63,7 @@ export const basicWalletInfo = {
   [WALLET_NAMES.martian]: {
     updatedIcon: WALLET_CONNECT_INFO.martian.icon,
     updatedName: WALLET_CONNECT_INFO.martian.text,
-    name: /^Martian$/i,
+    name: /^Martian|Martian Wallet$/i,
   },
   [WALLET_NAMES.nami]: {
     updatedIcon: WALLET_CONNECT_INFO.nami.icon,
@@ -2320,6 +2320,16 @@ export const sitesConfig: SitesInfo[] = [
             return (
               modal &&
               findIconAndNameDirectly('img[alt="Petra Wallet"]', 'auto-search-text', name, modal)
+            );
+          },
+        },
+        {
+          ...basicWalletInfo['martian'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('div.p-dialog', 'Connect a Wallet');
+            return (
+              modal &&
+              findIconAndNameDirectly('img[alt="Martian Wallet"]', 'auto-search-text', name, modal)
             );
           },
         },

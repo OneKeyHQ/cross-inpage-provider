@@ -43,7 +43,7 @@ test.describe('Connect Button Hack', () => {
         });
         await page.goto(`https://${url}`, { waitUntil: 'domcontentloaded' });
         if (typeof testPath === 'function') {
-          await testPath(page);
+          await testPath(page as any);
         } else {
           const actualPath = Array.isArray(testPath) ? testPath : testPath[device] || [];
           for (const seg of actualPath) {

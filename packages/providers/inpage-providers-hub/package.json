@@ -25,6 +25,7 @@
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "tsc && tsc --project tsconfig.cjs.json",
+    "test": "npx playwright test",
     "start": "tsc --watch"
   },
   "dependencies": {

@@ -3,10 +3,41 @@ import {
   IInjectedProviderNamesStrings,
 } from '@onekeyfe/cross-inpage-provider-types';
 
-import { IInpageProviderConfig, ProviderBase } from '@onekeyfe/cross-inpage-provider-core';
+import { IInpageProviderConfig, ProviderBase, switchDefaultWalletNotification } from '@onekeyfe/cross-inpage-provider-core';
 import { consts } from '@onekeyfe/cross-inpage-provider-core';
 
-const { WALLET_INFO_LOACAL_KEY } = consts;
+export interface IOneKeyWalletInfo {
+  enableExtContentScriptReloadButton?: boolean;
+  platform?: string;
+  version?: string;
+  buildNumber?: string;
+  disableExt: boolean;
+  isDefaultWallet?: boolean;
+  excludedDappList: string[];
+  isLegacy: boolean;
+  platformEnv: {
+    isRuntimeBrowser?: boolean;
+    isRuntimeChrome?: boolean;
+    isRuntimeFirefox?: boolean;
+
+    isWeb?: boolean;
+
+    isNative?: boolean;
+    isNativeIOS?: boolean;
+    isNativeAndroid?: boolean;
+
+    isExtension?: boolean;
+    isExtChrome?: boolean;
+    isExtFirefox?: boolean;
+
+    isDesktop?: boolean;
+    isDesktopWin?: boolean;
+    isDesktopLinux?: boolean;
+    isDesktopMac?: boolean;
+  };
+}
+
+const { WALLET_INFO_LOACAL_KEY_V5 } = consts;
 
 const PROVIDER_EVENTS = {
   'message_low_level': 'message_low_level',
@@ -35,7 +66,7 @@ class ProviderPrivate extends ProviderBase {
   private _registerEvents() {
     try {
       // platform check
-      const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);
+      const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY_V5);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -45,7 +76,8 @@ class ProviderPrivate extends ProviderBase {
           const { method, params } = payload;
           if (method === METHODS.wallet_events_ext_switch_changed) {
             try {
-              localStorage.setItem(WALLET_INFO_LOACAL_KEY, JSON.stringify(params));
+              localStorage.setItem(WALLET_INFO_LOACAL_KEY_V5, JSON.stringify(params));
+              this.notifyDefaultWalletChanged(params as IOneKeyWalletInfo)
             } catch (e) {
               console.error(e);
             }
@@ -61,6 +93,15 @@ class ProviderPrivate extends ProviderBase {
 
   request(data: unknown) {
     return this.bridgeRequest(data);
+  }
+
+  notifyDefaultWalletChanged(params: IOneKeyWalletInfo) {
+    let isDefaultWallet = !!params.isDefaultWallet
+    if (isDefaultWallet) {
+      const isExcludedWebsite = params.excludedDappList.some(i => i.startsWith(window.location.origin));
+      isDefaultWallet = !isExcludedWebsite;
+    }
+    switchDefaultWalletNotification(isDefaultWallet);
   }
 }
 

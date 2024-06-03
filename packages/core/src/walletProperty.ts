@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import { WALLET_INFO_LOACAL_KEY } from './consts';
+import { WALLET_INFO_LOACAL_KEY_V5 } from './consts';
 import { commonLogger } from './loggerConsole';
 
 /**
@@ -16,19 +17,30 @@ export enum ISpecialPropertyProviderNamesReflection {
   polkadot = 'polkadot-js',
 }
 
-export function checkWalletSwitchEnable(property: string) {
+export function checkWalletSwitchEnable() {
   try {
-    const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);
+    const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY_V5);
     const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
-    if (walletInfoLocal && walletInfoLocal.walletSwitchConfig) {
-      const { enable, disable } = walletInfoLocal.walletSwitchConfig;
-      const enableList: string[] = enable || [];
-      const disableList: string[] = disable || [];
-      return (
-        (enableList.includes(property) && !disableList.includes(property)) ||
-        (!enableList.includes(property) && !disableList.includes(property))
-      );
+    if (!walletInfoLocal) {
+      return true;
     }
+    if (!walletInfoLocal?.isDefaultWallet) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('OneKey is not default wallet')
+      }
+      return false
+    }
+    if (Array.isArray(walletInfoLocal?.excludedDappList)) {
+      const currentOrigin = window.location.origin;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      if (walletInfoLocal.excludedDappList.includes(currentOrigin)) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('skip inject web3 provider: ', currentOrigin)
+        }
+        return false;
+      }
+    }
+    return true
   } catch (e) {
     commonLogger.warn(e);
   }
@@ -38,7 +50,7 @@ export function checkWalletSwitchEnable(property: string) {
 export function checkEnableDefineProperty(property: string) {
   if (property === '$onekey') return false;
   try {
-    const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY);
+    const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY_V5);
     const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
     return !!walletInfoLocal?.platformEnv.isExtension;
   } catch (e) {
@@ -54,7 +66,7 @@ export function defineWindowProperty(
     enumerable?: boolean;
   },
 ) {
-  if (!checkWalletSwitchEnable(property)) return;
+  if (!checkWalletSwitchEnable()) return;
   const enable = checkEnableDefineProperty(property);
   const proxyProvider = new Proxy(provider as object, {
     defineProperty(target, property, attributes) {

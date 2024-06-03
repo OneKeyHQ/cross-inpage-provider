@@ -26,6 +26,7 @@ import type {
 import Long from 'long';
 import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from './cosmjs';
 import { isArray } from 'lodash';
+import { JSONUint8Array } from './utils/uint8-array';
 
 const PROVIDER_EVENTS = {
   'connect': 'connect',
@@ -205,6 +206,8 @@ function isWalletEventMethodMatch({ method, name }: { method: string; name: stri
   return method === `wallet_events_${name}`;
 }
 
+const USING_MESSAGE_SITES = ['https://wallet.keplr.app', 'https://testnet.keplr.app'];
+
 class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
   public readonly mode: KeplrMode = 'extension';
   protected _account: Key | null = null;
@@ -229,9 +232,58 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
       const { method, params } = payload;
 
       if (isWalletEventMethodMatch({ method, name: PROVIDER_EVENTS.accountChanged })) {
-        this._handleAccountChange(params as Key | undefined);
+        this._handleAccountChange(params as KeyHex | undefined);
       }
     });
+
+    this.on(PROVIDER_EVENTS.keplr_keystorechange, () => {
+      window.dispatchEvent(new Event(PROVIDER_EVENTS.keplr_keystorechange));
+    })
+
+    const isUsingMessage = USING_MESSAGE_SITES.includes(window.location.origin);
+    if (isUsingMessage) {
+      window.addEventListener('message', (e) => {
+        const data = e.data as undefined | {
+          type: string;
+          method: string;
+          args: any[];
+          id: string;
+        };
+        if (data && data.type === 'proxy-request' && data.method) {
+          const method = data.method as 'enable';
+          if (this[method]) {
+            const unwrapedArgs = JSONUint8Array.unwrap(data.args) as object[];
+            (this[method] as (...args: any[]) => Promise<any>)(...unwrapedArgs).then((res) => {
+              window.postMessage({
+                type: 'proxy-request-response',
+                id: data.id,
+                result: JSONUint8Array.wrap({
+                  return: res as object,
+                }) as {
+                  return: any;
+                },
+              });
+            }).catch((err: { message: string }) => {
+              window.postMessage({
+                type: 'proxy-request-response',
+                id: data.id,
+                result: {
+                  error: err.message,
+                },
+              });
+            })
+          } else {
+            window.postMessage({
+              type: 'proxy-request-response',
+              id: data.id,
+              result: {
+                error: true,
+              },
+            });
+          }
+        }
+      });
+    }
   }
 
   private _callBridge<T extends keyof JsBridgeRequest>(params: {
@@ -241,7 +293,7 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
     return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
   }
 
-  private _handleConnected(account: Key, options: { emit: boolean } = { emit: true }) {
+  private _handleConnected(account: KeyHex, options: { emit: boolean } = { emit: true }) {
     this._account = account;
     if (options.emit && this.isConnectionStatusChanged('connected')) {
       this.connectionStatus = 'connected';
@@ -261,18 +313,18 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
     }
   }
 
-  isAccountsChanged(account: Key | undefined) {
+  isAccountsChanged(account: KeyHex | undefined) {
     if (!account) return false;
     if (!this._account) return true;
 
-    return bytesToHex(account.pubKey) !== bytesToHex(this._account.pubKey);
+    return account.pubKey !== this._account.pubKey;
   }
 
   // trigger by bridge account change event
-  private _handleAccountChange(payload: Key | undefined) {
+  private _handleAccountChange(payload: KeyHex | undefined) {
     const account = payload;
     if (this.isAccountsChanged(account)) {
-      this.emit('keplr_keystorechange');
+      this.emit(PROVIDER_EVENTS.keplr_keystorechange);
     }
     if (!account) {
       this._handleDisconnected();
@@ -333,6 +385,10 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
       // @ts-expect-error
       address: hexToBytes(key.address),
     };
+  }
+
+  ping(): Promise<void> {
+    return Promise.resolve();
   }
 
   experimentalSuggestChain(chain: any): Promise<void> {

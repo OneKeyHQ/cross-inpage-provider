@@ -2417,7 +2417,6 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['apps.acala.network'],
-
     walletsForProvider: {
       [IInjectedProviderNames.polkadot]: [
         {

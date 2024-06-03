@@ -3,7 +3,7 @@ import { WALLET_CONNECT_INFO } from '../consts';
 import { hackConnectButton } from '../hackConnectButton';
 import domUtils from '../utils/utilsDomNodes';
 
-hackConnectButton({
+export default () => hackConnectButton({
   urls: ['app.boringdao.com'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod(options) {

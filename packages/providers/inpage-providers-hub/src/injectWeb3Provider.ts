@@ -9,6 +9,7 @@ import { ProviderAptos, ProviderAptosMartian } from '@onekeyfe/onekey-aptos-prov
 import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
 import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
 import { ProviderCardano, defineWindowCardanoProperty } from '@onekeyfe/onekey-cardano-provider';
+import { ProviderPrivateExternalAccount } from '@onekeyfe/onekey-private-external-account-provider';
 import { ProviderCosmos } from '@onekeyfe/onekey-cosmos-provider';
 import { ProviderPolkadot, registerPolkadot } from '@onekeyfe/onekey-polkadot-provider';
 import {
@@ -19,7 +20,9 @@ import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import { ProviderWebln } from '@onekeyfe/onekey-webln-provider';
 import { ProviderNostr } from '@onekeyfe/onekey-nostr-provider';
 import { ProviderBtc, ProviderBtcWallet } from '@onekeyfe/onekey-btc-provider';
-import './connectButtonHack';
+import { ProviderAlgo } from '@onekeyfe/onekey-algo-provider';
+import { hackAllConnectButtons } from './connectButtonHack';
+import { detectWebsiteRiskLevel } from './detectRiskWebsite';
 import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
 // import Web3 from 'web3'; // cause build error
 
@@ -43,11 +46,12 @@ export type IWindowOneKeyHub = {
   $private?: ProviderPrivate;
   $walletInfo?: {
     buildNumber: string;
-    isLegacy: boolean;
     disableExt?: boolean;
+    isLegacy: boolean;
+    isDefaultWallet?: boolean;
+    excludedDappList: string[];
     platform: string;
     version: string;
-    walletSwitchConfig: { enable: string[]; disable: [] };
     platformEnv: {
       isExtension: boolean;
       isDesktop: boolean;
@@ -116,11 +120,16 @@ function injectWeb3Provider(): unknown {
   const btc = new ProviderBtc({ bridge });
   const btcWallet = new ProviderBtcWallet({ bridge });
 
+  const algorand = new ProviderAlgo({ bridge });
+
+  const $privateExternalAccount = new ProviderPrivateExternalAccount({ bridge });
+
   // providerHub
   const $onekey = {
     ...window.$onekey,
     jsBridge: bridge,
     $private,
+    $privateExternalAccount,
     ethereum,
     solana,
     starcoin,
@@ -135,6 +144,7 @@ function injectWeb3Provider(): unknown {
     nostr,
     btc,
     btcwallet: btcWallet,
+    algorand,
   };
 
   defineWindowProperty('$onekey', $onekey, { enumerable: true });
@@ -155,7 +165,7 @@ function injectWeb3Provider(): unknown {
     provider: ethereum,
   });
 
-  if (checkWalletSwitchEnable('ethereum')) {
+  if (checkWalletSwitchEnable()) {
     registerEIP6963Provider({
       uuid: '7677b54f-3486-46e2-4e37-bf8747814f',
       name: 'MetaMask',
@@ -176,9 +186,13 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('suiWallet', sui);
   defineWindowProperty('unisat', btc);
   defineWindowProperty('btcwallet', btcWallet);
+  defineWindowProperty('algorand', algorand);
+  defineWindowProperty('exodus', {
+    algorand,
+  });
 
   // Cardano chain provider injection is handled independently.
-  if (checkWalletSwitchEnable('cardano')) {
+  if (checkWalletSwitchEnable()) {
     defineWindowCardanoProperty('cardano', cardano);
   }
 
@@ -204,34 +218,38 @@ function injectWeb3Provider(): unknown {
   window.dispatchEvent(new Event('ethereum#initialized'));
 
   // Solana Standard Wallet
-  if (checkWalletSwitchEnable('onekey-solana')) {
+  if (checkWalletSwitchEnable()) {
     registerSolanaWallet(solana, {
       icon: WALLET_CONNECT_INFO.onekey.icon as WalletIcon,
     });
   }
 
   // Sui Standard Wallet
-  if (checkWalletSwitchEnable('onekey-sui')) {
+  if (checkWalletSwitchEnable()) {
     registerSuiWallet(sui, {
       logo: WALLET_CONNECT_INFO.onekey.icon,
     });
   }
 
   // Override the SuiWallet Standard Wallet
-  if (checkWalletSwitchEnable('suiWallet')) {
+  if (checkWalletSwitchEnable()) {
     registerSuiWallet(sui, {
       name: 'Sui Wallet',
       logo: WALLET_CONNECT_INFO.onekey.icon,
     });
   }
 
-  if (checkWalletSwitchEnable('onekey-polkadot')) {
+  if (checkWalletSwitchEnable()) {
     registerPolkadot(polkadot);
   }
 
-  if (checkWalletSwitchEnable('polkadot-js')) {
+  if (checkWalletSwitchEnable()) {
     registerPolkadot(polkadot, 'polkadot-js', '0.44.1');
   }
+  setTimeout(() => {
+    void detectWebsiteRiskLevel();
+    void hackAllConnectButtons();
+  }, 500);
   return $onekey;
 }
 export { injectWeb3Provider };

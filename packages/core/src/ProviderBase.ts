@@ -12,7 +12,7 @@ import {
 import siteMetadata from './siteMetadata';
 import { fakeLogger, fakeDebugLogger, consoleErrorInDev } from './loggers';
 import versionInfo from './versionInfo';
-import { WALLET_INFO_LOACAL_KEY } from './consts';
+import { WALLET_INFO_LOACAL_KEY_V5 } from './consts';
 
 export type IBridgeRequestCallback = (
   error: Error | null,
@@ -112,7 +112,7 @@ abstract class ProviderBase extends CrossEventEmitter {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           window.$onekey.$walletInfo = result.walletInfo;
           try {
-            localStorage.setItem(WALLET_INFO_LOACAL_KEY, JSON.stringify(result.walletInfo));
+            localStorage.setItem(WALLET_INFO_LOACAL_KEY_V5, JSON.stringify(result.walletInfo));
           } catch (e) {
             console.error(e);
           }

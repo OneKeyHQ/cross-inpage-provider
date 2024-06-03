@@ -3,7 +3,7 @@ import { createNewImageToContainer, hackConnectButton } from '../hackConnectButt
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
-hackConnectButton({
+export default () => hackConnectButton({
   urls: ['stake.lido.fi'], // adapter to the site url, can have multiple urls.
   providers: [IInjectedProviderNames.ethereum], // provider class, example: IInjectedProviderNames.ethereum、IInjectedProviderNames.btc
   replaceMethod(options) {

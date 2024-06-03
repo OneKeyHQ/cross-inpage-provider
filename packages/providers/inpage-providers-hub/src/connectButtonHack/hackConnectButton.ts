@@ -55,7 +55,7 @@ function checkIfInjectedProviderEnable({ providerName }: { providerName: IInject
     property = providerName;
   }
 
-  const result = checkWalletSwitchEnable(property);
+  const result = checkWalletSwitchEnable();
   hackButtonLogger.log('checkIfInjectedProviderEnable', property, result);
   return result;
 }

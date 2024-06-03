@@ -2,7 +2,7 @@ import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 import { hackConnectButton } from '../hackConnectButton';
 
-hackConnectButton({
+export default () => hackConnectButton({
   urls: ['app.hope.money'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod(options) {

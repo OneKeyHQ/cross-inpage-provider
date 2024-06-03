@@ -2,7 +2,7 @@ import { hackConnectButton } from '../hackConnectButton';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
-hackConnectButton({
+export default () => hackConnectButton({
   urls: ['zerion.io', 'app.zerion.io', 'www.zerion.io'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {

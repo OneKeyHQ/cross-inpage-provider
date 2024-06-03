@@ -2,7 +2,7 @@ import { createNewImageToContainer, hackConnectButton } from '../hackConnectButt
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
-hackConnectButton({
+export default () => hackConnectButton({
   urls: ['synthetix.io', 'staking.synthetix.io', 'app.synthetix.io', 'www.synthetix.io'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {

@@ -194,13 +194,6 @@
     "@ethersproject/properties" "^5.6.0"
     "@ethersproject/strings" "^5.6.0"
 
-"@playwright/test@^1.43.1":
-  version "1.43.1"
-  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.43.1.tgz#16728a59eb8ce0f60472f98d8886d6cab0fa3e42"
-  integrity sha512-HgtQzFgNEEo4TE22K/X7sYTYNqEMMTZmFS8kTq6m8hXj+m1D8TgwgIbumHddJa9h4yl4GkKb8/bgAl2+g7eDgA==
-  dependencies:
-    playwright "1.43.1"
-
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
@@ -236,13 +229,6 @@
   version "12.20.49"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.20.49.tgz#97897a33dd145490f514bbcbccefc178534e360f"
   integrity sha512-5e6QNb9bkeh4Hni4ktLqUZuUqnGTX/kou2aZkXyxtuYaHXgBm+In1SHR9V+7kDzWzjB08KC2uqt2doDi7cuAAA==
-
-"@types/node@^20.12.7":
-  version "20.12.7"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.12.7.tgz#04080362fa3dd6c5822061aa3124f5c152cff384"
-  integrity sha512-wq0cICSkRLVaf3UGLMGItu/PtdY7oaXaI/RVU+xliKVOtRna3PRY57ZDfztpDL0n11vfymMUnXv8QwYCO7L1wg==
-  dependencies:
-    undici-types "~5.26.4"
 
 "@types/pbkdf2@^3.0.0":
   version "3.1.0"
@@ -1085,11 +1071,6 @@ fs-minipass@^1.2.7:
   dependencies:
     minipass "^2.6.0"
 
-fsevents@2.3.2:
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.2.tgz#8a526f78b8fdf4623b709e0b975c52c24c02fd1a"
-  integrity sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==
-
 function-bind@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/function-bind/-/function-bind-1.1.1.tgz#a56899d3ea3c9bab874bb9773b7c5ede92f4895d"
@@ -1883,20 +1864,6 @@ performance-now@^2.1.0:
   resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-2.1.0.tgz#6309f4e0e5fa913ec1c69307ae364b4b377c9e7b"
   integrity sha1-Ywn04OX6kT7BxpMHrjZLSzd8nns=
 
-playwright-core@1.43.1:
-  version "1.43.1"
-  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.43.1.tgz#0eafef9994c69c02a1a3825a4343e56c99c03b02"
-  integrity sha512-EI36Mto2Vrx6VF7rm708qSnesVQKbxEWvPrfA1IPY6HgczBplDx7ENtx+K2n4kJ41sLLkuGfmb0ZLSSXlDhqPg==
-
-playwright@1.43.1, playwright@^1.43.1:
-  version "1.43.1"
-  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.43.1.tgz#8ad08984ac66c9ef3d0db035be54dd7ec9f1c7d9"
-  integrity sha512-V7SoH0ai2kNt1Md9E3Gwas5B9m8KR2GVvwZnAI6Pg0m3sh7UvgiYhRrhsziCmqMJNouPckiOhk8T+9bSAK0VIA==
-  dependencies:
-    playwright-core "1.43.1"
-  optionalDependencies:
-    fsevents "2.3.2"
-
 prepend-http@^1.0.1:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/prepend-http/-/prepend-http-1.0.4.tgz#d4f4562b0ce3696e41ac52d0e002e57a635dc6dc"
@@ -2332,11 +2299,6 @@ unbox-primitive@^1.0.1:
     has-bigints "^1.0.2"
     has-symbols "^1.0.3"
     which-boxed-primitive "^1.0.2"
-
-undici-types@~5.26.4:
-  version "5.26.5"
-  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-5.26.5.tgz#bcd539893d00b56e964fd2657a4866b221a65617"
-  integrity sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==
 
 universalify@^0.1.0:
   version "0.1.2"

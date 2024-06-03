@@ -83,7 +83,7 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
 
     this._log = props.logger ?? window.console;
 
-    if (checkWalletSwitchEnable('tronLink')) {
+    if (checkWalletSwitchEnable()) {
       this._registerEvents();
 
       void this._initialize();

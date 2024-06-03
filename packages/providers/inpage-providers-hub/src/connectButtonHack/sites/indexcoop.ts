@@ -6,7 +6,7 @@ import {
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
 
-hackConnectButton({
+export default () => hackConnectButton({
   urls: ['indexcoop.com', 'app.indexcoop.com', 'www.indexcoop.com'],
   providers: [IInjectedProviderNames.ethereum],
   replaceMethod() {

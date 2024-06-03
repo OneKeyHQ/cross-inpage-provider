@@ -4,6 +4,8 @@ import { findIconAndNameByParent, findIconAndNameDirectly } from './findIconAndN
 import { findWalletIconByParent, isWalletIconSizeMatch, replaceIcon } from './imgUtils';
 import { findIconAndNameInShadowRoot } from './shadowRoot';
 import { ConstraintFn, FindResultType, Selector } from './type';
+import type { Page } from '@playwright/test';
+
 import {
   getConnectWalletModalByTitle,
   getMaxWithOfText,
@@ -131,7 +133,7 @@ export type WalletInfo = {
   /**
    * skip testing
    */
-  skip?: boolean | { mobile?: boolean; desktop?: boolean };
+  skip?: boolean | ((page: Page) => Promise<boolean>) | { mobile?: boolean; desktop?: boolean };
 };
 export type SitesInfo = {
   urls: string[];
@@ -147,16 +149,25 @@ export type SitesInfo = {
   /**
    * path for connect wallet modal used for testing
    */
-  testPath?: string[] | { mobile?: string[]; desktop?: string[] };
+  testPath?: string[] | { mobile?: string[]; desktop?: string[] } | ((page: Page) => Promise<void>);
   testUrls?: string[];
   only?: boolean;
   skip?: boolean | { mobile?: boolean; desktop?: boolean };
 };
-
+const onekeySelectorInRowbowkit = 'button[data-testid="rk-wallet-option-so.onekey.app.wallet"]';
+function hasOnekeyWallet(ele: HTMLElement | Document = document) {
+  return !!ele.querySelector(onekeySelectorInRowbowkit);
+}
 const metamaskForRainbowKit: WalletInfo = {
   ...basicWalletInfo['metamask'],
-  container: 'button[data-testid="rk-wallet-option-metaMask"]',
-  afterUpdate(textNode, img) {
+  skip: async (page: Page) => (await page.locator(onekeySelectorInRowbowkit).count()) > 0,
+  container: () => {
+    if (hasOnekeyWallet()) {
+      return null;
+    }
+    return document.querySelector('button[data-testid="rk-wallet-option-metaMask"]');
+  },
+  afterUpdate(textNode) {
     if (textNode.parentElement) {
       textNode.parentElement.style.whiteSpace = 'normal';
     }
@@ -165,8 +176,14 @@ const metamaskForRainbowKit: WalletInfo = {
 
 const walletConnectForRainbowKit: WalletInfo = {
   ...basicWalletInfo[WALLET_NAMES.walletconnect],
-  container: 'button[data-testid="rk-wallet-option-walletConnect"]',
-  afterUpdate(textNode, img) {
+  skip: async (page: Page) => (await page.locator(onekeySelectorInRowbowkit).count()) > 0,
+  container: () => {
+    if (hasOnekeyWallet()) {
+      return null;
+    }
+    return document.querySelector('button[data-testid="rk-wallet-option-walletConnect"]');
+  },
+  afterUpdate(textNode) {
     if (textNode.parentElement) {
       textNode.parentElement.style.whiteSpace = 'normal';
     }
@@ -188,6 +205,12 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.defisaver.com'],
+    testPath: ['button:text("ACCEPT")'],
+    // mutationObserverOptions: {
+    //   childList: true,
+    //   subtree: true,
+    //   attributes: true,
+    // },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -228,16 +251,20 @@ export const sitesConfig: SitesInfo[] = [
 
   {
     urls: ['trade.bluefin.io'],
+    testPath: [':text("View your")', ':text("Connect Account")'],
     walletsForProvider: {
       [IInjectedProviderNames.sui]: [
         {
           ...basicWalletInfo['suiwallet'],
-          name: /^Connect Sui Wallet$/,
-          container: () => getWalletListByBtn("div[role='dialog'] [data-testid='connect-wallet']"),
-          updateIcon: (originnalNode: HTMLElement, iconSrc: string) => {
-            const img = replaceIcon(originnalNode, iconSrc);
+          name: /Sui Wallet$/,
+          container: () => {
+            const modal = getConnectWalletModalByTitle('div.connect-wallet', 'Connect Account');
+            const button = modal?.querySelector('[data-testid="connect-wallet"]');
+            return button ? button.parentElement : null;
+          },
+
+          afterUpdate: (text, img) => {
             img.style.marginRight = '12px';
-            return img;
           },
         },
       ],
@@ -245,6 +272,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['omnilending.omnibtc.finance'],
+    testPath: ['button:text("Connect Wallet")'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -279,22 +307,27 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.uncx.network'],
-    testPath: [':text("Connect")'],
+    testPath: ['button:has-text("Connect")'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
           ...basicWalletInfo['metamask'],
           container: () => getWalletListByBtn("div[role='dialog'] .v-card .c-list"),
+          skip: { mobile: true },
         },
         {
           ...basicWalletInfo['walletconnect'],
           container: () => getWalletListByBtn("div[role='dialog'] .v-card .c-list"),
+          afterUpdate(textNode, img) {
+            img.style.height = 'auto';
+          },
         },
       ],
     },
   },
   {
     urls: ['app.benqi.fi'],
+    testPath: ['button:text("Connect Wallet")[class*="ActionButton__Button"]'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -372,7 +405,6 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
-  //TODO: 全是shadow root
   // {
   //   urls: ['lista.org'],
   //   walletsForProvider: {
@@ -393,7 +425,7 @@ export const sitesConfig: SitesInfo[] = [
   {
     urls: ['app.prismafinance.com'],
     skip: {
-      mobile: true, //WARN:没有入口?
+      mobile: true,
     },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
@@ -441,28 +473,28 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
-  {
-    urls: ['raydium.io'],
-    testPath: [
-      ':text("Launch App")',
-      ':text("I have read")',
-      ':text("Agree and Continue")',
-      ':text("Connect Wallet")',
-    ],
+  // {
+  //   urls: ['raydium.io'],
+  //   testPath: [
+  //     ':text("Launch App")',
+  //     ':text("I have read")',
+  //     ':text("Agree and Continue")',
+  //     ':text("Connect Wallet")',
+  //   ],
 
-    walletsForProvider: {
-      [IInjectedProviderNames.solana]: [
-        {
-          ...basicWalletInfo['phantom'],
-          container: () =>
-            getConnectWalletModalByTitle(
-              ['div.fixed[role="dialog"]', 'div.Drawer.fixed'],
-              'Connect your wallet to Raydium',
-            ),
-        },
-      ],
-    },
-  },
+  //   walletsForProvider: {
+  //     [IInjectedProviderNames.solana]: [
+  //       {
+  //         ...basicWalletInfo['phantom'],
+  //         container: () =>
+  //           getConnectWalletModalByTitle(
+  //             ['div.fixed[role="dialog"]', 'div.Drawer.fixed'],
+  //             'Connect your wallet to Raydium',
+  //           ),
+  //       },
+  //     ],
+  //   },
+  // },
   {
     urls: ['01.xyz'],
     testPath: [':text("Connect")', ':text("Continue")'],
@@ -494,27 +526,27 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
-
-  {
-    urls: ['defi.instadapp.io'],
-    testPath: [':text("Connect")'],
-    skip: {
-      mobile: true, //没有入口
-    },
-    walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [
-        {
-          ...basicWalletInfo['metamask'],
-          container: '#WEB3_CONNECT_MODAL_ID .web3modal-modal-card',
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          name: /^WalletConnect v2$/,
-          container: '#WEB3_CONNECT_MODAL_ID .web3modal-modal-card',
-        },
-      ],
-    },
-  },
+  //remove it for onekey exists
+  // {
+  //   urls: ['defi.instadapp.io'],
+  //   testPath: [':text("Connect")'],
+  //   skip: {
+  //     mobile: true, //没有入口
+  //   },
+  //   walletsForProvider: {
+  //     [IInjectedProviderNames.ethereum]: [
+  //       {
+  //         ...basicWalletInfo['metamask'],
+  //         container: '#WEB3_CONNECT_MODAL_ID .web3modal-modal-card',
+  //       },
+  //       {
+  //         ...basicWalletInfo['walletconnect'],
+  //         name: /^WalletConnect v2$/,
+  //         container: '#WEB3_CONNECT_MODAL_ID .web3modal-modal-card',
+  //       },
+  //     ],
+  //   },
+  // },
   {
     urls: ['crosschain.bifi.finance'],
     walletsForProvider: {
@@ -593,7 +625,6 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
-  // todo:speed
   {
     urls: ['app.justlend.org'],
     mutationObserverOptions: {
@@ -692,13 +723,9 @@ export const sitesConfig: SitesInfo[] = [
       [IInjectedProviderNames.cosmos]: [
         {
           ...basicWalletInfo['keplr'],
-          name: /^(Keplr|Keplr Mobile)$/i,
-          findIconAndName({ name }) {
-            return findIconAndNameDirectly(
-              '.ReactModalPortal button img[alt="Wallet logo"][src*="keplr"]',
-              (icon: HTMLElement) => icon.parentElement,
-              name,
-            );
+          name: /^Keplr$/i,
+          container: () => {
+            return getConnectWalletModalByTitle('div[role="dialog"]', 'Connect wallet');
           },
         },
       ],
@@ -758,17 +785,13 @@ export const sitesConfig: SitesInfo[] = [
     skip: {
       mobile: true, //WARN: mobile is not supported by the site
     },
+    constraintMap: { icon: [], text: [] },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
           ...basicWalletInfo['metamask'],
-          findIconAndName({ name }) {
-            return findIconAndNameDirectly(
-              '.relative.rounded-2xl.text-default svg.rounded-full',
-              (icon: HTMLElement) => icon.parentElement,
-              name,
-            );
-          },
+          container: () =>
+            getConnectWalletModalByTitle('.relative.rounded-2xl.text-default', 'Connect Wallet'),
         },
       ],
       [IInjectedProviderNames.polkadot]: [
@@ -787,7 +810,10 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['www.metapool.app'],
-    testPath: ['.chakra-modal__body', ':text("Start staking")', ':text("Connect your Wallet")'],
+    testPath: {
+      desktop: ['.chakra-modal__body', ':text("Start staking")', ':text("Connect your Wallet")'],
+      mobile: [':text("Connect")'],
+    },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
     },
@@ -822,48 +848,53 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
+  // {
+  //   urls: ['quickswap.exchange'],
+  //   testPath: [
+  //     ':nth-match(div.MuiBox-root input[type="checkbox"],1)',
+  //     ':nth-match(div.MuiBox-root input[type="checkbox"],2)',
+  //     ':text-is("Confirm")',
+  //     ':text-is("Connect Wallet")',
+  //   ],
+  //   walletsForProvider: {
+  //     [IInjectedProviderNames.ethereum]: [
+  //       {
+  //         ...basicWalletInfo['metamask'],
+  //         findIconAndName({ name }) {
+  //           return findIconAndNameDirectly(
+  //             '#connect-METAMASK img',
+  //             '#connect-METAMASK div.optionHeader',
+  //             name,
+  //           );
+  //         },
+  //       },
+  //       {
+  //         ...basicWalletInfo['walletconnect'],
+  //         findIconAndName({ name }) {
+  //           return findIconAndNameDirectly(
+  //             '#connect-WALLET_CONNECT img',
+  //             '#connect-WALLET_CONNECT div.optionHeader',
+  //             name,
+  //           );
+  //         },
+  //       },
+  //     ],
+  //   },
+  // },
   {
-    urls: ['quickswap.exchange'],
+    urls: ['www.saucerswap.finance'],
     testPath: [
-      ':nth-match(div.MuiBox-root input[type="checkbox"],1)',
-      ':nth-match(div.MuiBox-root input[type="checkbox"],2)',
-      ':text-is("Confirm")',
-      ':text-is("Connect Wallet")',
+      ':text("Connect Wallet")',
+      ':text("read to the end.")',
+      'input.PrivateSwitchBase-input',
+      'button:has-text("OK")',
     ],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
           ...basicWalletInfo['metamask'],
-          findIconAndName({ name }) {
-            return findIconAndNameDirectly(
-              '#connect-METAMASK img',
-              '#connect-METAMASK div.optionHeader',
-              name,
-            );
-          },
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName({ name }) {
-            return findIconAndNameDirectly(
-              '#connect-WALLET_CONNECT img',
-              '#connect-WALLET_CONNECT div.optionHeader',
-              name,
-            );
-          },
-        },
-      ],
-    },
-  },
-  {
-    urls: ['www.saucerswap.finance'],
-    skip: true, //TODO:暂时不支持滚动
-    walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [
-        {
-          ...basicWalletInfo['metamask'],
           container: () =>
-            getConnectWalletModalByTitle('div.MuiPaper-root[role="dialog"]', 'Pair Wallet'),
+            getConnectWalletModalByTitle('div.MuiPaper-root[role="dialog"]', 'Connect Wallet'),
         },
       ],
     },
@@ -1019,30 +1050,32 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['www.ankr.com'],
-    testPath: [':text("Sign in")', ':text("Continue with ETH Wallet")'],
-    skip: {
-      mobile: true, //WARN: mobile is not supported by the site .
+    testUrls: ['www.ankr.com/staking/stake/'],
+    testPath: {
+      mobile: ['header button.MuiButtonBase-root', ':text("Connect wallet")'],
+      desktop: [':text("Connect wallet")'],
     },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
           ...basicWalletInfo['metamask'],
           container: () =>
-            getConnectWalletModalByTitle('div[role="dialog"]', 'Continue with Ethereum Wallet'),
+            getConnectWalletModalByTitle('div[role="dialog"]', 'Connect wallet to continue'),
         },
       ],
     },
   },
   {
     urls: ['dapp.chainge.finance'],
-    skip: {
-      mobile: true, //WARN: mobile is not supported by the site
-    },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
           ...basicWalletInfo['metamask'],
-          container: () => getConnectWalletModalByTitle('div[style*="right:"]', 'Connect a wallet'),
+          container: () =>
+            getConnectWalletModalByTitle('div[style*="opacity: 1"]', 'Connect your wallet'),
+          afterUpdate(textNode, img) {
+            textNode.parentElement && (textNode.parentElement.style.textAlign = 'center');
+          },
         },
       ],
     },
@@ -1060,8 +1093,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.carbondefi.xyz'],
-    testPath: ['button:text("Accept All Cookies")', 'button:text("Connect Wallet")'],
-    // skip: true, //TODO:bug:未触发弹窗
+    testPath: ['button:has-text("Accept All Cookies")', 'header button:has-text("Connect Wallet")'],
 
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
@@ -1115,8 +1147,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.alexlab.co'],
-    testPath: [':text("Accept")', ':text("Connect stacks wallet")'],
-
+    testPath: [':text("Accept")', '[role="button"]:text("Connect Wallet")'],
     walletsForProvider: {
       [IInjectedProviderNames.btc]: [
         {
@@ -1129,14 +1160,13 @@ export const sitesConfig: SitesInfo[] = [
   {
     urls: ['www.benddao.xyz'],
     testPath: ['button.sc-bdvvtL.oDzIq'],
-    skip: true, //TODO:bug: onekey injected provider 没有运行
     walletsForProvider: {
-      [IInjectedProviderNames.btc]: [
-        {
-          ...basicWalletInfo['unisat'], //WARN:已经下线了
-          container: 'button#unisat-btc',
-        },
-      ],
+      // [IInjectedProviderNames.btc]: [
+      //   {
+      //     ...basicWalletInfo['unisat'], //WARN:已经下线了
+      //     container: 'button#unisat-btc',
+      //   },
+      // ],
       [IInjectedProviderNames.ethereum]: [
         {
           ...basicWalletInfo['metamask'],
@@ -1148,7 +1178,7 @@ export const sitesConfig: SitesInfo[] = [
   {
     urls: ['pro.apex.exchange'],
     skip: {
-      mobile: true, //TODO: not supported by the site
+      mobile: true, // not supported by the site
     },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
@@ -1286,9 +1316,7 @@ export const sitesConfig: SitesInfo[] = [
   // },
   {
     urls: ['app.init.capital'],
-    testPath: [':text("Do not show")', ':text("Continue")', ':text("Connect Wallet")'],
-    skip: true, //TODO:点不动
-
+    testPath: ['button:has-text("Continue")', ':text("Connect Wallet")'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
     },
@@ -1425,6 +1453,12 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.degate.com'],
+    testPath: async (page) => {
+      const frame = page.locator('iframe').contentFrame();
+      const targetElement = frame.locator('button:has-text("Connect Wallet")').first();
+      await targetElement.click();
+    },
+    testUrls: ['app.degate.com/trade/USDC/ETH'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -1601,15 +1635,12 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.gmx.io'],
-
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
     },
   },
-  //TODO:
   {
     urls: ['link3.to'],
-
     skip: {
       mobile: true, //WARN: mobile is not supported by the site
     },
@@ -1627,30 +1658,34 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['synapseprotocol.com'],
+    testPath: {
+      mobile: ['button[data-test-id="mobile-navbar-button"]', ':text("Connect Wallet")'],
+      desktop: [':text("Connect Wallet")'],
+    },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
     },
   },
-  {
-    urls: ['ambient.finance'],
-    testPath: {
-      desktop: [':text("Connect Wallet")', 'button:text("Agree")'],
-      mobile: [':text("Connect")', 'button:text("Agree")'], //TODO:点击不了Agree.
-    },
-    walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [
-        {
-          ...basicWalletInfo['metamask'],
-          container: 'button[aria-label*="connect to MetaMask"][class*="WalletButton_container"]',
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container:
-            'button[aria-label*="connect to WalletConnect"][class*="WalletButton_container"]',
-        },
-      ],
-    },
-  },
+  // {
+  //   urls: ['ambient.finance'],
+  //   testPath: {
+  //     desktop: [':text("Connect Wallet")', 'button:text("Agree")'],
+  //     mobile: [':text("Connect")', 'button:text("Agree")'],
+  //   },
+  //   walletsForProvider: {
+  //     [IInjectedProviderNames.ethereum]: [
+  //       {
+  //         ...basicWalletInfo['metamask'],
+  //         container: 'button[aria-label*="connect to MetaMask"][class*="WalletButton_container"]',
+  //       },
+  //       {
+  //         ...basicWalletInfo['walletconnect'],
+  //         container:
+  //           'button[aria-label*="connect to WalletConnect"][class*="WalletButton_container"]',
+  //       },
+  //     ],
+  //   },
+  // },
   {
     urls: ['app.hydroprotocol.finance'],
     walletsForProvider: {
@@ -2211,7 +2246,7 @@ export const sitesConfig: SitesInfo[] = [
     },
   },
   {
-    urls: ['pancakeswap.finance', 'app.pancakeswap.finance', 'www.pancakeswap.finance'],
+    urls: ['pancakeswap.finance', 'www.pancakeswap.finance'],
     skip: {
       mobile: true, //temp skip for lack walletconnect
     },
@@ -2467,7 +2502,13 @@ export const sitesConfig: SitesInfo[] = [
   {
     urls: ['blast.io'],
     testUrls: ['blast.io/zh-CN/bridge'],
-    testPath: [':text("Jackpot deck")', ":text('连接钱包')"],
+    testPath: async (page) => {
+      await page.locator(':text("Check your")').click();
+      await page.evaluate(function () {
+        document.querySelector('body')?.click();
+      });
+      await page.locator(":text('连接钱包')").click();
+    },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -2479,13 +2520,14 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.ichi.org'],
-    skip: true, //TODO:loading is too slow ,and no response to click
+    testPath: ['button:text("Connect Wallet")'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
     },
   },
   {
     urls: ['klayswap.com'],
+    testPath: ['button:text("Confirm")', ':text("Connect Wallet")'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -2699,11 +2741,11 @@ export const sitesConfig: SitesInfo[] = [
             const modal = modals?.[modals.length - 1] as HTMLElement;
             return modal
               ? findIconAndNameDirectly(
-                  'img[src*="wallet-MetaMask"]',
-                  'auto-search-text',
-                  name,
-                  modal,
-                )
+                'img[src*="wallet-MetaMask"]',
+                'auto-search-text',
+                name,
+                modal,
+              )
               : null;
           },
         },
@@ -2797,11 +2839,11 @@ export const sitesConfig: SitesInfo[] = [
             const modal = document.querySelector('div[role="presentation"].MuiModal-root');
             return modal
               ? findIconAndNameDirectly(
-                  'img[src*="static/media/1.eb7cbbcbf"]',
-                  'auto-search-text',
-                  name,
-                  modal as HTMLElement,
-                )
+                'img[src*="static/media/1.eb7cbbcbf"]',
+                'auto-search-text',
+                name,
+                modal as HTMLElement,
+              )
               : null;
           },
         },
@@ -2811,11 +2853,11 @@ export const sitesConfig: SitesInfo[] = [
             const modal = document.querySelector('div[role="presentation"].MuiModal-root');
             return modal
               ? findIconAndNameDirectly(
-                  'img[src*="static/media/2.cb9826961cbcd25676"]',
-                  'auto-search-text',
-                  name,
-                  modal as HTMLElement,
-                )
+                'img[src*="static/media/2.cb9826961cbcd25676"]',
+                'auto-search-text',
+                name,
+                modal as HTMLElement,
+              )
               : null;
           },
         },
@@ -2882,9 +2924,9 @@ export const sitesConfig: SitesInfo[] = [
             const img = text?.parentElement?.parentElement?.querySelector('img');
             return img && text
               ? {
-                  textNode: text,
-                  iconNode: img,
-                }
+                textNode: text,
+                iconNode: img,
+              }
               : null;
           },
           afterUpdate(textNode, img) {
@@ -2907,9 +2949,9 @@ export const sitesConfig: SitesInfo[] = [
             const img = text?.parentElement?.parentElement?.querySelector('img');
             return img && text
               ? {
-                  textNode: text,
-                  iconNode: img,
-                }
+                textNode: text,
+                iconNode: img,
+              }
               : null;
           },
           afterUpdate(textNode, img) {
@@ -3264,7 +3306,6 @@ export const sitesConfig: SitesInfo[] = [
       desktop: [':text("AGREE AND CONTINUE")', ':text("CONNECT WALLET")'],
       mobile: [":text('Connect your wallet')"],
     },
-    only: true,
 
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
@@ -3277,7 +3318,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['bsquared.boolbridge.com'],
-    testPath: [':text("Connect Wallet")', '.connect-button:nth-child(1)'],
+    testPath: ['.homepage button:has-text("Connect Wallet")'],
     walletsForProvider: {
       [IInjectedProviderNames.btc]: [
         {

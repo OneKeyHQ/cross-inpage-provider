@@ -14,7 +14,7 @@ async function dbg(locator: Locator) {
 }
 test.describe('Connect Button Hack', () => {
   console.log('total sites:', sitesConfig.length);
-  const startWebSite = 'app.ichi.org';
+  const startWebSite = 'app.turbos.finance';
   const startIdx = sitesConfig.findIndex((e) => e.urls.includes(startWebSite));
   const availableSites = sitesConfig.slice(startIdx == -1 ? 0 : startIdx);
   const sitesOnly = availableSites.filter((e) => e.only);
@@ -33,7 +33,7 @@ test.describe('Connect Button Hack', () => {
       test(url, async ({ page }, testInfo) => {
         const { project: { name }, } = testInfo;
         const index = sitesConfig.findIndex((e) => e.urls.includes(url));
-        testInfo['index']=index;
+        testInfo['index'] = index;
         const device = name.includes('Mobile') ? 'mobile' : 'desktop';
         if (typeof skip === 'object' && skip !== null && skip[device] === true) {
           return;
@@ -41,20 +41,29 @@ test.describe('Connect Button Hack', () => {
         page.on('console', (msg) => {
           console.log(`[chrome-devtool]: ${msg.text()}`);
         });
-        const actualPath = Array.isArray(testPath) ? testPath : testPath[device] || [];
-
         await page.goto(`https://${url}`, { waitUntil: 'domcontentloaded' });
-        for (const seg of actualPath) {
-          const locator = page.locator(seg).and(page.locator(':visible')).first();
-          await dbg(locator);
-          await locator.click();
+        if (typeof testPath === 'function') {
+          await testPath(page);
+        } else {
+          const actualPath = Array.isArray(testPath) ? testPath : testPath[device] || [];
+          for (const seg of actualPath) {
+            const locator = page.locator(seg).and(page.locator(':visible')).first();
+            await dbg(locator);
+            await locator.click();
+          }
         }
 
-        const pass:boolean[]=[];
+        const pass: boolean[] = [];
         for (const [provider, wallets = []] of Object.entries(walletsForProvider)) {
           for (const { updatedName, skip } of wallets) {
-            const skipThisWalletOnDevice = typeof skip === 'object' && skip !== null && skip[device] === true
-            if (skipThisWalletOnDevice || skip) {
+            if(typeof skip === 'boolean' && skip){
+              continue;
+            }
+            if(typeof skip === 'function' && await skip(page)){
+              continue;
+            }
+            const skipThisWalletOnDevice = typeof skip === 'object' && skip !== null && (skip[device] === true );
+            if (skipThisWalletOnDevice ) {
               continue;
             }
             const walletId = createWalletId(provider as IInjectedProviderNames, updatedName);
@@ -70,7 +79,7 @@ test.describe('Connect Button Hack', () => {
     }
   }
   //@ts-ignore
-  test.afterEach(async ({ page }, { project: { name },status, index }) => {
+  test.afterEach(async ({ page }, { project: { name }, status, index }) => {
     const isMobile = name.includes('Mobile');
     const host = page.url().split('/')[2] || 'passed';
     await page.screenshot({

@@ -8,5 +8,7 @@ node_modules/
 /tests/reports/
 */**/*.log
 */**/screenshots/
+*/**/screenshots-1/
+
 */**/reports/
 reports/

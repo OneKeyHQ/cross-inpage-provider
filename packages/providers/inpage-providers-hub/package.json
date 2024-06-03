@@ -47,5 +47,10 @@
     "@onekeyfe/onekey-tron-provider": "2.0.0-alpha.9",
     "@onekeyfe/onekey-webln-provider": "2.0.0-alpha.9",
     "web3": "^1.7.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.43.1",
+    "@types/node": "^20.12.7",
+    "playwright": "^1.43.1"
   }
 }

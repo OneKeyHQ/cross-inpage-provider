@@ -4,8 +4,7 @@ import { findIconAndNameByParent, findIconAndNameDirectly } from './findIconAndN
 import { findWalletIconByParent, isWalletIconSizeMatch, replaceIcon } from './imgUtils';
 import { findIconAndNameInShadowRoot } from './shadowRoot';
 import { ConstraintFn, FindResultType, Selector } from './type';
-import type { Page } from '@playwright/test';
-
+import type { Page } from 'playwright/test'
 import {
   getConnectWalletModalByTitle,
   getMaxWithOfText,

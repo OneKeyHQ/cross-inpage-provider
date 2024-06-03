@@ -180,7 +180,7 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('starcoin', starcoin);
   defineWindowProperty('aptos', martian);
   defineWindowProperty('petra', martian, { enumerable: true });
-  defineWindowProperty('martian', martianProxy);
+  defineWindowProperty('martian', martianProxy, { enumerable: true });
   defineWindowProperty('conflux', conflux);
   defineWindowProperty('tronLink', tron);
   defineWindowProperty('suiWallet', sui);

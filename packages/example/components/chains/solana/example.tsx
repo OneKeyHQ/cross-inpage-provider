@@ -2,7 +2,7 @@
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
 import { useMemo, useRef } from 'react';
-import { get } from 'lodash-es';
+import { get, set } from 'lodash-es';
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import { useWallet } from '../../../components/connect/WalletContext';
@@ -65,6 +65,10 @@ export default function Example() {
     };
   };
 
+  const onDisconnectWallet = async () => {
+    await provider?.disconnect();
+  };
+
   return (
     <>
       <ConnectButton<IProviderApi>
@@ -79,11 +83,12 @@ export default function Example() {
           );
         }}
         onConnect={onConnectWallet}
+        onDisconnect={onDisconnectWallet}
       />
 
       <ApiGroup title="Basics">
         <ApiPayload
-          title="Conenct Wallet"
+          title="connect"
           description="连接钱包并获取公钥"
           disableRequestContent
           onExecute={async (request: string) => {
@@ -176,7 +181,7 @@ export default function Example() {
           }}
         />
         <ApiPayload
-          title="signVersionedTransaction"
+          title="signTransaction (Versioned)"
           description="签署 Versioned 交易"
           presupposeParams={params.signAndSendTransaction(account?.publicKey)}
           onExecute={async (request: string) => {
@@ -200,7 +205,7 @@ export default function Example() {
           }}
         />
         <ApiPayload
-          title="signMultipleTransactions"
+          title="signAllTransactions"
           description="签署多个交易"
           presupposeParams={params.signMultipleTransaction(account?.publicKey)}
           onExecute={async (request: string) => {

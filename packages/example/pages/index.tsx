@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import { Tree } from 'react-arborist';
 import * as uuid from 'uuid';
 import { Button } from '../components/ui/button';
-import { registeredChains, thirdPartyChains } from '../components/chains';
+import { registeredChains, thirdPartyChains } from './chains';
 
 const data: ITreeNodeData[] = [
   {

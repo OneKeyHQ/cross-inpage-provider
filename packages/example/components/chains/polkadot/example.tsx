@@ -23,7 +23,7 @@ import { toast } from '../../ui/use-toast';
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([]);
 
-  const { provider, account } = useWallet<IProviderApi>();
+  const { provider, setAccount, account } = useWallet<IProviderApi>();
 
   const [api, setApi] = useState<ApiPromise>();
 
@@ -68,6 +68,32 @@ export default function Example() {
       address: account.address,
     };
   };
+
+  const listenerRef = useRef<() => void>();
+  useEffect(() => {
+    if (!api) {
+      return;
+    }
+    void web3AccountsSubscribe((accounts) => {
+      console.log('polkadot web3AccountsSubscribe', accounts);
+      
+      if (accounts.length === 0) {
+        return;
+      }
+      const [account] = accounts;
+      setAccount({
+        address: account.address,
+        name: account.meta?.name,
+        provider: provider,
+      });
+    }).then((listener) => {
+      listenerRef.current = listener;
+    });
+
+    return () => {
+      listenerRef.current?.();
+    };
+  }, [api, provider, setAccount]);
 
   return (
     <>

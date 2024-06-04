@@ -5,6 +5,17 @@ export default {
     'message': 'Hello World',
     'signature': '0x1',
   },
+  'requestMothed': [
+    {
+      'id': 'request',
+      'name': 'request',
+      'description': 'request eth mothed',
+      'value': JSON.stringify({
+        'method': 'eth_requestAccounts',
+        'params': [],
+      }),
+    },
+  ],
   'requestPermissions': [
     {
       'id': 'eth_accounts',
@@ -153,6 +164,17 @@ export default {
       'name': 'eth_sign',
       'description': 'personalSign',
       'value': '0x01',
+    },
+  ],
+  personalEcRecover: [
+    {
+      'id': 'eth_sign',
+      'name': 'eth_sign',
+      'description': 'personalSign',
+      'value': JSON.stringify({
+        'message': '0x01',
+        'signature': '把 personal_sign 的执行结果放在这里',
+      }),
     },
   ],
   signTypedData: [

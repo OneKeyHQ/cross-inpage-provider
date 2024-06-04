@@ -28,16 +28,15 @@ export const thirdPartyChains: IChainInfo[] = [
     href: 'https://metamask.github.io/test-dapp',
     icon: 'https://uni.onekey-asset.com/static/chain/eth.png',
   },
-  {
-    id: uuid.v4(),
-    name: 'NEAR ref-ui',
-    href: 'https://dapp-near-ref-ui.onekeytest.com',
-    target: '_blank',
-    icon: 'https://uni.onekey-asset.com/static/chain/near.png',
-  },
 ];
 
 export const registeredChains: IChainInfo[] = [
+  {
+    id: uuid.v4(),
+    name: 'Algo',
+    href: '/algo',
+    icon: 'https://uni.onekey-asset.com/static/chain/algo.png',
+  },
   {
     id: uuid.v4(),
     name: 'Algo WalletConnect',
@@ -68,18 +67,7 @@ export const registeredChains: IChainInfo[] = [
     href: '/btcBabylon',
     icon: 'https://uni.onekey-asset.com/static/chain/btc.png',
   },
-  {
-    id: uuid.v4(),
-    name: 'BTC Lightning Network',
-    href: '/webln',
-    icon: 'https://uni.onekey-asset.com/static/chain/lnd.png',
-  },
-  {
-    id: uuid.v4(),
-    name: 'BTC Nostr',
-    href: '/nostr',
-    icon: 'https://uni.onekey-asset.com/static/chain/nostr.png',
-  },
+
   {
     id: uuid.v4(),
     name: 'Cardano',
@@ -104,7 +92,18 @@ export const registeredChains: IChainInfo[] = [
     href: '/ethereum',
     icon: 'https://uni.onekey-asset.com/static/chain/eth.png',
   },
-
+  {
+    id: uuid.v4(),
+    name: 'Lightning Network',
+    href: '/webln',
+    icon: 'https://uni.onekey-asset.com/static/chain/lnd.png',
+  },
+  {
+    id: uuid.v4(),
+    name: 'Nostr',
+    href: '/nostr',
+    icon: 'https://uni.onekey-asset.com/static/chain/nostr.png',
+  },
   // {
   //   id: uuid.v4(),
   //   name: 'NEAR',

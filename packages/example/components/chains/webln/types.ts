@@ -11,8 +11,12 @@ export interface GetInfoResponse {
 
 export interface IProviderApi {
   isOneKey?: boolean;
+  on(event: string, listener: (...args: any[]) => void): this;
+  off(event: string, listener: (...args: any[]) => void): this;
   enable(): Promise<void>;
+  lnurl(lnurl: string): Promise<void>;
   getInfo(): Promise<GetInfoResponse>;
+  getBalance(): Promise<any>;
   signMessage(message: string): Promise<{
     message: string;
     signature: string;

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { get, isEmpty } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
@@ -15,6 +15,7 @@ import { Input } from '../../ui/input';
 import { createPSBT } from './utils';
 import * as bitcoin from 'bitcoinjs-lib';
 
+// https://docs.unisat.io/dev/unisat-developer-center/unisat-wallet
 export default function BTCExample() {
   const walletsRef = useRef<IProviderInfo[]>([
     {
@@ -29,7 +30,7 @@ export default function BTCExample() {
     },
   ]);
 
-  const { provider, account } = useWallet<IProviderApi>();
+  const { provider, setAccount, account } = useWallet<IProviderApi>();
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -50,12 +51,46 @@ export default function BTCExample() {
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, no-unsafe-optional-chaining
     const [address] = await provider?.requestAccounts();
+    const network = await provider?.getNetwork();
 
     return {
       provider,
       address,
+      chainId: network,
     };
   };
+
+  useEffect(() => {
+    const accountsChangedHandler = (accounts: string[]) => {
+      console.log('accountsChanged', accounts);
+
+      if (accounts.length) {
+        setAccount({
+          ...account,
+          address: accounts[0],
+        });
+      }
+    };
+
+    const networkChangedHandler = (network: string) => {
+      console.log('networkChanged', network);
+
+      if (network) {
+        setAccount({
+          ...account,
+          chainId: network,
+        });
+      }
+    };
+
+    provider?.on('accountsChanged', accountsChangedHandler);
+    provider?.on('networkChanged', networkChangedHandler);
+
+    return () => {
+      provider?.removeListener('accountsChanged', accountsChangedHandler);
+      provider?.removeListener('networkChanged', networkChangedHandler);
+    };
+  }, [account, provider, setAccount]);
 
   return (
     <>
@@ -75,7 +110,7 @@ export default function BTCExample() {
 
       <ApiGroup title="Basics">
         <ApiPayload
-          title="RequestAccounts"
+          title="requestAccounts"
           description="请求连接 Wallet 获取账户"
           disableRequestContent
           onExecute={async (request: string) => {
@@ -85,7 +120,7 @@ export default function BTCExample() {
         />
 
         <ApiPayload
-          title="GetAccounts"
+          title="getAccounts"
           description="获取当前账户地址"
           disableRequestContent
           onExecute={async () => {
@@ -94,7 +129,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="GetPublicKey"
+          title="getPublicKey"
           description="获取当前账户公钥"
           disableRequestContent
           onExecute={async () => {
@@ -103,7 +138,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="GetBalance"
+          title="getBalance"
           description="获取当前账户余额"
           disableRequestContent
           onExecute={async () => {
@@ -112,7 +147,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="GetNetwork"
+          title="getNetwork"
           description="获取当前网络"
           disableRequestContent
           onExecute={async () => {
@@ -121,7 +156,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="SwitchNetwork"
+          title="switchNetwork"
           description="切换当前网络"
           presupposeParams={params.switchNetwork}
           onExecute={async (request: string) => {
@@ -133,7 +168,7 @@ export default function BTCExample() {
 
       <ApiGroup title="Sign Message">
         <ApiPayload
-          title="SignMessage"
+          title="signMessage"
           description="签名消息"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
@@ -157,7 +192,7 @@ export default function BTCExample() {
 
       <ApiGroup title="Transaction">
         <ApiPayload
-          title="SendBitcoin"
+          title="sendBitcoin"
           description="发送交易"
           presupposeParams={params.sendBitcoin(account?.address ?? '')}
           onExecute={async (request: string) => {

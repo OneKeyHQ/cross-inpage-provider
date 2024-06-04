@@ -86,13 +86,13 @@ export function RequestEditor({
 }
 
 export type IResultDisplayProps = {
-  result: string | undefined;
+  result?: string | undefined;
   validateResult?: string;
 };
 export function ResultDisplay({ result, validateResult }: IResultDisplayProps) {
   return (
     <div className="flex flex-col gap-2">
-      <ResultTextArea label="执行结果" content={result} />
+      {result !== undefined && <ResultTextArea label="执行结果" content={result} />}
       {validateResult !== undefined && <ResultTextArea label="验证结果" content={validateResult} />}
     </div>
   );
@@ -106,7 +106,7 @@ export function ResultTextArea({ label, content }: IResultTextAreaProps) {
   return (
     <div className="flex flex-col">
       <div className="flex flex-row justify-between items-center">
-        <span className="text-base font-medium">执行结果</span>
+        <span className="text-base font-medium">{label}</span>
         <Button
           variant="link"
           size="sm"

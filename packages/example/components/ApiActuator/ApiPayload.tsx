@@ -7,7 +7,7 @@ import {
   IPresupposeParamsSelectorProps,
   PresupposeParamsSelector,
 } from './PresupposeParamsSelector';
-import { IRequestEditorProps, RequestEditor, ResultDisplay } from './RequestEditor';
+import { IRequestEditorProps, RequestEditor, ResultDisplay, ResultTextArea } from './RequestEditor';
 import { Button } from '../ui/button';
 import { ApiPayloadProvider, useApiPayload } from './ApiPayloadProvider';
 
@@ -160,12 +160,12 @@ function ExecuteResultDisplay() {
   const { state } = useApiPayload();
   const { result } = state;
 
-  return <ResultDisplay result={result} />;
+  return <ResultTextArea label="执行结果" content={result} />;
 }
 
 function ValidateResultDisplay() {
   const { state } = useApiPayload();
   const { validateResult } = state;
 
-  return <ResultDisplay result={validateResult} />;
+  return <ResultTextArea label="验证结果" content={validateResult} />;
 }

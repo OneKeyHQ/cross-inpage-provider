@@ -14,6 +14,7 @@ import { useConnection, useWallet as useSolWallet } from '@solana/wallet-adapter
 import InfoLayout from '../../../components/InfoLayout';
 import { createTransferTransaction, createVersionedTransaction } from '../solana/builder';
 import { jsonToUint8Array } from '../../../lib/uint8array';
+import { verifySignIn } from '@solana/wallet-standard-util';
 import nacl from 'tweetnacl';
 
 function Example() {
@@ -23,10 +24,13 @@ function Example() {
   const {
     connected,
     publicKey,
+    wallet,
+    disconnect,
     signMessage,
     signTransaction,
     signAllTransactions,
     sendTransaction,
+    signIn,
   } = useSolWallet();
 
   useEffect(() => {
@@ -37,14 +41,65 @@ function Example() {
     }
   }, [connected, setProvider]);
 
+  useEffect(() => {
+    // @ts-expect-error
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    wallet?.adapter?.wallet?.features?.['standard:events']?.on('connect', (e: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      console.log('sol connect event', e);
+    });
+    // @ts-expect-error
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    wallet?.adapter?.wallet?.features?.['standard:events']?.on('disconnect', (e) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      console.log('sol disconnect event', e);
+    });
+    // @ts-expect-error
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    wallet?.adapter?.wallet?.features?.['standard:events']?.on('accountChanged', (e) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      console.log('sol accountChanged event', e);
+    });
+    // @ts-expect-error
+  }, [wallet?.adapter?.wallet]);
+
   return (
     <>
       <WalletMultiButton />
 
       <InfoLayout title="Base Info">
-        {publicKey && <p>PublicKey: {publicKey.toBase58()}</p>}{' '}
+        {publicKey && <p>PublicKey: {publicKey.toBase58()}</p>}
+        {wallet?.adapter && <p>Wallet Name: {wallet?.adapter?.name}</p>}
+        {/* {wallet?.adapter && (
+          <p>Wallet Name: {wallet?.adapter?.wallet?.features}</p>
+        )} */}
+        {wallet?.adapter && (
+          <p>Wallet Api Version: {wallet?.adapter?.wallet?.version?.toString()}</p>
+        )}
+        {wallet?.adapter && (
+          <p>Accounts: {JSON.stringify(wallet?.adapter?.wallet?.accounts ?? [])}</p>
+        )}
+        {wallet?.adapter && (
+          <p>Support chains: {JSON.stringify(wallet?.adapter?.wallet?.chains ?? [])}</p>
+        )}
+        {wallet?.adapter && (
+          <p>
+            Wallet Icon: <img src={wallet?.adapter.icon} />
+          </p>
+        )}
       </InfoLayout>
 
+      <ApiGroup title="Basic Info">
+        <ApiPayload
+          title="disconnect"
+          description="断开链接"
+          disableRequestContent
+          onExecute={async () => {
+            const res = await disconnect();
+            return JSON.stringify(res);
+          }}
+        />
+      </ApiGroup>
       <ApiGroup title="Sign Message">
         <ApiPayload
           title="signMessage"
@@ -63,6 +118,55 @@ function Example() {
             );
 
             return Promise.resolve(isValidSignature.toString());
+          }}
+        />
+        <ApiPayload
+          title="signIn"
+          description="(不支持) Sign In With Solana EIP-4361"
+          onGenerateRequest={() => {
+            const now: Date = new Date();
+            const currentDateTime = now.toISOString();
+
+            const uri = window.location.href;
+            const currentUrl = new URL(uri);
+            const domain = currentUrl.host;
+
+            return Promise.resolve(
+              JSON.stringify({
+                domain: domain,
+                statement: 'Approve this wallet is owned by you.',
+                version: '1',
+                nonce: 'oBbLoEldZs',
+                chainId: 'solana:mainnet',
+                issuedAt: currentDateTime,
+                resources: ['https://onekey.so'],
+              }),
+            );
+          }}
+          onExecute={async (request: string) => {
+            const signInData = JSON.parse(request);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            const res = await signIn(signInData);
+            return JSON.stringify(res);
+          }}
+          onValidate={async (request: string, result: string) => {
+            const backendInput = JSON.parse(request);
+            const output = JSON.parse(result);
+
+            const backendOutput = {
+              account: {
+                publicKey: publicKey.toBuffer(),
+              },
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+              signature: new Uint8Array(Buffer.from(output.signature.data)),
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+              signedMessage: new Uint8Array(Buffer.from(output.signedMessage.data)),
+            };
+
+            // @ts-expect-error
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            const res = verifySignIn(backendInput, backendOutput);
+            return Promise.resolve(res.toString());
           }}
         />
       </ApiGroup>
@@ -116,7 +220,7 @@ function Example() {
           }}
         />
         <ApiPayload
-          title="signVersionedTransaction"
+          title="signTransaction (Versioned)"
           description="签署 Versioned 交易"
           presupposeParams={params.signAndSendTransaction(publicKey?.toBase58())}
           onExecute={async (request: string) => {
@@ -140,7 +244,7 @@ function Example() {
           }}
         />
         <ApiPayload
-          title="signMultipleTransactions"
+          title="signAllTransactions"
           description="签署多个交易"
           presupposeParams={params.signMultipleTransaction(publicKey?.toBase58() || '')}
           onExecute={async (request: string) => {

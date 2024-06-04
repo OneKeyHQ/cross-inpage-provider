@@ -13,7 +13,7 @@ import Long from 'long';
 import { MsgSend } from 'cosmjs-types/cosmos/bank/v1beta1/tx';
 import { PubKey } from 'cosmjs-types/cosmos/crypto/ed25519/keys';
 import { Any } from 'cosmjs-types/google/protobuf/any';
-import { AuthInfo, Fee, SignerInfo, TxBody, TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { AuthInfo, Fee, SignerInfo, Tx, TxBody, TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
@@ -31,6 +31,7 @@ import {
 import params, { networks } from './params';
 import { CosmosNodeClient } from './rpc';
 import { toast } from '../../ui/use-toast';
+import { BroadcastMode } from '@onekeyfe/onekey-cosmos-provider';
 
 function removeNull(obj: any): any {
   if (obj !== null && typeof obj === 'object') {
@@ -174,6 +175,21 @@ export default function Example() {
           ]}
           onExecute={async (request: string) => {
             const res = await provider?.getKey(network.id);
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="experimentalSuggestChain"
+          description="获取账户权限"
+          presupposeParams={[
+            {
+              id: 'experimentalSuggestChain',
+              name: 'experimentalSuggestChain',
+              value: network.id,
+            },
+          ]}
+          onExecute={async (request: string) => {
+            const res = await provider?.experimentalSuggestChain(network.id);
             return JSON.stringify(res);
           }}
         />
@@ -335,6 +351,15 @@ export default function Example() {
               chainId: network.id,
               accountNumber: Long.fromString(accountInfo?.account_number),
             });
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="sendTx"
+          description="sendTx"
+          onExecute={async (request: string) => {
+            const tx = hexToBytes(request);
+            const res = await provider?.sendTx(network.id, tx, BroadcastMode.Sync);
             return JSON.stringify(res);
           }}
         />

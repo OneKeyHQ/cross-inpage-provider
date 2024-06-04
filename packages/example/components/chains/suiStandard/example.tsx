@@ -48,7 +48,7 @@ function Example() {
   const wallet = useConnectWallet();
 
   const currentAccount = useCurrentAccount();
-  const { connectionStatus, isConnected } = useCurrentWallet();
+  const { currentWallet, connectionStatus, isConnected } = useCurrentWallet();
 
   const { mutateAsync: connect } = useConnectWallet();
   const { mutateAsync: signTransactionBlock } = useSignTransactionBlock();
@@ -75,6 +75,16 @@ function Example() {
         {currentAccount && <p>Account:{currentAccount?.address ?? ''}</p>}
         {currentAccount && <p>PubKey:{currentAccount?.publicKey ?? ''}</p>}
         {currentAccount && <p>ChainId:{currentAccount?.chains ?? ''}</p>}
+        {currentWallet && <p>Wallet Name:{currentWallet?.name ?? ''}</p>}
+        {currentWallet && <p>Wallet api version:{currentWallet?.version ?? ''}</p>}
+        {currentWallet && (
+          <p>Wallet Support Chains :{JSON.stringify(currentWallet?.chains ?? '')}</p>
+        )}
+        {currentWallet && (
+          <p>
+            Wallet Icon: <img src={currentWallet?.icon} />
+          </p>
+        )}
         {connectionStatus && <p>Status :{connectionStatus}</p>}
       </InfoLayout>
 

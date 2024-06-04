@@ -7,4 +7,5 @@ export const DEFAULT_APP_METADATA = {
 };
 
 export const DEFAULT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID;
-export const DEFAULT_RELAY_URL = process.env.NEXT_PUBLIC_WALLET_CONNECT_RELAY_URL;
+export const DEFAULT_RELAY_URL =
+  process.env.NEXT_PUBLIC_WALLET_CONNECT_RELAY_URL || 'wss://relay.walletconnect.com';

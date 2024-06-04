@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../connect/ConnectButton';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { get, isEmpty } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
@@ -29,7 +29,7 @@ export default function BTCExample() {
     },
   ]);
 
-  const { provider, account } = useWallet<IProviderApi>();
+  const { provider, setAccount, account } = useWallet<IProviderApi>();
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -56,6 +56,38 @@ export default function BTCExample() {
       address,
     };
   };
+
+  useEffect(() => {
+    const accountsChangedHandler = (accounts: string[]) => {
+      console.log('accountsChanged', accounts);
+
+      if (accounts.length) {
+        setAccount({
+          ...account,
+          address: accounts[0],
+        });
+      }
+    };
+
+    const networkChangedHandler = (network: string) => {
+      console.log('networkChanged', network);
+
+      if (network) {
+        setAccount({
+          ...account,
+          chainId: network,
+        });
+      }
+    };
+
+    provider?.on('accountsChanged', accountsChangedHandler);
+    provider?.on('networkChanged', networkChangedHandler);
+
+    return () => {
+      provider?.removeListener('accountsChanged', accountsChangedHandler);
+      provider?.removeListener('networkChanged', networkChangedHandler);
+    };
+  }, [account, provider, setAccount]);
 
   return (
     <>

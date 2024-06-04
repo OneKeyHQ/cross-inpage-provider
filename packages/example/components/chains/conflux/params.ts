@@ -1,6 +1,36 @@
 const chainIdInt = 1;
 
 export default {
+  'requestPermissions': [
+    {
+      'id': 'cfx_accounts',
+      'name': 'cfx_accounts',
+      'description': '请求权限',
+      'value': JSON.stringify({
+        'cfx_accounts': {},
+      }),
+    },
+    {
+      'id': 'cfx_accounts and cfx_chainId',
+      'name': 'cfx_accounts cfx_chainId',
+      'description': '请求权限',
+      'value': JSON.stringify({
+        'cfx_accounts': {},
+        'cfx_chainId': {},
+      }),
+    },
+  ],
+  'requestMothed': [
+    {
+      'id': 'request',
+      'name': 'request',
+      'description': 'request eth mothed',
+      'value': JSON.stringify({
+        'method': 'cfx_requestAccounts',
+        'params': [],
+      }),
+    },
+  ],
   addConfluxChain: [
     {
       id: 'wallet_addConfluxChain',
@@ -121,7 +151,7 @@ export default {
         'value': JSON.stringify({
           from: from,
           to: to,
-          value: '0x01'
+          value: '0x01',
         }),
       },
       {

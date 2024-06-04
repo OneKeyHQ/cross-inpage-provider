@@ -14,12 +14,12 @@ export default function Example() {
     {
       uuid: 'injected',
       name: 'Injected Wallet',
-      inject: 'solana',
+      inject: 'algorand',
     },
     {
       uuid: 'injected-onekey',
       name: 'Injected OneKey',
-      inject: '$onekey.solana',
+      inject: '$onekey.algorand',
     },
   ]);
 
@@ -35,11 +35,11 @@ export default function Example() {
     const provider = get(window, providerDetail.inject) as IProviderApi | undefined;
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, no-unsafe-optional-chaining
-    const { publicKey } = await provider?.connect();
+    const { accounts } = await provider?.enable();
 
     return {
       provider,
-      address: publicKey.toBase58(),
+      address: accounts[0],
     };
   };
 
@@ -51,7 +51,7 @@ export default function Example() {
             walletsRef.current.map((wallet) => {
               return {
                 id: wallet.uuid,
-                name: wallet.name,
+                name: wallet.inject ? wallet.name : `${wallet.name} (EIP6963)`,
               };
             }),
           );
@@ -61,10 +61,10 @@ export default function Example() {
 
       <ApiGroup title="Basics">
         <ApiPayload
-          title="getPublicKey"
+          title="enable"
           description="获取账户权限"
           onExecute={async (request: string) => {
-            const res = await provider?.connect();
+            const res = await provider?.enable();
             return JSON.stringify(res);
           }}
         />

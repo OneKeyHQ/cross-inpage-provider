@@ -27,7 +27,7 @@ export default function BTCExample() {
     },
   ]);
 
-  const { provider, account } = useWallet<IProviderApi>();
+  const { provider, setAccount, account } = useWallet<IProviderApi>();
   const [receiveAddress, setReceiveAddress] = useState<string>('');
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
@@ -59,9 +59,11 @@ export default function BTCExample() {
       }
     }
 
+    const [address] = await provider.request<string[]>({ method: 'tron_accounts' });
     return {
       provider,
-      address: tronWeb.defaultAddress.base58,
+      // address: tronWeb.defaultAddress.base58,
+      address: address,
     };
   };
 
@@ -82,6 +84,41 @@ export default function BTCExample() {
       throw new Error('Invalid Address');
     }
   };
+
+  useEffect(() => {
+    const accountsChangedHandler = (e: {
+      data: {
+        isTronLink: boolean;
+        message: {
+          action: string;
+          data: any;
+        };
+      }
+    }) => {
+      console.log('tron on message', e.data);
+
+      if (e.data.message && e.data.message.action === 'accountsChanged') {
+        const { address } = e.data.message.data;
+        setAccount({
+          ...account,
+          address,
+        });
+      }
+      if (e.data.message && e.data.message.action === 'setNode') {
+        // const { address } = e.data.message.data;
+        // setAccount({
+        //   ...account,
+        //   address,
+        // });
+      }
+    };
+
+    window.addEventListener('message', accountsChangedHandler);
+
+    return () => {
+      window.removeEventListener('message', accountsChangedHandler);
+    };
+  }, [account, provider, setAccount]);
 
   return (
     <>
@@ -108,7 +145,7 @@ export default function BTCExample() {
 
       <ApiGroup title="Basics">
         <ApiPayload
-          title="RequestAccounts"
+          title="tron_requestAccounts"
           description="连接钱包"
           disableRequestContent
           onExecute={async (request: string) => {
@@ -118,9 +155,30 @@ export default function BTCExample() {
             return JSON.stringify(res);
           }}
         />
-
         <ApiPayload
-          title="GetAccounts"
+          title="tron_chainid"
+          description="获取链 ID"
+          disableRequestContent
+          onExecute={async () => {
+            const res = await provider?.request<string>({
+              method: 'tron_chainid',
+            });
+            return res;
+          }}
+        />
+        <ApiPayload
+          title="tron_getProviderState"
+          description="获取钱包状态"
+          disableRequestContent
+          onExecute={async () => {
+            const res = await provider?.request<string>({
+              method: 'tron_getProviderState',
+            });
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="tron_accounts"
           description="获取账户"
           disableRequestContent
           onExecute={async () => {
@@ -134,7 +192,7 @@ export default function BTCExample() {
 
       <ApiGroup title="资产相关">
         <ApiPayload
-          title="Add Token"
+          title="wallet_watchAsset"
           description="添加 TRC20 资产"
           presupposeParams={params.addToken}
           onExecute={async (request: string) => {
@@ -199,7 +257,7 @@ export default function BTCExample() {
       </ApiGroup>
       <ApiGroup title="Transfer">
         <ApiPayload
-          title="NativeTransfer"
+          title="sign (NativeTransfer)"
           description="发送普通交易"
           presupposeParams={params.nativeTransfer(receiveAddress ?? '')}
           onExecute={async (request: string) => {
@@ -220,7 +278,7 @@ export default function BTCExample() {
         />
 
         <ApiPayload
-          title="SmartContractTransfer"
+          title="sign (SmartContractTransfer)"
           description="发送合约交易"
           presupposeParams={params.contractTransfer(receiveAddress ?? '')}
           onExecute={async (request: string) => {

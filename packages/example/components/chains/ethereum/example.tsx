@@ -37,7 +37,7 @@ export default function Example() {
     },
   ]);
 
-  const { provider, account } = useWallet<IEthereumProvider>();
+  const { provider, account, setAccount } = useWallet<IEthereumProvider>();
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -103,6 +103,50 @@ export default function Example() {
     };
   }, []);
 
+  useEffect(() => {
+    const accountsChangedHandler = (accounts: string[]) => {
+      console.log('evm accountsChanged', accounts);
+
+      if (accounts.length) {
+        setAccount({
+          ...account,
+          address: accounts[0],
+        });
+      }
+    };
+
+    const chainChangedHandler = (chainId: string) => {
+      console.log('evm chainChanged', chainId);
+
+      if (chainId) {
+        setAccount({
+          ...account,
+          chainId: chainId,
+        });
+      }
+    };
+    const connectHandler = (connectInfo: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      console.log('evm connect', connectInfo);
+    };
+    const disconnectHandler = (error: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      console.log('evm disconnect', error);
+    };
+
+    provider?.on('accountsChanged', accountsChangedHandler);
+    provider?.on('chainChanged', chainChangedHandler);
+    provider?.on('connect', connectHandler);
+    provider?.on('disconnect', disconnectHandler);
+
+    return () => {
+      provider?.removeListener('accountsChanged', accountsChangedHandler);
+      provider?.removeListener('chainChanged', chainChangedHandler);
+      provider?.removeListener('connect', connectHandler);
+      provider?.removeListener('disconnect', disconnectHandler);
+    };
+  }, [account, provider, setAccount]);
+
   return (
     <>
       <ConnectButton<IEthereumProvider>
@@ -122,7 +166,7 @@ export default function Example() {
 
       <ApiGroup title="Basics">
         <ApiPayload
-          title="RequestPermissions"
+          title="wallet_requestPermissions"
           description="获取账户权限"
           presupposeParams={params.requestPermissions}
           onExecute={async (request: string) => {
@@ -134,7 +178,7 @@ export default function Example() {
           }}
         />
         <ApiPayload
-          title="RequestAccounts"
+          title="eth_requestAccounts"
           description="获取账户"
           disableRequestContent
           onExecute={async () => {
@@ -145,9 +189,8 @@ export default function Example() {
             return JSON.stringify(res);
           }}
         />
-
         <ApiPayload
-          title="RevokePermissions"
+          title="wallet_revokePermissions"
           description="删除权限（暂时不支持）"
           presupposeParams={params.revokePermissions}
           onExecute={async () => {
@@ -158,11 +201,83 @@ export default function Example() {
             return JSON.stringify(res);
           }}
         />
+        <ApiPayload
+          title="eth_coinbase"
+          description="返回 coinbase 地址"
+          disableRequestContent
+          onExecute={async (request) => {
+            const res = await provider?.request({
+              'method': 'eth_coinbase',
+              'params': [],
+            });
+            return res as string;
+          }}
+        />
+        <ApiPayload
+          title="eth_accounts"
+          description="返回地址"
+          disableRequestContent
+          onExecute={async (request) => {
+            const res = await provider?.request({
+              'method': 'eth_accounts',
+              'params': [],
+            });
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="eth_chainId"
+          description="返回 chainId"
+          disableRequestContent
+          onExecute={async (request) => {
+            const res = await provider?.request({
+              'method': 'eth_chainId',
+              'params': [],
+            });
+            return res as string;
+          }}
+        />
+        <ApiPayload
+          title="net_version"
+          description="返回 net version"
+          disableRequestContent
+          onExecute={async (request) => {
+            const res = await provider?.request({
+              'method': 'net_version',
+              'params': [],
+            });
+            return res as string;
+          }}
+        />
+        <ApiPayload
+          title="isConnected"
+          description="isConnected"
+          disableRequestContent
+          allowCallWithoutProvider
+          onExecute={async (request: string) => {
+            // @ts-expect-error
+            const res = (await provider?.isConnected()) ?? false;
+            return res as string;
+          }}
+        />
+        <ApiPayload
+          title="request"
+          description="request 调用 eth 各种 RPC 方法"
+          presupposeParams={params.requestMothed}
+          onExecute={async (request: string) => {
+            const requestObj = JSON.parse(request);
+            const res = await provider?.request({
+              method: requestObj.method,
+              params: requestObj.params,
+            });
+            return JSON.stringify(res);
+          }}
+        />
       </ApiGroup>
 
       <ApiGroup title="Chain">
         <ApiPayload
-          title="AddEthereumChain"
+          title="wallet_addEthereumChain"
           description="(暂时不支持) 添加 Chain"
           presupposeParams={params.addEthereumChain}
           onExecute={async (request: string) => {
@@ -174,7 +289,7 @@ export default function Example() {
           }}
         />
         <ApiPayload
-          title="SwitchEthereumChain"
+          title="wallet_switchEthereumChain"
           description="切换 Chain"
           presupposeParams={params.switchEthereumChain}
           onExecute={async (request) => {
@@ -186,7 +301,7 @@ export default function Example() {
           }}
         />
         <ApiPayload
-          title="WatchAsset"
+          title="wallet_watchAsset"
           description="添加 Token"
           presupposeParams={params.watchAsset}
           onExecute={async (request) => {
@@ -201,7 +316,7 @@ export default function Example() {
 
       <ApiGroup title="Sign Message">
         <ApiPayload
-          title="GetEncryptionPublicKey"
+          title="eth_getEncryptionPublicKey"
           description="获取公钥"
           onExecute={async () => {
             const res = await provider?.request({
@@ -271,6 +386,23 @@ export default function Example() {
         />
 
         <ApiPayload
+          title="personal_ecRecover"
+          description="通过 personal_sign 签名的数据恢复地址"
+          presupposeParams={params.personalEcRecover}
+          onExecute={async (request) => {
+            const requestObj = JSON.parse(request);
+            const res = await provider?.request({
+              'method': 'personal_ecRecover',
+              'params': [requestObj.message, requestObj.signature],
+            });
+            return res as string;
+          }}
+          onValidate={async (request: string, response: string) => {
+            return Promise.resolve((response === account.address).toString());
+          }}
+        />
+
+        <ApiPayload
           title="eth_signTypedData"
           description="SignTypedData v1"
           presupposeParams={params.signTypedData}
@@ -292,7 +424,7 @@ export default function Example() {
         />
 
         <ApiPayload
-          title="signTypedDataV3"
+          title="eth_signTypedData_v3"
           description="SignTypedData V3"
           // @ts-expect-error
           presupposeParams={params.signTypedDataV3(Number(account?.chainId ?? '0x1', 'hex'))}
@@ -314,7 +446,7 @@ export default function Example() {
         />
 
         <ApiPayload
-          title="signTypedDataV4"
+          title="eth_signTypedData_v4"
           description="SignTypedData V4"
           // @ts-expect-error
           presupposeParams={params.signTypedDataV4(Number(account?.chainId ?? '0x1', 'hex'))}
@@ -338,7 +470,19 @@ export default function Example() {
 
       <ApiGroup title="Transaction">
         <ApiPayload
-          title="SendTransaction"
+          title="eth_signTransaction"
+          description="(不支持)签名交易"
+          presupposeParams={params.sendTransaction(account?.address ?? '', account?.address ?? '')}
+          onExecute={async (request: string) => {
+            const res = await provider?.request({
+              'method': 'eth_signTransaction',
+              'params': [JSON.parse(request)],
+            });
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="eth_sendTransaction"
           description="发送交易"
           presupposeParams={params.sendTransaction(account?.address ?? '', account?.address ?? '')}
           onExecute={async (request: string) => {

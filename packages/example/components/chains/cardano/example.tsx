@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -163,6 +164,65 @@ export default function Example() {
           }}
         />
         <ApiPayload
+          title="isEnabled"
+          description="是否已经连接"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            const res = await provider?.isEnabled();
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="apiVersion"
+          description="获取 API 版本"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            return JSON.stringify(provider?.apiVersion);
+          }}
+        />
+        <ApiPayload
+          title="name"
+          description="获取钱包名称"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            return JSON.stringify(provider?.name);
+          }}
+        />
+        <ApiPayload
+          title="icon"
+          description="获取图标"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            return JSON.stringify(provider?.icon);
+          }}
+        />
+        <ApiPayload
+          title="supportedExtensions"
+          description="获取支持的扩展"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            return JSON.stringify(provider?.supportedExtensions);
+          }}
+        />
+        <ApiPayload
+          title="getExtensions"
+          description="获取扩展"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            const res = await provider?.getExtensions();
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="getNetworkId"
+          description="获取网络 ID"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            const res = await provider?.getNetworkId();
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
           title="getUsedAddresses"
           description="获取地址列表"
           disableRequestContent
@@ -188,6 +248,14 @@ export default function Example() {
             const res = await walletApi?.getChangeAddress();
             return JSON.stringify(res);
           }}
+        /><ApiPayload
+          title="getRewardAddresses"
+          description="获取奖励地址"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            const res = await walletApi?.getRewardAddresses();
+            return JSON.stringify(res);
+          }}
         />
         <ApiPayload
           title="getBalance"
@@ -195,6 +263,22 @@ export default function Example() {
           disableRequestContent
           onExecute={async (request: string) => {
             const res = await walletApi?.getBalance();
+            return JSON.stringify(res);
+          }}
+        /><ApiPayload
+          title="getUtoxs"
+          description="获取 UTXO 列表"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            const res = await walletApi?.getUtoxs();
+            return JSON.stringify(res);
+          }}
+        /><ApiPayload
+          title="getCollateral"
+          description="获取抵押物"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            const res = await walletApi?.getCollateral();
             return JSON.stringify(res);
           }}
         />

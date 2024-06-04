@@ -6,6 +6,7 @@ export interface IProviderApi {
   connect(): Promise<{
     publicKey: PublicKey;
   }>;
+  disconnect(): Promise<void>;
   signMessage(
     data: Uint8Array,
     display?: string,

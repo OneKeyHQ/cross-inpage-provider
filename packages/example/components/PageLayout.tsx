@@ -1,5 +1,4 @@
 import ChangeChain from './ChangeChain';
-import DappList from './DAppList';
 import { LogsContainer } from './LogsLayout';
 import { WalletProvider } from './connect/WalletContext';
 import { Button } from './ui/button';
@@ -35,9 +34,7 @@ function PageLayout({ children, title }: IPageLayoutProps) {
       <ResizablePanelGroup direction="vertical" className="flex-grow">
         <ResizablePanel className="overflow-auto flex">
           <WalletProvider>
-            <div className="flex flex-col flex-grow p-3 gap-3">
-              {children}
-            </div>
+            <div className="flex flex-col flex-grow p-3 gap-3">{children}</div>
           </WalletProvider>
         </ResizablePanel>
         <ResizableHandle withHandle />

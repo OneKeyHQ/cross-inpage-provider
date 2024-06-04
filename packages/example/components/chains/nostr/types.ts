@@ -19,7 +19,10 @@ export type Event = {
 
 export interface IProviderApi {
   isOneKey?: boolean;
+  on(event: string, listener: (...args: any[]) => void): this;
+  removeListener(event: string, listener: (...args: any[]) => void): this;
   getPublicKey(): Promise<string>;
+  getRelays(): Promise<any>;
   signEvent(event: {
     created_at: number;
     kind: number;

@@ -25,6 +25,12 @@ export type ConnectButtonProps<T> = {
   onDisconnect?: () => Promise<void>;
 };
 
+const accountInfoKeys: Record<string, string> = {
+  address: '地址',
+  publicKey: '公钥',
+  chainId: '网络',
+};
+
 export default function ConnectButton<T>({
   fetchWallets,
   onConnect,
@@ -44,7 +50,7 @@ export default function ConnectButton<T>({
         setAccount(accountInfo);
       } catch (error) {
         console.log('connectWallet error', error);
-        
+
         toast({
           title: '连接失败',
           description: get(error, 'message', ''),
@@ -132,25 +138,15 @@ export default function ConnectButton<T>({
           )}
         </div>
         {account && (
-          <div className="flex flex-row flex-wrap gap-4">
-            {account?.address && (
-              <>
-                <span>地址:</span>
-                <span>{account?.address}</span>
-              </>
-            )}
-            {account?.publicKey && (
-              <>
-                <span>公钥:</span>
-                <span>{account?.publicKey}</span>
-              </>
-            )}
-            {account?.chainId && (
-              <>
-                <span>网络:</span>
-                <span>{account?.chainId}</span>
-              </>
-            )}
+          <div className="flex grid-cols-1 xl:grid-cols-2 flex-wrap gap-x-6 mt-4">
+            {Object.keys(account).map((key) => {
+              return (
+                <div key={key}>
+                  <span>{accountInfoKeys?.[key] ?? key}: </span>
+                  <span className="font-normal">{account[key]}</span>
+                </div>
+              );
+            })}
           </div>
         )}
       </CardContent>

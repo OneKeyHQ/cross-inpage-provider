@@ -41,6 +41,7 @@
     "@solana/wallet-adapter-react": "^0.15.35",
     "@solana/wallet-adapter-react-ui": "^0.9.35",
     "@solana/wallet-adapter-wallets": "^0.19.32",
+    "@solana/wallet-standard-util": "^1.1.1",
     "@solana/wallet-standard-wallet-adapter-react": "^1.1.2",
     "@solana/web3.js": "^1.91.8",
     "@starcoin/starcoin": "^2.1.6",

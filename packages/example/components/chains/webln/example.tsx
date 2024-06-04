@@ -26,7 +26,7 @@ export default function BTCExample() {
     },
   ]);
 
-  const { provider } = useWallet<IProviderApi>();
+  const { provider, setAccount, account } = useWallet<IProviderApi>();
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -49,6 +49,25 @@ export default function BTCExample() {
     };
   };
 
+  useEffect(() => {
+    const accountsChangedHandler = (accounts: string) => {
+      console.log('webln accountsChanged', accounts);
+
+      if (accounts.length) {
+        setAccount({
+          ...account,
+          address: accounts,
+        });
+      }
+    };
+
+    provider?.on('accountsChanged', accountsChangedHandler);
+
+    return () => {
+      provider?.off('accountsChanged', accountsChangedHandler);
+    };
+  }, [account, provider, setAccount]);
+
   return (
     <>
       <ConnectButton<IProviderApi>
@@ -66,7 +85,7 @@ export default function BTCExample() {
       />
       <ApiGroup title="Basics">
         <ApiPayload
-          title="Enable"
+          title="enable"
           description="连接钱包"
           onExecute={async (request: string) => {
             const res = await provider?.enable();
@@ -75,10 +94,26 @@ export default function BTCExample() {
         />
 
         <ApiPayload
-          title="GetInfo"
+          title="getInfo"
           description="获取 Info 信息"
           onExecute={async () => {
             const res = await provider?.getInfo();
+            return JSON.stringify(res);
+          }}
+        /><ApiPayload
+          title="getBalance"
+          description="获取余额"
+          onExecute={async () => {
+            const res = await provider?.getBalance();
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="lnurl"
+          description="lnurl"
+          presupposeParams={params.lnurl}
+          onExecute={async (request: string) => {
+            const res = await provider?.lnurl(request);
             return JSON.stringify(res);
           }}
         />

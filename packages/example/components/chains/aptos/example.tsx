@@ -91,6 +91,35 @@ export default function Example() {
             return JSON.stringify(res);
           }}
         />
+        <ApiPayload
+          title="isConnected"
+          description="isConnected"
+          disableRequestContent
+          allowCallWithoutProvider
+          // eslint-disable-next-line @typescript-eslint/require-await
+          onExecute={async (request: string) => {
+            const res = provider?.isConnected() ?? false;
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="account"
+          description="当前账户"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            const res = await provider?.account();
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="network"
+          description="当前网络"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            const res = await provider?.network();
+            return res;
+          }}
+        />
       </ApiGroup>
 
       <ApiGroup title="Transfer">

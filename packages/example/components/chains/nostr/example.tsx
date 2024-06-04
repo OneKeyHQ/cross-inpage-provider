@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { get } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
@@ -27,7 +27,7 @@ export default function Example() {
     },
   ]);
 
-  const { provider, account } = useWallet<IProviderApi>();
+  const { provider, setAccount, account } = useWallet<IProviderApi>();
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -55,6 +55,38 @@ export default function Example() {
       publicKey: publicKey,
     };
   };
+
+  useEffect(() => {
+    const accountsChangedHandler = (accounts: string) => {
+      console.log('nostr accountsChanged', accounts);
+
+      if (accounts.length) {
+        setAccount({
+          ...account,
+          address: accounts,
+        });
+      }
+    };
+
+    const connectHandler = (connectInfo: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      console.log('nostr connect', connectInfo);
+    };
+    const disconnectHandler = (error: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      console.log('nostr disconnect', error);
+    };
+
+    provider?.on('accountsChanged', accountsChangedHandler);
+    provider?.on('connect', connectHandler);
+    provider?.on('disconnect', disconnectHandler);
+
+    return () => {
+      provider?.removeListener('accountsChanged', accountsChangedHandler);
+      provider?.removeListener('connect', connectHandler);
+      provider?.removeListener('disconnect', disconnectHandler);
+    };
+  }, [account, provider, setAccount]);
 
   return (
     <>
@@ -89,6 +121,15 @@ export default function Example() {
             const obj = JSON.parse(request);
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             const res = await provider?.signEvent(obj);
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="getRelays"
+          description="getRelays"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            const res = await provider?.getRelays();
             return JSON.stringify(res);
           }}
         />

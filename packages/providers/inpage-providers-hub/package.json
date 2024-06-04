@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/inpage-providers-hub",
-  "version": "2.0.0-alpha.9",
+  "version": "2.0.0-alpha.10",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -28,24 +28,24 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "2.0.0-alpha.9",
-    "@onekeyfe/cross-inpage-provider-types": "2.0.0-alpha.9",
-    "@onekeyfe/onekey-algo-provider": "2.0.0-alpha.9",
-    "@onekeyfe/onekey-aptos-provider": "2.0.0-alpha.9",
-    "@onekeyfe/onekey-btc-provider": "2.0.0-alpha.9",
-    "@onekeyfe/onekey-cardano-provider": "2.0.0-alpha.9",
-    "@onekeyfe/onekey-conflux-provider": "2.0.0-alpha.9",
-    "@onekeyfe/onekey-cosmos-provider": "2.0.0-alpha.9",
-    "@onekeyfe/onekey-eth-provider": "2.0.0-alpha.9",
-    "@onekeyfe/onekey-nostr-provider": "2.0.0-alpha.9",
-    "@onekeyfe/onekey-polkadot-provider": "2.0.0-alpha.9",
-    "@onekeyfe/onekey-private-external-account-provider": "2.0.0-alpha.9",
-    "@onekeyfe/onekey-private-provider": "2.0.0-alpha.9",
-    "@onekeyfe/onekey-solana-provider": "2.0.0-alpha.9",
-    "@onekeyfe/onekey-starcoin-provider": "2.0.0-alpha.9",
-    "@onekeyfe/onekey-sui-provider": "2.0.0-alpha.9",
-    "@onekeyfe/onekey-tron-provider": "2.0.0-alpha.9",
-    "@onekeyfe/onekey-webln-provider": "2.0.0-alpha.9",
+    "@onekeyfe/cross-inpage-provider-core": "2.0.0-alpha.10",
+    "@onekeyfe/cross-inpage-provider-types": "2.0.0-alpha.10",
+    "@onekeyfe/onekey-algo-provider": "2.0.0-alpha.10",
+    "@onekeyfe/onekey-aptos-provider": "2.0.0-alpha.10",
+    "@onekeyfe/onekey-btc-provider": "2.0.0-alpha.10",
+    "@onekeyfe/onekey-cardano-provider": "2.0.0-alpha.10",
+    "@onekeyfe/onekey-conflux-provider": "2.0.0-alpha.10",
+    "@onekeyfe/onekey-cosmos-provider": "2.0.0-alpha.10",
+    "@onekeyfe/onekey-eth-provider": "2.0.0-alpha.10",
+    "@onekeyfe/onekey-nostr-provider": "2.0.0-alpha.10",
+    "@onekeyfe/onekey-polkadot-provider": "2.0.0-alpha.10",
+    "@onekeyfe/onekey-private-external-account-provider": "2.0.0-alpha.10",
+    "@onekeyfe/onekey-private-provider": "2.0.0-alpha.10",
+    "@onekeyfe/onekey-solana-provider": "2.0.0-alpha.10",
+    "@onekeyfe/onekey-starcoin-provider": "2.0.0-alpha.10",
+    "@onekeyfe/onekey-sui-provider": "2.0.0-alpha.10",
+    "@onekeyfe/onekey-tron-provider": "2.0.0-alpha.10",
+    "@onekeyfe/onekey-webln-provider": "2.0.0-alpha.10",
     "web3": "^1.7.3"
   }
 }

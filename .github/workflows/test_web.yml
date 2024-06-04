@@ -20,6 +20,11 @@ jobs:
         with:
           node-version: 18.x
           registry-url: 'https://registry.npmjs.org'
+      
+      - name: Write Example .env
+        run: |
+          # Next.js environment variables
+          echo "NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=${{ secrets.WALLET_CONNECT_PROJECT_ID }}" >> ./packages/example/.env
 
       - name: Install Dependency
         env:

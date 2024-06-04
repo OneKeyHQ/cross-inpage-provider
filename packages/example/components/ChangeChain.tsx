@@ -1,4 +1,4 @@
-import { registeredChains } from '../pages/chains';
+import { registeredChains } from '../chains';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 type IChangeChainProps = {
   defaultChainId?: string;

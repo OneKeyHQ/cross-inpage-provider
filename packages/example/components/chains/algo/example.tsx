@@ -68,15 +68,6 @@ export default function Example() {
             return JSON.stringify(res);
           }}
         />
-        <ApiPayload
-          title="signMessage"
-          description="签名消息"
-          onExecute={async (request: string) => {
-            const data = new TextEncoder().encode(request);
-            const res = await provider?.signMessage(data, 'hex');
-            return JSON.stringify(res);
-          }}
-        />
       </ApiGroup>
 
       <DappList dapps={dapps} />

@@ -143,6 +143,7 @@ export default function ConnectButton<T>({
               return (
                 <div key={key}>
                   <span>{accountInfoKeys?.[key] ?? key}: </span>
+                  {/* @ts-expect-error */}
                   <span className="font-normal">{account[key]}</span>
                 </div>
               );

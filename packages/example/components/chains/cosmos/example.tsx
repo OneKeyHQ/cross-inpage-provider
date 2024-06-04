@@ -31,7 +31,6 @@ import {
 import params, { networks } from './params';
 import { CosmosNodeClient } from './rpc';
 import { toast } from '../../ui/use-toast';
-import { BroadcastMode } from '@onekeyfe/onekey-cosmos-provider';
 
 function removeNull(obj: any): any {
   if (obj !== null && typeof obj === 'object') {
@@ -359,7 +358,8 @@ export default function Example() {
           description="sendTx"
           onExecute={async (request: string) => {
             const tx = hexToBytes(request);
-            const res = await provider?.sendTx(network.id, tx, BroadcastMode.Sync);
+            // @ts-expect-error
+            const res = await provider?.sendTx(network.id, tx, 'Sync');
             return JSON.stringify(res);
           }}
         />

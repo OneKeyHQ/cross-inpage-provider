@@ -74,12 +74,18 @@ function Example() {
           <p>Wallet Name: {wallet?.adapter?.wallet?.features}</p>
         )} */}
         {wallet?.adapter && (
+          // @ts-expect-error
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
           <p>Wallet Api Version: {wallet?.adapter?.wallet?.version?.toString()}</p>
         )}
         {wallet?.adapter && (
+          // @ts-expect-error
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
           <p>Accounts: {JSON.stringify(wallet?.adapter?.wallet?.accounts ?? [])}</p>
         )}
         {wallet?.adapter && (
+          // @ts-expect-error
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
           <p>Support chains: {JSON.stringify(wallet?.adapter?.wallet?.chains ?? [])}</p>
         )}
         {wallet?.adapter && (

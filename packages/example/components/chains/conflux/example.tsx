@@ -278,6 +278,7 @@ export default function BTCExample() {
           onExecute={async (request: string) => {
             return new Promise((resolve) => {
               const requestObj = JSON.parse(request);
+              // eslint-disable-next-line @typescript-eslint/no-floating-promises
               provider?.sendAsync(
                 {
                   method: requestObj.method,

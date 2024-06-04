@@ -83,6 +83,7 @@ export default function Example() {
       const [account] = accounts;
       setAccount({
         address: account.address,
+        // @ts-expect-error
         name: account.meta?.name,
         provider: provider,
       });

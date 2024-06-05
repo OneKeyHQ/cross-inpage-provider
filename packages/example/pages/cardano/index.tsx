@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import PageLayout from '../../components/PageLayout';
 
 // injected provider works only if nextjs ssr disabled
-const CardanoExample = dynamic(() => import('../../components/cardano/CardanoExample'), {
+const CardanoExample = dynamic(() => import('../../components/chains/cardano/example'), {
   ssr: false,
 });
 

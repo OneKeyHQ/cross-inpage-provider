@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import PageLayout from '../../components/PageLayout';
 
 // injected provider works only if nextjs ssr disabled
-const SuiExample = dynamic(() => import('../../components/suiStandard/SuiExample'), { ssr: false });
+const SuiExample = dynamic(() => import('../../components/chains/suiStandard/example'), { ssr: false });
 
 export default function () {
   return (

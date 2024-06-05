@@ -5,10 +5,9 @@ import dynamic from 'next/dynamic';
 import styles from '../../styles/Home.module.css';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { Button, HStack, TextArea, Box } from 'native-base';
 
 // injected provider works only if nextjs ssr disabled
-const STCExample = dynamic(() => import('../../components/starcoin/STCExample'), { ssr: false });
+const STCExample = dynamic(() => import('../../components/chains/starcoin/example'), { ssr: false });
 
 export default function () {
   const [uri, setUri] = useState('');
@@ -26,7 +25,7 @@ export default function () {
           Get uri from WalletConnectExample V1 →
         </a>
         <Box mb={4}>
-          <TextArea
+          {/* <input
             my={4}
             placeholder={'Copy & Paste Wallet-Connect uri here'}
             id="text-uri"
@@ -37,19 +36,19 @@ export default function () {
               text = text?.trim();
               setUri(text);
             }}
-          />
+          /> */}
           <HStack space={2}>
-            <Button
-              onPress={async () => {
+            <button
+              onClick={async () => {
                 const text = await navigator.clipboard.readText();
                 setUri(text || '');
               }}
             >
               Paste
-            </Button>
-            <Button variant={'outline'} onPress={() => setUri('')}>
+            </button>
+            <button variant={'outline'} onPress={() => setUri('')}>
               Clear
-            </Button>
+            </button>
           </HStack>
         </Box>
 

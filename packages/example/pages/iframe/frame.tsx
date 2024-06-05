@@ -1,16 +1,15 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
-import styles from '../../styles/Home.module.css';
 
-const IFrameExample = dynamic(() => import('../../components/iframe/IFrameExample'), {
+const IFrameExample = dynamic(() => import('../../components/chains/iframe/IFrameExample'), {
   ssr: false,
 });
 
 export default function () {
   return (
     <div>
-      <div className={styles.container}>
-        <h2>FRAME</h2>
+      <div className="p-2">
+        <h2 className="font-medium">IFrame</h2>
         <IFrameExample />
       </div>
     </div>

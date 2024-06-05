@@ -14,6 +14,7 @@ import { toast } from '../../ui/use-toast';
 import * as bitcoin from 'bitcoinjs-lib';
 import { Input } from '../../ui/input';
 import { createPSBT } from '../btc/utils';
+import { stringifyWithCircularReferences } from '../../../lib/jsonUtils';
 
 export default function BTCExample() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -112,7 +113,8 @@ export default function BTCExample() {
           disableRequestContent
           onExecute={async (request: string) => {
             const res = await provider?.connectWallet();
-            return JSON.stringify(res);
+            console.log('connectWallet result:', res);
+            return stringifyWithCircularReferences(res);
           }}
         />
         <ApiPayload

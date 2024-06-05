@@ -14,9 +14,16 @@ export interface IProviderApi {
   on(event: string, listener: (...args: any[]) => void): this;
   off(event: string, listener: (...args: any[]) => void): this;
   enable(): Promise<void>;
+  isEnabled(): Promise<boolean>;
   lnurl(lnurl: string): Promise<void>;
   getInfo(): Promise<GetInfoResponse>;
   getBalance(): Promise<any>;
+  getAddress(): Promise<{
+    address: string;
+    derivationPath: string;
+    index: number;
+    publicKey: string;
+  }>;
   signMessage(message: string): Promise<{
     message: string;
     signature: string;
@@ -34,6 +41,7 @@ export interface IProviderApi {
   sendPayment(invoice: string): Promise<{
     preimage: string;
   }>;
+  sendPaymentAsync(invoice: string): void;
   keysend(options: {
     destination: string;
     amount: string | number;

@@ -3,7 +3,8 @@ export default {
     {
       id: 'lnurl',
       name: 'lnurl',
-      value: 'LNURL1DP68GURN8GHJ7UM9WFMXJCM99E3K7MF0V9CXJ0M385EKVCENXC6R2C35XVUKXEFCV5MKVV34X5EKZD3EV56NYD3HXQURZEPEXEJXXEPNXSCRVWFNV9NXZCN9XQ6XYEFHVGCXXCMYXYMNSERXFQ5FNS',
+      value:
+        'LNURL1DP68GURN8GHJ7UM9WFMXJCM99E3K7MF0V9CXJ0M385EKVCENXC6R2C35XVUKXEFCV5MKVV34X5EKZD3EV56NYD3HXQURZEPEXEJXXEPNXSCRVWFNV9NXZCN9XQ6XYEFHVGCXXCMYXYMNSERXFQ5FNS',
     },
   ],
   signMessage: [
@@ -16,10 +17,37 @@ export default {
   makeInvoice: [
     {
       id: 'makeInvoice',
-      name: 'makeInvoice',
+      name: 'Make normal invoice',
       value: JSON.stringify({
         amount: 1000,
-        description: 'Test invoice',
+        defaultMemo: 'Test invoice',
+      }),
+    },
+    {
+      id: 'makeInvoice-default',
+      name: 'Make normal default invoice',
+      value: JSON.stringify({
+        amount: 1000,
+        defaultAmount: 1001,
+        defaultMemo: 'Test invoice',
+      }),
+    },
+    {
+      id: 'makeInvoice-max',
+      name: 'Make Max invoice',
+      value: JSON.stringify({
+        defaultAmount: 1001,
+        maximumAmount: 1000,
+        defaultMemo: 'Test max invoice',
+      }),
+    },
+    {
+      id: 'makeInvoice-min',
+      name: 'Make Min invoice',
+      value: JSON.stringify({
+        defaultAmount: 10,
+        minimumAmount: 100,
+        defaultMemo: 'Test min invoice',
       }),
     },
   ],

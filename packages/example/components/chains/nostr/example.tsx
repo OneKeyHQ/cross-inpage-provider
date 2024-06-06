@@ -58,7 +58,7 @@ export default function Example() {
 
   useEffect(() => {
     const accountsChangedHandler = (accounts: string) => {
-      console.log('nostr accountsChanged', accounts);
+      console.log('nostr [accountsChanged]', accounts);
 
       if (accounts.length) {
         setAccount({

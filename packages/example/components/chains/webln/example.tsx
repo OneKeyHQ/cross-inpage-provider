@@ -179,7 +179,7 @@ export default function BTCExample() {
         <ApiPayload
           title="sendPaymentAsync"
           description="支付 invoice，要通过 makeInvoice 生成 invoice，复制 paymentRequest 到 request 中"
-          onExecute={async (request: string) => {
+          onExecute={(request: string) => {
             if (!request) {
               toast({
                 title: '请通过 makeInvoice 生成 invoice，复制 paymentRequest 到 request 中',
@@ -187,7 +187,7 @@ export default function BTCExample() {
               return;
             }
             provider?.sendPaymentAsync(request);
-            return 'success';
+            return Promise.resolve('success');
           }}
         />
         <ApiPayload

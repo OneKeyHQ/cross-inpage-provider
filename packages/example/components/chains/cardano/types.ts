@@ -8,6 +8,8 @@ export interface IProviderApi {
   isEnabled(): Promise<boolean>;
   getExtensions(): Promise<any[]>;
   getNetworkId(): Promise<number>;
+  on(event: string, listener: (...args: any[]) => void): void;
+  removeListener(event: string, listener: (...args: any[]) => void): void;
 }
 
 export interface IProviderInfo {

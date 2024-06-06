@@ -49,12 +49,12 @@ export const registeredChains: IChainInfo[] = [
     href: '/aptos',
     icon: 'https://uni.onekey-asset.com/static/chain/apt.png',
   },
-  // {
-  //   id: uuid.v4(),
-  //   name: 'Aptos Martian',
-  //   href: '/aptosMartian',
-  //   icon: 'https://uni.onekey-asset.com/static/chain/apt.png',
-  // },
+  {
+    id: uuid.v4(),
+    name: 'Aptos Martian',
+    href: '/aptosMartian',
+    icon: 'https://uni.onekey-asset.com/static/chain/apt.png',
+  },
   {
     id: uuid.v4(),
     name: 'BTC',

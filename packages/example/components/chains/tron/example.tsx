@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable no-unsafe-optional-chaining */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
@@ -59,11 +60,11 @@ export default function BTCExample() {
       }
     }
 
-    const [address] = await provider.request<string[]>({ method: 'tron_accounts' });
+    // const [address] = await provider.request<string[]>({ method: 'tron_accounts' });
     return {
       provider,
-      // address: tronWeb.defaultAddress.base58,
-      address: address,
+      address: tronWeb.defaultAddress.base58,
+      // address: address,
     };
   };
 
@@ -73,7 +74,7 @@ export default function BTCExample() {
         title: 'Invalid Address',
         description: '请在 Example 顶部填写接收地址，转账地址不能与发送地址相同',
       });
-      throw new Error('Invalid Address');
+      throw new Error('请在 Example 顶部填写接收地址，转账地址不能与发送地址相同');
     }
 
     if (account.address === receiveAddress) {
@@ -81,7 +82,7 @@ export default function BTCExample() {
         title: 'Invalid Address',
         description: '转账地址不能与发送地址相同',
       });
-      throw new Error('Invalid Address');
+      throw new Error('转账地址不能与发送地址相同');
     }
   };
 
@@ -93,11 +94,13 @@ export default function BTCExample() {
           action: string;
           data: any;
         };
-      }
+      };
     }) => {
       console.log('tron on message', e.data);
 
       if (e.data.message && e.data.message.action === 'accountsChanged') {
+        console.log('tron [accountsChanged]', e.data.message.data);
+
         const { address } = e.data.message.data;
         setAccount({
           ...account,
@@ -105,11 +108,22 @@ export default function BTCExample() {
         });
       }
       if (e.data.message && e.data.message.action === 'setNode') {
+        console.log('tron [setNode]', e.data.message.data);
         // const { address } = e.data.message.data;
         // setAccount({
         //   ...account,
         //   address,
         // });
+      }
+      if (e.data.message && e.data.message.action === 'setAccount') {
+        console.log('tron [setAccount]', e.data.message.data);
+      }
+      if (e.data.message && e.data.message.action === 'connect') {
+        console.log('tron [connect]', e.data.message.data);
+      }
+
+      if (e.data.message && e.data.message.action === 'disconnect') {
+        console.log('tron [disconnect]', e.data.message.data);
       }
     };
 

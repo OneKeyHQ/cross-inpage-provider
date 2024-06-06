@@ -18,6 +18,7 @@ const data: ITreeNodeData[] = [
     children: [
       { id: uuid.v4(), name: 'iframe', href: '/iframe' },
       { id: uuid.v4(), name: 'Multichain', href: '/multichain' },
+      { id: uuid.v4(), name: 'Tools', href: '/tools' },
       { id: uuid.v4(), name: 'DeepLink', href: '/deeplink' },
       {
         id: uuid.v4(),

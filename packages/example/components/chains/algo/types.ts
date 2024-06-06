@@ -68,6 +68,18 @@ export interface BaseHTTPClient {
   ): Promise<BaseHTTPClientResponse>;
 }
 
+export const PROVIDER_EVENTS = {
+  'connect': 'connect',
+  'disconnect': 'disconnect',
+  'accountChanged': 'accountChanged',
+} as const;
+
+export type AlgoProviderEventsMap = {
+  [PROVIDER_EVENTS.connect]: (connectInfo: { address: string }) => void;
+  [PROVIDER_EVENTS.disconnect]: () => void;
+  [PROVIDER_EVENTS.accountChanged]: (address: string) => void;
+};
+
 export interface IProviderApi {
   enable(opts?: EnableOpts): Promise<EnableResult>;
 
@@ -80,6 +92,20 @@ export interface IProviderApi {
   getAlgodv2Client(): Promise<BaseHTTPClient>;
 
   getIndexerClient(): Promise<BaseHTTPClient>;
+
+  on<E extends keyof AlgoProviderEventsMap>(event: E, listener: AlgoProviderEventsMap[E]): this;
+  off<E extends keyof AlgoProviderEventsMap>(event: E, listener: AlgoProviderEventsMap[E]): this;
+
+  // legacy
+  connect(): Promise<{ address: string }>;
+
+  disconnect(): Promise<void>;
+
+  signAndSendTransaction(transactions: Uint8Array[]): Promise<{ txId: string }>;
+
+  signTransaction(transactions: Uint8Array[]): Promise<Uint8Array[]>;
+
+  signMessage(encodedMessage: Uint8Array, display?: string): Promise<Uint8Array>;
 }
 
 export interface IProviderInfo {

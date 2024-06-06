@@ -6,8 +6,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
-import { useRef, useState } from 'react';
-import { get } from 'lodash';
+import { useEffect, useRef, useState } from 'react';
+import { get, isEmpty } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import { useWallet } from '../../../components/connect/WalletContext';
@@ -36,14 +36,14 @@ export default function Example() {
     },
   ]);
 
-  const { provider, account } = useWallet<IProviderApi>();
+  const { provider, setAccount,account } = useWallet<IProviderApi>();
   const projectIdRef = useRef<string | null>(null);
 
   const [walletApi, setWalletApi] = useState<any | null>(null);
   const [lucid, setLucid] = useState<Lucid | null>(null);
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
-    if (!projectIdRef.current) {
+    if (!projectIdRef.current || !process.env.NEXT_PUBLIC_BLOCKFROST_CARDANO_PROJECT_ID) {
       toast({
         title: 'Project ID is required',
         description: 'Please set the project ID in the input box above',
@@ -85,6 +85,10 @@ export default function Example() {
       console.log('error', error);
     }
 
+    let projectId = projectIdRef.current
+    if(!projectId || isEmpty(projectId)) {
+      projectId = process.env.NEXT_PUBLIC_BLOCKFROST_CARDANO_PROJECT_ID
+    }
     const lucid = await Lucid.new(
       // test id
       new Blockfrost('https://cardano-mainnet.blockfrost.io/api/v0', projectIdRef.current),
@@ -104,6 +108,30 @@ export default function Example() {
     };
   };
 
+  useEffect(() => {
+    if (!provider) return
+    
+    const onConnectListener = (address: string) => {
+      console.log(`cardano on [connect] ${address}`);
+    }
+    const onAccountChangeListener = (address: string) => {
+      console.log(`cardano on [accountChange] ${address}`);
+      if(!address) return
+      setAccount({
+        ...account,
+        address,
+      });
+    }
+  
+    provider.on('connect',onConnectListener)
+    provider.on('accountChanged', onAccountChangeListener);
+
+    return () => {
+      provider.removeListener('connect', onConnectListener);
+      provider.removeListener('accountChanged', onAccountChangeListener);
+    }
+  }, [account, provider, setAccount])
+
   return (
     <>
       <ApiGroup title="Blockfrost Project ID">
@@ -121,7 +149,7 @@ export default function Example() {
       <ConnectButton<IProviderApi>
         fetchWallets={() => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          const wallets = Object.keys(window?.cardano)
+          const wallets = Object.keys(window?.cardano ?? {})
           .filter((name)=>['onekey','lace','nami','yoroi'].includes(name)).map((key) => {
             return {
               uuid: key,
@@ -350,6 +378,9 @@ export default function Example() {
               throw new Error('toAddress or amount is required');
             }
 
+            try {
+              
+            
             const tx = await lucid
               .newTx()
               .payToAddress(toAddress, { lovelace: BigInt(amount) })
@@ -358,11 +389,21 @@ export default function Example() {
             console.log('tx', tx.toString());
 
             return Promise.resolve(tx.toString());
+          } catch (error) {
+            console.log('error', error);
+            
+            throw error;   
+          }
           }}
         />
         <ApiPayload
           title="submitTx"
           description="广播交易"
+          presupposeParams={[{
+            id: 'submitTx',
+            name: 'submitTx',
+            value: '复制 signTx 签名结果到这里'          
+          }]}
           onExecute={async (request: string) => {
             const res = await walletApi?.submitTx(request, true);
             return res as string;

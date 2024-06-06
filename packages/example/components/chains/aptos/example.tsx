@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { get } from 'lodash';
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
 import { IProviderApi, IProviderInfo, SignMessageResponse } from './types';
@@ -24,7 +24,7 @@ export default function Example() {
     },
   ]);
 
-  const { provider, account } = useWallet<IProviderApi>();
+  const { provider, setAccount, account } = useWallet<IProviderApi>();
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -55,7 +55,25 @@ export default function Example() {
       chainId,
     };
   };
+  useEffect(() => {
+    if (!provider) return;
 
+    provider.onNetworkChange((network: string) => {
+      setAccount({
+        ...account,
+        chainId: network,
+      });
+      console.log(`aptos [onNetworkChange] ${network}`);
+    });
+    provider.onAccountChange((address: string | null) => {
+      console.log(`aptos [onAccountChange] ${address}`);
+      if (!address) return;
+      setAccount({
+        ...account,
+        address,
+      });
+    });
+  }, [account, provider, setAccount]);
   return (
     <>
       <ConnectButton<IProviderApi>
@@ -70,6 +88,7 @@ export default function Example() {
           );
         }}
         onConnect={onConnectWallet}
+        onDisconnect={() => provider?.disconnect()}
       />
 
       <ApiGroup title="Basics">

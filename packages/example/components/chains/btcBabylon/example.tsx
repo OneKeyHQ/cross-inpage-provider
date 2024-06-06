@@ -60,7 +60,7 @@ export default function BTCExample() {
 
   useEffect(() => {
     const accountsChangedHandler = (accounts: string[]) => {
-      console.log('accountsChanged', accounts);
+      console.log('btc babylon [accountsChanged]', accounts);
 
       if (accounts.length) {
         setAccount({
@@ -71,7 +71,7 @@ export default function BTCExample() {
     };
 
     const networkChangedHandler = (network: string) => {
-      console.log('networkChanged', network);
+      console.log('btc babylon [networkChanged]', network);
 
       if (network) {
         setAccount({

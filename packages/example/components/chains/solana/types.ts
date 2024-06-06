@@ -19,6 +19,8 @@ export interface IProviderApi {
   }>;
   signTransaction(transafe: Transaction | VersionedTransaction): Promise<string>;
   signAllTransactions(transafe: Transaction[]): Promise<string[]>;
+  on(event: string, listener: (...args: any[]) => void): void;
+  removeListener(event: string, listener: (...args: any[]) => void): void;
 }
 
 export interface IProviderInfo {

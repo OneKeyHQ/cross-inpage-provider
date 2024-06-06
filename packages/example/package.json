@@ -13,6 +13,8 @@
     "swap-lock-registry": "npx swap-lock-registry --yarn --parallel --url https://registry.yarnpkg.com yarn.lock"
   },
   "dependencies": {
+    "@codemirror/lang-json": "^6.0.1",
+    "@codemirror/lint": "^6.8.0",
     "@cosmjs/amino": "^0.32.3",
     "@ethersproject/bytes": "^5.0.6",
     "@metamask/eth-sig-util": "^7.0.2",
@@ -47,6 +49,7 @@
     "@starcoin/starcoin": "^2.1.6",
     "@starcoin/starmask-onboarding": "^1.0.0",
     "@tanstack/react-query": "^5.40.0",
+    "@uiw/react-codemirror": "^4.22.1",
     "@unisat/wallet-utils": "^1.0.0",
     "@walletconnect/core": "^2.13.0",
     "@walletconnect/sign-client": "^2.13.0",
@@ -60,6 +63,7 @@
     "bs58": "^5.0.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "codemirror": "^6.0.1",
     "compare-versions": "^4.1.2",
     "console-feed": "^3.5.0",
     "cosmjs-types": "^0.9.0",

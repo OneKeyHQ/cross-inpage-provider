@@ -4,6 +4,7 @@ import { AutoHeightTextarea } from '../ui/textarea';
 import { useApiPayload } from './ApiPayloadProvider';
 import { toast } from '../ui/use-toast';
 import { get } from 'lodash';
+import JsonEditor from '../ui/jsonEditor';
 
 export type IRequestEditorProps = {
   resetRequest: () => void;
@@ -74,12 +75,13 @@ export function RequestEditor({
       {disableRequestContent ? (
         <AutoHeightTextarea className="min-h-4" placeholder="Not Request" readOnly />
       ) : (
-        <AutoHeightTextarea
-          className="min-h-12"
-          value={request ?? ''}
-          placeholder="Request 信息"
-          onChange={(e) => handleSetRequest(e.target.value)}
-        />
+        // <AutoHeightTextarea
+        //   className="min-h-12"
+        //   value={request ?? ''}
+        //   placeholder="Request 信息"
+        //   onChange={(e) => handleSetRequest(e.target.value)}
+        // />
+        <JsonEditor value={request ?? ''} onChange={handleSetRequest} />
       )}
     </div>
   );

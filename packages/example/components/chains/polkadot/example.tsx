@@ -75,7 +75,7 @@ export default function Example() {
       return;
     }
     void web3AccountsSubscribe((accounts) => {
-      console.log('polkadot web3AccountsSubscribe', accounts);
+      console.log('polkadot [web3AccountsSubscribe]', accounts);
       
       if (accounts.length === 0) {
         return;
@@ -122,7 +122,7 @@ export default function Example() {
 
       <ApiGroup title="Basics">
         <ApiPayload
-          title="Accounts Get"
+          title="accounts.get"
           description="获取账户权限"
           disableRequestContent
           onExecute={async (request: string) => {
@@ -131,7 +131,7 @@ export default function Example() {
           }}
         />
         <ApiPayload
-          title="SignRaw"
+          title="signRaw"
           description="签名消息"
           presupposeParams={params.signRaw}
           onExecute={async (request: string) => {
@@ -162,7 +162,7 @@ export default function Example() {
           }}
         />
         <ApiPayload
-          title="SignAndSend"
+          title="signAndSend"
           description="签名并发送交易"
           presupposeParams={params.signAndSend(account?.address || '')}
           onExecute={async (request: string) => {

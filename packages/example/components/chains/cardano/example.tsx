@@ -43,7 +43,7 @@ export default function Example() {
   const [lucid, setLucid] = useState<Lucid | null>(null);
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
-    if (!projectIdRef.current || !process.env.NEXT_PUBLIC_BLOCKFROST_CARDANO_PROJECT_ID) {
+    if (!projectIdRef.current && !process.env.NEXT_PUBLIC_BLOCKFROST_CARDANO_PROJECT_ID) {
       toast({
         title: 'Project ID is required',
         description: 'Please set the project ID in the input box above',

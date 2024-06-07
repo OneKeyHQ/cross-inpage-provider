@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import { useCallback, useRef, useState } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
@@ -142,9 +143,9 @@ export default function ConnectButton<T>({
             {Object.keys(account).map((key) => {
               return (
                 <div key={key}>
-                  <span>{accountInfoKeys?.[key] ?? key}: </span>
+                  <span>{`${accountInfoKeys?.[key] ?? key}`}: </span>
                   {/* @ts-expect-error */}
-                  <span className="font-normal flex flex-wrap text-break">{account[key]}</span>
+                  <span className="font-normal flex flex-wrap text-break">{`${account?.[key]}`}</span>
                 </div>
               );
             })}

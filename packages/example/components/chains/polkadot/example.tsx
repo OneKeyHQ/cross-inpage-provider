@@ -61,11 +61,16 @@ export default function Example() {
       return;
     }
 
-    const [account] = await provider.accounts.get();
+    const accounts = await provider?.accounts?.get();
 
+    console.log('polkadot [connect wallet]', accounts?.[0]?.address);
+
+    const account = accounts?.[0];
     return {
       provider,
-      address: account.address,
+      address: account?.address ?? '',
+      name: account?.name ?? '',
+      type: account?.type ?? '',
     };
   };
 
@@ -74,9 +79,12 @@ export default function Example() {
     if (!api) {
       return;
     }
+    if (!provider) {
+      return;
+    }
     void web3AccountsSubscribe((accounts) => {
       console.log('polkadot [web3AccountsSubscribe]', accounts);
-      
+
       if (accounts.length === 0) {
         return;
       }
@@ -84,8 +92,8 @@ export default function Example() {
       setAccount({
         address: account.address,
         // @ts-expect-error
-        name: account.meta?.name,
-        provider: provider,
+        name: account?.name,
+        type: account?.type ?? '',
       });
     }).then((listener) => {
       listenerRef.current = listener;

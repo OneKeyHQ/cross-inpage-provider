@@ -53,16 +53,17 @@ const SignMessageMap = {
 
 export function MultipleCallSignMessage() {
   const connectWallet = () => {
+    console.log(`Call wallet Sign Message start ===>`);
     Object.keys(SignMessageMap).forEach(async (key) => {
       // @ts-expect-error
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
       SignMessageMap[key]()
         .then((address: string) => {
-          console.log(`Connect wallet ${key} address`, address);
+          console.log(`Call wallet Sign Message ${key} address`, address);
         })
         .catch((error: any) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          console.log(`Connect wallet ${key} error`, get(error, 'message', ''));
+          console.log(`Call wallet Sign Message ${key} error`, get(error, 'message', ''));
         });
       await new Promise((resolve) => setTimeout(resolve, 1000));
     });

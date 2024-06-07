@@ -40,6 +40,7 @@ const connectWalletMap = {
 
 export function MultipleCallConnectWallet() {
   const connectWallet = () => {
+    console.log(`Connect wallet start ===>`);
     Object.keys(connectWalletMap).forEach(async (key) => {
       // @ts-expect-error
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call

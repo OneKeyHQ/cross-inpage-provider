@@ -45,6 +45,16 @@ export function LoopEvmSignTx() {
     }
   };
 
+  const handleBatchSignTx = async (count: number) => {
+    console.log(`Batch sign tx start ===>`);
+
+    const promises = Array.from({ length: count }, (_, i) => {
+      return handleSignTx(account, account, i);
+    });
+
+    await Promise.all(promises);
+  };
+
   useEffect(() => {
     let timer: NodeJS.Timeout;
 
@@ -90,8 +100,10 @@ export function LoopEvmSignTx() {
               }}
             />
           </div>
+          <Button onClick={() => handleBatchSignTx(10)}>连续调用 10 次</Button>
+
           <div>
-            <p>开关</p>
+            <p>循环调用开关</p>
             <Switch checked={switchChecked} onCheckedChange={setSwitchChecked} />
           </div>
         </div>

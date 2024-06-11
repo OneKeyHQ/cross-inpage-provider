@@ -20,13 +20,13 @@ export default () => hackConnectButton({
         | HTMLElement
         | undefined
       )[];
-
       for (const walletBtn of walletBtnList) {
         if (walletBtn?.innerText === findName) {
           // replace text
           const textNode = domUtils.findTextNode(walletBtn, findName) as HTMLElement | undefined;
-          textNode?.replaceWith(text);
-
+          const newTextNode = document.createTextNode(text);
+          textNode?.replaceWith(newTextNode);
+          newTextNode?.parentElement && (newTextNode.parentElement.style.whiteSpace = 'normal');
           //image
           const imgContainer = walletBtn?.querySelector('svg')?.parentNode as
             | HTMLImageElement

@@ -68,7 +68,7 @@ export type SuiRequest = {
     input: SignTransactionBlockInput,
   ) => Promise<SuiSignTransactionBlockOutput>;
 
-  'signMessage': (input: SignMessageInput) => Promise<SuiSignMessageOutput>;
+  'signMessage': (input: SignMessageInput) => Promise<SuiSignPersonalMessageOutput>;
 
   'signPersonalMessage': (input: SignPersonalMessageInput) => Promise<SuiSignPersonalMessageOutput>;
 };
@@ -267,7 +267,7 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
     });
   }
 
-  async signMessage(input: SuiSignMessageInput): Promise<SuiSignMessageOutput> {
+  async signMessage(input: SuiSignMessageInput): Promise<SuiSignPersonalMessageOutput> {
     return this._callBridge({
       method: 'signMessage',
       params: {

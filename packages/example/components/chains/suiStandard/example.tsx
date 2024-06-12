@@ -110,7 +110,10 @@ function Example() {
             } = JSON.parse(result);
 
             // const publicKey = await verifySignature(hexToBytes(request), signature);
-            const publicKey = await verifyPersonalMessage(hexToBytes(request), signature);
+            const publicKey = await verifyPersonalMessage(
+              Buffer.from(messageBytes, 'base64'),
+              signature,
+            );
 
             return (currentAccount.address === publicKey.toSuiAddress()).toString();
           }}
@@ -136,7 +139,7 @@ function Example() {
               signature: string;
             } = JSON.parse(result);
 
-            const publicKey = await verifyPersonalMessage(hexToBytes(request), signature);
+            const publicKey = await verifyPersonalMessage(Buffer.from(bytes, 'base64'), signature);
 
             return (currentAccount.address === publicKey.toSuiAddress()).toString();
           }}

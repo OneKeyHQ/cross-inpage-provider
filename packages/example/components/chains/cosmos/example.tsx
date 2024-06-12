@@ -361,6 +361,7 @@ export default function Example() {
           generateRequestFrom={() => {
             return <Textarea name="tx" placeholder="将 signDirect 的执行结果复制粘贴到这里" />;
           }}
+          // eslint-disable-next-line @typescript-eslint/require-await
           onGenerateRequest={async (fromData: Record<string, any>) => {
             const requestTx = JSON.parse(fromData?.['tx'] as string);
 
@@ -369,6 +370,7 @@ export default function Example() {
               // Direct sign
               const bodyBytes = jsonToUint8Array(requestTx?.signed?.bodyBytes);
               const authInfoBytes = jsonToUint8Array(requestTx?.signed?.authInfoBytes);
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
               const signatures = [Buffer.from(requestTx?.signature?.signature ?? '', 'base64')];
 
               const txRaw = TxRaw.encode(

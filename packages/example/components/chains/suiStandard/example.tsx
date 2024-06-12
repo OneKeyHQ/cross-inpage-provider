@@ -102,16 +102,16 @@ function Example() {
           }}
           onValidate={async (request: string, result: string) => {
             const {
-              messageBytes,
+              bytes,
               signature,
             }: {
-              messageBytes: string;
+              bytes: string;
               signature: string;
             } = JSON.parse(result);
 
             // const publicKey = await verifySignature(hexToBytes(request), signature);
             const publicKey = await verifyPersonalMessage(
-              Buffer.from(messageBytes, 'base64'),
+              Buffer.from(bytes, 'base64'),
               signature,
             );
 
@@ -179,6 +179,21 @@ function Example() {
               account: currentAccount,
             });
             return JSON.stringify(res);
+          }}
+          onValidate={async (request: string, result: string) => {
+            const {
+              transactionBlockBytes,
+              signature,
+            }: {
+              transactionBlockBytes: string;
+              signature: string;
+            } = JSON.parse(result);
+            const publicKey = await verifyTransactionBlock(
+              Buffer.from(transactionBlockBytes, 'base64'),
+              signature,
+            );
+
+            return (currentAccount.address === publicKey.toSuiAddress()).toString();
           }}
         />
 

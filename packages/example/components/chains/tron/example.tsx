@@ -72,17 +72,17 @@ export default function BTCExample() {
     if (!receiveAddress || isEmpty(receiveAddress)) {
       toast({
         title: 'Invalid Address',
-        description: '请在 Example 顶部填写接收地址，转账地址不能与发送地址相同',
+        description: '请在 Example 顶部填写接收地址，收款地址不能与发送地址相同',
       });
-      throw new Error('请在 Example 顶部填写接收地址，转账地址不能与发送地址相同');
+      throw new Error('请在 Example 顶部填写接收地址，收款地址不能与发送地址相同');
     }
 
     if (account.address === receiveAddress) {
       toast({
         title: 'Invalid Address',
-        description: '转账地址不能与发送地址相同',
+        description: '收款地址不能与发送地址相同',
       });
-      throw new Error('转账地址不能与发送地址相同');
+      throw new Error('收款地址不能与发送地址相同');
     }
   };
 
@@ -149,7 +149,7 @@ export default function BTCExample() {
         }}
         onConnect={onConnectWallet}
       />
-      <ApiGroup title="转账地址">
+      <ApiGroup title="收款地址">
         <InputWithSave
           storageKey="tron-receive-address"
           onChange={setReceiveAddress}
@@ -207,7 +207,7 @@ export default function BTCExample() {
       <ApiGroup title="资产相关">
         <ApiPayload
           title="wallet_watchAsset"
-          description="添加 TRC20 资产"
+          description="（不支持）添加 TRC20 资产"
           presupposeParams={params.addToken}
           onExecute={async (request: string) => {
             const obj = JSON.parse(request);
@@ -222,7 +222,7 @@ export default function BTCExample() {
       <ApiGroup title="SignMessage">
         <ApiPayload
           title="SignMessage"
-          description="签名消息存在安全风险，硬件不支持"
+          description="（不支持）签名消息存在安全风险，硬件不支持"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
             const tronWeb = provider.tronWeb;
@@ -252,7 +252,7 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="SignMessage V2"
-          description="签名消息"
+          description="（不支持）签名消息"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
             const tronWeb = provider.tronWeb;
@@ -277,14 +277,12 @@ export default function BTCExample() {
           onExecute={async (request: string) => {
             checkReceiveAddress();
 
-            const [connectedAddress] = await provider.request<string[]>({
-              method: 'tron_accounts',
-            });
-
             const { to, amount } = JSON.parse(request);
 
             const tronWeb = provider.tronWeb;
-            const tx = await tronWeb.transactionBuilder.sendTrx(to, amount, connectedAddress);
+            const tx = await tronWeb.transactionBuilder.sendTrx(to, amount, account.address);
+            console.log('tx', tx);
+
             const signedTx = await tronWeb.trx.sign(tx);
             const broastTx = await tronWeb.trx.sendRawTransaction(signedTx);
             return JSON.stringify(broastTx);

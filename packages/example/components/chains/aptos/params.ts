@@ -24,4 +24,15 @@ export default {
       }),
     },
   ],
+  signGenericTransaction: (address: string) => [
+    {
+      id: 'signGenericTransaction',
+      name: 'signGenericTransaction',
+      value: JSON.stringify({
+        args: [address, '100000'],
+        func: '0x1::coin::transfer',
+        type_args: ['0x1::aptos_coin::AptosCoin'],
+      }),
+    },
+  ],
 };

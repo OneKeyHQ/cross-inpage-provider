@@ -35,6 +35,8 @@ function ApiPayloadContent({
   const handleSetRequest = useCallback(
     (newRequest: string) => {
       dispatch({ type: 'SET_REQUEST', payload: newRequest });
+      dispatch({ type: 'SET_RESULT', payload: '' });
+      dispatch({ type: 'SET_VALIDATE_RESULT', payload: '' });
     },
     [dispatch],
   );

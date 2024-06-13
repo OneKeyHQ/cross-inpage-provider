@@ -387,7 +387,7 @@ export default {
           'NestedArray': [
             {
               'name': 'items',
-              'type': 'SingleItem[2]',
+              'type': 'SingleItem',
             },
           ],
           'SingleItem': [

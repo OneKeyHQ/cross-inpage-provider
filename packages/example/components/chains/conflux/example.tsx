@@ -66,7 +66,7 @@ export default function BTCExample() {
 
   useEffect(() => {
     const accountsChangedHandler = (accounts: string[]) => {
-      console.log('accountsChanged', accounts);
+      console.log('cfx [accountsChanged]', accounts);
 
       if (accounts.length) {
         setAccount({
@@ -77,7 +77,7 @@ export default function BTCExample() {
     };
 
     const chainChangedHandler = (chainId: string) => {
-      console.log('chainChanged', chainId);
+      console.log('cfx [chainChanged]', chainId);
 
       if (chainId) {
         setAccount({
@@ -88,11 +88,11 @@ export default function BTCExample() {
     };
     const connectHandler = (connectInfo: any) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      console.log('connect', connectInfo);
+      console.log('cfx [connect]', connectInfo);
     };
     const disconnectHandler = (error: any) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      console.log('disconnect', error);
+      console.log('cfx [disconnect]', error);
     };
 
     provider?.on('accountsChanged', accountsChangedHandler);

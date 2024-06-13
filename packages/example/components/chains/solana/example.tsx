@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { get, set } from 'lodash-es';
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
@@ -36,7 +36,7 @@ export default function Example() {
     },
   ]);
 
-  const { provider, account } = useWallet<IProviderApi>();
+  const { provider, setAccount, account } = useWallet<IProviderApi>();
   const connection = useMemo(() => new Connection('https://node.onekey.so/sol'), []);
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
@@ -68,6 +68,41 @@ export default function Example() {
   const onDisconnectWallet = async () => {
     await provider?.disconnect();
   };
+
+  useEffect(() => {
+    if (!provider) return;
+
+    const onConnectListener = (publicKey: PublicKey) => {
+      console.log(`solana [connect] ${publicKey.toBase58()}`);
+      setAccount({
+        ...account,
+        publicKey: publicKey.toBase58(),
+      });
+    };
+    const onDisconnectListener = () => {
+      console.log('solana [disconnect] 👋');
+    };
+    const onAccountChangeListener = (publicKey: PublicKey | null) => {
+      if (publicKey) {
+        console.log(`solana [accountChanged] Switched account to ${publicKey?.toBase58()}`);
+        setAccount({
+          ...account,
+          publicKey: publicKey.toBase58(),
+        });
+      } else {
+        console.log('solana [accountChanged] Switched unknown account');
+      }
+    };
+
+    provider.on('connect', onConnectListener);
+    provider.on('disconnect', onDisconnectListener);
+    provider.on('accountChanged', onAccountChangeListener);
+    return () => {
+      provider.removeListener('connect', onConnectListener);
+      provider.removeListener('disconnect', onDisconnectListener);
+      provider.removeListener('accountChanged', onAccountChangeListener);
+    };
+  }, [account, provider, setAccount]);
 
   return (
     <>

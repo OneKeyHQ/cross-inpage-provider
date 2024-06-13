@@ -105,7 +105,7 @@ export default function Example() {
 
   useEffect(() => {
     const accountsChangedHandler = (accounts: string[]) => {
-      console.log('evm accountsChanged', accounts);
+      console.log('evm [accountsChanged]', accounts);
 
       if (accounts.length) {
         setAccount({
@@ -116,7 +116,7 @@ export default function Example() {
     };
 
     const chainChangedHandler = (chainId: string) => {
-      console.log('evm chainChanged', chainId);
+      console.log('evm [chainChanged]', chainId);
 
       if (chainId) {
         setAccount({
@@ -127,11 +127,11 @@ export default function Example() {
     };
     const connectHandler = (connectInfo: any) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      console.log('evm connect', connectInfo);
+      console.log('evm [connect]', connectInfo);
     };
     const disconnectHandler = (error: any) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      console.log('evm disconnect', error);
+      console.log('evm [disconnect]', error);
     };
 
     provider?.on('accountsChanged', accountsChangedHandler);
@@ -317,7 +317,7 @@ export default function Example() {
       <ApiGroup title="Sign Message">
         <ApiPayload
           title="eth_getEncryptionPublicKey"
-          description="获取公钥"
+          description="（已经弃用）获取公钥"
           onExecute={async () => {
             const res = await provider?.request({
               'method': 'eth_getEncryptionPublicKey',

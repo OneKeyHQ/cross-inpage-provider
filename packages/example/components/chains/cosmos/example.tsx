@@ -31,6 +31,8 @@ import {
 import params, { networks } from './params';
 import { CosmosNodeClient } from './rpc';
 import { toast } from '../../ui/use-toast';
+import { Textarea } from '../../ui/textarea';
+import { jsonToUint8Array } from '../../../lib/uint8array';
 
 function removeNull(obj: any): any {
   if (obj !== null && typeof obj === 'object') {
@@ -356,6 +358,36 @@ export default function Example() {
         <ApiPayload
           title="sendTx"
           description="sendTx"
+          generateRequestFrom={() => {
+            return <Textarea name="tx" placeholder="将 signDirect 的执行结果复制粘贴到这里" />;
+          }}
+          // eslint-disable-next-line @typescript-eslint/require-await
+          onGenerateRequest={async (fromData: Record<string, any>) => {
+            const requestTx = JSON.parse(fromData?.['tx'] as string);
+
+            let encodeTx = '';
+            if (requestTx?.signed?.bodyBytes && requestTx?.signed?.authInfoBytes) {
+              // Direct sign
+              const bodyBytes = jsonToUint8Array(requestTx?.signed?.bodyBytes);
+              const authInfoBytes = jsonToUint8Array(requestTx?.signed?.authInfoBytes);
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+              const signatures = [Buffer.from(requestTx?.signature?.signature ?? '', 'base64')];
+
+              const txRaw = TxRaw.encode(
+                TxRaw.fromPartial({
+                  bodyBytes: bodyBytes,
+                  authInfoBytes: authInfoBytes,
+                  signatures,
+                }),
+              ).finish();
+              encodeTx = Buffer.from(txRaw).toString('hex');
+            } else {
+              // Amino sign
+              throw new Error('Not support generate amino Tx');
+            }
+
+            return encodeTx;
+          }}
           onExecute={async (request: string) => {
             const tx = hexToBytes(request);
             // @ts-expect-error

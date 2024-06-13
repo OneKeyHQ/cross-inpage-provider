@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { get } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
@@ -23,7 +23,7 @@ export default function Example() {
     },
   ]);
 
-  const { provider } = useWallet<IProviderApi>();
+  const { provider, setAccount, account } = useWallet<IProviderApi>();
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -35,13 +35,42 @@ export default function Example() {
     const provider = get(window, providerDetail.inject) as IProviderApi | undefined;
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, no-unsafe-optional-chaining
-    const { accounts } = await provider?.enable();
+    const { address } = await provider?.connect();
 
     return {
       provider,
-      address: accounts[0],
+      address: address,
     };
   };
+
+  useEffect(() => {
+    const accountsChangedHandler = (address: string) => {
+      console.log('algo [accountChanged]', address);
+
+      if (address) {
+        setAccount({
+          ...account,
+          address: address,
+        });
+      }
+    };
+    const connectHandler = (connectInfo: { address: string }) => {
+      console.log('algo [connect]', connectInfo);
+    };
+    const disconnectHandler = () => {
+      console.log('algo [disconnect]');
+    };
+
+    provider?.on('accountChanged', accountsChangedHandler);
+    provider?.on('connect', connectHandler);
+    provider?.on('disconnect', disconnectHandler);
+
+    return () => {
+      provider?.off('accountChanged', accountsChangedHandler);
+      provider?.off('connect', connectHandler);
+      provider?.off('disconnect', disconnectHandler);
+    };
+  }, [account, provider, setAccount]);
 
   return (
     <>
@@ -59,6 +88,16 @@ export default function Example() {
         onConnect={onConnectWallet}
       />
 
+      <ApiGroup title="Legacy Basics">
+        <ApiPayload
+          title="connect"
+          description="(Legacy) 连接钱包"
+          onExecute={async (request: string) => {
+            const res = await provider?.connect();
+            return JSON.stringify(res);
+          }}
+        />
+      </ApiGroup>
       <ApiGroup title="Basics">
         <ApiPayload
           title="enable"

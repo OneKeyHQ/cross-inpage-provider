@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps, networks } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import { useWallet } from '../../../components/connect/WalletContext';
@@ -14,34 +14,93 @@ import {
   web3FromSource,
 } from '@polkadot/extension-dapp';
 import { stringToU8a, u8aToHex, u8aToU8a, u8aWrapBytes } from '@polkadot/util';
-import { signatureVerify, base58Decode, checkAddressChecksum } from '@polkadot/util-crypto';
+import {
+  signatureVerify,
+  base58Decode,
+  checkAddressChecksum,
+  encodeAddress,
+} from '@polkadot/util-crypto';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { hexToU8a, stringToHex } from '@polkadot/util';
 import params from './params';
 import { toast } from '../../ui/use-toast';
+import InfoLayout from '../../InfoLayout';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([]);
 
   const { provider, setAccount, account } = useWallet<IProviderApi>();
 
-  const [api, setApi] = useState<ApiPromise>();
+  const [networkAddressPrefix, setNetworkAddressPrefix] = useState<number>();
+  const [dynamicAddress, setDynamicAddress] = useState<string>('');
+
+  const currentAddress = useMemo(() => {
+    return account?.address;
+  }, [account]);
+  const currentNetworkAddressPrefix = useMemo(() => {
+    return networkAddressPrefix;
+  }, [networkAddressPrefix]);
+
+  const apiRef = useRef<ApiPromise>();
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    (async () => {
-      if (!account?.address) {
-        return;
+    if (currentNetworkAddressPrefix !== undefined) {
+      const networkInfo = networks.find((n) => n.addressPrefix === currentNetworkAddressPrefix);
+      if (networkInfo) {
+        const wsProvider = new WsProvider(networkInfo.url);
+        const newApiProvider = new ApiPromise({ provider: wsProvider });
+
+        console.log(
+          'polkadot newApiProvider [useEffect]',
+          currentNetworkAddressPrefix,
+          networkInfo.url,
+        );
+
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        newApiProvider.isReady.then(() => {
+          apiRef.current = newApiProvider;
+          return () => {
+            void newApiProvider.disconnect();
+            void wsProvider.disconnect();
+          }; // 清理函数
+        });
       }
-      const decoded = base58Decode(account?.address);
+    } else {
+      console.log('polkadot newApiProvider [useEffect] undefined');
+      apiRef.current = undefined;
+    }
+  }, [currentNetworkAddressPrefix]);
+
+  useEffect(() => {
+    console.log('polkadot [useEffect]', currentAddress, currentNetworkAddressPrefix);
+
+    if (currentAddress && currentNetworkAddressPrefix != null) {
+      const decoded = base58Decode(currentAddress);
       const [isValid, endPos, ss58Length, ss58Decoded] = checkAddressChecksum(decoded);
 
-      const networkInfo = networks.find((n) => n.addressPrefix === ss58Decoded);
+      const networkInfo = networks.find((n) => n.addressPrefix === currentNetworkAddressPrefix);
 
-      const wsProvider = new WsProvider(networkInfo.url);
-      const api = await ApiPromise.create({ provider: wsProvider });
-      setApi(api);
-    })();
+      if (!networkInfo) {
+        return;
+      }
+      setDynamicAddress(
+        encodeAddress(decoded.subarray(ss58Length, endPos), networkInfo.addressPrefix),
+      );
+    } else {
+      setDynamicAddress(undefined);
+    }
+  }, [currentAddress, currentNetworkAddressPrefix]);
+
+  useEffect(() => {
+    if (!account?.address) {
+      return;
+    }
+    const decoded = base58Decode(account?.address);
+    const [isValid, endPos, ss58Length, ss58Decoded] = checkAddressChecksum(decoded);
+
+    const networkInfo = networks.find((n) => n.addressPrefix === ss58Decoded);
+    setNetworkAddressPrefix(networkInfo.addressPrefix);
   }, [account?.address, provider]);
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
@@ -61,31 +120,39 @@ export default function Example() {
       return;
     }
 
-    const [account] = await provider.accounts.get();
+    const accounts = await provider?.accounts?.get();
 
+    console.log('polkadot [connect wallet]', accounts?.[0]?.address);
+
+    const account = accounts?.[0];
     return {
       provider,
-      address: account.address,
+      address: account?.address ?? '',
+      name: account?.name ?? '',
+      type: account?.type ?? '',
     };
   };
 
   const listenerRef = useRef<() => void>();
   useEffect(() => {
-    if (!api) {
+    if (!apiRef.current) {
+      return;
+    }
+    if (!provider) {
       return;
     }
     void web3AccountsSubscribe((accounts) => {
-      console.log('polkadot web3AccountsSubscribe', accounts);
-      
+      console.log('polkadot [web3AccountsSubscribe]', accounts);
+
       if (accounts.length === 0) {
         return;
       }
       const [account] = accounts;
       setAccount({
-        address: account.address,
+        address: account?.address,
         // @ts-expect-error
-        name: account.meta?.name,
-        provider: provider,
+        name: account?.name,
+        type: account?.type ?? '',
       });
     }).then((listener) => {
       listenerRef.current = listener;
@@ -94,7 +161,7 @@ export default function Example() {
     return () => {
       listenerRef.current?.();
     };
-  }, [api, provider, setAccount]);
+  }, [provider, setAccount]);
 
   return (
     <>
@@ -120,9 +187,34 @@ export default function Example() {
         onConnect={onConnectWallet}
       />
 
+      <InfoLayout title="该内容是动态计算的">
+        <p>只链接 Dot 账户即可，在这个切换不同网络即可发送不同网络的资产。</p>
+        <Select
+          value={networkAddressPrefix?.toString()}
+          onValueChange={(addressPrefix) => {
+            const chain = networks.find(
+              (chain) => chain.addressPrefix.toString() === addressPrefix,
+            );
+            setNetworkAddressPrefix(chain?.addressPrefix);
+          }}
+        >
+          <SelectTrigger className="w-[260px]">
+            <SelectValue placeholder="Change Polkadot Network" />
+          </SelectTrigger>
+          <SelectContent>
+            {networks.map((chain) => (
+              <SelectItem key={chain.name} value={chain.addressPrefix.toString()}>
+                <span className="font-medium">{chain.name}</span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {dynamicAddress && <p>地址: {dynamicAddress}</p>}
+      </InfoLayout>
+
       <ApiGroup title="Basics">
         <ApiPayload
-          title="Accounts Get"
+          title="accounts.get"
           description="获取账户权限"
           disableRequestContent
           onExecute={async (request: string) => {
@@ -131,7 +223,7 @@ export default function Example() {
           }}
         />
         <ApiPayload
-          title="SignRaw"
+          title="signRaw"
           description="签名消息"
           presupposeParams={params.signRaw}
           onExecute={async (request: string) => {
@@ -140,7 +232,7 @@ export default function Example() {
             const injector = await web3FromSource(account?.meta?.source);
             const res = await injector.signer.signRaw({
               data: message,
-              address: account.address,
+              address: currentAddress,
               type: 'bytes',
             });
             return JSON.stringify(res);
@@ -162,9 +254,9 @@ export default function Example() {
           }}
         />
         <ApiPayload
-          title="SignAndSend"
+          title="signAndSend"
           description="签名并发送交易"
-          presupposeParams={params.signAndSend(account?.address || '')}
+          presupposeParams={params.signAndSend(dynamicAddress || '')}
           onExecute={async (request: string) => {
             const {
               to,
@@ -178,10 +270,10 @@ export default function Example() {
             const injector = await web3FromSource(account?.meta?.source);
 
             return new Promise((resolve, reject) => {
-              api.tx.balances
+              apiRef.current.tx.balances
                 .transferKeepAlive(to, value)
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                .signAndSend(account?.address, { signer: injector.signer }, (status) => {
+                .signAndSend(currentAddress, { signer: injector.signer }, (status) => {
                   resolve(JSON.stringify(status));
                 })
                 .catch((e) => {

@@ -27,7 +27,6 @@ import sating from './sites/sating';
 import lidofi from './sites/lidofi';
 import eigenlayer from './sites/eigenlayer';
 import rocketpool from './sites/rocketpool';
-import avocado from './sites/avocado';
 import liteInstadapp from './sites/liteInstadapp';
 import methMantle from './sites/methMantle';
 import balancerFi from './sites/balancerFi';
@@ -71,7 +70,6 @@ function hackAllConnectButtons() {
   lidofi()
   eigenlayer()
   rocketpool()
-  avocado()
   liteInstadapp()
   methMantle()
   balancerFi()

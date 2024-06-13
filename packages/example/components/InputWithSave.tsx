@@ -5,10 +5,16 @@ import { Input } from './ui/input';
 export type IInputWithSaveProps = {
   storageKey: string;
   onChange: (value: string) => void;
+  type?: 'text' | 'number';
   defaultValue?: string;
 };
 
-export function InputWithSave({ storageKey, onChange, defaultValue }: IInputWithSaveProps) {
+export function InputWithSave({
+  storageKey,
+  onChange,
+  defaultValue,
+  type = 'text',
+}: IInputWithSaveProps) {
   const [inputValue, setInputValue] = useState('');
 
   // 初始化时从 localStorage 中获取值
@@ -19,10 +25,13 @@ export function InputWithSave({ storageKey, onChange, defaultValue }: IInputWith
   }, [storageKey, defaultValue, onChange]);
 
   // 使用 useCallback 来定义 debouncedChangeHandler
-  const debouncedChangeHandler = useCallback(debounce((value: string) => {
-    localStorage.setItem(storageKey, value);
-    onChange(value);
-  }, 300), [storageKey, onChange]);
+  const debouncedChangeHandler = useCallback(
+    debounce((value: string) => {
+      localStorage.setItem(storageKey, value);
+      onChange(value);
+    }, 300),
+    [storageKey, onChange],
+  );
 
   // 清除 debounce
   useEffect(() => {
@@ -38,6 +47,7 @@ export function InputWithSave({ storageKey, onChange, defaultValue }: IInputWith
   return (
     <Input
       key={storageKey}
+      type={type}
       value={inputValue}
       className="w-full p-2 border border-gray-300 rounded-md"
       onChange={handleChange}

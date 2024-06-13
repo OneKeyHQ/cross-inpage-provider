@@ -40,12 +40,12 @@ export default function BTCExample() {
     await provider?.enable();
 
     const {
-      node: { pubkey },
+      node: { pubkey, alias },
     } = await provider?.getInfo();
 
     return {
       provider,
-      pubkey,
+      pubkey: pubkey ?? alias,
     };
   };
 
@@ -88,7 +88,15 @@ export default function BTCExample() {
           title="enable"
           description="连接钱包"
           onExecute={async (request: string) => {
-            const res = await provider?.enable();
+            await provider?.enable();
+            return 'success';
+          }}
+        />
+        <ApiPayload
+          title="isEnabled"
+          description="连接钱包"
+          onExecute={async (request: string) => {
+            const res = await provider?.isEnabled();
             return JSON.stringify(res);
           }}
         />
@@ -100,7 +108,8 @@ export default function BTCExample() {
             const res = await provider?.getInfo();
             return JSON.stringify(res);
           }}
-        /><ApiPayload
+        />
+        <ApiPayload
           title="getBalance"
           description="获取余额"
           onExecute={async () => {
@@ -165,6 +174,20 @@ export default function BTCExample() {
             }
             const res = await provider?.sendPayment(request);
             return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="sendPaymentAsync"
+          description="支付 invoice，要通过 makeInvoice 生成 invoice，复制 paymentRequest 到 request 中"
+          onExecute={(request: string) => {
+            if (!request) {
+              toast({
+                title: '请通过 makeInvoice 生成 invoice，复制 paymentRequest 到 request 中',
+              });
+              return;
+            }
+            provider?.sendPaymentAsync(request);
+            return Promise.resolve('success');
           }}
         />
         <ApiPayload

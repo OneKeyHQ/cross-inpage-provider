@@ -1,13 +1,9 @@
-/* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable no-unsafe-optional-chaining */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/require-await */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
-import { useRef, useState } from 'react';
-import { get } from 'lodash';
+import { useEffect, useRef, useState } from 'react';
+import { get, isEmpty } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import { useWallet } from '../../../components/connect/WalletContext';
@@ -16,11 +12,17 @@ import DappList from '../../../components/DAppList';
 import params from './params';
 import { toast } from '../../ui/use-toast';
 import { Input } from '../../ui/input';
-import { Blockfrost, Lucid, type SignedMessage } from 'lucid-cardano';
+import { Blockfrost, Lucid, C, coreToUtxo } from 'lucid-cardano';
+import type { WalletApi, SignedMessage } from 'lucid-cardano';
 import { InputWithSave } from '../../InputWithSave';
+import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
 
 // https://use-cardano.alangaming.com/
 // https://github.com/spacebudz/lucid
+
+function cborToAddress(cbor: string) {
+  return C.Address.from_bytes(hexToBytes(cbor)).to_bech32(undefined);
+}
 
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -36,14 +38,14 @@ export default function Example() {
     },
   ]);
 
-  const { provider, account } = useWallet<IProviderApi>();
+  const { provider, setAccount, account } = useWallet<IProviderApi>();
   const projectIdRef = useRef<string | null>(null);
 
-  const [walletApi, setWalletApi] = useState<any | null>(null);
+  const [walletApi, setWalletApi] = useState<WalletApi | null>(null);
   const [lucid, setLucid] = useState<Lucid | null>(null);
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
-    if (!projectIdRef.current) {
+    if (!projectIdRef.current && !process.env.NEXT_PUBLIC_BLOCKFROST_CARDANO_PROJECT_ID) {
       toast({
         title: 'Project ID is required',
         description: 'Please set the project ID in the input box above',
@@ -85,6 +87,10 @@ export default function Example() {
       console.log('error', error);
     }
 
+    let projectId = projectIdRef.current;
+    if (!projectId || isEmpty(projectId)) {
+      projectId = process.env.NEXT_PUBLIC_BLOCKFROST_CARDANO_PROJECT_ID;
+    }
     const lucid = await Lucid.new(
       // test id
       new Blockfrost('https://cardano-mainnet.blockfrost.io/api/v0', projectIdRef.current),
@@ -104,6 +110,45 @@ export default function Example() {
     };
   };
 
+  useEffect(() => {
+    if (!provider) return;
+
+    const onConnectListener = (address: string) => {
+      console.log(`cardano on [connect] ${address}`);
+    };
+    const onAccountChangeListener = (address: string) => {
+      console.log(`cardano on [accountChange] ${address}`);
+      if (!address) return;
+      setAccount({
+        ...account,
+        address,
+      });
+    };
+
+    const onAction = provider?.experimental?.on || provider?.on;
+
+    if (onAction) {
+      try {
+        onAction?.('connect', onConnectListener);
+        onAction?.('accountChanged', onAccountChangeListener);
+      } catch (error) {
+        // ignore
+      }
+    }
+
+    return () => {
+      const offAction = provider?.experimental?.off || provider?.off;
+      if (offAction) {
+        try {
+          offAction?.('connect', onConnectListener);
+          offAction?.('accountChanged', onAccountChangeListener);
+        } catch (error) {
+          // ignore
+        }
+      }
+    };
+  }, [account, provider, setAccount]);
+
   return (
     <>
       <ApiGroup title="Blockfrost Project ID">
@@ -121,14 +166,15 @@ export default function Example() {
       <ConnectButton<IProviderApi>
         fetchWallets={() => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          const wallets = Object.keys(window?.cardano)
-          .filter((name)=>['onekey','lace','nami','yoroi'].includes(name)).map((key) => {
-            return {
-              uuid: key,
-              name: key,
-              inject: `cardano.${key}`,
-            };
-          });
+          const wallets = Object.keys(window?.cardano ?? {})
+            .filter((name) => ['onekey', 'lace', 'nami', 'yoroi'].includes(name))
+            .map((key) => {
+              return {
+                uuid: key,
+                name: key,
+                inject: `cardano.${key}`,
+              };
+            });
 
           // walletsRef.current =   walletsRef.current + wallets 保证不会重复
           wallets.forEach((wallet) => {
@@ -177,7 +223,7 @@ export default function Example() {
           description="获取 API 版本"
           disableRequestContent
           onExecute={async (request: string) => {
-            return JSON.stringify(provider?.apiVersion);
+            return provider?.apiVersion;
           }}
         />
         <ApiPayload
@@ -185,7 +231,7 @@ export default function Example() {
           description="获取钱包名称"
           disableRequestContent
           onExecute={async (request: string) => {
-            return JSON.stringify(provider?.name);
+            return provider?.name;
           }}
         />
         <ApiPayload
@@ -193,24 +239,7 @@ export default function Example() {
           description="获取图标"
           disableRequestContent
           onExecute={async (request: string) => {
-            return JSON.stringify(provider?.icon);
-          }}
-        />
-        <ApiPayload
-          title="supportedExtensions"
-          description="获取支持的扩展"
-          disableRequestContent
-          onExecute={async (request: string) => {
-            return JSON.stringify(provider?.supportedExtensions);
-          }}
-        />
-        <ApiPayload
-          title="getExtensions"
-          description="获取扩展"
-          disableRequestContent
-          onExecute={async (request: string) => {
-            const res = await provider?.getExtensions();
-            return JSON.stringify(res);
+            return provider?.icon;
           }}
         />
         <ApiPayload
@@ -218,67 +247,110 @@ export default function Example() {
           description="获取网络 ID"
           disableRequestContent
           onExecute={async (request: string) => {
-            const res = await provider?.getNetworkId();
-            return JSON.stringify(res);
+            const res = await walletApi?.getNetworkId();
+            return res.toString();
           }}
         />
         <ApiPayload
           title="getUsedAddresses"
-          description="获取地址列表"
+          description="获取地址列表。(origin 是接口原始信息，decode 是本网站解析的结果)"
           disableRequestContent
           onExecute={async (request: string) => {
             const res = await walletApi?.getUsedAddresses();
-            return JSON.stringify(res);
+            const decode = res.map((address) => {
+              return cborToAddress(address);
+            });
+            return JSON.stringify({
+              origin: res,
+              decode,
+            });
           }}
         />
         <ApiPayload
           title="getUnusedAddresses"
-          description="获取未使用地址"
+          description="获取未使用地址。(origin 是接口原始信息，decode 是本网站解析的结果)"
           disableRequestContent
           onExecute={async (request: string) => {
             const res = await walletApi?.getUnusedAddresses();
-            return JSON.stringify(res);
+            const decode = res.map((address) => {
+              return cborToAddress(address);
+            });
+            return JSON.stringify({
+              origin: res,
+              decode,
+            });
           }}
         />
         <ApiPayload
           title="getChangeAddress"
-          description="获取找零地址"
+          description="获取找零地址。(origin 是接口原始信息，decode 是本网站解析的结果)"
           disableRequestContent
           onExecute={async (request: string) => {
             const res = await walletApi?.getChangeAddress();
-            return JSON.stringify(res);
+            const address = cborToAddress(res);
+
+            return JSON.stringify({
+              origin: res,
+              decode: address,
+            });
           }}
-        /><ApiPayload
+        />
+        <ApiPayload
           title="getRewardAddresses"
-          description="获取奖励地址"
+          description="获取奖励地址。(origin 是接口原始信息，decode 是本网站解析的结果)"
           disableRequestContent
           onExecute={async (request: string) => {
             const res = await walletApi?.getRewardAddresses();
-            return JSON.stringify(res);
+            const decode = res.map((address) => {
+              return cborToAddress(address);
+            });
+            return JSON.stringify({
+              origin: res,
+              decode,
+            });
           }}
         />
         <ApiPayload
           title="getBalance"
-          description="获取余额"
+          description="获取余额。(origin 是接口原始信息，decode 是本网站解析的结果)"
           disableRequestContent
           onExecute={async (request: string) => {
             const res = await walletApi?.getBalance();
-            return JSON.stringify(res);
+            const decode = C.Value.from_bytes(hexToBytes(res));
+            return JSON.stringify({
+              origin: res,
+              decode: JSON.parse(decode.to_json()),
+            });
           }}
-        /><ApiPayload
-          title="getUtoxs"
-          description="获取 UTXO 列表"
+        />
+        <ApiPayload
+          title="getUtxos"
+          description="获取 UTXO 列表。(origin 是接口原始信息，decode 是本网站解析的结果)"
           disableRequestContent
           onExecute={async (request: string) => {
-            const res = await walletApi?.getUtoxs();
-            return JSON.stringify(res);
+            const res = await walletApi?.getUtxos();
+            const decode = res.map((utxo) => {
+              const decodeUtxo = C.TransactionUnspentOutput.from_bytes(hexToBytes(utxo));
+              return coreToUtxo(decodeUtxo);
+            });
+
+            return JSON.stringify(
+              {
+                origin: res,
+                decode,
+              },
+              (key, value) =>
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+                typeof value === 'bigint' ? value.toString() : value,
+            );
           }}
-        /><ApiPayload
+        />
+        <ApiPayload
           title="getCollateral"
           description="获取抵押物"
           disableRequestContent
           onExecute={async (request: string) => {
-            const res = await walletApi?.getCollateral();
+            const res = await walletApi?.experimental?.getCollateral();
             return JSON.stringify(res);
           }}
         />
@@ -293,16 +365,11 @@ export default function Example() {
             return JSON.stringify(res);
           }}
           onValidate={async (request: string, response: string) => {
-
-            const signedMessage = JSON.parse(response) as SignedMessage
+            const signedMessage = JSON.parse(response) as SignedMessage;
 
             console.log('signedMessage', signedMessage);
-          
-            const res = lucid.verifyMessage(
-              account.address,
-              request,
-              signedMessage,
-            );
+
+            const res = lucid.verifyMessage(account.address, request, signedMessage);
             return Promise.resolve(JSON.stringify(res));
           }}
         />
@@ -326,6 +393,7 @@ export default function Example() {
                   name="toAddress"
                   defaultValue={account?.address ?? ''}
                 />
+                <Input label="币种" type="text" name="coin" defaultValue={'ADA'} />
                 <Input
                   label="转账金额(最小值大约 0.96 ADA)"
                   type="number"
@@ -338,6 +406,7 @@ export default function Example() {
           onGenerateRequest={async (fromData: Record<string, any>) => {
             const toAddress = fromData['toAddress'] as string;
             const amount = parseInt(fromData['amount'] as string);
+            const coin = fromData['coin'] as string;
 
             console.log('toAddress', toAddress);
             console.log('amount', amount);
@@ -350,22 +419,46 @@ export default function Example() {
               throw new Error('toAddress or amount is required');
             }
 
-            const tx = await lucid
-              .newTx()
-              .payToAddress(toAddress, { lovelace: BigInt(amount) })
-              .complete();
+            try {
+              let unit = 'ada';
+              if (coin?.toUpperCase() === 'ADA') {
+                unit = 'lovelace';
+              } else {
+                unit = coin;
+              }
 
-            console.log('tx', tx.toString());
+              const tx = await lucid
+                .newTx()
+                .payToAddress(toAddress, { [unit]: BigInt(amount) })
+                .complete({
+                  coinSelection: true,
+                });
 
-            return Promise.resolve(tx.toString());
+              return Promise.resolve(tx.toString());
+            } catch (error) {
+              console.log('error', error);
+
+              if (error === 'InputsExhaustedError') {
+                throw new Error('余额不足, InputsExhaustedError');
+              }
+
+              throw error;
+            }
           }}
         />
         <ApiPayload
           title="submitTx"
           description="广播交易"
+          presupposeParams={[
+            {
+              id: 'submitTx',
+              name: 'submitTx',
+              value: '复制 signTx 签名结果到这里',
+            },
+          ]}
           onExecute={async (request: string) => {
-            const res = await walletApi?.submitTx(request, true);
-            return res as string;
+            const res = await walletApi?.submitTx(request);
+            return res;
           }}
         />
       </ApiGroup>

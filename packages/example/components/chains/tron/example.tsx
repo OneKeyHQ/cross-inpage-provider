@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable no-unsafe-optional-chaining */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
@@ -59,11 +60,11 @@ export default function BTCExample() {
       }
     }
 
-    const [address] = await provider.request<string[]>({ method: 'tron_accounts' });
+    // const [address] = await provider.request<string[]>({ method: 'tron_accounts' });
     return {
       provider,
-      // address: tronWeb.defaultAddress.base58,
-      address: address,
+      address: tronWeb.defaultAddress.base58,
+      // address: address,
     };
   };
 
@@ -71,17 +72,17 @@ export default function BTCExample() {
     if (!receiveAddress || isEmpty(receiveAddress)) {
       toast({
         title: 'Invalid Address',
-        description: '请在 Example 顶部填写接收地址，转账地址不能与发送地址相同',
+        description: '请在 Example 顶部填写接收地址，收款地址不能与发送地址相同',
       });
-      throw new Error('Invalid Address');
+      throw new Error('请在 Example 顶部填写接收地址，收款地址不能与发送地址相同');
     }
 
     if (account.address === receiveAddress) {
       toast({
         title: 'Invalid Address',
-        description: '转账地址不能与发送地址相同',
+        description: '收款地址不能与发送地址相同',
       });
-      throw new Error('Invalid Address');
+      throw new Error('收款地址不能与发送地址相同');
     }
   };
 
@@ -93,11 +94,13 @@ export default function BTCExample() {
           action: string;
           data: any;
         };
-      }
+      };
     }) => {
       console.log('tron on message', e.data);
 
       if (e.data.message && e.data.message.action === 'accountsChanged') {
+        console.log('tron [accountsChanged]', e.data.message.data);
+
         const { address } = e.data.message.data;
         setAccount({
           ...account,
@@ -105,11 +108,22 @@ export default function BTCExample() {
         });
       }
       if (e.data.message && e.data.message.action === 'setNode') {
+        console.log('tron [setNode]', e.data.message.data);
         // const { address } = e.data.message.data;
         // setAccount({
         //   ...account,
         //   address,
         // });
+      }
+      if (e.data.message && e.data.message.action === 'setAccount') {
+        console.log('tron [setAccount]', e.data.message.data);
+      }
+      if (e.data.message && e.data.message.action === 'connect') {
+        console.log('tron [connect]', e.data.message.data);
+      }
+
+      if (e.data.message && e.data.message.action === 'disconnect') {
+        console.log('tron [disconnect]', e.data.message.data);
       }
     };
 
@@ -135,7 +149,7 @@ export default function BTCExample() {
         }}
         onConnect={onConnectWallet}
       />
-      <ApiGroup title="转账地址">
+      <ApiGroup title="收款地址">
         <InputWithSave
           storageKey="tron-receive-address"
           onChange={setReceiveAddress}
@@ -193,7 +207,7 @@ export default function BTCExample() {
       <ApiGroup title="资产相关">
         <ApiPayload
           title="wallet_watchAsset"
-          description="添加 TRC20 资产"
+          description="（不支持）添加 TRC20 资产"
           presupposeParams={params.addToken}
           onExecute={async (request: string) => {
             const obj = JSON.parse(request);
@@ -208,7 +222,7 @@ export default function BTCExample() {
       <ApiGroup title="SignMessage">
         <ApiPayload
           title="SignMessage"
-          description="签名消息存在安全风险，硬件不支持"
+          description="（不支持）签名消息存在安全风险，硬件不支持"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
             const tronWeb = provider.tronWeb;
@@ -238,7 +252,7 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="SignMessage V2"
-          description="签名消息"
+          description="（不支持）签名消息"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
             const tronWeb = provider.tronWeb;
@@ -263,14 +277,12 @@ export default function BTCExample() {
           onExecute={async (request: string) => {
             checkReceiveAddress();
 
-            const [connectedAddress] = await provider.request<string[]>({
-              method: 'tron_accounts',
-            });
-
             const { to, amount } = JSON.parse(request);
 
             const tronWeb = provider.tronWeb;
-            const tx = await tronWeb.transactionBuilder.sendTrx(to, amount, connectedAddress);
+            const tx = await tronWeb.transactionBuilder.sendTrx(to, amount, account.address);
+            console.log('tx', tx);
+
             const signedTx = await tronWeb.trx.sign(tx);
             const broastTx = await tronWeb.trx.sendRawTransaction(signedTx);
             return JSON.stringify(broastTx);

@@ -90,7 +90,7 @@ function Example() {
 
       <ApiGroup title="SignMessage">
         <ApiPayload
-          title="SignMessage"
+          title="signMessage"
           description="签名消息, signMessage 不安全已经弃用, 目前（OneKey、Suiet、Sui Wallet、Martian） signMessage 实际实现已经变成了 signPersonalMessage"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
@@ -102,27 +102,25 @@ function Example() {
           }}
           onValidate={async (request: string, result: string) => {
             const {
-              messageBytes,
+              bytes,
               signature,
             }: {
-              messageBytes: string;
+              bytes: string;
               signature: string;
             } = JSON.parse(result);
 
-            try {
-              await verifySignature(hexToBytes(request), signature);
-            } catch (e) {
-              console.log(e);
-            }
             // const publicKey = await verifySignature(hexToBytes(request), signature);
-            const publicKey = await verifyPersonalMessage(hexToBytes(request), signature);
+            const publicKey = await verifyPersonalMessage(
+              Buffer.from(bytes, 'base64'),
+              signature,
+            );
 
             return (currentAccount.address === publicKey.toSuiAddress()).toString();
           }}
         />
 
         <ApiPayload
-          title="SignPersonalMessage"
+          title="signPersonalMessage"
           description="签名消息"
           presupposeParams={params.signPersonalMessage}
           onExecute={async (request: string) => {
@@ -141,7 +139,7 @@ function Example() {
               signature: string;
             } = JSON.parse(result);
 
-            const publicKey = await verifyPersonalMessage(hexToBytes(request), signature);
+            const publicKey = await verifyPersonalMessage(Buffer.from(bytes, 'base64'), signature);
 
             return (currentAccount.address === publicKey.toSuiAddress()).toString();
           }}
@@ -149,7 +147,7 @@ function Example() {
       </ApiGroup>
       <ApiGroup title="Transaction">
         <ApiPayload
-          title="SignTransaction"
+          title="signTransactionBlock"
           description="签名交易"
           presupposeParams={signTransactionPresupposeParams}
           onExecute={async (request: string) => {
@@ -182,10 +180,25 @@ function Example() {
             });
             return JSON.stringify(res);
           }}
+          onValidate={async (request: string, result: string) => {
+            const {
+              transactionBlockBytes,
+              signature,
+            }: {
+              transactionBlockBytes: string;
+              signature: string;
+            } = JSON.parse(result);
+            const publicKey = await verifyTransactionBlock(
+              Buffer.from(transactionBlockBytes, 'base64'),
+              signature,
+            );
+
+            return (currentAccount.address === publicKey.toSuiAddress()).toString();
+          }}
         />
 
         <ApiPayload
-          title="SignAndExecuteTransactionBlock"
+          title="signAndExecuteTransactionBlock"
           description="签名并执行交易"
           presupposeParams={signTransactionPresupposeParams}
           onExecute={async (request: string) => {
@@ -203,8 +216,18 @@ function Example() {
             transfer.setSender(from);
             const [coin] = transfer.splitCoins(transfer.gas, [transfer.pure(amount)]);
             transfer.transferObjects([coin], transfer.pure(to));
+
+            const tx = await sponsorTransaction(
+              client,
+              from,
+              await transfer.build({
+                client,
+                onlyTransactionKind: true,
+              }),
+            );
+
             const res: unknown = await signAndExecuteTransactionBlock({
-              transactionBlock: transfer,
+              transactionBlock: tx,
               account: currentAccount,
             });
             return JSON.stringify(res);

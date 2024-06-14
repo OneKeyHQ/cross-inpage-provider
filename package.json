@@ -5,7 +5,7 @@
     "node": "^16 || ^18 || ^20"
   },
   "scripts": {
-    "bootstrap": "lerna bootstrap",
+    "bootstrap": "lerna bootstrap --include-dependencies",
     "clean": "lerna clean --yes",
     "clean-workspace": "yarn clean && lerna run clean",
     "lint": "yarn run eslint --ext .ts,.tsx . --ignore-pattern /packages/example/**/*",

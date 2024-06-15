@@ -1,7 +1,7 @@
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { hackConnectButton } from '../hackConnectButton';
 import { SitesInfo, sitesConfig } from './config';
-import { findIconAndNameByParent as defaultFindIconAndName } from './findIconAndName';
+import { findIconAndNameByName as defaultFindIconAndName } from './findIconAndName';
 import { replaceIcon as defaultReplaceIcon } from './imgUtils';
 import { replaceText as defaultReplaceText, makeTextEllipse } from './textUtils';
 import { FindResultType } from './type';
@@ -59,10 +59,15 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                     ? document.querySelector(container)
                     : container();
                   if (!containerElement) {
-                    universalLog.warn('containerElement is null, container=',container);
+                    universalLog.warn('containerElement is null, container=', container);
                     continue;
                   }
-                  result = defaultFindIconAndName(containerElement, name, constraintMap);
+                  result = defaultFindIconAndName(
+                    containerElement,
+                    name,
+                    'auto-search-icon',
+                    constraintMap,
+                  );
                 }
                 if (!result) {
                   universalLog.warn('no result found');
@@ -92,4 +97,4 @@ export default () => {
   } catch (e) {
     universalLog.warn(e);
   }
-}
+};

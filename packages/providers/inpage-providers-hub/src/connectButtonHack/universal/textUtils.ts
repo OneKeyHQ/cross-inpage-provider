@@ -14,6 +14,9 @@ export function makeTextEllipse(
 export function makeTextWrap(textNode: HTMLElement) {
   textNode.style.whiteSpace = 'normal';
 }
+export function makeTextAlignLeft(textNode: HTMLElement) {
+  textNode.style.textAlign = 'left';
+}
 
 export function replaceText(textNode: Text, newText: string) {
   const newTextNode = document.createTextNode(newText);

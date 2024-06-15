@@ -1,5 +1,5 @@
 import { ConstraintFn, FindResultType, Selector } from './type';
-import { findIconAndNameByParent } from './findIconAndName';
+import { findIconAndNameByName } from './findIconAndName';
 import { isClickable, universalLog } from './utils';
 import { isWalletIconSizeMatch } from './imgUtils';
 
@@ -30,5 +30,5 @@ export function findIconAndNameInShadowRoot(
     universalLog.warn('findIconAndNameInShadowRoot,length=', length);
     return null;
   }
-  return findIconAndNameByParent(containerElements[0], walletName, constraints);
+  return findIconAndNameByName(containerElements[0], walletName, 'auto-search-icon', constraints);
 }

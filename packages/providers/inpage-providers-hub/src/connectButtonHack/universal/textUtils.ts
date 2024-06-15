@@ -17,6 +17,9 @@ export function makeTextWrap(textNode: HTMLElement) {
 export function makeTextAlignLeft(textNode: HTMLElement) {
   textNode.style.textAlign = 'left';
 }
+export function makeTextAlignCenter(textNode: HTMLElement) {
+  textNode.style.textAlign = 'center';
+}
 
 export function replaceText(textNode: Text, newText: string) {
   const newTextNode = document.createTextNode(newText);

@@ -12,9 +12,9 @@ export function replaceIcon(originalNode: HTMLElement, newIconSrc: string) {
   if (originalNode instanceof HTMLImageElement) {
     originalNode.src = newIconSrc;
     originalNode.removeAttribute('srcset');
-    originalNode.style.width = width;
-    originalNode.style.height = height;
-    originalNode.classList.add(...Array.from(originalNode.classList));
+    // originalNode.style.width = width;
+    // originalNode.style.height = height;
+    // originalNode.classList.add(...Array.from(originalNode.classList));
     return originalNode;
   } else {
     const imgNode = createImageEle(newIconSrc);
@@ -57,28 +57,30 @@ export function findIconNodesByParent(parent: HTMLElement) {
 export function findWalletIconByParent(parent: HTMLElement, constraints: ConstraintFn[]) {
   const iconNodes = findIconNodesByParent(parent);
   if (iconNodes.length === 0) {
-    universalLog.warn(`no icon node found`, parent);
+    universalLog.warn(`no icon node found for parent`, parent);
     return null;
   }
   if (iconNodes.length > 1) {
     universalLog.warn(`more than one icon node found`, iconNodes.length, iconNodes);
-    return null;
+    throw new Error('more than one icon node found');
   }
   const icon = iconNodes[0];
   if (constraints.some((f) => !f(icon))) {
-    universalLog.warn('it doesnt satisfy the constraints');
-    return null;
+    throw new Error('it doesnt satisfy the constraints');
   }
   return icon;
 }
-//TODO:  deal with lazy loading image
-export function isWalletIconSizeMatch(walletIcon: HTMLElement) {
+//NOTE:  use function isWalletIconLessEqualThan with lazy loading image
+export function isWalletIconSizeMatch(
+  walletIcon: HTMLElement,
+  min = ICON_MIN_SIZE,
+  max = ICON_MAX_SIZE,
+) {
   const { width, height } = walletIcon.getBoundingClientRect();
-  const isMatch =
-    width < ICON_MAX_SIZE &&
-    width > ICON_MIN_SIZE &&
-    height < ICON_MAX_SIZE &&
-    height > ICON_MIN_SIZE;
+  const isMatch = width <= max && width >= min && height <= max && height >= min;
   !isMatch && universalLog.log('wallet icon size doesnot match: ', width, height);
   return isMatch;
+}
+export function isWalletIconLessEqualThan(walletIcon: HTMLElement) {
+  return isWalletIconSizeMatch(walletIcon, 0, ICON_MAX_SIZE);
 }

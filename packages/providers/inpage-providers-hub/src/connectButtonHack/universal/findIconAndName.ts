@@ -1,5 +1,5 @@
 import { MAX_LEVELS, MAX_SEARCH_LEVELS_By_IMG } from './consts';
-import { findWalletIconByParent, isWalletIconSizeMatch } from './imgUtils';
+import { findWalletIconByParent, isWalletIconLessEqualThan } from './imgUtils';
 import { findWalletTextByParent } from './textUtils';
 import { ConstraintFn, FindResultType, Selector } from './type';
 import { arrayify, isClickable, isInExternalLink, universalLog } from './utils';
@@ -12,13 +12,11 @@ import { arrayify, isClickable, isInExternalLink, universalLog } from './utils';
 export function findIconAndNameByName(
   containerElement: HTMLElement,
   walletName: RegExp,
-  icon:
-    | 'auto-search-icon'
-    | ((text: HTMLElement) => HTMLElement | null | undefined) = 'auto-search-icon',
+  icon: 'auto-search-icon' | ((text: Text) => HTMLElement | null | undefined) = 'auto-search-icon',
   constraints: { text: ConstraintFn[]; icon: ConstraintFn[] } = {
     text: [isClickable],
-    icon: [isWalletIconSizeMatch, isClickable],
-  },
+    icon: [isWalletIconLessEqualThan, isClickable],
+},
 ): FindResultType | null {
   const textNode = findWalletTextByParent(containerElement, walletName, constraints.text);
   if (!textNode || !textNode.parentElement) {
@@ -32,13 +30,12 @@ export function findIconAndNameByName(
 
   let iconNode: HTMLImageElement | HTMLElement | undefined | null = undefined;
   if (typeof icon === 'function') {
-    iconNode = icon(textNode.parentElement);
-  } else {
+    iconNode = icon(textNode);
+  } else if (icon === 'auto-search-icon') {
     let parent: HTMLElement | null = textNode.parentElement;
     let level = 0;
     while (parent && parent !== containerElement?.parentElement && level++ < MAX_LEVELS) {
       const walletIcon = findWalletIconByParent(parent, constraints.icon);
-      //TODO: unnecessary to traverse the parent node if the icon have more than one
       if (!walletIcon) {
         parent = parent.parentElement;
         continue;
@@ -46,6 +43,9 @@ export function findIconAndNameByName(
       iconNode = walletIcon;
       break;
     }
+  } else {
+    universalLog.warn('icon paramter should be a function or auto-search-icon');
+    return null;
   }
 
   if (!iconNode) {

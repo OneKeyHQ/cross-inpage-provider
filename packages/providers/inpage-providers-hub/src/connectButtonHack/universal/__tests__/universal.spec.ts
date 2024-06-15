@@ -19,7 +19,7 @@ test.describe('Connect Button Hack', () => {
   const availableSites = sitesConfig.slice(startIdx == -1 ? 0 : startIdx);
   const sitesOnly = availableSites.filter((e) => e.only);
   const sites = sitesOnly.length > 0 ? sitesOnly : availableSites;
-  const sitesWithoutSkip = sites.filter((e) => (typeof e.skip === 'boolean' ? !e.skip : true));
+  const sitesWithoutSkip = sites.filter((e) => (typeof e.skip === 'boolean' ? !e.skip : true))
 
   for (const site of sitesWithoutSkip) {
     const {

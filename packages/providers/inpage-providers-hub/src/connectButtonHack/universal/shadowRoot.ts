@@ -1,7 +1,7 @@
 import { ConstraintFn, FindResultType, Selector } from './type';
 import { findIconAndNameByName } from './findIconAndName';
 import { isClickable, universalLog } from './utils';
-import { isWalletIconSizeMatch } from './imgUtils';
+import { isWalletIconLessEqualThan, isWalletIconSizeMatch } from './imgUtils';
 
 export function findIconAndNameInShadowRoot(
   hostSelector: Selector,
@@ -9,7 +9,7 @@ export function findIconAndNameInShadowRoot(
   walletName: RegExp,
   constraints: { text: ConstraintFn[]; icon: ConstraintFn[] } = {
     text: [isClickable],
-    icon: [isWalletIconSizeMatch, isClickable],
+    icon: [isWalletIconLessEqualThan, isClickable],
   },
 ): FindResultType | null {
   const shadowRoots: ShadowRoot[] = Array.from(document.querySelectorAll<HTMLElement>(hostSelector))

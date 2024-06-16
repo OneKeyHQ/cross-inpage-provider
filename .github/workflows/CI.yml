@@ -28,7 +28,10 @@ jobs:
           node-version: ${{ matrix.node_version }}
           cache: 'yarn'
 
+      # fix src/classes.ts(2,27): error TS2307: Cannot find module 'fast-safe-stringify'
+      # exec `yarn bootstrap` twice
       - run: yarn
+      - run: yarn bootstrap
       - run: yarn bootstrap
       - run: yarn build
       - run: yarn test

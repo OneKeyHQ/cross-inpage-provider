@@ -191,7 +191,7 @@ export default function Example() {
         />
         <ApiPayload
           title="wallet_revokePermissions"
-          description="删除权限（暂时不支持）"
+          description="（暂不支持）删除权限"
           presupposeParams={params.revokePermissions}
           onExecute={async () => {
             const res = await provider?.request({
@@ -278,7 +278,7 @@ export default function Example() {
       <ApiGroup title="Chain">
         <ApiPayload
           title="wallet_addEthereumChain"
-          description="(暂时不支持) 添加 Chain"
+          description="(暂不支持) 添加 Chain"
           presupposeParams={params.addEthereumChain}
           onExecute={async (request: string) => {
             const res = await provider?.request({

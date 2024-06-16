@@ -31,6 +31,7 @@ export interface IProviderApi extends IProviderBTCApi {
   getPublicKeyHex(): Promise<string>;
   signMessageBIP322(message: string): Promise<string>;
   getNetworkFees(): Promise<Fees>;
+  getBTCTipHeight(): Promise<number>;
   getUtxos(address: string, amount: number): Promise<UTXO[]>;
 }
 

@@ -128,7 +128,7 @@ function Example() {
         />
         <ApiPayload
           title="signIn"
-          description="(不支持) Sign In With Solana EIP-4361"
+          description="(暂不支持) Sign In With Solana EIP-4361"
           onGenerateRequest={() => {
             const now: Date = new Date();
             const currentDateTime = now.toISOString();

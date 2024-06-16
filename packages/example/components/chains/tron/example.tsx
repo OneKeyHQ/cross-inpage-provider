@@ -222,7 +222,7 @@ export default function BTCExample() {
       <ApiGroup title="SignMessage">
         <ApiPayload
           title="SignMessage"
-          description="（不支持）签名消息存在安全风险，硬件不支持"
+          description="（暂不支持）签名消息存在安全风险，硬件不支持"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
             const tronWeb = provider.tronWeb;
@@ -252,7 +252,7 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="SignMessage V2"
-          description="（不支持）签名消息"
+          description="（暂不支持）签名消息"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
             const tronWeb = provider.tronWeb;

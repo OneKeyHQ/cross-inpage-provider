@@ -94,7 +94,7 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="isEnabled"
-          description="连接钱包"
+          description="（暂不支持）连接钱包"
           onExecute={async (request: string) => {
             const res = await provider?.isEnabled();
             return JSON.stringify(res);
@@ -178,7 +178,7 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="sendPaymentAsync"
-          description="支付 invoice，要通过 makeInvoice 生成 invoice，复制 paymentRequest 到 request 中"
+          description="（暂不支持）支付 invoice，要通过 makeInvoice 生成 invoice，复制 paymentRequest 到 request 中"
           onExecute={(request: string) => {
             if (!request) {
               toast({
@@ -192,7 +192,7 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="keysend"
-          description="keysend"
+          description="（暂不支持）keysend"
           presupposeParams={params.keysend}
           onExecute={async (request: string) => {
             const obj = JSON.parse(request);

@@ -12,6 +12,8 @@ import DappList from '../../../components/DAppList';
 import params from './params';
 import { recoverPersonalSignature } from '@metamask/eth-sig-util';
 import { toast } from '../../ui/use-toast';
+import { bufferToHex, ecrecover, pubToAddress, toBuffer } from 'ethereumjs-util';
+import { address, format } from 'js-conflux-sdk';
 
 export default function BTCExample() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -176,6 +178,17 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
+          title="cfx_chainId"
+          description="获取 chainId"
+          disableRequestContent
+          onExecute={async () => {
+            const res = await provider?.request<string>({
+              method: 'cfx_chainId',
+            });
+            return res;
+          }}
+        />
+        <ApiPayload
           title="cfx_getMaxGasLimit"
           description="获取最大 Gas Limit"
           disableRequestContent
@@ -213,7 +226,7 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="wallet_getBlockTime"
-          description="获取区块时间"
+          description="（暂不支持）获取区块时间"
           disableRequestContent
           onExecute={async () => {
             const res = await provider?.request<string[]>({
@@ -224,7 +237,7 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="wallet_getBlockchainExplorerUrl"
-          description="获取区块链浏览器地址"
+          description="（暂不支持）获取区块链浏览器地址"
           disableRequestContent
           onExecute={async () => {
             const res = await provider?.request<string[]>({
@@ -295,7 +308,7 @@ export default function BTCExample() {
       <ApiGroup title="Chain">
         <ApiPayload
           title="wallet_addConfluxChain"
-          description="（不需要支持）添加 Chain"
+          description="（暂不支持）添加 Chain"
           presupposeParams={params.addConfluxChain}
           onExecute={async (request) => {
             const res = await provider?.request({
@@ -307,7 +320,7 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="wallet_switchConfluxChain"
-          description="（不需要支持）切换 Chain"
+          description="（暂不支持）切换 Chain"
           presupposeParams={params.addConfluxChain}
           onExecute={async (request) => {
             const res = await provider?.request({
@@ -319,7 +332,7 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="wallet_watchAsset"
-          description="添加 Token"
+          description="（暂不支持）添加 Token"
           presupposeParams={params.watchAsset}
           onExecute={async (request) => {
             const res = await provider?.request({
@@ -332,6 +345,20 @@ export default function BTCExample() {
       </ApiGroup>
 
       <ApiGroup title="Sign Message">
+        <ApiPayload
+          title="cfx_sign"
+          description="cfx_sign"
+          presupposeParams={params.cfxSign}
+          onExecute={async (request) => {
+            const res = await provider?.request({
+              'method': 'cfx_sign',
+              'params': [account.address, request],
+              // @ts-expect-error
+              'from': account.address,
+            });
+            return res as string;
+          }}
+        />
         <ApiPayload
           title="personal_sign"
           description="personal_sign"

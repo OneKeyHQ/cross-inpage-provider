@@ -118,7 +118,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="RequestAccounts"
+          title="requestAccounts"
           description="请求连接 Wallet 获取账户"
           disableRequestContent
           onExecute={async (request: string) => {
@@ -127,7 +127,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="GetAccounts"
+          title="getAccounts"
           description="获取当前账户地址"
           disableRequestContent
           onExecute={async () => {
@@ -136,7 +136,7 @@ export default function BTCExample() {
           }}
         />{' '}
         <ApiPayload
-          title="GetAddress"
+          title="getAddress"
           description="获取当前账户地址"
           disableRequestContent
           onExecute={async () => {
@@ -145,7 +145,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="GetPublicKey"
+          title="getPublicKey"
           description="获取当前账户公钥"
           disableRequestContent
           onExecute={async () => {
@@ -154,7 +154,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="GetPublicKeyHex"
+          title="getPublicKeyHex"
           description="获取当前账户公钥"
           disableRequestContent
           onExecute={async () => {
@@ -163,7 +163,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="GetBalance"
+          title="getBalance"
           description="获取当前账户余额"
           disableRequestContent
           onExecute={async () => {
@@ -172,7 +172,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="GetUtxos"
+          title="getUtxos"
           description="获取当前账户 UTXO 列表"
           presupposeParams={params.getUtxos(account?.address ?? '')}
           onExecute={async (request: string) => {
@@ -188,7 +188,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="GetWalletProviderName"
+          title="getWalletProviderName"
           description="获取当前钱包提供商名称"
           disableRequestContent
           onExecute={async () => {
@@ -197,7 +197,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="GetNetworkFees"
+          title="getNetworkFees"
           description="获取当前网络费用"
           disableRequestContent
           onExecute={async () => {
@@ -206,7 +206,16 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="GetNetwork"
+          title="getBTCTipHeight"
+          description="获取 BTC 区块高度"
+          disableRequestContent
+          onExecute={async () => {
+            const res = await provider?.getBTCTipHeight();
+            return res?.toString();
+          }}
+        />
+        <ApiPayload
+          title="getNetwork"
           description="获取当前网络"
           disableRequestContent
           onExecute={async () => {
@@ -215,7 +224,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="SwitchNetwork"
+          title="switchNetwork"
           description="切换当前网络"
           presupposeParams={params.switchNetwork}
           onExecute={async (request: string) => {

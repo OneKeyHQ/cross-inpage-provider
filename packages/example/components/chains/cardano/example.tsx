@@ -347,7 +347,7 @@ export default function Example() {
         />
         <ApiPayload
           title="getCollateral"
-          description="获取抵押物"
+          description="（暂不支持）获取抵押物"
           disableRequestContent
           onExecute={async (request: string) => {
             const res = await walletApi?.experimental?.getCollateral();

@@ -14,7 +14,7 @@ async function dbg(locator: Locator) {
 }
 test.describe('Connect Button Hack', () => {
   console.log('total sites:', sitesConfig.length);
-  const startWebSite = 'app.turbos.finance';
+  const startWebSite = 'app.vesper.finance';
   const startIdx = sitesConfig.findIndex((e) => e.urls.includes(startWebSite));
   const availableSites = sitesConfig.slice(startIdx == -1 ? 0 : startIdx);
   const sitesOnly = availableSites.filter((e) => e.only);
@@ -53,26 +53,23 @@ test.describe('Connect Button Hack', () => {
           }
         }
 
-        const pass: boolean[] = [];
         for (const [provider, wallets = []] of Object.entries(walletsForProvider)) {
           for (const { updatedName, skip } of wallets) {
-            if(typeof skip === 'boolean' && skip){
+            if (typeof skip === 'boolean' && skip) {
               continue;
             }
-            if(typeof skip === 'function' && await skip(page)){
+            if (typeof skip === 'function' && await skip(page)) {
               continue;
             }
-            const skipThisWalletOnDevice = typeof skip === 'object' && skip !== null && (skip[device] === true );
-            if (skipThisWalletOnDevice ) {
+            const skipThisWalletOnDevice = typeof skip === 'object' && skip !== null && (skip[device] === true);
+            if (skipThisWalletOnDevice) {
               continue;
             }
             const walletId = createWalletId(provider as IInjectedProviderNames, updatedName);
             const locator = page.locator(walletId.walletIdSelector).first();
-            await dbg(locator);
             const existed = await locator.evaluate((el) => !!el && el.tagName === 'IMG');
+            console.log('[dbg]: walletId found existed', walletId.walletId, existed);
             expect(existed).toBeTruthy();
-            console.log('[dbg]:', walletId.walletId, 'is found');
-            pass.push(existed);
           }
         }
       });

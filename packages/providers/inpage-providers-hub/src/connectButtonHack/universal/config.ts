@@ -428,7 +428,6 @@ export const sitesConfig: SitesInfo[] = [
     skip: {
       mobile: true,
     },
-    only: true,
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -1668,7 +1667,6 @@ export const sitesConfig: SitesInfo[] = [
   {
     urls: ['app.wagmi.com'],
     constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
-    only: true,
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -1744,7 +1742,6 @@ export const sitesConfig: SitesInfo[] = [
   {
     urls: ['rosswap.com'],
     constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
-    only: true,
     skip: {
       mobile: true, //no connect wallet modal
     },
@@ -1761,7 +1758,6 @@ export const sitesConfig: SitesInfo[] = [
   {
     urls: ['maiadao.io'],
     constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
-    only: true,
     skip: {
       mobile: true, //no connect wallet modal
     },
@@ -1940,7 +1936,6 @@ export const sitesConfig: SitesInfo[] = [
     testUrls: ['app.ariesmarkets.xyz/lending'],
 
     constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
-    only: true,
     walletsForProvider: {
       [IInjectedProviderNames.aptos]: [
         {
@@ -1953,7 +1948,6 @@ export const sitesConfig: SitesInfo[] = [
   {
     urls: ['app-mobile.ariesmarkets.xyz'],
     constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
-    only: true,
     walletsForProvider: {
       [IInjectedProviderNames.aptos]: [
         {
@@ -2558,7 +2552,6 @@ export const sitesConfig: SitesInfo[] = [
     skip: { mobile: true }, //input click not work
 
     constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
-    only: true,
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -2665,7 +2658,6 @@ export const sitesConfig: SitesInfo[] = [
       subtree: true,
       attributes: true,
     },
-    only: true,
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -2953,7 +2945,6 @@ export const sitesConfig: SitesInfo[] = [
   {
     urls: ['app.mav.xyz'],
     testUrls: ['app.mav.xyz'],
-    only: true,
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -2976,7 +2967,6 @@ export const sitesConfig: SitesInfo[] = [
   {
     urls: ['app.vesper.finance'],
     constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
-    only: true,
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -3051,7 +3041,7 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['phantom'],
           container: () =>
             getConnectWalletModalByTitle('div[role="dialog"]', 'Connect wallet to continue'),
-          afterUpdate(textNode, ) {
+          afterUpdate(textNode) {
             textNode.parentElement && makeTextAlignCenter(textNode.parentElement);
           },
         },
@@ -3060,7 +3050,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['stake.anvm.io'],
-
+    skip: { mobile: true }, //unistat is offline
     testPath: {
       desktop: [':text("Connect Wallet")', ':nth-match(button.rounded-full:text("Connect"),2)'],
       'mobile': [
@@ -3119,7 +3109,6 @@ export const sitesConfig: SitesInfo[] = [
     urls: ['app.reflexer.finance'],
     skip: { mobile: true }, //no item in wallet list
     constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
-    only: true,
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         { ...basicWalletInfo['metamask'], container: '#connect-METAMASK' },
@@ -3215,6 +3204,174 @@ export const sitesConfig: SitesInfo[] = [
           },
           afterUpdate(textNode) {
             textNode.parentElement && makeTextAlignLeft(textNode.parentElement);
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['phux.io'],
+    testPath: ['button:text("Accept")', ':text("Connect Wallet")'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => getConnectWalletModalByTitle('div.bal-modal', 'Connect to a wallet'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.metronome.io'],
+    testPath: ['button:text("Switch to")', ':text("Connect Wallet")'],
+    constraintMap: { text: [], 'icon': [isWalletIconLessEqualThan] },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => getConnectWalletModalByTitle('div.fixed', 'Connect Wallet'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['nftx.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
+    },
+  },
+  {
+    urls: ['app.marsprotocol.io'],
+    testPath: [':text("Connect Wallet")', 'button:has-text("Agree")'],
+    walletsForProvider: {
+      [IInjectedProviderNames.cosmos]: [
+        {
+          ...basicWalletInfo['keplr'],
+          name: /^Keplr Wallet$/,
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle(
+              'main > div.relative',
+              'Connect your wallet',
+            );
+            return (
+              modal &&
+              findIconAndNameByIcon(
+                'img[src*="keplr"][alt="Keplr Wallet"]',
+                'auto-search-text',
+                name,
+                modal,
+              )
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['farm.acala.network'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () =>
+            getConnectWalletModalByTitle(
+              '#headlessui-portal-root div.relative[id*="headlessui-dialog"]',
+              'Connect your wallet',
+            ),
+          afterUpdate(textNode) {
+            textNode.parentElement && makeTextWrap(textNode.parentElement);
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['baklava.space'],
+    testUrls: ['baklava.space/vaults/'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'div[role="dialog"][data-reach-dialog-content]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.lenfi.io'],
+    constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
+    walletsForProvider: {
+      [IInjectedProviderNames.cardano]: [
+        {
+          ...basicWalletInfo['nami'],
+          container: () => {
+            return getConnectWalletModalByTitle(
+              '.ReactModalPortal [role="dialog"]',
+              'Connect wallet',
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['oyster.synfutures.com'],
+    testPath: {
+      desktop: ['button:text("I Agree")', ':text("Connect Wallet")'],
+      mobile: ['button:text("I Agree")', 'button.wallet-connect-btn-mobile'],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+
+          container: () =>
+            getConnectWalletModalByTitle(
+              ':is(div[role="dialog"].user-wallet-modal,div.ant-drawer.user-wallet-drawer)',
+              'Connect Wallet',
+            ),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.liqee.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            return findIconAndNameByIcon(
+              'img[src*="media/wallet-MetaMask"]',
+              'auto-search-text',
+              name,
+              document.body,
+              { 'icon': [isWalletIconLessEqualThan, isClickable], 'text': [isClickable] },
+              2,
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.strike.org'],
+    testPath: {
+      desktop: [':text("Connect")', 'div.button:has-text("Continue")'],
+      mobile: ['div.sc-ecaExY', ':text("Connect")', 'div.button:has-text("Continue")'],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const metamaskBtn: HTMLElement | null = document.querySelector(
+              'div.ant-modal.connect-modal .metamask-connect-btn',
+            );
+            return (
+              metamaskBtn &&
+              findIconAndNameByIcon('img[alt="metamask"]', 'auto-search-text', name, metamaskBtn)
+            );
           },
         },
       ],

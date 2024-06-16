@@ -12,9 +12,6 @@ export function replaceIcon(originalNode: HTMLElement, newIconSrc: string) {
   if (originalNode instanceof HTMLImageElement) {
     originalNode.src = newIconSrc;
     originalNode.removeAttribute('srcset');
-    // originalNode.style.width = width;
-    // originalNode.style.height = height;
-    // originalNode.classList.add(...Array.from(originalNode.classList));
     return originalNode;
   } else {
     const imgNode = createImageEle(newIconSrc);

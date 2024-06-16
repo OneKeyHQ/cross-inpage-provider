@@ -116,7 +116,7 @@ export function findTextByImg(
   let parent: HTMLElement | null = img;
   let level = 0;
 
-  while (parent && parent != containerLimit && level++ < maxLevel) {
+  while (parent && parent != containerLimit.parentElement && level++ < maxLevel) {
     text = findWalletTextByParent(parent, walletName, constraints);
     if (text) {
       return text;

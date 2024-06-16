@@ -18,6 +18,9 @@ jobs:
 
       - name: Install Packages
         # global env make ci `yarn && yarn bootstrap` not correctly
+
+        # fix src/classes.ts(2,27): error TS2307: Cannot find module 'fast-safe-stringify'
+        # exec `yarn bootstrap` twice
         run: |
           yarn
           yarn bootstrap

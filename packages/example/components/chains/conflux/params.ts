@@ -126,7 +126,7 @@ export default {
         },
         primaryType: 'Mail',
         types: {
-          EIP712Domain: [
+          CIP23Domain: [
             { name: 'name', type: 'string' },
             { name: 'version', type: 'string' },
             { name: 'chainId', type: 'uint256' },
@@ -159,7 +159,7 @@ export default {
         'value': JSON.stringify({
           from: from,
           to: to,
-          value: '0x01',
+          value: '0x1',
         }),
       },
       {
@@ -169,7 +169,7 @@ export default {
         'value': JSON.stringify({
           from: from,
           to: to,
-          value: '0x01',
+          value: '0x1',
         }),
       },
     ];

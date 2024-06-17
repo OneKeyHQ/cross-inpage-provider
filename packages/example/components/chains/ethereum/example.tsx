@@ -190,6 +190,18 @@ export default function Example() {
           }}
         />
         <ApiPayload
+          title="wallet_getPermissions"
+          description="（暂不支持）获取权限"
+          disableRequestContent
+          onExecute={async () => {
+            const res = await provider?.request({
+              'method': 'wallet_getPermissions',
+              'params': [],
+            });
+            return JSON.stringify(res);
+          }}
+        />{' '}
+        <ApiPayload
           title="wallet_revokePermissions"
           description="（暂不支持）删除权限"
           presupposeParams={params.revokePermissions}

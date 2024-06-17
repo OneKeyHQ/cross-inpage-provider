@@ -96,19 +96,19 @@ export default function BTCExample() {
         };
       };
     }) => {
-      console.log('tron on message', e.data);
-
       if (e.data.message && e.data.message.action === 'accountsChanged') {
-        console.log('tron [accountsChanged]', e.data.message.data);
+        console.log('tron [accountsChanged]', e?.data?.message?.data);
 
-        const { address } = e.data.message.data;
-        setAccount({
-          ...account,
-          address,
-        });
+        const { address } = e?.data?.message?.data;
+        if (address) {
+          setAccount({
+            ...account,
+            address,
+          });
+        }
       }
       if (e.data.message && e.data.message.action === 'setNode') {
-        console.log('tron [setNode]', e.data.message.data);
+        console.log('tron [setNode]', e?.data?.message?.data);
         // const { address } = e.data.message.data;
         // setAccount({
         //   ...account,
@@ -116,14 +116,14 @@ export default function BTCExample() {
         // });
       }
       if (e.data.message && e.data.message.action === 'setAccount') {
-        console.log('tron [setAccount]', e.data.message.data);
+        console.log('tron [setAccount]', e?.data?.message?.data);
       }
       if (e.data.message && e.data.message.action === 'connect') {
-        console.log('tron [connect]', e.data.message.data);
+        console.log('tron [connect]', e?.data?.message?.data);
       }
 
       if (e.data.message && e.data.message.action === 'disconnect') {
-        console.log('tron [disconnect]', e.data.message.data);
+        console.log('tron [disconnect]', e?.data?.message?.data);
       }
     };
 
@@ -160,7 +160,7 @@ export default function BTCExample() {
       <ApiGroup title="Basics">
         <ApiPayload
           title="tron_requestAccounts"
-          description="连接钱包"
+          description="连接钱包, TronLink 需要解锁不然失败。"
           disableRequestContent
           onExecute={async (request: string) => {
             const res = await provider?.request<string[]>({
@@ -171,7 +171,7 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="tron_chainid"
-          description="获取链 ID"
+          description="（错误的方法）获取链 ID"
           disableRequestContent
           onExecute={async () => {
             const res = await provider?.request<string>({
@@ -199,6 +199,16 @@ export default function BTCExample() {
             const res = await provider?.request<string[]>({
               method: 'tron_accounts',
             });
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="getNodeInfo"
+          description="获取节点"
+          disableRequestContent
+          onExecute={async () => {
+            const tronWeb = provider.tronWeb;
+            const res = await await tronWeb.trx.getNodeInfo();
             return JSON.stringify(res);
           }}
         />
@@ -285,6 +295,8 @@ export default function BTCExample() {
 
             const signedTx = await tronWeb.trx.sign(tx);
             const broastTx = await tronWeb.trx.sendRawTransaction(signedTx);
+            console.log('broastTx', broastTx);
+
             return JSON.stringify(broastTx);
           }}
         />

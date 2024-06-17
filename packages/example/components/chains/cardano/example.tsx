@@ -116,22 +116,31 @@ export default function Example() {
     const onConnectListener = (address: string) => {
       console.log(`cardano on [connect] ${address}`);
     };
-    const onAccountChangeListener = (address: string) => {
+    const onAccountChangeListener = (address: string[]) => {
       console.log(`cardano on [accountChange] ${address}`);
-      if (!address) return;
+      if (!address.length) return;
       setAccount({
         ...account,
-        address,
+        address: address[0],
       });
     };
+    const onNetworkChangeListener = (network: any) => {
+      console.log(`cardano on [networkChange] ${network}`);
+    };
 
-    const onAction = provider?.experimental?.on || provider?.on;
+    const onAction = walletApi?.experimental?.on || provider?.on;
+
+    console.log('====>>>> onAction', onAction);
+
 
     if (onAction) {
       try {
+        console.log('====>>>> Register event');
         onAction?.('connect', onConnectListener);
-        onAction?.('accountChanged', onAccountChangeListener);
+        onAction?.('accountChange', onAccountChangeListener);
+        onAction?.('networkChange', onNetworkChangeListener);
       } catch (error) {
+        console.log('====>>>> Register Error');
         // ignore
       }
     }
@@ -141,7 +150,8 @@ export default function Example() {
       if (offAction) {
         try {
           offAction?.('connect', onConnectListener);
-          offAction?.('accountChanged', onAccountChangeListener);
+          offAction?.('networkChange', onAccountChangeListener);
+          offAction?.('networkChange', onNetworkChangeListener);
         } catch (error) {
           // ignore
         }

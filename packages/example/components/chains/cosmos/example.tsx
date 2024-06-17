@@ -113,6 +113,12 @@ export default function Example() {
     [network.id],
   );
 
+  const onDisconnectWallet = useCallback(async () => {
+    if (provider) {
+      await provider?.disconnect();
+    }
+  }, [provider]);
+
   return (
     <>
       <InfoLayout title="Base Info">
@@ -150,6 +156,7 @@ export default function Example() {
           );
         }}
         onConnect={onConnectWallet}
+        onDisconnect={onDisconnectWallet}
       />
 
       <ApiGroup title="Basics">

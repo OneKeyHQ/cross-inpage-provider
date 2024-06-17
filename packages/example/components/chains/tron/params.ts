@@ -41,7 +41,7 @@ export default {
         options: {},
         params: [
           { type: 'address', value: address },
-          { type: 'uint256', value: '1000000000000000000' },
+          { type: 'uint256', value: '100' },
         ],
       }),
     },
@@ -54,7 +54,7 @@ export default {
         options: {},
         params: [
           { type: 'address', value: address },
-          { type: 'uint256', value: '1000000000000000000' },
+          { type: 'uint256', value: '100000' },
         ],
       }),
     },

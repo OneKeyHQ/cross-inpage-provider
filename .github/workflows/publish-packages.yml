@@ -8,17 +8,22 @@ jobs:
     env:
       TEST_ENDPOINT: dapp-example.onekeytest.com
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: 20
           registry-url: 'https://registry.npmjs.org'
+          cache: 'yarn'
 
       - name: Install Packages
         # global env make ci `yarn && yarn bootstrap` not correctly
+
+        # fix src/classes.ts(2,27): error TS2307: Cannot find module 'fast-safe-stringify'
+        # exec `yarn bootstrap` twice
         run: |
           yarn
+          yarn bootstrap
           yarn bootstrap
           NODE_ENV=production yarn build
           yarn test
@@ -44,7 +49,7 @@ jobs:
           cp ./packages/example/out/index.html ./packages/example/out/404.html
 
       - name: Deploy Github Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./packages/example/out

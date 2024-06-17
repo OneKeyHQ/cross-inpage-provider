@@ -93,7 +93,7 @@ export default function Example() {
     }
     const lucid = await Lucid.new(
       // test id
-      new Blockfrost('https://cardano-mainnet.blockfrost.io/api/v0', projectIdRef.current),
+      new Blockfrost('https://cardano-mainnet.blockfrost.io/api/v0', projectId),
       'Mainnet',
     );
 
@@ -130,17 +130,12 @@ export default function Example() {
 
     const onAction = walletApi?.experimental?.on || provider?.on;
 
-    console.log('====>>>> onAction', onAction);
-
-
     if (onAction) {
       try {
-        console.log('====>>>> Register event');
         onAction?.('connect', onConnectListener);
         onAction?.('accountChange', onAccountChangeListener);
         onAction?.('networkChange', onNetworkChangeListener);
       } catch (error) {
-        console.log('====>>>> Register Error');
         // ignore
       }
     }

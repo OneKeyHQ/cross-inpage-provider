@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
-import { IProviderApi, IResult, IWalletTransaction, SignTxnParams } from './types';
+import { SignerTransaction } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
@@ -18,13 +18,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../../components/ui/select';
-import { useCallback, useState } from 'react';
-import { Scenario, scenarios, signTxnWithTestAccount } from './scenarios';
-import { ChainType } from './api';
-import algosdk from 'algosdk';
+import { useCallback, useEffect, useState } from 'react';
+import { ChainType, apiSubmitTransactions, clientForChain } from './api';
+import { Input } from '../../ui/input';
+import {
+  formatJsonRpcRequest,
+  generateSinglePayTxn,
+  getSignTxnRequestParams,
+  base64ToUint8Array,
+  generateSingleAssetTransferTxn,
+  generateSingleAssetCloseTxn,
+  generateSingleAppCall,
+  generateSingleAppOptIn,
+  generateSingleAppCloseOut,
+  generateSingleAppClearState,
+} from './transaction';
 
 // https://github.com/WalletConnect/walletconnect-monorepo/issues/3251
 // https://github.com/algorand/walletconnect-example-dapp
+// https://github.com/TxnLab/algorand-wc2
 const chainName = 'algorand';
 const namespace = 'wGHE2Pwdvd7S12BL5FaOP20EGYesN73k';
 const AlgoNameSpace: ProposalTypes.RequiredNamespaces = {
@@ -60,13 +72,20 @@ const AlgoNameSpaceOptional: ProposalTypes.OptionalNamespaces = {
   // },
 };
 
-const chainTypeMap = {
-  ['algorand:wGHE2Pwdvd7S12BL5FaOP20EGYesN73k']: ChainType.MainNet,
+// const chainTypeMap = {
+//   ['algorand:wGHE2Pwdvd7S12BL5FaOP20EGYesN73k']: ChainType.MainNet,
+//   ['algorand:SGO1GKSzyE7IEPItTxCByw9x8FmnrCDe']: ChainType.TestNet,
+// };
+
+const chainTypeToChainIdMap = {
+  [ChainType.MainNet]: 'algorand:wGHE2Pwdvd7S12BL5FaOP20EGYesN73k',
+  [ChainType.TestNet]: 'algorand:SGO1GKSzyE7IEPItTxCByw9x8FmnrCDe',
 };
 
 function Example() {
   const { connect, client, session, accounts } = useWalletConnectClient();
   const [account, setAccount] = useState<string>('');
+  const chain = ChainType.MainNet;
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
     await connect(AlgoNameSpace, AlgoNameSpaceOptional);
@@ -76,128 +95,179 @@ function Example() {
     };
   };
 
-  const handleSignTxnScenario = useCallback(
-    async (scenario: Scenario, chainId: string, address: string) => {
-      // @ts-expect-error
-      const chain = chainTypeMap?.[chainId] ?? ChainType.MainNet;
+  useEffect(() => {
+    if (accounts.length > 0) {
+      setAccount(accounts[0]);
+    }
+  }, [accounts]);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      const txnsToSign = await scenario(chain, address);
-      const flatTxns = txnsToSign.reduce((acc, val) => acc.concat(val), []);
+  const getAccountInfo = () => {
+    const [namespace, reference, address] = account?.split(':');
+    return {
+      namespace,
+      reference,
+      address,
+    };
+  };
 
-      const walletTxns: IWalletTransaction[] = flatTxns.map(
-        ({ txn, signers, authAddr, message }) => ({
-          txn: Buffer.from(algosdk.encodeUnsignedTransaction(txn)).toString('base64'),
-          signers,
-          authAddr,
-          message,
-        }),
-      );
+  const onCommonExecute = useCallback(async (request: string) => {
+    const requestObj = JSON.parse(request);
+    const response = await client?.request<(string | number[])[]>({
+      chainId: chainTypeToChainIdMap[chain],
+      topic: session.topic,
+      request: requestObj,
+    });
 
-      // sign transaction
-      const params: SignTxnParams = [walletTxns];
-      const result = await client?.request<Array<string | null>>({
-        chainId,
-        topic: session.topic,
-        request: {
-          method: 'algo_signTx',
-          params,
-        },
-      });
+    return JSON.stringify(response);
+  }, []);
 
-      console.log('Raw response:', result);
+  const onCommonValidate = useCallback(async (request: string, result: string) => {
+    const response = JSON.parse(result);
 
-      const indexToGroup = (index: number) => {
-        for (let group = 0; group < txnsToSign.length; group++) {
-          const groupLength = txnsToSign[group].length;
-          if (index < groupLength) {
-            return [group, index];
-          }
+    const signedTxns =
+      typeof response[0] === 'string'
+        ? (response as string[]).map(base64ToUint8Array)
+        : (response as number[][]).map((item) => Uint8Array.from(item));
 
-          index -= groupLength;
-        }
+    const sentTransaction = await apiSubmitTransactions(chain, signedTxns);
 
-        throw new Error(`Index too large for groups: ${index}`);
-      };
+    return JSON.stringify(sentTransaction);
+  }, []);
 
-      const signedPartialTxns: Array<Array<Uint8Array | null>> = txnsToSign.map(() => []);
-      result.forEach((r, i) => {
-        const [group, groupIndex] = indexToGroup(i);
-        const toSign = txnsToSign[group][groupIndex];
+  const generateJsonRpcRequest = useCallback((transaction: SignerTransaction) => {
+    const signTxnParams = getSignTxnRequestParams([transaction]);
+    const request = formatJsonRpcRequest('algo_signTxn', [signTxnParams]);
+    return JSON.stringify(request);
+  }, []);
 
-        if (r == null) {
-          if (toSign.signers !== undefined && toSign.signers?.length < 1) {
-            signedPartialTxns[group].push(null);
-            return;
-          }
-          throw new Error(`Transaction at index ${i}: was not signed when it should have been`);
-        }
+  const getTokenTransferFrom = () => {
+    return (
+      <>
+        <Input
+          label="收款地址"
+          type="text"
+          name="toAddress"
+          defaultValue={getAccountInfo()?.address ?? ''}
+        />
+        <Input label="转账金额" type="number" name="amount" defaultValue="10000" />
+        <Select name="assetIndex">
+          <SelectTrigger className="w-full">
+            <SelectValue className="text-base font-medium" placeholder="选择 Token" />
+          </SelectTrigger>
+          <SelectContent>
+            {[
+              {
+                name: 'MainNet USDC',
+                index: '31566704',
+              },
+              {
+                name: 'TestNet USDC',
+                index: '10458941',
+              },
+            ].map((item) => {
+              return (
+                <SelectItem key={item.index} value={item.index} className="text-base font-medium">
+                  {item.name}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
+        <Input label="note" type="text" name="note" />
+      </>
+    );
+  };
 
-        if (toSign.signers !== undefined && toSign.signers?.length < 1) {
-          throw new Error(`Transaction at index ${i} was signed when it should not have been`);
-        }
+  const generateSingleAssetTransferCommon = async (
+    fromData: Record<string, any>,
+    generate: (
+      chain: ChainType,
+      fromAddress: string,
+      toAddress: string,
+      assetIndex: string,
+      amount: number,
+      note: string | undefined,
+    ) => Promise<SignerTransaction>,
+  ) => {
+    const fromAddress = getAccountInfo()?.address ?? '';
+    const toAddress = fromData['toAddress'] as string;
+    const amount = parseInt(fromData['amount'] as string);
+    const assetIndex = fromData['assetIndex'] as string;
+    const note = fromData['note'] as string | undefined;
 
-        const rawSignedTxn = Buffer.from(r, 'base64');
-        signedPartialTxns[group].push(new Uint8Array(rawSignedTxn));
-      });
+    if (!toAddress || !amount) {
+      throw new Error('toAddress or amount is required');
+    }
+    if (!assetIndex) {
+      throw new Error('请选择 Token');
+    }
 
-      const signedTxns: Uint8Array[][] = signedPartialTxns.map(
-        (signedPartialTxnsInternal, group) => {
-          return signedPartialTxnsInternal.map((stxn, groupIndex) => {
-            if (stxn) {
-              return stxn;
-            }
+    const transaction = await generate(chain, fromAddress, toAddress, assetIndex, amount, note);
+    return generateJsonRpcRequest(transaction);
+  };
 
-            return signTxnWithTestAccount(txnsToSign[group][groupIndex].txn);
-          });
-        },
-      );
+  const getAppCallFrom = () => {
+    return (
+      <>
+        <Input
+          label="收款地址"
+          type="text"
+          name="toAddress"
+          defaultValue={getAccountInfo()?.address ?? ''}
+        />
+        <Select name="appIndex">
+          <SelectTrigger className="w-full">
+            <SelectValue className="text-base font-medium" placeholder="选择 App" />
+          </SelectTrigger>
+          <SelectContent>
+            {[
+              {
+                name: 'MainNet Test App',
+                index: '305162725',
+              },
+              {
+                name: 'TestNet Test App',
+                index: '22314999',
+              },
+            ].map((item) => {
+              return (
+                <SelectItem key={item.index} value={item.index} className="text-base font-medium">
+                  {item.name}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
+        <Input label="note" type="text" name="note" />
+      </>
+    );
+  };
 
-      const signedTxnInfo: Array<
-        Array<{
-          txID: string;
-          signingAddress?: string;
-          signature: string;
-        } | null>
-      > = signedPartialTxns.map((signedPartialTxnsInternal, group) => {
-        return signedPartialTxnsInternal.map((rawSignedTxn, i) => {
-          if (rawSignedTxn == null) {
-            return null;
-          }
+  const generateSingleAppCallCommon = async (
+    fromData: Record<string, any>,
+    generate: (
+      chain: ChainType,
+      fromAddress: string,
+      appIndex: string,
+      note: string | undefined,
+      appArgs?: Uint8Array[] | undefined,
+    ) => Promise<SignerTransaction>,
+  ) => {
+    const fromAddress = getAccountInfo()?.address ?? '';
+    const toAddress = fromData['toAddress'] as string;
+    const appIndex = fromData['appIndex'] as string;
+    const note = fromData['note'] as string | undefined;
 
-          const signedTxn = algosdk.decodeSignedTransaction(rawSignedTxn);
-          const txn = signedTxn.txn as unknown as algosdk.Transaction;
-          const txID = txn.txID();
-          const unsignedTxID = txnsToSign[group][i].txn.txID();
+    if (!toAddress) {
+      throw new Error('toAddress is required');
+    }
+    if (!appIndex) {
+      throw new Error('请选择 App');
+    }
 
-          if (txID !== unsignedTxID) {
-            throw new Error(
-              `Signed transaction at index ${i} differs from unsigned transaction. Got ${txID}, expected ${unsignedTxID}`,
-            );
-          }
-
-          if (!signedTxn.sig) {
-            throw new Error(`Signature not present on transaction at index ${i}`);
-          }
-
-          return {
-            txID,
-            signingAddress: signedTxn.sgnr ? algosdk.encodeAddress(signedTxn.sgnr) : undefined,
-            signature: Buffer.from(signedTxn.sig).toString('base64'),
-          };
-        });
-      });
-
-      // format displayed result
-      const formattedResult: IResult = {
-        method: 'algo_signTxn',
-        body: signedTxnInfo,
-      };
-
-      return JSON.stringify(formattedResult);
-    },
-    [client, session],
-  );
+    const transaction = await generate(chain, fromAddress, appIndex, note);
+    return generateJsonRpcRequest(transaction);
+  };
 
   if (!client) {
     return <div>Initializing...</div>;
@@ -244,14 +314,105 @@ function Example() {
           </SelectContent>
         </Select>
       </InfoLayout>
-      <ApiGroup title="Basics">
+      <ApiGroup title="algo_signTxn">
         <ApiPayload
-          title="getPublicKey"
-          description="获取账户权限"
-          onExecute={async (request: string) => {
-            const [namespace, reference, address] = account.split(':');
-            const chainId = `${namespace}:${reference}`;
-            return handleSignTxnScenario(scenarios[0].scenario, chainId, account);
+          title="algo_signTxn"
+          description="给账户转账"
+          onExecute={onCommonExecute}
+          onValidate={onCommonValidate}
+          generateRequestFrom={() => {
+            return (
+              <>
+                <Input
+                  label="收款地址"
+                  type="text"
+                  name="toAddress"
+                  defaultValue={getAccountInfo()?.address ?? ''}
+                />
+                <Input label="转账金额" type="number" name="amount" defaultValue="10000" />
+                <Input label="note" type="text" name="note" />
+              </>
+            );
+          }}
+          onGenerateRequest={async (fromData: Record<string, any>) => {
+            const fromAddress = getAccountInfo()?.address ?? '';
+            const toAddress = fromData['toAddress'] as string;
+            const amount = parseFloat(fromData['amount'] as string);
+            const note = fromData['note'] as string | undefined;
+
+            if (!toAddress || !amount) {
+              throw new Error('toAddress or amount is required');
+            }
+
+            const transaction = await generateSinglePayTxn(
+              chain,
+              fromAddress,
+              toAddress,
+              amount,
+              note,
+            );
+
+            return generateJsonRpcRequest(transaction);
+          }}
+        />
+        <ApiPayload
+          title="algo_signTxn"
+          description="AssetTransferTxn 给账户 Token 转账，amount 为 0 时为声明 Token（AssetOptInTxn）"
+          onExecute={onCommonExecute}
+          onValidate={onCommonValidate}
+          generateRequestFrom={getTokenTransferFrom}
+          onGenerateRequest={async (fromData: Record<string, any>) => {
+            return generateSingleAssetTransferCommon(fromData, generateSingleAssetTransferTxn);
+          }}
+        />
+        <ApiPayload
+          title="algo_signTxn"
+          description="删除 Token,!!!!! 请谨慎操作 !!!!!"
+          onExecute={onCommonExecute}
+          onValidate={onCommonValidate}
+          generateRequestFrom={getTokenTransferFrom}
+          onGenerateRequest={async (fromData: Record<string, any>) => {
+            return generateSingleAssetTransferCommon(fromData, generateSingleAssetCloseTxn);
+          }}
+        />
+        <ApiPayload
+          title="algo_signTxn"
+          description="ApplicationOptInTxn 进入 App 交互"
+          onExecute={onCommonExecute}
+          onValidate={onCommonValidate}
+          generateRequestFrom={getAppCallFrom}
+          onGenerateRequest={async (fromData: Record<string, any>) => {
+            return generateSingleAppCallCommon(fromData, generateSingleAppOptIn);
+          }}
+        />
+        <ApiPayload
+          title="algo_signTxn"
+          description="ApplicationNoOpTxn 与 App 交互"
+          onExecute={onCommonExecute}
+          onValidate={onCommonValidate}
+          generateRequestFrom={getAppCallFrom}
+          onGenerateRequest={async (fromData: Record<string, any>) => {
+            return generateSingleAppCallCommon(fromData, generateSingleAppCall);
+          }}
+        />
+        <ApiPayload
+          title="algo_signTxn"
+          description="ApplicationCloseOutTxn 与 App 交互"
+          onExecute={onCommonExecute}
+          onValidate={onCommonValidate}
+          generateRequestFrom={getAppCallFrom}
+          onGenerateRequest={async (fromData: Record<string, any>) => {
+            return generateSingleAppCallCommon(fromData, generateSingleAppCloseOut);
+          }}
+        />
+        <ApiPayload
+          title="algo_signTxn"
+          description="ApplicationClearStateTxn 与 App 交互"
+          onExecute={onCommonExecute}
+          onValidate={onCommonValidate}
+          generateRequestFrom={getAppCallFrom}
+          onGenerateRequest={async (fromData: Record<string, any>) => {
+            return generateSingleAppCallCommon(fromData, generateSingleAppClearState);
           }}
         />
       </ApiGroup>

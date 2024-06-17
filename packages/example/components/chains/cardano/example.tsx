@@ -393,7 +393,7 @@ export default function Example() {
             return (
               <>
                 <Input
-                  label="转账地址"
+                  label="收款地址"
                   type="text"
                   name="toAddress"
                   defaultValue={account?.address ?? ''}

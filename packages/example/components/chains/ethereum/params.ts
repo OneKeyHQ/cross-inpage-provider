@@ -527,36 +527,6 @@ export default {
           maxPriorityFeePerGas: '0x3b9aca00',
         }),
       },
-      {
-        'id': 'sendERC20',
-        'name': 'Send ERC20',
-        'description': '发送 ERC20 USDC Token',
-        'value': JSON.stringify({
-          from: from,
-          to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-          data: `0xa9059cbb${to.substring(2).padStart(64, '0')}${BigInt(1000)
-            .toString(16)
-            .padStart(64, '0')}`, // Assumes amount is a decimal string
-          value: '0x0',
-          gasLimit: '0x186a0', // 100000 in hexadecimal
-          gasPrice: '0xbebc200', // example gas price
-        }),
-      },
-      {
-        'id': 'approveERC20',
-        'name': 'Approve ERC20',
-        'description': '授权合约使用 USDC',
-        'value': JSON.stringify({
-          from: from,
-          to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-          data: `0x095ea7b3${'0x3b95bc951ee0f553ba487327278cac44f29715e5' // spender address
-            .substring(2)
-            .padStart(64, '0')}${BigInt(1000).toString(16).padStart(64, '0')}`,
-          value: '0x0',
-          gasLimit: '0x30d40', // 200000 in hexadecimal
-          gasPrice: '0xbebc200', // example gas price
-        }),
-      },
     ];
   },
 };

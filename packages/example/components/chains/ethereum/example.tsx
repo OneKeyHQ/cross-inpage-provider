@@ -18,6 +18,8 @@ import {
   recoverTypedSignature,
 } from '@metamask/eth-sig-util';
 import { toast } from '../../ui/use-toast';
+import { Input } from '../../ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 
 export default function Example() {
   const walletsRef = useRef<IEIP6963ProviderDetail[]>([
@@ -146,6 +148,51 @@ export default function Example() {
       provider?.removeListener('disconnect', disconnectHandler);
     };
   }, [account, provider, setAccount]);
+
+  const getTokenTransferFrom = () => {
+    return (
+      <>
+        <Input
+          label="收款地址"
+          type="text"
+          name="toAddress"
+          defaultValue={account?.address ?? ''}
+        />
+        <Input label="金额" type="number" name="amount" defaultValue="10000" />
+        <Select name="tokenAddress">
+          <SelectTrigger className="w-full">
+            <SelectValue className="text-base font-medium" placeholder="选择 Token" />
+          </SelectTrigger>
+          <SelectContent>
+            {[
+              {
+                name: 'MainNet USDC',
+                address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+              },
+              {
+                name: 'MainNet USDT',
+                address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+              },
+            ].map((item) => {
+              return (
+                <SelectItem key={item.name} value={item.address} className="text-base font-medium">
+                  {item.name}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
+      </>
+    );
+  };
+
+  const requestSendTransactionCommon = async (request: string) => {
+    const res = await provider?.request({
+      'method': 'eth_sendTransaction',
+      'params': [JSON.parse(request)],
+    });
+    return JSON.stringify(res);
+  };
 
   return (
     <>
@@ -497,12 +544,70 @@ export default function Example() {
           title="eth_sendTransaction"
           description="发送交易"
           presupposeParams={params.sendTransaction(account?.address ?? '', account?.address ?? '')}
-          onExecute={async (request: string) => {
-            const res = await provider?.request({
-              'method': 'eth_sendTransaction',
-              'params': [JSON.parse(request)],
+          onExecute={requestSendTransactionCommon}
+        />
+      </ApiGroup>
+      <ApiGroup title="eth_sendTransaction">
+        <ApiPayload
+          title="eth_sendTransaction"
+          description="发送 ERC20 Token"
+          onExecute={requestSendTransactionCommon}
+          generateRequestFrom={getTokenTransferFrom}
+          // @ts-expect-error
+          onGenerateRequest={(fromData: Record<string, any>) => {
+            const from = account?.address ?? '';
+            const to = fromData.toAddress ?? from;
+            const amount = fromData.amount;
+            const tokenAddress = fromData.tokenAddress;
+
+            if (!amount) {
+              return 'Amount is required';
+            }
+            if (!tokenAddress) {
+              return 'Token address is required';
+            }
+
+            return JSON.stringify({
+              from: from,
+              to: tokenAddress,
+              data: `0xa9059cbb${to.substring(2).padStart(64, '0')}${BigInt(amount)
+                .toString(16)
+                .padStart(64, '0')}`,
+              value: '0x0',
+              gasLimit: '0x186a0',
+              gasPrice: '0xbebc200',
             });
-            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="eth_sendTransaction"
+          description="授权 ERC20 Token，金额为 0 时表示取消授权"
+          onExecute={requestSendTransactionCommon}
+          generateRequestFrom={getTokenTransferFrom}
+          // @ts-expect-error
+          onGenerateRequest={(fromData: Record<string, any>) => {
+            const from = account?.address ?? '';
+            const to = fromData.toAddress ?? from;
+            const amount = fromData.amount;
+            const tokenAddress = fromData.tokenAddress;
+
+            if (!amount) {
+              return 'Amount is required';
+            }
+            if (!tokenAddress) {
+              return 'Token address is required';
+            }
+
+            return JSON.stringify({
+              from: from,
+              to: tokenAddress,
+              data: `0x095ea7b3${to.substring(2).padStart(64, '0')}${BigInt(amount)
+                .toString(16)
+                .padStart(64, '0')}`,
+              value: '0x0',
+              gasLimit: '0x186a0',
+              gasPrice: '0xbebc200',
+            });
           }}
         />
       </ApiGroup>

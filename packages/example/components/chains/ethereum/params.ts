@@ -85,22 +85,137 @@ export default {
     },
   ],
   switchEthereumChain: [
-    {
-      'id': 'switchEthereumChain_sepolia',
-      'name': 'Switch Sepolia Test Chain',
-      'description': '切换 Sepolia Chain',
-      'value': JSON.stringify({
-        'chainId': '0xaa36a7',
-      }),
-    },
-    {
-      'id': 'switchEthereumChain_Gnosis',
-      'name': 'Switch Gnosis Chain',
-      'description': '切换 Gnosis Chain',
-      'value': JSON.stringify({
-        'chainId': '0x64',
-      }),
-    },
+    [
+      {
+        name: 'Sepolia Test',
+        chainId: '0xaa36a7',
+      },
+      {
+        name: 'Gnosis',
+        chainId: '0x64',
+      },
+      {
+        name: 'filecoin Evm',
+        chainId: '0x13a',
+      },
+      {
+        name: 'Ethereum',
+        chainId: '0x1',
+      },
+      {
+        name: 'Optimism',
+        chainId: '0xa',
+      },
+      // {
+      //   name: 'EthereumPoW',
+      //   chainId: '0x64',
+      // },
+      {
+        name: 'Conflux eSpace',
+        chainId: '0x406',
+      },
+      {
+        name: 'Huobi ECO',
+        chainId: '0x80',
+      },
+      {
+        name: 'Aurora',
+        chainId: '0x4e454152',
+      },
+      {
+        name: 'Polygon',
+        chainId: '0x89',
+      },
+      {
+        name: 'Polygon akEVM',
+        chainId: '0x44d',
+      },
+      {
+        name: 'Cronos',
+        chainId: '0x19',
+      },
+      {
+        name: 'Fantom',
+        chainId: '0xfa',
+      },
+      {
+        name: 'Boba',
+        chainId: '0x120',
+      },
+      {
+        name: 'zkSync',
+        chainId: '0x144',
+      },
+      {
+        name: 'Arbitrum',
+        chainId: '0xa4b1',
+      },
+      {
+        name: 'Celo',
+        chainId: '0xa4ec',
+      },
+      {
+        name: 'Avalanche',
+        chainId: '0xa86a',
+      },
+      // {
+      //   name: 'DIS',
+      //   chainId: '0x64',
+      // },
+      {
+        name: 'BNB Smart Chain',
+        chainId: '0x38',
+      },
+      {
+        name: 'Ethereum Classic',
+        chainId: '0x3d',
+      },
+      // {
+      //   name: 'OKX Chain',
+      //   chainId: '0x64',
+      // },
+      {
+        name: 'Mixin Virtual Machine',
+        chainId: '0x120c7',
+      },
+      {
+        name: 'Linea',
+        chainId: '0xe708',
+      },
+      {
+        name: 'Base',
+        chainId: '0x2105',
+      },
+      {
+        name: 'Mantle',
+        chainId: '0x1388',
+      },
+      {
+        name: 'IoTeX',
+        chainId: '0x1251',
+      },
+      // {
+      //   name: 'Mantra',
+      //   chainId: '0x64',
+      // },
+      {
+        name: 'Blast',
+        chainId: '0xee',
+      },
+      {
+        name: 'OctaSpace',
+        chainId: '0xc3501',
+      },
+    ].map((item) => {
+      return {
+        'id': `switchEthereumChain_${item.name}`,
+        'name': `${item.name}`,
+        'description': `切换 ${item.name} Chain`,
+        'value': JSON.stringify({
+          'chainId': item.chainId,
+        }),
+      };
+    }),
   ],
   watchAsset: [
     {

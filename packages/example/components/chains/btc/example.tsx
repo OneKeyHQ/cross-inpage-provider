@@ -185,7 +185,7 @@ export default function BTCExample() {
               return verifyMessage(publicKey, obj.msg, response);
             }
 
-            return 'Unsupported type';
+            return 'Dapp Example: 不支持 bip322-simple 类型签字的验证';
           }}
         />
       </ApiGroup>

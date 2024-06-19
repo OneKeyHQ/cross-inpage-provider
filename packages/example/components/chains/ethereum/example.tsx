@@ -547,6 +547,7 @@ export default function Example() {
           onExecute={requestSendTransactionCommon}
         />
       </ApiGroup>
+
       <ApiGroup title="eth_sendTransaction">
         <ApiPayload
           title="eth_sendTransaction"
@@ -611,6 +612,7 @@ export default function Example() {
           }}
         />
       </ApiGroup>
+
       <DappList dapps={dapps} />
     </>
   );

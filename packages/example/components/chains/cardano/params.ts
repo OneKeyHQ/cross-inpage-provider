@@ -1,14 +1,14 @@
 export default {
   signData: [
     {
-      id: 'signData',
-      name: 'signData 010203',
-      value: '010203',
-    },
-    {
       id: 'signData hello',
       name: 'signData Hello',
       value: '48656c6c6f204f6e654b6579',
+    },
+    {
+      id: 'signData',
+      name: 'signData 010203',
+      value: '010203',
     },
   ],
   signTx: [

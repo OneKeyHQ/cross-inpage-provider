@@ -150,29 +150,11 @@ function Example() {
           defaultValue={getAccountInfo()?.address ?? ''}
         />
         <Input label="转账金额" type="number" name="amount" defaultValue="10000" />
-        <Select name="assetIndex">
-          <SelectTrigger className="w-full">
-            <SelectValue className="text-base font-medium" placeholder="选择 Token" />
-          </SelectTrigger>
-          <SelectContent>
-            {[
-              {
-                name: 'MainNet USDC',
-                index: '31566704',
-              },
-              {
-                name: 'TestNet USDC',
-                index: '10458941',
-              },
-            ].map((item) => {
-              return (
-                <SelectItem key={item.index} value={item.index} className="text-base font-medium">
-                  {item.name}
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
+        <select name="assetIndex" className="select">
+          <option selected>选择 Token</option>
+          <option value="31566704">MainNet USDC</option>
+          <option value="10458941">TestNet USDC</option>
+        </select>
         <Input label="note" type="text" name="note" />
       </>
     );
@@ -215,29 +197,12 @@ function Example() {
           name="toAddress"
           defaultValue={getAccountInfo()?.address ?? ''}
         />
-        <Select name="appIndex">
-          <SelectTrigger className="w-full">
-            <SelectValue className="text-base font-medium" placeholder="选择 App" />
-          </SelectTrigger>
-          <SelectContent>
-            {[
-              {
-                name: 'MainNet Test App',
-                index: '305162725',
-              },
-              {
-                name: 'TestNet Test App',
-                index: '22314999',
-              },
-            ].map((item) => {
-              return (
-                <SelectItem key={item.index} value={item.index} className="text-base font-medium">
-                  {item.name}
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
+        <select name="appIndex" className="select">
+          <option selected>选择 App</option>
+          <option value="305162725">MainNet Test App</option>
+          <option value="22314999">TestNet Test App</option>
+        </select>
+
         <Input label="note" type="text" name="note" />
       </>
     );

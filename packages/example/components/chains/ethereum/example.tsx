@@ -19,7 +19,6 @@ import {
 } from '@metamask/eth-sig-util';
 import { toast } from '../../ui/use-toast';
 import { Input } from '../../ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 
 export default function Example() {
   const walletsRef = useRef<IEIP6963ProviderDetail[]>([
@@ -159,29 +158,11 @@ export default function Example() {
           defaultValue={account?.address ?? ''}
         />
         <Input label="金额" type="number" name="amount" defaultValue="10000" />
-        <Select name="tokenAddress">
-          <SelectTrigger className="w-full">
-            <SelectValue className="text-base font-medium" placeholder="选择 Token" />
-          </SelectTrigger>
-          <SelectContent>
-            {[
-              {
-                name: 'MainNet USDC',
-                address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-              },
-              {
-                name: 'MainNet USDT',
-                address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-              },
-            ].map((item) => {
-              return (
-                <SelectItem key={item.name} value={item.address} className="text-base font-medium">
-                  {item.name}
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
+        <select name="tokenAddress" className="select">
+          <option selected>选择 Token</option>
+          <option value="0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48">MainNet USDC</option>
+          <option value="0xdAC17F958D2ee523a2206206994597C13D831ec7">MainNet USDT</option>
+        </select>
       </>
     );
   };
@@ -247,7 +228,7 @@ export default function Example() {
             });
             return JSON.stringify(res);
           }}
-        />{' '}
+        />
         <ApiPayload
           title="wallet_revokePermissions"
           description="（暂不支持）删除权限"

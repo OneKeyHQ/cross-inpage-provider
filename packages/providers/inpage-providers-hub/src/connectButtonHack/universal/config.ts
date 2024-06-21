@@ -3377,4 +3377,200 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
+  // {
+  //   urls: ['muesliswap.com'],
+  //   constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
+  //   walletsForProvider: {
+  //     [IInjectedProviderNames.cardano]: [
+  //       {
+  //         ...basicWalletInfo['nami'],
+  //         container: () => {
+  //           return getConnectWalletModalByTitle(
+  //             '.ReactModalPortal [role="dialog"]',
+  //             'Connect wallet',
+  //           );
+  //         },
+  //       },
+  //     ],
+  //   },
+  // }
+  {
+    urls: ['dapp.cian.app'],
+    testPath: [':text("Cancel")', ':text("Connect")'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle(
+              'div[role="dialog"].ant-modal',
+              'Connect Wallet',
+            );
+            return (
+              modal &&
+              findIconAndNameByIcon(
+                'img[src*="static/media/metamask"]',
+                'auto-search-text',
+                name,
+                modal,
+              )
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.ib.xyz'],
+    testPath: [':text("Cancel")', ':text("Connect")'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: '.modal .outer-container div.wallets-container ',
+          findIconAndName: ({ container, name }) => {
+            return findIconAndNameInShadowRoot('onboard-v2', container as string, name);
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.aptin.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.aptos]: [
+        {
+          ...basicWalletInfo['petra'],
+          container: () =>
+            getConnectWalletModalByTitle('div.MuiPaper-root.aptin-dialog', 'Connect a wallet'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['juicebox.money'],
+    testPath: {
+      desktop: [':text("Connect")', 'button:has-text("I Agree")'],
+      mobile: ['nav [role="button"]', ':text("Connect")', 'button:has-text("I Agree")'],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: '.modal .outer-container div.wallets-container ',
+          findIconAndName: ({ container, name }) => {
+            return findIconAndNameInShadowRoot('onboard-v2', container as string, name);
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['merlinswap.org'],
+    only: true,
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const textNodes = domUtils.findTextNode('#root', /^Connect Wallet$/, 'all') as
+              | Text[]
+              | null;
+            const text = textNodes?.find(
+              (e) =>
+                !!e.parentElement?.parentElement?.querySelector('img[src*="lightCloseButton.svg"]'),
+            );
+
+            const modal = text?.parentElement?.parentElement?.parentElement;
+            console.log('==>text', text, '==>modal', modal, 'textNodes', textNodes);
+            return (
+              (modal &&
+                findIconAndNameByIcon(
+                  'img.chakra-image[src*="wallet/metamask.png"]',
+                  'auto-search-text',
+                  name,
+                  modal,
+                )) ||
+              null
+            );
+          },
+        },
+      ],
+      [IInjectedProviderNames.btc]: [
+        {
+          ...basicWalletInfo['unisat'],
+          findIconAndName({ name }) {
+            const textNodes = domUtils.findTextNode('#root', /^Connect Wallet$/, 'all') as
+              | Text[]
+              | null;
+            const text = textNodes?.find(
+              (e) =>
+                !!e.parentElement?.parentElement?.querySelector('img[src*="lightCloseButton.svg"]'),
+            );
+            const modal = text?.parentElement?.parentElement?.parentElement;
+            return (
+              (modal &&
+                findIconAndNameByIcon(
+                  'img.chakra-image[src*="wallet/unisat.png"]',
+                  'auto-search-text',
+                  name,
+                  modal,
+                )) ||
+              null
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['testnet.zkbase.app'],
+    walletsForProvider: {
+      [IInjectedProviderNames.btc]: [
+        {
+          ...basicWalletInfo['unisat'],
+          container: () => getConnectWalletModalByTitle('div.modal-panel.w-full', 'Connect Wallet'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['veno.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName: ({ container, name }) => {
+            const modal = getConnectWalletModalByTitle(
+              'section[role="dialog"].chakra-modal__content',
+              'Connect wallet',
+            );
+            return (
+              modal && findIconAndNameByIcon('img[alt="MetaMask"]', 'auto-search-text', name, modal)
+            );
+          },
+        },
+      ],
+    },
+  },
+  // {
+  //   urls: ['www.erisprotocol.com'],
+  //   testUrls: ['www.erisprotocol.com/terra/amplifier/LUNA'],
+  //   walletsForProvider: {
+  //     [IInjectedProviderNames.cosmos]: [
+  //       {
+  //         ...basicWalletInfo['keplr'],
+  //         findIconAndName: ({ container, name }) => {
+  //           const modal = getConnectWalletModalByTitle(
+  //             'section[role="dialog"].chakra-modal__content',
+  //             'Connect wallet',
+  //           );
+  //           return (
+  //             modal && findIconAndNameByIcon('img[alt="MetaMask"]', 'auto-search-text', name, modal)
+  //           );
+  //         },
+  //       },
+  //     ],
+  //   },
+  // },
 ];

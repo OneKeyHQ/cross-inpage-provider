@@ -69,20 +69,11 @@ export default function BTCExample() {
   };
 
   const checkReceiveAddress = () => {
-    if (!receiveAddress || isEmpty(receiveAddress)) {
-      toast({
-        title: 'Invalid Address',
-        description: '请在 Example 顶部填写接收地址，收款地址不能与发送地址相同',
-      });
-      throw new Error('请在 Example 顶部填写接收地址，收款地址不能与发送地址相同');
-    }
-
     if (account.address === receiveAddress) {
       toast({
-        title: 'Invalid Address',
-        description: '收款地址不能与发送地址相同',
+        title: '温馨提示',
+        description: 'Tron 收款地址不能与发送地址相同',
       });
-      throw new Error('收款地址不能与发送地址相同');
     }
   };
 
@@ -149,7 +140,7 @@ export default function BTCExample() {
         }}
         onConnect={onConnectWallet}
       />
-      <ApiGroup title="收款地址">
+      <ApiGroup title="设置所有 Case 收款地址">
         <InputWithSave
           storageKey="tron-receive-address"
           onChange={setReceiveAddress}

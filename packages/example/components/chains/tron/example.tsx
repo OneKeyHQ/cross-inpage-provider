@@ -71,7 +71,7 @@ export default function BTCExample() {
   const checkReceiveAddress = () => {
     if (account.address === receiveAddress) {
       toast({
-        title: '温馨提示',
+        title: '温馨提示 (不是报错)',
         description: 'Tron 收款地址不能与发送地址相同',
       });
     }

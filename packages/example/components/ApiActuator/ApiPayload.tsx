@@ -109,6 +109,7 @@ function ApiExecute({ allowCallWithoutProvider, onExecute, onValidate }: IApiExe
 
   const handleExecute = useCallback(async () => {
     setLoading(true);
+    handleSetResult('Calling...');
     const { result, error } = await execute(request);
     setLoading(false);
     if (error) {

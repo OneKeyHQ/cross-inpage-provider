@@ -20,7 +20,14 @@ export function useApiExecutor({ onExecute, onValidate }: IApiExecutor): {
         return { result, error: undefined };
       } catch (error) {
         console.log('execute error', error);
-        return { result: undefined, error: get(error, 'message', 'Execution error') };
+
+        let errorMessage = '';
+        try {
+          errorMessage = JSON.stringify(error);
+        } catch (error) {
+          errorMessage = get(error, 'message', 'Execution error');
+        }
+        return { result: undefined, error: errorMessage };
       }
     },
     [onExecute],

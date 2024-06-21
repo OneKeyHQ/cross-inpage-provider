@@ -4,17 +4,13 @@ import { IconLogo } from './icon'
 let instance: ReturnType<typeof notification> | null;
 
 export const switchNetworkNotification = (networkChangedText: string) => {
-	console.log('====>1')
   if (isInSameOriginIframe()) {
-		console.log('====>2')
     return;
   }
   if (instance) {
-		console.log('====>3')
     instance.dismiss();
     instance = null;
   }
-	console.log('===>4')
   instance = notification({
     dismissible: false,
     duration: 1500,

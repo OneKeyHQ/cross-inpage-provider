@@ -3,7 +3,7 @@ import {
   IInjectedProviderNamesStrings,
 } from '@onekeyfe/cross-inpage-provider-types';
 
-import { IInpageProviderConfig, ProviderBase, switchDefaultWalletNotification } from '@onekeyfe/cross-inpage-provider-core';
+import { IInpageProviderConfig, ProviderBase, switchDefaultWalletNotification, switchNetworkNotification } from '@onekeyfe/cross-inpage-provider-core';
 import { consts } from '@onekeyfe/cross-inpage-provider-core';
 
 export interface IOneKeyWalletInfo {
@@ -45,6 +45,7 @@ const PROVIDER_EVENTS = {
 
 const METHODS = {
   wallet_events_ext_switch_changed: 'wallet_events_ext_switch_changed',
+  wallet_events_dapp_network_changed: 'wallet_events_dapp_network_changed'
 };
 
 class ProviderPrivate extends ProviderBase {
@@ -81,6 +82,9 @@ class ProviderPrivate extends ProviderBase {
             } catch (e) {
               console.error(e);
             }
+          } else if (method === METHODS.wallet_events_dapp_network_changed) {
+            console.log('=====>METHODS.wallet_events_dapp_network_changed')
+            this.notifyNetworkChanged(params as {networkChangedText: string})
           }
         });
       }
@@ -102,6 +106,11 @@ class ProviderPrivate extends ProviderBase {
       isDefaultWallet = !isExcludedWebsite;
     }
     switchDefaultWalletNotification(isDefaultWallet);
+  }
+
+  notifyNetworkChanged(params: {networkChangedText: string}) {
+    if (!params.networkChangedText) return
+    switchNetworkNotification(params.networkChangedText)
   }
 }
 

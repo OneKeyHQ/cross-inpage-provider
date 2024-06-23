@@ -80,7 +80,7 @@ export const basicWalletInfo = {
   [WALLET_NAMES.keplr]: {
     updatedIcon: WALLET_CONNECT_INFO.keplr.icon,
     updatedName: WALLET_CONNECT_INFO.keplr.text,
-    name: /^(Keplr|Keplr Mobile)$/i,
+    name: /^(Keplr|Keplr Mobile|Keplr Wallet)$/i,
   },
   [WALLET_NAMES.polkadot]: {
     updatedIcon: WALLET_CONNECT_INFO.polkadot.icon,
@@ -3467,7 +3467,6 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['merlinswap.org'],
-    only: true,
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -3553,24 +3552,124 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
-  // {
-  //   urls: ['www.erisprotocol.com'],
-  //   testUrls: ['www.erisprotocol.com/terra/amplifier/LUNA'],
-  //   walletsForProvider: {
-  //     [IInjectedProviderNames.cosmos]: [
-  //       {
-  //         ...basicWalletInfo['keplr'],
-  //         findIconAndName: ({ container, name }) => {
-  //           const modal = getConnectWalletModalByTitle(
-  //             'section[role="dialog"].chakra-modal__content',
-  //             'Connect wallet',
-  //           );
-  //           return (
-  //             modal && findIconAndNameByIcon('img[alt="MetaMask"]', 'auto-search-text', name, modal)
-  //           );
-  //         },
-  //       },
-  //     ],
-  //   },
-  // },
+  {
+    urls: ['www.tarot.to'],
+    testPath: {
+      'desktop': ['button:has-text("Accept")', ':text("Connect Wallet")'],
+      mobile: ['button:has-text("Accept")', 'nav button.inline-flex', ':text("Connect")'],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => {
+            return getConnectWalletModalByTitle(
+              'div[role="dialog"].fixed.z-tarotModal',
+              'Connect Wallet',
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['myfil.pages.dev'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => {
+            return getConnectWalletModalByTitle(
+              'div[role="dialog"].ant-modal-wrap',
+              'Connect Wallet',
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.term.finance'],
+    skip: true,
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => {
+            return getConnectWalletModalByTitle(
+              'section[role="dialog"].chakra-modal__content',
+              'Connect Wallet',
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.ribbon.finance'],
+    // testPath: { desktop: [":text('Connect Wallet')", ':text(Ethereum)'] },
+    skip: true,
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => {
+            return getConnectWalletModalByTitle('div[role="dialog"].modal', 'CONNECT WALLET');
+          },
+        },
+      ],
+      [IInjectedProviderNames.solana]: [
+        {
+          ...basicWalletInfo['phantom'],
+          container: () => {
+            return getConnectWalletModalByTitle('div[role="dialog"].modal', 'CONNECT WALLET');
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.pstake.finance'],
+    skip: true, //too slow
+    testUrls: ['app.pstake.finance/cosmos'],
+    walletsForProvider: {
+      [IInjectedProviderNames.cosmos]: [
+        {
+          ...basicWalletInfo['keplr'],
+          container: () => {
+            return getConnectWalletModalByTitle('.modal.wallets-modal', 'Connect wallet');
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['solo.top'],
+    skip: { mobile: true }, //no metamask on mobile
+    constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: '#connect-METAMASK',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['keep3r.network'],
+    only: true,
+    testPath: {
+      desktop: [':text("Connect wallet")'],
+      mobile: ['button.fixed.flex'],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: '.yearn--modal',
+        },
+      ],
+    },
+  },
 ];

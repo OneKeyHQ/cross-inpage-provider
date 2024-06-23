@@ -16,7 +16,6 @@ import { stripHexPrefix } from '../../../lib/hex';
 import nacl from 'tweetnacl';
 import params from './params';
 import { Textarea } from '../../ui/textarea';
-import { jsonToUint8Array } from '../../../lib/uint8array';
 
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([

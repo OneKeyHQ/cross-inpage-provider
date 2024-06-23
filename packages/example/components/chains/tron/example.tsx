@@ -63,10 +63,23 @@ export default function BTCExample() {
     // const [address] = await provider.request<string[]>({ method: 'tron_accounts' });
     return {
       provider,
-      address: tronWeb.defaultAddress.base58,
+      address: tronWeb?.defaultAddress?.base58,
       // address: address,
     };
   };
+
+  useEffect(() => {
+    if (!provider) return;
+    if (provider?.tronWeb?.defaultAddress?.base58) {
+      // @ts-expect-error
+      setAccount((pre) => {
+        return {
+          ...pre,
+          address: provider.tronWeb.defaultAddress.base58,
+        };
+      });
+    }
+  }, [provider]);
 
   const checkReceiveAddress = () => {
     if (account.address === receiveAddress) {
@@ -148,7 +161,7 @@ export default function BTCExample() {
         />
       </ApiGroup>
 
-      <ApiGroup title="Basics">
+      <ApiGroup title="Primitive Basics">
         <ApiPayload
           title="tron_requestAccounts"
           description="连接钱包, TronLink 需要解锁不然失败。"
@@ -158,17 +171,6 @@ export default function BTCExample() {
               method: 'tron_requestAccounts',
             });
             return JSON.stringify(res);
-          }}
-        />
-        <ApiPayload
-          title="tron_chainid"
-          description="（错误的方法）获取链 ID"
-          disableRequestContent
-          onExecute={async () => {
-            const res = await provider?.request<string>({
-              method: 'tron_chainid',
-            });
-            return res;
           }}
         />
         <ApiPayload
@@ -193,6 +195,29 @@ export default function BTCExample() {
             return JSON.stringify(res);
           }}
         />
+      </ApiGroup>
+
+      <ApiGroup title="TronWeb Basics">
+        <ApiPayload
+          title="getAccount"
+          description="获取账户信息"
+          disableRequestContent
+          onExecute={async () => {
+            const tronWeb = provider.tronWeb;
+            const res = await tronWeb.trx.getAccount(account.address);
+            return res;
+          }}
+        />
+        <ApiPayload
+          title="getBalance"
+          description="获取账户余额"
+          disableRequestContent
+          onExecute={async () => {
+            const tronWeb = provider.tronWeb;
+            const res = await tronWeb.trx.getBalance(account.address);
+            return res;
+          }}
+        />
         <ApiPayload
           title="getNodeInfo"
           description="获取节点"
@@ -200,6 +225,16 @@ export default function BTCExample() {
           onExecute={async () => {
             const tronWeb = provider.tronWeb;
             const res = await await tronWeb.trx.getNodeInfo();
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="listNodes"
+          description="获取节点"
+          disableRequestContent
+          onExecute={async () => {
+            const tronWeb = provider.tronWeb;
+            const res = await await tronWeb.trx.listNodes();
             return JSON.stringify(res);
           }}
         />

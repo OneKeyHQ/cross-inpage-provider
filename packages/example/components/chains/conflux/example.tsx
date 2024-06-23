@@ -10,10 +10,24 @@ import { useWallet } from '../../../components/connect/WalletContext';
 import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
 import params from './params';
-import { recoverPersonalSignature } from '@metamask/eth-sig-util';
+import { recoverPersonalSignature, recoverTypedSignature_v4 } from 'cfx-sig-util';
 import { toast } from '../../ui/use-toast';
-import { bufferToHex, ecrecover, pubToAddress, toBuffer } from 'ethereumjs-util';
-import { address, format } from 'js-conflux-sdk';
+import { address, Message } from 'js-conflux-sdk';
+import * as cfxUtil from 'cfx-util';
+import { getMessage } from 'cip-23';
+import { keccak256 } from 'ethereumjs-util';
+
+function recoverPublicKey(hash: Buffer, sig: string): Buffer {
+  const signature = cfxUtil.toBuffer(sig);
+  const sigParams = cfxUtil.fromRpcSig(cfxUtil.addHexPrefix(signature.toString('hex')));
+  return cfxUtil.ecrecover(hash, sigParams.v, sigParams.r, sigParams.s);
+}
+
+function recoverAddress(hash: Buffer, sig: string): string {
+  const publicKey = recoverPublicKey(hash, sig);
+  const sender = cfxUtil.publicToAddress(publicKey);
+  return cfxUtil.bufferToHex(sender);
+}
 
 export default function BTCExample() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -346,7 +360,7 @@ export default function BTCExample() {
 
       <ApiGroup title="Sign Message">
         <ApiPayload
-          title="cfx_sign"
+          title="(不支持) cfx_sign"
           description="cfx_sign"
           presupposeParams={params.cfxSign}
           onExecute={async (request) => {
@@ -357,6 +371,17 @@ export default function BTCExample() {
               'from': account.address,
             });
             return res as string;
+          }}
+          onValidate={async (request: string, response: string) => {
+            const hash = keccak256(Buffer.from(request));
+            const hexAddress = recoverAddress(hash, response);
+
+            return Promise.resolve(
+              (
+                hexAddress.replace('0x', '')?.toLowerCase() ===
+                address.decodeCfxAddress(account.address).hexAddress.toString('hex')
+              ).toString(),
+            );
           }}
         />
         <ApiPayload
@@ -371,8 +396,14 @@ export default function BTCExample() {
             return res as string;
           }}
           onValidate={async (request: string, response: string) => {
-            const res = recoverPersonalSignature({ data: request, signature: response });
-            return Promise.resolve((res === account.address).toString());
+            const hexAddress = recoverPersonalSignature({ data: request, sig: response });
+
+            return Promise.resolve(
+              (
+                hexAddress.replace('0x', '')?.toLowerCase() ===
+                address.decodeCfxAddress(account.address).hexAddress.toString('hex')
+              ).toString(),
+            );
           }}
         />
 
@@ -385,7 +416,20 @@ export default function BTCExample() {
               'method': 'cfx_signTypedData_v4',
               'params': [account.address, request],
             });
-            return JSON.stringify(res);
+            return res;
+          }}
+          onValidate={async (request: string, response: string) => {
+            const hash = keccak256(getMessage(JSON.parse(request)));
+
+            const hexAddress = recoverAddress(hash, response);
+            console.log('hexAddress', hexAddress);
+
+            return Promise.resolve(
+              (
+                hexAddress.replace('0x', '')?.toLowerCase() ===
+                address.decodeCfxAddress(account.address).hexAddress.toString('hex')
+              ).toString(),
+            );
           }}
         />
       </ApiGroup>

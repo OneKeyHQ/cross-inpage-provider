@@ -14,7 +14,6 @@ import { toast } from '../../ui/use-toast';
 import * as bitcoin from 'bitcoinjs-lib';
 import { Input } from '../../ui/input';
 import { createPSBT } from '../btc/utils';
-import { stringifyWithCircularReferences } from '../../../lib/jsonUtils';
 
 function SignMessageApiPayload({ provider }: { provider: IProviderApi | undefined }) {
   const [allowValidate, setAllowValidate] = useState(false);
@@ -153,7 +152,12 @@ export default function BTCExample() {
           onExecute={async (request: string) => {
             const res = await provider?.connectWallet();
             console.log('connectWallet result:', res);
-            return stringifyWithCircularReferences(res);
+            return JSON.stringify(res, (key, value) => {
+              if (['bridge', 'config', 'debugLogger', '_log'].indexOf(key) !== -1) {
+                return undefined;
+              }
+              return value;
+            });
           }}
         />
         <ApiPayload

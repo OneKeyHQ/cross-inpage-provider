@@ -14,7 +14,7 @@ import params from './params';
 import { InputWithSave } from '../../InputWithSave';
 import { toast } from '../../ui/use-toast';
 
-export default function BTCExample() {
+export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([
     {
       uuid: 'injected',

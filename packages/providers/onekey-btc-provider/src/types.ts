@@ -36,6 +36,7 @@ export enum ProviderEvents {
   DISCONNECT = 'disconnect',
   CLOSE = 'close',
   ACCOUNTS_CHANGED = 'accountsChanged',
+  ACCOUNT_CHANGED = 'accountChanged',
   NETWORK_CHANGED = 'networkChanged',
   MESSAGE_LOW_LEVEL = 'message_low_level',
 }
@@ -81,6 +82,7 @@ export interface ProviderEventsMap {
   [ProviderEvents.CONNECT]: (data: any) => void;
   [ProviderEvents.DISCONNECT]: () => void;
   [ProviderEvents.ACCOUNTS_CHANGED]: (accounts: string[]) => void;
+  [ProviderEvents.ACCOUNT_CHANGED]: (accounts: string[]) => void;
   [ProviderEvents.NETWORK_CHANGED]: (networkId: string) => void;
   [ProviderEvents.MESSAGE_LOW_LEVEL]: (payload: IJsonRpcRequest) => void;
 }

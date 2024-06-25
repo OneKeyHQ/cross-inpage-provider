@@ -10,8 +10,24 @@ import { useWallet } from '../../../components/connect/WalletContext';
 import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
 import params from './params';
-import { recoverPersonalSignature } from '@metamask/eth-sig-util';
+import { recoverPersonalSignature, recoverTypedSignature_v4 } from 'cfx-sig-util';
 import { toast } from '../../ui/use-toast';
+import { address, Message } from 'js-conflux-sdk';
+import * as cfxUtil from 'cfx-util';
+import { getMessage } from 'cip-23';
+import { keccak256 } from 'ethereumjs-util';
+
+function recoverPublicKey(hash: Buffer, sig: string): Buffer {
+  const signature = cfxUtil.toBuffer(sig);
+  const sigParams = cfxUtil.fromRpcSig(cfxUtil.addHexPrefix(signature.toString('hex')));
+  return cfxUtil.ecrecover(hash, sigParams.v, sigParams.r, sigParams.s);
+}
+
+function recoverAddress(hash: Buffer, sig: string): string {
+  const publicKey = recoverPublicKey(hash, sig);
+  const sender = cfxUtil.publicToAddress(publicKey);
+  return cfxUtil.bufferToHex(sender);
+}
 
 export default function BTCExample() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -176,6 +192,17 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
+          title="cfx_chainId"
+          description="获取 chainId"
+          disableRequestContent
+          onExecute={async () => {
+            const res = await provider?.request<string>({
+              method: 'cfx_chainId',
+            });
+            return res;
+          }}
+        />
+        <ApiPayload
           title="cfx_getMaxGasLimit"
           description="获取最大 Gas Limit"
           disableRequestContent
@@ -213,7 +240,7 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="wallet_getBlockTime"
-          description="获取区块时间"
+          description="（暂不支持）获取区块时间"
           disableRequestContent
           onExecute={async () => {
             const res = await provider?.request<string[]>({
@@ -224,7 +251,7 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="wallet_getBlockchainExplorerUrl"
-          description="获取区块链浏览器地址"
+          description="（暂不支持）获取区块链浏览器地址"
           disableRequestContent
           onExecute={async () => {
             const res = await provider?.request<string[]>({
@@ -295,7 +322,7 @@ export default function BTCExample() {
       <ApiGroup title="Chain">
         <ApiPayload
           title="wallet_addConfluxChain"
-          description="（不需要支持）添加 Chain"
+          description="（暂不支持）添加 Chain"
           presupposeParams={params.addConfluxChain}
           onExecute={async (request) => {
             const res = await provider?.request({
@@ -307,7 +334,7 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="wallet_switchConfluxChain"
-          description="（不需要支持）切换 Chain"
+          description="（暂不支持）切换 Chain"
           presupposeParams={params.addConfluxChain}
           onExecute={async (request) => {
             const res = await provider?.request({
@@ -319,7 +346,7 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="wallet_watchAsset"
-          description="添加 Token"
+          description="（暂不支持）添加 Token"
           presupposeParams={params.watchAsset}
           onExecute={async (request) => {
             const res = await provider?.request({
@@ -333,6 +360,31 @@ export default function BTCExample() {
 
       <ApiGroup title="Sign Message">
         <ApiPayload
+          title="(不支持) cfx_sign"
+          description="cfx_sign"
+          presupposeParams={params.cfxSign}
+          onExecute={async (request) => {
+            const res = await provider?.request({
+              'method': 'cfx_sign',
+              'params': [account.address, request],
+              // @ts-expect-error
+              'from': account.address,
+            });
+            return res as string;
+          }}
+          onValidate={async (request: string, response: string) => {
+            const hash = keccak256(Buffer.from(request));
+            const hexAddress = recoverAddress(hash, response);
+
+            return Promise.resolve(
+              (
+                hexAddress.replace('0x', '')?.toLowerCase() ===
+                address.decodeCfxAddress(account.address).hexAddress.toString('hex')
+              ).toString(),
+            );
+          }}
+        />
+        <ApiPayload
           title="personal_sign"
           description="personal_sign"
           presupposeParams={params.personalSign}
@@ -344,8 +396,14 @@ export default function BTCExample() {
             return res as string;
           }}
           onValidate={async (request: string, response: string) => {
-            const res = recoverPersonalSignature({ data: request, signature: response });
-            return Promise.resolve((res === account.address).toString());
+            const hexAddress = recoverPersonalSignature({ data: request, sig: response });
+
+            return Promise.resolve(
+              (
+                hexAddress.replace('0x', '')?.toLowerCase() ===
+                address.decodeCfxAddress(account.address).hexAddress.toString('hex')
+              ).toString(),
+            );
           }}
         />
 
@@ -358,7 +416,20 @@ export default function BTCExample() {
               'method': 'cfx_signTypedData_v4',
               'params': [account.address, request],
             });
-            return JSON.stringify(res);
+            return res;
+          }}
+          onValidate={async (request: string, response: string) => {
+            const hash = keccak256(getMessage(JSON.parse(request)));
+
+            const hexAddress = recoverAddress(hash, response);
+            console.log('hexAddress', hexAddress);
+
+            return Promise.resolve(
+              (
+                hexAddress.replace('0x', '')?.toLowerCase() ===
+                address.decodeCfxAddress(account.address).hexAddress.toString('hex')
+              ).toString(),
+            );
           }}
         />
       </ApiGroup>

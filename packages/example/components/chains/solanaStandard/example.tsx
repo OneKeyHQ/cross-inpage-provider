@@ -13,7 +13,6 @@ import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-r
 import { useConnection, useWallet as useSolWallet } from '@solana/wallet-adapter-react';
 import InfoLayout from '../../../components/InfoLayout';
 import { createTransferTransaction, createVersionedTransaction } from '../solana/builder';
-import { jsonToUint8Array } from '../../../lib/uint8array';
 import { verifySignIn } from '@solana/wallet-standard-util';
 import nacl from 'tweetnacl';
 
@@ -112,11 +111,10 @@ function Example() {
           description="签名消息"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
-            const res = await signMessage(Buffer.from(request, 'utf8'));
-            return JSON.stringify(res);
+            return await signMessage(Buffer.from(request, 'utf8'));
           }}
           onValidate={(request: string, result: string) => {
-            const signatureObj = jsonToUint8Array(result);
+            const signatureObj = new Uint8Array(JSON.parse(result));
             const isValidSignature = nacl.sign.detached.verify(
               Buffer.from(request, 'utf8'),
               signatureObj,
@@ -128,7 +126,7 @@ function Example() {
         />
         <ApiPayload
           title="signIn"
-          description="(不支持) Sign In With Solana EIP-4361"
+          description="(暂不支持) Sign In With Solana EIP-4361"
           onGenerateRequest={() => {
             const now: Date = new Date();
             const currentDateTime = now.toISOString();

@@ -58,19 +58,28 @@ export default function Example() {
   useEffect(() => {
     if (!provider) return;
 
-    provider.onNetworkChange((network: string) => {
+    // @ts-expect-error
+    provider.onNetworkChange((network: { chainId: string; name: string; url: string } | null) => {
+      console.log(`aptos [onNetworkChange] ${JSON.stringify(network)}`);
+
+      if (!network) return;
+      if (!network.chainId) return;
+
       setAccount({
         ...account,
-        chainId: network,
+        chainId: network?.chainId,
       });
-      console.log(`aptos [onNetworkChange] ${network}`);
     });
-    provider.onAccountChange((address: string | null) => {
-      console.log(`aptos [onAccountChange] ${address}`);
-      if (!address) return;
+    // @ts-expect-error
+    provider.onAccountChange((params: { address: string; publicKey: string } | null) => {
+      console.log(`aptos [onAccountChange] ${JSON.stringify(params)}`);
+      if (!params?.address) return;
+      if (!params?.publicKey) return;
+
       setAccount({
         ...account,
-        address,
+        address: params.address,
+        publicKey: params.publicKey,
       });
     });
   }, [account, provider, setAccount]);
@@ -107,6 +116,15 @@ export default function Example() {
           disableRequestContent
           onExecute={async (request: string) => {
             const res = await provider?.getNetwork();
+            return JSON.stringify(res);
+          }}
+        />{' '}
+        <ApiPayload
+          title="getNetworkURL"
+          description="getNetworkURL"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            const res = await provider?.getNetworkURL();
             return JSON.stringify(res);
           }}
         />

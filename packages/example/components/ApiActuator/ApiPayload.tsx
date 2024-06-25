@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { useWallet } from '../connect/WalletContext';
-import { useApiExecutor } from './useApiExecutor';
+import { IApiExecutor, useApiExecutor } from './useApiExecutor';
 import { IEthereumProvider } from '../chains/ethereum/types';
 import { Card, CardContent, CardDescription, CardHeader } from '../ui/card';
 import {
@@ -25,6 +25,7 @@ function ApiPayloadContent({
   presupposeParams,
   onExecute,
   onValidate,
+  onPresupposeParamChange,
   generateRequestFrom,
   onGenerateRequest,
   allowCallWithoutProvider,
@@ -48,7 +49,10 @@ function ApiPayloadContent({
 
       <CardContent>
         <div className="flex flex-col gap-3">
-          <PresupposeParamsSelector presupposeParams={presupposeParams} />
+          <PresupposeParamsSelector
+            presupposeParams={presupposeParams}
+            onPresupposeParamChange={onPresupposeParamChange}
+          />
 
           <RequestEditor
             generateRequestFrom={generateRequestFrom}
@@ -87,9 +91,7 @@ export function ApiPayload(props: IApiPayloadProps) {
 
 export type IApiExecuteProps = {
   allowCallWithoutProvider?: boolean;
-  onExecute: (request: string) => Promise<string>;
-  onValidate?: (request: string, response: string) => Promise<string>;
-};
+} & IApiExecutor;
 
 function ApiExecute({ allowCallWithoutProvider, onExecute, onValidate }: IApiExecuteProps) {
   const { provider } = useWallet<IEthereumProvider>();
@@ -109,6 +111,7 @@ function ApiExecute({ allowCallWithoutProvider, onExecute, onValidate }: IApiExe
 
   const handleExecute = useCallback(async () => {
     setLoading(true);
+    handleSetResult('Calling...');
     const { result, error } = await execute(request);
     setLoading(false);
     if (error) {

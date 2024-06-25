@@ -10,7 +10,7 @@ export enum ChainType {
 const mainNetClient = new algosdk.Algodv2('', 'https://mainnet-api.algonode.cloud', '');
 const testNetClient = new algosdk.Algodv2('', 'https://testnet-api.algonode.cloud', '');
 
-function clientForChain(chain: ChainType): algosdk.Algodv2 {
+export function clientForChain(chain: ChainType): algosdk.Algodv2 {
   switch (chain) {
     case ChainType.MainNet:
       return mainNetClient;

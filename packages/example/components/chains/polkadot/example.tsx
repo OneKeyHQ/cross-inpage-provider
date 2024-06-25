@@ -254,7 +254,7 @@ export default function Example() {
           }}
         />
         <ApiPayload
-          title="signAndSend"
+          title="signPayload"
           description="签名并发送交易"
           presupposeParams={params.signAndSend(dynamicAddress || '')}
           onExecute={async (request: string) => {

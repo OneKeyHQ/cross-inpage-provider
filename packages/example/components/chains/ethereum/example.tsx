@@ -18,6 +18,7 @@ import {
   recoverTypedSignature,
 } from '@metamask/eth-sig-util';
 import { toast } from '../../ui/use-toast';
+import { Input } from '../../ui/input';
 
 export default function Example() {
   const walletsRef = useRef<IEIP6963ProviderDetail[]>([
@@ -147,6 +148,33 @@ export default function Example() {
     };
   }, [account, provider, setAccount]);
 
+  const getTokenTransferFrom = () => {
+    return (
+      <>
+        <Input
+          label="收款地址"
+          type="text"
+          name="toAddress"
+          defaultValue={account?.address ?? ''}
+        />
+        <Input label="金额" type="number" name="amount" defaultValue="10000" />
+        <select name="tokenAddress" className="select">
+          <option selected>选择 Token</option>
+          <option value="0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48">MainNet USDC</option>
+          <option value="0xdAC17F958D2ee523a2206206994597C13D831ec7">MainNet USDT</option>
+        </select>
+      </>
+    );
+  };
+
+  const requestSendTransactionCommon = async (request: string) => {
+    const res = await provider?.request({
+      'method': 'eth_sendTransaction',
+      'params': [JSON.parse(request)],
+    });
+    return JSON.stringify(res);
+  };
+
   return (
     <>
       <ConnectButton<IEthereumProvider>
@@ -190,8 +218,20 @@ export default function Example() {
           }}
         />
         <ApiPayload
+          title="wallet_getPermissions"
+          description="（暂不支持）获取权限"
+          disableRequestContent
+          onExecute={async () => {
+            const res = await provider?.request({
+              'method': 'wallet_getPermissions',
+              'params': [],
+            });
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
           title="wallet_revokePermissions"
-          description="删除权限（暂时不支持）"
+          description="（暂不支持）删除权限"
           presupposeParams={params.revokePermissions}
           onExecute={async () => {
             const res = await provider?.request({
@@ -278,7 +318,7 @@ export default function Example() {
       <ApiGroup title="Chain">
         <ApiPayload
           title="wallet_addEthereumChain"
-          description="(暂时不支持) 添加 Chain"
+          description="(暂不支持) 添加 Chain"
           presupposeParams={params.addEthereumChain}
           onExecute={async (request: string) => {
             const res = await provider?.request({
@@ -485,15 +525,75 @@ export default function Example() {
           title="eth_sendTransaction"
           description="发送交易"
           presupposeParams={params.sendTransaction(account?.address ?? '', account?.address ?? '')}
-          onExecute={async (request: string) => {
-            const res = await provider?.request({
-              'method': 'eth_sendTransaction',
-              'params': [JSON.parse(request)],
+          onExecute={requestSendTransactionCommon}
+        />
+      </ApiGroup>
+
+      <ApiGroup title="eth_sendTransaction">
+        <ApiPayload
+          title="eth_sendTransaction"
+          description="发送 ERC20 Token"
+          onExecute={requestSendTransactionCommon}
+          generateRequestFrom={getTokenTransferFrom}
+          // @ts-expect-error
+          onGenerateRequest={(fromData: Record<string, any>) => {
+            const from = account?.address ?? '';
+            const to = fromData.toAddress ?? from;
+            const amount = fromData.amount;
+            const tokenAddress = fromData.tokenAddress;
+
+            if (!amount) {
+              return 'Amount is required';
+            }
+            if (!tokenAddress) {
+              return 'Token address is required';
+            }
+
+            return JSON.stringify({
+              from: from,
+              to: tokenAddress,
+              data: `0xa9059cbb${to.substring(2).padStart(64, '0')}${BigInt(amount)
+                .toString(16)
+                .padStart(64, '0')}`,
+              value: '0x0',
+              gasLimit: '0x186a0',
+              gasPrice: '0xbebc200',
             });
-            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="eth_sendTransaction"
+          description="授权 ERC20 Token，金额为 0 时表示取消授权"
+          onExecute={requestSendTransactionCommon}
+          generateRequestFrom={getTokenTransferFrom}
+          // @ts-expect-error
+          onGenerateRequest={(fromData: Record<string, any>) => {
+            const from = account?.address ?? '';
+            const to = fromData.toAddress ?? from;
+            const amount = fromData.amount;
+            const tokenAddress = fromData.tokenAddress;
+
+            if (!amount) {
+              return 'Amount is required';
+            }
+            if (!tokenAddress) {
+              return 'Token address is required';
+            }
+
+            return JSON.stringify({
+              from: from,
+              to: tokenAddress,
+              data: `0x095ea7b3${to.substring(2).padStart(64, '0')}${BigInt(amount)
+                .toString(16)
+                .padStart(64, '0')}`,
+              value: '0x0',
+              gasLimit: '0x186a0',
+              gasPrice: '0xbebc200',
+            });
           }}
         />
       </ApiGroup>
+
       <DappList dapps={dapps} />
     </>
   );

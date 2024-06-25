@@ -32,7 +32,6 @@ import params, { networks } from './params';
 import { CosmosNodeClient } from './rpc';
 import { toast } from '../../ui/use-toast';
 import { Textarea } from '../../ui/textarea';
-import { jsonToUint8Array } from '../../../lib/uint8array';
 
 function removeNull(obj: any): any {
   if (obj !== null && typeof obj === 'object') {
@@ -113,6 +112,12 @@ export default function Example() {
     [network.id],
   );
 
+  const onDisconnectWallet = useCallback(async () => {
+    if (provider) {
+      await provider?.disconnect();
+    }
+  }, [provider]);
+
   return (
     <>
       <InfoLayout title="Base Info">
@@ -150,6 +155,7 @@ export default function Example() {
           );
         }}
         onConnect={onConnectWallet}
+        onDisconnect={onDisconnectWallet}
       />
 
       <ApiGroup title="Basics">
@@ -175,8 +181,7 @@ export default function Example() {
             },
           ]}
           onExecute={async (request: string) => {
-            const res = await provider?.getKey(network.id);
-            return JSON.stringify(res);
+            return await provider?.getKey(network.id);
           }}
         />
         <ApiPayload
@@ -352,7 +357,7 @@ export default function Example() {
               chainId: network.id,
               accountNumber: Long.fromString(accountInfo?.account_number),
             });
-            return JSON.stringify(res);
+            return res;
           }}
         />
         <ApiPayload
@@ -368,8 +373,8 @@ export default function Example() {
             let encodeTx = '';
             if (requestTx?.signed?.bodyBytes && requestTx?.signed?.authInfoBytes) {
               // Direct sign
-              const bodyBytes = jsonToUint8Array(requestTx?.signed?.bodyBytes);
-              const authInfoBytes = jsonToUint8Array(requestTx?.signed?.authInfoBytes);
+              const bodyBytes = new Uint8Array(Buffer.from(requestTx?.signed?.bodyBytes));
+              const authInfoBytes = new Uint8Array(Buffer.from(requestTx?.signed?.authInfoBytes));
               // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
               const signatures = [Buffer.from(requestTx?.signature?.signature ?? '', 'base64')];
 

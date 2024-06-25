@@ -15,6 +15,7 @@ import { SignMessagePayload, SignMessageResponse } from '../aptos/types';
 import { stripHexPrefix } from '../../../lib/hex';
 import nacl from 'tweetnacl';
 import params from './params';
+import { Textarea } from '../../ui/textarea';
 
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -227,7 +228,7 @@ export default function Example() {
         />
         <ApiPayload
           title="generateSignAndSubmitTransaction"
-          description="generateSignAndSubmitTransaction"
+          description="（暂不支持）generateSignAndSubmitTransaction"
           presupposeParams={params.signTransaction(account?.address ?? '')}
           onExecute={async (request: string) => {
             const obj = JSON.parse(request);
@@ -253,6 +254,37 @@ export default function Example() {
             const obj = JSON.parse(request);
             const res = await provider?.signGenericTransaction(obj);
             return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="submitTransaction"
+          description="submitTransaction"
+          onExecute={async (request: string) => {
+            const obj = Buffer.from(request.split(',')?.map((v) => parseInt(v, 10)));
+            const res = await provider?.submitTransaction(obj);
+            return JSON.stringify(res);
+          }}
+          generateRequestFrom={() => {
+            return (
+              <Textarea
+                name="tx"
+                placeholder="将 generateTransaction 请求复制到这里"
+                defaultValue={JSON.stringify(
+                  {
+                    arguments: [account?.address ?? '', '100000'],
+                    function: '0x1::coin::transfer',
+                    type: 'entry_function_payload',
+                    type_arguments: ['0x1::aptos_coin::AptosCoin'],
+                  },
+                  null,
+                  2,
+                )}
+              />
+            );
+          }}
+          onGenerateRequest={async (fromData: Record<string, any>) => {
+            const requestTx = JSON.parse(fromData?.['tx'] as string);
+            return await provider?.generateTransaction(account?.address, requestTx);
           }}
         />
         <ApiPayload

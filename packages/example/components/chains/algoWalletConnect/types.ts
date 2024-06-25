@@ -1,4 +1,5 @@
 import { SignClient } from '@walletconnect/sign-client';
+import type { Transaction } from 'algosdk';
 
 export type IProviderApi = typeof SignClient;
 
@@ -32,4 +33,32 @@ export interface ISignTxnOpts {
 
 export type SignTxnParams = [IWalletTransaction[], ISignTxnOpts?];
 
-/* eslint-enable */
+// generated algo tx types
+export interface MultisigMetadata {
+  version: number;
+  threshold: number;
+  addrs: string[];
+}
+
+export interface SignerTransaction {
+  txn: Transaction;
+  authAddr?: string;
+  msig?: MultisigMetadata;
+  signers?: string[];
+  message?: string;
+}
+
+export interface WalletTransaction {
+  txn: string;
+  authAddr?: string;
+  msig?: MultisigMetadata;
+  signers?: string[];
+  message?: string;
+}
+
+export interface JsonRpcRequest<T = any> {
+  id: number;
+  jsonrpc: string;
+  method: string;
+  params: T;
+}

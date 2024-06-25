@@ -86,22 +86,135 @@ export default {
   ],
   switchEthereumChain: [
     {
-      'id': 'switchEthereumChain_sepolia',
-      'name': 'Switch Sepolia Test Chain',
-      'description': '切换 Sepolia Chain',
-      'value': JSON.stringify({
-        'chainId': '0xaa36a7',
-      }),
+      name: 'Sepolia Test',
+      chainId: '0xaa36a7',
     },
     {
-      'id': 'switchEthereumChain_Gnosis',
-      'name': 'Switch Gnosis Chain',
-      'description': '切换 Gnosis Chain',
-      'value': JSON.stringify({
-        'chainId': '0x64',
-      }),
+      name: 'Gnosis',
+      chainId: '0x64',
     },
-  ],
+    {
+      name: 'filecoin Evm',
+      chainId: '0x13a',
+    },
+    {
+      name: 'Ethereum',
+      chainId: '0x1',
+    },
+    {
+      name: 'Optimism',
+      chainId: '0xa',
+    },
+    // {
+    //   name: 'EthereumPoW',
+    //   chainId: '0x64',
+    // },
+    {
+      name: 'Conflux eSpace',
+      chainId: '0x406',
+    },
+    {
+      name: 'Huobi ECO',
+      chainId: '0x80',
+    },
+    {
+      name: 'Aurora',
+      chainId: '0x4e454152',
+    },
+    {
+      name: 'Polygon',
+      chainId: '0x89',
+    },
+    {
+      name: 'Polygon akEVM',
+      chainId: '0x44d',
+    },
+    {
+      name: 'Cronos',
+      chainId: '0x19',
+    },
+    {
+      name: 'Fantom',
+      chainId: '0xfa',
+    },
+    {
+      name: 'Boba',
+      chainId: '0x120',
+    },
+    {
+      name: 'zkSync',
+      chainId: '0x144',
+    },
+    {
+      name: 'Arbitrum',
+      chainId: '0xa4b1',
+    },
+    {
+      name: 'Celo',
+      chainId: '0xa4ec',
+    },
+    {
+      name: 'Avalanche',
+      chainId: '0xa86a',
+    },
+    // {
+    //   name: 'DIS',
+    //   chainId: '0x64',
+    // },
+    {
+      name: 'BNB Smart Chain',
+      chainId: '0x38',
+    },
+    {
+      name: 'Ethereum Classic',
+      chainId: '0x3d',
+    },
+    // {
+    //   name: 'OKX Chain',
+    //   chainId: '0x64',
+    // },
+    {
+      name: 'Mixin Virtual Machine',
+      chainId: '0x120c7',
+    },
+    {
+      name: 'Linea',
+      chainId: '0xe708',
+    },
+    {
+      name: 'Base',
+      chainId: '0x2105',
+    },
+    {
+      name: 'Mantle',
+      chainId: '0x1388',
+    },
+    {
+      name: 'IoTeX',
+      chainId: '0x1251',
+    },
+    // {
+    //   name: 'Mantra',
+    //   chainId: '0x64',
+    // },
+    {
+      name: 'Blast',
+      chainId: '0xee',
+    },
+    {
+      name: 'OctaSpace',
+      chainId: '0xc3501',
+    },
+  ].map((item) => {
+    return {
+      'id': `switchEthereumChain_${item.name}`,
+      'name': `${item.name}`,
+      'description': `切换 ${item.name} Chain`,
+      'value': JSON.stringify({
+        'chainId': item.chainId,
+      }),
+    };
+  }),
   watchAsset: [
     {
       'id': 'watchAsset erc20',
@@ -525,36 +638,6 @@ export default {
           gasLimit: '0x5028',
           maxFeePerGas: '0x2540be400',
           maxPriorityFeePerGas: '0x3b9aca00',
-        }),
-      },
-      {
-        'id': 'sendERC20',
-        'name': 'Send ERC20',
-        'description': '发送 ERC20 USDC Token',
-        'value': JSON.stringify({
-          from: from,
-          to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-          data: `0xa9059cbb${to.substring(2).padStart(64, '0')}${BigInt(1000)
-            .toString(16)
-            .padStart(64, '0')}`, // Assumes amount is a decimal string
-          value: '0x0',
-          gasLimit: '0x186a0', // 100000 in hexadecimal
-          gasPrice: '0xbebc200', // example gas price
-        }),
-      },
-      {
-        'id': 'approveERC20',
-        'name': 'Approve ERC20',
-        'description': '授权合约使用 USDC',
-        'value': JSON.stringify({
-          from: from,
-          to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-          data: `0x095ea7b3${'0x3b95bc951ee0f553ba487327278cac44f29715e5' // spender address
-            .substring(2)
-            .padStart(64, '0')}${BigInt(1000).toString(16).padStart(64, '0')}`,
-          value: '0x0',
-          gasLimit: '0x30d40', // 200000 in hexadecimal
-          gasPrice: '0xbebc200', // example gas price
         }),
       },
     ];

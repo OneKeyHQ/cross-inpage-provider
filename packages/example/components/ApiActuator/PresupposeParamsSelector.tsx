@@ -11,15 +11,20 @@ export type IPresupposeParam = {
 
 export type IPresupposeParamsSelectorProps = {
   presupposeParams?: IPresupposeParam[];
+  onPresupposeParamChange?: (paramId: string) => void;
 };
 
-export function PresupposeParamsSelector({ presupposeParams }: IPresupposeParamsSelectorProps) {
+export function PresupposeParamsSelector({
+  presupposeParams,
+  onPresupposeParamChange,
+}: IPresupposeParamsSelectorProps) {
   const { state, dispatch } = useApiPayload();
   const { currentPurposeParamId } = state;
 
   useEffect(() => {
     if (presupposeParams && presupposeParams.length > 0) {
       dispatch({ type: 'SET_CURRENT_PARAM_ID', payload: presupposeParams[0].id });
+      onPresupposeParamChange?.(presupposeParams[0].id);
     }
   }, [dispatch, presupposeParams]);
 
@@ -31,6 +36,7 @@ export function PresupposeParamsSelector({ presupposeParams }: IPresupposeParams
   const handleSetCurrentPurposeParamId = useCallback(
     (newPurposeParamId: string) => {
       dispatch({ type: 'SET_CURRENT_PARAM_ID', payload: newPurposeParamId });
+      onPresupposeParamChange?.(newPurposeParamId);
     },
     [dispatch],
   );

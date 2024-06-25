@@ -163,7 +163,7 @@ function ensureInjectRiskErrorScreen(riskInfo: IWalletRiskInfo) {
 export async function detectWebsiteRiskLevel() {
   console.log("=====>>>>:  Detect Risk website detectWebsiteRiskLevel");
   // wait nexttick
-  await wait(800);
+  await wait(1000);
   try {
     const riskResult = (await window.$onekey.$private.request({
       method: "wallet_detectRiskLevel",

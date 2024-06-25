@@ -170,6 +170,15 @@ const styles = `
       line-height: 16px;
       color: #13141A;
     }
+
+    .onekey-alert-network-changed {
+      border-radius: 8px;
+      height: 71px;
+
+      font-size: 12px;
+      line-height: 16px;
+      color: #13141A;
+    }
   `;
 
 function notification(options: Partial<NotificationSettings>) {

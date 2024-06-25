@@ -118,6 +118,7 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
     const disconnectError = web3Errors.provider.disconnected();
 
     this._emit(ProviderEvents.ACCOUNTS_CHANGED, []);
+    this._emit(ProviderEvents.ACCOUNT_CHANGED, []);
     this._emit(ProviderEvents.DISCONNECT, disconnectError);
     this._emit(ProviderEvents.CLOSE, disconnectError);
   }
@@ -139,6 +140,7 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
     this._selectedAddress = accounts?.[0];
     this._state.accounts = accounts;
     this._emit(ProviderEvents.ACCOUNTS_CHANGED, accounts);
+    this._emit(ProviderEvents.ACCOUNT_CHANGED, accounts);
   }
 
   protected async _request<T>(args: RequestArguments): Promise<T> {

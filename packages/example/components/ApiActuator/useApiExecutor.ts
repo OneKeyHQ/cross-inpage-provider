@@ -1,9 +1,10 @@
 import { get } from 'lodash';
 import { useCallback } from 'react';
+import { stringifyWithSpecialType } from '../../lib/jsonUtils';
 
 export type IApiExecutor = {
-  onExecute: (request: string) => Promise<string>;
-  onValidate: (request: string, response: string) => Promise<string>;
+  onExecute: (request: string) => Promise<any>;
+  onValidate?: (request: string, response: string) => Promise<string>;
 };
 
 export function useApiExecutor({ onExecute, onValidate }: IApiExecutor): {
@@ -16,11 +17,32 @@ export function useApiExecutor({ onExecute, onValidate }: IApiExecutor): {
   const execute = useCallback(
     async (request: string) => {
       try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const result = await onExecute(request);
-        return { result, error: undefined };
+
+        let resultString: string;
+        // normal types
+        if (
+          typeof result === 'number' ||
+          typeof result === 'boolean' ||
+          typeof result === 'string'
+        ) {
+          resultString = result.toString();
+        } else {
+          resultString = stringifyWithSpecialType(result);
+        }
+
+        return { result: resultString ?? 'null', error: undefined };
       } catch (error) {
         console.log('execute error', error);
-        return { result: undefined, error: get(error, 'message', 'Execution error') };
+
+        let errorMessage = '';
+        try {
+          errorMessage = JSON.stringify(error);
+        } catch (error) {
+          errorMessage = get(error, 'message', 'Execution error');
+        }
+        return { result: undefined, error: errorMessage };
       }
     },
     [onExecute],

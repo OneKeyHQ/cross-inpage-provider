@@ -14,7 +14,7 @@ import params from './params';
 import { InputWithSave } from '../../InputWithSave';
 import { toast } from '../../ui/use-toast';
 
-export default function BTCExample() {
+export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([
     {
       uuid: 'injected',
@@ -63,26 +63,30 @@ export default function BTCExample() {
     // const [address] = await provider.request<string[]>({ method: 'tron_accounts' });
     return {
       provider,
-      address: tronWeb.defaultAddress.base58,
+      address: tronWeb?.defaultAddress?.base58,
       // address: address,
     };
   };
 
-  const checkReceiveAddress = () => {
-    if (!receiveAddress || isEmpty(receiveAddress)) {
-      toast({
-        title: 'Invalid Address',
-        description: '请在 Example 顶部填写接收地址，收款地址不能与发送地址相同',
+  useEffect(() => {
+    if (!provider) return;
+    if (provider?.tronWeb?.defaultAddress?.base58) {
+      // @ts-expect-error
+      setAccount((pre) => {
+        return {
+          ...pre,
+          address: provider.tronWeb.defaultAddress.base58,
+        };
       });
-      throw new Error('请在 Example 顶部填写接收地址，收款地址不能与发送地址相同');
     }
+  }, [provider]);
 
+  const checkReceiveAddress = () => {
     if (account.address === receiveAddress) {
       toast({
-        title: 'Invalid Address',
-        description: '收款地址不能与发送地址相同',
+        title: '温馨提示 (不是报错)',
+        description: 'Tron 收款地址不能与发送地址相同',
       });
-      throw new Error('收款地址不能与发送地址相同');
     }
   };
 
@@ -96,19 +100,19 @@ export default function BTCExample() {
         };
       };
     }) => {
-      console.log('tron on message', e.data);
-
       if (e.data.message && e.data.message.action === 'accountsChanged') {
-        console.log('tron [accountsChanged]', e.data.message.data);
+        console.log('tron [accountsChanged]', e?.data?.message?.data);
 
-        const { address } = e.data.message.data;
-        setAccount({
-          ...account,
-          address,
-        });
+        const { address } = e?.data?.message?.data;
+        if (address) {
+          setAccount({
+            ...account,
+            address,
+          });
+        }
       }
       if (e.data.message && e.data.message.action === 'setNode') {
-        console.log('tron [setNode]', e.data.message.data);
+        console.log('tron [setNode]', e?.data?.message?.data);
         // const { address } = e.data.message.data;
         // setAccount({
         //   ...account,
@@ -116,14 +120,14 @@ export default function BTCExample() {
         // });
       }
       if (e.data.message && e.data.message.action === 'setAccount') {
-        console.log('tron [setAccount]', e.data.message.data);
+        console.log('tron [setAccount]', e?.data?.message?.data);
       }
       if (e.data.message && e.data.message.action === 'connect') {
-        console.log('tron [connect]', e.data.message.data);
+        console.log('tron [connect]', e?.data?.message?.data);
       }
 
       if (e.data.message && e.data.message.action === 'disconnect') {
-        console.log('tron [disconnect]', e.data.message.data);
+        console.log('tron [disconnect]', e?.data?.message?.data);
       }
     };
 
@@ -149,7 +153,7 @@ export default function BTCExample() {
         }}
         onConnect={onConnectWallet}
       />
-      <ApiGroup title="收款地址">
+      <ApiGroup title="设置所有 Case 收款地址">
         <InputWithSave
           storageKey="tron-receive-address"
           onChange={setReceiveAddress}
@@ -157,27 +161,16 @@ export default function BTCExample() {
         />
       </ApiGroup>
 
-      <ApiGroup title="Basics">
+      <ApiGroup title="Primitive Basics">
         <ApiPayload
           title="tron_requestAccounts"
-          description="连接钱包"
+          description="连接钱包, TronLink 需要解锁不然失败。"
           disableRequestContent
           onExecute={async (request: string) => {
             const res = await provider?.request<string[]>({
               method: 'tron_requestAccounts',
             });
             return JSON.stringify(res);
-          }}
-        />
-        <ApiPayload
-          title="tron_chainid"
-          description="获取链 ID"
-          disableRequestContent
-          onExecute={async () => {
-            const res = await provider?.request<string>({
-              method: 'tron_chainid',
-            });
-            return res;
           }}
         />
         <ApiPayload
@@ -204,6 +197,49 @@ export default function BTCExample() {
         />
       </ApiGroup>
 
+      <ApiGroup title="TronWeb Basics">
+        <ApiPayload
+          title="getAccount"
+          description="获取账户信息"
+          disableRequestContent
+          onExecute={async () => {
+            const tronWeb = provider.tronWeb;
+            const res = await tronWeb.trx.getAccount(account.address);
+            return res;
+          }}
+        />
+        <ApiPayload
+          title="getBalance"
+          description="获取账户余额"
+          disableRequestContent
+          onExecute={async () => {
+            const tronWeb = provider.tronWeb;
+            const res = await tronWeb.trx.getBalance(account.address);
+            return res;
+          }}
+        />
+        <ApiPayload
+          title="getNodeInfo"
+          description="获取节点"
+          disableRequestContent
+          onExecute={async () => {
+            const tronWeb = provider.tronWeb;
+            const res = await await tronWeb.trx.getNodeInfo();
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="listNodes"
+          description="获取节点"
+          disableRequestContent
+          onExecute={async () => {
+            const tronWeb = provider.tronWeb;
+            const res = await await tronWeb.trx.listNodes();
+            return JSON.stringify(res);
+          }}
+        />
+      </ApiGroup>
+
       <ApiGroup title="资产相关">
         <ApiPayload
           title="wallet_watchAsset"
@@ -222,7 +258,7 @@ export default function BTCExample() {
       <ApiGroup title="SignMessage">
         <ApiPayload
           title="SignMessage"
-          description="（不支持）签名消息存在安全风险，硬件不支持"
+          description="（暂不支持）签名消息存在安全风险，硬件不支持"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
             const tronWeb = provider.tronWeb;
@@ -252,7 +288,7 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="SignMessage V2"
-          description="（不支持）签名消息"
+          description="（暂不支持）签名消息"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
             const tronWeb = provider.tronWeb;
@@ -285,6 +321,8 @@ export default function BTCExample() {
 
             const signedTx = await tronWeb.trx.sign(tx);
             const broastTx = await tronWeb.trx.sendRawTransaction(signedTx);
+            console.log('broastTx', broastTx);
+
             return JSON.stringify(broastTx);
           }}
         />

@@ -76,6 +76,6 @@
   }
 }
 
-.container {
-  margin: 0;
+.select {
+  @apply bg-white border border-gray-300 rounded-lg p-2 text-gray-700 focus:outline-none focus:border-blue-500;
 }

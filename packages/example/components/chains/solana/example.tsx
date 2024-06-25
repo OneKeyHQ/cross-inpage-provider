@@ -12,7 +12,6 @@ import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
 import params from './params';
 import { createTransferTransaction, createVersionedTransaction } from './builder';
 import nacl from 'tweetnacl';
-import { jsonToUint8Array } from '../../../lib/uint8array';
 import { toast } from '../../ui/use-toast';
 
 const NETWORK = clusterApiUrl('mainnet-beta');
@@ -138,12 +137,10 @@ export default function Example() {
           description="签名消息(存在风险，硬件无法使用)"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
-            const res = await provider?.signMessage(Buffer.from(request, 'utf8'));
-            return JSON.stringify(res);
+            return await provider?.signMessage(Buffer.from(request, 'utf8'));
           }}
           onValidate={(request: string, result: string) => {
             // const message = bs58.decode(request).toString();
-
             const {
               signature,
               publicKey,
@@ -152,8 +149,7 @@ export default function Example() {
               publicKey: string;
             } = JSON.parse(result);
 
-            const signatureObj = jsonToUint8Array(signature);
-
+            const signatureObj = new Uint8Array(JSON.parse(result));
             const publicKeyObj = new PublicKey(publicKey);
             const isValidSignature = nacl.sign.detached.verify(
               Buffer.from(request, 'utf8'),

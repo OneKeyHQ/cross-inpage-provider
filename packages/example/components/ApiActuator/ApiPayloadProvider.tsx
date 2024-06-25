@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useReducer, Dispatch } from 'react';
+// @ts-expect-error
+import perfectJson from 'perfect-json';
 
 // 定义状态和动作的类型
 interface ApiPayloadState {
@@ -24,7 +26,30 @@ function tryFormatJson(json: string) {
   try {
     return JSON.stringify(JSON.parse(json), null, 2);
   } catch (error) {
-    return json;
+    return json; // 返回未修改的原始字符串
+  }
+}
+
+function tryFormatCompactJson(json: string) {
+  try {
+    const hasArray = /\[.*?\]/.test(json);
+    const obj = JSON.parse(json);
+    if (hasArray) {
+      return perfectJson(obj, {
+        // @ts-expect-error
+        singleLine: ({ value }) => {
+          // Array
+          if (Array.isArray(value)) {
+            return value.length > 10;
+          }
+          return false;
+        },
+      });
+    } else {
+      return JSON.stringify(obj, null, 2);
+    }
+  } catch (error) {
+    return json; // 返回未修改的原始字符串
   }
 }
 
@@ -34,7 +59,7 @@ function apiPayloadReducer(state: ApiPayloadState, action: ApiPayloadAction): Ap
     case 'SET_REQUEST':
       return { ...state, request: tryFormatJson(action.payload) };
     case 'SET_RESULT':
-      return { ...state, result: tryFormatJson(action.payload) };
+      return { ...state, result: tryFormatCompactJson(action.payload) };
     case 'SET_VALIDATE_RESULT':
       return { ...state, validateResult: tryFormatJson(action.payload) };
     case 'SET_CURRENT_PARAM_ID':

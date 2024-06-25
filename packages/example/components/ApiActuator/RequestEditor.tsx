@@ -5,6 +5,7 @@ import { useApiPayload } from './ApiPayloadProvider';
 import { toast } from '../ui/use-toast';
 import { get } from 'lodash';
 import JsonEditor from '../ui/jsonEditor';
+import { Card, CardContent } from '../ui/card';
 
 export type IRequestEditorProps = {
   resetRequest: () => void;

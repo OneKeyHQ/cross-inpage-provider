@@ -75,10 +75,18 @@ export default {
       }),
     },
   ],
-  personalSign: [
+  cfxSign: [
     {
       'id': 'eth_sign',
       'name': 'eth_sign',
+      'description': 'eth_sign 有安全风险，硬件不支持',
+      'value': '0x879a053d4800c6354e76c7985a865d2922c82fb5b3f4577b2fe08b998954f2e0',
+    },
+  ],
+  personalSign: [
+    {
+      'id': 'personal_sign',
+      'name': 'personal_sign',
       'description': 'personalSign',
       'value': 'personal sign message example',
     },
@@ -118,7 +126,7 @@ export default {
         },
         primaryType: 'Mail',
         types: {
-          EIP712Domain: [
+          CIP23Domain: [
             { name: 'name', type: 'string' },
             { name: 'version', type: 'string' },
             { name: 'chainId', type: 'uint256' },
@@ -151,7 +159,7 @@ export default {
         'value': JSON.stringify({
           from: from,
           to: to,
-          value: '0x01',
+          value: '0x1',
         }),
       },
       {
@@ -161,7 +169,7 @@ export default {
         'value': JSON.stringify({
           from: from,
           to: to,
-          value: '0x01',
+          value: '0x1',
         }),
       },
     ];

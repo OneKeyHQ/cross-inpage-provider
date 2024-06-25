@@ -93,7 +93,7 @@ export default function Example() {
     }
     const lucid = await Lucid.new(
       // test id
-      new Blockfrost('https://cardano-mainnet.blockfrost.io/api/v0', projectIdRef.current),
+      new Blockfrost('https://cardano-mainnet.blockfrost.io/api/v0', projectId),
       'Mainnet',
     );
 
@@ -116,21 +116,25 @@ export default function Example() {
     const onConnectListener = (address: string) => {
       console.log(`cardano on [connect] ${address}`);
     };
-    const onAccountChangeListener = (address: string) => {
+    const onAccountChangeListener = (address: string[]) => {
       console.log(`cardano on [accountChange] ${address}`);
-      if (!address) return;
+      if (!address.length) return;
       setAccount({
         ...account,
-        address,
+        address: address[0],
       });
     };
+    const onNetworkChangeListener = (network: any) => {
+      console.log(`cardano on [networkChange] ${network}`);
+    };
 
-    const onAction = provider?.experimental?.on || provider?.on;
+    const onAction = walletApi?.experimental?.on || provider?.on;
 
     if (onAction) {
       try {
         onAction?.('connect', onConnectListener);
-        onAction?.('accountChanged', onAccountChangeListener);
+        onAction?.('accountChange', onAccountChangeListener);
+        onAction?.('networkChange', onNetworkChangeListener);
       } catch (error) {
         // ignore
       }
@@ -141,7 +145,8 @@ export default function Example() {
       if (offAction) {
         try {
           offAction?.('connect', onConnectListener);
-          offAction?.('accountChanged', onAccountChangeListener);
+          offAction?.('networkChange', onAccountChangeListener);
+          offAction?.('networkChange', onNetworkChangeListener);
         } catch (error) {
           // ignore
         }
@@ -347,7 +352,7 @@ export default function Example() {
         />
         <ApiPayload
           title="getCollateral"
-          description="获取抵押物"
+          description="（暂不支持）获取抵押物"
           disableRequestContent
           onExecute={async (request: string) => {
             const res = await walletApi?.experimental?.getCollateral();
@@ -388,7 +393,7 @@ export default function Example() {
             return (
               <>
                 <Input
-                  label="转账地址"
+                  label="收款地址"
                   type="text"
                   name="toAddress"
                   defaultValue={account?.address ?? ''}

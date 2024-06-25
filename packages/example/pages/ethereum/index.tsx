@@ -10,7 +10,7 @@ const EVMExample = dynamic(() => import('../../components/chains/ethereum/exampl
 export default function () {
   return (
     <PageLayout title={'EVM DApp Example'}>
-      <EVMExample />;
+      <EVMExample />
     </PageLayout>
   );
 }

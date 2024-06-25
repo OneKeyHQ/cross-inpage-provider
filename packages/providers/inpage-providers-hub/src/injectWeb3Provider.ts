@@ -64,7 +64,7 @@ function injectWeb3Provider(): unknown {
   if (!window?.$onekey?.jsBridge) {
     throw new Error('OneKey jsBridge not found.');
   }
-
+  
   const bridge: JsBridgeBase = window?.$onekey?.jsBridge;
 
   const ethereum = new ProviderEthereum({
@@ -249,7 +249,7 @@ function injectWeb3Provider(): unknown {
   setTimeout(() => {
     void detectWebsiteRiskLevel();
     void hackAllConnectButtons();
-  }, 500);
+  }, 1000);
   return $onekey;
 }
 export { injectWeb3Provider };

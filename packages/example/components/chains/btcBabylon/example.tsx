@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../connect/ConnectButton';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { get, isEmpty } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
@@ -14,7 +14,45 @@ import { toast } from '../../ui/use-toast';
 import * as bitcoin from 'bitcoinjs-lib';
 import { Input } from '../../ui/input';
 import { createPSBT } from '../btc/utils';
-import { stringifyWithCircularReferences } from '../../../lib/jsonUtils';
+
+function SignMessageApiPayload({ provider }: { provider: IProviderApi | undefined }) {
+  const [allowValidate, setAllowValidate] = useState(false);
+
+  return (
+    <ApiPayload
+      title="SignMessage"
+      description="签名消息"
+      presupposeParams={params.signMessage}
+      onExecute={async (request: string) => {
+        const obj = JSON.parse(request) as { msg: string; type: string | undefined };
+        const res = await provider?.signMessage(obj.msg, obj.type);
+        return res;
+      }}
+      onPresupposeParamChange={(paramId: string) => {
+        if (paramId.indexOf('bip322-simple') > -1) {
+          setAllowValidate(false);
+        } else {
+          setAllowValidate(true);
+        }
+      }}
+      onValidate={
+        allowValidate
+          ? async (request: string, response: string) => {
+              const obj = JSON.parse(request) as { msg: string; type: string | undefined };
+              const publicKey = await provider?.getPublicKey();
+
+              if (!obj.type || obj.type === 'ecdsa') {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+                return verifyMessage(publicKey, obj.msg, response);
+              }
+
+              return 'Dapp Example: 不支持 bip322-simple 类型签字的验证';
+            }
+          : undefined
+      }
+    />
+  );
+}
 
 export default function BTCExample() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -114,11 +152,16 @@ export default function BTCExample() {
           onExecute={async (request: string) => {
             const res = await provider?.connectWallet();
             console.log('connectWallet result:', res);
-            return stringifyWithCircularReferences(res);
+            return JSON.stringify(res, (key, value) => {
+              if (['bridge', 'config', 'debugLogger', '_log'].indexOf(key) !== -1) {
+                return undefined;
+              }
+              return value;
+            });
           }}
         />
         <ApiPayload
-          title="RequestAccounts"
+          title="requestAccounts"
           description="请求连接 Wallet 获取账户"
           disableRequestContent
           onExecute={async (request: string) => {
@@ -127,7 +170,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="GetAccounts"
+          title="getAccounts"
           description="获取当前账户地址"
           disableRequestContent
           onExecute={async () => {
@@ -136,7 +179,7 @@ export default function BTCExample() {
           }}
         />{' '}
         <ApiPayload
-          title="GetAddress"
+          title="getAddress"
           description="获取当前账户地址"
           disableRequestContent
           onExecute={async () => {
@@ -145,7 +188,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="GetPublicKey"
+          title="getPublicKey"
           description="获取当前账户公钥"
           disableRequestContent
           onExecute={async () => {
@@ -154,7 +197,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="GetPublicKeyHex"
+          title="getPublicKeyHex"
           description="获取当前账户公钥"
           disableRequestContent
           onExecute={async () => {
@@ -163,7 +206,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="GetBalance"
+          title="getBalance"
           description="获取当前账户余额"
           disableRequestContent
           onExecute={async () => {
@@ -172,7 +215,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="GetUtxos"
+          title="getUtxos"
           description="获取当前账户 UTXO 列表"
           presupposeParams={params.getUtxos(account?.address ?? '')}
           onExecute={async (request: string) => {
@@ -188,7 +231,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="GetWalletProviderName"
+          title="getWalletProviderName"
           description="获取当前钱包提供商名称"
           disableRequestContent
           onExecute={async () => {
@@ -197,7 +240,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="GetNetworkFees"
+          title="getNetworkFees"
           description="获取当前网络费用"
           disableRequestContent
           onExecute={async () => {
@@ -206,7 +249,16 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="GetNetwork"
+          title="getBTCTipHeight"
+          description="获取 BTC 区块高度"
+          disableRequestContent
+          onExecute={async () => {
+            const res = await provider?.getBTCTipHeight();
+            return res?.toString();
+          }}
+        />
+        <ApiPayload
+          title="getNetwork"
           description="获取当前网络"
           disableRequestContent
           onExecute={async () => {
@@ -215,7 +267,7 @@ export default function BTCExample() {
           }}
         />
         <ApiPayload
-          title="SwitchNetwork"
+          title="switchNetwork"
           description="切换当前网络"
           presupposeParams={params.switchNetwork}
           onExecute={async (request: string) => {
@@ -226,27 +278,7 @@ export default function BTCExample() {
       </ApiGroup>
 
       <ApiGroup title="Sign Message">
-        <ApiPayload
-          title="SignMessage"
-          description="签名消息"
-          presupposeParams={params.signMessage}
-          onExecute={async (request: string) => {
-            const obj = JSON.parse(request) as { msg: string; type: string | undefined };
-            const res = await provider?.signMessage(obj.msg, obj.type);
-            return res;
-          }}
-          onValidate={async (request: string, response: string) => {
-            const obj = JSON.parse(request) as { msg: string; type: string | undefined };
-            const publicKey = await provider?.getPublicKey();
-
-            if (!obj.type || obj.type === 'ecdsa') {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-              return verifyMessage(publicKey, obj.msg, response);
-            }
-
-            return 'Unsupported type';
-          }}
-        />
+        <SignMessageApiPayload provider={provider} />
         <ApiPayload
           title="SignMessageBIP322"
           description="签名消息 BIP322"
@@ -321,7 +353,7 @@ export default function BTCExample() {
             return (
               <>
                 <Input
-                  label="转账地址"
+                  label="收款地址"
                   type="text"
                   name="toAddress"
                   defaultValue={account?.address ?? ''}
@@ -378,7 +410,7 @@ export default function BTCExample() {
             return (
               <>
                 <Input
-                  label="转账地址"
+                  label="收款地址"
                   type="text"
                   name="toAddress"
                   defaultValue={account?.address ?? ''}

@@ -26,6 +26,7 @@
     "prebuild": "rm -rf dist",
     "build": "tsc && tsc --project tsconfig.cjs.json",
     "test": "npx playwright test",
+    "test:report": "npx playwright show-report reports",
     "start": "tsc --watch"
   },
   "dependencies": {

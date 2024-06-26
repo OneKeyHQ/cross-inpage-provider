@@ -1,7 +1,12 @@
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO, WALLET_NAMES } from '../consts';
-import { findIconAndNameByParent, findIconAndNameDirectly } from './findIconAndName';
-import { findWalletIconByParent, isWalletIconSizeMatch, replaceIcon } from './imgUtils';
+import { findIconAndNameByName, findIconAndNameByIcon } from './findIconAndName';
+import {
+  findWalletIconByParent,
+  isWalletIconLessEqualThan,
+  isWalletIconSizeMatch,
+  replaceIcon,
+} from './imgUtils';
 import { findIconAndNameInShadowRoot } from './shadowRoot';
 import { ConstraintFn, FindResultType, Selector } from './type';
 import {
@@ -11,12 +16,20 @@ import {
   isClickable,
   isVisible,
 } from './utils';
-import { findWalletTextByParent, makeTextEllipse, makeTextWrap, replaceText } from './textUtils';
+import {
+  findWalletTextByParent,
+  makeTextAlignCenter,
+  makeTextAlignLeft,
+  makeTextEllipse,
+  makeTextWrap,
+  replaceText,
+} from './textUtils';
 import domUtils from '../utils/utilsDomNodes';
+import { text } from 'stream/consumers';
 
 type FrameLocator = {
   locator: (selector: string) => Locator;
-}
+};
 type Locator = {
   count: () => Promise<number>;
   contentFrame: () => FrameLocator;
@@ -67,7 +80,7 @@ export const basicWalletInfo = {
   [WALLET_NAMES.keplr]: {
     updatedIcon: WALLET_CONNECT_INFO.keplr.icon,
     updatedName: WALLET_CONNECT_INFO.keplr.text,
-    name: /^(Keplr|Keplr Mobile)$/i,
+    name: /^(Keplr|Keplr Mobile|Keplr Wallet)$/i,
   },
   [WALLET_NAMES.polkadot]: {
     updatedIcon: WALLET_CONNECT_INFO.polkadot.icon,
@@ -223,19 +236,15 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['metamask'],
           findIconAndName({ name }) {
-            return findIconAndNameDirectly(
-              '.button-option.MetaMask > svg',
-              '.button-option.MetaMask .connect-wallet-button-name',
-              name,
-            );
+            return findIconAndNameByIcon('.button-option.MetaMask > svg', 'auto-search-text', name);
           },
         },
         {
           ...basicWalletInfo['walletconnect'],
           findIconAndName({ name }) {
-            return findIconAndNameDirectly(
+            return findIconAndNameByIcon(
               '.button-option.WalletConnect > svg',
-              '.button-option.WalletConnect .connect-wallet-button-name',
+              'auto-search-text',
               name,
             );
           },
@@ -402,7 +411,7 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['walletconnect'],
           findIconAndName({ name }) {
-            return findIconAndNameDirectly(
+            return findIconAndNameByIcon(
               '.bg-connect button[type="button"] img[src*="connect-walletConnect.svg"]',
               'auto-search-text',
               name,
@@ -491,7 +500,7 @@ export const sitesConfig: SitesInfo[] = [
     urls: ['01.xyz'],
     testPath: [':text("Connect")', ':text("Continue")'],
     skip: {
-      mobile: true, //WARN:没有入口?
+      mobile: true,
     },
     walletsForProvider: {
       [IInjectedProviderNames.solana]: [
@@ -526,7 +535,7 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['metamask'],
           findIconAndName({ name }) {
-            return findIconAndNameDirectly(
+            return findIconAndNameByIcon(
               '.MuiPaper-root.MuiPaper-elevation a img[src*="icon-metamask"]',
               (icon: HTMLElement) => icon.parentElement?.parentElement,
               name,
@@ -536,7 +545,7 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['walletconnect'],
           findIconAndName({ name }) {
-            return findIconAndNameDirectly(
+            return findIconAndNameByIcon(
               '.MuiPaper-root.MuiPaper-elevation a img[src*="icon-walletconnect"]',
               (icon: HTMLElement) => icon.parentElement?.parentElement,
               name,
@@ -561,7 +570,7 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['unisat'],
           findIconAndName({ name }) {
-            return findIconAndNameDirectly(
+            return findIconAndNameByIcon(
               '.MuiStack-root button img[alt="Unisat"]',
               (icon: HTMLElement) => icon.parentElement?.parentElement?.parentElement,
               name,
@@ -770,7 +779,7 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['polkadot'],
           findIconAndName: ({ name }) => {
-            return findIconAndNameDirectly(
+            return findIconAndNameByIcon(
               '.relative.rounded-2xl.text-default img[alt="Polkadotjs Logo"]',
               (icon: HTMLElement) => icon.parentElement,
               name,
@@ -925,7 +934,7 @@ export const sitesConfig: SitesInfo[] = [
             );
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[alt="MetaMask"]',
                 (icon) => icon.parentElement?.parentElement,
                 name,
@@ -943,7 +952,7 @@ export const sitesConfig: SitesInfo[] = [
             );
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[alt="WalletConnect"]',
                 (icon) => icon.parentElement?.parentElement,
                 name,
@@ -976,7 +985,7 @@ export const sitesConfig: SitesInfo[] = [
             );
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'svg[aria-label="metamask-icon"]',
                 'auto-search-text',
                 name,
@@ -1046,16 +1055,8 @@ export const sitesConfig: SitesInfo[] = [
             );
             return (
               modal &&
-              findIconAndNameDirectly(
-                'img[src*="assets/metamask"]',
-                'auto-search-text',
-                name,
-                modal,
-              )
+              findIconAndNameByIcon('img[src*="assets/metamask"]', 'auto-search-text', name, modal)
             );
-          },
-          afterUpdate(text, imgNode) {
-            imgNode.style.height = 'auto';
           },
         },
         {
@@ -1065,21 +1066,13 @@ export const sitesConfig: SitesInfo[] = [
               'div[data-testid="modal-container"]',
               'Connect Wallet',
             );
-            const text = modal && findWalletTextByParent(modal, name, []);
-            const icon =
-              text && text.parentElement?.parentElement
-                ? findWalletIconByParent(text.parentElement.parentElement, [])
-                : null;
             return (
-              text &&
-              icon && {
-                iconNode: icon,
-                textNode: text,
-              }
+              modal &&
+              findIconAndNameByName(modal, name, 'auto-search-icon', {
+                text: [],
+                icon: [isWalletIconLessEqualThan],
+              })
             );
-          },
-          afterUpdate(text, imgNode) {
-            imgNode.style.height = 'auto';
           },
         },
       ],
@@ -1101,7 +1094,6 @@ export const sitesConfig: SitesInfo[] = [
     urls: ['www.benddao.xyz'],
     testPath: ['button.sc-bdvvtL.oDzIq'],
     walletsForProvider: {
-
       [IInjectedProviderNames.ethereum]: [
         {
           ...basicWalletInfo['metamask'],
@@ -1164,7 +1156,7 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['walletconnect'],
           findIconAndName({ name }) {
-            return findIconAndNameDirectly(
+            return findIconAndNameByIcon(
               'div.connectWalletModel img[src*="walletconnect"]',
               (e) => e.parentElement?.parentElement,
               name,
@@ -1209,7 +1201,7 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['metamask'],
           findIconAndName(wallet) {
-            return findIconAndNameDirectly(
+            return findIconAndNameByIcon(
               '[id*="popover-body"] img[src*="metamask.svg"][alt="wallet logo"]',
               'auto-search-text',
               wallet.name,
@@ -1261,7 +1253,7 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['metamask'],
           findIconAndName(wallet) {
-            return findIconAndNameDirectly(
+            return findIconAndNameByIcon(
               () =>
                 Array.from(
                   document.querySelectorAll<HTMLElement>(
@@ -1291,12 +1283,7 @@ export const sitesConfig: SitesInfo[] = [
             );
             return (
               modal &&
-              findIconAndNameDirectly(
-                'img[src*="metamask"]',
-                'auto-search-text',
-                wallet.name,
-                modal,
-              )
+              findIconAndNameByIcon('img[src*="metamask"]', 'auto-search-text', wallet.name, modal)
             );
           },
         },
@@ -1309,7 +1296,7 @@ export const sitesConfig: SitesInfo[] = [
             );
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[src*="walletconnect"]',
                 'auto-search-text',
                 wallet.name,
@@ -1345,8 +1332,7 @@ export const sitesConfig: SitesInfo[] = [
               'Connect your wallet',
             );
             return (
-              modal &&
-              findIconAndNameDirectly('img[alt="MetaMask"]', 'auto-search-text', name, modal)
+              modal && findIconAndNameByIcon('img[alt="MetaMask"]', 'auto-search-text', name, modal)
             );
           },
         },
@@ -1359,7 +1345,7 @@ export const sitesConfig: SitesInfo[] = [
             );
             return (
               modal &&
-              findIconAndNameDirectly('img[alt="WalletConnect"]', 'auto-search-text', name, modal)
+              findIconAndNameByIcon('img[alt="WalletConnect"]', 'auto-search-text', name, modal)
             );
           },
         },
@@ -1390,7 +1376,7 @@ export const sitesConfig: SitesInfo[] = [
             );
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[src*="metamask"]',
                 (icon) => icon.parentElement?.parentElement,
                 wallet.name,
@@ -1408,7 +1394,7 @@ export const sitesConfig: SitesInfo[] = [
             );
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[src*="walletConnect"]',
                 (icon) => icon.parentElement?.parentElement,
                 wallet.name,
@@ -1450,12 +1436,7 @@ export const sitesConfig: SitesInfo[] = [
             const modal = getConnectWalletModalByTitle('div.ant-modal-content', 'Select a wallet');
             return (
               modal &&
-              findIconAndNameDirectly(
-                'img[src*="metamask"]',
-                'auto-search-text',
-                wallet.name,
-                modal,
-              )
+              findIconAndNameByIcon('img[src*="metamask"]', 'auto-search-text', wallet.name, modal)
             );
           },
         },
@@ -1465,7 +1446,7 @@ export const sitesConfig: SitesInfo[] = [
             const modal = getConnectWalletModalByTitle('div.ant-modal-content', 'Select a wallet');
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[src*="wallet-connect.svg"]',
                 'auto-search-text',
                 name,
@@ -1491,7 +1472,7 @@ export const sitesConfig: SitesInfo[] = [
             );
             return (
               modal &&
-              findIconAndNameDirectly('img[alt="MetaMask"]', 'auto-search-text', wallet.name, modal)
+              findIconAndNameByIcon('img[alt="MetaMask"]', 'auto-search-text', wallet.name, modal)
             );
           },
         },
@@ -1504,7 +1485,7 @@ export const sitesConfig: SitesInfo[] = [
             );
             return (
               modal &&
-              findIconAndNameDirectly('img[alt="WalletConnect"]', 'auto-search-text', name, modal)
+              findIconAndNameByIcon('img[alt="WalletConnect"]', 'auto-search-text', name, modal)
             );
           },
         },
@@ -1512,7 +1493,7 @@ export const sitesConfig: SitesInfo[] = [
     },
   },
   {
-    urls: ['exchange.idex.io'],
+    urls: ['exchange.idex.io'], //not existed?
     testPath: {
       desktop: [':text("Get Started")', ':text("Connect Wallet")'],
       mobile: [':text("Get Started")', ':text("Connect")'],
@@ -1594,7 +1575,7 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['metamask'],
           findIconAndName({ name }) {
-            return findIconAndNameDirectly(
+            return findIconAndNameByIcon(
               'img[src*="metamask"][alt="Metamask"]',
               'auto-search-text',
               name,
@@ -1606,7 +1587,7 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['keplr'],
           findIconAndName({ name }) {
-            return findIconAndNameDirectly(
+            return findIconAndNameByIcon(
               'img[src*="keplr"][alt="Keplr"]',
               'auto-search-text',
               name,
@@ -1648,7 +1629,7 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['metamask'],
           findIconAndName({ name }) {
-            return findIconAndNameDirectly(
+            return findIconAndNameByIcon(
               'img[alt="Metamask Logo"][title="Metamask"]',
               'auto-search-text',
               name,
@@ -1658,7 +1639,7 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['walletconnect'],
           findIconAndName({ name }) {
-            return findIconAndNameDirectly(
+            return findIconAndNameByIcon(
               'img[alt="WalletConnect Logo"][title="WalletConnect"]',
               'auto-search-text',
               name,
@@ -1685,7 +1666,7 @@ export const sitesConfig: SitesInfo[] = [
 
   {
     urls: ['app.wagmi.com'],
-    constraintMap: { icon: [isWalletIconSizeMatch], text: [] },
+    constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -1716,7 +1697,7 @@ export const sitesConfig: SitesInfo[] = [
             );
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[src*="metamask.svg"][alt="MetaMask"]',
                 'auto-search-text',
                 name,
@@ -1725,7 +1706,6 @@ export const sitesConfig: SitesInfo[] = [
             );
           },
         },
-
       ],
     },
   },
@@ -1761,7 +1741,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['rosswap.com'],
-    constraintMap: { icon: [isWalletIconSizeMatch], text: [] },
+    constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
     skip: {
       mobile: true, //no connect wallet modal
     },
@@ -1777,7 +1757,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['maiadao.io'],
-    constraintMap: { icon: [isWalletIconSizeMatch], text: [] },
+    constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
     skip: {
       mobile: true, //no connect wallet modal
     },
@@ -1816,82 +1796,10 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['www.staderlabs.com'],
-    skip: {
-      mobile: true, //tmp skip for lack walletconnet
-    },
     testUrls: ['www.staderlabs.com/eth/stake/'],
-    constraintMap: { icon: [isWalletIconSizeMatch], text: [] },
+    constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [
-        {
-          ...basicWalletInfo['metamask'],
-
-          findIconAndName({ name }) {
-            const modal =
-              getConnectWalletModalByTitle('.chakra-modal__content-container', 'Select wallet') ||
-              getConnectWalletModalByTitle('#__CONNECTKIT__', 'Connect Wallet');
-            if (!modal) {
-              return null;
-            }
-            return (
-              findIconAndNameByParent(modal, name, {
-                text: [],
-                icon: [],
-              }) ||
-              findIconAndNameDirectly(
-                'img[src*="media/mm"][alt="metaMask Logo"]',
-                'auto-search-text',
-                name,
-                modal,
-                { text: [], icon: [] },
-                5,
-              )
-            );
-          },
-          afterUpdate(text, icon) {
-            const parent = text.parentElement?.parentElement;
-            makeTextWrap(text.parentElement!);
-            const imgContainer = parent?.firstChild as HTMLDivElement;
-            if (parent && imgContainer) {
-              imgContainer.style.display = 'flex';
-              imgContainer.style.alignItems = 'center';
-              imgContainer.style.borderRadius = '0';
-              imgContainer.style.flexShrink = '0';
-            }
-          },
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName({ name }) {
-            const modal =
-              getConnectWalletModalByTitle('.chakra-modal__content-container', 'Select wallet') ||
-              getConnectWalletModalByTitle('#__CONNECTKIT__', 'Connect Wallet');
-            if (!modal) {
-              return null;
-            }
-            return findIconAndNameDirectly(
-              'img[alt="walletConnect Logo"]',
-              'auto-search-text',
-              name,
-              modal,
-              { text: [], icon: [] },
-              5,
-            );
-          },
-          afterUpdate(text, icon) {
-            const parent = text.parentElement?.parentElement;
-            makeTextWrap(text.parentElement!);
-            const imgContainer = parent?.firstChild as HTMLDivElement;
-            if (parent && imgContainer) {
-              imgContainer.style.display = 'flex';
-              imgContainer.style.alignItems = 'center';
-              imgContainer.style.borderRadius = '0';
-              imgContainer.style.flexShrink = '0';
-            }
-          },
-          skip: { mobile: true },
-        },
-      ],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
     },
   },
   {
@@ -1903,7 +1811,7 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['phantom'],
           container: '#connect_modal',
-          afterUpdate(text, icon) {
+          afterUpdate(text) {
             if (text.parentElement?.parentElement) {
               text.parentElement.parentElement.style.whiteSpace = 'noWrap';
               makeTextEllipse(text.parentElement, { maxWidth: 'min(18vw,107px)' });
@@ -1915,8 +1823,6 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['buzz.bsquared.network'],
-    skip: true, //temp skip
-
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -1931,7 +1837,7 @@ export const sitesConfig: SitesInfo[] = [
             const modal = getConnectWalletModalByTitle('.modalContent', 'Connect Wallet');
             return (
               modal &&
-              findIconAndNameDirectly('img[src*="layout/unisat.png"]', 'auto-search-text', name)
+              findIconAndNameByIcon('img[src*="layout/unisat.png"]', 'auto-search-text', name)
             );
           },
         },
@@ -2029,7 +1935,7 @@ export const sitesConfig: SitesInfo[] = [
     urls: ['app.ariesmarkets.xyz'],
     testUrls: ['app.ariesmarkets.xyz/lending'],
 
-    constraintMap: { icon: [isWalletIconSizeMatch], text: [] },
+    constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
     walletsForProvider: {
       [IInjectedProviderNames.aptos]: [
         {
@@ -2041,7 +1947,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app-mobile.ariesmarkets.xyz'],
-    constraintMap: { icon: [isWalletIconSizeMatch], text: [] },
+    constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
     walletsForProvider: {
       [IInjectedProviderNames.aptos]: [
         {
@@ -2112,7 +2018,7 @@ export const sitesConfig: SitesInfo[] = [
             );
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[src*="nami.svg"][alt="Nami"]',
                 'auto-search-text',
                 name,
@@ -2139,7 +2045,7 @@ export const sitesConfig: SitesInfo[] = [
             const modal = getConnectWalletModalByTitle('#portal-root', 'Connect Wallet');
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[src*="wallets/metamask.png"]',
                 'auto-search-text',
                 name,
@@ -2156,7 +2062,7 @@ export const sitesConfig: SitesInfo[] = [
             const modal = getConnectWalletModalByTitle('#portal-root', 'Connect Wallet');
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[src*="wallets/walletconnect.png"]',
                 'auto-search-text',
                 name,
@@ -2198,7 +2104,7 @@ export const sitesConfig: SitesInfo[] = [
               getConnectWalletModalByTitle('div[role="dialog"]', 'Start by connecting with one');
             return (
               modal &&
-              findIconAndNameDirectly('img[src*="metamask.png"]', 'auto-search-text', name, modal)
+              findIconAndNameByIcon('img[src*="metamask.png"]', 'auto-search-text', name, modal)
             );
           },
         },
@@ -2222,7 +2128,7 @@ export const sitesConfig: SitesInfo[] = [
             const modal = getConnectWalletModalByTitle('div.p-dialog', 'Connect a Wallet');
             return (
               modal &&
-              findIconAndNameDirectly('img[alt="Petra Wallet"]', 'auto-search-text', name, modal)
+              findIconAndNameByIcon('img[alt="Petra Wallet"]', 'auto-search-text', name, modal)
             );
           },
         },
@@ -2232,7 +2138,7 @@ export const sitesConfig: SitesInfo[] = [
             const modal = getConnectWalletModalByTitle('div.p-dialog', 'Connect a Wallet');
             return (
               modal &&
-              findIconAndNameDirectly('img[alt="Martian Wallet"]', 'auto-search-text', name, modal)
+              findIconAndNameByIcon('img[alt="Martian Wallet"]', 'auto-search-text', name, modal)
             );
           },
         },
@@ -2290,7 +2196,7 @@ export const sitesConfig: SitesInfo[] = [
             const parent = shadowRoot.querySelector('div.wallet-list__container');
             return (
               parent &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[data-testid="wallet-icon-metamask"]',
                 'auto-search-text',
                 name,
@@ -2316,7 +2222,7 @@ export const sitesConfig: SitesInfo[] = [
             const modal = getConnectWalletModalByTitle('div[role="dialog"]', 'Connect wallet');
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[src*="metamask.svg"][alt="MetaMask icon"]',
                 'auto-search-text',
                 name,
@@ -2338,7 +2244,7 @@ export const sitesConfig: SitesInfo[] = [
             const modal = getConnectWalletModalByTitle('div[role="dialog"]', 'Connect Wallet');
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[alt="Polkadotjs Logo"]',
                 'auto-search-text',
                 /^Polkadot/,
@@ -2437,7 +2343,7 @@ export const sitesConfig: SitesInfo[] = [
             const modal = getConnectWalletModalByTitle('div[role="dialog"]', 'Connect Wallet');
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[src*="metamask.svg"][alt="Metamask"]',
                 'auto-search-text',
                 name,
@@ -2457,7 +2363,7 @@ export const sitesConfig: SitesInfo[] = [
             const modal = getConnectWalletModalByTitle('div[role="dialog"]', 'Connect Wallet');
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[src*="keplr.svg"][alt="Keplr"]',
                 'auto-search-text',
                 name,
@@ -2493,7 +2399,7 @@ export const sitesConfig: SitesInfo[] = [
             );
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[src*="metamask"][alt="MetaMask logo"]',
                 'auto-search-text',
                 wallet.name,
@@ -2511,7 +2417,7 @@ export const sitesConfig: SitesInfo[] = [
             );
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[src*="wallet_connect"][alt="WalletConnect logo"]',
                 'auto-search-text',
                 wallet.name,
@@ -2564,8 +2470,7 @@ export const sitesConfig: SitesInfo[] = [
               'Please select your wallet:',
             );
             return (
-              modal &&
-              findIconAndNameDirectly('img[alt="MetaMask"]', 'auto-search-text', name, modal)
+              modal && findIconAndNameByIcon('img[alt="MetaMask"]', 'auto-search-text', name, modal)
             );
           },
         },
@@ -2587,7 +2492,7 @@ export const sitesConfig: SitesInfo[] = [
             const modal = getConnectWalletModalByTitle('div.connect-options', 'Select Wallet');
             return (
               modal &&
-              findIconAndNameDirectly('img.logo[alt="MetaMask"]', 'auto-search-text', name, modal)
+              findIconAndNameByIcon('img.logo[alt="MetaMask"]', 'auto-search-text', name, modal)
             );
           },
         },
@@ -2597,7 +2502,7 @@ export const sitesConfig: SitesInfo[] = [
             const modal = getConnectWalletModalByTitle('div.connect-options', 'Select Wallet');
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img.logo[alt="WalletConnect"]',
                 'auto-search-text',
                 name,
@@ -2621,12 +2526,12 @@ export const sitesConfig: SitesInfo[] = [
               .filter(Boolean);
             const modal = modals?.[modals.length - 1] as HTMLElement;
             return modal
-              ? findIconAndNameDirectly(
-                'img[src*="wallet-MetaMask"]',
-                'auto-search-text',
-                name,
-                modal,
-              )
+              ? findIconAndNameByIcon(
+                  'img[src*="wallet-MetaMask"]',
+                  'auto-search-text',
+                  name,
+                  modal,
+                )
               : null;
           },
         },
@@ -2646,7 +2551,7 @@ export const sitesConfig: SitesInfo[] = [
     },
     skip: { mobile: true }, //input click not work
 
-    constraintMap: { icon: [isWalletIconSizeMatch], text: [] },
+    constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -2719,12 +2624,12 @@ export const sitesConfig: SitesInfo[] = [
           findIconAndName({ name }) {
             const modal = document.querySelector('div[role="presentation"].MuiModal-root');
             return modal
-              ? findIconAndNameDirectly(
-                'img[src*="static/media/1.eb7cbbcbf"]',
-                'auto-search-text',
-                name,
-                modal as HTMLElement,
-              )
+              ? findIconAndNameByIcon(
+                  'img[src*="static/media/1.eb7cbbcbf"]',
+                  'auto-search-text',
+                  name,
+                  modal as HTMLElement,
+                )
               : null;
           },
         },
@@ -2733,12 +2638,12 @@ export const sitesConfig: SitesInfo[] = [
           findIconAndName({ name }) {
             const modal = document.querySelector('div[role="presentation"].MuiModal-root');
             return modal
-              ? findIconAndNameDirectly(
-                'img[src*="static/media/2.cb9826961cbcd25676"]',
-                'auto-search-text',
-                name,
-                modal as HTMLElement,
-              )
+              ? findIconAndNameByIcon(
+                  'img[src*="static/media/2.cb9826961cbcd25676"]',
+                  'auto-search-text',
+                  name,
+                  modal as HTMLElement,
+                )
               : null;
           },
         },
@@ -2805,9 +2710,9 @@ export const sitesConfig: SitesInfo[] = [
             const img = text?.parentElement?.parentElement?.querySelector('img');
             return img && text
               ? {
-                textNode: text,
-                iconNode: img,
-              }
+                  textNode: text,
+                  iconNode: img,
+                }
               : null;
           },
           afterUpdate(textNode, img) {
@@ -2830,9 +2735,9 @@ export const sitesConfig: SitesInfo[] = [
             const img = text?.parentElement?.parentElement?.querySelector('img');
             return img && text
               ? {
-                textNode: text,
-                iconNode: img,
-              }
+                  textNode: text,
+                  iconNode: img,
+                }
               : null;
           },
           afterUpdate(textNode, img) {
@@ -2886,7 +2791,7 @@ export const sitesConfig: SitesInfo[] = [
             );
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[src*="metamask-icon"][alt="Icon"]',
                 'auto-search-text',
                 name,
@@ -2908,7 +2813,7 @@ export const sitesConfig: SitesInfo[] = [
             );
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[src*="wallet-connect-icon"][alt="Icon"]',
                 'auto-search-text',
                 name,
@@ -2995,32 +2900,12 @@ export const sitesConfig: SitesInfo[] = [
       [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
     },
   },
-  // {
-  //   urls: ['app.wombat.exchange'],
-  //   testPath: [':text("Click here to")', ':text("Accept")', ':text("Connect Wallet")'],
-  //   walletsForProvider: {
-  //     [IInjectedProviderNames.ethereum]: [
-  //       {
-  //         ...basicWalletInfo['metamask'],
-  //         container: '#select-wallet-MetaMask',
-  //       },
-  //       {
-  //         ...basicWalletInfo['walletconnect'],
-  //         container: '[id="select-wallet-Wallet Connect"]',
-  //       },
-  //     ],
-  //   },
-  // },
   {
     urls: ['hmx.org'],
     testUrls: ['hmx.org/blast/trade/eth-usd'],
     testPath: {
-      desktop: [
-        ':text("Trade Now and Win")',
-        ':text("Accept & Continue")',
-        ':text("Connect Wallet")',
-      ],
-      mobile: [':text("Continue on a ")', ':text("Accept & Continue")', ':text("Connect Wallet")'],
+      desktop: ['button:has-text("Accept & Continue")', ':text("Connect Wallet")'],
+      mobile: ['button:has-text("Accept & Continue")', ':text("Connect Wallet")'],
     },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
@@ -3030,7 +2915,7 @@ export const sitesConfig: SitesInfo[] = [
             const modal = getConnectWalletModalByTitle('div[role="dialog"]', 'Connect Wallet');
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[src*="metamask"][alt="MetaMask"]',
                 'auto-search-text',
                 wallet.name,
@@ -3045,7 +2930,7 @@ export const sitesConfig: SitesInfo[] = [
             const modal = getConnectWalletModalByTitle('div[role="dialog"]', 'Connect Wallet');
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[src*="wallet-connect"][alt="Wallet Connect"]',
                 'auto-search-text',
                 wallet.name,
@@ -3081,7 +2966,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.vesper.finance'],
-    constraintMap: { icon: [isWalletIconSizeMatch], text: [] },
+    constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -3106,7 +2991,7 @@ export const sitesConfig: SitesInfo[] = [
             const modal = getConnectWalletModalByTitle('div[role="dialog"]', 'Connect Wallet');
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[src*="metamask"][alt="MetaMask"]',
                 'auto-search-text',
                 wallet.name,
@@ -3146,8 +3031,8 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['metamask'],
           container: () =>
             getConnectWalletModalByTitle('div[role="dialog"]', 'Connect wallet to continue'),
-          afterUpdate(textNode, icon) {
-            textNode.parentElement && (textNode.parentElement.style.textAlign = 'center');
+          afterUpdate(textNode) {
+            textNode.parentElement && makeTextAlignCenter(textNode.parentElement);
           },
         },
       ],
@@ -3156,13 +3041,16 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['phantom'],
           container: () =>
             getConnectWalletModalByTitle('div[role="dialog"]', 'Connect wallet to continue'),
+          afterUpdate(textNode) {
+            textNode.parentElement && makeTextAlignCenter(textNode.parentElement);
+          },
         },
       ],
     },
   },
   {
     urls: ['stake.anvm.io'],
-
+    skip: { mobile: true }, //unistat is offline
     testPath: {
       desktop: [':text("Connect Wallet")', ':nth-match(button.rounded-full:text("Connect"),2)'],
       'mobile': [
@@ -3220,7 +3108,7 @@ export const sitesConfig: SitesInfo[] = [
   {
     urls: ['app.reflexer.finance'],
     skip: { mobile: true }, //no item in wallet list
-    constraintMap: { icon: [isWalletIconSizeMatch], text: [] },
+    constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         { ...basicWalletInfo['metamask'], container: '#connect-METAMASK' },
@@ -3245,7 +3133,7 @@ export const sitesConfig: SitesInfo[] = [
             const modal = getConnectWalletModalByTitle('div.ant-modal-content', 'Connect Wallet');
             return (
               modal &&
-              findIconAndNameDirectly(
+              findIconAndNameByIcon(
                 'img[src*="static/media/metamask"]',
                 'auto-search-text',
                 name,
@@ -3253,6 +3141,533 @@ export const sitesConfig: SitesInfo[] = [
               )
             );
           },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.hydration.net'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle(
+              'div[role="dialog"][data-state="open"]',
+              'Connect wallet',
+            );
+            return (
+              modal &&
+              findIconAndNameByIcon(
+                'img[src*="assets/MetaMask"][alt="MetaMask Logo"]',
+                'auto-search-text',
+                name,
+                modal,
+              )
+            );
+          },
+        },
+      ],
+      [IInjectedProviderNames.polkadot]: [
+        {
+          ...basicWalletInfo['polkadot'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle(
+              'div[role="dialog"][data-state="open"]',
+              'Connect wallet',
+            );
+            return (
+              modal &&
+              findIconAndNameByIcon('img[alt="Polkadotjs Logo"]', 'auto-search-text', name, modal)
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.slingshot.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('#portal-root>div', 'Connect Wallet');
+            return (
+              modal &&
+              findIconAndNameByName(modal, name, (text) => {
+                return text?.parentElement?.parentElement?.parentElement?.querySelector(
+                  'div svg[height="38"]',
+                );
+              })
+            );
+          },
+          afterUpdate(textNode) {
+            textNode.parentElement && makeTextAlignLeft(textNode.parentElement);
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['phux.io'],
+    testPath: ['button:text("Accept")', ':text("Connect Wallet")'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => getConnectWalletModalByTitle('div.bal-modal', 'Connect to a wallet'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.metronome.io'],
+    testPath: ['button:text("Switch to")', ':text("Connect Wallet")'],
+    constraintMap: { text: [], 'icon': [isWalletIconLessEqualThan] },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => getConnectWalletModalByTitle('div.fixed', 'Connect Wallet'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['nftx.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
+    },
+  },
+  {
+    urls: ['app.marsprotocol.io'],
+    testPath: [':text("Connect Wallet")', 'button:has-text("Agree")'],
+    walletsForProvider: {
+      [IInjectedProviderNames.cosmos]: [
+        {
+          ...basicWalletInfo['keplr'],
+          name: /^Keplr Wallet$/,
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle(
+              'main > div.relative',
+              'Connect your wallet',
+            );
+            return (
+              modal &&
+              findIconAndNameByIcon(
+                'img[src*="keplr"][alt="Keplr Wallet"]',
+                'auto-search-text',
+                name,
+                modal,
+              )
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['farm.acala.network'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () =>
+            getConnectWalletModalByTitle(
+              '#headlessui-portal-root div.relative[id*="headlessui-dialog"]',
+              'Connect your wallet',
+            ),
+          afterUpdate(textNode) {
+            textNode.parentElement && makeTextWrap(textNode.parentElement);
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['baklava.space'],
+    testUrls: ['baklava.space/vaults/'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'div[role="dialog"][data-reach-dialog-content]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.lenfi.io'],
+    constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
+    walletsForProvider: {
+      [IInjectedProviderNames.cardano]: [
+        {
+          ...basicWalletInfo['nami'],
+          container: () => {
+            return getConnectWalletModalByTitle(
+              '.ReactModalPortal [role="dialog"]',
+              'Connect wallet',
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['oyster.synfutures.com'],
+    testPath: {
+      desktop: ['button:text("I Agree")', ':text("Connect Wallet")'],
+      mobile: ['button:text("I Agree")', 'button.wallet-connect-btn-mobile'],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+
+          container: () =>
+            getConnectWalletModalByTitle(
+              ':is(div[role="dialog"].user-wallet-modal,div.ant-drawer.user-wallet-drawer)',
+              'Connect Wallet',
+            ),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.liqee.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            return findIconAndNameByIcon(
+              'img[src*="media/wallet-MetaMask"]',
+              'auto-search-text',
+              name,
+              document.body,
+              { 'icon': [isWalletIconLessEqualThan, isClickable], 'text': [isClickable] },
+              2,
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.strike.org'],
+    testPath: {
+      desktop: [':text("Connect")', 'div.button:has-text("Continue")'],
+      mobile: ['div.sc-ecaExY', ':text("Connect")', 'div.button:has-text("Continue")'],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const metamaskBtn: HTMLElement | null = document.querySelector(
+              'div.ant-modal.connect-modal .metamask-connect-btn',
+            );
+            return (
+              metamaskBtn &&
+              findIconAndNameByIcon('img[alt="metamask"]', 'auto-search-text', name, metamaskBtn)
+            );
+          },
+        },
+      ],
+    },
+  },
+  // {
+  //   urls: ['muesliswap.com'],
+  //   constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
+  //   walletsForProvider: {
+  //     [IInjectedProviderNames.cardano]: [
+  //       {
+  //         ...basicWalletInfo['nami'],
+  //         container: () => {
+  //           return getConnectWalletModalByTitle(
+  //             '.ReactModalPortal [role="dialog"]',
+  //             'Connect wallet',
+  //           );
+  //         },
+  //       },
+  //     ],
+  //   },
+  // }
+  {
+    urls: ['dapp.cian.app'],
+    testPath: [':text("Cancel")', ':text("Connect")'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle(
+              'div[role="dialog"].ant-modal',
+              'Connect Wallet',
+            );
+            return (
+              modal &&
+              findIconAndNameByIcon(
+                'img[src*="static/media/metamask"]',
+                'auto-search-text',
+                name,
+                modal,
+              )
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.ib.xyz'],
+    testPath: [':text("Cancel")', ':text("Connect")'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: '.modal .outer-container div.wallets-container ',
+          findIconAndName: ({ container, name }) => {
+            return findIconAndNameInShadowRoot('onboard-v2', container as string, name);
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.aptin.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.aptos]: [
+        {
+          ...basicWalletInfo['petra'],
+          container: () =>
+            getConnectWalletModalByTitle('div.MuiPaper-root.aptin-dialog', 'Connect a wallet'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['juicebox.money'],
+    testPath: {
+      desktop: [':text("Connect")', 'button:has-text("I Agree")'],
+      mobile: ['nav [role="button"]', ':text("Connect")', 'button:has-text("I Agree")'],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: '.modal .outer-container div.wallets-container ',
+          findIconAndName: ({ container, name }) => {
+            return findIconAndNameInShadowRoot('onboard-v2', container as string, name);
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['merlinswap.org'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const textNodes = domUtils.findTextNode('#root', /^Connect Wallet$/, 'all') as
+              | Text[]
+              | null;
+            const text = textNodes?.find(
+              (e) =>
+                !!e.parentElement?.parentElement?.querySelector('img[src*="lightCloseButton.svg"]'),
+            );
+
+            const modal = text?.parentElement?.parentElement?.parentElement;
+            console.log('==>text', text, '==>modal', modal, 'textNodes', textNodes);
+            return (
+              (modal &&
+                findIconAndNameByIcon(
+                  'img.chakra-image[src*="wallet/metamask.png"]',
+                  'auto-search-text',
+                  name,
+                  modal,
+                )) ||
+              null
+            );
+          },
+        },
+      ],
+      [IInjectedProviderNames.btc]: [
+        {
+          ...basicWalletInfo['unisat'],
+          findIconAndName({ name }) {
+            const textNodes = domUtils.findTextNode('#root', /^Connect Wallet$/, 'all') as
+              | Text[]
+              | null;
+            const text = textNodes?.find(
+              (e) =>
+                !!e.parentElement?.parentElement?.querySelector('img[src*="lightCloseButton.svg"]'),
+            );
+            const modal = text?.parentElement?.parentElement?.parentElement;
+            return (
+              (modal &&
+                findIconAndNameByIcon(
+                  'img.chakra-image[src*="wallet/unisat.png"]',
+                  'auto-search-text',
+                  name,
+                  modal,
+                )) ||
+              null
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['testnet.zkbase.app'],
+    walletsForProvider: {
+      [IInjectedProviderNames.btc]: [
+        {
+          ...basicWalletInfo['unisat'],
+          container: () => getConnectWalletModalByTitle('div.modal-panel.w-full', 'Connect Wallet'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['veno.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName: ({ container, name }) => {
+            const modal = getConnectWalletModalByTitle(
+              'section[role="dialog"].chakra-modal__content',
+              'Connect wallet',
+            );
+            return (
+              modal && findIconAndNameByIcon('img[alt="MetaMask"]', 'auto-search-text', name, modal)
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['www.tarot.to'],
+    testPath: {
+      'desktop': ['button:has-text("Accept")', ':text("Connect Wallet")'],
+      mobile: ['button:has-text("Accept")', 'nav button.inline-flex', ':text("Connect")'],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => {
+            return getConnectWalletModalByTitle(
+              'div[role="dialog"].fixed.z-tarotModal',
+              'Connect Wallet',
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['myfil.pages.dev'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => {
+            return getConnectWalletModalByTitle(
+              'div[role="dialog"].ant-modal-wrap',
+              'Connect Wallet',
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.term.finance'],
+    skip: true,
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => {
+            return getConnectWalletModalByTitle(
+              'section[role="dialog"].chakra-modal__content',
+              'Connect Wallet',
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.ribbon.finance'],
+    // testPath: { desktop: [":text('Connect Wallet')", ':text(Ethereum)'] },
+    skip: true,
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => {
+            return getConnectWalletModalByTitle('div[role="dialog"].modal', 'CONNECT WALLET');
+          },
+        },
+      ],
+      [IInjectedProviderNames.solana]: [
+        {
+          ...basicWalletInfo['phantom'],
+          container: () => {
+            return getConnectWalletModalByTitle('div[role="dialog"].modal', 'CONNECT WALLET');
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.pstake.finance'],
+    skip: true, //too slow
+    testUrls: ['app.pstake.finance/cosmos'],
+    walletsForProvider: {
+      [IInjectedProviderNames.cosmos]: [
+        {
+          ...basicWalletInfo['keplr'],
+          container: () => {
+            return getConnectWalletModalByTitle('.modal.wallets-modal', 'Connect wallet');
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['solo.top'],
+    skip: { mobile: true }, //no metamask on mobile
+    constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: '#connect-METAMASK',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['keep3r.network'],
+    only: true,
+    testPath: {
+      desktop: [':text("Connect wallet")'],
+      mobile: ['button.fixed.flex'],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: '.yearn--modal',
         },
       ],
     },

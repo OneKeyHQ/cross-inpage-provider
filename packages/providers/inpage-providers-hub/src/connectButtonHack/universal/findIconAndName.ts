@@ -1,5 +1,5 @@
 import { MAX_LEVELS, MAX_SEARCH_LEVELS_By_IMG } from './consts';
-import { findWalletIconByParent, isWalletIconSizeMatch } from './imgUtils';
+import { findWalletIconByParent, isWalletIconLessEqualThan } from './imgUtils';
 import { findWalletTextByParent } from './textUtils';
 import { ConstraintFn, FindResultType, Selector } from './type';
 import { arrayify, isClickable, isInExternalLink, universalLog } from './utils';
@@ -9,13 +9,14 @@ import { arrayify, isClickable, isInExternalLink, universalLog } from './utils';
  *   don't document to querySelector because it maybe not work in shadowRoot,
  *   instead of it, use the containerElement
  */
-export function findIconAndNameByParent(
+export function findIconAndNameByName(
   containerElement: HTMLElement,
   walletName: RegExp,
+  icon: 'auto-search-icon' | ((text: Text) => HTMLElement | null | undefined) = 'auto-search-icon',
   constraints: { text: ConstraintFn[]; icon: ConstraintFn[] } = {
     text: [isClickable],
-    icon: [isWalletIconSizeMatch, isClickable],
-  },
+    icon: [isWalletIconLessEqualThan, isClickable],
+},
 ): FindResultType | null {
   const textNode = findWalletTextByParent(containerElement, walletName, constraints.text);
   if (!textNode || !textNode.parentElement) {
@@ -27,20 +28,26 @@ export function findIconAndNameByParent(
     return null;
   }
 
-  let parent: HTMLElement | null = textNode.parentElement;
-  let iconNode: HTMLImageElement | HTMLElement | undefined = undefined;
-
-  let level = 0;
-  while (parent && parent !== containerElement?.parentElement && level++ < MAX_LEVELS) {
-    const walletIcon = findWalletIconByParent(parent, constraints.icon);
-    //TODO: unnecessary to traverse the parent node if the icon have more than one
-    if (!walletIcon) {
-      parent = parent.parentElement;
-      continue;
+  let iconNode: HTMLImageElement | HTMLElement | undefined | null = undefined;
+  if (typeof icon === 'function') {
+    iconNode = icon(textNode);
+  } else if (icon === 'auto-search-icon') {
+    let parent: HTMLElement | null = textNode.parentElement;
+    let level = 0;
+    while (parent && parent !== containerElement?.parentElement && level++ < MAX_LEVELS) {
+      const walletIcon = findWalletIconByParent(parent, constraints.icon);
+      if (!walletIcon) {
+        parent = parent.parentElement;
+        continue;
+      }
+      iconNode = walletIcon;
+      break;
     }
-    iconNode = walletIcon;
-    break;
+  } else {
+    universalLog.warn('icon paramter should be a function or auto-search-icon');
+    return null;
   }
+
   if (!iconNode) {
     universalLog.log(`no wallet ${walletName.toString()} icon node found`);
     return null;
@@ -49,16 +56,13 @@ export function findIconAndNameByParent(
   return { iconNode, textNode };
 }
 
-export function findIconAndNameDirectly(
+export function findIconAndNameByIcon(
   iconSelector: Selector | (() => HTMLElement | null | undefined),
-  textSelector:
-    | 'auto-search-text'
-    | ((icon: HTMLElement) => HTMLElement | null | undefined)
-    | (Selector & Record<never, never>),
+  textSelector: 'auto-search-text' | ((icon: HTMLElement) => HTMLElement | null | undefined),
   name: RegExp,
   container: HTMLElement | Document = document,
   constraints: { text: ConstraintFn[]; icon: ConstraintFn[] } = { text: [], icon: [] },
-  searchLevel = MAX_SEARCH_LEVELS_By_IMG
+  searchLevel = MAX_SEARCH_LEVELS_By_IMG,
 ): FindResultType | null {
   const iconElements =
     typeof iconSelector === 'string'
@@ -71,21 +75,14 @@ export function findIconAndNameDirectly(
   }
 
   const iconElement = Array.from(iconElements)[0];
+
+  //find the text node by img
   let textNode: Text | null = null;
   if (textSelector === 'auto-search-text') {
     const containerEle = container instanceof HTMLElement ? container : document.body;
     textNode = iconElement
       ? findTextByImg(iconElement, name, containerEle, constraints.text, searchLevel)
       : null;
-  } else if (typeof textSelector === 'string') {
-    const textContainer = Array.from(container.querySelectorAll<HTMLElement>(textSelector))?.filter(
-      Boolean,
-    );
-    if (textContainer?.length > 1) {
-      universalLog.warn('more one wallet text found ,please check the selector');
-      return null;
-    }
-    textNode = findWalletTextByParent(textContainer[0], name, constraints.text);
   } else if (typeof textSelector === 'function') {
     const containerEle = iconElement && textSelector(iconElement);
     textNode =
@@ -113,13 +110,13 @@ export function findTextByImg(
   walletName: RegExp,
   containerLimit: HTMLElement,
   constraints: ConstraintFn[],
-  maxLevel = MAX_SEARCH_LEVELS_By_IMG
+  maxLevel = MAX_SEARCH_LEVELS_By_IMG,
 ) {
   let text: null | Text = null;
   let parent: HTMLElement | null = img;
   let level = 0;
 
-  while (parent && parent != containerLimit && level++ < maxLevel) {
+  while (parent && parent != containerLimit.parentElement && level++ < maxLevel) {
     text = findWalletTextByParent(parent, walletName, constraints);
     if (text) {
       return text;

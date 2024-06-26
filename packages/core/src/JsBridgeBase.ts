@@ -29,6 +29,7 @@ function toPlainError(errorInfo: IErrorInfo) {
     info: errorInfo.info as unknown, // i18n params
     className: errorInfo.className,
     autoToast: errorInfo.autoToast,
+    requestId: errorInfo.requestId,
   };
 }
 
@@ -57,6 +58,7 @@ type IErrorInfo = Error & {
   info?: any;
   className?: string;
   autoToast?: boolean;
+  requestId?: string;
 };
 
 const BRIDGE_EVENTS = {

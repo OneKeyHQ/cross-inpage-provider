@@ -291,7 +291,7 @@ export default function App() {
 
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
+      <WalletProvider wallets={wallets} autoConnect localStorageKey="onekey_sol_dapp_example">
         <WalletModalProvider>
           <Example />
         </WalletModalProvider>

@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { useApiPayload } from './ApiPayloadProvider';
+import { useApiDispatch, useCurrentParamId, usePresupposeParams } from './ApiPayloadProvider';
 
 export type IPresupposeParam = {
   id: string;
@@ -10,16 +10,15 @@ export type IPresupposeParam = {
 };
 
 export type IPresupposeParamsSelectorProps = {
-  presupposeParams?: IPresupposeParam[];
   onPresupposeParamChange?: (paramId: string) => void;
 };
 
 export function PresupposeParamsSelector({
-  presupposeParams,
   onPresupposeParamChange,
 }: IPresupposeParamsSelectorProps) {
-  const { state, dispatch } = useApiPayload();
-  const { currentPurposeParamId } = state;
+  const presupposeParams = usePresupposeParams();
+  const currentPurposeParamId = useCurrentParamId();
+  const dispatch = useApiDispatch();
 
   useEffect(() => {
     if (presupposeParams && presupposeParams.length > 0) {

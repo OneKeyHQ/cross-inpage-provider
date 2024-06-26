@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import {
@@ -15,6 +15,7 @@ import type { IAccountInfo, IKnownWallet } from './types';
 import { useWallet } from './WalletContext';
 import { toast } from '../ui/use-toast';
 import { get } from 'lodash';
+import { useSettings } from '../../hooks/useSettings';
 
 export type ConnectButtonProps<T> = {
   fetchWallets: () => Promise<IKnownWallet[]>;
@@ -37,7 +38,9 @@ export default function ConnectButton<T>({
   onConnect,
   onDisconnect,
 }: ConnectButtonProps<T>) {
+  const { settings } = useSettings();
   const connectDialogRef = useRef<any>(null);
+  const autoConnectedRef = useRef<boolean>(false);
 
   const [wallets, setWallets] = useState<IKnownWallet[]>([]);
 
@@ -62,6 +65,7 @@ export default function ConnectButton<T>({
   );
 
   const disconnectWallet = useCallback(async () => {
+    autoConnectedRef.current = false;
     await onDisconnect?.();
     setProvider(null);
     setAccount(null);
@@ -77,21 +81,44 @@ export default function ConnectButton<T>({
     }, 150);
   }, []);
 
-  const connectWalletWithDialog = useCallback(async () => {
-    const wallets = await fetchWallets?.();
+  const connectWalletWithDialog = useCallback(
+    async (options?: { directConnection?: boolean }) => {
+      const wallets = await fetchWallets?.();
 
-    if (wallets?.length === 0) {
-      closeDialog();
-      return;
-    }
+      if (wallets?.length === 0) {
+        closeDialog();
+        return;
+      }
 
-    if (wallets?.length === 1) {
-      closeDialog();
-      await connectWallet(wallets[0]);
-    } else {
-      setWallets(wallets);
-    }
-  }, [closeDialog, connectWallet, fetchWallets]);
+      const { directConnection } = options ?? { directConnection: false };
+      if (wallets?.length === 1 || (wallets?.length > 0 && directConnection)) {
+        closeDialog();
+        await connectWallet(wallets[0]);
+      } else {
+        setWallets(wallets);
+      }
+    },
+    [closeDialog, connectWallet, fetchWallets],
+  );
+
+  useEffect(() => {
+    const timeout = setTimeout(async () => {
+      if (autoConnectedRef.current) return;
+
+      console.log('settings.autoConnect', settings.autoConnect);
+      if (settings.autoConnect) {
+        autoConnectedRef.current = true;
+        await connectWalletWithDialog({
+          directConnection: true,
+        });
+      }
+    }, 500);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.autoConnect]);
 
   return (
     <Card>
@@ -99,7 +126,7 @@ export default function ConnectButton<T>({
         <div className="flex flex-row flex-wrap justify-between">
           <Dialog>
             <DialogTrigger asChild>
-              <Button onClick={connectWalletWithDialog}>Connect Wallet</Button>
+              <Button onClick={() => connectWalletWithDialog()}>Connect Wallet</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogClose ref={connectDialogRef} />

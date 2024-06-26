@@ -1,23 +1,43 @@
-import React, { useCallback, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useWallet } from '../connect/WalletContext';
 import { IApiExecutor, useApiExecutor } from './useApiExecutor';
 import { IEthereumProvider } from '../chains/ethereum/types';
 import { Card, CardContent, CardDescription, CardHeader } from '../ui/card';
 import {
+  IPresupposeParam,
   IPresupposeParamsSelectorProps,
   PresupposeParamsSelector,
 } from './PresupposeParamsSelector';
-import { IRequestEditorProps, RequestEditor, ResultDisplay, ResultTextArea } from './RequestEditor';
+import { IRequestEditorProps, RequestEditor, ResultTextArea } from './RequestEditor';
 import { Button } from '../ui/button';
-import { ApiPayloadProvider, useApiPayload } from './ApiPayloadProvider';
+import {
+  ApiPayloadProvider,
+  useApiDispatch,
+  useRequest,
+  useResult,
+  useValidateResult,
+} from './ApiPayloadProvider';
 
 export type IApiPayloadProps = {
   title: string;
   disableRequestContent?: boolean;
   description?: string;
+  presupposeParams?: IPresupposeParam[];
 } & IApiExecuteProps &
   IPresupposeParamsSelectorProps &
   Omit<IRequestEditorProps, 'resetRequest'>;
+
+const InitPresupposeParams: FC<{ presupposeParams?: IPresupposeParam[] }> = ({
+  presupposeParams,
+}) => {
+  const dispatch = useApiDispatch();
+
+  useEffect(() => {
+    dispatch({ type: 'SET_PRESUPPOSE_PARAMS', payload: presupposeParams });
+  }, [presupposeParams, dispatch]);
+
+  return null;
+};
 
 function ApiPayloadContent({
   title,
@@ -31,41 +51,23 @@ function ApiPayloadContent({
   allowCallWithoutProvider,
   disableRequestContent,
 }: IApiPayloadProps) {
-  const { dispatch } = useApiPayload();
-
-  const handleSetRequest = useCallback(
-    (newRequest: string) => {
-      dispatch({ type: 'SET_REQUEST', payload: newRequest });
-      dispatch({ type: 'SET_RESULT', payload: '' });
-      dispatch({ type: 'SET_VALIDATE_RESULT', payload: '' });
-    },
-    [dispatch],
-  );
-
   return (
     <Card>
-      <CardHeader className="text-xl font-medium">{title}</CardHeader>
+      <InitPresupposeParams presupposeParams={presupposeParams} />
+      <CardHeader className="text-xl font-medium searchable">{title}</CardHeader>
       {description && <CardDescription>{description}</CardDescription>}
 
       <CardContent>
         <div className="flex flex-col gap-3">
-          <PresupposeParamsSelector
-            presupposeParams={presupposeParams}
-            onPresupposeParamChange={onPresupposeParamChange}
-          />
+          <PresupposeParamsSelector onPresupposeParamChange={onPresupposeParamChange} />
 
           <RequestEditor
             generateRequestFrom={generateRequestFrom}
             onGenerateRequest={onGenerateRequest}
             disableRequestContent={disableRequestContent}
-            resetRequest={() => handleSetRequest(presupposeParams?.[0]?.value)}
           />
 
-          <ApiExecute
-            allowCallWithoutProvider={allowCallWithoutProvider}
-            onExecute={onExecute}
-            onValidate={onValidate}
-          />
+          <ApiExecute allowCallWithoutProvider={allowCallWithoutProvider} onExecute={onExecute} />
 
           <ExecuteResultDisplay />
 
@@ -91,14 +93,20 @@ export function ApiPayload(props: IApiPayloadProps) {
 
 export type IApiExecuteProps = {
   allowCallWithoutProvider?: boolean;
+  timeout?: number;
 } & IApiExecutor;
 
-function ApiExecute({ allowCallWithoutProvider, onExecute, onValidate }: IApiExecuteProps) {
+function ApiExecute({
+  allowCallWithoutProvider,
+  onExecute,
+  onValidate,
+  timeout = 15000,
+}: IApiExecuteProps) {
   const { provider } = useWallet<IEthereumProvider>();
   const { execute } = useApiExecutor({ onExecute, onValidate });
 
-  const { state, dispatch } = useApiPayload();
-  const { request } = state;
+  const request = useRequest();
+  const dispatch = useApiDispatch();
 
   const [loading, setLoading] = useState(false);
 
@@ -112,13 +120,24 @@ function ApiExecute({ allowCallWithoutProvider, onExecute, onValidate }: IApiExe
   const handleExecute = useCallback(async () => {
     setLoading(true);
     handleSetResult('Calling...');
-    const { result, error } = await execute(request);
-    setLoading(false);
-    if (error) {
+
+    try {
+      // @ts-expect-error
+      const { result, error } = await Promise.race([
+        execute(request),
+        new Promise((_, rej) => setTimeout(() => rej(`call timeout ${timeout}ms`), timeout)),
+      ]);
+      if (error) {
+        handleSetResult(`Error: ${error}`);
+      } else {
+        handleSetResult(result);
+      }
+    } catch (error) {
+      console.log('execute error', error);
+
       handleSetResult(`Error: ${error}`);
-    } else {
-      handleSetResult(result);
     }
+    setLoading(false);
   }, [execute, request, handleSetResult]);
 
   return (
@@ -133,8 +152,9 @@ function ApiExecute({ allowCallWithoutProvider, onExecute, onValidate }: IApiExe
 }
 
 function ApiExecuteValidate({ onExecute, onValidate }: IApiExecuteProps) {
-  const { state, dispatch } = useApiPayload();
-  const { request, result } = state;
+  const request = useRequest();
+  const result = useResult();
+  const dispatch = useApiDispatch();
 
   const { validate } = useApiExecutor({ onExecute, onValidate });
 
@@ -162,15 +182,13 @@ function ApiExecuteValidate({ onExecute, onValidate }: IApiExecuteProps) {
 }
 
 function ExecuteResultDisplay() {
-  const { state } = useApiPayload();
-  const { result } = state;
+  const result = useResult();
 
   return <ResultTextArea label="执行结果" content={result} />;
 }
 
 function ValidateResultDisplay() {
-  const { state } = useApiPayload();
-  const { validateResult } = state;
+  const validateResult = useValidateResult();
 
   return <ResultTextArea label="验证结果" content={validateResult} />;
 }

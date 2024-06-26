@@ -19,6 +19,7 @@ import {
 } from '@metamask/eth-sig-util';
 import { toast } from '../../ui/use-toast';
 import { Input } from '../../ui/input';
+import { isEqChainId } from './utils';
 
 export default function Example() {
   const walletsRef = useRef<IEIP6963ProviderDetail[]>([
@@ -148,7 +149,85 @@ export default function Example() {
     };
   }, [account, provider, setAccount]);
 
-  const getTokenTransferFrom = () => {
+  const getTokenTransferFrom = (chainId: string | undefined) => {
+    const tokens: {
+      name: string;
+      address: string;
+    }[] = [];
+    // EVM MainNet
+    if (isEqChainId(chainId, '0x1')) {
+      tokens.push({
+        name: 'USDC',
+        address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+      });
+      tokens.push({
+        name: 'USDT',
+        address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      });
+    }
+    // Polygon
+    if (isEqChainId(chainId, '0x89')) {
+      tokens.push({
+        name: 'USDC.e',
+        address: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+      });
+      tokens.push({
+        name: 'USDT',
+        address: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
+      });
+      tokens.push({
+        name: 'USDC',
+        address: '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359',
+      });
+    }
+    // BSC
+    if (isEqChainId(chainId, '0x38')) {
+      tokens.push({
+        name: 'USDC',
+        address: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',
+      });
+      tokens.push({
+        name: 'anyUSDC',
+        address: '0x8965349fb649A33a30cbFDa057D8eC2C48AbE2A2',
+      });
+    }
+    // arb
+    if (isEqChainId(chainId, '0xa4b1')) {
+      tokens.push({
+        name: 'USDC',
+        address: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+      });
+      tokens.push({
+        name: 'USDT.e',
+        address: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
+      });
+      tokens.push({
+        name: 'USDT',
+        address: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+      });
+    }
+    // Optimism
+    if (isEqChainId(chainId, '0xa')) {
+      tokens.push({
+        name: 'USDC',
+        address: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85',
+      });
+      tokens.push({
+        name: 'USDC.e',
+        address: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+      });
+      tokens.push({
+        name: 'USDT',
+        address: '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58',
+      });
+    }
+
+    if (!tokens.length) {
+      tokens.push({
+        name: 'MainNet USDC',
+        address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+      });
+    }
     return (
       <>
         <Input
@@ -160,8 +239,9 @@ export default function Example() {
         <Input label="金额" type="number" name="amount" defaultValue="10000" />
         <select name="tokenAddress" className="select">
           <option selected>选择 Token</option>
-          <option value="0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48">MainNet USDC</option>
-          <option value="0xdAC17F958D2ee523a2206206994597C13D831ec7">MainNet USDT</option>
+          {tokens.map((token) => (
+            <option value={token.address}>{token.name}</option>
+          ))}
         </select>
       </>
     );
@@ -534,7 +614,7 @@ export default function Example() {
           title="eth_sendTransaction"
           description="发送 ERC20 Token"
           onExecute={requestSendTransactionCommon}
-          generateRequestFrom={getTokenTransferFrom}
+          generateRequestFrom={() => getTokenTransferFrom(account?.chainId)}
           // @ts-expect-error
           onGenerateRequest={(fromData: Record<string, any>) => {
             const from = account?.address ?? '';
@@ -565,7 +645,7 @@ export default function Example() {
           title="eth_sendTransaction"
           description="授权 ERC20 Token，金额为 0 时表示取消授权"
           onExecute={requestSendTransactionCommon}
-          generateRequestFrom={getTokenTransferFrom}
+          generateRequestFrom={() => getTokenTransferFrom(account?.chainId)}
           // @ts-expect-error
           onGenerateRequest={(fromData: Record<string, any>) => {
             const from = account?.address ?? '';

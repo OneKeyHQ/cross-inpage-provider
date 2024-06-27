@@ -21,6 +21,7 @@ import {
   makeTextAlignCenter,
   makeTextAlignLeft,
   makeTextEllipse,
+  makeTextWordBreak,
   makeTextWrap,
   replaceText,
 } from './textUtils';
@@ -2154,7 +2155,7 @@ export const sitesConfig: SitesInfo[] = [
     },
   },
   {
-    urls: ['stbt.matrixdock.com'],
+    urls: ['stbt.matrixdock.com', 'app.matrixdock.com'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -2165,6 +2166,9 @@ export const sitesConfig: SitesInfo[] = [
               modal &&
               findIconAndNameByIcon('img[src*="icon-metamask"]', 'auto-search-text', name, modal)
             );
+          },
+          afterUpdate(textNode) {
+            textNode.parentElement && makeTextWordBreak(textNode.parentElement);
           },
         },
         {
@@ -2180,6 +2184,9 @@ export const sitesConfig: SitesInfo[] = [
                 modal,
               )
             );
+          },
+          afterUpdate(textNode) {
+            textNode.parentElement && makeTextWordBreak(textNode.parentElement);
           },
         },
       ],

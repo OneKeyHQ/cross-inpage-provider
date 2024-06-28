@@ -14,6 +14,9 @@ export function makeTextEllipse(
 export function makeTextWrap(textNode: HTMLElement) {
   textNode.style.whiteSpace = 'normal';
 }
+export function makeTextWordBreak(textNode: HTMLElement) {
+  textNode.style.wordBreak = 'break-word';
+}
 export function makeTextAlignLeft(textNode: HTMLElement) {
   textNode.style.textAlign = 'left';
 }

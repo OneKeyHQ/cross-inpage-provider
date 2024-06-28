@@ -21,6 +21,7 @@ import {
   makeTextAlignCenter,
   makeTextAlignLeft,
   makeTextEllipse,
+  makeTextWordBreak,
   makeTextWrap,
   replaceText,
 } from './textUtils';
@@ -922,7 +923,7 @@ export const sitesConfig: SitesInfo[] = [
     },
   },
   {
-    urls: ['bifrost.app'],
+    urls: ['bifrost.app', 'app.bifrost.io'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -1191,6 +1192,8 @@ export const sitesConfig: SitesInfo[] = [
             return icon ? replaceIcon(icon, updatedIcon) : null;
           },
         },
+        metamaskForRainbowKit,
+        walletConnectForRainbowKit,
       ],
     },
   },
@@ -1236,6 +1239,12 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['www.dx.app'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+    },
+  },
+  {
+    urls: ['app.redacted.finance'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
     },
@@ -2145,24 +2154,44 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
-  // {
-  //   urls: ['stbt.matrixdock.com'],
-
-  //   walletsForProvider: {
-  //     [IInjectedProviderNames.ethereum]: [
-  //       {
-  //         ...basicWalletInfo['metamask'],
-  //         findIconAndName({ name }) {
-  //           const modal = getConnectWalletModalByTitle('div.inside', 'Connect Wallet');
-  //           return (
-  //             modal &&
-  //             findIconAndNameDirectly('img[src*="metamask.png"]', 'auto-search-text', name, modal)
-  //           );
-  //         },
-  //       },
-  //     ],
-  //   },
-  // },
+  {
+    urls: ['stbt.matrixdock.com', 'app.matrixdock.com'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('div.dialog-container', 'Available Wallets');
+            return (
+              modal &&
+              findIconAndNameByIcon('img[src*="icon-metamask"]', 'auto-search-text', name, modal)
+            );
+          },
+          afterUpdate(textNode) {
+            textNode.parentElement && makeTextWordBreak(textNode.parentElement);
+          },
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('div.dialog-container', 'Available Wallets');
+            return (
+              modal &&
+              findIconAndNameByIcon(
+                'img[src*="icon-wallet-connect"]',
+                'auto-search-text',
+                name,
+                modal,
+              )
+            );
+          },
+          afterUpdate(textNode) {
+            textNode.parentElement && makeTextWordBreak(textNode.parentElement);
+          },
+        },
+      ],
+    },
+  },
   {
     urls: ['spooky.fi'],
     walletsForProvider: {
@@ -3235,7 +3264,7 @@ export const sitesConfig: SitesInfo[] = [
     },
   },
   {
-    urls: ['nftx.io'],
+    urls: ['nftx.io', 'v3.nftx.io'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },

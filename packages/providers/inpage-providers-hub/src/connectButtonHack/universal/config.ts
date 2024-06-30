@@ -3687,7 +3687,6 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['keep3r.network'],
-    only: true,
     testPath: {
       desktop: [':text("Connect wallet")'],
       mobile: ['button.fixed.flex'],
@@ -3697,6 +3696,239 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['metamask'],
           container: '.yearn--modal',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['ape.bond'],
+
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: '#wallet-connect-metamask',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['deri.io'],
+    testUrls: ['deri.io/#/lite/trade/futures/BTCUSD'],
+
+    constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: '.dialog.wallet-modal',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['bridge.wing.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: '.bridge-list__content .wallet_type',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['helixapp.com'],
+    testPath: [':text("Connect Wallet")', ':text("Confirm")'],
+
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () =>
+            getConnectWalletModalByTitle('.fixed.backdrop-filter .modal-container', 'Popular'),
+        },
+      ],
+      [IInjectedProviderNames.cosmos]: [
+        {
+          ...basicWalletInfo['keplr'],
+          container: () =>
+            getConnectWalletModalByTitle('.fixed.backdrop-filter .modal-container', 'Popular'),
+        },
+      ],
+      // [IInjectedProviderNames.solana]: [
+      //   {
+      //     ...basicWalletInfo['phantom'],
+      //     container: () =>
+      //       getConnectWalletModalByTitle(
+      //         '.fixed.backdrop-filter .modal-container',
+      //         'Other Wallets',
+      //       ),
+      //   },
+      // ],
+    },
+  },
+  {
+    urls: ['app.ux.xyz'],
+    testPath: ['button:has-text("Yes")', ':text("Connect")'],
+    skip: { mobile: true },
+    walletsForProvider: {
+      [IInjectedProviderNames.cosmos]: [
+        {
+          ...basicWalletInfo['keplr'],
+          name: /^Keplr Wallet$/,
+          container: () => getConnectWalletModalByTitle('div.modal-layer', 'Connect Wallet'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app-v2.acryptos.com'],
+    skip: { mobile: true },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: '#WEB3_CONNECT_MODAL_ID',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['fusionx.finance'],
+    testUrls: ['fusionx.finance/swap'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          name: /^Metamask$/,
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle(
+              '#portal-root div[role="dialog"]',
+              'Connect Wallet',
+            );
+            return (
+              modal &&
+              findIconAndNameByIcon('img[src*="metamask"]', 'auto-search-text', name, modal)
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.optim.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.cardano]: [
+        {
+          ...basicWalletInfo['nami'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle(
+              'div.backdrop-blur[class*="Modal"]',
+              'Select Wallet',
+            );
+            return (
+              modal &&
+              findIconAndNameByIcon('img[src*="nami"][alt="Nami"]', 'auto-search-text', name, modal)
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['autofarm.network'],
+    testPath: [':text("Wallet")'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: '.modal .outer-container div.wallets-container ',
+          findIconAndName: ({ container, name }) => {
+            return findIconAndNameInShadowRoot('onboard-v2', container as string, name);
+          },
+          afterUpdate(textNode) {
+            textNode.parentElement && makeTextAlignLeft(textNode.parentElement);
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.wingriders.com'],
+    testPath: {
+      desktop: [
+        'button:has-text("Got it")',
+        'button:has-text("I Agree")',
+        ':text("Connect Wallet")',
+      ],
+      mobile: [
+        'button:has-text("Got it")',
+        'button:has-text("I Agree")',
+        'header button svg',
+        ':text("Connect Wallet")',
+      ],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.cardano]: [
+        {
+          ...basicWalletInfo['nami'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle(
+              'div.MuiDialog-container',
+              'Connect to WingRiders',
+            );
+            return (
+              modal &&
+              findIconAndNameByIcon(
+                'img[src*="nami"][alt="Nami wallet"]',
+                'auto-search-text',
+                name,
+                modal,
+              )
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.vyfi.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.cardano]: [
+        {
+          ...basicWalletInfo['nami'],
+          container: '#wallet-connect-nami',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['wemixonkroma.xyz'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: '.wallet-modal-connect-button',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.arcade.xyz'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
+    },
+  },
+  {
+    urls: ['app.quarry.so'],
+    testPath: [':text("Connect Wallet")', ':text("Continue")'],
+    walletsForProvider: {
+      [IInjectedProviderNames.solana]: [
+        {
+          ...basicWalletInfo['phantom'],
+          container: () =>
+            getConnectWalletModalByTitle('.goki-walletkit-modal-wrapper', 'Select your wallet'),
         },
       ],
     },

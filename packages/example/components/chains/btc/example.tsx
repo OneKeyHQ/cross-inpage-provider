@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { get, isEmpty } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
@@ -14,47 +14,7 @@ import { toast } from '../../ui/use-toast';
 import { Input } from '../../ui/input';
 import { createPSBT } from './utils';
 import * as bitcoin from 'bitcoinjs-lib';
-
-function SignMessageApiPayload({ provider }: { provider: IProviderApi | undefined }) {
-  const [allowValidate, setAllowValidate] = useState(true);
-
-  return (
-    <ApiPayload
-      title="SignMessage"
-      description="签名消息"
-      presupposeParams={params.signMessage}
-      onExecute={async (request: string) => {
-        const obj = JSON.parse(request) as { msg: string; type: string | undefined };
-        const res = await provider?.signMessage(obj.msg, obj.type);
-        return res;
-      }}
-      onPresupposeParamChange={(paramId: string) => {
-        console.log('paramId', paramId);
-
-        if (paramId.indexOf('bip322-simple') > -1) {
-          setAllowValidate(false);
-        } else {
-          setAllowValidate(true);
-        }
-      }}
-      onValidate={
-        allowValidate
-          ? async (request: string, response: string) => {
-              const obj = JSON.parse(request) as { msg: string; type: string | undefined };
-              const publicKey = await provider?.getPublicKey();
-
-              if (!obj.type || obj.type === 'ecdsa') {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-                return verifyMessage(publicKey, obj.msg, response);
-              }
-
-              return 'Dapp Example: 不支持 bip322-simple 类型签字的验证';
-            }
-          : undefined
-      }
-    />
-  );
-}
+import { Verifier } from 'bip322-js';
 
 // https://docs.unisat.io/dev/unisat-developer-center/unisat-wallet
 export default function BTCExample() {
@@ -208,7 +168,30 @@ export default function BTCExample() {
       </ApiGroup>
 
       <ApiGroup title="Sign Message">
-        <SignMessageApiPayload provider={provider} />
+        <ApiPayload
+          title="SignMessage"
+          description="签名消息"
+          presupposeParams={params.signMessage}
+          onExecute={async (request: string) => {
+            const obj = JSON.parse(request) as { msg: string; type: string | undefined };
+            const res = await provider?.signMessage(obj.msg, obj.type);
+            return res;
+          }}
+          onValidate={async (request: string, response: string) => {
+            const obj = JSON.parse(request) as { msg: string; type: string | undefined };
+            const publicKey = await provider?.getPublicKey();
+
+            if (!obj.type || obj.type === 'ecdsa') {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+              return verifyMessage(publicKey, obj.msg, response);
+            }
+
+            if (obj.type === 'bip322-simple') {
+              return Verifier.verifySignature(account.address, obj.msg, response);
+            }
+            return 'Dapp Example: 不支持的类型签字的验证';
+          }}
+        />
       </ApiGroup>
 
       <ApiGroup title="Transaction">

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../connect/ConnectButton';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { get, isEmpty } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
@@ -14,45 +14,7 @@ import { toast } from '../../ui/use-toast';
 import * as bitcoin from 'bitcoinjs-lib';
 import { Input } from '../../ui/input';
 import { createPSBT } from '../btc/utils';
-
-function SignMessageApiPayload({ provider }: { provider: IProviderApi | undefined }) {
-  const [allowValidate, setAllowValidate] = useState(false);
-
-  return (
-    <ApiPayload
-      title="SignMessage"
-      description="签名消息"
-      presupposeParams={params.signMessage}
-      onExecute={async (request: string) => {
-        const obj = JSON.parse(request) as { msg: string; type: string | undefined };
-        const res = await provider?.signMessage(obj.msg, obj.type);
-        return res;
-      }}
-      onPresupposeParamChange={(paramId: string) => {
-        if (paramId.indexOf('bip322-simple') > -1) {
-          setAllowValidate(false);
-        } else {
-          setAllowValidate(true);
-        }
-      }}
-      onValidate={
-        allowValidate
-          ? async (request: string, response: string) => {
-              const obj = JSON.parse(request) as { msg: string; type: string | undefined };
-              const publicKey = await provider?.getPublicKey();
-
-              if (!obj.type || obj.type === 'ecdsa') {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-                return verifyMessage(publicKey, obj.msg, response);
-              }
-
-              return 'Dapp Example: 不支持 bip322-simple 类型签字的验证';
-            }
-          : undefined
-      }
-    />
-  );
-}
+import { Verifier } from 'bip322-js';
 
 export default function BTCExample() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -278,7 +240,30 @@ export default function BTCExample() {
       </ApiGroup>
 
       <ApiGroup title="Sign Message">
-        <SignMessageApiPayload provider={provider} />
+        <ApiPayload
+          title="SignMessage"
+          description="签名消息"
+          presupposeParams={params.signMessage}
+          onExecute={async (request: string) => {
+            const obj = JSON.parse(request) as { msg: string; type: string | undefined };
+            const res = await provider?.signMessage(obj.msg, obj.type);
+            return res;
+          }}
+          onValidate={async (request: string, response: string) => {
+            const obj = JSON.parse(request) as { msg: string; type: string | undefined };
+            const publicKey = await provider?.getPublicKey();
+
+            if (!obj.type || obj.type === 'ecdsa') {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+              return verifyMessage(publicKey, obj.msg, response);
+            }
+
+            if (obj.type === 'bip322-simple') {
+              return Verifier.verifySignature(account.address, obj.msg, response);
+            }
+            return 'Dapp Example: 不支持的类型签字的验证';
+          }}
+        />
         <ApiPayload
           title="SignMessageBIP322"
           description="签名消息 BIP322"
@@ -287,18 +272,10 @@ export default function BTCExample() {
             const res = await provider?.signMessageBIP322(request);
             return res;
           }}
-          // onValidate={async (request: string, response: string) => {
-          //   const pubKeyHex = await provider?.getPublicKeyHex();
-          //   const network = bitcoin;
-          //   const xxx = simulateMessageAsTransaction(
-          //     Buffer.from(request).toString('hex'),
-          //     response,
-          //     pubKeyHex,
-          //     network,
-          //   );
-
-          //   return Promise.resolve(xxx.toString());
-          // }}
+          // @ts-expect-error
+          onValidate={async (request: string, response: string) => {
+            return Verifier.verifySignature(account.address, request, response);
+          }}
         />
       </ApiGroup>
 

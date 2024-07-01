@@ -1,26 +1,48 @@
 import { FormEvent, useCallback, useState } from 'react';
 import { Button } from '../ui/button';
 import { AutoHeightTextarea } from '../ui/textarea';
-import { useApiPayload } from './ApiPayloadProvider';
+import {
+  useApiDispatch,
+  useCurrentParamId,
+  usePresupposeParams,
+  useRequest,
+} from './ApiPayloadProvider';
 import { toast } from '../ui/use-toast';
 import { get } from 'lodash';
 import JsonEditor from '../ui/jsonEditor';
-import { Card, CardContent } from '../ui/card';
+
+function ResetRequest() {
+  const presupposeParams = usePresupposeParams();
+  const currentPurposeParamId = useCurrentParamId();
+  const dispatch = useApiDispatch();
+
+  const handleSetRequest = useCallback(() => {
+    const newRequest = presupposeParams?.find((param) => param.id === currentPurposeParamId)?.value;
+    dispatch({ type: 'SET_REQUEST', payload: newRequest });
+    dispatch({ type: 'SET_RESULT', payload: '' });
+    dispatch({ type: 'SET_VALIDATE_RESULT', payload: '' });
+  }, [dispatch, presupposeParams, currentPurposeParamId]);
+
+  return (
+    <Button variant="outline" size="sm" onClick={handleSetRequest}>
+      Rest 请求
+    </Button>
+  );
+}
 
 export type IRequestEditorProps = {
-  resetRequest: () => void;
   disableRequestContent?: boolean;
   generateRequestFrom?: () => React.ReactNode;
   onGenerateRequest?: (formData: Record<string, any>) => Promise<string>;
 };
 export function RequestEditor({
   disableRequestContent,
-  resetRequest,
   generateRequestFrom,
   onGenerateRequest,
 }: IRequestEditorProps) {
-  const { state, dispatch } = useApiPayload();
-  const { request } = state;
+  const request = useRequest();
+  const dispatch = useApiDispatch();
+
   const [generateRequesting, setGenerateRequesting] = useState(false);
 
   const handleSetRequest = useCallback(
@@ -61,9 +83,7 @@ export function RequestEditor({
         <span className="text-base font-medium">
           请求{!disableRequestContent && <span>(可以手动编辑)</span>}
         </span>
-        <Button variant="outline" size="sm" onClick={resetRequest}>
-          Rest 请求
-        </Button>
+        <ResetRequest />
       </div>
       {onGenerateRequest && (
         <form onSubmit={handleGenerateRequestSubmit} className="p-2 m-2 gap-1 flex flex-col">

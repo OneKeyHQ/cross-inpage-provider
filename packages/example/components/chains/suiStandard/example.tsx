@@ -257,7 +257,7 @@ export default function App() {
           setActiveNetwork(network);
         }}
       >
-        <WalletProvider enableUnsafeBurner>
+        <WalletProvider enableUnsafeBurner autoConnect>
           <ConnectButton />
           <Example />
         </WalletProvider>

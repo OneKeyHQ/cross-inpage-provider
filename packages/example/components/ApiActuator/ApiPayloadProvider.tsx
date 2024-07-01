@@ -1,59 +1,48 @@
-import React, { createContext, useContext, useReducer, Dispatch } from 'react';
+import React, { createContext, useContext, useReducer, useMemo, useCallback } from 'react';
 // @ts-expect-error
 import perfectJson from 'perfect-json';
+import { IPresupposeParam } from './PresupposeParamsSelector';
 
-// 定义状态和动作的类型
-interface ApiPayloadState {
-  request: string;
-  result: string;
-  validateResult: string;
-  currentPurposeParamId: string;
-}
+const RequestContext = createContext<string>('');
+const ResultContext = createContext<string>('');
+const ValidateResultContext = createContext<string>('');
+const CurrentParamIdContext = createContext<string>('');
+const PresupposeParamsContext = createContext<IPresupposeParam[] | undefined>(undefined);
+const DispatchContext = createContext<React.Dispatch<ApiPayloadAction> | null>(null);
 
 type ApiPayloadAction =
   | { type: 'SET_REQUEST'; payload: string }
   | { type: 'SET_RESULT'; payload: string }
   | { type: 'SET_VALIDATE_RESULT'; payload: string }
-  | { type: 'SET_CURRENT_PARAM_ID'; payload: string };
+  | { type: 'SET_CURRENT_PARAM_ID'; payload: string }
+  | { type: 'SET_PRESUPPOSE_PARAMS'; payload: IPresupposeParam[] };
 
-// 创建 Context
-const ApiPayloadContext = createContext<{
-  state: ApiPayloadState;
-  dispatch: Dispatch<ApiPayloadAction>;
-} | null>(null);
-
-function tryFormatJson(json: string) {
+// 优化 JSON 格式化函数
+const tryFormatJson = (json: string) => {
   try {
     return JSON.stringify(JSON.parse(json), null, 2);
-  } catch (error) {
-    return json; // 返回未修改的原始字符串
+  } catch {
+    return json;
   }
-}
+};
 
-function tryFormatCompactJson(json: string) {
+const tryFormatCompactJson = (json: string) => {
   try {
     const hasArray = /\[.*?\]/.test(json);
     const obj = JSON.parse(json);
     if (hasArray) {
       return perfectJson(obj, {
         // @ts-expect-error
-        singleLine: ({ value }) => {
-          // Array
-          if (Array.isArray(value)) {
-            return value.length > 10;
-          }
-          return false;
-        },
+        singleLine: ({ value }) => Array.isArray(value) && value.length > 10,
       });
     } else {
       return JSON.stringify(obj, null, 2);
     }
-  } catch (error) {
-    return json; // 返回未修改的原始字符串
+  } catch {
+    return json;
   }
-}
+};
 
-// Reducer 函数
 function apiPayloadReducer(state: ApiPayloadState, action: ApiPayloadAction): ApiPayloadState {
   switch (action.type) {
     case 'SET_REQUEST':
@@ -64,14 +53,23 @@ function apiPayloadReducer(state: ApiPayloadState, action: ApiPayloadAction): Ap
       return { ...state, validateResult: tryFormatJson(action.payload) };
     case 'SET_CURRENT_PARAM_ID':
       return { ...state, currentPurposeParamId: action.payload };
+    case 'SET_PRESUPPOSE_PARAMS':
+      return { ...state, presupposeParams: action.payload };
     default:
       return state;
   }
 }
 
-// Provider 组件
+interface ApiPayloadState {
+  request: string;
+  result: string;
+  validateResult: string;
+  currentPurposeParamId: string;
+  presupposeParams?: IPresupposeParam[];
+}
+
 interface IApiPayloadProviderProps {
-  children: React.ReactNode; // 假设你有这个类型定义好
+  children: React.ReactNode;
 }
 
 export function ApiPayloadProvider({ children }: IApiPayloadProviderProps) {
@@ -82,16 +80,59 @@ export function ApiPayloadProvider({ children }: IApiPayloadProviderProps) {
     currentPurposeParamId: '',
   });
 
+  const memoizedDispatch = useCallback(dispatch, []);
+
+  const requestValue = useMemo(() => state.request, [state.request]);
+  const resultValue = useMemo(() => state.result, [state.result]);
+  const validateResultValue = useMemo(() => state.validateResult, [state.validateResult]);
+  const currentParamIdValue = useMemo(
+    () => state.currentPurposeParamId,
+    [state.currentPurposeParamId],
+  );
+  const presupposeParamsValue = useMemo(() => state.presupposeParams, [state.presupposeParams]);
+
   return (
-    <ApiPayloadContext.Provider value={{ state, dispatch }}>{children}</ApiPayloadContext.Provider>
+    <DispatchContext.Provider value={memoizedDispatch}>
+      <RequestContext.Provider value={requestValue}>
+        <ResultContext.Provider value={resultValue}>
+          <ValidateResultContext.Provider value={validateResultValue}>
+            <CurrentParamIdContext.Provider value={currentParamIdValue}>
+              <PresupposeParamsContext.Provider value={presupposeParamsValue}>
+                {children}
+              </PresupposeParamsContext.Provider>
+            </CurrentParamIdContext.Provider>
+          </ValidateResultContext.Provider>
+        </ResultContext.Provider>
+      </RequestContext.Provider>
+    </DispatchContext.Provider>
   );
 }
 
-// Hook to use the context
 export function useApiPayload() {
-  const context = useContext(ApiPayloadContext);
-  if (!context) {
+  const dispatch = useContext(DispatchContext);
+  if (!dispatch) {
     throw new Error('useApiPayload must be used within a ApiPayloadProvider');
   }
-  return context;
+
+  return {
+    request: useContext(RequestContext),
+    result: useContext(ResultContext),
+    validateResult: useContext(ValidateResultContext),
+    currentPurposeParamId: useContext(CurrentParamIdContext),
+    presupposeParams: useContext(PresupposeParamsContext),
+    dispatch,
+  };
 }
+
+export const useRequest = () => useContext(RequestContext);
+export const useResult = () => useContext(ResultContext);
+export const useValidateResult = () => useContext(ValidateResultContext);
+export const useCurrentParamId = () => useContext(CurrentParamIdContext);
+export const usePresupposeParams = () => useContext(PresupposeParamsContext);
+export const useApiDispatch = () => {
+  const dispatch = useContext(DispatchContext);
+  if (!dispatch) {
+    throw new Error('useApiDispatch must be used within a ApiPayloadProvider');
+  }
+  return dispatch;
+};

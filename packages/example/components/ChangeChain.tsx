@@ -18,7 +18,7 @@ export default function ChangeChain({ defaultChainId }: IChangeChainProps) {
         }
       }}
     >
-      <SelectTrigger className="w-[260px]">
+      <SelectTrigger className="w-[80px] md:w-[160px]">
         <SelectValue placeholder="Change Chain" defaultValue={defaultChainId} />
       </SelectTrigger>
       <SelectContent>

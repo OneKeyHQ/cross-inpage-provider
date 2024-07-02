@@ -100,7 +100,7 @@ function ApiExecute({
   allowCallWithoutProvider,
   onExecute,
   onValidate,
-  timeout = 15000,
+  timeout = 60 * 1000,
 }: IApiExecuteProps) {
   const { provider } = useWallet<IEthereumProvider>();
   const { execute } = useApiExecutor({ onExecute, onValidate });

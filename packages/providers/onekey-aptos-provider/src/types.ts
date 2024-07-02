@@ -1,3 +1,5 @@
+import type { Types } from 'aptos';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export type AptosAccountInfo = {
   publicKey: string;
@@ -9,7 +11,7 @@ export type TxnOptions = {
   sequence_number?: string;
   max_gas_amount?: string;
   gas_unit_price?: string;
-  gas_currency_code?: string, // TODO: 
+  gas_currency_code?: string; // TODO:
   // Unix timestamp, in seconds + 10 seconds
   expiration_timestamp_secs?: string;
 };
@@ -38,3 +40,25 @@ export interface SignMessageResponse {
   prefix: string; // Should always be APTOS
   signature: string; // The signed full message
 }
+
+export type IRawTransaction = {
+  sender: string;
+  sequence_number: bigint;
+  payload: Types.TransactionPayload;
+  max_gas_amount: bigint;
+  gas_unit_price: bigint;
+  expiration_timestamp_secs: bigint;
+  chain_id: number;
+};
+
+type SignTransactionPayloadV1 = Types.TransactionPayload;
+type SignTransactionPayloadV2 = {
+  rawTransaction: IRawTransaction;
+  feePayerAddress?: string;
+  secondarySignerAddresses: string[];
+};
+type MartianSignTransactionPayload = string;
+export type SignTransactionPayload =
+  | MartianSignTransactionPayload
+  | SignTransactionPayloadV1
+  | SignTransactionPayloadV2;

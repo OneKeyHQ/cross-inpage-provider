@@ -1,12 +1,20 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { ProviderAptosBase } from './ProviderAptosBase';
-import { AptosAccountInfo, SignMessagePayload, SignMessageResponse } from './types';
+import type {
+  AptosAccountInfo,
+  SignMessagePayload,
+  SignMessageResponse,
+  SignTransactionPayload,
+} from './types';
 import type * as TypeUtils from './type-utils';
 import { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
-import { Types } from 'aptos';
+import {  BCS, TxnBuilderTypes, type Types } from 'aptos';
+import { convertV2JsonPayloadToV1, convertV2toV1 } from './conversion';
+import { AnyRawTransaction,InputTransactionData,TransactionOptions } from '@aptos-labs/wallet-adapter-core';
+import { AccountAddress } from '@aptos-labs/ts-sdk';
 
 export type AptosProviderType = 'petra' | 'martian';
 
@@ -39,9 +47,12 @@ export type AptosRequest = {
 
   'signMessage': (payload: SignMessagePayload) => Promise<SignMessageResponse>;
 
-  'signAndSubmitTransaction': (transactions: Types.TransactionPayload) => Promise<string>;
+  'signAndSubmitTransaction': (transactions: InputTransactionData | Types.TransactionPayload) => Promise<string>;
 
-  'signTransaction': (transactions: Types.TransactionPayload) => Promise<string>;
+  'signTransaction': (transactions: SignTransactionPayload) => Promise<string>;
+
+  // V2 To V1 SignTransaction
+  'martianSignTransaction': (transactions: string) => Promise<string>;
 };
 
 type JsBridgeRequest = {
@@ -233,10 +244,54 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     return Promise.resolve(res);
   }
 
-  async signAndSubmitTransaction(transactions: any): Promise<any> {
+  async signAndSubmitTransaction(
+    payloadV1OrGenerateTxnInput: InputTransactionData | Types.TransactionPayload,
+    optionsV1?: any,
+): Promise<any> {
+    if ("data" in payloadV1OrGenerateTxnInput) {
+      const generateTxnInput = payloadV1OrGenerateTxnInput;
+      const options = {
+        expirationTimestamp: generateTxnInput.options?.expireTimestamp,
+        sender: generateTxnInput.sender
+          ? AccountAddress.from(generateTxnInput.sender).toString()
+          : undefined,
+        ...generateTxnInput.options,
+      }
+
+      // The payload arguments are not serialized, the easiest thing to do is to generate a payload instance
+      // if (areBCSArguments(generateTxnInput.data.functionArguments)) {
+      //   const network = await this.network();
+      //   const payload = await generateV1TransactionPayload(generateTxnInput.data, network);
+      //   return await this.signAndSubmitBCSTransaction(payload, options);
+      // }
+
+      // The payload arguments are serialized, we can just convert and send them over
+      const payload = convertV2JsonPayloadToV1(generateTxnInput.data)
+      const res = await this._callBridge({
+        method: 'signAndSubmitTransaction',
+        params: payload,
+      });
+      if (!res) throw web3Errors.provider.unauthorized();
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return JSON.parse(res);
+    } else if("payload" in payloadV1OrGenerateTxnInput){
+        const generateTxnInput = payloadV1OrGenerateTxnInput;
+
+        const res = await this._callBridge({
+          method: 'signAndSubmitTransaction',
+          // @ts-expect-error
+          params: generateTxnInput.payload,
+        });
+        if (!res) throw web3Errors.provider.unauthorized();
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return JSON.parse(res);
+    }
+
     const res = await this._callBridge({
       method: 'signAndSubmitTransaction',
-      params: transactions as Types.TransactionPayload,
+      params: payloadV1OrGenerateTxnInput ,
     });
     if (!res) throw web3Errors.provider.unauthorized();
 
@@ -244,10 +299,66 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     return JSON.parse(res);
   }
 
-  async signTransaction(transactions: any): Promise<any> {
+  async signTransaction(transactionOrPayload: Types.TransactionPayload | TxnBuilderTypes.TransactionPayload | AnyRawTransaction,optionsOrAsFeePayer?: TransactionOptions | boolean): Promise<any> {
+      if ('rawTransaction' in transactionOrPayload) {
+        const transaction = transactionOrPayload as AnyRawTransaction
+        const asFeePayer = (optionsOrAsFeePayer as boolean | undefined) ?? false;
+        const rawTxnV1 = convertV2toV1(transaction.rawTransaction, TxnBuilderTypes.RawTransaction);
+
+        const secondarySignersAddressesV1 = transaction.secondarySignerAddresses?.map((address:AccountAddress) =>
+          convertV2toV1(address, TxnBuilderTypes.AccountAddress),
+        );
+
+        let rawTxn:
+          | TxnBuilderTypes.RawTransaction
+          | TxnBuilderTypes.FeePayerRawTransaction
+          | TxnBuilderTypes.MultiAgentRawTransaction;
+
+        if (asFeePayer) {
+          const activeAccount = await this.account();
+          const feePayerAddressV1 = TxnBuilderTypes.AccountAddress.fromHex(activeAccount.address);
+          rawTxn = new TxnBuilderTypes.FeePayerRawTransaction(
+            rawTxnV1,
+            secondarySignersAddressesV1 ?? [],
+            feePayerAddressV1,
+          );
+        } else if (transaction.feePayerAddress) {
+          const feePayerAddressV1 = convertV2toV1(
+            transaction.feePayerAddress,
+            TxnBuilderTypes.AccountAddress,
+          );
+          rawTxn = new TxnBuilderTypes.FeePayerRawTransaction(
+            rawTxnV1,
+            secondarySignersAddressesV1 ?? [],
+            feePayerAddressV1,
+          );
+        } else if (secondarySignersAddressesV1) {
+          rawTxn = new TxnBuilderTypes.MultiAgentRawTransaction(
+            rawTxnV1,
+            secondarySignersAddressesV1,
+          );
+        } else {
+          rawTxn = rawTxnV1;
+        }
+
+        const serializer = new BCS.Serializer();
+        rawTxn.serialize(serializer)
+        const bcsTxn = serializer.getBytes().toString();
+
+        const res: string = await this._callBridge({
+          method: 'martianSignTransaction',
+          params: bcsTxn,
+        });
+
+        if (!res) throw web3Errors.provider.unauthorized();
+
+        return new Uint8Array(Buffer.from(res, 'hex'));
+      }
+
+
     const res = await this._callBridge({
       method: 'signTransaction',
-      params: transactions as Types.TransactionPayload,
+      params: transactionOrPayload as Types.TransactionPayload,
     });
     if (!res) throw web3Errors.provider.unauthorized();
 

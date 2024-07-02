@@ -117,6 +117,7 @@ class ProviderAptosMartian extends ProviderAptos {
     return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
   }
 
+  // @ts-expect-error
   async signAndSubmitTransaction(
     transaction: string | Types.TransactionPayload,
   ): Promise<string | Types.Transaction> {
@@ -137,7 +138,8 @@ class ProviderAptosMartian extends ProviderAptos {
     }
   }
 
-  async signTransaction(
+  // @ts-expect-error
+  override async signTransaction(
     transaction: string | Types.TransactionPayload,
   ): Promise<string | Uint8Array> {
     if (typeof transaction === 'string') {
@@ -265,7 +267,8 @@ class ProviderAptosMartian extends ProviderAptos {
   }
 
   async submitTransaction(transaction: Uint8Array | string): Promise<string> {
-    const txraw = typeof transaction === 'string' ?  this._convertStringToUint8Array(transaction) : transaction;
+    const txraw =
+      typeof transaction === 'string' ? this._convertStringToUint8Array(transaction) : transaction;
     return this._callMartianBridge({
       method: 'submitTransaction',
       params: Buffer.from(txraw).toString('hex'),
@@ -276,6 +279,7 @@ class ProviderAptosMartian extends ProviderAptos {
     start?: AnyNumber;
     limit?: number;
   }): Promise<Types.Transaction[]> {
+    // @ts-expect-error
     return this._callMartianBridge({
       method: 'getTransactions',
       params: {
@@ -286,6 +290,7 @@ class ProviderAptosMartian extends ProviderAptos {
   }
 
   async getTransaction(txnHash: string): Promise<Types.Transaction> {
+    // @ts-expect-error
     return this._callMartianBridge({
       method: 'getTransaction',
       params: txnHash,
@@ -296,6 +301,7 @@ class ProviderAptosMartian extends ProviderAptos {
     accountAddress: MaybeHexString,
     query?: { start?: AnyNumber; limit?: number },
   ): Promise<Types.Transaction[]> {
+    // @ts-expect-error
     return this._callMartianBridge({
       method: 'getAccountTransactions',
       // @ts-expect-error

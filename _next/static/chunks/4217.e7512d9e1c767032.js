@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[4217],{54217:function(a,e,s){a.exports=s.p+"static/media/cardano_multiplatform_lib_bg.6fce7641.wasm"}}]);

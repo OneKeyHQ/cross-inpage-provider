@@ -166,6 +166,7 @@ function ApiExecuteValidate({ onExecute, onValidate }: IApiExecuteProps) {
   );
 
   const handleValidate = useCallback(async () => {
+    handleSetValidateResult('Validating...');
     const { validation, error } = await validate(request, result);
     if (error) {
       handleSetValidateResult(`Error: ${error}`);

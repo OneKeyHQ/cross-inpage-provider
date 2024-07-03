@@ -118,7 +118,7 @@ function Example() {
 
         <ApiPayload
           title="signPersonalMessage"
-          description="签名消息"
+          description="签名消息（SDK 验证依赖网络可能会失败，可以刷新网页重试 或 稍后重试，问题上下文 https://github.com/MystenLabs/sui/issues/17912#issuecomment-2166621747）"
           presupposeParams={params.signPersonalMessage}
           onExecute={async (request: string) => {
             const res = await signPersonalMessage({

@@ -30,6 +30,7 @@ function toPlainError(errorInfo: IErrorInfo) {
     className: errorInfo.className,
     autoToast: errorInfo.autoToast,
     requestId: errorInfo.requestId,
+    toastId: errorInfo.toastId,
   };
 }
 
@@ -59,6 +60,7 @@ type IErrorInfo = Error & {
   className?: string;
   autoToast?: boolean;
   requestId?: string;
+  toastId?: string;
 };
 
 const BRIDGE_EVENTS = {

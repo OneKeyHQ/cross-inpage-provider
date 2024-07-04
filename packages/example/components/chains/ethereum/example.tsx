@@ -149,7 +149,7 @@ export default function Example() {
     };
   }, [account, provider, setAccount]);
 
-  const getTokenTransferFrom = (chainId: string | undefined) => {
+  const getTokenTransferFrom = (chainId: string | undefined, approve: boolean = false) => {
     const tokens: {
       name: string;
       address: string;
@@ -237,6 +237,20 @@ export default function Example() {
           defaultValue={account?.address ?? ''}
         />
         <Input label="金额" type="number" name="amount" defaultValue="10000" />
+
+        {approve && (
+          <>
+            <div>
+              <input id="max_approve" name="maxApprove" type="checkbox" />
+              <label htmlFor="max_approve">无限授权</label>
+            </div>
+            <div>
+              <input id="mock_uniswap" name="mockUniSwap" type="checkbox" />
+              <label htmlFor="mock_uniswap">模拟 UniSwap（不传 Value）</label>
+            </div>
+          </>
+        )}
+
         <select name="tokenAddress" className="select">
           <option selected>选择 Token</option>
           {tokens.map((token) => (
@@ -645,13 +659,15 @@ export default function Example() {
           title="eth_sendTransaction"
           description="授权 ERC20 Token，金额为 0 时表示取消授权"
           onExecute={requestSendTransactionCommon}
-          generateRequestFrom={() => getTokenTransferFrom(account?.chainId)}
+          generateRequestFrom={() => getTokenTransferFrom(account?.chainId, true)}
           // @ts-expect-error
           onGenerateRequest={(fromData: Record<string, any>) => {
             const from = account?.address ?? '';
             const to = fromData.toAddress ?? from;
             const amount = fromData.amount;
             const tokenAddress = fromData.tokenAddress;
+            const maxApprove = fromData.maxApprove;
+            const mockUniSwap = fromData.mockUniSwap;
 
             if (!amount) {
               return 'Amount is required';
@@ -660,12 +676,30 @@ export default function Example() {
               return 'Token address is required';
             }
 
+            // maxApprove
+            let approveAmount;
+            if (maxApprove) {
+              // 使用最大值 2^256 - 1 表示无限额度
+              approveAmount = 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+            } else {
+              approveAmount = BigInt(amount).toString(16).padStart(64, '0');
+            }
+
+            const data = `0x095ea7b3${to.substring(2).padStart(64, '0')}${approveAmount}`;
+
+            if (mockUniSwap) {
+              return JSON.stringify({
+                from: from,
+                to: tokenAddress,
+                data,
+                gas: '0xc049',
+              });
+            }
+
             return JSON.stringify({
               from: from,
               to: tokenAddress,
-              data: `0x095ea7b3${to.substring(2).padStart(64, '0')}${BigInt(amount)
-                .toString(16)
-                .padStart(64, '0')}`,
+              data,
               value: '0x0',
               gasLimit: '0x186a0',
               gasPrice: '0xbebc200',

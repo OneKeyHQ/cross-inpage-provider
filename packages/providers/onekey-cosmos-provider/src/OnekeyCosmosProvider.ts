@@ -206,7 +206,7 @@ function isWalletEventMethodMatch({ method, name }: { method: string; name: stri
   return method === `wallet_events_${name}`;
 }
 
-const USING_MESSAGE_SITES = ['https://wallet.keplr.app', 'https://testnet.keplr.app', 'https://trade.levana.finance'];
+const USING_MESSAGE_SITES = ['https://wallet.keplr.app', 'https://testnet.keplr.app', 'https://trade.levana.finance', 'https://gov.levana.finance'];
 
 class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
   public readonly mode: KeplrMode = 'extension';

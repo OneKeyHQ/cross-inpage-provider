@@ -6,7 +6,7 @@ declare global {
     solflare: any;
     glowSolana: any;
     solana: any;
-    starcoin: any;
+    // starcoin: any;
     aptos: any;
     martian: any;
     conflux: any;
@@ -43,7 +43,7 @@ export enum IInjectedProviderNames {
   conflux = 'conflux',
   tron = 'tron',
   solana = 'solana',
-  starcoin = 'starcoin',
+  // starcoin = 'starcoin',
   sollet = 'sollet',
   near = 'near',
   aptos = 'aptos',

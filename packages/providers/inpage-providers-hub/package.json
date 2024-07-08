@@ -44,7 +44,6 @@
     "@onekeyfe/onekey-private-external-account-provider": "2.0.2",
     "@onekeyfe/onekey-private-provider": "2.0.2",
     "@onekeyfe/onekey-solana-provider": "2.0.2",
-    "@onekeyfe/onekey-starcoin-provider": "2.0.1",
     "@onekeyfe/onekey-sui-provider": "2.0.2",
     "@onekeyfe/onekey-tron-provider": "2.0.2",
     "@onekeyfe/onekey-webln-provider": "2.0.2",

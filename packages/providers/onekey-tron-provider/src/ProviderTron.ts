@@ -165,11 +165,8 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
         get() {
           if (!self._connected) {
             self._log.warn(
-              'OneKey: We recommend that DApp developers use tronLink.request({method: "tron_requestAccounts"}) to request users’ account information at the earliest time possible in order to get a complete TronWeb injection.',
+              'OneKey: We recommend that DApp developers use $onekey.tron.request({method: "tron_requestAccounts"}) to request users’ account information at the earliest time possible in order to get a complete TronWeb injection.',
             );
-            void self.request({
-              method: 'tron_requestAccounts',
-            });
           }
           return self._defaultAddress;
         },

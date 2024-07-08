@@ -4,12 +4,12 @@ import { JsBridgeBase } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderEthereum, shimWeb3, registerEIP6963Provider } from '@onekeyfe/onekey-eth-provider';
 import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
 import { ProviderSolana, registerSolanaWallet, WalletIcon } from '@onekeyfe/onekey-solana-provider';
-import { ProviderStarcoin } from '@onekeyfe/onekey-starcoin-provider';
+// import { ProviderStarcoin } from '@onekeyfe/onekey-starcoin-provider';
 import { ProviderAptos, ProviderAptosMartian } from '@onekeyfe/onekey-aptos-provider';
 import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
 import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
 import { ProviderCardano, defineWindowCardanoProperty } from '@onekeyfe/onekey-cardano-provider';
-import { ProviderPrivateExternalAccount } from '@onekeyfe/onekey-private-external-account-provider';
+// import { ProviderPrivateExternalAccount } from '@onekeyfe/onekey-private-external-account-provider';
 import { ProviderCosmos } from '@onekeyfe/onekey-cosmos-provider';
 import { ProviderPolkadot, registerPolkadot } from '@onekeyfe/onekey-polkadot-provider';
 import {
@@ -32,7 +32,7 @@ export type IWindowOneKeyHub = {
   ethereum?: ProviderEthereum;
   solana?: ProviderSolana;
   phantom?: { solana?: ProviderSolana };
-  starcoin?: any;
+  // starcoin?: any;
   aptos?: ProviderAptos;
   petra?: ProviderAptos;
   martian?: ProviderAptosMartian;
@@ -77,9 +77,9 @@ function injectWeb3Provider(): unknown {
     bridge,
   });
 
-  const starcoin = new ProviderStarcoin({
-    bridge,
-  });
+  // const starcoin = new ProviderStarcoin({
+  //   bridge,
+  // });
 
   const martian = new ProviderAptosMartian({
     bridge,
@@ -122,17 +122,17 @@ function injectWeb3Provider(): unknown {
 
   const algorand = new ProviderAlgo({ bridge });
 
-  const $privateExternalAccount = new ProviderPrivateExternalAccount({ bridge });
+  // const $privateExternalAccount = new ProviderPrivateExternalAccount({ bridge });
 
   // providerHub
   const $onekey = {
     ...window.$onekey,
     jsBridge: bridge,
     $private,
-    $privateExternalAccount,
+    // $privateExternalAccount,
     ethereum,
     solana,
-    starcoin,
+    // starcoin,
     aptos: martian,
     conflux,
     tron,
@@ -177,7 +177,7 @@ function injectWeb3Provider(): unknown {
 
   defineWindowProperty('solana', solana);
   defineWindowProperty('phantom', { solana });
-  defineWindowProperty('starcoin', starcoin);
+  // defineWindowProperty('starcoin', starcoin);
   defineWindowProperty('aptos', martian);
   defineWindowProperty('petra', martian, { enumerable: true });
   defineWindowProperty('martian', martianProxy, { enumerable: true });

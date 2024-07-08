@@ -67,7 +67,7 @@ test.describe('Connect Button Hack', () => {
             }
             const walletId = createWalletId(provider as IInjectedProviderNames, updatedName);
             const locator = page.locator(walletId.walletIdSelector).first();
-            const existed = await locator.evaluate((el) => !!el && el.tagName === 'IMG');
+            const existed = await locator.evaluate((el) => !!el );
             console.log('[dbg]: walletId found existed', walletId.walletId, existed);
             expect(existed).toBeTruthy();
           }

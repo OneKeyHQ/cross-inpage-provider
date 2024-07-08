@@ -48,8 +48,8 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                 );
                 let result: FindResultType | null = null;
                 if (update) {
-                  const newIconElement = update(wallet);
-                  newIconElement && walletId.updateFlag(newIconElement);
+                  const ele = update(wallet);
+                  ele && walletId.updateFlag(ele);
                   continue;
                 } else if (findIconAndName) {
                   result = findIconAndName.call(null, wallet);

@@ -18,6 +18,10 @@ const commonConfig = {
       // '@solana/web3.js': path.resolve(__dirname, 'development/resolveAlias/@solana-web3'),
     },
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.d.ts'],
+    fallback: {
+      'crypto': false,
+      'crypto-browserify': require.resolve('crypto-browserify'),
+    },
   },
   module: {
     rules: [

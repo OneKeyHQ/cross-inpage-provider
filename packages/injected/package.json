@@ -48,6 +48,7 @@
     "@onekeyfe/extension-bridge-injected": "2.0.2",
     "@onekeyfe/inpage-providers-hub": "2.0.2",
     "@onekeyfe/native-bridge-injected": "2.0.2",
-    "buffer": "^6.0.3"
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.0"
   }
 }

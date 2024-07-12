@@ -19,7 +19,7 @@ export const getWalletListByBtn = (anyButtonSelector: Selector) => {
 };
 export const getConnectWalletModalByTitle = (
   modalSelector: Selector | Selector[],
-  title: string,
+  title: string | string[],
   filter?: (modal: HTMLElement) => boolean,
 ) => {
   const selectors = arrayify(modalSelector);
@@ -27,9 +27,12 @@ export const getConnectWalletModalByTitle = (
   for (const selector of selectors) {
     eles.push(...Array.from(document.querySelectorAll<HTMLElement>(selector)));
   }
+  const titles = arrayify(title);
   const res: HTMLElement[] = [];
   for (const ele of eles) {
-    if (isVisible(ele) && filter ? filter(ele) : true && ele.innerText.includes(title)) {
+    if (
+      isVisible(ele) && filter ? filter(ele) : true && titles.some((t) => ele.innerText.includes(t))
+    ) {
       res.push(ele);
     }
   }

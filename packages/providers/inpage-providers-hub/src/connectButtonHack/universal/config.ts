@@ -154,7 +154,7 @@ export type WalletInfo = {
   /**
    * used when there is only one icon or name element(not both) and other special cases
    */
-  update?: (this: void, wallet: WalletInfo) => HTMLImageElement | null;
+  update?: (this: void, wallet: WalletInfo) => HTMLElement | null;
 
   /**
    * skip testing
@@ -929,10 +929,10 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['metamask'],
           findIconAndName({ name }) {
-            const modal = getConnectWalletModalByTitle(
-              'div.chakra-modal__content-container',
+            const modal = getConnectWalletModalByTitle('div.chakra-modal__content-container', [
               'Connect Wallet',
-            );
+              '链接钱包',
+            ]);
             return (
               modal &&
               findIconAndNameByIcon(
@@ -947,10 +947,10 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['walletconnect'],
           findIconAndName({ name }) {
-            const modal = getConnectWalletModalByTitle(
-              'div.chakra-modal__content-container',
+            const modal = getConnectWalletModalByTitle('div.chakra-modal__content-container', [
               'Connect Wallet',
-            );
+              '链接钱包',
+            ]);
             return (
               modal &&
               findIconAndNameByIcon(
@@ -968,7 +968,10 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['polkadot'],
           name: /^polkadot\.js$/i,
           container: () =>
-            getConnectWalletModalByTitle('div.chakra-modal__content-container', 'Connect Wallet'),
+            getConnectWalletModalByTitle('div.chakra-modal__content-container', [
+              'Connect Wallet',
+              '链接钱包',
+            ]),
         },
       ],
     },
@@ -1335,28 +1338,11 @@ export const sitesConfig: SitesInfo[] = [
       [IInjectedProviderNames.ethereum]: [
         {
           ...basicWalletInfo['metamask'],
-          findIconAndName({ name }) {
-            const modal = getConnectWalletModalByTitle(
-              '#rlogin-connect-modal',
-              'Connect your wallet',
-            );
-            return (
-              modal && findIconAndNameByIcon('img[alt="MetaMask"]', 'auto-search-text', name, modal)
-            );
-          },
+          container: '#rlogin-connect-modal',
         },
         {
           ...basicWalletInfo['walletconnect'],
-          findIconAndName({ name }) {
-            const modal = getConnectWalletModalByTitle(
-              '#rlogin-connect-modal',
-              'Connect your wallet',
-            );
-            return (
-              modal &&
-              findIconAndNameByIcon('img[alt="WalletConnect"]', 'auto-search-text', name, modal)
-            );
-          },
+          container: '#rlogin-connect-modal',
         },
       ],
     },
@@ -1796,8 +1782,11 @@ export const sitesConfig: SitesInfo[] = [
             const modal = document.querySelector('#wallet-info-dropdown ul') as HTMLElement;
             const textNode = findWalletTextByParent(modal, name, [isClickable]);
             const newTextNode = textNode && replaceText(textNode, updatedName);
-            newTextNode?.parentElement && makeTextEllipse(newTextNode?.parentElement);
-            return null;
+            if (!newTextNode) {
+              return null;
+            }
+            newTextNode.parentElement && makeTextEllipse(newTextNode.parentElement);
+            return newTextNode.parentElement;
           },
         },
       ],
@@ -1889,7 +1878,7 @@ export const sitesConfig: SitesInfo[] = [
             const text = button && findWalletTextByParent(button, name, []);
             text && replaceText(text, updatedName);
             button && (button.style.backgroundImage = `url(${updatedIcon})`);
-            return null;
+            return button;
           },
         },
       ],
@@ -2042,7 +2031,7 @@ export const sitesConfig: SitesInfo[] = [
     },
   },
   {
-    urls: ['pancakeswap.finance', 'www.pancakeswap.finance'],
+    urls: ['pancakeswap.finance', 'www.pancakeswap.finance', 'aptos.pancakeswap.finance'],
     skip: {
       mobile: true, //temp skip for lack walletconnect
     },
@@ -2073,6 +2062,42 @@ export const sitesConfig: SitesInfo[] = [
               modal &&
               findIconAndNameByIcon(
                 'img[src*="wallets/walletconnect.png"]',
+                'auto-search-text',
+                name,
+                modal,
+                { text: [], icon: [] },
+                5,
+              )
+            );
+          },
+        },
+      ],
+      [IInjectedProviderNames.aptos]: [
+        {
+          ...basicWalletInfo['petra'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('#portal-root', 'Connect Wallet');
+            return (
+              modal &&
+              findIconAndNameByIcon(
+                'img[src*="wallets/petra.png"]',
+                'auto-search-text',
+                name,
+                modal,
+                { text: [], icon: [] },
+                5,
+              )
+            );
+          },
+        },
+        {
+          ...basicWalletInfo['martian'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('#portal-root', 'Connect Wallet');
+            return (
+              modal &&
+              findIconAndNameByIcon(
+                'img[src*="wallets/martian.png"]',
                 'auto-search-text',
                 name,
                 modal,
@@ -2369,7 +2394,10 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['metamask'],
           findIconAndName({ name }) {
-            const modal = getConnectWalletModalByTitle('div[role="dialog"]', 'Connect Wallet');
+            const modal = getConnectWalletModalByTitle('div[role="dialog"]', [
+              'Connect Wallet',
+              '连接钱包',
+            ]);
             return (
               modal &&
               findIconAndNameByIcon(
@@ -2389,7 +2417,10 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['keplr'],
           findIconAndName({ name }) {
-            const modal = getConnectWalletModalByTitle('div[role="dialog"]', 'Connect Wallet');
+            const modal = getConnectWalletModalByTitle('div[role="dialog"]', [
+              'Connect Wallet',
+              '连接钱包',
+            ]);
             return (
               modal &&
               findIconAndNameByIcon(
@@ -2518,7 +2549,10 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['metamask'],
           findIconAndName({ name }) {
-            const modal = getConnectWalletModalByTitle('div.connect-options', 'Select Wallet');
+            const modal = getConnectWalletModalByTitle('div.connect-options', [
+              'Select Wallet',
+              '选择钱包',
+            ]);
             return (
               modal &&
               findIconAndNameByIcon('img.logo[alt="MetaMask"]', 'auto-search-text', name, modal)
@@ -2528,7 +2562,10 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['walletconnect'],
           findIconAndName({ name }) {
-            const modal = getConnectWalletModalByTitle('div.connect-options', 'Select Wallet');
+            const modal = getConnectWalletModalByTitle('div.connect-options', [
+              'Select Wallet',
+              '选择钱包',
+            ]);
             return (
               modal &&
               findIconAndNameByIcon(
@@ -2730,7 +2767,7 @@ export const sitesConfig: SitesInfo[] = [
           findIconAndName({ name }) {
             const modal = getConnectWalletModalByTitle(
               'div.MuiDrawer-paper.MuiDrawer-paperAnchorRight',
-              'CONNECT A WALLET',
+              ['CONNECT A WALLET', '连接钱包', 'ウォレットを接続'],
             );
             if (!modal) {
               return null;
@@ -2755,7 +2792,7 @@ export const sitesConfig: SitesInfo[] = [
           findIconAndName({ name }) {
             const modal = getConnectWalletModalByTitle(
               'div.MuiDrawer-paper.MuiDrawer-paperAnchorRight',
-              'CONNECT A WALLET',
+              ['CONNECT A WALLET', '连接钱包', 'ウォレットを接続'],
             );
             if (!modal) {
               return null;
@@ -3164,6 +3201,23 @@ export const sitesConfig: SitesInfo[] = [
               modal &&
               findIconAndNameByIcon(
                 'img[src*="static/media/metamask"]',
+                'auto-search-text',
+                name,
+                modal,
+              )
+            );
+          },
+        },
+      ],
+      [IInjectedProviderNames.tron]: [
+        {
+          ...basicWalletInfo['tronlink'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('div.ant-modal-content', 'Connect Wallet');
+            return (
+              modal &&
+              findIconAndNameByIcon(
+                'img[src*="static/media/tronlink"]',
                 'auto-search-text',
                 name,
                 modal,
@@ -3809,7 +3863,17 @@ export const sitesConfig: SitesInfo[] = [
             );
             return (
               modal &&
-              findIconAndNameByIcon('img[src*="metamask"]', 'auto-search-text', name, modal)
+              findIconAndNameByIcon(
+                'img[src*="metamask"]',
+                'auto-search-text',
+                name,
+                modal,
+                {
+                  'icon': [isWalletIconLessEqualThan],
+                  'text': [],
+                },
+                5,
+              )
             );
           },
         },
@@ -3929,6 +3993,29 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['phantom'],
           container: () =>
             getConnectWalletModalByTitle('.goki-walletkit-modal-wrapper', 'Select your wallet'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['www.erisprotocol.com'],
+    testUrls: ['www.erisprotocol.com/terra/amp-compounder'],
+    walletsForProvider: {
+      [IInjectedProviderNames.cosmos]: [
+        {
+          ...basicWalletInfo['keplr'],
+          name: /^Keplr$/,
+          update({ name, updatedName }) {
+            const modal = getConnectWalletModalByTitle('tui-dialog', 'Connected Wallets');
+            if (!modal) {
+              return null;
+            }
+            const text = findWalletTextByParent(modal, name, []);
+            if (!text) {
+              return null;
+            }
+            return replaceText(text, updatedName)?.parentElement;
+          },
         },
       ],
     },

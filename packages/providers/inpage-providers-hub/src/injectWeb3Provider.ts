@@ -64,7 +64,7 @@ function injectWeb3Provider(): unknown {
   if (!window?.$onekey?.jsBridge) {
     throw new Error('OneKey jsBridge not found.');
   }
-  
+
   const bridge: JsBridgeBase = window?.$onekey?.jsBridge;
 
   const ethereum = new ProviderEthereum({
@@ -185,7 +185,9 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('tronLink', tron);
   defineWindowProperty('suiWallet', sui);
   defineWindowProperty('unisat', btc);
-  defineWindowProperty('btcwallet', btcWallet);
+  defineWindowProperty('btcwallet', btcWallet, {
+    disablePlatform: ['extension'],
+  });
   defineWindowProperty('algorand', algorand);
   defineWindowProperty('exodus', {
     algorand,

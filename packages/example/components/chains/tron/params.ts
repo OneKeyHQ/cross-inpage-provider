@@ -59,4 +59,48 @@ export default {
       }),
     },
   ],
+  freezeBalanceV2: (address: string) => [
+    {
+      id: 'freezeBalanceV2-1',
+      name: 'FreezeBalanceV2 Bandwidth',
+      value: JSON.stringify({
+        amount: 1,
+        resource: 'BANDWIDTH',
+        address,
+        options: {},
+      }),
+    },
+    {
+      id: 'freezeBalanceV2-2',
+      name: 'FreezeBalanceV2 ENERGY',
+      value: JSON.stringify({
+        amount: 1,
+        resource: 'ENERGY',
+        address,
+        options: {},
+      }),
+    },
+  ],
+  unfreezeBalanceV2: (address: string) => [
+    {
+      id: 'unfreezeBalanceV2-1',
+      name: 'unfreezeBalanceV2 Bandwidth',
+      value: JSON.stringify({
+        amount: 1,
+        resource: 'BANDWIDTH',
+        address,
+        options: {},
+      }),
+    },
+    {
+      id: 'unfreezeBalanceV2-2',
+      name: 'unfreezeBalanceV2 ENERGY',
+      value: JSON.stringify({
+        amount: 1,
+        resource: 'ENERGY',
+        address,
+        options: {},
+      }),
+    },
+  ],
 };

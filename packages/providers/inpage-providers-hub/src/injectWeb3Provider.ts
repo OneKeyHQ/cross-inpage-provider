@@ -186,7 +186,7 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('suiWallet', sui);
   defineWindowProperty('unisat', btc);
   defineWindowProperty('btcwallet', btcWallet, {
-    disablePlatform: ['extension'],
+    disablePlatform: ['extension', 'desktop'],
   });
   defineWindowProperty('algorand', algorand);
   defineWindowProperty('exodus', {

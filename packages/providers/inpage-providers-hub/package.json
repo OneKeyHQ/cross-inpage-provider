@@ -34,6 +34,7 @@
     "@onekeyfe/cross-inpage-provider-types": "2.0.6",
     "@onekeyfe/onekey-algo-provider": "2.0.6",
     "@onekeyfe/onekey-aptos-provider": "2.0.6",
+    "@onekeyfe/onekey-scdo-provider": "2.0.6",
     "@onekeyfe/onekey-btc-provider": "2.0.6",
     "@onekeyfe/onekey-cardano-provider": "2.0.6",
     "@onekeyfe/onekey-conflux-provider": "2.0.6",

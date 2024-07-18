@@ -18,6 +18,7 @@ import {
 } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import { ProviderWebln } from '@onekeyfe/onekey-webln-provider';
+import { ProviderScdo } from '@onekeyfe/onekey-scdo-provider';
 import { ProviderNostr } from '@onekeyfe/onekey-nostr-provider';
 import { ProviderBtc, ProviderBtcWallet } from '@onekeyfe/onekey-btc-provider';
 import { ProviderAlgo } from '@onekeyfe/onekey-algo-provider';
@@ -43,6 +44,7 @@ export type IWindowOneKeyHub = {
   nostr?: ProviderNostr;
   unisat?: ProviderBtc;
   btcwallet?: ProviderBtcWallet;
+  scdo?: ProviderScdo;
   $private?: ProviderPrivate;
   $walletInfo?: {
     buildNumber: string;
@@ -122,6 +124,8 @@ function injectWeb3Provider(): unknown {
 
   const algorand = new ProviderAlgo({ bridge });
 
+  const scdo = new ProviderScdo({ bridge });
+
   // const $privateExternalAccount = new ProviderPrivateExternalAccount({ bridge });
 
   // providerHub
@@ -140,6 +144,7 @@ function injectWeb3Provider(): unknown {
     sui,
     cardano,
     cosmos,
+    scdo,
     webln,
     nostr,
     btc,
@@ -185,6 +190,7 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('tronLink', tron);
   defineWindowProperty('suiWallet', sui);
   defineWindowProperty('unisat', btc);
+  defineWindowProperty('scdo', scdo);
   defineWindowProperty('algorand', algorand);
   defineWindowProperty('exodus', {
     algorand,

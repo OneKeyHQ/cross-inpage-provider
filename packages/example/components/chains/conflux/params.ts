@@ -1,4 +1,4 @@
-const chainIdInt = 1;
+const chainIdInt = 1029;
 
 export default {
   'requestPermissions': [

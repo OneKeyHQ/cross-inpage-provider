@@ -348,6 +348,62 @@ export default function Example() {
             return JSON.stringify(broastTx);
           }}
         />
+
+        <ApiPayload
+          title="sign (FreezeBalanceV2)"
+          description="冻结余额 V2"
+          presupposeParams={params.freezeBalanceV2(receiveAddress ?? '')}
+          onExecute={async (request: string) => {
+            checkReceiveAddress();
+
+            const { amount, resource, address, options } = JSON.parse(request);
+
+            const tronWeb = provider.tronWeb;
+            const tx = await tronWeb.transactionBuilder.freezeBalanceV2(
+              amount,
+              resource,
+              address,
+              options,
+            );
+            const signedTx = await tronWeb.trx.sign(tx.transaction);
+            const broastTx = await tronWeb.trx.sendRawTransaction(signedTx);
+            return JSON.stringify(broastTx);
+          }}
+        />
+        <ApiPayload
+          title="sign (CancelUnfreezeBalanceV2)"
+          description="取消等待中的质押"
+          onExecute={async (request: string) => {
+            checkReceiveAddress();
+            const tronWeb = provider.tronWeb;
+            const tx = await tronWeb.transactionBuilder.cancelUnfreezeBalanceV2(
+              tronWeb.defaultAddress.base58,
+            );
+            const signedTx = await tronWeb.trx.sign(tx.transaction);
+            const broastTx = await tronWeb.trx.sendRawTransaction(signedTx);
+            return JSON.stringify(broastTx);
+          }}
+        />
+        <ApiPayload
+          title="sign (UnfreezeBalanceV2)"
+          description="解除质押资源 V2"
+          presupposeParams={params.unfreezeBalanceV2(receiveAddress ?? '')}
+          onExecute={async (request: string) => {
+            checkReceiveAddress();
+
+            const { amount, resource, address, options } = JSON.parse(request);
+            const tronWeb = provider.tronWeb;
+            const tx = await tronWeb.transactionBuilder.unfreezeBalanceV2(
+              amount,
+              resource,
+              address,
+              options,
+            );
+            const signedTx = await tronWeb.trx.sign(tx.transaction);
+            const broastTx = await tronWeb.trx.sendRawTransaction(signedTx);
+            return JSON.stringify(broastTx);
+          }}
+        />
       </ApiGroup>
       <DappList dapps={dapps} />
     </>

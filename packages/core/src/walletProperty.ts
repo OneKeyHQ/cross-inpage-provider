@@ -17,6 +17,34 @@ export enum ISpecialPropertyProviderNamesReflection {
   polkadot = 'polkadot-js',
 }
 
+export type IPlatformType = 'native' | 'extension' | 'web' | 'desktop';
+
+export function checkPlatformEnable(disablePlatform?: IPlatformType[]) {
+  const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY_V5);
+  const walletInfoLocal = walletInfoLocalStr ? JSON.parse(walletInfoLocalStr) : null;
+
+  if (!walletInfoLocal) {
+    return true;
+  }
+  if (disablePlatform) {
+    for (const platform of disablePlatform) {
+      if (platform === 'web' && walletInfoLocal?.platformEnv?.isWeb) {
+        return false;
+      }
+      if (platform === 'desktop' && walletInfoLocal?.platformEnv?.isDesktop) {
+        return false;
+      }
+      if (platform === 'extension' && walletInfoLocal?.platformEnv?.isExtension) {
+        return false;
+      }
+      if (platform === 'native' && walletInfoLocal?.platformEnv?.isNative) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 export function checkWalletSwitchEnable() {
   try {
     const walletInfoLocalStr = localStorage.getItem(WALLET_INFO_LOACAL_KEY_V5);
@@ -26,21 +54,21 @@ export function checkWalletSwitchEnable() {
     }
     if (!walletInfoLocal?.isDefaultWallet) {
       if (process.env.NODE_ENV !== 'production') {
-        console.log('OneKey is not default wallet')
+        console.log('OneKey is not default wallet');
       }
-      return false
+      return false;
     }
     if (Array.isArray(walletInfoLocal?.excludedDappList)) {
       const currentOrigin = window.location.origin;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       if (walletInfoLocal.excludedDappList.includes(currentOrigin)) {
         if (process.env.NODE_ENV !== 'production') {
-          console.log('skip inject web3 provider: ', currentOrigin)
+          console.log('skip inject web3 provider: ', currentOrigin);
         }
         return false;
       }
     }
-    return true
+    return true;
   } catch (e) {
     commonLogger.warn(e);
   }
@@ -64,8 +92,10 @@ export function defineWindowProperty(
   provider: unknown,
   options?: {
     enumerable?: boolean;
+    disablePlatform?: IPlatformType[];
   },
 ) {
+  if (!checkPlatformEnable(options?.disablePlatform)) return;
   if (!checkWalletSwitchEnable()) return;
   const enable = checkEnableDefineProperty(property);
   const proxyProvider = new Proxy(provider as object, {

@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/inpage-providers-hub",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -30,23 +30,23 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "2.0.3",
-    "@onekeyfe/cross-inpage-provider-types": "2.0.3",
-    "@onekeyfe/onekey-algo-provider": "2.0.3",
-    "@onekeyfe/onekey-aptos-provider": "2.0.3",
-    "@onekeyfe/onekey-btc-provider": "2.0.3",
-    "@onekeyfe/onekey-cardano-provider": "2.0.3",
-    "@onekeyfe/onekey-conflux-provider": "2.0.3",
-    "@onekeyfe/onekey-cosmos-provider": "2.0.3",
-    "@onekeyfe/onekey-eth-provider": "2.0.3",
-    "@onekeyfe/onekey-nostr-provider": "2.0.3",
-    "@onekeyfe/onekey-polkadot-provider": "2.0.3",
-    "@onekeyfe/onekey-private-external-account-provider": "2.0.3",
-    "@onekeyfe/onekey-private-provider": "2.0.3",
-    "@onekeyfe/onekey-solana-provider": "2.0.3",
-    "@onekeyfe/onekey-sui-provider": "2.0.3",
-    "@onekeyfe/onekey-tron-provider": "2.0.3",
-    "@onekeyfe/onekey-webln-provider": "2.0.3",
+    "@onekeyfe/cross-inpage-provider-core": "2.0.4",
+    "@onekeyfe/cross-inpage-provider-types": "2.0.4",
+    "@onekeyfe/onekey-algo-provider": "2.0.4",
+    "@onekeyfe/onekey-aptos-provider": "2.0.4",
+    "@onekeyfe/onekey-btc-provider": "2.0.4",
+    "@onekeyfe/onekey-cardano-provider": "2.0.4",
+    "@onekeyfe/onekey-conflux-provider": "2.0.4",
+    "@onekeyfe/onekey-cosmos-provider": "2.0.4",
+    "@onekeyfe/onekey-eth-provider": "2.0.4",
+    "@onekeyfe/onekey-nostr-provider": "2.0.4",
+    "@onekeyfe/onekey-polkadot-provider": "2.0.4",
+    "@onekeyfe/onekey-private-external-account-provider": "2.0.4",
+    "@onekeyfe/onekey-private-provider": "2.0.4",
+    "@onekeyfe/onekey-solana-provider": "2.0.4",
+    "@onekeyfe/onekey-sui-provider": "2.0.4",
+    "@onekeyfe/onekey-tron-provider": "2.0.4",
+    "@onekeyfe/onekey-webln-provider": "2.0.4",
     "web3": "^1.7.3"
   },
   "devDependencies": {

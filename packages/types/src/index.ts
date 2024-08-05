@@ -16,6 +16,7 @@ declare global {
     suiWallet: any;
     cardano: any;
     scdo: any;
+    ton: any;
     keplr: any;
     webln: any;
     nostr: any;
@@ -55,6 +56,7 @@ export enum IInjectedProviderNames {
   cosmos = 'cosmos',
   polkadot = 'polkadot',
   scdo = 'scdo',
+  ton = 'ton',
   webln = 'webln',
   nostr = 'nostr',
   $private = '$private',

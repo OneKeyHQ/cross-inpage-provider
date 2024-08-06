@@ -17,6 +17,7 @@ export type TonRequest = {
   'disconnect': () => Promise<void>;
   'sendTransaction': (payload: TransactionPayload) => Promise<string>;
   'signData': (payload: SignDataPayload) => Promise<SignDataResult>;
+  'getDeviceInfo': () => Promise<Partial<DeviceInfo>>;
 };
 
 type JsBridgeRequest = {
@@ -53,7 +54,16 @@ function isWalletEventMethodMatch({ method, name }: { method: string; name: stri
 export class ProviderTon extends ProviderTonBase implements IProviderTon {
   private _accountInfo: AccountInfo | null = null;
 
-  deviceInfo: DeviceInfo;
+  deviceInfo: DeviceInfo = {
+    platform: this._getPlatform(),
+    appName: 'OneKey',
+    appVersion: '5.0.0',
+    maxProtocolVersion: 2,
+    features: [
+      { name: 'SendTransaction', maxMessages: 4 },
+      { name: 'SignData' },
+    ],
+  };
   walletInfo?: WalletInfo;
   protocolVersion = 2;
   isWalletBrowser = true;
@@ -64,7 +74,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
       bridge: props.bridge || getOrCreateExtInjectedJsBridge({ timeout: props.timeout }),
     });
 
-    this.deviceInfo = this._getDeviceInfo();
+    void this._getDeviceInfo();
 
     this._registerEvents();
   }
@@ -77,33 +87,31 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
       iosPlatforms = ['iPhone', 'iPad'];
     let os = 'windows';
 
-  if (macosPlatforms.indexOf(platform) !== -1) {
-    os = 'mac';
-  } else if (iosPlatforms.indexOf(platform) !== -1) {
-    if (platform === 'iPhone') {
-      os = 'iphone';
-    } else {
-      os = 'ipad';
+    if (macosPlatforms.indexOf(platform) !== -1) {
+      os = 'mac';
+    } else if (iosPlatforms.indexOf(platform) !== -1) {
+      if (platform === 'iPhone') {
+        os = 'iphone';
+      } else {
+        os = 'ipad';
+      }
+    } else if (windowsPlatforms.indexOf(platform) !== -1) {
+      os = 'windows';
+    } else if (/Android/.test(userAgent)) {
+      os = 'android';
+    } else if (!os && /Linux/.test(platform)) {
+      os = 'linux';
     }
-  } else if (windowsPlatforms.indexOf(platform) !== -1) {
-    os = 'windows';
-  } else if (/Android/.test(userAgent)) {
-    os = 'android';
-  } else if (!os && /Linux/.test(platform)) {
-    os = 'linux';
+
+    return os as 'iphone' | 'ipad' | 'android' | 'windows' | 'mac' | 'linux';
   }
 
-  return os as 'iphone' | 'ipad' | 'android' | 'windows' | 'mac' | 'linux';
-  }
-
-  private _getDeviceInfo(): DeviceInfo {
-    return {
-      platform: this._getPlatform(),
-      appName: 'OneKey',
-      appVersion: '2.0.0',
-      maxProtocolVersion: 2,
-      features: [],
-    };
+  private async _getDeviceInfo() {
+    const deviceInfo = await this._callBridge({
+      method: 'getDeviceInfo',
+      params: [],
+    });
+    Object.assign(this.deviceInfo, deviceInfo);
   }
 
   private _registerEvents() {
@@ -132,7 +140,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     this._accountInfo = accountInfo;
     if (options.emit && this.isConnectionStatusChanged('connected')) {
       this.connectionStatus = 'connected';
-      const address = accountInfo.account.address ?? null;
+      const address = accountInfo.address ?? null;
       this.emit('connect', address);
       this.emit('accountChanged', address);
     }
@@ -149,14 +157,14 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
   }
 
   override isAccountsChanged(accountInfo: AccountInfo | undefined) {
-    return accountInfo?.account.address !== this._accountInfo?.account.address;
+    return accountInfo?.address !== this._accountInfo?.address;
   }
 
   // trigger by bridge account change event
   private _handleAccountChange(payload: AccountInfo) {
     const accountInfo = payload;
     if (this.isAccountsChanged(accountInfo)) {
-      this.emit('accountChanged', accountInfo?.account.address || null);
+      this.emit('accountChanged', accountInfo?.address || null);
     }
     if (!accountInfo) {
       this._handleDisconnected();
@@ -181,9 +189,9 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
         payload: {
           items: [{
             name: "ton_addr",
-            ...this._accountInfo.account,
+            ...this._accountInfo,
           }],
-          device: this._accountInfo.device,
+          device: this.deviceInfo,
         },
       }
     }
@@ -212,9 +220,9 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
       payload: {
         items: [{
           name: "ton_addr",
-          ...result.account,
+          ...result,
         }],
-        device: result.device,
+        device: this.deviceInfo,
       },
     };
   }
@@ -232,11 +240,11 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     
     let res: unknown;
     if (message.method === 'sendTransaction') {
-      res = await this.sendTransaction(message.params[0] as TransactionPayload);
+      res = await this._sendTransaction(message.params[0] as TransactionPayload);
     } else if (message.method === 'signData') {
-      res = await this.signData(message.params[0] as SignDataPayload);
+      res = await this._signData(message.params[0] as SignDataPayload);
     } else if (message.method === 'disconnect') {
-      await this.disconnect();
+      await this._disconnect();
       res = '';
     } else {
       throw web3Errors.provider.unsupportedMethod();
@@ -252,7 +260,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     };
   }
 
-  async sendTransaction(payload: TransactionPayload): Promise<Uint8Array> {
+  private async _sendTransaction(payload: TransactionPayload): Promise<Uint8Array> {
     const txid = await this._callBridge({
       method: 'sendTransaction',
       params: [payload],
@@ -261,7 +269,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     return Buffer.from(txid, 'hex');
   }
 
-  async signData(payload: SignDataPayload): Promise<SignDataResult> {
+  private async _signData(payload: SignDataPayload): Promise<SignDataResult> {
     const res = await this._callBridge({
       method: 'signData',
       params: [payload],
@@ -270,7 +278,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     return res;
   }
 
-  async disconnect(): Promise<void> {
+  private async _disconnect(): Promise<void> {
     await this._callBridge({
       method: 'disconnect',
       params: [],

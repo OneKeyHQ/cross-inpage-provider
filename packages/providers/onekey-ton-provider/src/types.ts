@@ -149,13 +149,10 @@ export interface WalletEvent {
 type WalletEventName = 'connect' | 'connect_error' | 'disconnect';
 
 export interface AccountInfo {
-  account: {
-    address: string; // TON address raw (`0:<hex>`)
-    network: NETWORK; // network global_id
-    publicKey: string; // HEX string without 0x
-    walletStateInit: string; // Base64 (not url safe) encoded stateinit cell for the wallet contract
-  }
-  device: DeviceInfo;
+  address: string; // TON address raw (`0:<hex>`)
+  network: NETWORK; // network global_id
+  publicKey: string; // HEX string without 0x
+  walletStateInit: string; // Base64 (not url safe) encoded stateinit cell for the wallet contract
 }
 
 export interface Message {

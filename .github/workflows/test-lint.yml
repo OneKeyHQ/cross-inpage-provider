@@ -1,4 +1,4 @@
-name: CI
+name: test-lint
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
       - master
 
 jobs:
-  test:
+  lint:
     runs-on: ${{ matrix.os }}
 
     strategy:

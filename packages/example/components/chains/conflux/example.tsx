@@ -446,7 +446,7 @@ export default function BTCExample() {
             });
             return res as string;
           }}
-        />{' '}
+        />
         <ApiPayload
           title="wallet_sendTransaction"
           description="发送交易"

@@ -64,9 +64,13 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
       { name: 'SignData' },
     ],
   };
-  walletInfo?: WalletInfo;
+  walletInfo?: WalletInfo = {
+    name: 'OneKey',
+    image: 'https://uni.onekey-asset.com/static/logo/onekey.png',
+    about_url: 'https://onekey.so',
+  };
   protocolVersion = 2;
-  isWalletBrowser = true;
+  isWalletBrowser = false;
 
   constructor(props: OneKeyTonProviderProps) {
     super({
@@ -239,10 +243,16 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     const id = message.id;
     
     let res: unknown;
+    const params = message.params.map((p) => {
+      if (typeof p === 'string') {
+        return JSON.parse(p) as unknown;
+      }
+      return p;
+    });
     if (message.method === 'sendTransaction') {
-      res = await this._sendTransaction(message.params[0] as TransactionPayload);
+      res = await this._sendTransaction(params[0] as TransactionPayload);
     } else if (message.method === 'signData') {
-      res = await this._signData(message.params[0] as SignDataPayload);
+      res = await this._signData(params[0] as SignDataPayload);
     } else if (message.method === 'disconnect') {
       await this._disconnect();
       res = '';

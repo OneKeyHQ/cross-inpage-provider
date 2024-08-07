@@ -118,7 +118,7 @@ export default function Example() {
             const res = await provider?.getNetwork();
             return JSON.stringify(res);
           }}
-        />{' '}
+        />
         <ApiPayload
           title="getNetworkURL"
           description="getNetworkURL"

@@ -139,7 +139,7 @@ export default function BTCExample() {
             const res = await provider?.getAccounts();
             return JSON.stringify(res);
           }}
-        />{' '}
+        />
         <ApiPayload
           title="getAddress"
           description="获取当前账户地址"

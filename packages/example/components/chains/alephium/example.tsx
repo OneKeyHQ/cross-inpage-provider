@@ -33,7 +33,21 @@ export function Example() {
             wallet?.account?.address ?? '',
           )}
           onExecute={async (request: string) => {
-            return wallet.signer.signAndSubmitTransferTx(JSON.parse(request));
+            const params = JSON.parse(request);
+            return wallet.signer.signAndSubmitTransferTx({
+              ...params,
+              destinations: params.destinations.map((destination: any) => ({
+                address: destination?.address,
+                attoAlphAmount: destination?.amount?.toString(),
+                tokens: destination?.tokens?.map((token: any) => ({
+                  id: token?.id,
+                  amount: token?.amount?.toString(),
+                })),
+                lockTime: destination?.lockTime,
+                message: destination?.message,
+              })),
+              signerAddress: params.signerAddress,
+            });
           }}
         />
         <ApiPayload
@@ -71,7 +85,8 @@ export function Example() {
           onExecute={async (request: string) => {
             return wallet.signer.signUnsignedTx(JSON.parse(request));
           }}
-        /><ApiPayload
+        />
+        <ApiPayload
           title="signMessage"
           description=""
           allowCallWithoutProvider={!!wallet}
@@ -89,7 +104,7 @@ export function Example() {
 
 export default function App() {
   return (
-    <AlephiumWalletProvider network="mainnet" theme="retro">
+    <AlephiumWalletProvider network="testnet" theme="retro">
       <Example />
     </AlephiumWalletProvider>
   );

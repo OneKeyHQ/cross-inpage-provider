@@ -10,21 +10,21 @@ export default {
         destinations: [
           {
             address: to,
-            amount: '20000000',
+            amount: ONE_ALPH.toString(),
           },
         ],
       }),
     },
     {
-      id: 'signAndSubmitTransferTx-token',
+      id: 'signAndSubmitTransferTx-token-638b022292ea665dc9c946eec02ef9602926dc0e6db17143baebce898e34a302',
       name: 'Token',
       value: JSON.stringify({
         signerAddress: from,
         destinations: [
           {
             address: to,
-            amount: DUST_AMOUNT,
-            tokens: [{ id: 'tokenId', amount: 10 }],
+            amount: DUST_AMOUNT.toString(),
+            tokens: [{ id: '638b022292ea665dc9c946eec02ef9602926dc0e6db17143baebce898e34a302', amount: '10' }],
           },
         ],
       }),
@@ -33,11 +33,11 @@ export default {
   signAndSubmitDeployContractTx: (from: string) => {
     return [
       {
-        id: 'signAndSubmitDeployContractTx-native',
-        name: 'Native with body',
+        id: 'signAndSubmitDeployContractTx-test',
+        name: 'Deploy test contract',
         value: JSON.stringify({
           signerAddress: from,
-          bytecode: '010203',
+          bytecode: '000117010100000004d362d46012b413c40de0b6b3a7640000a90000',
         }),
       },
     ];
@@ -45,11 +45,11 @@ export default {
   signAndSubmitExecuteScriptTx: (from: string) => {
     return [
       {
-        id: 'signAndSubmitExecuteScriptTx-native',
-        name: 'Native with body',
+        id: 'signAndSubmitExecuteScriptTx-call-test-contract',
+        name: 'call test contract',
         value: JSON.stringify({
           signerAddress: from,
-          bytecode: '010203',
+          bytecode: '01010300000007b413c40de0b6b3a7640000a20c0c1440206c3b1f6262ffad9a4cb1e78f03f17f3593837505a69edbc18a59cf23c1f1c4020100',
         }),
       },
     ];

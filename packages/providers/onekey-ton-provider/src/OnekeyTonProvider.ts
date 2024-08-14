@@ -4,7 +4,25 @@ import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injec
 import { ProviderTonBase } from './ProviderTonBase';
 import type * as TypeUtils from './type-utils';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
-import { AccountInfo, AppRequest, ConnectEvent, ConnectEventErrorCode, ConnectEventErrorMessage, ConnectRequest, DeviceInfo, SignDataPayload, SignDataResult, TransactionPayload, WalletEvent, WalletInfo, WalletResponse } from './types';
+import {
+  AccountInfo,
+  AppRequest,
+  ConnectEvent,
+  ConnectEventErrorCode,
+  ConnectEventErrorMessage,
+  ConnectItemReply,
+  ConnectRequest,
+  DeviceInfo,
+  SignDataRequest,
+  SignDataResult,
+  SignProofRequest,
+  SignProofResult,
+  TonProofItem,
+  TransactionRequest,
+  WalletEvent,
+  WalletInfo,
+  WalletResponse
+} from './types';
 
 const PROVIDER_EVENTS = {
   'disconnect': 'disconnect',
@@ -15,8 +33,9 @@ const PROVIDER_EVENTS = {
 export type TonRequest = {
   'connect': (protocolVersion?: number, message?: ConnectRequest) => Promise<AccountInfo>;
   'disconnect': () => Promise<void>;
-  'sendTransaction': (payload: TransactionPayload) => Promise<string>;
-  'signData': (payload: SignDataPayload) => Promise<SignDataResult>;
+  'sendTransaction': (payload: TransactionRequest) => Promise<string>;
+  'signData': (payload: SignDataRequest) => Promise<SignDataResult>;
+  'signProof': (request: SignProofRequest) => Promise<SignProofResult>;
   'getDeviceInfo': () => Promise<Partial<DeviceInfo>>;
 };
 
@@ -186,46 +205,71 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
   private _id = 0;
   async _connect(protocolVersion?: number, message?: ConnectRequest): Promise<ConnectEvent> {
     const id = ++this._id;
-    if (this._accountInfo) {
-      return {
-        event: 'connect',
-        id,
-        payload: {
-          items: [{
-            name: "ton_addr",
-            ...this._accountInfo,
-          }],
-          device: this.deviceInfo,
-        },
+    const isGetTonAddr = !message || (message && message.items.some((item) => item.name === "ton_addr"));
+    const proofItem = message && message.items.find((item) => item.name === "ton_proof") as (TonProofItem | undefined);
+    const items = [] as ConnectItemReply[];
+
+    if (isGetTonAddr) {
+      if (this._accountInfo) {
+        items.push({
+          name: "ton_addr",
+          ...this._accountInfo,
+        });
+      } else {
+        const result = await this._callBridge({
+          method: 'connect',
+          params: (protocolVersion && message) ? [protocolVersion, message] : [],
+        });
+    
+        if (!result) {
+          return {
+            event: "connect_error",
+            id,
+            payload: {
+              code: ConnectEventErrorCode.UNKNOWN_ERROR,
+              message: ConnectEventErrorMessage.UNKNOWN_ERROR
+            }
+          }
+        }
+        this._handleConnected(result, { emit: true });
+        items.push({
+          name: "ton_addr",
+          ...result,
+        });
       }
     }
 
-    const result = await this._callBridge({
-      method: 'connect',
-      params: (protocolVersion && message) ? [protocolVersion, message] : [],
-    });
-
-    if (!result) {
-      return {
-        event: "connect_error",
-        id,
-        payload: {
-          code: ConnectEventErrorCode.UNKNOWN_ERROR,
-          message: ConnectEventErrorMessage.UNKNOWN_ERROR
+    if (proofItem) {
+      const result = await this._callBridge({
+        method: 'signProof',
+        params: [{
+          payload: proofItem.payload,
+        }],
+      });
+      if (!result) {
+        return {
+          event: "connect_error",
+          id,
+          payload: {
+            code: ConnectEventErrorCode.UNKNOWN_ERROR,
+            message: ConnectEventErrorMessage.UNKNOWN_ERROR
+          }
         }
       }
+      items.push({
+        name: "ton_proof",
+        proof: {
+          ...result,
+          payload: proofItem.payload,
+        }
+      });
     }
-
-    this._handleConnected(result, { emit: true });
 
     return {
       event: 'connect',
       id,
       payload: {
-        items: [{
-          name: "ton_addr",
-          ...result,
-        }],
+        items,
         device: this.deviceInfo,
       },
     };
@@ -250,9 +294,9 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
       return p;
     });
     if (message.method === 'sendTransaction') {
-      res = await this._sendTransaction(params[0] as TransactionPayload);
+      res = await this._sendTransaction(params[0] as TransactionRequest);
     } else if (message.method === 'signData') {
-      res = await this._signData(params[0] as SignDataPayload);
+      res = await this._signData(params[0] as SignDataRequest);
     } else if (message.method === 'disconnect') {
       await this._disconnect();
       res = '';
@@ -270,19 +314,19 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     };
   }
 
-  private async _sendTransaction(payload: TransactionPayload): Promise<Uint8Array> {
+  private async _sendTransaction(request: TransactionRequest): Promise<Uint8Array> {
     const txid = await this._callBridge({
       method: 'sendTransaction',
-      params: [payload],
+      params: [request],
     });
 
     return Buffer.from(txid, 'hex');
   }
 
-  private async _signData(payload: SignDataPayload): Promise<SignDataResult> {
+  private async _signData(request: SignDataRequest): Promise<SignDataResult> {
     const res = await this._callBridge({
       method: 'signData',
-      params: [payload],
+      params: [request],
     });
 
     return res;

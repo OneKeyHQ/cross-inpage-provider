@@ -5,12 +5,12 @@ export type ConnectRequest = {
 
 // In the future we may add other personal items.
 // Or, instead of the wallet address we may ask for per-service ID.
-type ConnectItem = TonAddressItem | TonProofItem;
+export type ConnectItem = TonAddressItem | TonProofItem;
 
-type TonAddressItem = {
+export type TonAddressItem = {
   name: "ton_addr";
 }
-type TonProofItem = {
+export type TonProofItem = {
   name: "ton_proof";
   payload: string; // arbitrary payload, e.g. nonce + expiration timestamp.
 }
@@ -72,11 +72,11 @@ export interface WalletInfo {
 type Feature = { name: 'SendTransaction', maxMessages: number } | // `maxMessages` is maximum number of messages in one `SendTransaction` that the wallet supports
 { name: 'SignData' };
 
-type ConnectItemReply = TonAddressItemReply | TonProofItemReply;
+export type ConnectItemReply = TonAddressItemReply | TonProofItemReply;
 
 // Untrusted data returned by the wallet. 
 // If you need a guarantee that the user owns this address and public key, you need to additionally request a ton_proof.
-type TonAddressItemReply = {
+export type TonAddressItemReply = {
   name: "ton_addr";
   address: string; // TON address raw (`0:<hex>`)
   network: NETWORK; // network global_id
@@ -84,7 +84,7 @@ type TonAddressItemReply = {
   walletStateInit: string; // Base64 (not url safe) encoded stateinit cell for the wallet contract
 }
 
-type TonProofItemReply = TonProofItemReplySuccess | TonProofItemReplyError;
+export type TonProofItemReply = TonProofItemReplySuccess | TonProofItemReplyError;
 
 type TonProofItemReplySuccess = {
   name: "ton_proof";
@@ -162,7 +162,7 @@ export interface Message {
   stateInit?: string;
 }
 
-export interface TransactionPayload {
+export interface TransactionRequest {
   valid_until?: number;
   network?: NETWORK;
   from?: string;
@@ -181,7 +181,7 @@ interface SendTransactionResponseError {
   id: string;
 }
 
-export interface SignDataPayload {
+export interface SignDataRequest {
   schema_crc: number;
   cell: string;
   publicKey?: string;
@@ -190,4 +190,17 @@ export interface SignDataPayload {
 export interface SignDataResult {
   signature: string; // base64 encoded signature 
   timestamp: string; // UNIX timestamp in seconds (UTC) at the moment on creating the signature.
+}
+
+export interface SignProofRequest {
+  payload: string;
+}
+
+export interface SignProofResult {
+  signature: string; // base64 encoded signature 
+  timestamp: string; // 64-bit unix epoch time of the signing operation (seconds)
+  domain: {
+    lengthBytes: number; // AppDomain Length
+    value: string;  // app domain name (as url part, without encoding)
+  };
 }

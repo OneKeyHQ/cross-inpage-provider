@@ -325,12 +325,12 @@ export default function Example() {
         />
         <ApiPayload
           title="wallet_revokePermissions"
-          description="（暂不支持）删除权限"
+          description="删除权限"
           presupposeParams={params.revokePermissions}
-          onExecute={async () => {
+          onExecute={async (param) => {
             const res = await provider?.request({
               'method': 'wallet_revokePermissions',
-              'params': [],
+              'params': [JSON.parse(param)],
             });
             return JSON.stringify(res);
           }}

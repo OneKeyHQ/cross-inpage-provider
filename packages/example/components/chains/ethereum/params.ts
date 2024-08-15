@@ -39,7 +39,7 @@ export default {
     {
       'id': 'revokePermissions',
       'name': 'revokePermissions',
-      'description': '删除权限',
+      'description': '断开 App 的授权连接',
       'value': JSON.stringify({
         'eth_accounts': {},
       }),

@@ -173,7 +173,7 @@ export type GetRewardAddresses = () => Promise<Cbor[]>;
 
   getBalance: GetBalance;
 
-  getCollateral: GetCollateral;
+  // getCollateral: GetCollateral;
 
   getUsedAddresses: GetUsedAddresses;
 

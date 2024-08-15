@@ -179,7 +179,6 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
     const API = {
       getNetworkId: () => this.getNetworkId(),
       getUtxos:  (amount?: Cbor, paginate?: Paginate) => this.getUtxos(amount, paginate),
-      getCollateral: () => this.getCollateral(),
       getBalance: () => this.getBalance(),
       getUsedAddresses: () => this.getUsedAddresses(),
       getUnusedAddresses: () => this.getUnUsedAddress(), 
@@ -232,7 +231,7 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
   }
 
   async getCollateral() {
-    return Promise.resolve(null)
+    return Promise.resolve([])
   }
 
   async getBalance() {

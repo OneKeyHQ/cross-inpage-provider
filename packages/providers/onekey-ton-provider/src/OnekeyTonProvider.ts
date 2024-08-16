@@ -1,27 +1,31 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { ProviderTonBase } from './ProviderTonBase';
 import type * as TypeUtils from './type-utils';
-import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
 import {
-  AccountInfo,
   AppRequest,
+  CONNECT_EVENT_ERROR_CODES,
   ConnectEvent,
-  ConnectEventErrorCode,
-  ConnectEventErrorMessage,
   ConnectItemReply,
   ConnectRequest,
   DeviceInfo,
+  RpcMethod,
+  SEND_TRANSACTION_ERROR_CODES,
+  TonProofItem,
+  WalletEvent,
+  WalletResponse,
+  WalletResponseSuccess
+} from '@tonconnect/protocol';
+import {
+  AccountInfo,
+  ConnectEventErrorMessage,
+  SendTransactionErrorMessage,
   SignDataRequest,
   SignDataResult,
   SignProofRequest,
   SignProofResult,
-  TonProofItem,
   TransactionRequest,
-  WalletEvent,
   WalletInfo,
-  WalletResponse
 } from './types';
 
 const PROVIDER_EVENTS = {
@@ -58,7 +62,7 @@ export interface IProviderTon extends ProviderTonBase {
   isWalletBrowser: boolean; // if the page is opened into wallet's browser
   connect(protocolVersion: number, message: ConnectRequest): Promise<ConnectEvent>;
   restoreConnection(): Promise<ConnectEvent>;
-  send(message: AppRequest): Promise<WalletResponse>;
+  send<T extends RpcMethod>(message: AppRequest<T>): Promise<WalletResponse<T>>;
   listen(callback: (event: WalletEvent) => void): void;
 }
 
@@ -226,16 +230,16 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
             event: "connect_error",
             id,
             payload: {
-              code: ConnectEventErrorCode.UNKNOWN_ERROR,
+              code: CONNECT_EVENT_ERROR_CODES.UNKNOWN_ERROR,
               message: ConnectEventErrorMessage.UNKNOWN_ERROR
             }
           }
         }
-        this._handleConnected(result, { emit: true });
         items.push({
           name: "ton_addr",
           ...result,
         });
+        this._handleConnected(result, { emit: true });
       }
     }
 
@@ -251,7 +255,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
           event: "connect_error",
           id,
           payload: {
-            code: ConnectEventErrorCode.UNKNOWN_ERROR,
+            code: CONNECT_EVENT_ERROR_CODES.UNKNOWN_ERROR,
             message: ConnectEventErrorMessage.UNKNOWN_ERROR
           }
         }
@@ -283,7 +287,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     return this._connect();
   }
 
-  async send(message: AppRequest): Promise<WalletResponse> {
+  async send<T extends RpcMethod>(message: AppRequest<T>): Promise<WalletResponse<T>> {
     const id = message.id;
     
     let res: unknown;
@@ -301,17 +305,29 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
       await this._disconnect();
       res = '';
     } else {
-      throw web3Errors.provider.unsupportedMethod();
+      return {
+        id,
+        error: {
+          code: SEND_TRANSACTION_ERROR_CODES.METHOD_NOT_SUPPORTED,
+          message: SendTransactionErrorMessage.METHOD_NOT_SUPPORTED,
+        },
+      }
     }
 
     if (res === undefined) {
-      throw web3Errors.provider.unauthorized();
+      return {
+        id,
+        error: {
+          code: SEND_TRANSACTION_ERROR_CODES.UNKNOWN_ERROR,
+          message: SendTransactionErrorMessage.UNKNOWN_ERROR,
+        },
+      }
     }
 
     return {
       id,
       result: res,
-    };
+    } as WalletResponseSuccess<T>;
   }
 
   private async _sendTransaction(request: TransactionRequest): Promise<Uint8Array> {

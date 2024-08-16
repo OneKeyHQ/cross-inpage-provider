@@ -31,6 +31,7 @@
     "@onekeyfe/cross-inpage-provider-core": "2.0.4",
     "@onekeyfe/cross-inpage-provider-errors": "2.0.4",
     "@onekeyfe/cross-inpage-provider-types": "2.0.4",
-    "@onekeyfe/extension-bridge-injected": "2.0.4"
+    "@onekeyfe/extension-bridge-injected": "2.0.4",
+    "@tonconnect/protocol": "^2.2.6"
   }
 }

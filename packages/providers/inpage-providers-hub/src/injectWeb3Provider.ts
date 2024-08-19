@@ -105,7 +105,7 @@ function injectWeb3Provider(): unknown {
     bridge,
   });
 
-  const ton = new ProviderTon({
+  const tonconnect = new ProviderTon({
     bridge,
   });
 
@@ -148,7 +148,7 @@ function injectWeb3Provider(): unknown {
     tron,
     sollet: null,
     sui,
-    ton,
+    tonconnect,
     cardano,
     cosmos,
     scdo,
@@ -196,7 +196,9 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('conflux', conflux);
   defineWindowProperty('tronLink', tron);
   defineWindowProperty('suiWallet', sui);
-  defineWindowProperty('ton', ton);
+  defineWindowProperty('tonkeeper', {
+    tonconnect,
+  });
   defineWindowProperty('unisat', btc);
   defineWindowProperty('scdo', scdo);
   defineWindowProperty('algorand', algorand);

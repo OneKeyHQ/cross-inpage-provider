@@ -152,7 +152,7 @@ function injectWeb3Provider(): unknown {
     algorand,
   };
 
-  defineWindowProperty('$onekey', $onekey, { enumerable: true });
+  defineWindowProperty('$onekey', $onekey, { enumerable: true, alwaysInject: true });
 
   const martianProxy = new Proxy(martian, {
     get: (target, property, ...args) => {

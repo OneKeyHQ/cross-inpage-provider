@@ -93,10 +93,13 @@ export function defineWindowProperty(
   options?: {
     enumerable?: boolean;
     disablePlatform?: IPlatformType[];
+    alwaysInject?: boolean;
   },
 ) {
-  if (!checkPlatformEnable(options?.disablePlatform)) return;
-  if (!checkWalletSwitchEnable()) return;
+  if (!options?.alwaysInject) {
+    if (!checkPlatformEnable(options?.disablePlatform)) return;
+    if (!checkWalletSwitchEnable()) return;
+  }
   const enable = checkEnableDefineProperty(property);
   const proxyProvider = new Proxy(provider as object, {
     defineProperty(target, property, attributes) {

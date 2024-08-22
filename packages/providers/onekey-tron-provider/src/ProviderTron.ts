@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import dequal from 'fast-deep-equal';
 import TronWeb, { UnsignedTransaction, SignedTransaction } from 'tronweb';
 import SunWeb from 'sunweb';
@@ -22,6 +24,7 @@ import {
   requestAccountsResponse,
 } from './types';
 import { isWalletEventMethodMatch } from './utils';
+import BigNumber from 'bignumber.js';
 type OneKeyTronProviderProps = IInpageProviderConfig & {
   timeout?: number;
 };
@@ -32,6 +35,17 @@ export const CONTRACT_ADDRESS = {
 };
 
 export const SIDE_CHAIN_ID = '41E209E4DE650F0150788E8EC5CAFA240A23EB8EB7';
+
+export const AUTO_REQUEST_ACCOUNTS_ORIGIN_WHITE_LIST = [
+  'https://tronscan.org',
+  'https://tronscan.io',
+];
+
+export const TRON_REQUEST_ACCOUNTS_LOCAL_KEY = 'onekey_tron_request_accounts_local_key';
+
+export const TRON_REQUEST_ACCOUNTS_INTERVAL = 10 * 60 * 1000; // ten minutes
+
+const globalWindow = typeof window !== 'undefined' ? window : global;
 
 class OneKeyTronWeb extends TronWeb {
   constructor(props: any, provider: IProviderTron) {
@@ -167,7 +181,50 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
             self._log.warn(
               'OneKey: We recommend that DApp developers use $onekey.tron.request({method: "tron_requestAccounts"}) to request users’ account information at the earliest time possible in order to get a complete TronWeb injection.',
             );
+
+            const origin = globalWindow?.location?.origin || '';
+
+            if (origin && AUTO_REQUEST_ACCOUNTS_ORIGIN_WHITE_LIST.includes(origin)) {
+              const requestAccountsLocalStr = localStorage.getItem(TRON_REQUEST_ACCOUNTS_LOCAL_KEY);
+
+              const requestAccountsLocal = requestAccountsLocalStr
+                ? JSON.parse(requestAccountsLocalStr)
+                : null;
+
+              if (requestAccountsLocal && requestAccountsLocal[origin]) {
+                const requestTimeStamp = requestAccountsLocal[origin];
+
+                if (
+                  new BigNumber(Date.now())
+                    .minus(requestTimeStamp as string)
+                    .isGreaterThan(TRON_REQUEST_ACCOUNTS_INTERVAL)
+                ) {
+                  localStorage.setItem(
+                    TRON_REQUEST_ACCOUNTS_LOCAL_KEY,
+                    JSON.stringify({
+                      ...requestAccountsLocal,
+                      [origin]: Date.now(),
+                    }),
+                  );
+                  void self.request({
+                    method: 'tron_requestAccounts',
+                  });
+                }
+              } else {
+                localStorage.setItem(
+                  TRON_REQUEST_ACCOUNTS_LOCAL_KEY,
+                  JSON.stringify({
+                    ...requestAccountsLocal,
+                    [origin]: Date.now(),
+                  }),
+                );
+                void self.request({
+                  method: 'tron_requestAccounts',
+                });
+              }
+            }
           }
+
           return self._defaultAddress;
         },
         set(value) {
@@ -275,6 +332,7 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
     if (!this._connected) {
       this._connected = true;
       this._postMessage(ProviderEvents.CONNECT);
+      this._postMessage(ProviderEvents.ACCEPT_WEB);
     }
   }
 

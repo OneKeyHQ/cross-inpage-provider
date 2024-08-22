@@ -14,6 +14,7 @@ export enum ProviderEvents {
   MESSAGE = 'message',
   MESSAGE_LOW_LEVEL = 'message_low_level',
   CHAIN_CHANGED = 'chainChanged',
+  ACCEPT_WEB = 'acceptWeb',
 }
 
 export interface Nodes {

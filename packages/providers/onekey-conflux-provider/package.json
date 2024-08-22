@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/onekey-conflux-provider",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -28,9 +28,9 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "2.0.6",
-    "@onekeyfe/cross-inpage-provider-errors": "2.0.6",
-    "@onekeyfe/cross-inpage-provider-types": "2.0.6",
-    "@onekeyfe/extension-bridge-injected": "2.0.6"
+    "@onekeyfe/cross-inpage-provider-core": "2.0.7",
+    "@onekeyfe/cross-inpage-provider-errors": "2.0.7",
+    "@onekeyfe/cross-inpage-provider-types": "2.0.7",
+    "@onekeyfe/extension-bridge-injected": "2.0.7"
   }
 }

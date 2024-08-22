@@ -80,7 +80,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
   deviceInfo: DeviceInfo = {
     platform: this._getPlatform(),
     appName: 'OneKey',
-    appVersion: '5.0.0',
+    appVersion: '0.0.0',
     maxProtocolVersion: 2,
     features: [
       { name: 'SendTransaction', maxMessages: 4 },

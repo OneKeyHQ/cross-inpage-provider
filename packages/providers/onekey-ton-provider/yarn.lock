@@ -2,42 +2,42 @@
 # yarn lockfile v1
 
 
-"@onekeyfe/cross-inpage-provider-core@2.0.4":
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-core/-/cross-inpage-provider-core-2.0.4.tgz#ae29d8acb74491f85c5cba4cf8d831abd2ea243e"
-  integrity sha512-q20HSeQCGWBUkqNVSqZSH2Y0YunlD+qvIzJDFS7OumBmX5TeosyoSFVsLoBIh5eEtlhCjEwBKIcn7Vlyhce4jw==
+"@onekeyfe/cross-inpage-provider-core@2.0.6":
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-core/-/cross-inpage-provider-core-2.0.6.tgz#8c7438b244140ca2f66e86f6192aca3d6dcd709b"
+  integrity sha512-LkkRL8XFdRBUtiyMLijQCLtPwwnf5Q/HAU5ACT/RUBo+bfW21ruXbH9glmTnkIFkckb4JDSZNc4ejJ7vTX4JdQ==
   dependencies:
-    "@onekeyfe/cross-inpage-provider-errors" "2.0.4"
-    "@onekeyfe/cross-inpage-provider-events" "2.0.4"
-    "@onekeyfe/cross-inpage-provider-types" "2.0.4"
+    "@onekeyfe/cross-inpage-provider-errors" "2.0.6"
+    "@onekeyfe/cross-inpage-provider-events" "2.0.6"
+    "@onekeyfe/cross-inpage-provider-types" "2.0.6"
     events "^3.3.0"
     lodash-es "^4.17.21"
     ms "^2.1.3"
 
-"@onekeyfe/cross-inpage-provider-errors@2.0.4":
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-2.0.4.tgz#0b7dfe0ec00a6c10f8b1d856938544afc36babe1"
-  integrity sha512-EKGV5892cLMrSRifregRdqhVxZZ3E1GPZCA8DlOYMYTt9bRO7GBRZV1PZ6rmo+gaA7sDGs6A29ti+RyHafSKJw==
+"@onekeyfe/cross-inpage-provider-errors@2.0.6":
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-2.0.6.tgz#5e2117c65a8e4e69ed6b100dfc2b088f9345d62d"
+  integrity sha512-161PkiPQTCiMaiaC5UB+det4Dk8uyufBJNeAZESt88DSyJ6j1ya9iIv6O7XUwLwTv5EKlDWNDnMuO/N7V1yefw==
   dependencies:
     fast-safe-stringify "^2.0.6"
 
-"@onekeyfe/cross-inpage-provider-events@2.0.4":
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-events/-/cross-inpage-provider-events-2.0.4.tgz#b0f97e4604c56b7343178c58e36075ebb828df26"
-  integrity sha512-vNCxBjLQjx7HuUiLBTqX3r8QQW9ycwzf79b73eAAPuHaI7WNsVAlre8AFLYNEv5mWEer1v6iJxXGRx0WbyXOsA==
+"@onekeyfe/cross-inpage-provider-events@2.0.6":
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-events/-/cross-inpage-provider-events-2.0.6.tgz#824704fdc2778e2e5e9b23ca3e938a4e9f886fc3"
+  integrity sha512-G1nXGIc3y+uS7dSrNMlfvna/CZe6JjbuSomCQHgdcDlkqujU7AYLA+Ek799CCniRuWBlAu30JGOGGsSFMzoEmg==
 
-"@onekeyfe/cross-inpage-provider-types@2.0.4":
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-types/-/cross-inpage-provider-types-2.0.4.tgz#ecd3692da6455b0a9ee15c6f811b7fcd093eae88"
-  integrity sha512-6X9JZ6/gV1VrDDWdJvWDiD/R2ge4AFHyjKW1YlSsNsE2W5W9vWB5n2Ls6N5eoc9zpa+mIKPiBvTNu6sdfgJiwQ==
+"@onekeyfe/cross-inpage-provider-types@2.0.6":
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-types/-/cross-inpage-provider-types-2.0.6.tgz#dd4211827858cf7c6204da974fa46dd306aad947"
+  integrity sha512-pcZ8gSLNHOWXHGFQNyYR+PKLfvuJeIjRC4bOjj24Y3VLUZVGDIUJcJrNf29/ymcqTzued0qC/Ed815dfvhdWdg==
 
-"@onekeyfe/extension-bridge-injected@2.0.4":
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/extension-bridge-injected/-/extension-bridge-injected-2.0.4.tgz#4d466cdc9c3784e7bbfd16f3b834f0eb77faf3d7"
-  integrity sha512-Yzf2CPads2V/b9Rj9T9gA3gvU8o45z4L2sSDy//g1QRouI76IgJQZqv5qJ2vldaB3QqGIAMX0ilEvwaJfiOEoQ==
+"@onekeyfe/extension-bridge-injected@2.0.6":
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/extension-bridge-injected/-/extension-bridge-injected-2.0.6.tgz#092659d5c05bc54e5d113a90e99809bd7670a976"
+  integrity sha512-NOChBfl3UGPUGn9sLxXQ0bGD4/zNbxRQLfvxTFrR/9IjtRygYOpqSlSQ5uN10pceL+LsFY6+aD285qu8SNSCEA==
   dependencies:
-    "@onekeyfe/cross-inpage-provider-core" "2.0.4"
-    "@onekeyfe/cross-inpage-provider-types" "2.0.4"
+    "@onekeyfe/cross-inpage-provider-core" "2.0.6"
+    "@onekeyfe/cross-inpage-provider-types" "2.0.6"
 
 "@tonconnect/protocol@^2.2.6":
   version "2.2.6"

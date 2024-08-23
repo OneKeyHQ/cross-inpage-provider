@@ -36,7 +36,7 @@ export const styleContent = `
 	display: flex;
 	align-items: flex-end;
 	flex-direction: column;
-	z-index: 100000;
+	z-index: 2147483647;
 	box-sizing: border-box;
 }
 .onekey-inject-modal-container {

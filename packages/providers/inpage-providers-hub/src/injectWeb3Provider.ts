@@ -19,6 +19,7 @@ import {
 import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import { ProviderWebln } from '@onekeyfe/onekey-webln-provider';
 import { ProviderScdo } from '@onekeyfe/onekey-scdo-provider';
+import { ProviderTon } from '@onekeyfe/onekey-ton-provider';
 import { ProviderNostr } from '@onekeyfe/onekey-nostr-provider';
 import { ProviderBtc, ProviderBtcWallet } from '@onekeyfe/onekey-btc-provider';
 import { ProviderAlgo } from '@onekeyfe/onekey-algo-provider';
@@ -42,6 +43,7 @@ export type IWindowOneKeyHub = {
   keplr?: ProviderCosmos;
   webln?: ProviderWebln;
   nostr?: ProviderNostr;
+  ton?: ProviderTon;
   unisat?: ProviderBtc;
   btcwallet?: ProviderBtcWallet;
   scdo?: ProviderScdo;
@@ -103,6 +105,10 @@ function injectWeb3Provider(): unknown {
     bridge,
   });
 
+  const tonconnect = new ProviderTon({
+    bridge,
+  });
+
   const cosmos = new ProviderCosmos({
     bridge,
   });
@@ -142,6 +148,7 @@ function injectWeb3Provider(): unknown {
     tron,
     sollet: null,
     sui,
+    tonconnect,
     cardano,
     cosmos,
     scdo,
@@ -189,6 +196,9 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('conflux', conflux);
   defineWindowProperty('tronLink', tron);
   defineWindowProperty('suiWallet', sui);
+  defineWindowProperty('tonkeeper', {
+    tonconnect,
+  });
   defineWindowProperty('unisat', btc);
   defineWindowProperty('scdo', scdo);
   defineWindowProperty('algorand', algorand);

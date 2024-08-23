@@ -37,6 +37,7 @@
     "@onekeyfe/onekey-btc-provider": "2.1.2",
     "@onekeyfe/onekey-cardano-provider": "2.1.2",
     "@onekeyfe/onekey-conflux-provider": "2.1.2",
+    "@onekeyfe/onekey-ton-provider": "2.1.2",
     "@onekeyfe/onekey-cosmos-provider": "2.1.2",
     "@onekeyfe/onekey-eth-provider": "2.1.2",
     "@onekeyfe/onekey-nostr-provider": "2.1.2",

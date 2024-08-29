@@ -1,4 +1,4 @@
-import { ONE_ALPH, DUST_AMOUNT } from '@alephium/web3'
+import { ONE_ALPH, DUST_AMOUNT } from '@alephium/web3';
 
 export default {
   signAndSubmitTransferTx: (from: string, to: string) => [
@@ -16,15 +16,62 @@ export default {
       }),
     },
     {
-      id: 'signAndSubmitTransferTx-token-638b022292ea665dc9c946eec02ef9602926dc0e6db17143baebce898e34a302',
-      name: 'Token',
+      id: 'signAndSubmitTransferTx-token-722954d9067c5a5ad532746a024f2a9d7a18ed9b90e27d0a3a504962160b5600',
+      name: 'Token-USDC-MAIN',
       value: JSON.stringify({
         signerAddress: from,
         destinations: [
           {
             address: to,
             amount: DUST_AMOUNT.toString(),
-            tokens: [{ id: '638b022292ea665dc9c946eec02ef9602926dc0e6db17143baebce898e34a302', amount: '10' }],
+            tokens: [
+              {
+                id: '722954d9067c5a5ad532746a024f2a9d7a18ed9b90e27d0a3a504962160b5600',
+                amount: '10',
+              },
+            ],
+          },
+        ],
+      }),
+    },
+    {
+      id: 'signAndSubmitTransferTx-token-556d9582463fe44fbd108aedc9f409f69086dc78d994b88ea6c9e65f8bf98e00',
+      name: 'Token-USDT-MAIN',
+      value: JSON.stringify({
+        signerAddress: from,
+        destinations: [
+          {
+            address: to,
+            amount: DUST_AMOUNT.toString(),
+            tokens: [
+              {
+                id: '556d9582463fe44fbd108aedc9f409f69086dc78d994b88ea6c9e65f8bf98e00',
+                amount: '10',
+              },
+            ],
+          },
+        ],
+      }),
+    },
+    {
+      id: 'signAndSubmitTransferTx-Multiple-Native-and-Token-USDT-MAIN',
+      name: 'Multiple Native andToken-USDT-MAIN',
+      value: JSON.stringify({
+        signerAddress: from,
+        destinations: [
+          {
+            address: to,
+            amount: DUST_AMOUNT.toString(),
+            tokens: [
+              {
+                id: '556d9582463fe44fbd108aedc9f409f69086dc78d994b88ea6c9e65f8bf98e00',
+                amount: '10',
+              },
+            ],
+          },
+          {
+            address: to,
+            amount: ONE_ALPH.toString(),
           },
         ],
       }),
@@ -49,7 +96,8 @@ export default {
         name: 'call test contract',
         value: JSON.stringify({
           signerAddress: from,
-          bytecode: '01010300000007b413c40de0b6b3a7640000a20c0c1440206c3b1f6262ffad9a4cb1e78f03f17f3593837505a69edbc18a59cf23c1f1c4020100',
+          bytecode:
+            '01010300000007b413c40de0b6b3a7640000a20c0c1440206c3b1f6262ffad9a4cb1e78f03f17f3593837505a69edbc18a59cf23c1f1c4020100',
         }),
       },
     ];

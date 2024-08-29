@@ -6,6 +6,7 @@ type methodType =
   | 'scdo_signTransaction'
   | 'scdo_sendTransaction'
   | 'scdo_signMessage'
+  | 'scdo_ecRecover'
   | 'scdo_estimateGas';
 export interface IProviderApi {
   request<T>({ method, params }: { method: methodType; params?: Array<unknown> }): Promise<T>;

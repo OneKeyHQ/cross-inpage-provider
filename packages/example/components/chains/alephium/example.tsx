@@ -10,6 +10,7 @@ import {
   useWallet,
   useBalance,
 } from '@alephium/web3-react';
+import { verifySignedMessage } from '@alephium/web3';
 
 export function Example() {
   const wallet = useWallet();
@@ -94,6 +95,18 @@ export function Example() {
           onExecute={async (request: string) => {
             return wallet.signer.signMessage(JSON.parse(request));
           }}
+          onValidate={async (request: string, response: string) => {
+            const params = JSON.parse(request);
+            const signature = JSON.parse(response).signature;
+
+            return verifySignedMessage(
+              params.message,
+              params.messageHasher,
+              wallet.account.publicKey,
+              signature,
+              params.signerKeyType,
+            ).toString();
+          }}
         />
       </ApiGroup>
 
@@ -104,7 +117,7 @@ export function Example() {
 
 export default function App() {
   return (
-    <AlephiumWalletProvider network="testnet" theme="retro">
+    <AlephiumWalletProvider network="mainnet" theme="retro">
       <Example />
     </AlephiumWalletProvider>
   );

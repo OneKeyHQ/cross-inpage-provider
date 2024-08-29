@@ -35,7 +35,7 @@ export const registeredChains: IChainInfo[] = [
     id: uuid.v4(),
     name: 'Alephium',
     href: '/alephium',
-    icon: 'https://uni.onekey-asset.com/static/chain/alephium.png',
+    icon: 'https://uni.onekey-asset.com/static/chain/alph.png',
   },
   {
     id: uuid.v4(),

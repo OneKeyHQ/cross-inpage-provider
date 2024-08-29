@@ -38,7 +38,7 @@ export function Example() {
           title="sendTransaction"
           description="转账普通 Native"
           allowCallWithoutProvider={!!userFriendlyAddress}
-          presupposeParams={params.sendTransaction(rawAddress)}
+          presupposeParams={params.sendTransaction(userFriendlyAddress || '')}
           onExecute={async (request: string) => {
             const res = await tonConnectUI?.sendTransaction(JSON.parse(request));
             return JSON.stringify(res);
@@ -48,7 +48,7 @@ export function Example() {
           title="sendTransaction"
           description="带评论的转账普通 Native"
           allowCallWithoutProvider={!!userFriendlyAddress}
-          presupposeParams={params.sendTransactionWithBody(rawAddress)}
+          presupposeParams={params.sendTransactionWithBody(userFriendlyAddress || '')}
           onExecute={async (request: string) => {
             const res = await tonConnectUI?.sendTransaction(JSON.parse(request));
             return JSON.stringify(res);

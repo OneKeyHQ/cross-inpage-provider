@@ -10,6 +10,7 @@ import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
 import params from './params';
 
+// https://demo.scdo.org/
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([
     {
@@ -80,12 +81,21 @@ export default function Example() {
         <ApiPayload
           title="scdo_getBalance"
           description="获取账户余额"
+          presupposeParams={[
+            {
+              id: 'scdo_getBalance',
+              name: 'getBalance',
+              value: account?.address,
+            },
+          ]}
           onExecute={async (request: string) => {
             const res = await provider?.request<string[]>({
               method: 'scdo_getBalance',
-              params: [account?.address ?? '', '', -1],
+              params: [request ?? '', '', -1],
             });
-            return JSON.stringify(res);
+            console.log('scdo_getBalance', res);
+
+            return res;
           }}
         />
       </ApiGroup>
@@ -93,22 +103,17 @@ export default function Example() {
       <ApiGroup title="Sign Message">
         <ApiPayload
           title="scdo_signMessage"
-          description="获取账户余额"
+          description="签署消息"
           onExecute={async (request: string) => {
             return await provider?.request<string>({
               method: 'scdo_signMessage',
               params: [request],
             });
           }}
-        />
-
-        <ApiPayload
-          title="scdo_signMessage"
-          description="签署消息"
-          onExecute={async (request: string) => {
+          onValidate={async (request: string, response: string) => {
             return await provider?.request<string>({
-              method: 'scdo_signMessage',
-              params: [request],
+              method: 'scdo_ecRecover',
+              params: [request, response],
             });
           }}
         />

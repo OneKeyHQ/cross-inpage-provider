@@ -14,7 +14,7 @@ export default {
     },
     {
       id: 'sendTransaction-native-two',
-      name: 'Native',
+      name: 'Native Two',
       value: JSON.stringify({
         messages: [
           {
@@ -30,7 +30,7 @@ export default {
     },
     {
       id: 'sendTransaction-native-four',
-      name: 'Native',
+      name: 'Native Four',
       value: JSON.stringify({
         messages: [
           {

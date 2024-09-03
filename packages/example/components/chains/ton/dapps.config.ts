@@ -1,6 +1,6 @@
 export const dapps = [
   {
-    name: 'Magic Eden',
-    url: 'https://magiceden.io/',
+    name: 'Ton Dapp Demo',
+    url: 'https://ton-connect.github.io/demo-dapp-with-react-ui/',
   },
 ];

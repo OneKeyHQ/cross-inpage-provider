@@ -7,7 +7,7 @@ import { tryParsePublicKey } from '../wrappers/walletsData';
 
 const tonProofPrefix = 'ton-proof-item-v2/';
 const tonConnectPrefix = 'ton-connect';
-const allowedDomains = ['ton-connect.github.io', 'localhost:5173'];
+const allowedDomains = ['dapp-example.onekeytest.com', 'localhost:3000'];
 const validAuthTime = 15 * 60; // 15 minute
 
 export class TonProofService {

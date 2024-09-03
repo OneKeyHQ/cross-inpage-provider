@@ -196,6 +196,9 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('conflux', conflux);
   defineWindowProperty('tronLink', tron);
   defineWindowProperty('suiWallet', sui);
+  // defineWindowProperty('onekeyTonWallet', {
+  //   tonconnect,
+  // });
   // defineWindowProperty('tonkeeper', {
   //   tonconnect,
   // });

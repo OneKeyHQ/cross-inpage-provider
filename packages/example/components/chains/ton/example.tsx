@@ -127,7 +127,19 @@ export function Example() {
 
 export default function App() {
   return (
-    <TonConnectUIProvider manifestUrl="https://dapp-example.onekeytest.com/tonconnect-manifest.json">
+    <TonConnectUIProvider manifestUrl="https://dapp-example.onekeytest.com/tonconnect-manifest.json"
+      walletsListConfiguration={{
+        includeWallets: [
+          {
+            appName: "onekey",
+            name: "OneKey",
+            imageUrl: "https://common.onekey-asset.com/logo/onekey.png",
+            aboutUrl: "https://onekey.so",
+            jsBridgeKey: "onekeyTonWallet",
+            platforms: ["chrome"]
+          },
+        ]
+      }}>
       {/* <TonConnectUIProvider manifestUrl="https://ton-connect.github.io/demo-dapp-with-react-ui/tonconnect-manifest.json"> */}
       <Example />
     </TonConnectUIProvider>

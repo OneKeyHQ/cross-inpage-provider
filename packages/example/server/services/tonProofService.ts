@@ -39,8 +39,8 @@ export class TonProofService {
       }
 
       // 2.2. Check that TonAddressItemReply.publicKey equals to obtained public key
-      const wantedPublicKey = Buffer.from(payload.public_key, 'hex');
-      if (!publicKey.equals(wantedPublicKey)) {
+      const wantedPublicKey = payload.public_key ? Buffer.from(payload.public_key, 'hex') : null;
+      if (wantedPublicKey && !publicKey.equals(wantedPublicKey)) {
         return false;
       }
 
@@ -51,7 +51,8 @@ export class TonProofService {
         return false;
       }
 
-      if (!allowedDomains.includes(payload.proof.domain.value)) {
+      const domain = payload.proof.domain.value?.replace('https://', '').replace('http://', '');
+      if (!allowedDomains.includes(domain)) {
         return false;
       }
 
@@ -108,8 +109,12 @@ export class TonProofService {
 
       const result = Buffer.from(sha256(fullMsg));
 
+      console.log('====>>>>> result', result);
+      console.log('====>>>>> message.signature', message.signature);
+
       return sign.detached.verify(result, message.signature, publicKey);
     } catch (e) {
+      console.log('====>>>>> error', e);
       return false;
     }
   }

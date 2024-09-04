@@ -4,7 +4,7 @@ import zod from 'zod';
 export const CheckProofRequest = zod.object({
   address: zod.string(),
   network: zod.enum([CHAIN.MAINNET, CHAIN.TESTNET]),
-  public_key: zod.string(),
+  public_key: zod.string().optional(),
   proof: zod.object({
     timestamp: zod.number(),
     domain: zod.object({

@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/cross-inpage-provider-example",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "private": true,
   "scripts": {
     "postinstall": "patch-package",
@@ -13,6 +13,7 @@
     "swap-lock-registry": "npx swap-lock-registry --yarn --parallel --url https://registry.yarnpkg.com yarn.lock"
   },
   "dependencies": {
+    "@alephium/web3-react": "^1.4.0",
     "@codemirror/lang-json": "^6.0.1",
     "@codemirror/lint": "^6.8.0",
     "@cosmjs/amino": "^0.32.3",
@@ -20,17 +21,17 @@
     "@metamask/eth-sig-util": "^7.0.2",
     "@metamask/onboarding": "^1.0.1",
     "@mysten/dapp-kit": "0.13.2",
-    "@onekeyfe/cross-inpage-provider-core": "2.1.3",
-    "@onekeyfe/cross-inpage-provider-types": "2.1.3",
-    "@onekeyfe/onekey-aptos-provider": "2.1.3",
-    "@onekeyfe/onekey-cardano-provider": "2.1.3",
-    "@onekeyfe/onekey-conflux-provider": "2.1.3",
-    "@onekeyfe/onekey-cosmos-provider": "2.1.3",
-    "@onekeyfe/onekey-near-provider": "2.1.3",
-    "@onekeyfe/onekey-solana-provider": "2.1.3",
-    "@onekeyfe/onekey-sui-provider": "2.1.3",
-    "@onekeyfe/onekey-tron-provider": "2.1.3",
-    "@onekeyfe/onekey-webln-provider": "2.1.3",
+    "@onekeyfe/cross-inpage-provider-core": "2.1.4",
+    "@onekeyfe/cross-inpage-provider-types": "2.1.4",
+    "@onekeyfe/onekey-aptos-provider": "2.1.4",
+    "@onekeyfe/onekey-cardano-provider": "2.1.4",
+    "@onekeyfe/onekey-conflux-provider": "2.1.4",
+    "@onekeyfe/onekey-cosmos-provider": "2.1.4",
+    "@onekeyfe/onekey-near-provider": "2.1.4",
+    "@onekeyfe/onekey-solana-provider": "2.1.4",
+    "@onekeyfe/onekey-sui-provider": "2.1.4",
+    "@onekeyfe/onekey-tron-provider": "2.1.4",
+    "@onekeyfe/onekey-webln-provider": "2.1.4",
     "@polkadot/api": "^9.11.3",
     "@polkadot/extension-dapp": "^0.47.5",
     "@radix-ui/react-checkbox": "^1.1.0",
@@ -50,6 +51,10 @@
     "@starcoin/starcoin": "^2.1.6",
     "@starcoin/starmask-onboarding": "^1.0.0",
     "@tanstack/react-query": "^5.40.0",
+    "@ton/core": "^0.57.0",
+    "@ton/crypto": "^3.3.0",
+    "@ton/ton": "^15.0.0",
+    "@tonconnect/ui-react": "^2.0.6",
     "@uiw/react-codemirror": "^4.22.1",
     "@unisat/wallet-utils": "^1.0.0",
     "@walletconnect/core": "^2.13.0",
@@ -72,11 +77,13 @@
     "console-feed": "^3.5.0",
     "cosmjs-types": "^0.9.0",
     "ethereumjs-util": "^7.1.5",
+    "jose": "^5.8.0",
     "js-conflux-sdk": "^2.1.8",
     "lodash-es": "^4.17.21",
     "long": "^5.2.3",
     "lucid-cardano": "^0.10.7",
     "lucide-react": "^0.378.0",
+    "msw": "^2.4.1",
     "near-api-js": "^0.44.2",
     "next": "^13.5.6",
     "next-themes": "^0.3.0",
@@ -109,5 +116,10 @@
     "sass": "^1.51.0",
     "tailwindcss": "^3.4.3",
     "typescript": "5.1.6"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

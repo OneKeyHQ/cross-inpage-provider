@@ -117,9 +117,17 @@ function ApiExecute({
     [dispatch],
   );
 
+  const handleSetValidateResult = useCallback(
+    (newResult: string) => {
+      dispatch({ type: 'SET_VALIDATE_RESULT', payload: newResult });
+    },
+    [dispatch],
+  );
+
   const handleExecute = useCallback(async () => {
     setLoading(true);
     handleSetResult('Calling...');
+    handleSetValidateResult('');
 
     try {
       // @ts-expect-error

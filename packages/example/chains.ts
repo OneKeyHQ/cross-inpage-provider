@@ -33,6 +33,12 @@ export const thirdPartyChains: IChainInfo[] = [
 export const registeredChains: IChainInfo[] = [
   {
     id: uuid.v4(),
+    name: 'Alephium',
+    href: '/alephium',
+    icon: 'https://uni.onekey-asset.com/static/chain/alph.png',
+  },
+  {
+    id: uuid.v4(),
     name: 'Algo',
     href: '/algo',
     icon: 'https://uni.onekey-asset.com/static/chain/algo.png',
@@ -124,6 +130,12 @@ export const registeredChains: IChainInfo[] = [
   },
   {
     id: uuid.v4(),
+    name: 'Scdo',
+    href: '/scdo',
+    icon: 'https://uni.onekey-asset.com/static/chain/scdo.png',
+  },
+  {
+    id: uuid.v4(),
     name: 'Solana Standard',
     href: '/solanaStandard',
     icon: 'https://uni.onekey-asset.com/static/chain/sol.png',
@@ -139,6 +151,12 @@ export const registeredChains: IChainInfo[] = [
     name: 'Sui Standard',
     href: '/suiStandard',
     icon: 'https://uni.onekey-asset.com/static/chain/sui.png',
+  },
+  {
+    id: uuid.v4(),
+    name: 'Ton',
+    href: '/ton',
+    icon: 'https://uni.onekey-asset.com/static/chain/ton.png',
   },
   {
     id: uuid.v4(),

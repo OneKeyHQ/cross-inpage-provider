@@ -18,8 +18,8 @@ import {
 } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import { ProviderWebln } from '@onekeyfe/onekey-webln-provider';
-// import { ProviderScdo } from '@onekeyfe/onekey-scdo-provider';
-// import { ProviderTon } from '@onekeyfe/onekey-ton-provider';
+import { ProviderScdo } from '@onekeyfe/onekey-scdo-provider';
+import { ProviderTon } from '@onekeyfe/onekey-ton-provider';
 import { ProviderNostr } from '@onekeyfe/onekey-nostr-provider';
 import { ProviderBtc, ProviderBtcWallet } from '@onekeyfe/onekey-btc-provider';
 import { ProviderAlgo } from '@onekeyfe/onekey-algo-provider';
@@ -43,10 +43,10 @@ export type IWindowOneKeyHub = {
   keplr?: ProviderCosmos;
   webln?: ProviderWebln;
   nostr?: ProviderNostr;
-  // ton?: ProviderTon;
+  ton?: ProviderTon;
   unisat?: ProviderBtc;
   btcwallet?: ProviderBtcWallet;
-  // scdo?: ProviderScdo;
+  scdo?: ProviderScdo;
   $private?: ProviderPrivate;
   $walletInfo?: {
     buildNumber: string;
@@ -105,9 +105,9 @@ function injectWeb3Provider(): unknown {
     bridge,
   });
 
-  // const tonconnect = new ProviderTon({
-  //   bridge,
-  // });
+  const tonconnect = new ProviderTon({
+    bridge,
+  });
 
   const cosmos = new ProviderCosmos({
     bridge,
@@ -130,7 +130,7 @@ function injectWeb3Provider(): unknown {
 
   const algorand = new ProviderAlgo({ bridge });
 
-  // const scdo = new ProviderScdo({ bridge });
+  const scdo = new ProviderScdo({ bridge });
 
   // const $privateExternalAccount = new ProviderPrivateExternalAccount({ bridge });
 
@@ -148,10 +148,10 @@ function injectWeb3Provider(): unknown {
     tron,
     sollet: null,
     sui,
-    // tonconnect,
+    tonconnect,
     cardano,
     cosmos,
-    // scdo,
+    scdo,
     webln,
     nostr,
     btc,
@@ -196,11 +196,14 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('conflux', conflux);
   defineWindowProperty('tronLink', tron);
   defineWindowProperty('suiWallet', sui);
-  // defineWindowProperty('tonkeeper', {
-  //   tonconnect,
-  // });
+  defineWindowProperty('onekeyTonWallet', {
+    tonconnect,
+  });
+  defineWindowProperty('openmask', {
+    tonconnect,
+  });
   defineWindowProperty('unisat', btc);
-  // defineWindowProperty('scdo', scdo);
+  defineWindowProperty('scdo', scdo);
   defineWindowProperty('algorand', algorand);
   defineWindowProperty('exodus', {
     algorand,

@@ -15,6 +15,8 @@ import InfoLayout from '../../../components/InfoLayout';
 import { createTransferTransaction, createVersionedTransaction } from '../solana/builder';
 import { verifySignIn } from '@solana/wallet-standard-util';
 import nacl from 'tweetnacl';
+import { Transaction, VersionedTransaction } from '@solana/web3.js';
+import base58 from 'bs58';
 
 function Example() {
   const { setProvider } = useWallet();
@@ -247,6 +249,24 @@ function Example() {
             return JSON.stringify(res);
           }}
         />
+        {/* <ApiPayload
+          title="signTransaction Raw Tx"
+          description="签署 Raw Tx 交易"
+          presupposeParams={params.signRawTransaction}
+          onExecute={async (request: string) => {
+            const { message } = JSON.parse(request);
+            const txByte = base58.decode(message);
+            let tx
+            try {
+              tx = Transaction.from(txByte);
+            } catch (e) {
+              tx = VersionedTransaction.deserialize(txByte);
+            }
+
+            const res = await signTransaction(tx);
+            return res;
+          }}
+        /> */}
         <ApiPayload
           title="signAllTransactions"
           description="签署多个交易"

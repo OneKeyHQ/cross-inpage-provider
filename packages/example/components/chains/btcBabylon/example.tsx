@@ -111,6 +111,7 @@ export default function BTCExample() {
           title="connectWallet"
           description="请求连接 Wallet 获取账户"
           disableRequestContent
+          allowCallWithoutProvider
           onExecute={async (request: string) => {
             const res = await provider?.connectWallet();
             console.log('connectWallet result:', res);
@@ -272,7 +273,6 @@ export default function BTCExample() {
             const res = await provider?.signMessageBIP322(request);
             return res;
           }}
-          // @ts-expect-error
           onValidate={async (request: string, response: string) => {
             return Verifier.verifySignature(account.address, request, response);
           }}
@@ -359,6 +359,10 @@ export default function BTCExample() {
 
             return Promise.resolve(psbt);
           }}
+          onValidate={async (request: string, response: string) => {
+            const res = await provider?.pushPsbt(response);
+            return JSON.stringify(res);
+          }}
         />
         <ApiPayload
           title="signPsbts"
@@ -422,6 +426,10 @@ export default function BTCExample() {
                 options: [pabtObj.options],
               }),
             );
+          }}
+          onValidate={async (request: string, response: string) => {
+            const [psbtHexs] = JSON.parse(response)
+            return await provider?.pushPsbt(psbtHexs);
           }}
         />
         <ApiPayload

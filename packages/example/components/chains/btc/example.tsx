@@ -114,6 +114,7 @@ export default function BTCExample() {
           title="requestAccounts"
           description="请求连接 Wallet 获取账户"
           disableRequestContent
+          allowCallWithoutProvider={true}
           onExecute={async (request: string) => {
             const res = await provider?.requestAccounts();
             return JSON.stringify(res);
@@ -274,10 +275,14 @@ export default function BTCExample() {
 
             return Promise.resolve(psbt);
           }}
+          onValidate={async (request: string, response: string) => {
+            const res = await provider?.pushPsbt(response);
+            return JSON.stringify(res);
+          }}
         />
         <ApiPayload
           title="signPsbts"
-          description="signPsbts"
+          description="signPsbts、验证流程尝试广播第一个交易"
           presupposeParams={params.signPsbts}
           onExecute={async (request: string) => {
             const { psbtHexs, options } = JSON.parse(request) as {
@@ -337,6 +342,10 @@ export default function BTCExample() {
                 options: [pabtObj.options],
               }),
             );
+          }}
+          onValidate={async (request: string, response: string) => {
+            const [psbtHexs] = JSON.parse(response)
+            return await provider?.pushPsbt(psbtHexs);
           }}
         />
         <ApiPayload

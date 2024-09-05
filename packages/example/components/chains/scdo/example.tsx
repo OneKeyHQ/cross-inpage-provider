@@ -9,6 +9,8 @@ import { useWallet } from '../../../components/connect/WalletContext';
 import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
 import params from './params';
+import { Input } from '../../ui/input';
+import { ScdoNodeClient } from './rpc';
 
 // https://demo.scdo.org/
 export default function Example() {
@@ -24,6 +26,8 @@ export default function Example() {
       inject: '$onekey.scdo',
     },
   ]);
+
+  const client = new ScdoNodeClient();
 
   const { account, provider } = useWallet<IProviderApi>();
 
@@ -42,6 +46,33 @@ export default function Example() {
       provider,
       address: address,
     };
+  };
+
+  const getTokenTransferFrom = (chainId: string | undefined, approve: boolean = false) => {
+    return (
+      <>
+        <Input
+          label="收款地址"
+          type="text"
+          name="toAddress"
+          defaultValue={account?.address ?? ''}
+        />
+        <Input label="金额" type="number" name="amount" defaultValue="10000" />
+
+        {approve && (
+          <>
+            <div>
+              <input id="max_approve" name="maxApprove" type="checkbox" />
+              <label htmlFor="max_approve">无限授权</label>
+            </div>
+            <div>
+              <input id="mock_uniswap" name="mockUniSwap" type="checkbox" />
+              <label htmlFor="mock_uniswap">模拟 UniSwap（不传 Value）</label>
+            </div>
+          </>
+        )}
+      </>
+    );
   };
 
   return (
@@ -141,6 +172,29 @@ export default function Example() {
             return await provider?.request<string>({
               method: 'scdo_signTransaction',
               params: [tx],
+            });
+          }}
+          generateRequestFrom={() => getTokenTransferFrom(account?.chainId)}
+          onGenerateRequest={async (fromData: Record<string, any>) => {
+            const from = account?.address ?? '';
+            const to = fromData.toAddress ?? from;
+            const amount = fromData.amount;
+
+            if (!amount) {
+              return 'Amount is required';
+            }
+
+            const nonce = await client.getNonce(from);
+            console.log('nonce', nonce);
+
+            return JSON.stringify({
+              accountNonce: nonce,
+              from: from,
+              to: to,
+              amount: amount,
+              gasLimit: 21000,
+              gasPrice: 1,
+              payload: '',
             });
           }}
         />

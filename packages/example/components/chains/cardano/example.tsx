@@ -389,6 +389,9 @@ export default function Example() {
             const signedTx = await lucid.fromTx(request).sign().complete();
             return signedTx.toString();
           }}
+          onValidate={async (request: string, response: string) => {
+            return await walletApi?.submitTx(response);
+          }}
           generateRequestFrom={() => {
             return (
               <>
@@ -458,7 +461,8 @@ export default function Example() {
             {
               id: 'submitTx',
               name: 'submitTx',
-              value: '复制 signTx 签名结果到这里',
+              value:
+                '复制 signTx 签名结果到这里、然后点击执行。\nsignTx 验证流程会自动广播交易。重复广播会报错。',
             },
           ]}
           onExecute={async (request: string) => {

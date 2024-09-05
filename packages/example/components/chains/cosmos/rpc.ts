@@ -35,4 +35,20 @@ export class CosmosNodeClient {
 
     return response.data.account;
   }
+
+  public async encodeAmino(json: string): Promise<string | null> {
+    const jsonFormatted = JSON.stringify(JSON.parse(json));
+    const response = await this.axios.post<{ amino_binary: string }>(
+      `/cosmos/tx/v1beta1/encode/amino`,
+      {
+        amino_json: jsonFormatted,
+      }
+    );
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    return response.data.amino_binary;
+  }
 }

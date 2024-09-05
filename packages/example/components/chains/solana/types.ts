@@ -17,8 +17,8 @@ export interface IProviderApi {
   signAndSendTransaction(transafe: Transaction): Promise<{
     signature: Uint8Array;
   }>;
-  signTransaction(transafe: Transaction | VersionedTransaction): Promise<string>;
-  signAllTransactions(transafe: Transaction[]): Promise<string[]>;
+  signTransaction(transafe: Transaction | VersionedTransaction): Promise<Transaction | VersionedTransaction>;
+  signAllTransactions(transafe: Transaction[]): Promise<(Transaction | VersionedTransaction)[]>;
   on(event: string, listener: (...args: any[]) => void): void;
   removeListener(event: string, listener: (...args: any[]) => void): void;
 }

@@ -211,8 +211,10 @@ export default function Example() {
           onExecute={async (request: string) => {
             const obj = JSON.parse(request);
             const tx = await provider?.generateTransaction(account?.address, obj);
-            const res = await provider?.signTransaction(tx);
-            return JSON.stringify(res);
+            return await provider?.signTransaction(tx);
+          }}
+          onValidate={async (request: string, result: string) => {
+            return await provider?.submitTransaction(new Uint8Array(result.split(",").map((item) => parseInt(item, 10))));
           }}
         />
         <ApiPayload
@@ -232,8 +234,7 @@ export default function Example() {
           presupposeParams={params.signTransaction(account?.address ?? '')}
           onExecute={async (request: string) => {
             const obj = JSON.parse(request);
-            const res = await provider?.generateSignAndSubmitTransaction(account?.address, obj);
-            return JSON.stringify(res);
+            return await provider?.generateSignAndSubmitTransaction(account?.address, obj);
           }}
         />
         <ApiPayload
@@ -243,12 +244,17 @@ export default function Example() {
           onExecute={async (request: string) => {
             const obj = JSON.parse(request);
             const res = await provider?.generateTransaction(account?.address, obj);
+            return res;
+          }}
+          onValidate={async (request: string, result: string) => {
+            const signedRawTx = await provider?.signTransaction(result);
+            const res = await provider?.submitTransaction(signedRawTx);
             return JSON.stringify(res);
           }}
         />
         <ApiPayload
           title="signGenericTransaction"
-          description="signGenericTransaction"
+          description="signGenericTransaction 会广播上链"
           presupposeParams={params.signGenericTransaction(account?.address ?? '')}
           onExecute={async (request: string) => {
             const obj = JSON.parse(request);

@@ -12,6 +12,18 @@ import {
 } from '@alephium/web3-react';
 import { verifySignedMessage } from '@alephium/web3';
 
+import { NodeProvider, TransactionBuilder, buildScriptByteCode, buildContractByteCode, ONE_ALPH, DUST_AMOUNT } from "@alephium/web3"
+import * as fetchRetry from 'fetch-retry'
+
+// 防止限频
+const retryFetch = fetchRetry.default(fetch, {
+  retries: 10,
+  retryDelay: 1000
+})
+
+const nodeUrl = "https://node.testnet.alephium.org"
+const nodeProvider = new NodeProvider(nodeUrl, undefined, retryFetch)
+
 export function Example() {
   const wallet = useWallet();
   const balance = useBalance();
@@ -85,6 +97,14 @@ export function Example() {
           presupposeParams={params.signUnsignedTx(wallet?.account?.address ?? '')}
           onExecute={async (request: string) => {
             return wallet.signer.signUnsignedTx(JSON.parse(request));
+          }}
+          onValidate={async (request: string, response: string) => {
+            const { unsignedTx, signature } = JSON.parse(response);
+            const txId = await nodeProvider.transactions.postTransactionsSubmit({
+              unsignedTx,
+              signature,
+            });
+            return txId.txId;
           }}
         />
         <ApiPayload

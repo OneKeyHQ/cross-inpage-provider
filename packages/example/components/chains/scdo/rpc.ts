@@ -1,6 +1,7 @@
 import type { AxiosInstance } from 'axios';
 import Axios from 'axios';
 
+// https://scdo-project.gitbook.io/scdo-wiki/developer/api/rpc
 export class ScdoNodeClient {
   public readonly axios: AxiosInstance;
 

@@ -33,6 +33,7 @@
     "@onekeyfe/cross-inpage-provider-core": "2.1.4",
     "@onekeyfe/cross-inpage-provider-types": "2.1.4",
     "@onekeyfe/onekey-algo-provider": "2.1.4",
+    "@onekeyfe/onekey-alph-provider": "2.1.2",
     "@onekeyfe/onekey-aptos-provider": "2.1.4",
     "@onekeyfe/onekey-btc-provider": "2.1.4",
     "@onekeyfe/onekey-cardano-provider": "2.1.4",

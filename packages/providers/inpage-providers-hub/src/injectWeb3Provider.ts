@@ -7,6 +7,7 @@ import { ProviderSolana, registerSolanaWallet, WalletIcon } from '@onekeyfe/onek
 // import { ProviderStarcoin } from '@onekeyfe/onekey-starcoin-provider';
 import { ProviderAptos, ProviderAptosMartian } from '@onekeyfe/onekey-aptos-provider';
 import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
+import { ProviderAlph } from '@onekeyfe/onekey-alph-provider';
 import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
 import { ProviderCardano, defineWindowCardanoProperty } from '@onekeyfe/onekey-cardano-provider';
 // import { ProviderPrivateExternalAccount } from '@onekeyfe/onekey-private-external-account-provider';
@@ -46,6 +47,7 @@ export type IWindowOneKeyHub = {
   ton?: ProviderTon;
   unisat?: ProviderBtc;
   btcwallet?: ProviderBtcWallet;
+  alephium?: ProviderAlph;
   scdo?: ProviderScdo;
   $private?: ProviderPrivate;
   $walletInfo?: {
@@ -105,6 +107,10 @@ function injectWeb3Provider(): unknown {
     bridge,
   });
 
+  const alephium = new ProviderAlph({
+    bridge,
+  });
+
   const tonconnect = new ProviderTon({
     bridge,
   });
@@ -150,6 +156,7 @@ function injectWeb3Provider(): unknown {
     sui,
     tonconnect,
     cardano,
+    alephium,
     cosmos,
     scdo,
     webln,
@@ -194,6 +201,10 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('petra', martian, { enumerable: true });
   defineWindowProperty('martian', martianProxy, { enumerable: true });
   defineWindowProperty('conflux', conflux);
+  defineWindowProperty('alephium', alephium);
+  defineWindowProperty('alephiumProviders', {
+    alephium,
+  });
   defineWindowProperty('tronLink', tron);
   defineWindowProperty('suiWallet', sui);
   defineWindowProperty('onekeyTonWallet', {

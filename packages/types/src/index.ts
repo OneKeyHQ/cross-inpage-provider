@@ -15,6 +15,7 @@ declare global {
     sunWeb: any;
     suiWallet: any;
     cardano: any;
+    alephium: any;
     scdo: any;
     ton: any;
     keplr: any;
@@ -53,6 +54,7 @@ export enum IInjectedProviderNames {
   algo = 'algo',
   sui = 'sui',
   cardano = 'cardano',
+  alephium = 'alephium',
   cosmos = 'cosmos',
   polkadot = 'polkadot',
   scdo = 'scdo',

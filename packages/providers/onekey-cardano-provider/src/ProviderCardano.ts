@@ -137,7 +137,7 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
   }
 
   private _handleAccountChange(payload: CardanoAccount) {
-    const account = payload.accounts.address
+    const account = payload.accounts?.address
     if (this.isAccountsChanged(account)) {
       this.emit('accountChanged', account || null);
     }

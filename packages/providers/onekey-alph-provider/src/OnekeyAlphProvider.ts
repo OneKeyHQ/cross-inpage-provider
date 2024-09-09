@@ -38,10 +38,14 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
   id = 'alephium';
   name = 'Alephium';
   icon = 'https://uni.onekey-asset.com/static/logo/onekey.png';
-  version = '0.0.0';
+  version = '0.9.4';
   _accountInfo: Account | undefined;
 
   _base: ProviderAlphBase
+
+  onDisconnected: (() => void | Promise<void>) | undefined = undefined
+  #nodeProvider: NodeProvider | undefined = undefined
+  #explorerProvider: ExplorerProvider | undefined = undefined
   
   constructor(props: OneKeyTonProviderProps) {
     super();
@@ -126,6 +130,10 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
       method: 'disconnect',
       params: [],
     });
+    if (this.onDisconnected !== undefined) {
+      await this.onDisconnected()
+    }
+    this.onDisconnected = undefined;
     this._handleDisconnected();
   }
 
@@ -137,6 +145,9 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
   }
 
   enableIfConnected(options: EnableOptions): Promise<Account | undefined> {
+    if (options.onDisconnected) {
+      this.onDisconnected = options.onDisconnected
+    }
     return this.bridgeRequest({
       method: 'enableIfConnected',
       params: options,
@@ -155,8 +166,7 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
     let params: Record<string, unknown> = {};
     if (opt) {
       if (opt.onDisconnected) {
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        this.on(PROVIDER_EVENTS.disconnect, opt.onDisconnected);
+        this.onDisconnected = opt.onDisconnected
       }
       params = {}
       Object.keys(opt).forEach((key) => {
@@ -170,11 +180,17 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
   }
 
   get nodeProvider(): NodeProvider | undefined {
-    return undefined;
+    if (!this.#nodeProvider) {
+      this.#nodeProvider = new NodeProvider('https://node.mainnet.alephium.org');
+    }
+    return this.#nodeProvider;
   }
 
   get explorerProvider(): ExplorerProvider | undefined {
-    return undefined;
+    if (!this.#explorerProvider) {
+      this.#explorerProvider = new ExplorerProvider('https://backend.mainnet.alephium.org');
+    }
+    return this.#explorerProvider;
   }
 
   unsafeGetSelectedAccount(): Promise<Account> {

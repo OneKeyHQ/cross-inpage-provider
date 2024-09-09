@@ -41,6 +41,9 @@ export function PresupposeParamsSelector({
   );
 
   const showPresupposeParams = presupposeParams && presupposeParams.length > 1;
+
+  const presupposeParamsDescription = presupposeParams?.find((param) => param.id === currentPurposeParamId)?.description;
+
   return showPresupposeParams ? (
     <div className="flex flex-col gap-2">
       <span className="text-base font-medium">预设参数</span>
@@ -60,6 +63,12 @@ export function PresupposeParamsSelector({
           ))}
         </SelectContent>
       </Select>
+      {
+        presupposeParamsDescription &&
+        <p className="px-2 text-base text-muted-foreground">
+          {presupposeParamsDescription}
+        </p>
+      }
     </div>
   ) : null;
 }

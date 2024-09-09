@@ -140,7 +140,7 @@ export default {
       },
       {
         id: 'signMessage-default-sha256',
-        name: 'Default with Sha256',
+        name: 'Default with Sha256（硬件不支持）',
         value: JSON.stringify({
           signerAddress: from,
           signerKeyType: 'default',
@@ -150,7 +150,7 @@ export default {
       },
       {
         id: 'signMessage-default-blake2b',
-        name: 'Default with Blake2b',
+        name: 'Default with Blake2b（硬件不支持）',
         value: JSON.stringify({
           signerAddress: from,
           signerKeyType: 'default',
@@ -160,7 +160,7 @@ export default {
       },
       {
         id: 'signMessage-default-identity',
-        name: 'Default with Identity',
+        name: 'Default with Identity（硬件不支持）',
         value: JSON.stringify({
           signerAddress: from,
           signerKeyType: 'default',
@@ -170,7 +170,7 @@ export default {
       },
       {
         id: 'signMessage-bip340-schnorr-alephium',
-        name: 'Bip340 Schnorr with Alephium',
+        name: 'Bip340 Schnorr with Alephium（不支持）',
         value: JSON.stringify({
           signerAddress: from,
           signerKeyType: 'bip340-schnorr',
@@ -180,7 +180,7 @@ export default {
       },
       {
         id: 'signMessage-bip340-schnorr-sha256',
-        name: 'Bip340 Schnorr with Sha256',
+        name: 'Bip340 Schnorr with Sha256（不支持）',
         value: JSON.stringify({
           signerAddress: from,
           signerKeyType: 'bip340-schnorr',
@@ -190,7 +190,7 @@ export default {
       },
       {
         id: 'signMessage-bip340-schnorr-blake2b',
-        name: 'Bip340 Schnorr with Blake2b',
+        name: 'Bip340 Schnorr with Blake2b（不支持）',
         value: JSON.stringify({
           signerAddress: from,
           signerKeyType: 'bip340-schnorr',
@@ -200,7 +200,7 @@ export default {
       },
       {
         id: 'signMessage-bip340-schnorr-identity',
-        name: 'Bip340 Schnorr with Identity',
+        name: 'Bip340 Schnorr with Identity（不支持）',
         value: JSON.stringify({
           signerAddress: from,
           signerKeyType: 'bip340-schnorr',

@@ -17,6 +17,7 @@ import * as fetchRetry from 'fetch-retry'
 import { useState } from 'react';
 import { RadioGroup, RadioGroupItem } from '../../ui/radio-group';
 import { Label } from '../../ui/label';
+import { useToast } from '../../ui/use-toast';
 
 // 防止限频
 const retryFetch = fetchRetry.default(fetch, {
@@ -24,12 +25,13 @@ const retryFetch = fetchRetry.default(fetch, {
   retryDelay: 1000
 })
 
-const nodeUrl = "https://node.testnet.alephium.org"
+const nodeUrl = "https://node.mainnet.alephium.org"
 const nodeProvider = new NodeProvider(nodeUrl, undefined, retryFetch)
 
 export function Example() {
   const wallet = useWallet();
   const balance = useBalance();
+  const { toast } = useToast();
 
   return (
     <>
@@ -107,6 +109,13 @@ export function Example() {
               unsignedTx,
               signature,
             });
+            if (!txId.txId) {
+              toast({
+                title: '交易提交失败',
+                description: '请排出网络问题,',
+                variant: 'destructive',
+              });
+            }
             return txId.txId;
           }}
         />
@@ -122,13 +131,22 @@ export function Example() {
             const params = JSON.parse(request);
             const signature = JSON.parse(response).signature;
 
-            return verifySignedMessage(
+            const signed = verifySignedMessage(
               params.message,
               params.messageHasher,
               wallet.account.publicKey,
               signature,
               params.signerKeyType,
-            ).toString();
+            )
+
+            if (!signed) {
+              toast({
+                title: '签名验证失败',
+                variant: 'destructive',
+              });
+            }
+
+            return signed.toString();
           }}
         />
       </ApiGroup>

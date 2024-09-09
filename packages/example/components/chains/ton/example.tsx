@@ -13,6 +13,7 @@ import InfoLayout from '../../InfoLayout';
 import params from './params';
 import { TonProofDemoApi } from './TonProofDemoApi';
 import { Switch } from '../../ui/switch';
+import { useToast } from '../../ui/use-toast';
 
 const TON_SCAM_DAPP_ENABLE_KEY = 'ton_scam_dapp_enable';
 
@@ -21,8 +22,9 @@ export function Example() {
   const rawAddress = useTonAddress(false);
   const wallet = useTonWallet();
   const [tonConnectUI, setOptions] = useTonConnectUI();
+  const { toast } = useToast();
 
-  const enable = localStorage.getItem(TON_SCAM_DAPP_ENABLE_KEY);
+  const scamEnable = localStorage.getItem(TON_SCAM_DAPP_ENABLE_KEY);
 
   return (
     <>
@@ -31,7 +33,7 @@ export function Example() {
       <InfoLayout title="Base Info">
         <div>
           <p>伪装欺诈模式</p>
-          <Switch checked={!!enable} onCheckedChange={async (checked) => {
+          <Switch checked={!!scamEnable} onCheckedChange={async (checked) => {
             if (tonConnectUI.connected) {
               await tonConnectUI?.disconnect();
               TonProofDemoApi.reset();
@@ -91,6 +93,20 @@ export function Example() {
             if (wallet.connectItems?.tonProof && 'proof' in wallet.connectItems.tonProof) {
               try {
                 const result = await TonProofDemoApi.checkProof(wallet.connectItems.tonProof.proof, wallet.account);
+
+                if (!result) {
+                  toast({
+                    variant: 'destructive',
+                    title: 'Proof 签名验证失败'
+                  });
+                }
+                if (result && scamEnable) {
+                  toast({
+                    title: '当前处于伪装欺诈模式，不应该成功连接账户',
+                    variant: 'destructive'
+                  });
+                }
+
                 return JSON.stringify({
                   success: result,
                   proof: wallet.connectItems.tonProof.proof
@@ -130,7 +146,6 @@ export function Example() {
         />
         <ApiPayload
           title="sendTransaction"
-          description="带评论的转账普通 Native"
           allowCallWithoutProvider={!!userFriendlyAddress}
           presupposeParams={params.sendTransactionWithBody(userFriendlyAddress || '')}
           onExecute={async (request: string) => {

@@ -64,6 +64,21 @@ export default {
             {
               address: to,
               amount: '5000000',
+              payload: 'te6ccsEBAQEADAAMABQAAAAASGVsbG8hCaTc/g==',
+            },
+          ],
+        }),
+      },
+      {
+        id: 'sendTransaction-native-stateInit',
+        name: 'Native with stateInit and body',
+        description: '带 stateInit 只有未初始化的账户才可以转账成功',
+        value: JSON.stringify({
+          validUntil: Math.floor(Date.now() / 1000) + 360,
+          messages: [
+            {
+              address: to,
+              amount: '5000000',
               stateInit:
                 'te6cckEBBAEAOgACATQCAQAAART/APSkE/S88sgLAwBI0wHQ0wMBcbCRW+D6QDBwgBDIywVYzxYh+gLLagHPFsmAQPsAlxCarA==',
               payload: 'te6ccsEBAQEADAAMABQAAAAASGVsbG8hCaTc/g==',

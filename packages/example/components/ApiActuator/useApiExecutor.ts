@@ -1,6 +1,7 @@
 import { get } from 'lodash';
 import { useCallback } from 'react';
 import { stringifyWithSpecialType } from '../../lib/jsonUtils';
+import { useToast } from '../ui/use-toast';
 
 export type IApiExecutor = {
   onExecute: (request: string) => Promise<any>;
@@ -14,6 +15,8 @@ export function useApiExecutor({ onExecute, onValidate }: IApiExecutor): {
     result: string,
   ) => Promise<{ validation: string | undefined; error: string | undefined }>;
 } {
+  const { toast } = useToast();
+
   const execute = useCallback(
     async (request: string) => {
       try {
@@ -68,11 +71,16 @@ export function useApiExecutor({ onExecute, onValidate }: IApiExecutor): {
 
         return { validation: validationString ?? 'null', error: undefined };
       } catch (error) {
+        toast({
+          title: '验证失败',
+          description: get(error, 'message', '验证失败'),
+          variant: 'destructive',
+        });
         console.log('validate error', error);
         return { validation: undefined, error: get(error, 'message', 'Validation error') };
       }
     },
-    [onValidate],
+    [onValidate, toast],
   );
 
   return { execute, validate };

@@ -4,7 +4,7 @@ import { stringifyWithSpecialType } from '../../lib/jsonUtils';
 
 export type IApiExecutor = {
   onExecute: (request: string) => Promise<any>;
-  onValidate?: (request: string, response: string) => Promise<string>;
+  onValidate?: (request: string, response: string) => Promise<any>;
 };
 
 export function useApiExecutor({ onExecute, onValidate }: IApiExecutor): {
@@ -51,8 +51,22 @@ export function useApiExecutor({ onExecute, onValidate }: IApiExecutor): {
   const validate = useCallback(
     async (request: string, result: string) => {
       try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const validation = await onValidate(request, result);
-        return { validation, error: undefined };
+
+        let validationString: string;
+        // normal types
+        if (
+          typeof validation === 'number' ||
+          typeof validation === 'boolean' ||
+          typeof validation === 'string'
+        ) {
+          validationString = validation.toString();
+        } else {
+          validationString = stringifyWithSpecialType(validation);
+        }
+
+        return { validation: validationString ?? 'null', error: undefined };
       } catch (error) {
         console.log('validate error', error);
         return { validation: undefined, error: get(error, 'message', 'Validation error') };

@@ -3,6 +3,7 @@ import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
 import { useEffect, useRef } from 'react';
 import { get } from 'lodash';
+import axios from 'axios';
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
 import { IProviderApi, IProviderInfo, SignMessageResponse } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
@@ -188,7 +189,23 @@ export default function Example() {
           onExecute={async (request: string) => {
             const obj = JSON.parse(request);
             const res = await provider?.signTransaction(obj);
-            return JSON.stringify(res);
+            return res;
+          }}
+          onValidate={async (request: string, result: string) => {
+            const jsonObject = JSON.parse(result);
+            const buffer = new Uint8Array(jsonObject);
+
+            const options = {
+              method: 'POST',
+              url: 'https://api.mainnet.aptoslabs.com/v1/transactions',
+              headers: {'Content-Type': 'application/x.aptos.signed_transaction+bcs'},
+              data: buffer
+            };
+
+            const res = await axios.request(options);
+
+            console.log(res.data);
+            return Promise.resolve(JSON.stringify(res.data));
           }}
         />
         <ApiPayload

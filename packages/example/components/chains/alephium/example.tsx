@@ -12,6 +12,21 @@ import {
 } from '@alephium/web3-react';
 import { verifySignedMessage } from '@alephium/web3';
 
+import { NodeProvider, TransactionBuilder, buildScriptByteCode, buildContractByteCode, ONE_ALPH, DUST_AMOUNT } from "@alephium/web3"
+import * as fetchRetry from 'fetch-retry'
+import { useState } from 'react';
+import { RadioGroup, RadioGroupItem } from '../../ui/radio-group';
+import { Label } from '../../ui/label';
+
+// 防止限频
+const retryFetch = fetchRetry.default(fetch, {
+  retries: 10,
+  retryDelay: 1000
+})
+
+const nodeUrl = "https://node.testnet.alephium.org"
+const nodeProvider = new NodeProvider(nodeUrl, undefined, retryFetch)
+
 export function Example() {
   const wallet = useWallet();
   const balance = useBalance();
@@ -86,6 +101,14 @@ export function Example() {
           onExecute={async (request: string) => {
             return wallet.signer.signUnsignedTx(JSON.parse(request));
           }}
+          onValidate={async (request: string, response: string) => {
+            const { unsignedTx, signature } = JSON.parse(response);
+            const txId = await nodeProvider.transactions.postTransactionsSubmit({
+              unsignedTx,
+              signature,
+            });
+            return txId.txId;
+          }}
         />
         <ApiPayload
           title="signMessage"
@@ -115,9 +138,36 @@ export function Example() {
   );
 }
 
+const groupOptions = [
+  { label: '不指定', value: -1 },
+  { label: 'Group 0', value: 0 },
+  { label: 'Group 1', value: 1 },
+  { label: 'Group 2', value: 2 },
+  { label: 'Group 3', value: 3 },
+];
+
 export default function App() {
+  const [group, setGroup] = useState(0);
+
   return (
-    <AlephiumWalletProvider network="mainnet" theme="retro">
+    <AlephiumWalletProvider network="mainnet" theme="retro" addressGroup={group === -1 ? undefined : group}>
+      <InfoLayout title="连接指定 Group 账户">
+        <RadioGroup className='flex flex-row space-x-4' aria-labelledby="Select one item" defaultValue={"0"} name="form" onValueChange={(value) => {
+          const valueInt = parseInt(value);
+          if (valueInt === -1) {
+            setGroup(-1);
+          } else {
+            setGroup(valueInt);
+          }
+        }}>
+          {groupOptions.map((option) => (
+            <div className="items-center space-x-2">
+              <RadioGroupItem value={option.value.toString()} id={option.value.toString()} />
+              <Label htmlFor={option.value.toString()}>{option.label}</Label>
+            </div>
+          ))}
+        </RadioGroup>
+      </InfoLayout>
       <Example />
     </AlephiumWalletProvider>
   );

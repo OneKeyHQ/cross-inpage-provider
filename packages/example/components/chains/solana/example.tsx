@@ -8,7 +8,7 @@ import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import { useWallet } from '../../../components/connect/WalletContext';
 import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
-import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
+import { Connection, PublicKey, Transaction, VersionedTransaction, clusterApiUrl } from '@solana/web3.js';
 import params from './params';
 import { createTransferTransaction, createVersionedTransaction } from './builder';
 import nacl from 'tweetnacl';
@@ -208,7 +208,19 @@ export default function Example() {
               amount,
             );
             const res = await provider?.signTransaction(transafe);
-            return JSON.stringify(res);
+            return Buffer.from(res.serialize()).toString('hex')
+          }}
+          onValidate={async (request: string, result: string) => {
+            const tx = Transaction.from(Buffer.from(result, 'hex'))
+            const verified = tx.verifySignatures()
+
+            const res = await connection.simulateTransaction(tx)
+            return {
+              success: res.value.err === null,
+              verified,
+              tryRun: res,
+              tx
+            }
           }}
         />
         <ApiPayload
@@ -232,7 +244,17 @@ export default function Example() {
               amount,
             );
             const res = await provider?.signTransaction(transafe);
-            return JSON.stringify(res);
+            return Buffer.from(res.serialize()).toString('hex')
+          }}
+          onValidate={async (request: string, result: string) => {
+            const tx = VersionedTransaction.deserialize(Buffer.from(result, 'hex'))
+
+            const res = await connection.simulateTransaction(tx)
+            return {
+              success: res.value.err === null,
+              tryRun: res,
+              tx
+            }
           }}
         />
         <ApiPayload
@@ -256,7 +278,22 @@ export default function Example() {
             });
 
             const res = await provider?.signAllTransactions(trans);
-            return JSON.stringify(res);
+            return res.map(r => Buffer.from(r.serialize()).toString('hex'))
+          }}
+          onValidate={async (request: string, result: string) => {
+            const txArray = JSON.parse(result) as string[]
+            const txs = txArray.map(r => Transaction.from(Buffer.from(r, 'hex')))
+            const verifiedResult = []
+            for (const tx of txs) {
+              const verified = tx.verifySignatures()
+              const res = await connection.simulateTransaction(tx)
+              verifiedResult.push({
+                success: res.value.err === null,
+                verified,
+                tryRun: res,
+              })
+            }
+            return verifiedResult
           }}
         />
       </ApiGroup>

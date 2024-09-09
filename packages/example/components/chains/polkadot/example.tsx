@@ -250,7 +250,7 @@ export default function Example() {
               signature,
               account.address,
             );
-            return Promise.resolve(isValid.toString());
+            return Promise.resolve(isValid);
           }}
         />
         <ApiPayload
@@ -274,7 +274,7 @@ export default function Example() {
                 .transferKeepAlive(to, value)
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 .signAndSend(currentAddress, { signer: injector.signer }, (status) => {
-                  resolve(JSON.stringify(status));
+                  resolve(status);
                 })
                 .catch((e) => {
                   reject(e);

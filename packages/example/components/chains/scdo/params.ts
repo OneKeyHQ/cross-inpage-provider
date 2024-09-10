@@ -34,15 +34,15 @@ export default {
         to: '1S015daca201b66f96f74b4230916f9db8db0c0002',
       }),
     },
-    // {
-    //   id: 'sendTransaction-big-payload',
-    //   name: 'Big Payload',
-    //   value: JSON.stringify({
-    //     from: from,
-    //     payload: `0x${'010203040506070809'.repeat(600)}`,
-    //     to: from,
-    //   }),
-    // },
+    {
+      id: 'sendTransaction-big-payload',
+      name: 'Big Payload',
+      value: JSON.stringify({
+        from: from,
+        payload: `0x${'010203040506070809'.repeat(600)}`,
+        to: from,
+      }),
+    },
   ],
   estimateGas: (from: string, to: string) => [
     {

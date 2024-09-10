@@ -157,7 +157,11 @@ export function Example() {
           allowCallWithoutProvider={!!wallet}
           presupposeParams={params.signAndSubmitDeployContractTx(wallet?.account?.address ?? '')}
           onExecute={async (request: string) => {
-            return wallet.signer.signAndSubmitDeployContractTx(JSON.parse(request));
+            console.log('xxx=====>>>>>>> 1');
+            const xxx = await wallet.signer.signAndSubmitDeployContractTx(JSON.parse(request));
+            console.log('xxx=====>>>>>>> 2', xxx);
+
+            return xxx;
           }}
         />
         <ApiPayload
@@ -174,6 +178,8 @@ export function Example() {
           description=""
           allowCallWithoutProvider={!!wallet}
           presupposeParams={params.signAndSubmitUnsignedTx(wallet?.account?.address ?? '')}
+          generateRequestFrom={() => getTokenTransferFrom(wallet?.account?.address ?? '')}
+          onGenerateRequest={tokenTransferFromToTx}
           onExecute={async (request: string) => {
             return wallet.signer.signAndSubmitUnsignedTx(JSON.parse(request));
           }}

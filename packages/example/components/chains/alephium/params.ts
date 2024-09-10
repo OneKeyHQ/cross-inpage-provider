@@ -82,9 +82,10 @@ export default {
       {
         id: 'signAndSubmitDeployContractTx-test',
         name: 'Deploy test contract',
+        description: 'Deploy test contract 最少需要 0.1 ALPH',
         value: JSON.stringify({
           signerAddress: from,
-          bytecode: '000117010100000004d362d46012b413c40de0b6b3a7640000a90000',
+          bytecode: '000110010001010105d3eb23039a16000e2c020000',
         }),
       },
     ];
@@ -97,7 +98,7 @@ export default {
         value: JSON.stringify({
           signerAddress: from,
           bytecode:
-            '01010300000007b413c40de0b6b3a7640000a20c0c1440206c3b1f6262ffad9a4cb1e78f03f17f3593837505a69edbc18a59cf23c1f1c4020100',
+            '0101030001000d13020d0d144020c3fb9f552e7ab1138023ef0e313cf43483fc7fa35f2bbadc3f997ab17e52a10001001700160013020e2c2f0c7b',
         }),
       },
     ];

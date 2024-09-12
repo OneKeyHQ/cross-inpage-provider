@@ -12,12 +12,13 @@ import {
 } from '@alephium/web3-react';
 import { verifySignedMessage } from '@alephium/web3';
 
-import { NodeProvider, TransactionBuilder, buildScriptByteCode, buildContractByteCode, ONE_ALPH, DUST_AMOUNT } from "@alephium/web3"
+import { NodeProvider, TransactionBuilder, DUST_AMOUNT } from "@alephium/web3"
 import * as fetchRetry from 'fetch-retry'
 import { useState } from 'react';
 import { RadioGroup, RadioGroupItem } from '../../ui/radio-group';
 import { Label } from '../../ui/label';
 import { useToast } from '../../ui/use-toast';
+import { Input } from '../../ui/input';
 
 // 防止限频
 const retryFetch = fetchRetry.default(fetch, {
@@ -32,6 +33,88 @@ export function Example() {
   const wallet = useWallet();
   const balance = useBalance();
   const { toast } = useToast();
+
+  const getTokenTransferFrom = (chainId: string | undefined, approve: boolean = false) => {
+    const tokens: {
+      name: string;
+      address: string;
+    }[] = [];
+
+    tokens.push({
+      name: 'USDC',
+      address: '722954d9067c5a5ad532746a024f2a9d7a18ed9b90e27d0a3a504962160b5600',
+    });
+    tokens.push({
+      name: 'USDT',
+      address: '556d9582463fe44fbd108aedc9f409f69086dc78d994b88ea6c9e65f8bf98e00',
+    });
+
+    return (
+      <>
+        <Input
+          label="收款地址"
+          type="text"
+          name="toAddress"
+          defaultValue={wallet?.account?.address ?? ''}
+        />
+        <Input label="金额" type="number" name="amount" defaultValue={DUST_AMOUNT.toString()} />
+
+        <select name="tokenAddress" className="select">
+          <option selected value={undefined}>选择 Token</option>
+          {tokens.map((token) => (
+            <option value={token.address}>{token.name}</option>
+          ))}
+        </select>
+      </>
+    );
+  };
+
+  const tokenTransferFromToTx = async (fromData: Record<string, any>) => {
+    const from = wallet?.account?.address ?? '';
+    const senderPublicKey = wallet?.account?.publicKey ?? '';
+    const to = fromData.toAddress ?? from;
+    const amount = fromData.amount;
+    const tokenAddress = fromData.tokenAddress;
+
+    if (!amount) {
+      return 'Amount is required';
+    }
+
+    const builder = TransactionBuilder.from(nodeUrl)
+
+    if (tokenAddress && tokenAddress !== '选择 Token') {
+
+      const buildTxResultScript = await builder.buildTransferTx(
+        {
+          signerAddress: from,
+          destinations: [
+            { address: to, attoAlphAmount: amount },
+          ]
+        },
+        senderPublicKey
+      )
+
+      return JSON.stringify({
+        unsignedTx: buildTxResultScript.unsignedTx,
+        signerAddress: from,
+      })
+    }
+
+    const buildTxResultScript = await builder.buildTransferTx(
+      {
+        signerAddress: from,
+        destinations: [
+          { address: to, attoAlphAmount: DUST_AMOUNT, tokens: [{ id: tokenAddress, amount: amount }] },
+        ]
+      },
+      senderPublicKey
+    )
+
+    return JSON.stringify({
+      unsignedTx: buildTxResultScript.unsignedTx,
+      signerAddress: from,
+    })
+  }
 
   return (
     <>
@@ -74,7 +157,11 @@ export function Example() {
           allowCallWithoutProvider={!!wallet}
           presupposeParams={params.signAndSubmitDeployContractTx(wallet?.account?.address ?? '')}
           onExecute={async (request: string) => {
-            return wallet.signer.signAndSubmitDeployContractTx(JSON.parse(request));
+            console.log('xxx=====>>>>>>> 1');
+            const xxx = await wallet.signer.signAndSubmitDeployContractTx(JSON.parse(request));
+            console.log('xxx=====>>>>>>> 2', xxx);
+
+            return xxx;
           }}
         />
         <ApiPayload
@@ -91,6 +178,8 @@ export function Example() {
           description=""
           allowCallWithoutProvider={!!wallet}
           presupposeParams={params.signAndSubmitUnsignedTx(wallet?.account?.address ?? '')}
+          generateRequestFrom={() => getTokenTransferFrom(wallet?.account?.address ?? '')}
+          onGenerateRequest={tokenTransferFromToTx}
           onExecute={async (request: string) => {
             return wallet.signer.signAndSubmitUnsignedTx(JSON.parse(request));
           }}
@@ -100,6 +189,8 @@ export function Example() {
           description=""
           allowCallWithoutProvider={!!wallet}
           presupposeParams={params.signUnsignedTx(wallet?.account?.address ?? '')}
+          generateRequestFrom={() => getTokenTransferFrom(wallet?.account?.address ?? '')}
+          onGenerateRequest={tokenTransferFromToTx}
           onExecute={async (request: string) => {
             return wallet.signer.signUnsignedTx(JSON.parse(request));
           }}

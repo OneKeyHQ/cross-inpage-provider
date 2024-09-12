@@ -9,7 +9,6 @@ export default {
         from,
         gasLimit: 21000,
         gasPrice: 1,
-        hash: '0x258791d390b94380b64ad72efb7b434489d8298db770e796f42dc3876de49ca4',
         payload: '',
         to,
       }),
@@ -26,13 +25,22 @@ export default {
       }),
     },
     {
-      id: 'sendTransaction-contract',
-      name: 'Contract',
+      id: 'sendTransaction-erc20-contract',
+      name: 'ERC20 Token',
       value: JSON.stringify({
         from: from,
         payload:
-          '0xa9059cbb000000000000000000000000016cc151292ade2936ca8b1764240061f9673c51000000000000000000000000000000000000000000000000000000000000000a',
-        to: '',
+          '0xa9059cbb0000000000000000000000000118a02f993fc7a4348fd36b7f7a596948f02b310000000000000000000000000000000000000000000000000000000000002710',
+        to: '1S015daca201b66f96f74b4230916f9db8db0c0002',
+      }),
+    },
+    {
+      id: 'sendTransaction-big-payload',
+      name: 'Big Payload',
+      value: JSON.stringify({
+        from: from,
+        payload: `0x${'010203040506070809'.repeat(600)}`,
+        to: from,
       }),
     },
   ],
@@ -46,7 +54,6 @@ export default {
         'from': from,
         'gasLimit': 21000,
         'gasPrice': 1,
-        'hash': '0x258791d390b94380b64ad72efb7b434489d8298db770e796f42dc3876de49ca4',
         'payload': '',
         'signature': {
           'Sig':

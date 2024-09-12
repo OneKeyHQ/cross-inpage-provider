@@ -46,7 +46,7 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
   onDisconnected: (() => void | Promise<void>) | undefined = undefined
   #nodeProvider: NodeProvider | undefined = undefined
   #explorerProvider: ExplorerProvider | undefined = undefined
-  
+
   constructor(props: OneKeyTonProviderProps) {
     super();
 

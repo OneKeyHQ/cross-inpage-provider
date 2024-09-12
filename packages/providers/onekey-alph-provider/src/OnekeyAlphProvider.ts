@@ -198,27 +198,27 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
   }
 
   signAndSubmitDeployContractTx(params: SignDeployContractTxParams): Promise<SignDeployContractTxResult> {
-    return this.bridgeRequest({ method: 'signAndSubmitDeployContractTx', params }) as Promise<SignDeployContractTxResult>;
+    return this.bridgeRequest({ method: 'signAndSubmitDeployContractTx', params: JSON.stringify(params) }) as Promise<SignDeployContractTxResult>;
   }
 
   signAndSubmitExecuteScriptTx(params: SignExecuteScriptTxParams): Promise<SignExecuteScriptTxResult> {
-    return this.bridgeRequest({ method: 'signAndSubmitExecuteScriptTx', params }) as Promise<SignExecuteScriptTxResult>;
+    return this.bridgeRequest({ method: 'signAndSubmitExecuteScriptTx', params: JSON.stringify(params) }) as Promise<SignExecuteScriptTxResult>;
   }
 
   signAndSubmitTransferTx(params: SignTransferTxParams): Promise<SignTransferTxResult> {
-    return this.bridgeRequest({ method: 'signAndSubmitTransferTx', params }) as Promise<SignTransferTxResult>;
+    return this.bridgeRequest({ method: 'signAndSubmitTransferTx', params: JSON.stringify(params) }) as Promise<SignTransferTxResult>;
   }
 
   signAndSubmitUnsignedTx(params: SignUnsignedTxParams): Promise<SignUnsignedTxResult> {
-    return this.bridgeRequest({ method: 'signAndSubmitUnsignedTx', params }) as Promise<SignUnsignedTxResult>;
+    return this.bridgeRequest({ method: 'signAndSubmitUnsignedTx', params: JSON.stringify(params) }) as Promise<SignUnsignedTxResult>;
   }
 
   signUnsignedTx(params: SignUnsignedTxParams): Promise<SignUnsignedTxResult> {
-    return this.bridgeRequest({ method: 'signUnsignedTx', params }) as Promise<SignUnsignedTxResult>;
+    return this.bridgeRequest({ method: 'signUnsignedTx', params: JSON.stringify(params) }) as Promise<SignUnsignedTxResult>;
   }
 
   signMessage(params: SignMessageParams): Promise<SignMessageResult> {
-    return this.bridgeRequest({ method: 'signMessage', params }) as Promise<SignMessageResult>;
+    return this.bridgeRequest({ method: 'signMessage', params: JSON.stringify(params) }) as Promise<SignMessageResult>;
   }
 
   request(message: RequestMessage) {

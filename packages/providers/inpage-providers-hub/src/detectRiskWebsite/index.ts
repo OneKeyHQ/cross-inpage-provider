@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import { isInSameOriginIframe } from '@onekeyfe/cross-inpage-provider-core';
 import { styleContent } from "./style";
 
 enum EHostSecurityLevel {
@@ -175,3 +176,30 @@ export async function detectWebsiteRiskLevel() {
     console.error("Detect Risk website error: ", e);
   }
 }
+
+export function listenPageFocus() {
+  // Notify the frontend of the last focused URL when the function is called
+  try {
+    void window.$onekey.$private.request({
+      method: "wallet_lastFocusUrl",
+    });
+  } catch {
+    // ignore
+  }
+
+  // Add a focus event listener to the window
+  window.addEventListener('focus', () => {
+    try {
+      if (isInSameOriginIframe()) {
+        return
+      }
+      void window.$onekey.$private.request({
+        method: "wallet_lastFocusUrl",
+      });
+    } catch (error) {
+      console.error('Error notifying frontend of page focus:', error);
+    }
+  });
+}
+
+

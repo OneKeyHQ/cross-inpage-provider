@@ -1,6 +1,6 @@
 
-import notification from './notification'
-export { notification }
+import notification, { isInSameOriginIframe} from './notification'
+export { notification, isInSameOriginIframe }
 
 export * from './swtichDefaultWalletNotification'
 export * from './switchNetworkNotification'

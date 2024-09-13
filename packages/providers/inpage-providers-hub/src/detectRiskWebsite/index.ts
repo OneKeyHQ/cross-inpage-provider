@@ -179,10 +179,17 @@ export async function detectWebsiteRiskLevel() {
 
 export function listenPageFocus() {
   // Notify the frontend of the last focused URL when the function is called
-  try {
+  const notifyToBackground = () => {
+    if (window.top !== window.self) {
+      return;
+    }
     void window.$onekey.$private.request({
       method: "wallet_lastFocusUrl",
     });
+  };
+
+  try {
+    notifyToBackground();
   } catch {
     // ignore
   }
@@ -190,16 +197,9 @@ export function listenPageFocus() {
   // Add a focus event listener to the window
   window.addEventListener('focus', () => {
     try {
-      if (isInSameOriginIframe()) {
-        return
-      }
-      void window.$onekey.$private.request({
-        method: "wallet_lastFocusUrl",
-      });
+      notifyToBackground();
     } catch (error) {
       console.error('Error notifying frontend of page focus:', error);
     }
   });
 }
-
-

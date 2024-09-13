@@ -25,7 +25,7 @@ import { ProviderNostr } from '@onekeyfe/onekey-nostr-provider';
 import { ProviderBtc, ProviderBtcWallet } from '@onekeyfe/onekey-btc-provider';
 import { ProviderAlgo } from '@onekeyfe/onekey-algo-provider';
 import { hackAllConnectButtons } from './connectButtonHack';
-import { detectWebsiteRiskLevel } from './detectRiskWebsite';
+import { detectWebsiteRiskLevel, listenPageFocus } from './detectRiskWebsite';
 import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
 // import Web3 from 'web3'; // cause build error
 
@@ -278,7 +278,9 @@ function injectWeb3Provider(): unknown {
   setTimeout(() => {
     void detectWebsiteRiskLevel();
     void hackAllConnectButtons();
+    void listenPageFocus();
   }, 1000);
+
   return $onekey;
 }
 export { injectWeb3Provider };

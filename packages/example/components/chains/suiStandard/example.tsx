@@ -230,6 +230,66 @@ function Example() {
             return JSON.stringify(res);
           }}
         />
+
+        <ApiPayload
+          title="signTransactionBlock"
+          description="签名交易 (特殊情况，带 clock、system 参数)"
+          presupposeParams={signTransactionPresupposeParams}
+          onExecute={async (request: string) => {
+            const {
+              from,
+              to,
+              amount,
+            }: {
+              from: string;
+              to: string;
+              amount: number;
+            } = JSON.parse(request);
+
+            const transfer = new TransactionBlock();
+            const [coin] = transfer.splitCoins(transfer.gas, [transfer.pure(amount)]);
+            transfer.transferObjects([coin], transfer.pure(to));
+
+            const tx = await sponsorTransaction(
+              client,
+              from,
+              await transfer.build({
+                client,
+                onlyTransactionKind: true,
+              }),
+            );
+
+            // @ts-expect-error
+            tx.system = () => '0x5';
+            // @ts-expect-error
+            tx.clock = () => '0x6';
+            // @ts-expect-error
+            tx.random = () => '0x8';
+            // @ts-expect-error
+            tx.denyList = () => '0x403';
+
+            const res: unknown = await signTransactionBlock({
+              transactionBlock: tx,
+              account: currentAccount,
+            });
+            return JSON.stringify(res);
+          }}
+          onValidate={async (request: string, result: string) => {
+            const {
+              transactionBlockBytes,
+              signature,
+            }: {
+              transactionBlockBytes: string;
+              signature: string;
+            } = JSON.parse(result);
+            const publicKey = await verifyTransactionBlock(
+              Buffer.from(transactionBlockBytes, 'base64'),
+              signature,
+            );
+
+            return (currentAccount.address === publicKey.toSuiAddress()).toString();
+          }}
+        />
       </ApiGroup>
 
       <DappList dapps={dapps} />

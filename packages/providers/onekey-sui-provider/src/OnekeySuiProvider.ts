@@ -6,6 +6,7 @@ import { ProviderSuiBase } from './ProviderSuiBase';
 import type * as TypeUtils from './type-utils';
 import type { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
+import { TransactionBlock } from '@mysten/sui.js/transactions';
 
 import { ALL_PERMISSION_TYPES, AccountInfo } from './types';
 import type { PermissionType } from './types';
@@ -47,7 +48,10 @@ type SignTransactionBlockInput = SuiSignTransactionBlockInput & {
 };
 type SignMessageInput = SuiSignMessageInput & { messageSerialize: string; walletSerialize: string };
 
-type SignPersonalMessageInput = SuiSignPersonalMessageInput & { messageSerialize: string; walletSerialize: string };
+type SignPersonalMessageInput = SuiSignPersonalMessageInput & {
+  messageSerialize: string;
+  walletSerialize: string;
+};
 
 export type SuiRequest = {
   'hasPermissions': (permissions: readonly PermissionType[]) => Promise<boolean>;
@@ -248,6 +252,9 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
       method: 'signAndExecuteTransactionBlock',
       params: {
         ...input,
+        // https://github.com/MystenLabs/sui/blob/ace69fa8404eb704b504082d324ebc355a3d2948/sdk/typescript/src/transactions/object.ts#L6-L17
+        // With a few more objects, other wallets have steps for tojson.
+        transactionBlock: TransactionBlock.from(input.transactionBlock.serialize()),
         walletSerialize: JSON.stringify(input.account),
         blockSerialize: input.transactionBlock.serialize(),
       },
@@ -261,6 +268,7 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
       method: 'signTransactionBlock',
       params: {
         ...input,
+        transactionBlock: TransactionBlock.from(input.transactionBlock.serialize()),
         walletSerialize: JSON.stringify(input.account),
         blockSerialize: input.transactionBlock.serialize(),
       },
@@ -278,7 +286,9 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
     });
   }
 
-  async signPersonalMessage(input: SuiSignPersonalMessageInput): Promise<SuiSignPersonalMessageOutput> {
+  async signPersonalMessage(
+    input: SuiSignPersonalMessageInput,
+  ): Promise<SuiSignPersonalMessageOutput> {
     return this._callBridge({
       method: 'signPersonalMessage',
       params: {

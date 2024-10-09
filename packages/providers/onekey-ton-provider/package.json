@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/onekey-ton-provider",
-  "version": "2.1.9",
+  "version": "2.1.10",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -28,10 +28,10 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "2.1.9",
-    "@onekeyfe/cross-inpage-provider-errors": "2.1.9",
-    "@onekeyfe/cross-inpage-provider-types": "2.1.9",
-    "@onekeyfe/extension-bridge-injected": "2.1.9",
+    "@onekeyfe/cross-inpage-provider-core": "2.1.10",
+    "@onekeyfe/cross-inpage-provider-errors": "2.1.10",
+    "@onekeyfe/cross-inpage-provider-types": "2.1.10",
+    "@onekeyfe/extension-bridge-injected": "2.1.10",
     "@tonconnect/protocol": "^2.2.6"
   }
 }

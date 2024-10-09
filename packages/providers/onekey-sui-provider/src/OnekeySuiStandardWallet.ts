@@ -25,7 +25,7 @@ import {
   Wallet,
 } from '@mysten/wallet-standard';
 import { ProviderSui } from './OnekeySuiProvider';
-import { ALL_PERMISSION_TYPES, PermissionType, WalletInfo } from './types';
+import { AccountInfo, ALL_PERMISSION_TYPES, PermissionType, WalletInfo } from './types';
 
 type WalletEventsMap = {
   [E in keyof StandardEventsListeners]: Parameters<StandardEventsListeners[E]>[0];
@@ -123,7 +123,6 @@ class OnekeySuiStandardWallet implements Wallet {
   };
 
   $connected = async () => {
-    const activeChain = await this.getActiveChain();
     if (!(await this.$hasPermissions(['viewAccount']))) {
       return;
     }
@@ -136,19 +135,7 @@ class OnekeySuiStandardWallet implements Wallet {
     }
 
     if (account) {
-      this._account = new ReadonlyWalletAccount({
-        address: account.address,
-        publicKey: hexToBytes(account.publicKey),
-        chains: activeChain ? [activeChain] : [],
-        features: [
-          Feature.STANDARD__CONNECT,
-          Feature.SUI__SIGN_AND_EXECUTE_TRANSACTION_BLOCK,
-          Feature.SUI__SIGN_TRANSACTION_BLOCK,
-          Feature.SUI__SIGN_MESSAGE,
-          Feature.SUI__SIGN_PERSONAL_MESSAGE,
-        ],
-      });
-      this._events.emit('change', { accounts: this.accounts });
+      await this.handleAccountSwitch(account);
       return { accounts: this.accounts };
     }
   };
@@ -195,18 +182,51 @@ class OnekeySuiStandardWallet implements Wallet {
 
   subscribeEventFromBackend() {
     this.provider.onNetworkChange((network) => {
-      if (!network) return;
-      return this.handleNetworkSwitch({ network });
+      if (!network) {
+        return;
+      }
+      this.handleNetworkSwitch({ network: network });
+    });
+
+    this.provider.onAccountChange((account) => {
+      if (!account) {
+        return;
+      }
+      void this.handleAccountSwitch(account);
     });
   }
 
-  handleNetworkSwitch(payload: { network: string }) {
+  handleAccountSwitch = async (payload: AccountInfo) => {
+    const { address, publicKey } = payload;
+
+    const activateChain = await this.getActiveChain();
+    this._account = new ReadonlyWalletAccount({
+      address: address,
+      publicKey: hexToBytes(publicKey),
+      chains: activateChain ? [activateChain] : [],
+      features: [
+        Feature.STANDARD__CONNECT,
+        Feature.SUI__SIGN_AND_EXECUTE_TRANSACTION_BLOCK,
+        Feature.SUI__SIGN_TRANSACTION_BLOCK,
+        Feature.SUI__SIGN_MESSAGE,
+        Feature.SUI__SIGN_PERSONAL_MESSAGE,
+      ],
+    });
+
+    this._events.emit('change', {
+      accounts: this.accounts,
+      chains: activateChain ? [activateChain] : [],
+    });
+  };
+
+  handleNetworkSwitch = (payload: { network: string }) => {
     const { network } = payload;
 
     this._events.emit('change', {
+      accounts: this.accounts,
       chains: [network as IdentifierString],
     });
-  }
+  };
 }
 
 export function registerSuiWallet(provider: ProviderSui, options?: WalletInfo) {

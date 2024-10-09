@@ -33,7 +33,9 @@ const PROVIDER_EVENTS = {
 type SuiProviderEventsMap = {
   [PROVIDER_EVENTS.connect]: (account: string) => void;
   [PROVIDER_EVENTS.disconnect]: () => void;
-  [PROVIDER_EVENTS.accountChanged]: (account: string | null) => void;
+  [PROVIDER_EVENTS.accountChanged]: (
+    account: { address: string; publicKey: string } | null,
+  ) => void;
   [PROVIDER_EVENTS.networkChange]: (name: string | null) => void;
   [PROVIDER_EVENTS.message_low_level]: (payload: IJsonRpcRequest) => void;
 };
@@ -153,20 +155,19 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
   }
 
   private _handleConnected(account: AccountInfo, options: { emit: boolean } = { emit: true }) {
-    this._account = account;
-    if (options.emit && this.isConnectionStatusChanged('connected')) {
-      this.connectionStatus = 'connected';
-      const address = account ?? null;
-      this.emit('connect', address.address);
-      this.emit('accountChanged', address.address);
+    if (options.emit) {
+      this.emit('connect', account?.address ?? null);
+      this.emit(
+        'accountChanged',
+        account ? { address: account?.address, publicKey: account?.publicKey } : null,
+      );
     }
   }
 
   private _handleDisconnected(options: { emit: boolean } = { emit: true }) {
     this._account = null;
 
-    if (options.emit && this.isConnectionStatusChanged('disconnected')) {
-      this.connectionStatus = 'disconnected';
+    if (options.emit) {
       this.emit('disconnect');
       this.emit('accountChanged', null);
     }
@@ -178,16 +179,16 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
 
   // trigger by bridge account change event
   private _handleAccountChange(payload: AccountInfo | undefined) {
-    const account = payload;
-    if (this.isAccountsChanged(account)) {
-      this.emit('accountChanged', account?.address || null);
-    }
-    if (!account) {
+    if (!payload) {
       this._handleDisconnected();
       return;
     }
 
-    this._handleConnected(account, { emit: false });
+    if (this.isAccountsChanged(payload)) {
+      this._handleConnected(payload);
+    }
+
+    this._account = payload;
   }
 
   private _network: string | null | undefined;
@@ -204,14 +205,14 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
   }
 
   async hasPermissions(permissions: readonly PermissionType[] = ALL_PERMISSION_TYPES) {
-    return this._callBridge({
+    return await this._callBridge({
       method: 'hasPermissions',
       params: permissions,
     });
   }
 
   async requestPermissions(permissions: readonly PermissionType[] = ALL_PERMISSION_TYPES) {
-    return this._callBridge({
+    return await this._callBridge({
       method: 'requestPermissions',
       params: permissions,
     });
@@ -234,7 +235,6 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
       this._handleDisconnected();
       throw web3Errors.provider.unauthorized();
     }
-    this._handleConnected(accounts[0]);
     return accounts;
   }
 

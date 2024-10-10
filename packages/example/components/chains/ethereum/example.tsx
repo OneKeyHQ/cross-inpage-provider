@@ -81,6 +81,7 @@ export default function Example() {
 
   useEffect(() => {
     const listener = (event: IEIP6963AnnounceProviderEvent) => {
+      console.log('evm eip6963 [listener]', event);
       const { info, provider } = event.detail;
       const wallet = walletsRef.current.find((wallet) => wallet.info.uuid === info.uuid);
       if (!wallet) {

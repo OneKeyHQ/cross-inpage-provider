@@ -349,12 +349,14 @@ export default function BTCExample() {
               throw new Error('toAddress or amount is required');
             }
 
+            const network = await provider.getNetwork();
+
             const psbt = createPSBT(
               account?.address ?? '',
               toAddress,
               amount,
               gasPrice,
-              bitcoin.networks.bitcoin,
+              network === 'livenet' ? bitcoin.networks.bitcoin : bitcoin.networks.testnet,
             );
 
             return Promise.resolve(psbt);
@@ -410,12 +412,14 @@ export default function BTCExample() {
               throw new Error('toAddress or amount is required');
             }
 
+            const network = await provider.getNetwork();
+
             const psbt = await createPSBT(
               account?.address ?? '',
               toAddress,
               amount,
               gasPrice,
-              bitcoin.networks.bitcoin,
+              network === 'livenet' ? bitcoin.networks.bitcoin : bitcoin.networks.testnet,
             );
 
             const pabtObj = JSON.parse(psbt);

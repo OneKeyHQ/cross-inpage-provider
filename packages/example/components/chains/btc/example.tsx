@@ -177,7 +177,7 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="switchChain"
-          description="切换当前网络"
+          description="切换当前链"
           presupposeParams={params.switchChain}
           onExecute={async (request: string) => {
             const res = await provider?.switchChain(request);

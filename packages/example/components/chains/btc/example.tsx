@@ -166,6 +166,24 @@ export default function BTCExample() {
             return res;
           }}
         />
+        <ApiPayload
+          title="getChain"
+          description="获取当前链"
+          disableRequestContent
+          onExecute={async () => {
+            const res = await provider?.getChain();
+            return res;
+          }}
+        />
+        <ApiPayload
+          title="switchChain"
+          description="切换当前链"
+          presupposeParams={params.switchChain}
+          onExecute={async (request: string) => {
+            const res = await provider?.switchChain(request);
+            return res;
+          }}
+        />
       </ApiGroup>
 
       <ApiGroup title="Sign Message">
@@ -265,12 +283,13 @@ export default function BTCExample() {
               throw new Error('toAddress or amount is required');
             }
 
+            const network = await provider?.getNetwork();
             const psbt = createPSBT(
               account?.address ?? '',
               toAddress,
               amount,
               gasPrice,
-              bitcoin.networks.bitcoin,
+              network === 'livenet' ? bitcoin.networks.bitcoin : bitcoin.networks.testnet,
             );
 
             return Promise.resolve(psbt);
@@ -326,12 +345,13 @@ export default function BTCExample() {
               throw new Error('toAddress or amount is required');
             }
 
+            const network = await provider?.getNetwork();
             const psbt = await createPSBT(
               account?.address ?? '',
               toAddress,
               amount,
               gasPrice,
-              bitcoin.networks.bitcoin,
+              network === 'livenet' ? bitcoin.networks.bitcoin : bitcoin.networks.testnet,
             );
 
             const pabtObj = JSON.parse(psbt);

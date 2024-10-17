@@ -149,7 +149,12 @@ export default function Example() {
               publicKey: string;
             } = JSON.parse(result);
 
-            const signatureObj = new Uint8Array(JSON.parse(result));
+            let signatureObj;
+            if(Array.isArray(signature)) {
+              signatureObj = new Uint8Array(signature)
+            } else {
+              signatureObj = new Uint8Array(signature.data)
+            }
             const publicKeyObj = new PublicKey(publicKey);
             const isValidSignature = nacl.sign.detached.verify(
               Buffer.from(request, 'utf8'),

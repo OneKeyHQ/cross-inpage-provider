@@ -46,6 +46,8 @@ export enum ProviderMethods {
   GET_ACCOUNTS = 'getAccounts',
   GET_NETWORK = 'getNetwork',
   SWITCH_NETWORK = 'switchNetwork',
+  GET_CHAIN = 'getChain',
+  SWITCH_CHAIN = 'switchChain',
   GET_PUBLIC_KEY = 'getPublicKey',
   GET_BALANCE = 'getBalance',
   GET_INSCRIPTIONS = 'getInscriptions',
@@ -111,6 +113,12 @@ export interface UTXO {
   scriptPubKey: string;
 }
 
+export interface Chain {
+  enum: string;
+  name: string;
+  network: string;
+}
+
 export interface IProviderBtc extends ProviderBtcBase {
   readonly isOneKey: boolean;
 
@@ -118,6 +126,8 @@ export interface IProviderBtc extends ProviderBtcBase {
   getAccounts(): Promise<string[]>;
   getNetwork(): Promise<string>;
   switchNetwork(network: NetworkType): Promise<void>;
+  getChain(): Promise<Chain>;
+  switchChain(chain: string): Promise<Chain>;
   getPublicKey(): Promise<string>;
   getBalance(): Promise<BalanceInfo | number>;
   getInscriptions(

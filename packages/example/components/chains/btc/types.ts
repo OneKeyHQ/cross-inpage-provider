@@ -6,6 +6,8 @@ export interface IProviderApi {
   getAccounts(): Promise<string[]>;
   getNetwork(): Promise<string>;
   switchNetwork(network: string): Promise<string>;
+  getChain(): Promise<any>;
+  switchChain(chain: string): Promise<any>;
   getPublicKey(): Promise<string>;
   getBalance(): Promise<{
     confirmed: number;

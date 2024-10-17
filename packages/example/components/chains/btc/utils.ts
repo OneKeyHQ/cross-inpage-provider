@@ -126,7 +126,7 @@ export async function createPSBT(
 
   const utxos = await blockbook.getUTXOs(senderAddress);
   if (utxos.length === 0) {
-    throw new Error('No UTXOs found');
+    throw new Error('当前地址没有在 Blockbook 找到 UTXO');
   }
 
   const selectedUtxo = await addInputsAndOutputs(

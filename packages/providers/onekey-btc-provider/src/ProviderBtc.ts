@@ -14,6 +14,7 @@ import {
   MessageType,
   BalanceInfo,
   InscriptionInfo,
+  Chain,
 } from './types';
 import { isWalletEventMethodMatch } from './utils';
 
@@ -32,7 +33,7 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
     isUnlocked: false,
     initialized: false,
     isPermanentlyDisconnected: false,
-    isBtcWalletProvider: false
+    isBtcWalletProvider: false,
   };
 
   private readonly _log: ConsoleLike;
@@ -189,6 +190,25 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
     });
   }
 
+  //https://docs.unisat.io/dev/unisat-developer-center/unisat-wallet/supported-chains
+  async getChain() {
+    return this._request<Chain>({
+      method: ProviderMethods.GET_CHAIN,
+    });
+  }
+
+  /**
+   *
+   * @param chain the chain. BITCOIN_MAINNET or BITCOIN_TESTNET or FRACTAL_BITCOIN_MAINNET
+   * @returns
+   */
+  async switchChain(chain: string) {
+    return this._request<Chain>({
+      method: ProviderMethods.SWITCH_CHAIN,
+      params: { chain },
+    });
+  }
+
   async getPublicKey() {
     return this._request<string>({
       method: ProviderMethods.GET_PUBLIC_KEY,
@@ -295,6 +315,10 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
         amount,
       },
     });
+  }
+
+  async getVersion() {
+    return Promise.resolve('1.4.10');
   }
 
   on<E extends ProviderEvents>(event: E, listener: ProviderEventsMap[E]): this {

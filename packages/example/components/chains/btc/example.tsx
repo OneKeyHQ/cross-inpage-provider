@@ -166,6 +166,24 @@ export default function BTCExample() {
             return res;
           }}
         />
+        <ApiPayload
+          title="getChain"
+          description="获取当前链"
+          disableRequestContent
+          onExecute={async () => {
+            const res = await provider?.getChain();
+            return res;
+          }}
+        />
+        <ApiPayload
+          title="switchChain"
+          description="切换当前网络"
+          presupposeParams={params.switchChain}
+          onExecute={async (request: string) => {
+            const res = await provider?.switchChain(request);
+            return res;
+          }}
+        />
       </ApiGroup>
 
       <ApiGroup title="Sign Message">

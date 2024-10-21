@@ -22,8 +22,9 @@ export const JsonEditor = ({ value, placeholder, onChange }: JsonEditorProps) =>
 
   return (
     <CodeMirror
-      className="text-sm"
+      className="text-sm overflow-auto max-h-[500px]"
       value={value}
+      data-test="json-editor"
       placeholder={placeholder}
       extensions={[
         isJson ? json() : [],

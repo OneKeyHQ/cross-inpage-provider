@@ -10,7 +10,7 @@ export default (params: IEIP712Params) => ({
         { name: 'name', type: 'string' },
       ],
       NestedArray: [
-        { name: 'nestedItems', type: 'SingleItem[][]' },
+        { name: 'items', type: 'SingleItem[][]' },
       ],
       SingleItem: [
         { name: 'id', type: 'uint256' },
@@ -25,34 +25,22 @@ export default (params: IEIP712Params) => ({
       version: '1',
     },
     message: {
-      nestedItems: [
+      items: [
         [
-          {
-            items: [
-              { id: 1, value: 'Item1-1' },
-              { id: 2, value: 'Item1-2' },
-            ],
-          },
-          {
-            items: [
-              { id: 3, value: 'Item2-1' },
-              { id: 4, value: 'Item2-2' },
-            ],
-          },
+          { id: 1, value: 'Item1-1' },
+          { id: 2, value: 'Item1-2' },
         ],
         [
-          {
-            items: [
-              { id: 5, value: 'Item3-1' },
-              { id: 6, value: 'Item3-2' },
-            ],
-          },
-          {
-            items: [
-              { id: 7, value: 'Item4-1' },
-              { id: 8, value: 'Item4-2' },
-            ],
-          },
+          { id: 3, value: 'Item2-1' },
+          { id: 4, value: 'Item2-2' },
+        ],
+        [
+          { id: 5, value: 'Item3-1' },
+          { id: 6, value: 'Item3-2' },
+        ],
+        [
+          { id: 7, value: 'Item4-1' },
+          { id: 8, value: 'Item4-2' },
         ],
       ],
     },

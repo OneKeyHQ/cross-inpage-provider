@@ -1,7 +1,7 @@
 import type { IEIP712Params } from '../../types';
 
 export default (params: IEIP712Params) => ({
-  id: 'signTypedDataV4-uniswap-swap',
+  id: 'signTypedDataV4-permitSingle',
   name: 'permit2: PermitSingle 方法 Swap USDC => Matic',
   description: '模仿 UniSwap Swap，数据来自 Polygon USDC => Matic',
   value: JSON.stringify({

@@ -1,7 +1,7 @@
 import type { IEIP712Params } from '../../types';
 
 export default (params: IEIP712Params) => ({
-  id: 'signTypedDataV4',
+  id: 'signTypedDataV4-normal',
   name: '默认类型: signTypedDataV4',
   description: 'SignTypedDataV4 Normal',
   value: JSON.stringify({

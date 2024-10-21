@@ -1,4 +1,4 @@
-import type { IEIP712Params } from '../types';
+import type { IEIP712Params } from '../../types';
 
 export default (params: IEIP712Params) => ({
   id: 'signTypedDataV5-permitwitnessTransferFrom',

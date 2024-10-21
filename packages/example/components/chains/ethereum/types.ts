@@ -28,3 +28,7 @@ export interface IEIP6963AnnounceProviderEvent extends CustomEvent {
   type: 'eip6963:announceProvider';
   detail: IEIP6963ProviderDetail;
 }
+
+export interface IEIP712Params {
+  chainId: number;
+}

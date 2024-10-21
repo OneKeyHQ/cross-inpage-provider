@@ -1,7 +1,7 @@
 import type { IEIP712Params } from '../../types';
 
 export default (params: IEIP712Params) => ({
-  id: 'signTypedDataV5-permitwitnessTransferFrom',
+  id: 'signTypedDataV5-permitWitnessTransferFrom',
   name: '默认类型: PermitWitnessTransferFrom 方法',
   description: '模仿 UniSwap 现价单，数据来自 ETH 主网 USDC => ETH',
   value: JSON.stringify({

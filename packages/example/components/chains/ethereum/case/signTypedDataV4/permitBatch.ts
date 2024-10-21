@@ -1,7 +1,7 @@
 import type { IEIP712Params } from '../../types';
 
 export default (params: IEIP712Params) => ({
-  id: 'signTypedDataV4-uniswap-swap',
+  id: 'signTypedDataV4-permitBatch',
   name: 'permit2: PermitBatch 代币批量授权',
   description: 'permit2: PermitBatch 代币批量授权，一次授权两个代币信息',
   value: JSON.stringify({

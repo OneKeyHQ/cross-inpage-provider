@@ -20,7 +20,7 @@ import {
 import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import { ProviderWebln } from '@onekeyfe/onekey-webln-provider';
 import { ProviderScdo } from '@onekeyfe/onekey-scdo-provider';
-import { ProviderTon } from '@onekeyfe/onekey-ton-provider';
+import { createTonProviderOpenMask, ProviderTon } from '@onekeyfe/onekey-ton-provider';
 import { ProviderNostr } from '@onekeyfe/onekey-nostr-provider';
 import { ProviderBtc, ProviderBtcWallet } from '@onekeyfe/onekey-btc-provider';
 import { ProviderAlgo } from '@onekeyfe/onekey-algo-provider';
@@ -211,7 +211,8 @@ function injectWeb3Provider(): unknown {
     tonconnect,
   });
   defineWindowProperty('openmask', {
-    tonconnect,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    tonconnect: createTonProviderOpenMask(tonconnect),
   });
   defineWindowProperty('unisat', btc);
   defineWindowProperty('scdo', scdo);

@@ -105,6 +105,9 @@ function isWalletEventMethodMatch({ method, name }: { method: string; name: stri
 }
 
 class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
+  readonly isAIP62Standard = true;
+  readonly isSignTransactionV1_1 = false;
+
   protected _state: ProviderState = {
     account: null,
   };

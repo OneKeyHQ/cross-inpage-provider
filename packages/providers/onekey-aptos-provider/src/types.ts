@@ -1,3 +1,5 @@
+import { WalletIcon } from '@wallet-standard/core';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export type AptosAccountInfo = {
   publicKey: string;
@@ -42,3 +44,9 @@ export interface SignMessageResponse {
   prefix: string; // Should always be APTOS
   signature: string; // The signed full message
 }
+
+
+export type WalletInfo = {
+  name?: string;
+  logo: WalletIcon;
+};

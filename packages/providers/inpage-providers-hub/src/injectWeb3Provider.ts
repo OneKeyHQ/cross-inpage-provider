@@ -5,7 +5,12 @@ import { ProviderEthereum, shimWeb3, registerEIP6963Provider } from '@onekeyfe/o
 import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
 import { ProviderSolana, registerSolanaWallet, WalletIcon } from '@onekeyfe/onekey-solana-provider';
 // import { ProviderStarcoin } from '@onekeyfe/onekey-starcoin-provider';
-import { ProviderAptos, ProviderAptosMartian } from '@onekeyfe/onekey-aptos-provider';
+import {
+  AptosStandardProvider,
+  ProviderAptos,
+  ProviderAptosMartian,
+  registerAptosWallet,
+} from '@onekeyfe/onekey-aptos-provider';
 import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
 import { ProviderAlph, registerAlephiumProvider } from '@onekeyfe/onekey-alph-provider';
 import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
@@ -264,6 +269,16 @@ function injectWeb3Provider(): unknown {
       logo: WALLET_CONNECT_INFO.onekey.icon,
     });
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  registerAptosWallet(
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    new AptosStandardProvider(martian, {
+      name: 'Petra',
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      logo: WALLET_CONNECT_INFO.onekey.icon as WalletIcon,
+    }),
+  );
 
   // Override the SuiWallet Standard Wallet
   if (checkWalletSwitchEnable()) {

@@ -14,7 +14,7 @@ import {
   TonProofItem,
   WalletEvent,
   WalletResponse,
-  WalletResponseSuccess
+  WalletResponseSuccess,
 } from '@tonconnect/protocol';
 import {
   AccountInfo,
@@ -45,7 +45,7 @@ export type TonRequest = {
 
 type JsBridgeRequest = {
   [K in keyof TonRequest]: (
-    params: Parameters<TonRequest[K]>
+    params: Parameters<TonRequest[K]>,
   ) => Promise<TypeUtils.WireStringified<TypeUtils.ResolvePromise<ReturnType<TonRequest[K]>>>>;
 };
 
@@ -74,22 +74,54 @@ function isWalletEventMethodMatch({ method, name }: { method: string; name: stri
   return method === `wallet_events_${name}`;
 }
 
+export function createTonProviderOpenMask(originalProvider: ProviderTon) {
+  return createTonProvider(
+    originalProvider,
+    {
+      appName: 'openmask',
+      appVersion: '0.21.1',
+    },
+    {
+      name: 'OpenMask',
+      image:
+        'https://raw.githubusercontent.com/OpenProduct/openmask-extension/main/public/openmask-logo-288.png',
+      about_url: 'https://www.openmask.app/',
+    },
+  );
+}
+
+export function createTonProvider(
+  originalProvider: ProviderTon,
+  customDeviceInfo: Partial<DeviceInfo>,
+  customWalletInfo: Partial<WalletInfo>,
+): ProviderTon {
+  return new Proxy(originalProvider, {
+    get(target, prop, receiver) {
+      if (prop === 'deviceInfo') {
+        return { ...target.deviceInfo, ...customDeviceInfo };
+      }
+      if (prop === 'walletInfo') {
+        return { ...target.walletInfo, ...customWalletInfo };
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return Reflect.get(target, prop, receiver);
+    },
+  });
+}
+
 export class ProviderTon extends ProviderTonBase implements IProviderTon {
   private _accountInfo: AccountInfo | null = null;
 
   deviceInfo: DeviceInfo = {
     platform: this._getPlatform(),
-    appName: 'OneKey',
+    appName: 'onekey',
     appVersion: '0.0.0',
     maxProtocolVersion: 2,
-    features: [
-      { name: 'SendTransaction', maxMessages: 4 },
-      { name: 'SignData' },
-    ],
+    features: [{ name: 'SendTransaction', maxMessages: 4 }, { name: 'SignData' }],
   };
   walletInfo?: WalletInfo = {
     name: 'OneKey',
-    image: 'https://uni.onekey-asset.com/static/logo/onekey.png',
+    image: 'https://common.onekey-asset.com/logo/onekey-x288.png',
     about_url: 'https://onekey.so',
   };
   protocolVersion = 2;
@@ -101,7 +133,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
       bridge: props.bridge || getOrCreateExtInjectedJsBridge({ timeout: props.timeout }),
     });
 
-    void this._getDeviceInfo();
+    // void this._getDeviceInfo();
 
     this._registerEvents();
   }
@@ -209,34 +241,37 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
   private _id = 0;
   async _connect(protocolVersion?: number, message?: ConnectRequest): Promise<ConnectEvent> {
     const id = ++this._id;
-    const isGetTonAddr = !message || (message && message.items.some((item) => item.name === "ton_addr"));
-    const proofItem = message && message.items.find((item) => item.name === "ton_proof") as (TonProofItem | undefined);
+    const isGetTonAddr =
+      !message || (message && message.items.some((item) => item.name === 'ton_addr'));
+    const proofItem =
+      message &&
+      (message.items.find((item) => item.name === 'ton_proof') as TonProofItem | undefined);
     const items = [] as ConnectItemReply[];
 
     if (isGetTonAddr) {
       if (this._accountInfo) {
         items.push({
-          name: "ton_addr",
+          name: 'ton_addr',
           ...this._accountInfo,
         });
       } else {
         const result = await this._callBridge({
           method: 'connect',
-          params: (protocolVersion && message) ? [protocolVersion, message] : [],
+          params: protocolVersion && message ? [protocolVersion, message] : [],
         });
-    
+
         if (!result) {
           return {
-            event: "connect_error",
+            event: 'connect_error',
             id,
             payload: {
               code: CONNECT_EVENT_ERROR_CODES.UNKNOWN_ERROR,
-              message: ConnectEventErrorMessage.UNKNOWN_ERROR
-            }
-          }
+              message: ConnectEventErrorMessage.UNKNOWN_ERROR,
+            },
+          };
         }
         items.push({
-          name: "ton_addr",
+          name: 'ton_addr',
           ...result,
         });
         this._handleConnected(result, { emit: true });
@@ -246,26 +281,28 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     if (proofItem) {
       const result = await this._callBridge({
         method: 'signProof',
-        params: [{
-          payload: proofItem.payload,
-        }],
+        params: [
+          {
+            payload: proofItem.payload,
+          },
+        ],
       });
       if (!result) {
         return {
-          event: "connect_error",
+          event: 'connect_error',
           id,
           payload: {
             code: CONNECT_EVENT_ERROR_CODES.UNKNOWN_ERROR,
-            message: ConnectEventErrorMessage.UNKNOWN_ERROR
-          }
-        }
+            message: ConnectEventErrorMessage.UNKNOWN_ERROR,
+          },
+        };
       }
       items.push({
-        name: "ton_proof",
+        name: 'ton_proof',
         proof: {
           ...result,
           payload: proofItem.payload,
-        }
+        },
       });
     }
 
@@ -289,7 +326,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
 
   async send<T extends RpcMethod>(message: AppRequest<T>): Promise<WalletResponse<T>> {
     const id = message.id;
-    
+
     let res: unknown;
     const params = message.params.map((p) => {
       if (typeof p === 'string') {
@@ -311,7 +348,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
           code: SEND_TRANSACTION_ERROR_CODES.METHOD_NOT_SUPPORTED,
           message: SendTransactionErrorMessage.METHOD_NOT_SUPPORTED,
         },
-      }
+      };
     }
 
     if (res === undefined) {
@@ -321,7 +358,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
           code: SEND_TRANSACTION_ERROR_CODES.UNKNOWN_ERROR,
           message: SendTransactionErrorMessage.UNKNOWN_ERROR,
         },
-      }
+      };
     }
 
     return {

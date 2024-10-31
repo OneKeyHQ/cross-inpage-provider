@@ -48,6 +48,10 @@ export function Example() {
         </div>
         {userFriendlyAddress && <p>userFriendlyAddress: {userFriendlyAddress}</p>}
         {rawAddress && <p>rawAddress: {rawAddress}</p>}
+        {wallet?.account && <p>Wallet Account PublicKey: {wallet?.account.publicKey}</p>}
+        {wallet?.account && <p>Wallet Account Chain: {wallet?.account.chain}</p>}
+        {wallet?.account && <p>Wallet Account WalletStateInit: {wallet?.account.walletStateInit}</p>}
+
         {wallet?.device?.appName && <p>Wallet AppName: {wallet?.device?.appName}</p>}
         {wallet?.device?.appVersion && <p>Wallet appVersion: {wallet?.device?.appVersion}</p>}
         {wallet?.device?.platform && <p>Wallet platform: {wallet?.device?.platform}</p>}

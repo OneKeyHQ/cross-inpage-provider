@@ -437,12 +437,12 @@ export default function Example() {
         />
         <ApiPayload
           title="wallet_watchAsset"
-          description="添加 Token"
+          description="添加资产 Token、NFT（EIP 747）"
           presupposeParams={params.watchAsset}
           onExecute={async (request) => {
             const res = await provider?.request({
               'method': 'wallet_watchAsset',
-              'params': [JSON.parse(request)],
+              'params': JSON.parse(request),
             });
             return JSON.stringify(res);
           }}

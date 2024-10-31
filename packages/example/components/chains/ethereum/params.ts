@@ -219,35 +219,74 @@ export default {
   }),
   watchAsset: [
     {
-      'id': 'watchAsset erc20',
-      'name': '添加 ERC20 资产',
-      'description': '添加 ERC20 资产',
+      'id': 'watchAsset erc20 foo',
+      'name': '主网 FOO ERC20',
+      'description': '测试添加主网 FOO ERC20 资产',
       'value': JSON.stringify({
-        'type': 'ERC20',
-        'options': {
-          'address': '0xb60e8dd61c5d32be8058bb8eb970870f07233155',
-          'symbol': 'FOO',
-          'decimals': 18,
-          'image': 'https://foo.io/token-image.svg',
+        type: 'ERC20',
+        options: {
+          address: '0xa9b4d559a98ff47c83b74522b7986146538cd4df',
+          symbol: 'FOO',
+          decimals: 18,
+          image: 'https://foo.io/token-image.svg',
         },
       }),
     },
     {
-      'id': 'watchAsset ERC721',
-      'name': '添加 ERC721 资产',
-      'description': '暂时不支持',
+      'id': 'watchAsset ERC721 Lido',
+      'name': '主网 Lido ERC721',
+      'description': '测试主网 Lido: stETH Withdrawal NFT ERC721 资产',
       'value': JSON.stringify({
         'type': 'ERC721',
         'options': {
-          'address': '0x123456789abcdef0123456789abcdef01234567',
-          'tokenId': '42',
+          'address': '0x889edc2edab5f40e902b864ad4d7ade8e412f9b1',
+          'tokenId': '50632',
         },
       }),
     },
     {
-      'id': 'watchAsset ERC1155',
-      'name': '资产 ERC1155 资产',
-      'description': '暂时不支持',
+      'id': 'watchAsset ERC1155 Lido',
+      'name': '主网 ERC1155',
+      'description': '测试添加主网 ERC1155 资产',
+      'value': JSON.stringify({
+        'type': 'ERC1155',
+        'options': {
+          'address': '0xabcdef0123456789abcdef0123456789abcdef01',
+          'tokenId': '1337',
+        },
+      }),
+    },
+    {
+      'id': 'watchAsset erc20 Polygon WETH',
+      'name': 'Polygon WETH ERC20',
+      'description': '测试添加 Polygon WETH 资产',
+      'value': JSON.stringify({
+        type: 'ERC20',
+        options: {
+          address: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
+          symbol: 'WETH',
+          decimals: 18,
+          image: 'https://polygonscan.com/token/images/wETH_32.png',
+        },
+      }),
+    },
+    {
+      'id': 'watchAsset ERC721 Polygon unstoppable',
+      'name': 'Polygon Unstoppable ERC721',
+      'description': '测试 Polygon Unstoppable ERC721 资产',
+      'value': JSON.stringify({
+        'type': 'ERC721',
+        'options': {
+          'address': '0xa9a6a3626993d487d2dbda3173cf58ca1a9d9e9f',
+          'tokenId':
+            '17893201811739899534133387548294644234750447072813328765681112569786468116764',
+        },
+      }),
+    },
+    {
+      'id': 'watchAsset ERC1155 Polygon Lido',
+      'name': 'Polygon ERC1155',
+      'description': '测试添加 Polygon ERC1155 资产',
       'value': JSON.stringify({
         'type': 'ERC1155',
         'options': {

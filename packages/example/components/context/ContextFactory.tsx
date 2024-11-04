@@ -1,62 +1,79 @@
 import React, { createContext, useContext, useReducer, useCallback, useMemo } from 'react';
 
-// 定义基础Store的类型
 type BaseStore = Record<string, any>;
 
-// Store上下文类型
-export interface StoreContextType<T extends BaseStore> {
-  state: T;
-  dispatch: React.Dispatch<Partial<T>>;
+interface Action<T> {
+  type: string;
+  field?: keyof T;
+  payload?: any;
 }
 
-// 创建Store的工厂函数
 export function createStore<T extends BaseStore>(initialState: T) {
-  const StoreContext = createContext<StoreContextType<T> | null>(null);
+  // 为每个字段创建独立的 Context
+  const FieldContexts = new Map<keyof T, React.Context<any>>();
+  const DispatchContext = createContext<((action: Action<T>) => void) | null>(null);
 
-  // Reducer
-  const reducer = (state: T, action: Partial<T>) => ({
-    ...state,
-    ...action,
-  });
+  const getFieldContext = (field: keyof T) => {
+    if (!FieldContexts.has(field)) {
+      FieldContexts.set(field, createContext(initialState[field]));
+    }
+    return FieldContexts.get(field)!;
+  };
 
-  // Provider组件
   const Provider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [state, dispatch] = useReducer(reducer, initialState);
+    const [state, setState] = useReducer(
+      (state: T, action: Action<T>) => {
+        switch (action.type) {
+          case 'SET_FIELD':
+            if (!action.field) return state;
+            return {
+              ...state,
+              [action.field]: action.payload
+            };
+          default:
+            return state;
+        }
+      },
+      initialState
+    );
 
-    const memoizedDispatch = useCallback(dispatch, []);
-    const value = useMemo(() => ({ state, dispatch: memoizedDispatch }), [state, memoizedDispatch]);
+    const dispatch = useCallback((action: Action<T>) => {
+      setState(action);
+    }, []);
+
+    // 为每个字段创建独立的 Provider
+    const providers = useMemo(() => {
+      return Object.keys(state).reduce((acc, key) => {
+        const Context = getFieldContext(key as keyof T);
+        return (
+          <Context.Provider value={state[key as keyof T]}>
+            {acc}
+          </Context.Provider>
+        );
+      }, children);
+    }, [state]);
 
     return (
-      <StoreContext.Provider value={value}>
-        {children}
-      </StoreContext.Provider>
+      <DispatchContext.Provider value={dispatch}>
+        {providers}
+      </DispatchContext.Provider>
     );
   };
 
-  // Hook
-  const useStore = () => {
-    const context = useContext(StoreContext);
-    if (!context) {
-      throw new Error('useStore must be used within its Provider');
-    }
-    return context;
+  const useDispatch = () => {
+    const dispatch = useContext(DispatchContext);
+    if (!dispatch) throw new Error('useDispatch must be used within Provider');
+    return dispatch;
   };
 
-  // 选择器Hook
-  const useStoreSelector = <K extends keyof T>(key: K): [T[K], (value: T[K]) => void] => {
-    const { state, dispatch } = useStore();
-    const value = useMemo(() => state[key], [state, key]);
-
-    const setValue = useCallback((newValue: T[K]) => {
-      dispatch({ [key]: newValue } as unknown as Partial<T>);
-    }, [dispatch, key]);
-
-    return [value, setValue];
+  const useFieldValue = <K extends keyof T>(field: K) => {
+    const Context = getFieldContext(field);
+    return useContext(Context);
   };
 
   return {
     Provider,
-    useStore,
-    useStoreSelector,
+    useDispatch,
+    useFieldValue
   };
 }

@@ -84,9 +84,12 @@ const extensionConfig = merge(commonConfig, {
 });
 
 const nativeConfig = merge(commonConfig, {
-  target: 'electron-preload',
+  target: 'web',
   entry: {
     injectedDesktop: './src/injectedDesktop.ts',
+  },
+  externals: {
+    electron: 'commonjs electron', // 将 Electron 标记为外部模块
   },
 });
 

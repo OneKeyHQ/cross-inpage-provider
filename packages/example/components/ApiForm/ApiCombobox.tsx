@@ -8,7 +8,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { ChevronDownIcon, CheckIcon } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
-interface IOption<T> {
+export interface IOption<T> {
   value: string;
   label: string;
   extra?: T;
@@ -88,6 +88,8 @@ export const ApiCombobox = forwardRef<ApiComboboxRef, ApiComboboxProps>(function
     if (defaultValue) {
       setField({ ...field, value: defaultValue });
     }
+    field.name = label;
+    field.required = required;
   }, []);
 
   useImperativeHandle(ref, () => ({
@@ -113,13 +115,15 @@ export const ApiCombobox = forwardRef<ApiComboboxRef, ApiComboboxProps>(function
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {currentOption?.value
-            ? options.find((option) => option.value === currentOption?.value)?.label
-            : placeholder}
+          <span className="truncate text-left break-all line-clamp-2">
+            {currentOption?.value
+              ? options.find((option) => option.value === currentOption?.value)?.label
+              : placeholder}
+          </span>
           <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
         <Command>
           <CommandInput placeholder={placeholder} className="h-9" />
           <CommandList>
@@ -129,6 +133,7 @@ export const ApiCombobox = forwardRef<ApiComboboxRef, ApiComboboxProps>(function
                 <CommandItem
                   key={option.value}
                   value={option.label}
+                  className="break-all"
                   onSelect={(currentLabel) => {
                     const currentOption = options?.find(opt => opt.label === currentLabel);
                     setValue(currentOption?.value ?? null);

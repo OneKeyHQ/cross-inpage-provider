@@ -9,8 +9,6 @@ export interface FormStore<T> {
   id: string;
   scope: Store;
   fieldsAtom: (id: string) => ReturnType<typeof atom<IFormField<T>>>;
-  loadingAtom: ReturnType<typeof atom<boolean>>;
-  resultAtom: ReturnType<typeof atom<string>>;
   reset: () => void;
 }
 
@@ -33,14 +31,10 @@ export const createFormStore = <T = string>(id?: string): FormStore<T> => {
       fieldsMap.set(id, { value: undefined });
       return localAtom;
     }),
-    loadingAtom: atom(false),
-    resultAtom: atom(''),
     reset: () => {
       fieldsMap.forEach((_, fieldId) => {
         store.scope.set(store.fieldsAtom(fieldId), { value: undefined });
       });
-      store.scope.set(store.loadingAtom, false);
-      store.scope.set(store.resultAtom, '');
       fieldsMap.clear();
     }
   };

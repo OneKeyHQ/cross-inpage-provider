@@ -1,9 +1,9 @@
-import React, { memo, useContext, useCallback } from 'react';
+import React, { memo, useContext, useCallback, useMemo, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { Button } from '../ui/button';
 import { ApiFormContext } from './ApiForm';
 import { useValidation } from './hooks/useValidation';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { toast } from '../ui/use-toast';
 
 export interface ApiButtonProps {
@@ -14,13 +14,15 @@ export interface ApiButtonProps {
         fields: string[];
         validator?: (values: Record<string, { id: string; value: string; required: boolean }>) => string | undefined;
     };
+    availableDependencyFields?: string[];
 }
 
 export const ApiButton = memo(({
     id,
     label,
     onClick,
-    validation
+    validation,
+    availableDependencyFields,
 }: ApiButtonProps) => {
     const context = useContext(ApiFormContext);
     if (!context) throw new Error('ApiButton must be used within ApiForm');
@@ -31,13 +33,37 @@ export const ApiButton = memo(({
     const loading = field.extra?.loading ?? false;
     const result = field.extra?.result;
 
+    useEffect(() => {
+        field.name = label;
+    }, []);
+
+    const dependencyStates = availableDependencyFields?.map(fieldId => {
+        const [field] = useAtom(store.fieldsAtom(fieldId));
+        return {
+            id: fieldId,
+            value: field.value,
+            name: field.name
+        };
+    }) ?? [];
+
+    const disabledTooltip = useMemo(() => {
+        const filterFields = dependencyStates.filter(field =>
+            (field.value == null || isEmpty(field.value))
+        );
+
+        if (filterFields.length > 0) {
+            return `请填写 ${filterFields.map(field => field.name ?? field.id).join(', ')}`;
+        }
+        return null;
+    }, [dependencyStates]);
+
     const setResult = (value: string) => {
         setField({ ...field, extra: { ...field.extra, result: value } });
-    };
+    }
 
     const setLoading = (value: boolean) => {
         setField({ ...field, extra: { ...field.extra, loading: value } });
-    };
+    }
 
     const { validate } = useValidation({
         store,
@@ -74,11 +100,12 @@ export const ApiButton = memo(({
             <Button
                 key={id}
                 onClick={handleClick}
-                disabled={loading}
+                disabled={disabledTooltip != null}
                 loading={loading}
             >
                 {label}
             </Button>
+            {disabledTooltip && <div className="text-red-500 text-sm">{disabledTooltip}</div>}
             {result && <div className="text-red-500 text-sm">{result}</div>}
         </div>
     );

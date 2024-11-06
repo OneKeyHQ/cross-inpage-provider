@@ -192,13 +192,13 @@ export default function Example() {
             const res = await provider?.signMessage(obj);
             return JSON.stringify(res);
           }}
-          onValidate={(request: string, result: string) => {
+          onValidate={async (request: string, result: string) => {
             const { fullMessage, signature } = JSON.parse(result) as SignMessageResponse;
-
+            const account = await provider?.account();
             const isValidSignature = nacl.sign.detached.verify(
               Buffer.from(fullMessage),
-              hexToBytes(signature),
-              hexToBytes(stripHexPrefix(account?.publicKey)),
+              hexToBytes(stripHexPrefix(signature)),
+              hexToBytes(stripHexPrefix(account?.publicKey ?? '')),
             );
 
             return Promise.resolve(isValidSignature.toString());

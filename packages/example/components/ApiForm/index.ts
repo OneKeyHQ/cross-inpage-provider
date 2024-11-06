@@ -4,10 +4,12 @@ import { ApiButton } from './ApiButton';
 import { ApiJsonEdit } from './ApiJsonEdit';
 import { ApiSelector } from './ApiSelector';
 import { ApiCheckbox } from './ApiCheckbox';
+import { ApiAutoTextArea } from './ApiAutoTextArea';
 import { ApiTextArea } from './ApiTextArea';
 import { ApiSwitch } from './ApiSwitch';
 import { ApiCombobox } from './ApiCombobox';
 import { ApiSeparator } from './ApiSeparator';
+import { ApiText } from './ApiText';
 
 const Form = ApiForm as typeof ApiForm & {
   Field: typeof ApiField;
@@ -15,10 +17,12 @@ const Form = ApiForm as typeof ApiForm & {
   JsonEdit: typeof ApiJsonEdit;
   Selector: typeof ApiSelector;
   Checkbox: typeof ApiCheckbox;
+  AutoHeightTextArea: typeof ApiAutoTextArea;
   TextArea: typeof ApiTextArea;
   Switch: typeof ApiSwitch;
   Combobox: typeof ApiCombobox;
   Separator: typeof ApiSeparator;
+  Text: typeof ApiText;
 };
 
 Form.Field = ApiField;
@@ -26,10 +30,12 @@ Form.Button = ApiButton;
 Form.JsonEdit = ApiJsonEdit;
 Form.Selector = ApiSelector;
 Form.Checkbox = ApiCheckbox;
+Form.AutoHeightTextArea = ApiAutoTextArea;
 Form.TextArea = ApiTextArea;
 Form.Switch = ApiSwitch;
 Form.Combobox = ApiCombobox;
 Form.Separator = ApiSeparator;
+Form.Text = ApiText;
 
 export { Form as ApiForm };
 export type { ApiFormProps, ApiFormRef } from './ApiForm';
@@ -38,6 +44,8 @@ export type { ApiButtonProps } from './ApiButton';
 export type { ApiJsonEditProps } from './ApiJsonEdit';
 export type { ApiSelectorProps, ApiSelectorRef } from './ApiSelector';
 export type { ApiCheckboxProps } from './ApiCheckbox';
+export type { ApiAutoTextAreaProps } from './ApiAutoTextArea';
 export type { ApiTextAreaProps } from './ApiTextArea';
 export type { ApiSwitchProps } from './ApiSwitch';
-export type { ApiComboboxProps, ApiComboboxRef } from './ApiCombobox';
+export type { ApiComboboxProps, ApiComboboxRef, IOption as ComboboxOption } from './ApiCombobox';
+export type { ApiTextProps } from './ApiText';

@@ -25,11 +25,10 @@ import { isEqChainId, parseChainId } from './utils';
 import { ApiForm, ApiFormRef, ApiComboboxRef } from '../../ApiForm';
 import Contract721 from './case/contract/contract721.json';
 import Contract1155 from './case/contract/contract1155.json';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../ui/card';
 import maliciousCases from './case/transfer/malicious';
 import malformedCases from './case/transfer/malformed';
 import { MALICIOUS_ADDRESS } from './case/contract/SampleContracts';
+import TabCard from '../../TabCard';
 
 const {
   nftsAbi,
@@ -51,7 +50,7 @@ const WalletWatchAsset = ({ chainId }: { chainId: string | undefined }) => {
     const tokens = TokenList.tokens.filter((token) => parseChainId(chainId) === token.chainId);
     const tokenOptions = tokens.map((token) => ({
       value: token.address,
-      label: token.name,
+      label: `${token.name} - ${token.address}`,
       extra: {
         type: 'ERC20',
         options: {
@@ -118,131 +117,115 @@ const WalletWatchAssetERC721 = ({ chainId }: { chainId: string | undefined }) =>
   let nftsFactory: ethers.ContractFactory
 
   return <ApiForm title="wallet_watchAsset ERC721" description='添加 ERC721 资产' ref={apiFromRef}>
+    <TabCard tabs={[
+      {
+        label: '部署合约',
+        value: 'deploy',
+        title: '部署 ERC721 合约',
+        description: '部署 ERC721 合约，用于测试 wallet_watchAsset ERC721，尽量使用手续费低的链',
+        content: <><ApiForm.Button
+          id="deployButton"
+          label="部署 ERC721 合约"
+          onClick={async () => {
+            try {
+              const ethersProvider = new ethers.providers.Web3Provider(provider, 'any');
 
-    <Tabs defaultValue="deploy">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="deploy">部署合约</TabsTrigger>
-        <TabsTrigger value="use">使用已有 ERC721 合约</TabsTrigger>
-      </TabsList>
-      <TabsContent value="deploy">
-        <Card>
-          <CardHeader>
-            <CardTitle>部署 ERC721 合约</CardTitle>
-            <CardDescription>
-              部署 ERC721 合约，用于测试 wallet_watchAsset ERC721，尽量使用手续费低的链
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <ApiForm.Button
-              id="deployButton"
-              label="部署 ERC721 合约"
-              onClick={async () => {
-                try {
-                  const ethersProvider = new ethers.providers.Web3Provider(provider, 'any');
+              nftsFactory = new ethers.ContractFactory(
+                nftsAbi,
+                nftsBytecode,
+                ethersProvider.getSigner(),
+              );
 
-                  nftsFactory = new ethers.ContractFactory(
-                    nftsAbi,
-                    nftsBytecode,
-                    ethersProvider.getSigner(),
-                  );
+              nftsContract = await nftsFactory.deploy();
+              await nftsContract.deployTransaction.wait();
+            } catch (error) {
+              const reason = get(error, 'reason', undefined);
+              const message = get(error, 'message', undefined);
+              apiFromRef.current?.setJsonValue('deployResponse', reason || message);
+              throw error;
+            }
 
-                  nftsContract = await nftsFactory.deploy();
-                  await nftsContract.deployTransaction.wait();
-                } catch (error) {
-                  const reason = get(error, 'reason', undefined);
-                  const message = get(error, 'message', undefined);
-                  apiFromRef.current?.setJsonValue('deployResponse', reason || message);
-                  throw error;
+            if (nftsContract.address === undefined) {
+              return;
+            }
+
+            console.log(
+              `Contract mined! address: ${nftsContract.address} transactionHash: ${nftsContract.deployTransaction.hash}`,
+            );
+
+            apiFromRef.current?.setValue('deployResponse', nftsContract.address);
+          }}
+        />
+
+          <ApiForm.TextArea
+            id="deployResponse"
+            label="部署结果"
+          />
+
+          <ApiForm.Separator />
+
+          <ApiForm.Field
+            id="mintAmount"
+            label="铸造数量"
+            defaultValue="3"
+            type="number"
+            required
+          />
+
+          <ApiForm.Button
+            id="mintButton"
+            label="铸造"
+            onClick={async () => {
+              const mintAmount = apiFromRef.current?.getValue('mintAmount');
+              try {
+                let result = await nftsContract.mintNFTs(mintAmount, {
+                  from: account?.address,
+                });
+                result = await result.wait();
+              } catch (error) {
+                apiFromRef.current?.setJsonValue('mintResponse', error);
+                throw error;
+              }
+
+              if (nftsContract.address === undefined) {
+                return;
+              }
+
+              apiFromRef.current?.setValue('mintResponse', nftsContract.address);
+            }}
+            availableDependencyFields={['mintAmount']}
+            validation={{
+              fields: ['mintAmount'],
+              validator: (values) => {
+                if (!values.mintAmount.value) {
+                  return '请输入铸造数量';
                 }
-
-                if (nftsContract.address === undefined) {
-                  return;
+                if (!account) {
+                  return '请连接钱包';
                 }
-
-                console.log(
-                  `Contract mined! address: ${nftsContract.address} transactionHash: ${nftsContract.deployTransaction.hash}`,
-                );
-
-                apiFromRef.current?.setValue('deployResponse', nftsContract.address);
-              }}
-            />
-
-            <ApiForm.TextArea
-              id="deployResponse"
-              label="部署结果"
-            />
-
-            <ApiForm.Separator />
-
-            <ApiForm.Field
-              id="mintAmount"
-              label="铸造数量"
-              defaultValue="3"
-              type="number"
-              required
-            />
-
-            <ApiForm.Button
-              id="mintButton"
-              label="铸造"
-              onClick={async () => {
-                const mintAmount = apiFromRef.current?.getValue('mintAmount');
-                try {
-                  let result = await nftsContract.mintNFTs(mintAmount, {
-                    from: account?.address,
-                  });
-                  result = await result.wait();
-                } catch (error) {
-                  apiFromRef.current?.setJsonValue('mintResponse', error);
-                  throw error;
+                if (!nftsContract) {
+                  return '请部署 ERC721 合约';
                 }
+              }
+            }}
+          />
 
-                if (nftsContract.address === undefined) {
-                  return;
-                }
-
-                apiFromRef.current?.setValue('mintResponse', nftsContract.address);
-              }}
-              validation={{
-                fields: ['mintAmount'],
-                validator: (values) => {
-                  if (!values.mintAmount.value) {
-                    return '请输入铸造数量';
-                  }
-                  if (!account) {
-                    return '请连接钱包';
-                  }
-                  if (!nftsContract) {
-                    return '请部署 ERC721 合约';
-                  }
-                }
-              }}
-            />
-
-            <ApiForm.TextArea
-              id="mintResponse"
-              label="铸造结果"
-            />
-          </CardContent>
-        </Card>
-      </TabsContent>
-      <TabsContent value="use">
-        <Card>
-          <CardHeader>
-            <CardTitle>使用 ERC721 合约</CardTitle>
-            <CardDescription>
-              使用当前帐户已经部署的 ERC721 合约，测试 wallet_watchAsset ERC721，在区块浏览器中查找 Owner 为当前帐户的 ERC721 资产，填写 Contract Address 和 TokenId 进行观察
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <ApiForm.Field
-              id="watchContractAddress"
-              label="已经部署的 ERC721 合约地址"
-            />
-          </CardContent>
-        </Card>
-      </TabsContent>
-    </Tabs>
+          <ApiForm.TextArea
+            id="mintResponse"
+            label="铸造结果"
+          /></>,
+      },
+      {
+        label: '使用 ERC721 合约',
+        value: 'use',
+        title: '使用 ERC721 合约',
+        description: '使用当前帐户已经部署的 ERC721 合约，测试 wallet_watchAsset ERC721，在区块浏览器中查找 Owner 为当前帐户的 ERC721 资产，填写 Contract Address 和 TokenId 进行观察',
+        content: <ApiForm.Field
+          id="watchContractAddress"
+          label="已经部署的 ERC721 合约地址"
+        />,
+      },
+    ]} />
 
     <ApiForm.Field
       id="watchTokenId"
@@ -279,6 +262,7 @@ const WalletWatchAssetERC721 = ({ chainId }: { chainId: string | undefined }) =>
 
         apiFromRef.current?.setValue('watchResponse', JSON.stringify(watchNftsResult, null, 2));
       }}
+      availableDependencyFields={['watchTokenId']}
       validation={{
         fields: ['watchTokenId', 'watchContractAddress'],
         validator: (values) => {
@@ -311,154 +295,138 @@ const WalletWatchAssetERC1155 = ({ chainId }: { chainId: string | undefined }) =
   let erc1155Factory: ethers.ContractFactory
 
   return <ApiForm title="wallet_watchAsset ERC1155" description='添加 ERC1155 资产 尽量使用手续费低的链' ref={apiFromRef}>
+    <TabCard tabs={[
+      {
+        label: '部署合约',
+        value: 'deploy',
+        title: '部署 ERC1155 合约',
+        description: '部署 ERC1155 合约，用于测试 wallet_watchAsset ERC1155，尽量使用手续费低的链',
+        content: <><ApiForm.Button
+          id="deployButton"
+          label="部署 ERC1155 合约"
+          onClick={async () => {
+            try {
+              const ethersProvider = new ethers.providers.Web3Provider(provider, 'any');
 
-    <Tabs defaultValue="deploy">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="deploy">部署合约</TabsTrigger>
-        <TabsTrigger value="use">使用已有 ERC1155 合约</TabsTrigger>
-      </TabsList>
-      <TabsContent value="deploy">
-        <Card>
-          <CardHeader>
-            <CardTitle>部署 ERC1155 合约</CardTitle>
-            <CardDescription>
-              部署 ERC1155 合约，用于测试 wallet_watchAsset ERC1155，尽量使用手续费低的链
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <ApiForm.Button
-              id="deployButton"
-              label="部署 ERC1155 合约"
-              onClick={async () => {
-                try {
-                  const ethersProvider = new ethers.providers.Web3Provider(provider, 'any');
+              erc1155Factory = new ethers.ContractFactory(
+                erc1155Abi,
+                erc1155Bytecode,
+                ethersProvider.getSigner(),
+              );
 
-                  erc1155Factory = new ethers.ContractFactory(
-                    erc1155Abi,
-                    erc1155Bytecode,
-                    ethersProvider.getSigner(),
-                  );
+              erc1155Contract = await erc1155Factory.deploy();
+              await erc1155Contract.deployTransaction.wait();
+            } catch (error) {
+              const reason = get(error, 'reason', undefined);
+              const message = get(error, 'message', undefined);
+              apiFromRef.current?.setJsonValue('deployResponse', reason || message);
+              throw error;
+            }
 
-                  erc1155Contract = await erc1155Factory.deploy();
-                  await erc1155Contract.deployTransaction.wait();
-                } catch (error) {
-                  const reason = get(error, 'reason', undefined);
-                  const message = get(error, 'message', undefined);
-                  apiFromRef.current?.setJsonValue('deployResponse', reason || message);
-                  throw error;
+            if (erc1155Contract.address === undefined) {
+              return;
+            }
+
+            console.log(
+              `Contract mined! address: ${erc1155Contract.address} transactionHash: ${erc1155Contract.deployTransaction.hash}`,
+            );
+
+            apiFromRef.current?.setValue('deployResponse', erc1155Contract.address);
+          }}
+        />
+
+          <ApiForm.TextArea
+            id="deployResponse"
+            label="部署结果"
+          />
+
+          <ApiForm.Separator />
+
+          <ApiForm.Field
+            id="mintTokenId"
+            label="铸造的 Token IDs"
+            defaultValue="1, 2, 3"
+            required
+          />
+
+          <ApiForm.Field
+            id="mintAmount"
+            label="Token IDs 对应铸造数量"
+            defaultValue="1, 10, 100"
+            required
+          />
+
+          <ApiForm.Button
+            id="mintButton"
+            label="铸造"
+            onClick={async () => {
+              const mintTokenIds = apiFromRef.current?.getValue('mintTokenId');
+              const mintAmounts = apiFromRef.current?.getValue('mintAmount');
+              try {
+                const params = [
+                  account?.address,
+                  mintTokenIds.split(',').map(Number),
+                  mintAmounts.split(',').map(Number),
+                  '0x',
+                ];
+                let result = await erc1155Contract.mintBatch(...params);
+                result = await result.wait();
+
+                console.log('mint success', result);
+              } catch (error) {
+                const reason = get(error, 'reason', undefined);
+                const message = get(error, 'message', undefined);
+                apiFromRef.current?.setJsonValue('mintResponse', reason || message);
+                throw error;
+              }
+
+              if (erc1155Contract.address === undefined) {
+                return;
+              }
+
+              apiFromRef.current?.setValue('mintResponse', erc1155Contract.address);
+            }}
+            availableDependencyFields={['mintTokenId', 'mintAmount']}
+            validation={{
+              fields: ['mintTokenId', 'mintAmount'],
+              validator: (values) => {
+                if (!values.mintTokenId.value) {
+                  return '请输入铸造的 Token IDs';
+                }
+                if (!values.mintAmount.value) {
+                  return '请输入铸造数量';
                 }
 
-                if (erc1155Contract.address === undefined) {
-                  return;
+                if (values.mintTokenId.value.split(',').length !== values.mintAmount.value.split(',').length) {
+                  return '铸造的 Token IDs 和铸造数量数量不一致';
                 }
 
-                console.log(
-                  `Contract mined! address: ${erc1155Contract.address} transactionHash: ${erc1155Contract.deployTransaction.hash}`,
-                );
-
-                apiFromRef.current?.setValue('deployResponse', erc1155Contract.address);
-              }}
-            />
-
-            <ApiForm.TextArea
-              id="deployResponse"
-              label="部署结果"
-            />
-
-            <ApiForm.Separator />
-
-            <ApiForm.Field
-              id="mintTokenId"
-              label="铸造的 Token IDs"
-              defaultValue="1, 2, 3"
-              required
-            />
-
-            <ApiForm.Field
-              id="mintAmount"
-              label="Token IDs 对应铸造数量"
-              defaultValue="1, 10, 100"
-              required
-            />
-
-            <ApiForm.Button
-              id="mintButton"
-              label="铸造"
-              onClick={async () => {
-                const mintTokenIds = apiFromRef.current?.getValue('mintTokenId');
-                const mintAmounts = apiFromRef.current?.getValue('mintAmount');
-                try {
-                  const params = [
-                    account?.address,
-                    mintTokenIds.split(',').map(Number),
-                    mintAmounts.split(',').map(Number),
-                    '0x',
-                  ];
-                  let result = await erc1155Contract.mintBatch(...params);
-                  result = await result.wait();
-
-                  console.log('mint success', result);
-                } catch (error) {
-                  const reason = get(error, 'reason', undefined);
-                  const message = get(error, 'message', undefined);
-                  apiFromRef.current?.setJsonValue('mintResponse', reason || message);
-                  throw error;
+                if (!account) {
+                  return '请连接钱包';
                 }
-
-                if (erc1155Contract.address === undefined) {
-                  return;
+                if (!erc1155Contract) {
+                  return '请部署 ERC1155 合约';
                 }
+              }
+            }}
+          />
 
-                apiFromRef.current?.setValue('mintResponse', erc1155Contract.address);
-              }}
-              validation={{
-                fields: ['mintTokenId', 'mintAmount'],
-                validator: (values) => {
-                  if (!values.mintTokenId.value) {
-                    return '请输入铸造的 Token IDs';
-                  }
-                  if (!values.mintAmount.value) {
-                    return '请输入铸造数量';
-                  }
-
-                  if (values.mintTokenId.value.split(',').length !== values.mintAmount.value.split(',').length) {
-                    return '铸造的 Token IDs 和铸造数量数量不一致';
-                  }
-
-                  if (!account) {
-                    return '请连接钱包';
-                  }
-                  if (!erc1155Contract) {
-                    return '请部署 ERC1155 合约';
-                  }
-                }
-              }}
-            />
-
-            <ApiForm.TextArea
-              id="mintResponse"
-              label="铸造结果"
-            />
-          </CardContent>
-        </Card>
-      </TabsContent>
-      <TabsContent value="use">
-        <Card>
-          <CardHeader>
-            <CardTitle>使用 ERC1155 合约</CardTitle>
-            <CardDescription>
-              使用当前帐户已经部署的 ERC1155 合约，测试 wallet_watchAsset ERC1155，在区块浏览器中查找 Owner 为当前帐户的 ERC1155 资产，填写 Contract Address 和 TokenId 进行观察
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <ApiForm.Field
-              id="watchContractAddress"
-              label="已经部署的 ERC1155 合约地址"
-            />
-          </CardContent>
-        </Card>
-      </TabsContent>
-    </Tabs>
+          <ApiForm.TextArea
+            id="mintResponse"
+            label="铸造结果"
+          /></>,
+      },
+      {
+        label: '使用 ERC1155 合约',
+        value: 'use',
+        title: '使用 ERC1155 合约',
+        description: '使用当前帐户已经部署的 ERC1155 合约，测试 wallet_watchAsset ERC1155，在区块浏览器中查找 Owner 为当前帐户的 ERC1155 资产，填写 Contract Address 和 TokenId 进行观察',
+        content: <ApiForm.Field
+          id="watchContractAddress"
+          label="已经部署的 ERC1155 合约地址"
+        />,
+      },
+    ]} />
 
     <ApiForm.Field
       id="watchTokenId"
@@ -495,6 +463,7 @@ const WalletWatchAssetERC1155 = ({ chainId }: { chainId: string | undefined }) =
 
         apiFromRef.current?.setValue('watchResponse', JSON.stringify(watchNftsResult, null, 2));
       }}
+      availableDependencyFields={['watchTokenId']}
       validation={{
         fields: ['watchTokenId', 'watchContractAddress'],
         validator: (values) => {

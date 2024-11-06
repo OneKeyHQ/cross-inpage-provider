@@ -1,30 +1,23 @@
 import React, { memo, useContext, useEffect } from 'react';
 import { useAtom } from 'jotai';
-import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { ApiFormContext } from './ApiForm';
+import { AutoHeightTextarea } from '../ui/textarea';
 
 
-interface ApiInputProps {
+interface AutoTextAreaProps {
   id: string;
   placeholder?: string;
-  type?: 'text' | 'number' | 'password';
-  hidden?: boolean;
-  defaultValue?: string;
   label?: string;
   required?: boolean;
 }
 
-const ApiInput = memo(({
+const TextArea = memo(({
   id,
   placeholder,
-  type = 'text',
-  hidden = false,
-  defaultValue,
   label,
   required
-}: ApiInputProps) => {
-
+}: AutoTextAreaProps) => {
   const context = useContext(ApiFormContext);
   if (!context) throw new Error('ApiField must be used within ApiForm');
 
@@ -32,55 +25,45 @@ const ApiInput = memo(({
   const [field, setField] = useAtom(store.fieldsAtom(id));
 
   useEffect(() => {
-    if (defaultValue) {
-      setField({ ...field, value: defaultValue });
-    }
     field.name = label;
     field.required = required;
   }, []);
 
   return <>
-    <Input
+    <AutoHeightTextarea
       id={id}
       value={field.value}
-      defaultValue={defaultValue}
       onChange={(e) => setField({ ...field, value: e.target.value })}
       placeholder={placeholder}
       disabled={field.disabled}
-      type={type}
-      hidden={hidden}
     />
-    {field.error && !hidden && (
+    {field.error && (
       <div className="text-sm text-red-500">{field.error}</div>
     )}
   </>
 });
 
-export interface ApiFieldProps extends ApiInputProps {
+export interface ApiAutoTextAreaProps extends AutoTextAreaProps {
   id: string;
-  required?: boolean;
 }
 
-export const ApiField = memo(({
+export const ApiAutoTextArea = memo(({
   id,
   label,
   placeholder,
-  required,
-  hidden = false,
-  defaultValue
-}: ApiFieldProps) => {
-
+  required
+}: ApiAutoTextAreaProps) => {
   return (
     <div>
-      {label && !hidden && (
+      {label && (
         <Label htmlFor={id}>
           {label}
           {required && <span className="text-red-500">*</span>}
         </Label>
       )}
-      <ApiInput id={id} placeholder={placeholder} hidden={hidden} defaultValue={defaultValue} label={label} required={required} />
+      <TextArea id={id} placeholder={placeholder} label={label} required={required} />
     </div>
   );
 });
 
-ApiField.displayName = 'ApiField';
+ApiAutoTextArea.displayName = 'ApiAutoTextArea';

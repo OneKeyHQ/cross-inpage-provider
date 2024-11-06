@@ -18,6 +18,8 @@ export interface ApiSelectorProps<T = any> {
   defaultValue?: string;
   placeholder?: string;
   onRequestOptions?: () => Promise<IOption<T>[]>
+  onValueChange?: (value: string | null) => void;
+  onOptionChange?: (option: IOption<T> | null) => void;
 }
 
 export interface ApiSelectorRef<T = any> {
@@ -34,7 +36,9 @@ export const ApiSelector = forwardRef<ApiSelectorRef, ApiSelectorProps>(function
     required,
     defaultValue,
     placeholder,
-    onRequestOptions
+    onRequestOptions,
+    onValueChange,
+    onOptionChange
   }: ApiSelectorProps<T>,
   ref: React.Ref<ApiSelectorRef<T>>,
 ) {
@@ -54,7 +58,7 @@ export const ApiSelector = forwardRef<ApiSelectorRef, ApiSelectorProps>(function
   const setOptions = useCallback((options: IOption<T>[]) => {
     setField({
       ...field, extra: {
-        options: [...options]
+        options
       }
     });
   }, [setField]);
@@ -63,6 +67,8 @@ export const ApiSelector = forwardRef<ApiSelectorRef, ApiSelectorProps>(function
     if (defaultValue) {
       setField({ ...field, value: defaultValue });
     }
+    field.name = label;
+    field.required = required;
   }, []);
 
   useEffect(() => {
@@ -73,9 +79,20 @@ export const ApiSelector = forwardRef<ApiSelectorRef, ApiSelectorProps>(function
     }
   }, [onRequestOptions]);
 
+  const setValue = useCallback((value: string | null) => {
+    setField({ ...field, value });
+    onValueChange?.(value);
+    onOptionChange?.(options?.find(opt => opt.value === value) ?? null);
+  }, [setField, onValueChange, onOptionChange, options]);
+
+  useEffect(() => {
+    if (defaultValue) {
+      setField({ ...field, value: defaultValue });
+    }
+  }, []);
 
   useImperativeHandle(ref, () => ({
-    setValue: (key: string | null) => setField({ ...field, value: key }),
+    setValue,
     getCurrentValue: () => currentOption?.value,
     getCurrentOption: () => currentOption,
     getOptions: () => options,
@@ -92,7 +109,7 @@ export const ApiSelector = forwardRef<ApiSelectorRef, ApiSelectorProps>(function
     <Select
       defaultValue={defaultValue}
       value={field.value}
-      onValueChange={(value) => setField({ ...field, value })}
+      onValueChange={setValue}
     >
       {placeholder && (
         <SelectTrigger className="w-full">

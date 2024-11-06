@@ -1,5 +1,6 @@
 export interface IFormField<T> {
   value: T;
+  name?: string;
   disabled?: boolean;
   error?: string;
   required?: boolean;
@@ -14,6 +15,6 @@ export interface IApiFormState<T> {
 
 // 新增: 验证规则类型
 export interface IValidationRule {
-  fields: string[];  // 需要验证的字段
+  fields: string[]; // 需要验证的字段
   validator?: (values: Record<string, string>) => string | undefined; // 自定义验证函数
 }

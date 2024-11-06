@@ -1,4 +1,4 @@
-import React, { memo, useContext } from 'react';
+import React, { memo, useContext, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { Label } from '../ui/label';
 import { ApiFormContext } from './ApiForm';
@@ -8,11 +8,15 @@ import JsonEditor from '../ui/jsonEditor';
 interface JsonEditProps {
   id: string;
   placeholder?: string;
+  label?: string;
+  required?: boolean;
 }
 
 const JsonEdit = memo(({
   id,
-  placeholder
+  placeholder,
+  label,
+  required
 }: JsonEditProps) => {
 
   const context = useContext(ApiFormContext);
@@ -20,6 +24,11 @@ const JsonEdit = memo(({
 
   const { store } = context;
   const [field, setField] = useAtom(store.fieldsAtom(id));
+
+  useEffect(() => {
+    field.name = label;
+    field.required = required;
+  }, []);
 
   return <>
     <JsonEditor

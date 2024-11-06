@@ -21,6 +21,10 @@ export const ApiSwitch = memo(({
   const [field, setField] = useAtom(store.fieldsAtom(id));
 
   useEffect(() => {
+    field.name = label;
+  }, []);
+
+  useEffect(() => {
     if (defaultChecked) {
       setField({ ...field, value: defaultChecked });
     }

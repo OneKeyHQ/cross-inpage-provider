@@ -19,7 +19,7 @@ export default {
     },
     {
       id: 'signSchnorr',
-      name: 'Hex String',
+      name: 'Hex String - 硬件报错符合预期',
       value: '010203',
     },
     // {

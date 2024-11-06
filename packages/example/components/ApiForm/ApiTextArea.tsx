@@ -1,18 +1,22 @@
-import React, { memo, useContext } from 'react';
+import React, { memo, useContext, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { Label } from '../ui/label';
 import { ApiFormContext } from './ApiForm';
-import { AutoHeightTextarea } from '../ui/textarea';
+import { Textarea } from '../ui/textarea';
 
 
 interface TextAreaProps {
   id: string;
   placeholder?: string;
+  label?: string;
+  required?: boolean;
 }
 
 const TextArea = memo(({
   id,
-  placeholder
+  placeholder,
+  label,
+  required
 }: TextAreaProps) => {
   const context = useContext(ApiFormContext);
   if (!context) throw new Error('ApiField must be used within ApiForm');
@@ -20,13 +24,19 @@ const TextArea = memo(({
   const { store } = context;
   const [field, setField] = useAtom(store.fieldsAtom(id));
 
+  useEffect(() => {
+    field.name = label;
+    field.required = required;
+  }, []);
+
   return <>
-    <AutoHeightTextarea
+    <Textarea
       id={id}
       value={field.value}
       onChange={(e) => setField({ ...field, value: e.target.value })}
       placeholder={placeholder}
       disabled={field.disabled}
+      style={{ overflow: 'hidden' }}
     />
     {field.error && (
       <div className="text-sm text-red-500">{field.error}</div>

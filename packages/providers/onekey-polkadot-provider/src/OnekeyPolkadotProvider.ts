@@ -263,11 +263,13 @@ class ProviderPolkadot extends ProviderPolkadotBase implements IProviderPolkadot
     });
   }
 
-  web3Accounts(anyType?: boolean): Promise<InjectedAccount[]> {
-    return this._callBridge({
+  async web3Accounts(anyType?: boolean): Promise<InjectedAccount[]> {
+    const accounts = await this._callBridge({
       method: 'web3Accounts',
       params: anyType ?? false,
     });
+    super.emit('accountChanged', accounts);
+    return accounts;
   }
 
   web3AccountsSubscribe(cb: (accounts: InjectedAccount[]) => any): Unsubcall {

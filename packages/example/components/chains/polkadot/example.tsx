@@ -135,9 +135,6 @@ export default function Example() {
 
   const listenerRef = useRef<() => void>();
   useEffect(() => {
-    if (!apiRef.current) {
-      return;
-    }
     if (!provider) {
       return;
     }
@@ -219,6 +216,20 @@ export default function Example() {
           disableRequestContent
           onExecute={async (request: string) => {
             const res = await provider?.accounts.get();
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="accounts.get (Manta dApp)"
+          description="Test Manta Connect (dApp)"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            // serialization provider
+            JSON.stringify(provider)
+            // get accounts
+            const localProvider = provider
+            const accountProvider = localProvider?.accounts
+            const res = await accountProvider?.get();
             return JSON.stringify(res);
           }}
         />

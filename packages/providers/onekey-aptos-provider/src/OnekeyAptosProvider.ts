@@ -316,6 +316,10 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     return super.on(PROVIDER_EVENTS.accountChanged, listener);
   }
 
+  onDisconnect(listener: AptosProviderEventsMap['disconnect']): this {
+    return super.on(PROVIDER_EVENTS.disconnect, listener);
+  }
+
   on<E extends keyof AptosProviderEventsMap>(event: E, listener: AptosProviderEventsMap[E]): this {
     return super.on(event, listener);
   }

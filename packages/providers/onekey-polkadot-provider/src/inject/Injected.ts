@@ -22,4 +22,13 @@ export default class implements Injected {
     this.provider = undefined;
     this.signer = new Signer(provider);
   }
+
+  toJSON() {
+    return {
+      accounts: this.accounts,
+      metadata: this.metadata,
+      provider: this.provider,
+      signer: this.signer,
+    };
+  }
 }

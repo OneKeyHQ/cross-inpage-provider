@@ -10,6 +10,18 @@ export default class implements InjectedAccounts {
   };
 
   subscribe = (cb: (accounts: InjectedAccount[]) => unknown): Unsubcall => {
+    // listener for account change
+    (async () => {
+      const accounts = await this.get();
+      cb(accounts);
+    })();
     return this.provider.web3AccountsSubscribe(cb);
   };
+
+  toJSON() {
+    return {
+      get: {},
+      subscribe: {},
+    };
+  }
 }

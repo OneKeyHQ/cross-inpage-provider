@@ -83,6 +83,11 @@ export default function Example() {
         publicKey: params.publicKey,
       });
     });
+
+    // @ts-expect-error
+    provider.onDisconnect?.((params: { name: string | null } | null) => {
+      console.log(`aptos [onDisconnect] ${JSON.stringify(params)}`);
+    });
   }, [account, provider, setAccount]);
   return (
     <>
@@ -198,7 +203,7 @@ export default function Example() {
             const options = {
               method: 'POST',
               url: 'https://api.mainnet.aptoslabs.com/v1/transactions',
-              headers: {'Content-Type': 'application/x.aptos.signed_transaction+bcs'},
+              headers: { 'Content-Type': 'application/x.aptos.signed_transaction+bcs' },
               data: buffer
             };
 

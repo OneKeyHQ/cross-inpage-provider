@@ -11,4 +11,8 @@ export default class Signer {
   signRaw = async (payload: SignerPayloadRaw): Promise<SignerResult> => {
     return this.provider.web3SignRaw(payload);
   };
+
+  toJSON() {
+    return {};
+  }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/onekey-solana-provider",
-  "version": "2.1.12",
+  "version": "2.1.13",
   "keywords": [
     "cross-inpage-provider",
     "solona"
@@ -29,10 +29,10 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "2.1.12",
-    "@onekeyfe/cross-inpage-provider-errors": "2.1.12",
-    "@onekeyfe/cross-inpage-provider-types": "2.1.12",
-    "@onekeyfe/extension-bridge-injected": "2.1.12",
+    "@onekeyfe/cross-inpage-provider-core": "2.1.13",
+    "@onekeyfe/cross-inpage-provider-errors": "2.1.13",
+    "@onekeyfe/cross-inpage-provider-types": "2.1.13",
+    "@onekeyfe/extension-bridge-injected": "2.1.13",
     "@solana/wallet-standard-features": "^1.1.0",
     "@solana/web3.js": "^1.41.3",
     "@wallet-standard/base": "^1.0.1",

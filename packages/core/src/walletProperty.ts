@@ -17,6 +17,17 @@ export enum ISpecialPropertyProviderNamesReflection {
   polkadot = 'polkadot-js',
 }
 
+export const DEFINE_PROPERTY_WHITELIST = [
+  'connectionStatus', // common
+  '_state', // common
+  '_account', // ada、cosmos
+  'accounts',
+  'states',
+  'isConnected',
+  'address',
+  'accountChanged',
+];
+
 export type IPlatformType = 'native' | 'extension' | 'web' | 'desktop';
 
 export function checkPlatformEnable(disablePlatform?: IPlatformType[]) {
@@ -103,7 +114,13 @@ export function defineWindowProperty(
   const enable = checkEnableDefineProperty(property);
   const proxyProvider = new Proxy(provider as object, {
     defineProperty(target, property, attributes) {
-      // skip define Prevent overwriting
+      try {
+        if (DEFINE_PROPERTY_WHITELIST.includes(property as string)) {
+          return Reflect.defineProperty(target, property, attributes);
+        }
+      } catch (error) {
+        // ignore error
+      }
       return true;
     },
   });

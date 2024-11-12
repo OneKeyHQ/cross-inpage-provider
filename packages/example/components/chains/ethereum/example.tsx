@@ -27,7 +27,7 @@ import Contract721 from './case/contract/contract721.json';
 import Contract1155 from './case/contract/contract1155.json';
 import maliciousCases from './case/transfer/malicious';
 import malformedCases from './case/transfer/malformed';
-import { MALICIOUS_ADDRESS } from './case/contract/SampleContracts';
+import { checkSupportNetwork, getSupportNetworkNames, MALICIOUS_ADDRESS } from './case/contract/SampleContracts';
 import TabCard from '../../TabCard';
 
 const {
@@ -1179,7 +1179,12 @@ export default function Example() {
         <ApiPayload
           title="eth_sendTransaction"
           description="测试风险合约调用"
-          onExecute={requestSendTransactionCommon}
+          onExecute={(request: string) => {
+            if (!checkSupportNetwork(parseChainId(account?.chainId))) {
+              return Promise.resolve(`不支持的网络: 支持 ${getSupportNetworkNames().join(', ')}`);
+            }
+            return requestSendTransactionCommon(request);
+          }}
           presupposeParams={maliciousCases.sendTransactionERC20(
             account?.address ?? '',
             account?.chainId ?? '',
@@ -1190,6 +1195,9 @@ export default function Example() {
           title="eth_signTypedData_v4"
           description="测试风险 eth_signTypedData_v4 交易"
           onExecute={async (request: string) => {
+            if (!checkSupportNetwork(parseChainId(account?.chainId))) {
+              return `不支持的网络: 支持 ${getSupportNetworkNames().join(', ')}`;
+            }
             return await provider?.request({
               'method': 'eth_signTypedData_v4',
               'params': [account.address, request],

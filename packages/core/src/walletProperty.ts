@@ -18,14 +18,7 @@ export enum ISpecialPropertyProviderNamesReflection {
 }
 
 export const DEFINE_PROPERTY_WHITELIST = [
-  'connectionStatus', // common
-  '_state', // common
-  '_account', // ada、cosmos
-  'accounts',
-  'states',
-  'isConnected',
-  'address',
-  'accountChanged',
+  'connectionStatus', // base provider
 ];
 
 export type IPlatformType = 'native' | 'extension' | 'web' | 'desktop';

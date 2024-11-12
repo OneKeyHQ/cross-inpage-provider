@@ -8,6 +8,15 @@ export const NETWORKS_BY_CHAIN_ID = {
   11155111: 'sepolia',
   8453: 'base',
   204: 'opBnb',
+  1: 'mainnet',
+};
+
+export const checkSupportNetwork = (chainId: number) => {
+  return NETWORKS_BY_CHAIN_ID[chainId as keyof typeof NETWORKS_BY_CHAIN_ID];
+};
+
+export const getSupportNetworkNames = () => {
+  return Object.values(NETWORKS_BY_CHAIN_ID);
 };
 
 export const ERC20_USDC_CONTRACTS = {
@@ -19,6 +28,7 @@ export const ERC20_USDC_CONTRACTS = {
   sepolia: '0x27A56df30bC838BCA36141E517e7b5376dea68eE',
   base: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
   opBnb: '0x9e5aac1ba1a2e6aed6b32689dfcf62a509ca96f3',
+  mainnet: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
 };
 
 export const ERC721_SAMPLE_CONTRACTS = {
@@ -30,6 +40,7 @@ export const ERC721_SAMPLE_CONTRACTS = {
   sepolia: '0xbba60aa8144579e07c6db64121b0f608ab6f0c89',
   base: '0x90997fc967e75b7e69f899133aab31d197beb802',
   opBnb: '0x61d7e121185b1d7902a3da7f3c8ac9faaee8863b',
+  mainnet: '0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d',
 };
 
 export const MALICIOUS_CONTRACT_ADDRESSES = {

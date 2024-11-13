@@ -23,6 +23,11 @@ export default function Example() {
       name: 'Injected Wallet',
       inject: 'aptos',
     },
+    {
+      uuid: 'injected-onekey',
+      name: 'Injected OneKey',
+      inject: '$onekey.aptos',
+    },
   ]);
 
   const { provider, setAccount, account } = useWallet<IProviderApi>();

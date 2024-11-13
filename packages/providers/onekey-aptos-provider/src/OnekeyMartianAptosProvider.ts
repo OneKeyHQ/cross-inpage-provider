@@ -96,7 +96,7 @@ class ProviderAptosMartian extends ProviderAptos {
   public readonly isMartian = true;
 
   get publicKey() {
-    return this._account?.publicKey ?? null;
+    return this._state.account?.publicKey ?? null;
   }
 
   constructor(props: OneKeyAptosProviderProps) {

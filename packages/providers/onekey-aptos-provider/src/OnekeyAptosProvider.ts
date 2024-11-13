@@ -2,7 +2,7 @@
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { ProviderAptosBase } from './ProviderAptosBase';
-import { AptosAccountInfo, SignMessagePayload, SignMessageResponse } from './types';
+import { AptosAccountInfo, ProviderState, SignMessagePayload, SignMessageResponse } from './types';
 import type * as TypeUtils from './type-utils';
 import { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
@@ -105,12 +105,14 @@ function isWalletEventMethodMatch({ method, name }: { method: string; name: stri
 }
 
 class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
-  protected _account: AptosAccountInfo | null = null;
+  protected _state: ProviderState = {
+    account: null,
+  };
 
   protected aptosProviderType: AptosProviderType = 'petra';
 
   get publicKey() {
-    return this._account?.publicKey ?? null;
+    return this._state?.account?.publicKey ?? null;
   }
 
   constructor(props: OneKeyAptosProviderProps) {
@@ -151,30 +153,33 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
   }
 
   private _handleConnected(account: AptosAccountInfo, options: { emit: boolean } = { emit: true }) {
-    this._account = account;
+    this._state.account = {
+      publicKey: account.publicKey,
+      address: account.address,
+    };
     if (this.isConnectionStatusChanged('connected')) {
       this.connectionStatus = 'connected';
-    }
-    if (options.emit) {
-      const address = account?.address ?? null;
-      this.emit('connect', address);
-      this.emit('accountChanged', address);
+      if (options.emit) {
+        const address = account?.address ?? null;
+        this.emit('connect', address);
+        this.emit('accountChanged', address);
+      }
     }
   }
 
   private _handleDisconnected(options: { emit: boolean } = { emit: true }) {
-    this._account = null;
+    this._state.account = null;
     if (this.isConnectionStatusChanged('disconnected')) {
       this.connectionStatus = 'disconnected';
-    }
-    if (options.emit) {
-      this.emit('disconnect');
-      this.emit('accountChanged', null);
+      if (options.emit) {
+        this.emit('disconnect');
+        this.emit('accountChanged', null);
+      }
     }
   }
 
   override isAccountsChanged(account: AptosAccountInfo | undefined) {
-    return account?.address !== this._account?.address;
+    return account?.address !== this._state.account?.address;
   }
 
   // trigger by bridge account change event
@@ -205,8 +210,8 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
   }
 
   async connect(): Promise<AptosAccountInfo> {
-    if (this._account) {
-      return Promise.resolve(this._account);
+    if (this._state.account) {
+      return Promise.resolve(this._state.account);
     }
 
     const result = await this._callBridge({
@@ -222,7 +227,7 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
   }
 
   isConnected() {
-    return this.isConnectionStatusChanged('connected');
+    return !!this._state.account;
   }
 
   async account(): Promise<AptosAccountInfo> {

@@ -4,12 +4,16 @@ export type AptosAccountInfo = {
   address: string;
 };
 
+export type ProviderState = {
+  account: AptosAccountInfo | null;
+};
+
 export type TxnOptions = {
   sender?: string;
   sequence_number?: string;
   max_gas_amount?: string;
   gas_unit_price?: string;
-  gas_currency_code?: string, // TODO: 
+  gas_currency_code?: string, // TODO:
   // Unix timestamp, in seconds + 10 seconds
   expiration_timestamp_secs?: string;
 };

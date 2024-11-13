@@ -152,8 +152,10 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
 
   private _handleConnected(account: AptosAccountInfo, options: { emit: boolean } = { emit: true }) {
     this._account = account;
-    if (options.emit && this.isConnectionStatusChanged('connected')) {
+    if (this.isConnectionStatusChanged('connected')) {
       this.connectionStatus = 'connected';
+    }
+    if (options.emit) {
       const address = account?.address ?? null;
       this.emit('connect', address);
       this.emit('accountChanged', address);
@@ -162,9 +164,10 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
 
   private _handleDisconnected(options: { emit: boolean } = { emit: true }) {
     this._account = null;
-
-    if (options.emit && this.isConnectionStatusChanged('disconnected')) {
+    if (this.isConnectionStatusChanged('disconnected')) {
       this.connectionStatus = 'disconnected';
+    }
+    if (options.emit) {
       this.emit('disconnect');
       this.emit('accountChanged', null);
     }
@@ -219,7 +222,7 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
   }
 
   isConnected() {
-    return this._account !== null;
+    return this.isConnectionStatusChanged('connected');
   }
 
   async account(): Promise<AptosAccountInfo> {

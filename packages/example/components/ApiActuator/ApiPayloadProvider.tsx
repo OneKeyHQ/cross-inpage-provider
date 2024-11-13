@@ -18,7 +18,7 @@ type ApiPayloadAction =
   | { type: 'SET_PRESUPPOSE_PARAMS'; payload: IPresupposeParam[] };
 
 // 优化 JSON 格式化函数
-const tryFormatJson = (json: string) => {
+export const tryFormatJson = (json: string) => {
   try {
     return JSON.stringify(JSON.parse(json), null, 2);
   } catch {

@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SuiObjectRef, SuiClient } from '@mysten/sui.js/client';
+import { SUI_TYPE_ARG } from '@mysten/sui.js/utils';
 import { TransactionBlock } from '@mysten/sui.js/transactions';
-
+import type { CoinStruct } from '@mysten/sui.js/client';
 export async function sponsorTransaction(
   client: SuiClient,
   sender: string,
   transactionKindBytes: Uint8Array,
+  coinType: string = SUI_TYPE_ARG,
 ) {
   let payment: SuiObjectRef[] = [];
 

@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/extension-bridge-hosted",
-  "version": "2.1.14",
+  "version": "2.1.15",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -28,8 +28,8 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "2.1.14",
-    "@onekeyfe/cross-inpage-provider-types": "2.1.14",
+    "@onekeyfe/cross-inpage-provider-core": "2.1.15",
+    "@onekeyfe/cross-inpage-provider-types": "2.1.15",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

@@ -148,9 +148,16 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
     if (options.onDisconnected) {
       this.onDisconnected = options.onDisconnected
     }
+    const params: Record<string, unknown> = {};
+    Object.keys(options).forEach((key) => {
+      if (options[key as keyof EnableOptions] instanceof Function) {
+        return;
+      }
+      params[key] = options[key as keyof EnableOptions];
+    })
     return this.bridgeRequest({
       method: 'enableIfConnected',
-      params: options,
+      params,
     }) as Promise<Account | undefined>;
   }
 

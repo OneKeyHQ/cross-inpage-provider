@@ -35,8 +35,8 @@ function isWalletEventMethodMatch({ method, name }: { method: string; name: stri
 }
 
 export class ProviderAlph extends InteractiveSignerProvider implements AlephiumWindowObject {
-  id = 'onekey';
-  name = 'OneKey';
+  id = 'alephium';
+  name = 'Alephium';
   icon = 'https://uni.onekey-asset.com/static/logo/onekey.png';
   version = '0.9.4';
   _accountInfo: Account | undefined;
@@ -148,16 +148,9 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
     if (options.onDisconnected) {
       this.onDisconnected = options.onDisconnected
     }
-    const params: Record<string, unknown> = {};
-    Object.keys(options).forEach((key) => {
-      if (options[key as keyof EnableOptions] instanceof Function) {
-        return;
-      }
-      params[key] = options[key as keyof EnableOptions];
-    })
     return this.bridgeRequest({
       method: 'enableIfConnected',
-      params,
+      params: options,
     }) as Promise<Account | undefined>;
   }
 

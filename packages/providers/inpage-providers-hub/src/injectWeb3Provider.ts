@@ -7,7 +7,7 @@ import { ProviderSolana, registerSolanaWallet, WalletIcon } from '@onekeyfe/onek
 // import { ProviderStarcoin } from '@onekeyfe/onekey-starcoin-provider';
 import { ProviderAptos, ProviderAptosMartian } from '@onekeyfe/onekey-aptos-provider';
 import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
-import { ProviderAlph, registerAlephiumProvider } from '@onekeyfe/onekey-alph-provider';
+import { ProviderAlph } from '@onekeyfe/onekey-alph-provider';
 import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
 import { ProviderCardano, defineWindowCardanoProperty } from '@onekeyfe/onekey-cardano-provider';
 // import { ProviderPrivateExternalAccount } from '@onekeyfe/onekey-private-external-account-provider';
@@ -205,7 +205,6 @@ function injectWeb3Provider(): unknown {
   defineWindowProperty('alephiumProviders', {
     alephium,
   });
-  registerAlephiumProvider(alephium);
   defineWindowProperty('tronLink', tron);
   defineWindowProperty('suiWallet', sui);
   defineWindowProperty('onekeyTonWallet', {

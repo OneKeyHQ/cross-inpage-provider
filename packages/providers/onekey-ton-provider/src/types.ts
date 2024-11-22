@@ -1,5 +1,24 @@
 import { CHAIN } from "@tonconnect/protocol";
 
+export enum OneKeyTonProviderErrorCode {
+  UNKNOWN_ERROR = 0,
+  BAD_REQUEST = 1,
+  APP_MANIFEST_NOT_FOUND = 2,
+  APP_MANIFEST_CONTENT_ERROR = 3,
+  UNKNOWN_APP = 100,
+  USER_DECLINED = 300,
+  UNSUPPORTED_METHOD = 400,
+}
+
+export class OneKeyTonProviderError extends Error {
+  code: OneKeyTonProviderErrorCode;
+
+  constructor(code: OneKeyTonProviderErrorCode, message: string) {
+    super(message);
+    this.code = code;
+  }
+}
+
 export enum ConnectEventErrorMessage {
   UNKNOWN_ERROR = "Unknown error",
   BAD_REQUEST = "Bad request",
@@ -7,6 +26,7 @@ export enum ConnectEventErrorMessage {
   APP_MANIFEST_CONTENT_ERROR = "App manifest content error",
   UNKNOWN_APP = "Unknown app",
   USER_DECLINED = "User declined the connection",
+  UNSUPPORTED_METHOD = "Method is not supported",
 }
 
 export interface WalletInfo {
@@ -52,7 +72,7 @@ export interface SignDataRequest {
 }
 
 export interface SignDataResult {
-  signature: string; // base64 encoded signature 
+  signature: string; // base64 encoded signature
   timestamp: number; // UNIX timestamp in seconds (UTC) at the moment on creating the signature.
 }
 
@@ -61,7 +81,7 @@ export interface SignProofRequest {
 }
 
 export interface SignProofResult {
-  signature: string; // base64 encoded signature 
+  signature: string; // base64 encoded signature
   timestamp: number; // 64-bit unix epoch time of the signing operation (seconds)
   domain: {
     lengthBytes: number; // AppDomain Length

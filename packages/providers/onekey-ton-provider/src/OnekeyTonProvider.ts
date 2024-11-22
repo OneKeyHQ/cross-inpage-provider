@@ -19,6 +19,8 @@ import {
 import {
   AccountInfo,
   ConnectEventErrorMessage,
+  OneKeyTonProviderError,
+  OneKeyTonProviderErrorCode,
   SendTransactionErrorMessage,
   SignDataRequest,
   SignDataResult,
@@ -27,6 +29,7 @@ import {
   TransactionRequest,
   WalletInfo,
 } from './types';
+import { errorCodes } from '@onekeyfe/cross-inpage-provider-errors';
 
 const PROVIDER_EVENTS = {
   'disconnect': 'disconnect',
@@ -188,11 +191,24 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     });
   }
 
-  private _callBridge<T extends keyof JsBridgeRequest>(params: {
+  private async _callBridge<T extends keyof JsBridgeRequest>(params: {
     method: T;
     params: JsBridgeRequestParams<T>;
-  }): JsBridgeRequestResponse<T> {
-    return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
+  }): Promise<JsBridgeRequestResponse<T>> {
+    try {
+      return await this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
+    } catch (e: any) {
+      const { message, code } = e;
+      switch(code){
+        case errorCodes.provider.userRejectedRequest:
+        case errorCodes.provider.unauthorized:
+          throw new OneKeyTonProviderError(OneKeyTonProviderErrorCode.USER_DECLINED, message)
+
+        case errorCodes.provider.unsupportedMethod:
+          throw new OneKeyTonProviderError(OneKeyTonProviderErrorCode.UNSUPPORTED_METHOD, message)
+      }
+      throw e;
+    }
   }
 
   private _handleConnected(accountInfo: AccountInfo, options: { emit: boolean } = { emit: true }) {

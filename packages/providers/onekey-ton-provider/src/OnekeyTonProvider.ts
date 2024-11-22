@@ -196,16 +196,22 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     params: JsBridgeRequestParams<T>;
   }): Promise<JsBridgeRequestResponse<T>> {
     try {
-      return await this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
+      return (await this.bridgeRequest(params)) as JsBridgeRequestResponse<T>;
     } catch (e: any) {
-      const { message, code } = e;
-      switch(code){
+      const errorObj = e as { message?: unknown; code?: number };
+      const errorMessage: string =
+        typeof errorObj.message === 'string' ? errorObj.message : JSON.stringify(errorObj.message);
+
+      switch (errorObj.code) {
         case errorCodes.provider.userRejectedRequest:
         case errorCodes.provider.unauthorized:
-          throw new OneKeyTonProviderError(OneKeyTonProviderErrorCode.USER_DECLINED, message)
+          throw new OneKeyTonProviderError(OneKeyTonProviderErrorCode.USER_DECLINED, errorMessage);
 
         case errorCodes.provider.unsupportedMethod:
-          throw new OneKeyTonProviderError(OneKeyTonProviderErrorCode.UNSUPPORTED_METHOD, message)
+          throw new OneKeyTonProviderError(
+            OneKeyTonProviderErrorCode.UNSUPPORTED_METHOD,
+            errorMessage,
+          );
       }
       throw e;
     }

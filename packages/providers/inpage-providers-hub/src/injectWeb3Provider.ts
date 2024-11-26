@@ -10,7 +10,6 @@ import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
 import { ProviderAlph, registerAlephiumProvider } from '@onekeyfe/onekey-alph-provider';
 import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
 import { ProviderCardano, defineWindowCardanoProperty } from '@onekeyfe/onekey-cardano-provider';
-// import { ProviderPrivateExternalAccount } from '@onekeyfe/onekey-private-external-account-provider';
 import { ProviderCosmos } from '@onekeyfe/onekey-cosmos-provider';
 import { ProviderPolkadot, registerPolkadot } from '@onekeyfe/onekey-polkadot-provider';
 import {
@@ -18,6 +17,7 @@ import {
   checkWalletSwitchEnable,
 } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
+import { ProviderBfc, registerBfcWallet } from '@onekeyfe/onekey-bfc-provider';
 import { ProviderWebln } from '@onekeyfe/onekey-webln-provider';
 import { ProviderScdo } from '@onekeyfe/onekey-scdo-provider';
 import { createTonProviderOpenMask, ProviderTon } from '@onekeyfe/onekey-ton-provider';
@@ -27,7 +27,6 @@ import { ProviderAlgo } from '@onekeyfe/onekey-algo-provider';
 import { hackAllConnectButtons } from './connectButtonHack';
 import { detectWebsiteRiskLevel, listenPageFocus } from './detectRiskWebsite';
 import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
-// import Web3 from 'web3'; // cause build error
 
 export type IWindowOneKeyHub = {
   debugLogger?: any;
@@ -40,6 +39,7 @@ export type IWindowOneKeyHub = {
   petra?: ProviderAptos;
   martian?: ProviderAptosMartian;
   suiWallet?: ProviderSui;
+  bfcWallet?: ProviderBfc;
   cardano?: ProviderCardano;
   keplr?: ProviderCosmos;
   webln?: ProviderWebln;
@@ -103,6 +103,10 @@ function injectWeb3Provider(): unknown {
     bridge,
   });
 
+  const bfc = new ProviderBfc({
+    bridge,
+  });
+
   const cardano = new ProviderCardano({
     bridge,
   });
@@ -138,14 +142,11 @@ function injectWeb3Provider(): unknown {
 
   const scdo = new ProviderScdo({ bridge });
 
-  // const $privateExternalAccount = new ProviderPrivateExternalAccount({ bridge });
-
   // providerHub
   const $onekey = {
     ...window.$onekey,
     jsBridge: bridge,
     $private,
-    // $privateExternalAccount,
     ethereum,
     solana,
     // starcoin,
@@ -154,6 +155,7 @@ function injectWeb3Provider(): unknown {
     tron,
     sollet: null,
     sui,
+    bfc,
     tonconnect,
     cardano,
     alephium,
@@ -208,6 +210,7 @@ function injectWeb3Provider(): unknown {
   registerAlephiumProvider(alephium);
   defineWindowProperty('tronLink', tron);
   defineWindowProperty('suiWallet', sui);
+  defineWindowProperty('bfcWallet', bfc);
   defineWindowProperty('onekeyTonWallet', {
     tonconnect,
   });
@@ -266,6 +269,13 @@ function injectWeb3Provider(): unknown {
   if (checkWalletSwitchEnable()) {
     registerSuiWallet(sui, {
       name: 'Sui Wallet',
+      logo: WALLET_CONNECT_INFO.onekey.icon,
+    });
+  }
+
+  // BFC Standard Wallet
+  if (checkWalletSwitchEnable()) {
+    registerBfcWallet(bfc, {
       logo: WALLET_CONNECT_INFO.onekey.icon,
     });
   }

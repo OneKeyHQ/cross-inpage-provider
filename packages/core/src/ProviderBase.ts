@@ -183,6 +183,7 @@ abstract class ProviderBase extends CrossEventEmitter {
       return result;
     } catch (error) {
       if (callback && hasCallback) {
+        // @ts-expect-error
         callback(error);
       }
       throw error;

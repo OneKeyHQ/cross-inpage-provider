@@ -245,6 +245,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
       !message || (message && message.items.some((item) => item.name === 'ton_addr'));
     const proofItem =
       message &&
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       (message.items.find((item) => item.name === 'ton_proof') as TonProofItem | undefined);
     const items = [] as ConnectItemReply[];
 

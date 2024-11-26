@@ -69,6 +69,7 @@ export class CosmJSOfflineSigner
     return await this.service.signDirect(this.chainId, signerAddress, {
       bodyBytes: signDoc.bodyBytes,
       authInfoBytes: signDoc.authInfoBytes,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
       accountNumber: Long.fromValue(signDoc.accountNumber),
       chainId: signDoc.chainId,
     });

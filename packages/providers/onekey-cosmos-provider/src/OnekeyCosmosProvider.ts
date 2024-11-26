@@ -438,6 +438,7 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
           bodyBytes: signDoc?.bodyBytes ? bytesToHex(signDoc?.bodyBytes) : null,
           authInfoBytes: signDoc?.authInfoBytes ? bytesToHex(signDoc?.authInfoBytes) : null,
           chainId: signDoc.chainId,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
           accountNumber: signDoc?.accountNumber?.toString(),
         },
         signOptions,
@@ -452,6 +453,7 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
         // @ts-expect-error
         authInfoBytes: hexToBytes(res.signed.authInfoBytes),
         // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         accountNumber: Long.fromString(res.signed.accountNumber),
         chainId: res.signed.chainId,
       },

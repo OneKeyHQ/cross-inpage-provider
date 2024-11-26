@@ -35,8 +35,10 @@ function isWalletEventMethodMatch({ method, name }: { method: string; name: stri
 }
 
 export class ProviderAlph extends InteractiveSignerProvider implements AlephiumWindowObject {
-  id = 'onekey';
-  name = 'OneKey';
+  id = 'alephium';
+  name = 'Alephium';
+  // id = 'onekey';
+  // name = 'OneKey';
   icon = 'https://uni.onekey-asset.com/static/logo/onekey.png';
   version = '0.9.4';
   _accountInfo: Account | undefined;

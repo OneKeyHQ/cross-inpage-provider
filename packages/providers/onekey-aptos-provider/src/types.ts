@@ -15,7 +15,7 @@ export type TxnOptions = {
   sequence_number?: string;
   max_gas_amount?: string;
   gas_unit_price?: string;
-  gas_currency_code?: string, // TODO:
+  gas_currency_code?: string; // TODO:
   // Unix timestamp, in seconds + 10 seconds
   expiration_timestamp_secs?: string;
 };
@@ -45,8 +45,8 @@ export interface SignMessageResponse {
   signature: string; // The signed full message
 }
 
-
 export type WalletInfo = {
-  name?: string;
+  name: string;
   logo: WalletIcon;
+  url?: string | undefined;
 };

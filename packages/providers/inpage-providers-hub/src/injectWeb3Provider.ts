@@ -270,15 +270,22 @@ function injectWeb3Provider(): unknown {
     });
   }
 
+  // OneKey Aptos Standard Wallet
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  registerAptosWallet(
+  registerAptosWallet(martian, {
+    name: WALLET_CONNECT_INFO.onekey.text,
+    logo: WALLET_CONNECT_INFO.onekey.icon as WalletIcon,
+  });
+
+  // Petra Aptos Standard Wallet
+  if (checkWalletSwitchEnable()) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    new AptosStandardProvider(martian, {
+    registerAptosWallet(martian, {
       name: 'Petra',
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      logo: WALLET_CONNECT_INFO.onekey.icon as WalletIcon,
-    }),
-  );
+      logo: WALLET_CONNECT_INFO.petra.icon as WalletIcon,
+      url: "https://chrome.google.com/webstore/detail/petra-aptos-wallet/ejjladinnckdgjemekebdpeokbikhfci",
+    });
+  }
 
   // Override the SuiWallet Standard Wallet
   if (checkWalletSwitchEnable()) {

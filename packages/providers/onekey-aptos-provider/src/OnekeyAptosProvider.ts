@@ -6,9 +6,15 @@ import { AptosAccountInfo, ProviderState, SignMessagePayload, SignMessageRespons
 import type * as TypeUtils from './type-utils';
 import { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
-import { Types } from 'aptos';
+import type { Types } from 'aptos';
+import type { AccountAuthenticator, AnyRawTransaction } from '@aptos-labs/ts-sdk';
 
 export type AptosProviderType = 'petra' | 'martian';
+
+type SignTransactionV2Params = {
+  transaction: AnyRawTransaction;
+  asFeePayer?: boolean;
+};
 
 const PROVIDER_EVENTS = {
   'connect': 'connect',
@@ -42,6 +48,8 @@ export type AptosRequest = {
   'signAndSubmitTransaction': (transactions: Types.TransactionPayload) => Promise<string>;
 
   'signTransaction': (transactions: Types.TransactionPayload) => Promise<string>;
+
+  'signTransactionV2': (params: SignTransactionV2Params) => Promise<AccountAuthenticator>;
 };
 
 type JsBridgeRequest = {
@@ -84,6 +92,8 @@ export interface IProviderAptos extends ProviderAptosBase {
   signAndSubmitTransaction(transactions: any): Promise<any>;
 
   signTransaction(transactions: any): Promise<any>;
+
+  signTransactionV2(params: SignTransactionV2Params): Promise<AccountAuthenticator>;
 
   /**
    * Sign message
@@ -263,6 +273,18 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     if (!res) throw web3Errors.provider.unauthorized();
 
     return new Uint8Array(Buffer.from(res, 'hex'));
+  }
+
+  async signTransactionV2(params: SignTransactionV2Params): Promise<AccountAuthenticator> {
+    const res = await this._callBridge({
+      method: 'signTransactionV2',
+      params: { transaction: params.transaction, asFeePayer: params.asFeePayer },
+    });
+    if (!res) throw web3Errors.provider.unauthorized();
+    console.log('=====>>>>> res', res);
+
+    // @ts-expect-error
+    return res;
   }
 
   signMessage(payload: SignMessagePayload): Promise<SignMessageResponse> {

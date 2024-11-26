@@ -120,7 +120,7 @@ export async function createPSBT(
   }
   const blockbook = new BlockBook(url);
 
-  const psbt = new bitcoin.Psbt({ network: bitcoin.networks.bitcoin });
+  const psbt = new bitcoin.Psbt({ network });
   psbt.setVersion(2);
   psbt.setLocktime(0);
 

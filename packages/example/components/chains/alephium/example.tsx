@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument */
+
 import { dapps } from './dapps.config';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import DappList from '../../DAppList';
@@ -34,6 +35,7 @@ export function Example() {
   const balance = useBalance();
   const { toast } = useToast();
 
+  // eslint-disable-next-line @typescript-eslint/no-inferrable-types
   const getTokenTransferFrom = (chainId: string | undefined, approve: boolean = false) => {
     const tokens: {
       name: string;
@@ -237,7 +239,7 @@ export function Example() {
               });
             }
 
-            return signed.toString();
+            return Promise.resolve(signed.toString());
           }}
         />
       </ApiGroup>

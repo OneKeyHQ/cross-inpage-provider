@@ -102,6 +102,7 @@ function Example() {
   }, [accounts]);
 
   const getAccountInfo = () => {
+    // eslint-disable-next-line no-unsafe-optional-chaining
     const [namespace, reference, address] = account?.split(':');
     return {
       namespace,

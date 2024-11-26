@@ -31,6 +31,7 @@ const tryFormatCompactJson = (json: string) => {
     const hasArray = /\[.*?\]/.test(json);
     const obj = JSON.parse(json);
     if (hasArray) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return perfectJson(obj, {
         // @ts-expect-error
         singleLine: ({ value }) => Array.isArray(value) && value.length > 10,

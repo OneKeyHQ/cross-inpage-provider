@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   Account,
   ConnectAdditionalRequest,
@@ -18,7 +19,7 @@ class TonProofDemoApiService {
     this.accessToken = localStorage.getItem(this.localStorageKey);
 
     if (!this.accessToken) {
-      this.generatePayload();
+      void this.generatePayload();
     }
   }
 
@@ -76,13 +77,14 @@ class TonProofDemoApiService {
       })
     ).json();
 
+    // eslint-disable-next-line @typescript-eslint/ban-types
     return response as {};
   }
 
   reset() {
     this.accessToken = null;
     localStorage.removeItem(this.localStorageKey);
-    this.generatePayload();
+    void this.generatePayload();
   }
 }
 

@@ -1,3 +1,4 @@
+// @ts-ignore
 import Long from 'long';
 import { ProviderCosmos } from './OnekeyCosmosProvider';
 import {

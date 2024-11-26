@@ -23,6 +23,7 @@ import type {
   StdSignature,
   StdSignDoc,
 } from './types';
+// @ts-ignore
 import Long from 'long';
 import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from './cosmjs';
 import { isArray } from 'lodash';
@@ -450,7 +451,7 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
         bodyBytes: hexToBytes(res.signed.bodyBytes),
         // @ts-expect-error
         authInfoBytes: hexToBytes(res.signed.authInfoBytes),
-        // @ts-expect-error
+        // @ts-ignore
         accountNumber: Long.fromString(res.signed.accountNumber),
         chainId: res.signed.chainId,
       },

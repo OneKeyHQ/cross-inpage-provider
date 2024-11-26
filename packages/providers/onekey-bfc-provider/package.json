@@ -1,5 +1,5 @@
 {
-  "name": "@onekeyfe/onekey-private-external-account-provider",
+  "name": "@onekeyfe/onekey-bfc-provider",
   "version": "2.1.16",
   "keywords": [
     "cross-inpage-provider"
@@ -28,9 +28,15 @@
     "start": "tsc --watch"
   },
   "dependencies": {
+    "@benfen/bfc.js": "0.2.7",
     "@onekeyfe/cross-inpage-provider-core": "2.1.16",
     "@onekeyfe/cross-inpage-provider-errors": "2.1.16",
     "@onekeyfe/cross-inpage-provider-types": "2.1.16",
-    "@onekeyfe/extension-bridge-injected": "2.1.16"
+    "@onekeyfe/extension-bridge-injected": "2.1.16",
+    "eth-rpc-errors": "^4.0.3",
+    "mitt": "^3.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5"
   }
 }

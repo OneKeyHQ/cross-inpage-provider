@@ -61,8 +61,8 @@ export enum IInjectedProviderNames {
   ton = 'ton',
   webln = 'webln',
   nostr = 'nostr',
+  bfc = 'bfc',
   $private = '$private',
-  $privateExternalAccount = '$privateExternalAccount',
   $hardware_sdk = '$hardware_sdk',
   $walletConnect = '$walletConnect' 
 }

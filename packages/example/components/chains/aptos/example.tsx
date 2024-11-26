@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
 import { useEffect, useRef } from 'react';
@@ -11,7 +11,6 @@ import { useWallet } from '../../../components/connect/WalletContext';
 import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
 import params from './params';
-import { SignMessagePayload } from '@onekeyfe/onekey-aptos-provider/dist/types';
 import nacl from 'tweetnacl';
 import { stripHexPrefix } from 'ethereumjs-util';
 import { toast } from '../../ui/use-toast';
@@ -39,6 +38,7 @@ export default function Example() {
       return Promise.reject('Wallet not found');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const provider = get(window, providerDetail.inject) as IProviderApi | undefined;
 
     if (!provider) {
@@ -176,7 +176,7 @@ export default function Example() {
           description="signMessage"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
-            const obj = JSON.parse(request) as SignMessagePayload;
+            const obj = JSON.parse(request);
             const res = await provider?.signMessage(obj);
             return JSON.stringify(res);
           }}

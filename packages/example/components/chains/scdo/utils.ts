@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import { defaultAbiCoder } from '@ethersproject/abi';
 
 export function encodeTokenTransferPayload({ address, amount }: { address: string; amount: string }) {

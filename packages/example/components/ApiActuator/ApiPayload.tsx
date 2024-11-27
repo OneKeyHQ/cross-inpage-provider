@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useWallet } from '../connect/WalletContext';
 import { IApiExecutor, useApiExecutor } from './useApiExecutor';
 import { IEthereumProvider } from '../chains/ethereum/types';
@@ -96,6 +96,11 @@ export type IApiExecuteProps = {
   timeout?: number;
 } & IApiExecutor;
 
+interface IExecuteResult {
+  result: string | undefined;
+  error?: string | undefined;
+}
+
 function ApiExecute({
   allowCallWithoutProvider,
   onExecute,
@@ -130,10 +135,9 @@ function ApiExecute({
     handleSetValidateResult('');
 
     try {
-      // @ts-expect-error
       const { result, error } = await Promise.race([
         execute(request),
-        new Promise((_, rej) => setTimeout(() => rej(`call timeout ${timeout}ms`), timeout)),
+        new Promise<IExecuteResult>((_, rej) => setTimeout(() => rej(`call timeout ${timeout}ms`), timeout)),
       ]);
       if (error) {
         handleSetResult(`Error: ${error}`);
@@ -143,7 +147,7 @@ function ApiExecute({
     } catch (error) {
       console.log('execute error', error);
 
-      handleSetResult(`Error: ${error}`);
+      handleSetResult(`Error: ${typeof error === 'string' ? error : JSON.stringify(error)}`);
     }
     setLoading(false);
   }, [execute, request, handleSetResult]);

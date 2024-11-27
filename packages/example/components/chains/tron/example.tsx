@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
 /* eslint-disable no-unsafe-optional-chaining */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
 import { use, useEffect, useRef, useState } from 'react';

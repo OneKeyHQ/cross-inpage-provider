@@ -1,5 +1,5 @@
 /* eslint-disable no-unsafe-optional-chaining */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return */
 require('@solana/wallet-adapter-react-ui/styles.css');
 import { dapps } from './dapps.config';
 import { useEffect, useMemo } from 'react';

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return, no-unsafe-optional-chaining */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
 import { useRef } from 'react';
@@ -52,6 +52,7 @@ export default function Example() {
     };
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-inferrable-types
   const getTokenTransferFrom = (chainId: string | undefined, approve: boolean = false) => {
     const tokens: {
       name: string;

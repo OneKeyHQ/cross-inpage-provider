@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../connect/ConnectButton';
 import { useEffect, useRef } from 'react';
@@ -274,7 +274,7 @@ export default function BTCExample() {
             return res;
           }}
           onValidate={async (request: string, response: string) => {
-            return Verifier.verifySignature(account.address, request, response);
+            return Promise.resolve(Verifier.verifySignature(account.address, request, response));
           }}
         />
       </ApiGroup>

@@ -159,6 +159,25 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
       ...props,
       bridge: props.bridge || getOrCreateExtInjectedJsBridge({ timeout: props.timeout }),
     });
+    this._registerEvents = this._registerEvents.bind(this);
+    this._callBridge = this._callBridge.bind(this);
+    this._handleAccountChange = this._handleAccountChange.bind(this);
+    this._handleConnected = this._handleConnected.bind(this);
+    this._handleDisconnected = this._handleDisconnected.bind(this);
+    this._handleSignAndSendTransaction = this._handleSignAndSendTransaction.bind(this);
+    this._handleSignTransaction = this._handleSignTransaction.bind(this);
+    this._handleSignAllTransactions = this._handleSignAllTransactions.bind(this);
+    this._handleSignMessage = this._handleSignMessage.bind(this);
+
+    this.request = this.request.bind(this);
+    this.connect = this.connect.bind(this);
+    this.disconnect = this.disconnect.bind(this);
+    this.signAndSendTransaction = this.signAndSendTransaction.bind(this);
+    this.signTransaction = this.signTransaction.bind(this);
+    this.signAllTransactions = this.signAllTransactions.bind(this);
+    this.signMessage = this.signMessage.bind(this);
+    this.isAccountsChanged = this.isAccountsChanged.bind(this);
+    this.bridgeRequest = this.bridgeRequest.bind(this);
 
     this._registerEvents();
   }

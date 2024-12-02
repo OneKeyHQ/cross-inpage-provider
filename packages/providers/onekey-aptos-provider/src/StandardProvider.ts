@@ -1,4 +1,4 @@
-import { Ed25519Signature, Ed25519PublicKey, Network } from '@aptos-labs/ts-sdk';
+import { Ed25519Signature, Ed25519PublicKey, Network, AccountAddress } from '@aptos-labs/ts-sdk';
 import {
   APTOS_CHAINS,
   AccountInfo,
@@ -30,10 +30,13 @@ import type {
   AptosOnNetworkChangeMethod,
   AptosFeatures,
   WalletIcon,
+  AptosOnAccountChangeInput,
+  AptosOnNetworkChangeInput,
 } from '@aptos-labs/wallet-standard';
 
 import type { ProviderAptos } from './OnekeyAptosProvider';
 import type { WalletInfo } from './types';
+import { stripHexPrefix } from './utils';
 
 export class WalletAccount implements AptosWalletAccount {
   address: string;
@@ -78,10 +81,6 @@ export class AptosStandardProvider implements AptosWallet {
     this.name = options.name;
     this.icon = options.logo;
     this.url = options.url ? options.url : this.url;
-
-    // this._events = mitt();
-    // this._account = null;
-    // this.subscribeEventFromBackend();
   }
 
   chains = APTOS_CHAINS;
@@ -184,27 +183,16 @@ export class AptosStandardProvider implements AptosWallet {
     transaction: AnyRawTransaction,
     asFeePayer?: boolean,
   ): Promise<UserResponse<AccountAuthenticator>> => {
-    // const signature = await this.provider.signTransaction(transaction, asFeePayer);
-
-    // // THIS LOGIC SHOULD BE REPLACED. IT IS FOR EXAMPLE PURPOSES ONLY.
-    // if (asFeePayer) {
-    //   const senderAuthenticator = this.aptos.transaction.signAsFeePayer({
-    //     signer: this.signer,
-    //     transaction,
-    //   });
-
-    //   return Promise.resolve({
-    //     status: UserResponseStatus.APPROVED,
-    //     args: senderAuthenticator,
-    //   });
-    // }
-    // const senderAuthenticator = this.aptos.transaction.sign({
-    //   signer: this.signer,
-    //   transaction,
-    // });
+    let transactionType: 'simple' | 'multi_agent';
+    if (transaction.secondarySignerAddresses) {
+      transactionType = 'multi_agent';
+    } else {
+      transactionType = 'simple';
+    }
 
     const signature = await this.provider.signTransactionV2({
-      transaction,
+      transaction: transaction.bcsToHex().toStringWithoutPrefix(),
+      transactionType,
       asFeePayer,
     });
 
@@ -222,12 +210,12 @@ export class AptosStandardProvider implements AptosWallet {
     input: AptosSignMessageInput,
   ): Promise<UserResponse<AptosSignMessageOutput>> => {
     try {
-      const result = await this.provider.signMessage({
+      const result = await this.provider.signMessageCompatible({
         address: input.address,
         application: input.application,
         chainId: input.chainId,
         message: input.message,
-        nonce: parseInt(input.nonce),
+        nonce: input.nonce,
       });
 
       return {
@@ -236,7 +224,7 @@ export class AptosStandardProvider implements AptosWallet {
           address: result.address,
           fullMessage: result.fullMessage,
           message: result.message,
-          nonce: result.nonce.toString(),
+          nonce: result.nonce,
           prefix: 'APTOS',
           signature: new Ed25519Signature(result.signature),
         },
@@ -248,13 +236,34 @@ export class AptosStandardProvider implements AptosWallet {
     }
   };
 
-  onAccountChange: AptosOnAccountChangeMethod = async (): Promise<void> => {
-    // THIS LOGIC SHOULD BE REPLACED. IT IS FOR EXAMPLE PURPOSES ONLY.
+  onAccountChange: AptosOnAccountChangeMethod = async (
+    input: AptosOnAccountChangeInput,
+  ): Promise<void> => {
+    this.provider.onAccountChangeStandardV2((account) => {
+      const address: string = stripHexPrefix(account?.address ?? '');
+      if (account && address.length === 64) {
+        input(
+          new AccountInfo({
+            address: new AccountAddress(Buffer.from(address, 'hex')),
+            publicKey: new Ed25519PublicKey(account?.publicKey ?? ''),
+          }),
+        );
+      }
+    });
     return Promise.resolve();
   };
 
-  onNetworkChange: AptosOnNetworkChangeMethod = async (): Promise<void> => {
-    // THIS LOGIC SHOULD BE REPLACED. IT IS FOR EXAMPLE PURPOSES ONLY.
+  onNetworkChange: AptosOnNetworkChangeMethod = async (
+    input: AptosOnNetworkChangeInput,
+  ): Promise<void> => {
+    this.provider.onNetworkChange((network) => {
+      const chainId = network === 'Mainnet' ? 1 : 2;
+      const name = network === 'Mainnet' ? Network.MAINNET : Network.DEVNET;
+      input({
+        name,
+        chainId,
+      });
+    });
     return Promise.resolve();
   };
 }

@@ -117,7 +117,7 @@ export default function ConnectButton<T>({
     return () => {
       clearTimeout(timeout);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings.autoConnect]);
 
   return (
@@ -144,6 +144,11 @@ export default function ConnectButton<T>({
                           />
                         )}
                         <span className="font-medium">{wallet.name}</span>
+                        {wallet.tags?.map((tag) => (
+                          <span key={tag} className="text-xs font-light">
+                            {tag}
+                          </span>
+                        ))}
                       </Button>
                     </DialogClose>
                   ))}

@@ -15,13 +15,6 @@ import nacl from 'tweetnacl';
 import { stripHexPrefix } from 'ethereumjs-util';
 import { toast } from '../../ui/use-toast';
 
-import {
-  Wallet,
-  WalletWithFeatures,
-  WalletsEventsListeners,
-  getWallets
-} from '@wallet-standard/core'
-
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([
     {
@@ -68,12 +61,6 @@ export default function Example() {
       chainId,
     };
   };
-
-  window.addEventListener('wallet-standard:register-wallet', (event) => {
-    console.log('wallet-standard:register-wallet', event);
-  });
-
-  window.dispatchEvent(new Event('wallet-standard:register-wallet', { detail: () => {} }));
 
   useEffect(() => {
     if (!provider) return;
@@ -182,23 +169,6 @@ export default function Example() {
             return res;
           }}
         />
-        <ApiPayload
-          title="getWallets"
-          description="getWallets"
-          disableRequestContent
-          allowCallWithoutProvider
-          onExecute={async (request: string) => {
-            const { get, on } = getWallets();
-            console.log('wallets', get());
-
-            on("register", function () {
-              const { get } = getWallets();
-              console.log('register', get());
-            });
-
-            return JSON.stringify(get());
-          }}
-        />
       </ApiGroup>
 
       <ApiGroup title="Transfer">
@@ -240,7 +210,7 @@ export default function Example() {
               method: 'POST',
               url: 'https://api.mainnet.aptoslabs.com/v1/transactions',
               headers: { 'Content-Type': 'application/x.aptos.signed_transaction+bcs' },
-              data: buffer
+              data: buffer,
             };
 
             const res = await axios.request(options);

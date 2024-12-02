@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { IDebugLogger, ConsoleLike } from '@onekeyfe/cross-inpage-provider-types';
+import { ConsoleLike, IDebugLogger } from '@onekeyfe/cross-inpage-provider-types';
 // @ts-ignore
-import createDebugAsync from './debug';
 import { DEBUG_LOGGER_STORAGE_KEY } from './consts';
 import { CrossEventEmitter } from './CrossEventEmitter';
+import createDebugAsync from './debug';
 
 // enable debugLogger:
 //    localStorage.setItem('$$ONEKEY_DEBUG_LOGGER', '*');
@@ -41,6 +41,7 @@ class FakeDebugLogger extends CrossEventEmitter implements IDebugLogger {
   constructor() {
     super();
     this.initExternalLogInstances();
+    this.setMaxListeners(9999);
   }
 
   jsBridge = (...args: any[]) => null;
@@ -57,6 +58,8 @@ class FakeDebugLogger extends CrossEventEmitter implements IDebugLogger {
       this[name] = this._createExternalLog(name);
     });
   }
+
+  isFaked = true;
 
   _debug = {
     enable(config: string) {
@@ -80,12 +83,14 @@ class FakeDebugLogger extends CrossEventEmitter implements IDebugLogger {
     (name: string) =>
     (...args: any[]) => {
       this.once('debugReady', () => {
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        this[name]?.(...args);
+        if (!this.isFaked) {
+          // @ts-ignore
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+          this[name]?.(...args);
+        }
       });
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      return this._externalLogger?.log?.(`${name  } >>> `, ...args);
+      return this._externalLogger?.log?.(`${name} >>> `, ...args);
     };
 }
 
@@ -95,10 +100,13 @@ class AppDebugLogger extends FakeDebugLogger {
     // TODO createDebugSync
     void createDebugAsync().then((debug) => {
       this._debug = debug;
+      this.isFaked = false;
       this.initDebugInstances();
       this.emit('debugReady');
     });
   }
+
+  isFaked = false;
 
   initDebugInstances() {
     if (this.isDebugReady()) {
@@ -142,4 +150,4 @@ class AppDebugLogger extends FakeDebugLogger {
 const fakeDebugLogger: IDebugLogger = new FakeDebugLogger();
 const appDebugLogger: IDebugLogger = new AppDebugLogger();
 
-export { fakeDebugLogger, appDebugLogger, fakeLogger, consoleErrorInDev };
+export { appDebugLogger, consoleErrorInDev, fakeDebugLogger, fakeLogger };

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
-import { Types, MaybeHexString } from 'aptos';
+import type { Types, MaybeHexString } from 'aptos';
 import { TxnPayload, TxnOptions } from './types';
 import type * as TypeUtils from './type-utils';
 import { AptosProviderType, ProviderAptos } from './OnekeyAptosProvider';
@@ -265,7 +265,8 @@ class ProviderAptosMartian extends ProviderAptos {
   }
 
   async submitTransaction(transaction: Uint8Array | string): Promise<string> {
-    const txraw = typeof transaction === 'string' ?  this._convertStringToUint8Array(transaction) : transaction;
+    const txraw =
+      typeof transaction === 'string' ? this._convertStringToUint8Array(transaction) : transaction;
     return this._callMartianBridge({
       method: 'submitTransaction',
       params: Buffer.from(txraw).toString('hex'),

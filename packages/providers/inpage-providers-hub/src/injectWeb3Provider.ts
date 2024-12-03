@@ -5,7 +5,11 @@ import { ProviderEthereum, shimWeb3, registerEIP6963Provider } from '@onekeyfe/o
 import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
 import { ProviderSolana, registerSolanaWallet, WalletIcon } from '@onekeyfe/onekey-solana-provider';
 // import { ProviderStarcoin } from '@onekeyfe/onekey-starcoin-provider';
-import { ProviderAptos, ProviderAptosMartian } from '@onekeyfe/onekey-aptos-provider';
+import {
+  ProviderAptos,
+  ProviderAptosMartian,
+  registerAptosWallet,
+} from '@onekeyfe/onekey-aptos-provider';
 import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
 import { ProviderAlph, registerAlephiumProvider } from '@onekeyfe/onekey-alph-provider';
 import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
@@ -181,11 +185,13 @@ function injectWeb3Provider(): unknown {
   });
 
   defineWindowProperty('ethereum', ethereum);
+  // OneKey Ethereum EIP6963 Provider
   registerEIP6963Provider({
     image: WALLET_CONNECT_INFO.onekey.icon,
     provider: ethereum,
   });
 
+  // Override MetaMask EIP6963 Provider
   if (checkWalletSwitchEnable()) {
     registerEIP6963Provider({
       uuid: '7677b54f-3486-46e2-4e37-bf8747814f',
@@ -251,17 +257,30 @@ function injectWeb3Provider(): unknown {
   // TODO use initializeInpageProvider.ts
   window.dispatchEvent(new Event('ethereum#initialized'));
 
-  // Solana Standard Wallet
-  if (checkWalletSwitchEnable()) {
-    registerSolanaWallet(solana, {
-      icon: WALLET_CONNECT_INFO.onekey.icon as WalletIcon,
-    });
-  }
+  // OneKey Solana Standard Wallet
+  registerSolanaWallet(solana, {
+    icon: WALLET_CONNECT_INFO.onekey.icon as WalletIcon,
+  });
 
-  // Sui Standard Wallet
+  // OneKey Sui Standard Wallet
+  registerSuiWallet(sui, {
+    logo: WALLET_CONNECT_INFO.onekey.icon,
+  });
+
+  // OneKey Aptos Standard Wallet
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  registerAptosWallet(martian, {
+    name: WALLET_CONNECT_INFO.onekey.text,
+    logo: WALLET_CONNECT_INFO.onekey.icon as WalletIcon,
+  });
+
+  // Override Petra Aptos Standard Wallet
   if (checkWalletSwitchEnable()) {
-    registerSuiWallet(sui, {
-      logo: WALLET_CONNECT_INFO.onekey.icon,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    registerAptosWallet(martian, {
+      name: 'Petra',
+      logo: WALLET_CONNECT_INFO.petra.icon as WalletIcon,
+      url: 'https://chrome.google.com/webstore/detail/petra-aptos-wallet/ejjladinnckdgjemekebdpeokbikhfci',
     });
   }
 
@@ -273,17 +292,15 @@ function injectWeb3Provider(): unknown {
     });
   }
 
-  // BFC Standard Wallet
-  if (checkWalletSwitchEnable()) {
-    registerBfcWallet(bfc, {
-      logo: WALLET_CONNECT_INFO.onekey.icon,
-    });
-  }
+  // OneKey BFC Standard Wallet
+  registerBfcWallet(bfc, {
+    logo: WALLET_CONNECT_INFO.onekey.icon,
+  });
 
-  if (checkWalletSwitchEnable()) {
-    registerPolkadot(polkadot);
-  }
+  // OneKey Polkadot Standard Wallet
+  registerPolkadot(polkadot);
 
+  // Override Polkadot Standard Wallet
   if (checkWalletSwitchEnable()) {
     registerPolkadot(polkadot, 'polkadot-js', '0.44.1');
   }

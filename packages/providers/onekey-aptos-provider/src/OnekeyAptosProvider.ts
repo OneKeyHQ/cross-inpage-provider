@@ -2,19 +2,39 @@
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { ProviderAptosBase } from './ProviderAptosBase';
-import { AptosAccountInfo, ProviderState, SignMessagePayload, SignMessageResponse } from './types';
+import {
+  AptosAccountInfo,
+  ProviderState,
+  SignMessagePayload,
+  SignMessagePayloadCompatible,
+  SignMessageResponse,
+  SignMessageResponseCompatible,
+} from './types';
 import type * as TypeUtils from './type-utils';
 import { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
-import { Types } from 'aptos';
+import type { Types } from 'aptos';
+import type { AccountAuthenticator } from '@aptos-labs/ts-sdk';
+import {
+  AccountAuthenticatorEd25519,
+  Ed25519PublicKey,
+  Ed25519Signature,
+} from '@aptos-labs/ts-sdk';
 
 export type AptosProviderType = 'petra' | 'martian';
+
+type SignTransactionV2Params = {
+  transaction: string;
+  transactionType: 'simple' | 'multi_agent';
+  asFeePayer?: boolean;
+};
 
 const PROVIDER_EVENTS = {
   'connect': 'connect',
   'disconnect': 'disconnect',
   'accountChanged': 'accountChanged',
   'networkChange': 'networkChange',
+  'accountChangedV2': 'accountChangedV2',
   'message_low_level': 'message_low_level',
 } as const;
 
@@ -23,6 +43,7 @@ type AptosProviderEventsMap = {
   [PROVIDER_EVENTS.disconnect]: () => void;
   [PROVIDER_EVENTS.accountChanged]: (account: string | null) => void;
   [PROVIDER_EVENTS.networkChange]: (name: string | null) => void;
+  [PROVIDER_EVENTS.accountChangedV2]: (account: AptosAccountInfo | null) => void;
   [PROVIDER_EVENTS.message_low_level]: (payload: IJsonRpcRequest) => void;
 };
 
@@ -37,11 +58,17 @@ export type AptosRequest = {
 
   'getNetworkURL': () => Promise<string>;
 
-  'signMessage': (payload: SignMessagePayload) => Promise<SignMessageResponse>;
+  'signMessage': (payload: SignMessagePayloadCompatible) => Promise<SignMessageResponseCompatible>;
 
   'signAndSubmitTransaction': (transactions: Types.TransactionPayload) => Promise<string>;
 
   'signTransaction': (transactions: Types.TransactionPayload) => Promise<string>;
+
+  'signTransactionV2': (params: SignTransactionV2Params) => Promise<{
+    type: 'ed25519' | 'multi_ed25519' | 'secp256k1';
+    signature: string;
+    publicKey: string;
+  }>;
 };
 
 type JsBridgeRequest = {
@@ -85,6 +112,8 @@ export interface IProviderAptos extends ProviderAptosBase {
 
   signTransaction(transactions: any): Promise<any>;
 
+  signTransactionV2(params: SignTransactionV2Params): Promise<AccountAuthenticator>;
+
   /**
    * Sign message
    * @returns Transaction
@@ -105,6 +134,9 @@ function isWalletEventMethodMatch({ method, name }: { method: string; name: stri
 }
 
 class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
+  readonly isAIP62Standard = true;
+  readonly isSignTransactionV1_1 = false;
+
   protected _state: ProviderState = {
     account: null,
   };
@@ -113,6 +145,10 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
 
   get publicKey() {
     return this._state?.account?.publicKey ?? null;
+  }
+
+  get accountInfoOneKey() {
+    return this._state?.account ?? null;
   }
 
   constructor(props: OneKeyAptosProviderProps) {
@@ -163,6 +199,7 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
         const address = account?.address ?? null;
         this.emit('connect', address);
         this.emit('accountChanged', address);
+        this.emit('accountChangedV2', account);
       }
     }
   }
@@ -174,6 +211,7 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
       if (options.emit) {
         this.emit('disconnect');
         this.emit('accountChanged', null);
+        this.emit('accountChangedV2', null);
       }
     }
   }
@@ -187,6 +225,7 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     const account = payload;
     if (this.isAccountsChanged(account)) {
       this.emit('accountChanged', account?.address || null);
+      this.emit('accountChangedV2', account);
     }
     if (!account) {
       this._handleDisconnected();
@@ -262,11 +301,48 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     return new Uint8Array(Buffer.from(res, 'hex'));
   }
 
-  signMessage(payload: SignMessagePayload): Promise<SignMessageResponse> {
+  async signTransactionV2(params: SignTransactionV2Params): Promise<AccountAuthenticator> {
+    const res = await this._callBridge({
+      method: 'signTransactionV2',
+      params: {
+        transaction: params.transaction,
+        transactionType: params.transactionType,
+        asFeePayer: params.asFeePayer,
+      },
+    });
+    if (!res) throw web3Errors.provider.unauthorized();
+
+    if (res.type === 'ed25519') {
+      return new AccountAuthenticatorEd25519(
+        new Ed25519PublicKey(res.publicKey),
+        new Ed25519Signature(res.signature),
+      );
+    }
+
+    throw new Error('Unsupported sign type');
+  }
+
+  async signMessageCompatible(
+    payload: SignMessagePayloadCompatible,
+  ): Promise<SignMessageResponseCompatible> {
     return this._callBridge({
       method: 'signMessage',
       params: payload,
     });
+  }
+
+  async signMessage(payload: SignMessagePayload): Promise<SignMessageResponse> {
+    const payloadCompatible: SignMessagePayloadCompatible = {
+      ...payload,
+      nonce: payload.nonce.toString(),
+    };
+
+    const signMessageCompatible = await this.signMessageCompatible(payloadCompatible);
+
+    return {
+      ...signMessageCompatible,
+      nonce: parseInt(signMessageCompatible.nonce),
+    };
   }
 
   network(): Promise<string> {
@@ -322,6 +398,10 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
 
   onAccountChange(listener: AptosProviderEventsMap['accountChanged']): this {
     return super.on(PROVIDER_EVENTS.accountChanged, listener);
+  }
+
+  onAccountChangeStandardV2(listener: AptosProviderEventsMap['accountChangedV2']): this {
+    return super.on(PROVIDER_EVENTS.accountChangedV2, listener);
   }
 
   onDisconnect(listener: AptosProviderEventsMap['disconnect']): this {

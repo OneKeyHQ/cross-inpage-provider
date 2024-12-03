@@ -61,6 +61,7 @@ export default function Example() {
       chainId,
     };
   };
+
   useEffect(() => {
     if (!provider) return;
 
@@ -209,7 +210,7 @@ export default function Example() {
               method: 'POST',
               url: 'https://api.mainnet.aptoslabs.com/v1/transactions',
               headers: { 'Content-Type': 'application/x.aptos.signed_transaction+bcs' },
-              data: buffer
+              data: buffer,
             };
 
             const res = await axios.request(options);

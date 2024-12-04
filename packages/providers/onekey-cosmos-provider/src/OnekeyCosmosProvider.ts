@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable tsdoc/syntax */
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
-import type { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
+import { checkEnableDefineProperty, checkWalletSwitchEnable, type IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { ProviderCosmosBase } from './ProviderCosmosBase';
 import type * as TypeUtils from './type-utils';
@@ -249,6 +249,8 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
         args: any[];
         id: string;
       };
+      if(!checkWalletSwitchEnable()) return;
+
       if (data && data.type === 'proxy-request' && data.method) {
         const method = data.method as 'enable';
         if (this[method]) {

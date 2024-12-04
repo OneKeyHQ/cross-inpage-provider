@@ -1,4 +1,10 @@
-import { Ed25519Signature, Ed25519PublicKey, Network, AccountAddress } from '@aptos-labs/ts-sdk';
+import {
+  Ed25519Signature,
+  Ed25519PublicKey,
+  Network,
+  AccountAddress,
+  isEncodedEntryFunctionArgument,
+} from '@aptos-labs/ts-sdk';
 import {
   APTOS_CHAINS,
   AccountInfo,
@@ -32,6 +38,9 @@ import type {
   WalletIcon,
   AptosOnAccountChangeInput,
   AptosOnNetworkChangeInput,
+  AptosSignAndSubmitTransactionMethod,
+  AptosSignAndSubmitTransactionInput,
+  AptosSignAndSubmitTransactionOutput,
 } from '@aptos-labs/wallet-standard';
 
 import type { ProviderAptos } from './OnekeyAptosProvider';
@@ -121,6 +130,10 @@ export class AptosStandardProvider implements AptosWallet {
         version: '1.0.0',
         onNetworkChange: this.onNetworkChange,
       },
+      'aptos:signAndSubmitTransaction': {
+        version: '1.1.0',
+        signAndSubmitTransaction: this.signAndSubmitTransaction,
+      },
     };
   }
 
@@ -202,6 +215,27 @@ export class AptosStandardProvider implements AptosWallet {
     });
   };
 
+  signAndSubmitTransaction: AptosSignAndSubmitTransactionMethod = async (
+    input: AptosSignAndSubmitTransactionInput,
+  ): Promise<UserResponse<AptosSignAndSubmitTransactionOutput>> => {
+    const { payload } = input;
+
+    const existsBscEncodedArg = payload.functionArguments.find((arg) =>
+      isEncodedEntryFunctionArgument(arg),
+    );
+
+    if (existsBscEncodedArg) {
+      throw new Error('Unsupported Function Arguments type');
+    }
+
+    const result = await this.provider.signAndSubmitTransactionV2(JSON.stringify(input));
+
+    return Promise.resolve({
+      status: UserResponseStatus.REJECTED,
+      args: result,
+    });
+  };
+
   /**
    * @param input - A message to sign with the private key of the connected account.
    * @returns A user response either with a signed message, or the user rejecting to sign.
@@ -240,6 +274,7 @@ export class AptosStandardProvider implements AptosWallet {
     input: AptosOnAccountChangeInput,
   ): Promise<void> => {
     this.provider.onAccountChangeStandardV2((account) => {
+      console.log('=====>>>>> onAccountChange', account);
       const address: string = stripHexPrefix(account?.address ?? '');
       if (account && address.length === 64) {
         input(

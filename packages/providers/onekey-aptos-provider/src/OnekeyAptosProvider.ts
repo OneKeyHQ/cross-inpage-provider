@@ -20,6 +20,7 @@ import {
   Ed25519PublicKey,
   Ed25519Signature,
 } from '@aptos-labs/ts-sdk';
+import { AptosSignAndSubmitTransactionOutput } from '@aptos-labs/wallet-standard';
 
 export type AptosProviderType = 'petra' | 'martian';
 
@@ -69,6 +70,8 @@ export type AptosRequest = {
     signature: string;
     publicKey: string;
   }>;
+
+  'signAndSubmitTransactionV2': (params: string) => Promise<AptosSignAndSubmitTransactionOutput>;
 };
 
 type JsBridgeRequest = {
@@ -113,6 +116,7 @@ export interface IProviderAptos extends ProviderAptosBase {
   signTransaction(transactions: any): Promise<any>;
 
   signTransactionV2(params: SignTransactionV2Params): Promise<AccountAuthenticator>;
+  signAndSubmitTransactionV2(params: string): Promise<AptosSignAndSubmitTransactionOutput>;
 
   /**
    * Sign message
@@ -260,7 +264,7 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
 
     if (!result) throw web3Errors.provider.unauthorized();
 
-    this._handleConnected(result, { emit: true });
+    this._handleConnected(result, { emit: false });
 
     return result;
   }
@@ -320,6 +324,13 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     }
 
     throw new Error('Unsupported sign type');
+  }
+
+  async signAndSubmitTransactionV2(params: string): Promise<AptosSignAndSubmitTransactionOutput> {
+    return this._callBridge({
+      method: 'signAndSubmitTransactionV2',
+      params,
+    });
   }
 
   async signMessageCompatible(

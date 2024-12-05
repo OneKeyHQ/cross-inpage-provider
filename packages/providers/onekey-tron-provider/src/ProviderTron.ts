@@ -39,6 +39,7 @@ export const SIDE_CHAIN_ID = '41E209E4DE650F0150788E8EC5CAFA240A23EB8EB7';
 export const AUTO_REQUEST_ACCOUNTS_ORIGIN_WHITE_LIST = [
   'https://tronscan.org',
   'https://tronscan.io',
+  'https://app.justlend.org',
 ];
 
 export const TRON_REQUEST_ACCOUNTS_LOCAL_KEY = 'onekey_tron_request_accounts_local_key';

@@ -46,6 +46,7 @@ import type {
 import type { ProviderAptos } from './OnekeyAptosProvider';
 import type { WalletInfo } from './types';
 import { stripHexPrefix } from './utils';
+import { enhancedJSONStringify } from '@onekeyfe/cross-inpage-provider-core';
 
 export class WalletAccount implements AptosWalletAccount {
   address: string;
@@ -228,7 +229,7 @@ export class AptosStandardProvider implements AptosWallet {
       throw new Error('Unsupported Function Arguments type');
     }
 
-    const result = await this.provider.signAndSubmitTransactionV2(JSON.stringify(input));
+    const result = await this.provider.signAndSubmitTransactionV2(enhancedJSONStringify(input));
 
     return Promise.resolve({
       status: UserResponseStatus.APPROVED,

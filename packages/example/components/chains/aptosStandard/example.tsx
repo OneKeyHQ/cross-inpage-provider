@@ -28,7 +28,7 @@ import {
   AccountAddress,
   U64,
   U256,
-  isEncodedEntryFunctionArgument,
+  InputGenerateTransactionPayloadData,
 } from '@aptos-labs/ts-sdk';
 import {
   WalletReadyState,
@@ -335,14 +335,27 @@ function Example() {
           ]}
           onExecute={async (request: string) => {
             const { recipient, amount, coinType } = JSON.parse(request);
+            const buffer = new ArrayBuffer(3);
+            const uint8Array = new Uint8Array(buffer);
+            uint8Array.set([1, 2, 3]);
+
+            const data: InputGenerateTransactionPayloadData = {
+              function: '0x1::primary_fungible_store::transfer',
+              typeArguments: ['0x1::fungible_asset::Metadata'],
+              functionArguments: [
+                coinType,
+                recipient as string,
+                amount as number,
+                hexToBytes('010203'),
+                buffer,
+              ],
+            };
+
+            console.log('=====>>>>> data', data, JSON.stringify(data));
             return {
               result: await signAndSubmitTransaction({
                 sender: account?.address ?? '',
-                data: {
-                  function: '0x1::primary_fungible_store::transfer',
-                  typeArguments: ['0x1::fungible_asset::Metadata'],
-                  functionArguments: [coinType, recipient as string, amount as number],
-                },
+                data,
               }),
             };
           }}

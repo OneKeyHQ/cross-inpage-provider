@@ -25,6 +25,10 @@ import {
   Ed25519PublicKey,
   Ed25519Signature,
   AccountAuthenticatorEd25519,
+  AccountAddress,
+  U64,
+  U256,
+  isEncodedEntryFunctionArgument,
 } from '@aptos-labs/ts-sdk';
 import {
   WalletReadyState,
@@ -314,6 +318,70 @@ function Example() {
         />
       </ApiGroup>
 
+      <ApiGroup title="SignAndSubmitTransaction Test">
+        <ApiPayload
+          title="signAndSubmitTransaction Normal Argument"
+          description="Normal Argument 测试"
+          presupposeParams={[
+            {
+              id: 'sender',
+              name: 'sender',
+              value: JSON.stringify({
+                recipient: account?.address ?? '',
+                amount: 100000,
+                coinType: '0x357b0b74bc833e95a115ad22604854d6b0fca151cecd94111770e5d6ffc9dc2b',
+              }),
+            },
+          ]}
+          onExecute={async (request: string) => {
+            const { recipient, amount, coinType } = JSON.parse(request);
+            return {
+              result: await signAndSubmitTransaction({
+                sender: account?.address ?? '',
+                data: {
+                  function: '0x1::primary_fungible_store::transfer',
+                  typeArguments: ['0x1::fungible_asset::Metadata'],
+                  functionArguments: [coinType, recipient as string, amount as number],
+                },
+              }),
+            };
+          }}
+        />
+
+        <ApiPayload
+          title="signAndSubmitTransaction Encode Argument"
+          description="Encode Argument 测试 (OneKey、OKX、MizuWallet 等都不支持)"
+          presupposeParams={[
+            {
+              id: 'sender',
+              name: 'sender',
+              value: JSON.stringify({
+                recipient: account?.address ?? '',
+                amount: 100000,
+                coinType: '0x357b0b74bc833e95a115ad22604854d6b0fca151cecd94111770e5d6ffc9dc2b',
+              }),
+            },
+          ]}
+          onExecute={async (request: string) => {
+            const { recipient, amount, coinType } = JSON.parse(request);
+            return {
+              result: await signAndSubmitTransaction({
+                sender: account?.address ?? '',
+                data: {
+                  function: '0x1::primary_fungible_store::transfer',
+                  typeArguments: ['0x1::fungible_asset::Metadata'],
+                  functionArguments: [
+                    coinType,
+                    AccountAddress.from(recipient as string),
+                    new U64(amount as number),
+                  ],
+                },
+              }),
+            };
+          }}
+        />
+      </ApiGroup>
+
       <DappList dapps={dapps} />
     </>
   );
@@ -326,6 +394,7 @@ function AptosConnectButton() {
 
   const walletsRef = useRef<(Wallet | AptosStandardSupportedWallet)[]>([]);
   walletsRef.current = wallets.filter((wallet) => wallet.readyState === WalletReadyState.Installed);
+  console.log('Aptos Standard Wallets:', walletsRef.current);
 
   const onConnectWallet = useCallback(
     async (selectedWallet: IKnownWallet) => {

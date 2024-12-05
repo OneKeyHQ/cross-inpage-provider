@@ -1,4 +1,10 @@
-import { Ed25519Signature, Ed25519PublicKey, Network, AccountAddress } from '@aptos-labs/ts-sdk';
+import {
+  Ed25519Signature,
+  Ed25519PublicKey,
+  Network,
+  AccountAddress,
+  isEncodedEntryFunctionArgument,
+} from '@aptos-labs/ts-sdk';
 import {
   APTOS_CHAINS,
   AccountInfo,
@@ -32,6 +38,9 @@ import type {
   WalletIcon,
   AptosOnAccountChangeInput,
   AptosOnNetworkChangeInput,
+  AptosSignAndSubmitTransactionMethod,
+  AptosSignAndSubmitTransactionInput,
+  AptosSignAndSubmitTransactionOutput,
 } from '@aptos-labs/wallet-standard';
 
 import type { ProviderAptos } from './OnekeyAptosProvider';
@@ -121,6 +130,10 @@ export class AptosStandardProvider implements AptosWallet {
         version: '1.0.0',
         onNetworkChange: this.onNetworkChange,
       },
+      'aptos:signAndSubmitTransaction': {
+        version: '1.1.0',
+        signAndSubmitTransaction: this.signAndSubmitTransaction,
+      },
     };
   }
 
@@ -199,6 +212,27 @@ export class AptosStandardProvider implements AptosWallet {
     return Promise.resolve({
       status: UserResponseStatus.APPROVED,
       args: signature,
+    });
+  };
+
+  signAndSubmitTransaction: AptosSignAndSubmitTransactionMethod = async (
+    input: AptosSignAndSubmitTransactionInput,
+  ): Promise<UserResponse<AptosSignAndSubmitTransactionOutput>> => {
+    const { payload } = input;
+
+    const existsBscEncodedArg = payload.functionArguments.find((arg) =>
+      isEncodedEntryFunctionArgument(arg),
+    );
+
+    if (existsBscEncodedArg) {
+      throw new Error('Unsupported Function Arguments type');
+    }
+
+    const result = await this.provider.signAndSubmitTransactionV2(JSON.stringify(input));
+
+    return Promise.resolve({
+      status: UserResponseStatus.APPROVED,
+      args: result,
     });
   };
 

@@ -320,8 +320,37 @@ function Example() {
 
       <ApiGroup title="SignAndSubmitTransaction Test">
         <ApiPayload
+          title="signAndSubmitTransaction Normal Argument"
+          description="Normal Argument 测试"
+          presupposeParams={[
+            {
+              id: 'sender',
+              name: 'sender',
+              value: JSON.stringify({
+                recipient: account?.address ?? '',
+                amount: 100000,
+                coinType: '0x357b0b74bc833e95a115ad22604854d6b0fca151cecd94111770e5d6ffc9dc2b',
+              }),
+            },
+          ]}
+          onExecute={async (request: string) => {
+            const { recipient, amount, coinType } = JSON.parse(request);
+            return {
+              result: await signAndSubmitTransaction({
+                sender: account?.address ?? '',
+                data: {
+                  function: '0x1::primary_fungible_store::transfer',
+                  typeArguments: ['0x1::fungible_asset::Metadata'],
+                  functionArguments: [coinType, recipient as string, amount as number],
+                },
+              }),
+            };
+          }}
+        />
+
+        <ApiPayload
           title="signAndSubmitTransaction Encode Argument"
-          description="Encode Argument 测试"
+          description="Encode Argument 测试 (OneKey、OKX、MizuWallet 等都不支持)"
           presupposeParams={[
             {
               id: 'sender',
@@ -346,35 +375,6 @@ function Example() {
                     AccountAddress.from(recipient as string),
                     new U64(amount as number),
                   ],
-                },
-              }),
-            };
-          }}
-        />
-
-        <ApiPayload
-          title="signAndSubmitTransaction Normal Argument"
-          description="Normal Argument 测试"
-          presupposeParams={[
-            {
-              id: 'sender',
-              name: 'sender',
-              value: JSON.stringify({
-                recipient: account?.address ?? '',
-                amount: 100000,
-                coinType: '0x357b0b74bc833e95a115ad22604854d6b0fca151cecd94111770e5d6ffc9dc2b',
-              }),
-            },
-          ]}
-          onExecute={async (request: string) => {
-            const { recipient, amount, coinType } = JSON.parse(request);
-            return {
-              result: await signAndSubmitTransaction({
-                sender: account?.address ?? '',
-                data: {
-                  function: '0x1::primary_fungible_store::transfer',
-                  typeArguments: ['0x1::fungible_asset::Metadata'],
-                  functionArguments: [coinType, recipient as string, amount as number],
                 },
               }),
             };

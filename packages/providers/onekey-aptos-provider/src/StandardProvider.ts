@@ -231,7 +231,7 @@ export class AptosStandardProvider implements AptosWallet {
     const result = await this.provider.signAndSubmitTransactionV2(JSON.stringify(input));
 
     return Promise.resolve({
-      status: UserResponseStatus.REJECTED,
+      status: UserResponseStatus.APPROVED,
       args: result,
     });
   };
@@ -274,7 +274,6 @@ export class AptosStandardProvider implements AptosWallet {
     input: AptosOnAccountChangeInput,
   ): Promise<void> => {
     this.provider.onAccountChangeStandardV2((account) => {
-      console.log('=====>>>>> onAccountChange', account);
       const address: string = stripHexPrefix(account?.address ?? '');
       if (account && address.length === 64) {
         input(

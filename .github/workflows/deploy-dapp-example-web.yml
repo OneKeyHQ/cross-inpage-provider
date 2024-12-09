@@ -25,6 +25,7 @@ jobs:
           # Next.js environment variables
           echo "NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=${{ secrets.WALLET_CONNECT_PROJECT_ID }}" > ./packages/example/.env
           echo "NEXT_PUBLIC_BLOCKFROST_CARDANO_PROJECT_ID=${{ secrets.BLOCKFROST_CARDANO_PROJECT_ID }}" >> ./packages/example/.env
+          echo "NEXT_PUBLIC_OKLINK_API_KEY=${{ secrets.EXAMPLE_OKLINK_API_KEY }}" >> ./packages/example/.env
 
       - name: Install Dependency
         env:

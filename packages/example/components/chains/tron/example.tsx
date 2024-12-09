@@ -2,8 +2,8 @@
 /* eslint-disable no-unsafe-optional-chaining */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
-import { use, useEffect, useRef, useState } from 'react';
-import { get, isEmpty } from 'lodash';
+import { memo, useEffect, useRef, useState } from 'react';
+import { get } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import { useWallet } from '../../../components/connect/WalletContext';
@@ -12,6 +12,79 @@ import DappList from '../../../components/DAppList';
 import params from './params';
 import { InputWithSave } from '../../InputWithSave';
 import { toast } from '../../ui/use-toast';
+import { ApiComboboxRef, ApiForm, ApiFormRef } from '../../ApiForm';
+import { okLinkRequest } from '../utils/OkLink';
+
+const WalletWatchAsset = memo(() => {
+  const apiFromRef = useRef<ApiFormRef>(null);
+  const apiFromComboboxRef = useRef<ApiComboboxRef>(null);
+
+  const { provider } = useWallet<IProviderApi>();
+
+  useEffect(() => {
+    okLinkRequest.getTokenList('TRON', 'TRC20').then((tokens) => {
+      const tokenOptions = tokens.map((token) => ({
+        value: token.tokenContractAddress,
+        label: `${token.token} - ${token.tokenContractAddress}`,
+        extra: {
+          type: 'trc20',
+          options: {
+            address: token.tokenContractAddress,
+            symbol: token.token,
+            decimals: token.precision,
+            image: token.logoUrl,
+          }
+        }
+      }));
+
+      apiFromComboboxRef.current?.setOptions(tokenOptions);
+    })
+  }, []);
+
+  return <ApiForm title="wallet_watchAsset TRC20" description='(V5 不支持) 添加 TRC20 资产' ref={apiFromRef}>
+    <ApiForm.Combobox
+      ref={apiFromComboboxRef}
+      id="tokenSelector"
+      label="预设参数"
+      placeholder="请选择 TRC20 Token"
+      onOptionChange={(option) => {
+        apiFromRef.current?.setJsonValue('request', option?.extra);
+      }}
+    />
+
+    <ApiForm.JsonEdit
+      id="request"
+      label="请求(可以手动编辑)"
+      required
+    />
+
+    <ApiForm.Button
+      id="watchButton"
+      label="观察 Asset"
+      onClick={async () => {
+        const res = await provider?.request({
+          'method': 'wallet_watchAsset',
+          'params': JSON.parse(apiFromRef.current?.getValue('request') ?? ''),
+        });
+        apiFromRef.current?.setValue('response', JSON.stringify(res, null, 2));
+      }}
+      availableDependencyFields={['request']}
+      validation={{
+        fields: ['request'],
+        validator: (values) => {
+          if (!values.request) {
+            return '请选择 TRC20 Token';
+          }
+        }
+      }}
+    />
+
+    <ApiForm.TextArea
+      id="response"
+      label="执行结果"
+    />
+  </ApiForm>
+});
 
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -240,19 +313,7 @@ export default function Example() {
       </ApiGroup>
 
       <ApiGroup title="资产相关">
-        <ApiPayload
-          title="wallet_watchAsset"
-          description="（不支持）添加 TRC20 资产"
-          presupposeParams={params.addToken}
-          onExecute={async (request: string) => {
-            const obj = JSON.parse(request);
-            const res = await provider?.request<string>({
-              method: 'wallet_watchAsset',
-              params: obj,
-            });
-            return JSON.stringify(res);
-          }}
-        />
+        <WalletWatchAsset />
       </ApiGroup>
       <ApiGroup title="SignMessage">
         <ApiPayload

@@ -1,6 +1,7 @@
 /* eslint-disable no-unsafe-optional-chaining */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return */
 import { dapps } from './dapps.config';
+import axios from 'axios';
 import ConnectButton from '../../../components/connect/ConnectButton';
 import { useEffect, useRef } from 'react';
 import { get } from 'lodash';
@@ -16,6 +17,7 @@ import { address, Message } from 'js-conflux-sdk';
 import * as cfxUtil from 'cfx-util';
 import { getMessage } from 'cip-23';
 import { keccak256 } from 'ethereumjs-util';
+import { ApiComboboxRef, ApiForm, ApiFormRef } from '../../ApiForm';
 
 function recoverPublicKey(hash: Buffer, sig: string): Buffer {
   const signature = cfxUtil.toBuffer(sig);
@@ -27,6 +29,85 @@ function recoverAddress(hash: Buffer, sig: string): string {
   const publicKey = recoverPublicKey(hash, sig);
   const sender = cfxUtil.publicToAddress(publicKey);
   return cfxUtil.bufferToHex(sender);
+}
+
+const WalletWatchAsset = ({ chainId }: { chainId: string | undefined }) => {
+  const apiFromRef = useRef<ApiFormRef>(null);
+  const apiFromComboboxRef = useRef<ApiComboboxRef>(null);
+
+  const { provider } = useWallet<IProviderApi>();
+
+  useEffect(() => {
+    // https://testingcf.jsdelivr.net/gh/conflux-fans/token-list@master/cfx.fluent.json
+    axios.get('https://testingcf.jsdelivr.net/gh/conflux-fans/token-list@master/cfx.fluent.json').then((res) => {
+      const tokens = res.data.tokens as {
+        chainId: number;
+        address: string;
+        name: string;
+        symbol: string;
+        decimals: number;
+        logoURI: string;
+      }[]
+      const tokenOptions = tokens.map((token) => ({
+        value: token.address,
+        label: `${token.name} - ${token.address}`,
+        extra: {
+          type: 'CRC20',
+          options: {
+            address: token.address,
+            symbol: token.symbol,
+            decimals: token.decimals,
+            image: token.logoURI,
+          }
+        }
+      }));
+
+      apiFromComboboxRef.current?.setOptions(tokenOptions);
+    })
+  }, [chainId]);
+
+  return <ApiForm title="wallet_watchAsset CRC20" description='添加 CRC20 资产' ref={apiFromRef}>
+    <ApiForm.Combobox
+      ref={apiFromComboboxRef}
+      id="tokenSelector"
+      label="预设参数"
+      placeholder="请选择 CRC20 Token"
+      onOptionChange={(option) => {
+        apiFromRef.current?.setJsonValue('request', option?.extra);
+      }}
+    />
+
+    <ApiForm.JsonEdit
+      id="request"
+      label="请求(可以手动编辑)"
+      required
+    />
+
+    <ApiForm.Button
+      id="watchButton"
+      label="观察 Asset"
+      onClick={async () => {
+        const res = await provider?.request({
+          'method': 'wallet_watchAsset',
+          'params': JSON.parse(apiFromRef.current?.getValue('request') ?? ''),
+        });
+        apiFromRef.current?.setValue('response', JSON.stringify(res, null, 2));
+      }}
+      validation={{
+        fields: ['request'],
+        validator: (values) => {
+          if (!values.request) {
+            return '请选择 CRC20 Token';
+          }
+        }
+      }}
+    />
+
+    <ApiForm.TextArea
+      id="response"
+      label="执行结果"
+    />
+  </ApiForm>
 }
 
 export default function BTCExample() {
@@ -459,6 +540,10 @@ export default function BTCExample() {
             return res as string;
           }}
         />
+      </ApiGroup>
+
+      <ApiGroup title="wallet_watchAsset (EIP 747)">
+        <WalletWatchAsset chainId={account?.chainId} />
       </ApiGroup>
 
       <DappList dapps={dapps} />

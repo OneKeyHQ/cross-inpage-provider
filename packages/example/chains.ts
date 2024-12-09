@@ -69,6 +69,12 @@ export const registeredChains: IChainInfo[] = [
   },
   {
     id: uuid.v4(),
+    name: 'Benfen',
+    href: '/benfen',
+    icon: 'https://uni.onekey-asset.com/static/chain/bfc.png',
+  },
+  {
+    id: uuid.v4(),
     name: 'BTC',
     href: '/btcUnitsat',
     icon: 'https://uni.onekey-asset.com/static/chain/btc.png',

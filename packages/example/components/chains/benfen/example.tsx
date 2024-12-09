@@ -3,59 +3,54 @@
 /* eslint-disable no-unsafe-optional-chaining */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
-import { useEffect, useMemo, useState } from 'react';
-import { hexToBytes } from '@noble/hashes/utils';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import ConnectButton from '../../../components/connect/ConnectButton';
+import { hexToBytes, bytesToHex } from '@noble/hashes/utils';
 import { useWallet } from '../../../components/connect/WalletContext';
 import DappList from '../../../components/DAppList';
 import params from './params';
-import { getFullnodeUrl } from '@mysten/sui.js/client';
-// import { WalletKitProvider, useWalletKit } from '@mysten/wallet-kit';
+import { getFullnodeUrl } from '@benfen/bfc.js/client';
 import {
-  ConnectButton,
   useCurrentAccount,
   useSignTransactionBlock,
   useSignAndExecuteTransactionBlock,
   useSignPersonalMessage,
-  useSuiClient,
+  useBenfenClient,
   useWallets,
+  BenfenClientProvider,
   useDisconnectWallet,
   useConnectWallet,
   useCurrentWallet,
-  useAccounts,
   WalletProvider,
-  SuiClientProvider,
   createNetworkConfig,
-} from '@mysten/dapp-kit';
+} from '@benfen/bfc.js/dapp-kit';
 import InfoLayout from '../../../components/InfoLayout';
-import { SuiObjectRef } from '@mysten/sui.js/client';
-import { TransactionBlock } from '@mysten/sui.js/transactions';
+import { TransactionBlock } from '@benfen/bfc.js/transactions';
 import {
   verifySignature,
   verifyPersonalMessage,
   verifyTransactionBlock,
-} from '@mysten/sui.js/verify';
+} from '@benfen/bfc.js/verify';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import '@mysten/dapp-kit/dist/index.css';
 import { useSignMessage } from './useSignMessage';
 import { ApiGroup, ApiPayload } from '../../ApiActuator';
 import { sponsorTransaction } from './utils';
+import { IKnownWallet } from '../../connect/types';
+import { WalletWithRequiredFeatures } from '@benfen/bfc.js/dist/cjs/wallet-standard';
 
 function Example() {
-  const client = useSuiClient();
+  const client = useBenfenClient();
   const { setProvider } = useWallet();
 
-  const accounts = useAccounts();
-  const wallet = useConnectWallet();
-
   const currentAccount = useCurrentAccount();
-  const { currentWallet, connectionStatus, isConnected } = useCurrentWallet();
+  const { isConnected } = useCurrentWallet();
 
-  const { mutateAsync: connect } = useConnectWallet();
   const { mutateAsync: signTransactionBlock } = useSignTransactionBlock();
   const { mutateAsync: signAndExecuteTransactionBlock } = useSignAndExecuteTransactionBlock();
   const { mutateAsync: signPersonalMessage } = useSignPersonalMessage();
   const { mutateAsync: signMessage } = useSignMessage();
-  const { mutateAsync: disconnect } = useDisconnectWallet();
+
+  console.log('currentAccount', currentAccount);
 
   useEffect(() => {
     if (isConnected && currentAccount) {
@@ -71,23 +66,6 @@ function Example() {
 
   return (
     <>
-      <InfoLayout title="Base Info">
-        {currentAccount && <p>Account:{currentAccount?.address ?? ''}</p>}
-        {currentAccount && <p>PubKey:{currentAccount?.publicKey ?? ''}</p>}
-        {currentAccount && <p>ChainId:{currentAccount?.chains ?? ''}</p>}
-        {currentWallet && <p>Wallet Name:{currentWallet?.name ?? ''}</p>}
-        {currentWallet && <p>Wallet api version:{currentWallet?.version ?? ''}</p>}
-        {currentWallet && (
-          <p>Wallet Support Chains :{JSON.stringify(currentWallet?.chains ?? '')}</p>
-        )}
-        {currentWallet && (
-          <p>
-            Wallet Icon: <img src={currentWallet?.icon} />
-          </p>
-        )}
-        {connectionStatus && <p>Status :{connectionStatus}</p>}
-      </InfoLayout>
-
       <ApiGroup title="SignMessage">
         <ApiPayload
           title="signMessage"
@@ -112,7 +90,9 @@ function Example() {
             // const publicKey = await verifySignature(hexToBytes(request), signature);
             const publicKey = await verifyPersonalMessage(Buffer.from(bytes, 'base64'), signature);
 
-            return (currentAccount.address === publicKey.toSuiAddress()).toString();
+            return (
+              bytesToHex(currentAccount.publicKey) === bytesToHex(publicKey.toRawBytes())
+            ).toString();
           }}
         />
 
@@ -138,7 +118,9 @@ function Example() {
 
             const publicKey = await verifyPersonalMessage(Buffer.from(bytes, 'base64'), signature);
 
-            return (currentAccount.address === publicKey.toSuiAddress()).toString();
+            return (
+              bytesToHex(currentAccount.publicKey) === bytesToHex(publicKey.toRawBytes())
+            ).toString();
           }}
         />
       </ApiGroup>
@@ -190,7 +172,9 @@ function Example() {
               signature,
             );
 
-            return (currentAccount.address === publicKey.toSuiAddress()).toString();
+            return (
+              bytesToHex(currentAccount.publicKey) === bytesToHex(publicKey.toRawBytes())
+            ).toString();
           }}
         />
 
@@ -287,7 +271,9 @@ function Example() {
               signature,
             );
 
-            return (currentAccount.address === publicKey.toSuiAddress()).toString();
+            return (
+              bytesToHex(currentAccount.publicKey) === bytesToHex(publicKey.toRawBytes())
+            ).toString();
           }}
         />
       </ApiGroup>
@@ -304,24 +290,91 @@ const { networkConfig } = createNetworkConfig({
   mainnet: { url: getFullnodeUrl('mainnet') },
 });
 
+function BenfenConnectButton() {
+  const wallets = useWallets();
+  const currentAccount = useCurrentAccount();
+  const { currentWallet, connectionStatus, isConnected } = useCurrentWallet();
+
+  const { mutateAsync: connect } = useConnectWallet();
+  const { mutateAsync: disconnect } = useDisconnectWallet();
+
+  const walletsRef = useRef<WalletWithRequiredFeatures[]>([]);
+  walletsRef.current = wallets;
+  console.log('Benfen Standard Wallets:', walletsRef.current);
+
+  const onConnectWallet = useCallback(
+    async (selectedWallet: IKnownWallet) => {
+      const wallet = walletsRef.current.find((w) => w.name === selectedWallet.id);
+      if (!wallet) {
+        return Promise.reject('Wallet not found');
+      }
+
+      void connect({ wallet, accountAddress: currentAccount?.address });
+
+      return {
+        provider: undefined,
+      };
+    },
+    [connect, currentAccount?.address],
+  );
+
+  return (
+    <>
+      <ConnectButton<any>
+        fetchWallets={() => {
+          return Promise.resolve(
+            walletsRef.current.map((wallet) => {
+              return {
+                id: wallet.name,
+                name: wallet.name,
+              };
+            }),
+          );
+        }}
+        onConnect={onConnectWallet}
+        onDisconnect={() => void disconnect()}
+      />
+
+      <InfoLayout title="Base Info">
+        {currentAccount && <p>Account:{currentAccount?.address ?? ''}</p>}
+        {currentAccount && <p>PubKey:{currentAccount?.publicKey ?? ''}</p>}
+        {currentAccount && <p>ChainId:{currentAccount?.chains ?? ''}</p>}
+        {currentWallet && <p>Wallet Name:{currentWallet?.name ?? ''}</p>}
+        {currentWallet && <p>Wallet api version:{currentWallet?.version ?? ''}</p>}
+        {currentWallet && (
+          <p>Wallet Support Chains :{JSON.stringify(currentWallet?.chains ?? '')}</p>
+        )}
+        {currentWallet && (
+          <p>
+            Wallet Icon: <img src={currentWallet?.icon} />
+          </p>
+        )}
+        {connectionStatus && <p>Status :{connectionStatus}</p>}
+        {currentWallet && (
+          <p>Wallet Support Features: {JSON.stringify(currentWallet?.features ?? '', null, 2)}</p>
+        )}
+      </InfoLayout>
+    </>
+  );
+}
+
 export default function App() {
-  const [activeNetwork, setActiveNetwork] = useState('mainnet');
+  const [activeNetwork, setActiveNetwork] = useState<'mainnet' | 'testnet'>('mainnet');
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SuiClientProvider
+      <BenfenClientProvider
         networks={networkConfig}
-        // @ts-expect-error
         network={activeNetwork}
         onNetworkChange={(network) => {
           setActiveNetwork(network);
         }}
       >
-        <WalletProvider enableUnsafeBurner autoConnect>
-          <ConnectButton />
+        <WalletProvider autoConnect>
+          <BenfenConnectButton />
           <Example />
         </WalletProvider>
-      </SuiClientProvider>
+      </BenfenClientProvider>
     </QueryClientProvider>
   );
 }

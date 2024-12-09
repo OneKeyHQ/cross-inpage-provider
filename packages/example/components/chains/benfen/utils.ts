@@ -1,15 +1,15 @@
 // Copyright (c) Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-import { SuiObjectRef, SuiClient } from '@mysten/sui.js/client';
-import { TransactionBlock } from '@mysten/sui.js/transactions';
+import { BenfenObjectRef, BenfenClient } from '@benfen/bfc.js/client';
+import { TransactionBlock } from '@benfen/bfc.js/transactions';
 
 export async function sponsorTransaction(
-  client: SuiClient,
+  client: BenfenClient,
   sender: string,
   transactionKindBytes: Uint8Array,
 ) {
-  let payment: SuiObjectRef[] = [];
+  let payment: BenfenObjectRef[] = [];
 
   const coins = await client.getCoins({ owner: sender, limit: 1 });
   if (coins.data.length > 0) {

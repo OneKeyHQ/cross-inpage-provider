@@ -1,7 +1,7 @@
 // Copyright (c) Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-import { useCurrentAccount, useCurrentWallet } from '@mysten/dapp-kit';
+import { useCurrentAccount, useCurrentWallet } from '@benfen/bfc.js/dapp-kit';
 import type {
   SuiSignPersonalMessageInput,
   SuiSignPersonalMessageOutput,

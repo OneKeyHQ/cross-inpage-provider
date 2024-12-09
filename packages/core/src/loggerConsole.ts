@@ -41,10 +41,11 @@ class Logger {
   constructor(module: string | null = null) {
     this.module = module;
     const config = getStoredLogConfig();
-    this.level = config ?? LogLevel.DEBUG;
-    if (process.env.NODE_ENV === 'production') {
-      this.level = config ?? LogLevel.ERROR;
-    }
+    this.level = LogLevel.DEBUG;
+    // this.level = config ?? LogLevel.DEBUG;
+    // if (process.env.NODE_ENV === 'production') {
+    //   this.level = config ?? LogLevel.ERROR;
+    // }
   }
 
   private shouldLog(level: LogLevel): boolean {

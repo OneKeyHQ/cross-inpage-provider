@@ -74,10 +74,16 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
                   continue;
                 }
                 const { textNode, iconNode } = result;
-                if (textNode && iconNode) {
-                  const newText = updateName(textNode, updatedName);
-                  const newIconElement = updateIcon(iconNode, updatedIcon);
+                let newText: Text | null = null;
+                let newIconElement: HTMLImageElement | null = null;
+                if (textNode) {
+                  newText = updateName(textNode, updatedName);
+                }
+                if (iconNode) {
+                  newIconElement = updateIcon(iconNode, updatedIcon);
                   walletId.updateFlag(newIconElement);
+                }
+                if (newText || newIconElement) {
                   afterUpdate?.(newText, newIconElement);
                 }
               } catch (e) {

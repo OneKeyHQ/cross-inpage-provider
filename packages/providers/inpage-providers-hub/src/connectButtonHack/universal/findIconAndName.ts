@@ -12,19 +12,22 @@ import { arrayify, isClickable, isInExternalLink, universalLog } from './utils';
 export function findIconAndNameByName(
   containerElement: HTMLElement,
   walletName: RegExp,
-  icon: 'auto-search-icon' | ((text: Text) => HTMLElement | null | undefined) = 'auto-search-icon',
+  icon:
+    | 'none'
+    | 'auto-search-icon'
+    | ((text: Text) => HTMLElement | null | undefined) = 'auto-search-icon',
   constraints: { text: ConstraintFn[]; icon: ConstraintFn[] } = {
     text: [isClickable],
     icon: [isWalletIconLessEqualThan, isClickable],
-},
+  },
 ): FindResultType | null {
   const textNode = findWalletTextByParent(containerElement, walletName, constraints.text);
   if (!textNode || !textNode.parentElement) {
-    universalLog.log(`no wallet name ${walletName.toString()} text node found`);
+    universalLog.debug(`no wallet name ${walletName.toString()} text node found`);
     return null;
   }
   if (isInExternalLink(textNode.parentElement, containerElement)) {
-    universalLog.log(`${walletName.toString()} is in external link`);
+    universalLog.debug(`${walletName.toString()} is in external link`);
     return null;
   }
 
@@ -43,17 +46,17 @@ export function findIconAndNameByName(
       iconNode = walletIcon;
       break;
     }
-  } else {
+  } else if (typeof icon === 'string' && icon !== 'none') {
     universalLog.warn('icon paramter should be a function or auto-search-icon');
     return null;
   }
 
-  if (!iconNode) {
-    universalLog.log(`no wallet ${walletName.toString()} icon node found`);
+  if (!iconNode && typeof icon === 'string' && icon !== 'none') {
+    universalLog.debug(`no wallet ${walletName.toString()} icon node found`);
     return null;
   }
   // make sure the icon and text are both existed
-  return { iconNode, textNode };
+  return { iconNode: iconNode ?? null, textNode };
 }
 
 export function findIconAndNameByIcon(

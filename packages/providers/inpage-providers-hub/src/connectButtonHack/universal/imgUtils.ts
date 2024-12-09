@@ -57,15 +57,18 @@ export function findWalletIconByParent(parent: HTMLElement, constraints: Constra
     universalLog.warn(`no icon node found for parent`, parent);
     return null;
   }
-  if (iconNodes.length > 1) {
+
+  const filteredIconNodes = iconNodes.filter((icon) => constraints.every((f) => f(icon)));
+
+  if (filteredIconNodes.length === 0) {
+    throw new Error('it doesnt satisfy the constraints');
+  }
+
+  if (filteredIconNodes.length > 1) {
     universalLog.warn(`more than one icon node found`, iconNodes.length, iconNodes);
     throw new Error('more than one icon node found');
   }
-  const icon = iconNodes[0];
-  if (constraints.some((f) => !f(icon))) {
-    throw new Error('it doesnt satisfy the constraints');
-  }
-  return icon;
+  return filteredIconNodes[0];
 }
 //NOTE:  use function isWalletIconLessEqualThan with lazy loading image
 export function isWalletIconSizeMatch(

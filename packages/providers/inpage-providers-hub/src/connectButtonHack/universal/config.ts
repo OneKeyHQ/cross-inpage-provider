@@ -1,12 +1,7 @@
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO, WALLET_NAMES } from '../consts';
 import { findIconAndNameByName, findIconAndNameByIcon } from './findIconAndName';
-import {
-  findWalletIconByParent,
-  isWalletIconLessEqualThan,
-  isWalletIconSizeMatch,
-  replaceIcon,
-} from './imgUtils';
+import { isWalletIconLessEqualThan, replaceIcon } from './imgUtils';
 import { findIconAndNameInShadowRoot } from './shadowRoot';
 import { ConstraintFn, FindResultType, Selector } from './type';
 import {
@@ -26,7 +21,6 @@ import {
   replaceText,
 } from './textUtils';
 import domUtils from '../utils/utilsDomNodes';
-import { text } from 'stream/consumers';
 
 type FrameLocator = {
   locator: (selector: string) => Locator;
@@ -149,7 +143,7 @@ export type WalletInfo = {
 
   updateIcon?: (this: void, img: HTMLElement, iconStr: string) => HTMLImageElement;
   updateName?: (this: void, textNode: Text, text: string) => Text;
-  afterUpdate?: (this: void, textNode: Text, img: HTMLImageElement) => void;
+  afterUpdate?: (this: void, textNode: Text | null, img: HTMLImageElement | null) => void;
 
   /**
    * used when there is only one icon or name element(not both) and other special cases
@@ -194,7 +188,7 @@ const metamaskForRainbowKit: WalletInfo = {
     return document.querySelector('button[data-testid="rk-wallet-option-metaMask"]');
   },
   afterUpdate(textNode) {
-    if (textNode.parentElement) {
+    if (textNode?.parentElement) {
       textNode.parentElement.style.whiteSpace = 'normal';
     }
   },
@@ -210,7 +204,19 @@ const walletConnectForRainbowKit: WalletInfo = {
     return document.querySelector('button[data-testid="rk-wallet-option-walletConnect"]');
   },
   afterUpdate(textNode) {
-    if (textNode.parentElement) {
+    if (textNode?.parentElement) {
+      textNode.parentElement.style.whiteSpace = 'normal';
+    }
+  },
+};
+
+const petraForRainbowKit: WalletInfo = {
+  ...basicWalletInfo[WALLET_NAMES.petra],
+  container: () => {
+    return document.querySelector('button[data-testid="rk-wallet-option-petra"]');
+  },
+  afterUpdate(textNode) {
+    if (textNode?.parentElement) {
       textNode.parentElement.style.whiteSpace = 'normal';
     }
   },
@@ -224,7 +230,7 @@ export const sitesConfig: SitesInfo[] = [
       [IInjectedProviderNames.sui]: [
         {
           ...basicWalletInfo['suiwallet'],
-          container: "div[role='dialog'] .rc-dialog-body > ul",
+          container: "div[role='dialog'] .rc-dialog-body",
         },
       ],
     },
@@ -281,7 +287,7 @@ export const sitesConfig: SitesInfo[] = [
           },
 
           afterUpdate: (text, img) => {
-            img.style.marginRight = '12px';
+            if (img) img.style.marginRight = '12px';
           },
         },
       ],
@@ -336,7 +342,7 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['walletconnect'],
           container: () => getWalletListByBtn("div[role='dialog'] .v-card .c-list"),
           afterUpdate(textNode, img) {
-            img.style.height = 'auto';
+            if (img) img.style.height = 'auto';
           },
         },
       ],
@@ -351,14 +357,14 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['metamask'],
           container: '#metamask',
           afterUpdate(textNode, img) {
-            textNode.parentElement && (textNode.parentElement.style.textAlign = 'left');
+            textNode?.parentElement && (textNode.parentElement.style.textAlign = 'left');
           },
         },
         {
           ...basicWalletInfo['walletconnect'],
           container: '#wallet-connect',
           afterUpdate(textNode, img) {
-            textNode.parentElement && (textNode.parentElement.style.textAlign = 'left');
+            textNode?.parentElement && (textNode.parentElement.style.textAlign = 'left');
           },
         },
       ],
@@ -601,7 +607,7 @@ export const sitesConfig: SitesInfo[] = [
             );
           },
           afterUpdate(textNode, img) {
-            textNode.parentElement && makeTextEllipse(textNode.parentElement);
+            textNode?.parentElement && makeTextEllipse(textNode.parentElement);
           },
         },
       ],
@@ -668,23 +674,23 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
-  {
-    urls: ['app.thala.fi'],
-    testPath: [':text("I agree")', ':text("Connect")'],
-    walletsForProvider: {
-      [IInjectedProviderNames.aptos]: [
-        {
-          ...basicWalletInfo['petra'],
-          container: () => {
-            return getConnectWalletModalByTitle('div.chakra-modal__body', 'Welcome to Thala');
-          },
-          afterUpdate(textNode, img) {
-            textNode.parentElement && (textNode.parentElement.style.textAlign = 'left');
-          },
-        },
-      ],
-    },
-  },
+  // {
+  //   urls: ['app.thala.fi'],
+  //   testPath: [':text("I agree")', ':text("Connect")'],
+  //   walletsForProvider: {
+  //     [IInjectedProviderNames.aptos]: [
+  //       {
+  //         ...basicWalletInfo['petra'],
+  //         container: () => {
+  //           return getConnectWalletModalByTitle('div.chakra-modal__body', 'Welcome to Thala');
+  //         },
+  //         afterUpdate(textNode, img) {
+  //           textNode.parentElement && (textNode.parentElement.style.textAlign = 'left');
+  //         },
+  //       },
+  //     ],
+  //   },
+  // },
   {
     urls: ['app.kinza.finance'],
     testPath: {
@@ -1027,7 +1033,7 @@ export const sitesConfig: SitesInfo[] = [
           container: () =>
             getConnectWalletModalByTitle('div[style*="opacity: 1"]', 'Connect your wallet'),
           afterUpdate(textNode, img) {
-            textNode.parentElement && (textNode.parentElement.style.textAlign = 'center');
+            textNode?.parentElement && (textNode.parentElement.style.textAlign = 'center');
           },
         },
       ],
@@ -1601,14 +1607,14 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['metamask'],
           container: 'button#wallet-connect-metamask',
           afterUpdate(textNode, updatedName) {
-            textNode.parentElement && makeTextEllipse(textNode.parentElement);
+            textNode?.parentElement && makeTextEllipse(textNode.parentElement);
           },
         },
         {
           ...basicWalletInfo['walletconnect'],
           container: 'button#wallet-connect-walletconnect',
           afterUpdate(textNode, updatedName) {
-            textNode.parentElement && makeTextEllipse(textNode.parentElement);
+            textNode?.parentElement && makeTextEllipse(textNode.parentElement);
           },
         },
       ],
@@ -1672,7 +1678,7 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['walletconnect'],
           container: '#wallet-dropdown-scroll-wrapper',
           afterUpdate(textNode, img) {
-            textNode.parentElement && (textNode.parentElement.style.textAlign = 'left');
+            textNode?.parentElement && (textNode.parentElement.style.textAlign = 'left');
           },
         },
       ],
@@ -1810,7 +1816,7 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['phantom'],
           container: '#connect_modal',
           afterUpdate(text) {
-            if (text.parentElement?.parentElement) {
+            if (text?.parentElement?.parentElement) {
               text.parentElement.parentElement.style.whiteSpace = 'noWrap';
               makeTextEllipse(text.parentElement, { maxWidth: 'min(18vw,107px)' });
             }
@@ -1893,11 +1899,10 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['martian'],
           container: 'div.ant-modal.wallet-modal',
         },
-        //petra不存在
-        // {
-        //   ...basicWalletInfo['petra'],
-        //   container: 'div.ant-modal.wallet-modal',
-        // },
+        {
+          ...basicWalletInfo['petra'],
+          container: 'div.ant-modal.wallet-modal',
+        },
       ],
       [IInjectedProviderNames.sui]: [
         {
@@ -1921,8 +1926,10 @@ export const sitesConfig: SitesInfo[] = [
           container: '.connect-wallet-modal',
           ...basicWalletInfo['walletconnect'],
           afterUpdate(textNode, img) {
-            img.style.height = '40px';
-            img.style.width = '40px';
+            if (img) {
+              img.style.height = '40px';
+              img.style.width = '40px';
+            }
           },
         },
       ],
@@ -2119,8 +2126,10 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['metamask'],
           container: () => getConnectWalletModalByTitle('div.ant-modal-content', 'Select a Wallet'),
           afterUpdate(textNode, icon) {
-            icon.style.height = '28px';
-            icon.style.width = 'auto';
+            if (icon) {
+              icon.style.height = '28px';
+              icon.style.width = 'auto';
+            }
           },
         },
       ],
@@ -2193,7 +2202,7 @@ export const sitesConfig: SitesInfo[] = [
             );
           },
           afterUpdate(textNode) {
-            textNode.parentElement && makeTextWordBreak(textNode.parentElement);
+            textNode?.parentElement && makeTextWordBreak(textNode.parentElement);
           },
         },
         {
@@ -2211,7 +2220,7 @@ export const sitesConfig: SitesInfo[] = [
             );
           },
           afterUpdate(textNode) {
-            textNode.parentElement && makeTextWordBreak(textNode.parentElement);
+            textNode?.parentElement && makeTextWordBreak(textNode.parentElement);
           },
         },
       ],
@@ -2375,12 +2384,14 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['metamask'],
           container: 'div.SelectWalletModal',
           afterUpdate(textNode, icon) {
-            if (textNode.parentElement) {
+            if (textNode?.parentElement) {
               makeTextEllipse(textNode.parentElement, { width: '100%' });
               textNode.parentElement.style.flexShrink = '0';
               // textNode.parentElement.style.width = '100%';
             }
-            icon.style.height = 'auto';
+            if (icon) {
+              icon.style.height = 'auto';
+            }
           },
         },
       ],
@@ -2409,7 +2420,9 @@ export const sitesConfig: SitesInfo[] = [
             );
           },
           afterUpdate(textNode, icon) {
-            icon.style.marginRight = '12px';
+            if (icon) {
+              icon.style.marginRight = '12px';
+            }
           },
         },
       ],
@@ -2432,7 +2445,9 @@ export const sitesConfig: SitesInfo[] = [
             );
           },
           afterUpdate(textNode, icon) {
-            icon.style.marginRight = '12px';
+            if (icon) {
+              icon.style.marginRight = '12px';
+            }
           },
         },
       ],
@@ -2733,10 +2748,12 @@ export const sitesConfig: SitesInfo[] = [
             return findIconAndNameInShadowRoot('onboard-v2', container as string, name);
           },
           afterUpdate(textNode, img) {
-            img.style.width = '32px';
-            img.style.height = '32px';
-            img.style.maxWidth = '32px';
-            img.style.maxHeight = '32px';
+            if (img) {
+              img.style.width = '32px';
+              img.style.height = '32px';
+              img.style.maxWidth = '32px';
+              img.style.maxHeight = '32px';
+            }
           },
         },
         {
@@ -2746,10 +2763,12 @@ export const sitesConfig: SitesInfo[] = [
             return findIconAndNameInShadowRoot('onboard-v2', container as string, name);
           },
           afterUpdate(textNode, img) {
-            img.style.width = '32px';
-            img.style.height = '32px';
-            img.style.maxWidth = '32px';
-            img.style.maxHeight = '32px';
+            if (img) {
+              img.style.width = '32px';
+              img.style.height = '32px';
+              img.style.maxWidth = '32px';
+              img.style.maxHeight = '32px';
+            }
           },
         },
       ],
@@ -2782,7 +2801,7 @@ export const sitesConfig: SitesInfo[] = [
               : null;
           },
           afterUpdate(textNode, img) {
-            if (textNode.parentElement) {
+            if (textNode?.parentElement) {
               textNode.parentElement.style.overflow = 'visible';
             }
           },
@@ -2807,7 +2826,7 @@ export const sitesConfig: SitesInfo[] = [
               : null;
           },
           afterUpdate(textNode, img) {
-            if (textNode.parentElement) {
+            if (textNode?.parentElement) {
               textNode.parentElement.style.overflow = 'visible';
             }
           },
@@ -2866,8 +2885,10 @@ export const sitesConfig: SitesInfo[] = [
             );
           },
           afterUpdate(textNode, iconNode) {
-            iconNode.style.aspectRatio = '1';
-            iconNode.style.minWidth = '32px';
+            if (iconNode) {
+              iconNode.style.aspectRatio = '1';
+              iconNode.style.minWidth = '32px';
+            }
           },
         },
         {
@@ -2888,13 +2909,15 @@ export const sitesConfig: SitesInfo[] = [
             );
           },
           afterUpdate(textNode, iconNode) {
-            iconNode.style.aspectRatio = '1';
-            iconNode.style.minWidth = '32px';
-            const { defaultVal } = getMaxWithOfText(textNode, iconNode);
-            textNode.parentElement &&
-              makeTextEllipse(textNode.parentElement, {
-                maxWidth: defaultVal,
-              });
+            if (iconNode && textNode) {
+              iconNode.style.aspectRatio = '1';
+              iconNode.style.minWidth = '32px';
+              const { defaultVal } = getMaxWithOfText(textNode, iconNode);
+              textNode.parentElement &&
+                makeTextEllipse(textNode.parentElement, {
+                  maxWidth: defaultVal,
+                });
+            }
           },
         },
       ],
@@ -2940,20 +2963,6 @@ export const sitesConfig: SitesInfo[] = [
     testPath: [':text("STAKE NOW")', ':text("CONNECT WALLET")'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
-    },
-  },
-  {
-    urls: ['app.cellana.finance'],
-
-    walletsForProvider: {
-      [IInjectedProviderNames.aptos]: [
-        {
-          ...basicWalletInfo['petra'],
-          name: /^Petra Wallet$/,
-          container: () =>
-            getConnectWalletModalByTitle('div.ant-modal[role="dialog"]', 'Connect a wallet'),
-        },
-      ],
     },
   },
   {
@@ -3098,7 +3107,7 @@ export const sitesConfig: SitesInfo[] = [
           container: () =>
             getConnectWalletModalByTitle('div[role="dialog"]', 'Connect wallet to continue'),
           afterUpdate(textNode) {
-            textNode.parentElement && makeTextAlignCenter(textNode.parentElement);
+            textNode?.parentElement && makeTextAlignCenter(textNode.parentElement);
           },
         },
       ],
@@ -3108,7 +3117,7 @@ export const sitesConfig: SitesInfo[] = [
           container: () =>
             getConnectWalletModalByTitle('div[role="dialog"]', 'Connect wallet to continue'),
           afterUpdate(textNode) {
-            textNode.parentElement && makeTextAlignCenter(textNode.parentElement);
+            textNode?.parentElement && makeTextAlignCenter(textNode.parentElement);
           },
         },
       ],
@@ -3286,7 +3295,7 @@ export const sitesConfig: SitesInfo[] = [
             );
           },
           afterUpdate(textNode) {
-            textNode.parentElement && makeTextAlignLeft(textNode.parentElement);
+            textNode?.parentElement && makeTextAlignLeft(textNode.parentElement);
           },
         },
       ],
@@ -3362,7 +3371,7 @@ export const sitesConfig: SitesInfo[] = [
               'Connect your wallet',
             ),
           afterUpdate(textNode) {
-            textNode.parentElement && makeTextWrap(textNode.parentElement);
+            textNode?.parentElement && makeTextWrap(textNode.parentElement);
           },
         },
       ],
@@ -3514,18 +3523,6 @@ export const sitesConfig: SitesInfo[] = [
           findIconAndName: ({ container, name }) => {
             return findIconAndNameInShadowRoot('onboard-v2', container as string, name);
           },
-        },
-      ],
-    },
-  },
-  {
-    urls: ['app.aptin.io'],
-    walletsForProvider: {
-      [IInjectedProviderNames.aptos]: [
-        {
-          ...basicWalletInfo['petra'],
-          container: () =>
-            getConnectWalletModalByTitle('div.MuiPaper-root.aptin-dialog', 'Connect a wallet'),
         },
       ],
     },
@@ -3912,7 +3909,7 @@ export const sitesConfig: SitesInfo[] = [
             return findIconAndNameInShadowRoot('onboard-v2', container as string, name);
           },
           afterUpdate(textNode) {
-            textNode.parentElement && makeTextAlignLeft(textNode.parentElement);
+            textNode?.parentElement && makeTextAlignLeft(textNode.parentElement);
           },
         },
       ],
@@ -4016,6 +4013,282 @@ export const sitesConfig: SitesInfo[] = [
             }
             return replaceText(text, updatedName)?.parentElement;
           },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['typus.finance'],
+    testUrls: ['typus.finance/safu'],
+    testPath: [':text("CONNECT WALLET")'],
+
+    walletsForProvider: {
+      [IInjectedProviderNames.sui]: [
+        {
+          ...basicWalletInfo['suiwallet'],
+          findIconAndName() {
+            const modal = getConnectWalletModalByTitle(
+              'section.chakra-modal__content',
+              'Connect a Wallet',
+            );
+            const ele = modal?.querySelector('div');
+            return (ele && findIconAndNameByName(ele, /^Sui$/i, 'auto-search-icon')) ?? null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.bucketprotocol.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.sui]: [
+        {
+          ...basicWalletInfo['suiwallet'],
+          container: 'div[role="dialog"]',
+          findIconAndName({ name, container }) {
+            const modal = getConnectWalletModalByTitle(
+              container as string,
+              'Connect a Wallet from list',
+            );
+            return (modal && findIconAndNameByName(modal, name, 'auto-search-icon')) ?? null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['mainnet.aux.exchange'],
+
+    walletsForProvider: {
+      [IInjectedProviderNames.aptos]: [
+        {
+          ...basicWalletInfo['petra'],
+          container: '[id^="headlessui-dialog-panel-"]',
+          findIconAndName({ name, container }) {
+            const modal = getConnectWalletModalByTitle(container as string, 'Select Wallet');
+            return (
+              (modal &&
+                findIconAndNameByName(modal, name, 'auto-search-icon', {
+                  icon: [isWalletIconLessEqualThan],
+                  text: [],
+                })) ??
+              null
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['aptoswap.net'],
+    testUrls: ['aptoswap.net/app'],
+
+    walletsForProvider: {
+      [IInjectedProviderNames.aptos]: [
+        {
+          ...basicWalletInfo['petra'],
+          container: 'div.modal-background-content-frame .modal-wallet-frame',
+          findIconAndName({ name, container }) {
+            const modal = getConnectWalletModalByTitle(container as string, 'Sellect Your Wallet');
+            return (
+              (modal &&
+                findIconAndNameByName(modal, name, 'auto-search-icon', {
+                  icon: [
+                    isWalletIconLessEqualThan,
+                    (walletIcon) => walletIcon.getAttribute('aria-hidden') !== 'true',
+                  ],
+                  text: [],
+                })) ??
+              null
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['abelfinance.xyz'],
+
+    constraintMap: {
+      icon: [isWalletIconLessEqualThan],
+      text: [],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.aptos]: [
+        {
+          ...basicWalletInfo['petra'],
+          container: 'div.ant-modal .ant-modal-content .ant-modal-body',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['stake.dittofinance.io'],
+
+    constraintMap: {
+      icon: [isWalletIconLessEqualThan],
+      text: [],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.aptos]: [
+        {
+          ...basicWalletInfo['petra'],
+          container: 'div.modal-enter-done div[class*="WalletList"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['www.emojicoin.fun'],
+
+    walletsForProvider: {
+      [IInjectedProviderNames.aptos]: [
+        {
+          ...basicWalletInfo['petra'],
+          container: '[id^="headlessui-dialog-panel-"]',
+          findIconAndName({ name, container }) {
+            const modal = getConnectWalletModalByTitle(container as string, 'LOG IN OR SIGN UP');
+            return (
+              (modal &&
+                findIconAndNameByName(modal, /^PETRA$/i, 'none', {
+                  icon: [isWalletIconLessEqualThan],
+                  text: [],
+                })) ??
+              null
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.tortuga.finance'],
+
+    constraintMap: {
+      icon: [isWalletIconLessEqualThan],
+      text: [],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.aptos]: [
+        {
+          ...basicWalletInfo['petra'],
+          container: 'dialog.dialog div.dialog-content',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.merkle.trade'],
+    walletsForProvider: {
+      [IInjectedProviderNames.aptos]: [petraForRainbowKit],
+    },
+  },
+  {
+    urls: ['app.panora.exchange'],
+    walletsForProvider: {
+      [IInjectedProviderNames.aptos]: [
+        {
+          ...basicWalletInfo['petra'],
+          container: 'div#full-width-tabpanel-0 .MuiBox-root',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['trade.echelon.market'],
+    walletsForProvider: {
+      [IInjectedProviderNames.aptos]: [
+        {
+          ...basicWalletInfo['petra'],
+          container: '[id^="headlessui-dialog-panel-"]',
+          findIconAndName({ name, container }) {
+            const modal = getConnectWalletModalByTitle(container as string, 'Welcome to Echelon');
+            return (
+              (modal &&
+                findIconAndNameByName(modal, name, 'none', {
+                  icon: [
+                    isWalletIconLessEqualThan,
+                    (walletIcon) => !walletIcon.classList.contains('arrow'),
+                  ],
+                  text: [isClickable],
+                })) ??
+              null
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['trade.baptswap.com'],
+    walletsForProvider: {
+      [IInjectedProviderNames.aptos]: [
+        {
+          ...basicWalletInfo['petra'],
+          container: '[id^="headlessui-dialog-panel-"]',
+          findIconAndName({ name, container }) {
+            const modal = getConnectWalletModalByTitle(container as string, 'Connect a Wallet');
+            return (
+              (modal &&
+                findIconAndNameByName(modal, name, 'none', {
+                  icon: [
+                    isWalletIconLessEqualThan,
+                    (walletIcon) => !walletIcon.classList.contains('arrow'),
+                  ],
+                  text: [isClickable],
+                })) ??
+              null
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.superposition.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.aptos]: [
+        {
+          ...basicWalletInfo['petra'],
+          container: 'div.account-wallets-outer div.account-wallet-list',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.trufin.io'],
+
+    constraintMap: {
+      icon: [isWalletIconLessEqualThan],
+      text: [],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.aptos]: [
+        {
+          ...basicWalletInfo['petra'],
+          container: 'div.MuiDialogContent-root div.MuiGrid-container',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.mole.fi'],
+
+    constraintMap: {
+      icon: [isWalletIconLessEqualThan],
+      text: [],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.aptos]: [
+        {
+          ...basicWalletInfo['petra'],
+          container: 'div#connectWallet div.wallet-list',
+        },
+      ],
+      [IInjectedProviderNames.sui]: [
+        {
+          ...basicWalletInfo['suiwallet'],
+          container: 'div#connectWallet div.wallet-list',
         },
       ],
     },

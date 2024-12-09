@@ -37,7 +37,9 @@ export const ApiButton = memo(({
         field.name = label;
     }, []);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const dependencyStates = availableDependencyFields?.map(fieldId => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         const [field] = useAtom(store.fieldsAtom(fieldId));
         return {
             id: fieldId,

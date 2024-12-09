@@ -71,7 +71,7 @@ export const ApiCombobox = forwardRef<ApiComboboxRef, ApiComboboxProps>(function
 
   useEffect(() => {
     if (onRequestOptions) {
-      onRequestOptions().then((options) => {
+      void onRequestOptions().then((options) => {
         setOptions(options);
       });
     }

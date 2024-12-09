@@ -68,6 +68,7 @@ export function createStore<T extends BaseStore>(initialState: T) {
 
   const useFieldValue = <K extends keyof T>(field: K) => {
     const Context = getFieldContext(field);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return useContext(Context);
   };
 

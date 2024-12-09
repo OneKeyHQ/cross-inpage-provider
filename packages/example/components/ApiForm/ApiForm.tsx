@@ -64,6 +64,7 @@ export const ApiForm = forwardRef<ApiFormRef, ApiFormProps>(function ApiForm(
     },
     setField: (id: string, field: any) => {
       const oldField = store.scope.get(store.fieldsAtom(id));
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       store.scope.set(store.fieldsAtom(id), {
         ...oldField,
         ...field

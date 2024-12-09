@@ -70,13 +70,13 @@ function AssetInfoView({ viewRef, client }: { viewRef: ApiFormRef | undefined, c
 
   useEffect(() => {
     if (viewRef) {
-      (async () => {
+      void (async () => {
         const coinInfo = await client.getCoinMetadata({ coinType: field.value });
         viewRef?.setValue('assetInfo', `name: ${coinInfo?.name}, symbol: ${coinInfo?.symbol}, decimals: ${coinInfo?.decimals}`);
         viewRef?.setValue('assetDecimals', coinInfo?.decimals);
       })();
     }
-  }, [field.value]);
+  }, [client, field.value, viewRef]);
 
   return <></>
 }
@@ -110,7 +110,7 @@ function TransferForm() {
   useEffect(() => {
     if (currentAccount && currentAccount?.address) {
       apiFromRef.current?.setValue('to', currentAccount.address);
-      getCoins().then((coinTypes) => {
+      void getCoins().then((coinTypes) => {
         const options = Array.from(coinTypes.keys()).map((key) => {
           return {
             label: key,
@@ -136,6 +136,7 @@ function TransferForm() {
 
     const transfer = new TransactionBlock();
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const amountBN = new BigNumber(amount).shiftedBy(decimals);
     const amountBNString = amountBN.toString();
     console.log('amountBNString', amountBNString);

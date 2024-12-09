@@ -73,7 +73,7 @@ export const ApiSelector = forwardRef<ApiSelectorRef, ApiSelectorProps>(function
 
   useEffect(() => {
     if (onRequestOptions) {
-      onRequestOptions().then((options) => {
+      void onRequestOptions().then((options) => {
         setOptions(options);
       });
     }

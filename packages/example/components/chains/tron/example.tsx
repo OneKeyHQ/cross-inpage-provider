@@ -22,7 +22,7 @@ const WalletWatchAsset = memo(() => {
   const { provider } = useWallet<IProviderApi>();
 
   useEffect(() => {
-    okLinkRequest.getTokenList('TRON', 'TRC20').then((tokens) => {
+    void okLinkRequest.getTokenList('TRON', 'TRC20').then((tokens) => {
       const tokenOptions = tokens.map((token) => ({
         value: token.tokenContractAddress,
         label: `${token.token} - ${token.tokenContractAddress}`,

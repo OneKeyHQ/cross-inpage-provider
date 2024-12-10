@@ -116,9 +116,9 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
   deviceInfo: DeviceInfo = {
     platform: this._getPlatform(),
     appName: 'onekey',
-    appVersion: '0.0.0',
+    appVersion: this.version,
     maxProtocolVersion: 2,
-    features: [{ name: 'SendTransaction', maxMessages: 4 }, { name: 'SignData' }],
+    features: [{ name: 'SendTransaction', maxMessages: 4 }],
   };
   walletInfo?: WalletInfo = {
     name: 'OneKey',

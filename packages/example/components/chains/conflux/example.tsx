@@ -39,7 +39,7 @@ const WalletWatchAsset = ({ chainId }: { chainId: string | undefined }) => {
 
   useEffect(() => {
     // https://testingcf.jsdelivr.net/gh/conflux-fans/token-list@master/cfx.fluent.json
-    axios.get('https://testingcf.jsdelivr.net/gh/conflux-fans/token-list@master/cfx.fluent.json').then((res) => {
+    void axios.get('https://testingcf.jsdelivr.net/gh/conflux-fans/token-list@master/cfx.fluent.json').then((res) => {
       const tokens = res.data.tokens as {
         chainId: number;
         address: string;

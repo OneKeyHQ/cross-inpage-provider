@@ -1,0 +1,45 @@
+{
+  "private": true,
+  "name": "@onekeyfe/e2e",
+  "version": "2.1.23",
+  "keywords": [
+    "cross-inpage-provider"
+  ],
+  "author": "dev-fe@onekey.so",
+  "repository": "https://github.com/OneKeyHQ/cross-inpage-provider",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "files": [
+    "dist/*"
+  ],
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.js",
+    "require": "./dist/cjs/index.js"
+  },
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.js",
+  "main": "./dist/cjs/index.js",
+  "scripts": {
+    "env": "node dotEnvInit.js",
+    "report": "yarn env && npx playwright show-report",
+    "test": "yarn env && npx playwright test",
+    "test:headed": "yarn env && npx playwright test  --headed && yarn report",
+    "test:ui": "yarn env && npx playwright test --ui"
+  },
+  "dependencies": {
+    "@onekeyfe/inpage-providers-hub": "2.1.23",
+    "@onekeyfe/cross-inpage-provider-injected": "2.1.23",
+    "@onekeyfe/cross-inpage-provider-types": "2.1.23",
+    "lodash-es": "^4.17.21"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "@types/lodash-es": "^4.17.12",
+    "@types/node": "^20.12.7",
+    "playwright": "^1.49.1"
+  }
+}

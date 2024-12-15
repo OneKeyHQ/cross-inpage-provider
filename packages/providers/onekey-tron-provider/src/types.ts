@@ -1,5 +1,5 @@
 import { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
-import TronWeb, { UnsignedTransaction, SignedTransaction } from 'tronweb/dist/TronWeb';
+import TronWeb, { UnsignedTransaction, SignedTransaction } from 'tronweb';
 
 import { ProviderTronBase } from './ProviderTronBase';
 

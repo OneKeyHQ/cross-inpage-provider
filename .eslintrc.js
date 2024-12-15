@@ -24,5 +24,15 @@ module.exports = {
   },
   env: {
     browser: true,
+    node: true,
   },
+  overrides: [
+    {
+      files: ["*.cjs"],
+      rules: {
+        "@typescript-eslint/no-var-requires": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off"
+      }
+    }
+  ]
 };

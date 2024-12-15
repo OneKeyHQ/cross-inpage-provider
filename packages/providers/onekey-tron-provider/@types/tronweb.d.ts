@@ -57,7 +57,7 @@ type HttpProvider = {
   request(endpoint: string, payload: unknown, method = 'get'): Promise<any>;
 };
 
-declare module 'tronweb/dist/TronWeb' {
+declare module 'tronweb' {
   export class TronWeb {
     ready: boolean;
     constructor(options: any);

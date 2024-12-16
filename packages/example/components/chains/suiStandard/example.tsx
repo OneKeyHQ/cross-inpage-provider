@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { hexToBytes } from '@noble/hashes/utils';
+import { hexToBytes,bytesToHex } from '@noble/hashes/utils';
 import { useWallet } from '../../../components/connect/WalletContext';
 import DappList from '../../../components/DAppList';
 import params from './params';
@@ -219,6 +219,10 @@ function Example() {
     return params.signTransaction(currentAccount?.address ?? '');
   }, [currentAccount?.address]);
 
+  const signTokenTransactionParams = useMemo(() => {
+    return params.signTokenTransaction(currentAccount?.address ?? '');
+  }, [currentAccount?.address]);
+
   return (
     <>
       <InfoLayout title="Base Info">
@@ -239,7 +243,7 @@ function Example() {
       </InfoLayout>
 
       <ApiGroup title="SignMessage">
-        <ApiPayload
+        {/* <ApiPayload
           title="signMessage"
           description="签名消息, signMessage 不安全已经弃用, 目前（OneKey、Suiet、Sui Wallet、Martian） signMessage 实际实现已经变成了 signPersonalMessage"
           presupposeParams={params.signMessage}
@@ -264,7 +268,7 @@ function Example() {
 
             return (currentAccount.address === publicKey.toSuiAddress()).toString();
           }}
-        />
+        /> */}
 
         <ApiPayload
           title="signPersonalMessage"
@@ -438,6 +442,101 @@ function Example() {
             );
 
             return (currentAccount.address === publicKey.toSuiAddress()).toString();
+          }}
+        />
+         <ApiPayload
+          title="signTransactionBlock (USDC)"
+          description="USDC代币转账签名"
+          presupposeParams={signTokenTransactionParams}
+          onExecute={async (request: string) => {
+            const { from, to, amount ,token} = JSON.parse(request);
+
+            const transfer = new TransactionBlock();
+            transfer.setSender(from);
+            
+            const { data: coins } = await client.getCoins({
+              owner: from,
+              coinType: token,
+            });
+
+            if (!coins.length) {
+              throw new Error('No BUSD coins found');
+            }
+
+            const [coin] = transfer.splitCoins(
+              transfer.object(coins[0].coinObjectId),
+              [transfer.pure(amount)]
+            );
+            transfer.transferObjects([coin], transfer.pure(to));
+
+            const tx = await sponsorTransaction(
+              client,
+              from,
+              await transfer.build({
+                client,
+                onlyTransactionKind: true,
+              }),
+            );
+
+            const res = await signTransactionBlock({
+              transactionBlock: tx,
+              account: currentAccount,
+            });
+            return JSON.stringify(res);
+          }}
+          onValidate={async (request: string, result: string) => {
+            const { transactionBlockBytes, signature } = JSON.parse(result);
+            const publicKey = await verifyTransactionBlock(
+              Buffer.from(transactionBlockBytes, 'base64'),
+              signature,
+            );
+
+            return (
+              bytesToHex(currentAccount.publicKey) === bytesToHex(publicKey.toRawBytes())
+            ).toString();
+          }}
+        />
+
+        <ApiPayload
+          title="signAndExecuteTransactionBlock (USDC)"
+          description="USDC代币转账签名并执行"
+          presupposeParams={signTokenTransactionParams}
+          onExecute={async (request: string) => {
+            const { from, to, amount, token } = JSON.parse(request);
+
+            const transfer = new TransactionBlock();
+            transfer.setSender(from);
+            
+            const { data: coins } = await client.getCoins({
+              owner: from,
+              coinType: token,
+            });
+
+            if (!coins.length) {
+              throw new Error('No BUSD coins found');
+            }
+
+            const [coin] = transfer.splitCoins(
+              transfer.object(coins[0].coinObjectId),
+              [transfer.pure(BigInt(amount))]
+            );
+            transfer.transferObjects([coin], transfer.pure(to));
+
+            const tx = await sponsorTransaction(
+              client,
+              from,
+              await transfer.build({
+                client,
+                onlyTransactionKind: true,
+              }),
+            );
+
+            const res = await signAndExecuteTransactionBlock({
+              transactionBlock: tx,
+              account: currentAccount,
+            });
+            
+            return JSON.stringify(res);
           }}
         />
       </ApiGroup>

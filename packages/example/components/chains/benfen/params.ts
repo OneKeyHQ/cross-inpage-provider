@@ -34,4 +34,16 @@ export default {
       }),
     },
   ],
+  signTokenTransaction: (address: string) => [
+    {
+      id: 'signUSDTransaction',
+      name: 'BUSD_TYPE',
+      value: JSON.stringify({
+        from: address,
+        to: address,
+        amount: 1000, // 0.000001 USD
+        token: '0x00000000000000000000000000000000000000000000000000000000000000c8::busd::BUSD'      
+      }),
+    },
+  ],
 };

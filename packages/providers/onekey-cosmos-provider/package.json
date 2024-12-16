@@ -34,7 +34,11 @@
     "@onekeyfe/cross-inpage-provider-types": "2.1.23",
     "@onekeyfe/extension-bridge-injected": "2.1.23",
     "eth-rpc-errors": "^4.0.3",
+    "lodash-es": "^4.17.21",
     "long": "^5.2.1",
     "mitt": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "^4.17.12"
   }
 }

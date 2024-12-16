@@ -29,7 +29,7 @@ import type {
 // @ts-ignore
 import Long from 'long';
 import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from './cosmjs';
-import { isArray } from 'lodash';
+import { isArray } from 'lodash-es';
 import { JSONUint8Array } from './utils/uint8-array';
 
 const PROVIDER_EVENTS = {

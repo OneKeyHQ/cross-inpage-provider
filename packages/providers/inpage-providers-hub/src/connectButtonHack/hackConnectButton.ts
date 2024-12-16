@@ -3,7 +3,7 @@ import {
   Logger,
   checkWalletSwitchEnable,
 } from '@onekeyfe/cross-inpage-provider-core';
-import { throttle, ThrottleSettings } from 'lodash';
+import { throttle, ThrottleSettings } from 'lodash-es';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import type { IWindowOneKeyHub } from '../injectWeb3Provider';
 

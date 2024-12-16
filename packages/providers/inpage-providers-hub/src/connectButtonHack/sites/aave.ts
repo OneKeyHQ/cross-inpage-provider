@@ -1,7 +1,7 @@
 import { hackConnectButton } from '../hackConnectButton';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO } from '../consts';
-import { last } from 'lodash';
+import { last } from 'lodash-es';
 
 export default () => hackConnectButton({
   urls: ['aave.com', 'app.aave.com', 'www.aave.com'],

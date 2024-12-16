@@ -88,7 +88,9 @@ export function tryParsePublicKey(stateInit: StateInit): Buffer | null {
       if (wallet.init.code.equals(stateInit.code)) {
         return loadData(stateInit.data.beginParse()).publicKey;
       }
-    } catch (e) {}
+    } catch (e) {
+      // ignore
+    }
   }
 
   return null;

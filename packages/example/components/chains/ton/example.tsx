@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return */
 import { dapps } from './dapps.config';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
-import DappList from '../../../components/DAppList';
+import DappList from '../../DAppList';
 import {
   TonConnectButton,
   TonConnectUIProvider,
@@ -14,8 +14,15 @@ import params from './params';
 import { TonProofDemoApi } from './TonProofDemoApi';
 import { Switch } from '../../ui/switch';
 import { useToast } from '../../ui/use-toast';
-
+import { useState, useEffect } from 'react';
 const TON_SCAM_DAPP_ENABLE_KEY = 'ton_scam_dapp_enable';
+
+type IPresupposeParam = {
+  id: string;
+  name: string;
+  value: string;
+  description?: string;
+};
 
 export function Example() {
   const userFriendlyAddress = useTonAddress();
@@ -23,6 +30,17 @@ export function Example() {
   const wallet = useTonWallet();
   const [tonConnectUI, setOptions] = useTonConnectUI();
   const { toast } = useToast();
+  const [tokenParams, setTokenParams] = useState<IPresupposeParam[]>([]);
+
+  useEffect(() => {
+    async function fetchTokenParams() {
+      if (userFriendlyAddress) {
+        const result = await params.sendTokenTransaction(userFriendlyAddress);
+        setTokenParams(result);
+      }
+    }
+    void fetchTokenParams();
+  }, [userFriendlyAddress]);
 
   const scamEnable = localStorage.getItem(TON_SCAM_DAPP_ENABLE_KEY);
 
@@ -60,7 +78,7 @@ export function Example() {
         )}
       </InfoLayout>
 
-      <ApiGroup title='Sign Proof 按步骤操作'>
+      <ApiGroup title='Sign Proof 按步骤作'>
         <ApiPayload
           title="步骤1: Loading Proof Data"
           description="步骤1: 断开连接，生成 Proof Payload"
@@ -72,7 +90,7 @@ export function Example() {
               TonProofDemoApi.reset();
             }
 
-            // 设置 loading 状态
+            // 置 loading 状态
             tonConnectUI.setConnectRequestParameters({ state: 'loading' });
 
             const payload = await TonProofDemoApi.generatePayload();
@@ -106,7 +124,7 @@ export function Example() {
                 }
                 if (result && scamEnable) {
                   toast({
-                    title: '当前处于伪装欺诈模式，不应该成功连接账户',
+                    title: '当前处于伪���欺诈模式，不应该成功连接账户',
                     variant: 'destructive'
                   });
                 }
@@ -152,6 +170,19 @@ export function Example() {
           title="sendTransaction"
           allowCallWithoutProvider={!!userFriendlyAddress}
           presupposeParams={params.sendTransactionWithBody(userFriendlyAddress || '')}
+          onExecute={async (request: string) => {
+            const res = await tonConnectUI?.sendTransaction(JSON.parse(request));
+            return JSON.stringify(res);
+          }}
+        />
+      </ApiGroup>
+
+      <ApiGroup title="Send Transaction">
+        <ApiPayload
+          title="Send Jetton"
+          description="代币转账"
+          allowCallWithoutProvider={!!userFriendlyAddress}
+          presupposeParams={tokenParams}
           onExecute={async (request: string) => {
             const res = await tonConnectUI?.sendTransaction(JSON.parse(request));
             return JSON.stringify(res);

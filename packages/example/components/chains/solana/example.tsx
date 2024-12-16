@@ -1,18 +1,19 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return */
 import { dapps } from './dapps.config';
-import ConnectButton from '../../../components/connect/ConnectButton';
+import ConnectButton from '../../connect/ConnectButton';
 import { useEffect, useMemo, useRef } from 'react';
 import { get, set } from 'lodash-es';
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
-import { useWallet } from '../../../components/connect/WalletContext';
-import type { IKnownWallet } from '../../../components/connect/types';
-import DappList from '../../../components/DAppList';
+import { useWallet } from '../../connect/WalletContext';
+import type { IKnownWallet } from '../../connect/types';
+import DappList from '../../DAppList';
 import { Connection, PublicKey, Transaction, VersionedTransaction, clusterApiUrl } from '@solana/web3.js';
 import params from './params';
-import { createTransferTransaction, createVersionedTransaction } from './builder';
+import { createTransferTransaction, createVersionedTransaction, createTokenTransferTransaction } from './builder';
 import nacl from 'tweetnacl';
 import { toast } from '../../ui/use-toast';
+// import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
 const NETWORK = clusterApiUrl('mainnet-beta');
 
@@ -102,6 +103,21 @@ export default function Example() {
       provider.removeListener('accountChanged', onAccountChangeListener);
     };
   }, [account, provider, setAccount]);
+
+  console.log('createTokenTransferTransaction exists:', typeof createTokenTransferTransaction);
+
+  const transactionStatus = {
+    status: 'pending',
+    message: `
+      交易尚未在本地确认
+      
+      这是正常的，因为交易刚刚被广播到网络
+      
+      交易需要等待网络确认，这个过程需要一些时间
+      
+      请等待区块确认...
+    `
+  };
 
   return (
     <>
@@ -216,16 +232,19 @@ export default function Example() {
             return Buffer.from(res.serialize()).toString('hex')
           }}
           onValidate={async (request: string, result: string) => {
-            const tx = Transaction.from(Buffer.from(result, 'hex'))
-            const verified = tx.verifySignatures()
+            const tx = Transaction.from(Buffer.from(result, 'hex'));
+            const verified = tx.verifySignatures();
 
-            const res = await connection.simulateTransaction(tx)
+            const res = await connection.simulateTransaction(tx, {
+              sigVerify: false,
+            });
+
             return {
               success: res.value.err === null,
               verified,
               tryRun: res,
               tx
-            }
+            };
           }}
         />
         <ApiPayload
@@ -299,6 +318,38 @@ export default function Example() {
               })
             }
             return verifiedResult
+          }}
+        />
+        <ApiPayload
+          title="transferToken"
+          description="代币转账"
+          presupposeParams={params.signAndSendTokenTransaction(account?.publicKey)}
+          onExecute={async (request: string) => {
+            const {
+              tokenMint,
+              toPubkey,
+              amount,
+              decimals
+            }: {
+              tokenMint: string;
+              toPubkey: string;
+              amount: number;
+              decimals: number;
+            } = JSON.parse(request);
+            
+            const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+            const transaction = await createTokenTransferTransaction(
+              connection,
+              new PublicKey(account?.publicKey),
+              new PublicKey(toPubkey),
+              new PublicKey(tokenMint),
+              recentBlockhash,
+              amount,
+              decimals
+            );
+
+            const res = await provider?.signAndSendTransaction(transaction);
+            return JSON.stringify(res);
           }}
         />
       </ApiGroup>

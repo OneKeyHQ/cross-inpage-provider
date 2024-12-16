@@ -6,7 +6,9 @@ import {
   TransactionMessage,
   VersionedMessage,
   VersionedTransaction,
+  Connection,
 } from '@solana/web3.js';
+import { TOKEN_PROGRAM_ID, createTransferInstruction, getAssociatedTokenAddress } from '@solana/spl-token';
 
 export const createTransferTransaction = (
   publicKey: PublicKey,
@@ -52,5 +54,42 @@ export const createVersionedTransaction = (
   }).compileToV0Message();
 
   const transaction = new VersionedTransaction(messageV0);
+  return transaction;
+};
+
+// 将 async function 改为箭头函数形式的导出
+export const createTokenTransferTransaction = async (
+  connection: Connection,
+  fromPubkey: PublicKey,
+  toPubkey: PublicKey,
+  tokenMint: PublicKey,
+  recentBlockhash: string,
+  amount: number,
+  decimals: number
+): Promise<Transaction> => {
+  const transaction = new Transaction();
+  
+  const fromTokenAccount = await getAssociatedTokenAddress(
+    tokenMint,
+    fromPubkey
+  );
+  
+  const toTokenAccount = await getAssociatedTokenAddress(
+    tokenMint,
+    toPubkey
+  );
+
+  transaction.add(
+    createTransferInstruction(
+      fromTokenAccount,
+      toTokenAccount,
+      fromPubkey,
+      BigInt(amount * Math.pow(10, decimals)),
+    )
+  );
+
+  transaction.feePayer = fromPubkey;
+  transaction.recentBlockhash = recentBlockhash;
+
   return transaction;
 };

@@ -34,4 +34,16 @@ export default {
       }),
     },
   ],
+  signTokenTransaction: (address: string) => [
+    {
+      id: 'signUSDCransaction',
+      name: 'USDC_TYPE',
+      value: JSON.stringify({
+        from: address,
+        to: address,
+        amount: 1000, // 0.000001 USD
+        token: '0x5d4b302506645c37ff133b98c4b50a5ae14841659738d6d733d59d0d217a93bf::coin::COIN'      
+      }),
+    },
+  ],
 };

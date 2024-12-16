@@ -1,3 +1,20 @@
+const TOKEN_LIST = [
+  {
+    symbol: 'USDT',
+    tokenMint: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+    decimals: 6
+  },
+  {
+    symbol: 'USDC',
+    tokenMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+    decimals: 6
+  },
+  // {
+  //   symbol: 'RNDR',
+  //   tokenMint: '7atgF8KQo4wJrD5ATGX7t1V2zVvykPJbFfNeVf1icFv1',
+  //   decimals: 8
+  // },
+];
 export default {
   signMessage: [
     {
@@ -16,6 +33,17 @@ export default {
       }),
     },
   ],
+  signAndSendTokenTransaction: (publicKey: string) => 
+    TOKEN_LIST.map(token => ({
+      id: `signAndSendTokenTransaction_${token.symbol}`,
+      name: `Send ${token.symbol} Token`,
+      value: JSON.stringify({
+        tokenMint: token.tokenMint,
+        toPubkey: publicKey,
+        amount: 0.000001,
+        decimals: token.decimals
+      }),
+    })),
   signMultipleTransaction: (publicKey: string) => [
     {
       id: 'signMultipleTransaction',

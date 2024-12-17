@@ -581,7 +581,7 @@ function App() {
       const result = await (window as unknown as {
         $onekey: {
           $private: {
-            request: (arg: { method: string; params: { url: string } }) => 
+            request: (arg: { method: string; params: { url: string } }) =>
               Promise<{ securityInfo: IHostSecurity }>
           }
         }
@@ -647,7 +647,7 @@ function App() {
   );
 }
 
-export async function injectFloatingIcon() {
+export async function injectFloatingButton() {
   const { isShow, i18n } = await (window as unknown as {
     $onekey: {
       $private: {

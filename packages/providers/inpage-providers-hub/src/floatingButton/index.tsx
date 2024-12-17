@@ -21,14 +21,14 @@ const textStyle = {
 const containerId = 'onekey-floating-widget';
 
 const useOutsideClick = (
-  ref: { current?: HTMLElement },
+  ref: { current?: HTMLDivElement | null },
   callback: () => void,
 ) => {
   useEffect(() => {
-    const handleClickOutside = (event: { target: unknown }) => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (
         ref.current &&
-        !ref.current.contains(event.target as HTMLElement | null)
+        !ref.current.contains(event.target as HTMLElement)
       ) {
         callback();
       }
@@ -39,9 +39,8 @@ const useOutsideClick = (
     };
   }, [callback, ref]);
 };
-
 function CloseDialog({ onClose }: { onClose: () => void }) {
-  const dialogRef = useRef();
+  const dialogRef = useRef<HTMLDivElement | undefined>(undefined);
   useOutsideClick(dialogRef, onClose);
   return (
     <div
@@ -142,7 +141,7 @@ function IconButton({
           bottom: '-10px',
           opacity: showCloseButton ? 1 : 0,
         }}
-        onClick={(event: MouseEvent) => {
+        onClick={(event) => {
           event.stopPropagation();
           setIsShowCloseButton(false);
           setIsShowCloseDialog(true);
@@ -293,15 +292,13 @@ function SecurityRiskDetectionRow({
     const mediumSecurity =
       securityInfo?.checkSources
         .filter((item) =>
-          [EHostSecurityLevel.Medium, EHostSecurityLevel.Low].includes(
-            item.riskLevel,
-          ),
+          EHostSecurityLevel.Medium == item.riskLevel,
         )
         .map((item) => item.name)
         .join(' & ') || '';
     if (mediumSecurity) {
       return {
-        securityStatus: EHostSecurityLevel.High,
+        securityStatus: EHostSecurityLevel.Medium,
         securityElement: (
           <>
             <span
@@ -375,6 +372,7 @@ function SecurityRiskDetectionRow({
       </div>
     </SecurityInfoRow>
   );
+}
 
 function SecurityInfo({
   securityInfo,
@@ -383,7 +381,7 @@ function SecurityInfo({
   securityInfo: IHostSecurity;
   onClose: () => void;
 }) {
-  const viewRef = useRef();
+  const viewRef = useRef<HTMLDivElement | null>(null);
   useOutsideClick(viewRef, onClose);
   return (
     <div
@@ -464,9 +462,11 @@ function SecurityInfo({
             {securityInfo?.dapp.name || securityInfo?.host}
           </div>
           <div
-            width="24"
-            height="24"
-            cursor="pointer"
+            style={{
+              width: "24",
+              height: "24",
+              cursor: "pointer"
+            }}
           >
             <svg
               width="24"
@@ -567,6 +567,7 @@ function SecurityInfo({
       </div>
     </div>
   );
+}
 
 function App() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -577,139 +578,18 @@ function App() {
     setIsExpanded(!isExpanded);
     setIsShowSecurityInfo(true);
     if (!securityInfo) {
-      const result = await backgroundApiProxy.serviceDiscovery.checkUrlSecurity(
-        {
-          url: globalThis.location.origin,
-          from: 'app',
-        },
-      );
-      // const testData = {
-      //   'host': 'www.google.com',
-      //   'phishingSite': false,
-      //   'level': EHostSecurityLevel.Unknown,
-      //   'isWhiteList': false,
-      //   'isBlackList': false,
-      //   'createdAt': '2024-03-12',
-      //   'updatedAt': '2024-12-16',
-      //   'checkSources': [
-      //     {
-      //       'name': 'scam-sniffer',
-      //       'riskLevel': EHostSecurityLevel.Unknown,
-      //     },
-      //     {
-      //       'name': 'goplus',
-      //       'riskLevel': EHostSecurityLevel.Unknown,
-      //     },
-      //     {
-      //       'name': 'blockaid',
-      //       'riskLevel': EHostSecurityLevel.Unknown,
-      //     },
-      //   ],
-      //   'alert': '未认证的网站，请自行甄别决定是否继续访问',
-      //   'detail': {
-      //     'title': '未认证的网站',
-      //     'content':
-      //       '无法获取网站的信息。在批准该网站发起任何请求之前，请自行甄别安全风险，谨防钓鱼欺诈。',
-      //   },
-      //   'attackTypes': [],
-      //   'projectName': '',
-      //   'dapp': {
-      //     name: '',
-      //     logo: '',
-      //     description: { text: '' },
-      //     tags: [],
-      //     origins: [],
-      //   },
-      // };
-
-      const testData = {
-        'host': 'app.uniswap.org',
-        'projectName': 'Uniswap',
-        'phishingSite': false,
-        'level': 'security',
-        'isWhiteList': false,
-        'isBlackList': false,
-        'createdAt': '2024-03-08',
-        'updatedAt': '2024-12-16',
-        'checkSources': [
-          {
-            'name': 'scam-sniffer',
-            'riskLevel': 'unknown',
-          },
-          {
-            'name': 'goplus',
-            'riskLevel': 'security',
-          },
-          {
-            'name': 'blockaid',
-            'riskLevel': 'unknown',
-          },
-        ],
-        'alert': '已认证的网站',
-        'detail': {
-          'title': '已认证的网站',
-          'content': '通过多个可信源认证的 Web3 网站，可以放心使用。',
-        },
-        'attackTypes': [],
-        'dapp': {
-          'name': 'Uniswap V1',
-          'logo': 'https://dev.onekey-asset.com/discover/dapp/Uniswap%20V1.png',
-          'categories': [
-            {
-              'name': {
-                'text': 'exchanges',
-                'lokaliseKey': '438062876',
-                'deleted': false,
-              },
-              'recommendIndex': 0,
-              'origin': 'dappradar',
-              'categoryId': 'bf95c0de-fd9d-498b-8695-f9bca97fdc53',
-            },
-          ],
-          'tags': [
-            {
-              'name': {
-                'text': ' 🔥 Hot',
-                'lokaliseKey': '438074961',
-                'deleted': false,
-              },
-              'tagId': '25be6bf0-6f93-4ef2-a0a6-500fcafca0e5',
-              'type': 'critical',
-            },
-          ],
-          'origins': [
-            {
-              'name': 'okx',
-              'logo': 'https://uni.onekey-asset.com/static/logo/dapp_okx.png',
-            },
-            {
-              'name': 'bitget',
-              'logo':
-                'https://uni.onekey-asset.com/static/logo/dapp_bitget.png',
-            },
-            {
-              'name': 'defillama',
-              'logo':
-                'https://uni.onekey-asset.com/static/logo/dapp_defillama.png',
-            },
-            {
-              'name': 'tp',
-              'logo': 'https://uni.onekey-asset.com/static/logo/dapp_tp.png',
-            },
-            {
-              'name': 'dappradar',
-              'logo':
-                'https://uni.onekey-asset.com/static/logo/dapp_dappradar.png',
-            },
-          ],
-          'description': {
-            'text': 'Decentralized protocol for automated liquidity',
-            'lokaliseKey': '438065900',
-            'deleted': false,
-          },
-        },
-      };
-      setSecurityInfo(testData);
+      const result = await (window as unknown as {
+        $onekey: {
+          $private: {
+            request: (arg: { method: string; params: { url: string } }) => 
+              Promise<{ securityInfo: IHostSecurity }>
+          }
+        }
+      }).$onekey.$private.request({
+        method: 'wallet_detectRiskLevel',
+        params: { url: window.location.origin },
+      });
+      setSecurityInfo(result.securityInfo);
     }
   };
 
@@ -765,11 +645,37 @@ function App() {
       )}
     </div>
   );
+}
 
-async function injectFloatingIcon() {
-  const isShowFloatingButton =
-    await backgroundApiProxy.serviceSetting.isShowFloatingButton();
-  if (!isShowFloatingButton) {
+export async function injectFloatingIcon() {
+  const { isShow, i18n } = await (window as unknown as {
+    $onekey: {
+      $private: {
+        request: (
+          arg: { method: string; }
+        ) => Promise<{
+          isShow: boolean,
+          i18n: {
+            title: string;
+            description: string;
+            continueMessage: string;
+            continueLink: string;
+            addToWhiteListLink: string;
+            sourceMessage: string;
+            fetchingDAppInfo: string;
+            dappListedBy: string;
+            riskDetection: string;
+            maliciousDappWarningSourceMessage: string;
+            verifiedSite: string;
+            unknown: string;
+          }
+        }>
+      }
+    }
+  }).$onekey.$private.request({
+    method: 'wallet_isShowFloatingButton',
+  });
+  if (!isShow) {
     return;
   }
 

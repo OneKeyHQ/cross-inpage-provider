@@ -3,6 +3,7 @@
   "include": ["./src"],
   "exclude": ["./src/**/*.spec.ts", "./src/**/__tests__"],
   "compilerOptions": {
+    "jsx": "react-jsx",
     "outDir": "./dist/cjs"
   }
 }

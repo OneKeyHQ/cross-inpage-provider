@@ -40,7 +40,7 @@ const useOutsideClick = (
   }, [callback, ref]);
 };
 function CloseDialog({ onClose }: { onClose: () => void }) {
-  const dialogRef = useRef<HTMLDivElement | undefined>(undefined);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
   useOutsideClick(dialogRef, onClose);
   return (
     <div

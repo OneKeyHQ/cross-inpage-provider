@@ -70,7 +70,7 @@ export type IWindowOneKeyHub = {
   };
 };
 
-function injectWeb3Provider(): unknown {
+function injectWeb3Provider({ showFloatingButton = false }: { showFloatingButton?: boolean } = {}): unknown {
   if (!window?.$onekey?.jsBridge) {
     throw new Error('OneKey jsBridge not found.');
   }
@@ -305,6 +305,9 @@ function injectWeb3Provider(): unknown {
     registerPolkadot(polkadot, 'polkadot-js', '0.44.1');
   }
   setTimeout(() => {
+    if (showFloatingButton) {
+
+    }
     void detectWebsiteRiskLevel();
     void hackAllConnectButtons();
     void listenPageFocus();

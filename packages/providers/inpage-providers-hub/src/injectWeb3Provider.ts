@@ -30,7 +30,7 @@ import { ProviderBtc, ProviderBtcWallet } from '@onekeyfe/onekey-btc-provider';
 import { ProviderAlgo } from '@onekeyfe/onekey-algo-provider';
 import { hackAllConnectButtons } from './connectButtonHack';
 import { detectWebsiteRiskLevel, listenPageFocus } from './detectRiskWebsite';
-import { injectFloatingIcon } from './floatingButton';
+import { injectFloatingButton } from './floatingButton';
 import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
 
 export type IWindowOneKeyHub = {
@@ -307,7 +307,7 @@ function injectWeb3Provider({ showFloatingButton = false }: { showFloatingButton
   }
   setTimeout(() => {
     void detectWebsiteRiskLevel();
-    void injectFloatingIcon();
+    void injectFloatingButton();
     void hackAllConnectButtons();
     void listenPageFocus();
   }, 1000);

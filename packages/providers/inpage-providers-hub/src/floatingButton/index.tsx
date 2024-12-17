@@ -6,6 +6,24 @@ import {
 } from './type'
 
 let isInjected = false;
+interface i18nText {
+  title: string;
+  description: string;
+  continueMessage: string;
+  continueLink: string;
+  addToWhiteListLink: string;
+  sourceMessage: string;
+  fetchingDAppInfo: string;
+  dappListedBy: string;
+  riskDetection: string;
+  maliciousDappWarningSourceMessage: string;
+  verifiedSite: string;
+  unknown: string;
+  maliciousSiteWarning: string;
+  suspectedMaliciousBehavior: string;
+}
+
+let i18n: i18nText = {} as i18nText
 
 const logoStyle = {
   width: '28px',
@@ -228,7 +246,7 @@ function SecurityRiskDetectionRow({
                 fontSize: '11.2px',
               }}
             >
-              Verified
+              {i18n.verifiedSite}
             </span>
             <svg
               width="13"
@@ -267,7 +285,7 @@ function SecurityRiskDetectionRow({
                 fontSize: '11.2px',
               }}
             >
-              Malicious site
+              {i18n.maliciousSiteWarning}
             </span>
             <svg
               width="18"
@@ -308,7 +326,7 @@ function SecurityRiskDetectionRow({
                 fontSize: '11.2px',
               }}
             >
-              Suspected malicious behavior
+              {i18n.suspectedMaliciousBehavior}
             </span>
             <svg
               width="16"
@@ -339,7 +357,7 @@ function SecurityRiskDetectionRow({
             fontSize: '11.2px',
           }}
         >
-          Unknown
+          {i18n.unknown}
         </span>
       ),
     };
@@ -492,7 +510,7 @@ function SecurityInfo({
           }}
         />
         {securityInfo?.dapp?.origins.length ? (
-          <SecurityInfoRow title="Dapp listed by">
+          <SecurityInfoRow title={i18n.dappListedBy}>
             <div
               style={{
                 display: 'flex',
@@ -648,33 +666,21 @@ function App() {
 }
 
 export async function injectFloatingButton() {
-  const { isShow, i18n } = await (window as unknown as {
+  const { isShow, i18n: i18nResponse } = await (globalThis as unknown as {
     $onekey: {
       $private: {
         request: (
           arg: { method: string; }
         ) => Promise<{
           isShow: boolean,
-          i18n: {
-            title: string;
-            description: string;
-            continueMessage: string;
-            continueLink: string;
-            addToWhiteListLink: string;
-            sourceMessage: string;
-            fetchingDAppInfo: string;
-            dappListedBy: string;
-            riskDetection: string;
-            maliciousDappWarningSourceMessage: string;
-            verifiedSite: string;
-            unknown: string;
-          }
+          i18n: i18nText
         }>
       }
     }
   }).$onekey.$private.request({
     method: 'wallet_isShowFloatingButton',
   });
+  i18n = i18nResponse
   if (!isShow) {
     return;
   }

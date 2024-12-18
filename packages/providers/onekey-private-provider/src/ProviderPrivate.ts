@@ -45,10 +45,12 @@ const PROVIDER_EVENTS = {
 
 const METHODS = {
   wallet_events_ext_switch_changed: 'wallet_events_ext_switch_changed',
-  wallet_events_dapp_network_changed: 'wallet_events_dapp_network_changed'
+  wallet_events_dapp_network_changed: 'wallet_events_dapp_network_changed',
+  wallet_events_floating_icon_changed: 'wallet_events_floating_icon_changed',
 };
 
 class ProviderPrivate extends ProviderBase {
+  _listeners: { type: string, callback: (params: any) => void }[] = []
   constructor(props: IInpageProviderConfig) {
     super(props);
     try {
@@ -85,11 +87,21 @@ class ProviderPrivate extends ProviderBase {
           }
         } else if (method === METHODS.wallet_events_dapp_network_changed) {
           this.notifyNetworkChanged(params as {networkChangedText: string})
+        } else if (method === METHODS.wallet_events_floating_icon_changed) {
+          this._listeners.forEach((listener) => {
+            if (listener.type === method) {
+              listener.callback(params)
+            }
+          })
         }
       });
     } catch (e) {
       console.error(e);
     }
+  }
+
+  onNotifyFloatingIconChanged(callback: (params: {showFloatingIcon: boolean}) => void) {
+    this._listeners.push({ type: METHODS.wallet_events_floating_icon_changed, callback })
   }
 
   protected providerName: IInjectedProviderNamesStrings = IInjectedProviderNames.$private;

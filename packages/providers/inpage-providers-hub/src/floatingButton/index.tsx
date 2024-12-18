@@ -148,13 +148,16 @@ function IconButton({
   isExpanded,
   onClick,
   dataLoaded,
+  isShowCloseDialog,
+  showCloseDialog,
 }: {
   isExpanded: boolean;
+  isShowCloseDialog: boolean;
   onClick: () => void;
   dataLoaded: boolean;
+  showCloseDialog: () => void;
 }) {
   const [showCloseButton, setIsShowCloseButton] = useState(false);
-  const [showCloseDialog, setIsShowCloseDialog] = useState(false);
   return (
     <div
       style={{
@@ -166,14 +169,14 @@ function IconButton({
         padding: '8px',
       }}
       onMouseEnter={() => {
-        if (isExpanded || showCloseDialog) {
+        if (isExpanded || isShowCloseDialog) {
           return;
         }
         setIsShowCloseButton(true);
       }}
       onMouseLeave={() => setIsShowCloseButton(false)}
       onClick={() => {
-        if (showCloseDialog) {
+        if (isShowCloseDialog) {
           return;
         }
         setIsShowCloseButton(false);
@@ -196,7 +199,7 @@ function IconButton({
         onClick={(event) => {
           event.stopPropagation();
           setIsShowCloseButton(false);
-          setIsShowCloseDialog(true);
+          showCloseDialog();
         }}
       >
         <svg
@@ -214,13 +217,6 @@ function IconButton({
           />
         </svg>
       </div>
-      {!isExpanded && showCloseDialog && (
-        <CloseDialog
-          onClose={() => {
-            setIsShowCloseDialog(false);
-          }}
-        />
-      )}
     </div>
   );
 }
@@ -414,9 +410,12 @@ function SecurityRiskDetectionRow({
 function SecurityInfo({
   securityInfo,
   onClose,
+  showCloseDialog,
+
 }: {
   securityInfo: IHostSecurity;
   onClose: () => void;
+  showCloseDialog: () => void;
 }) {
   const viewRef = useRef<HTMLDivElement | null>(null);
   useOutsideClick(viewRef, onClose);
@@ -503,6 +502,10 @@ function SecurityInfo({
               width: "24",
               height: "24",
               cursor: "pointer"
+            }}
+            onClick={() => {
+              onClose();
+              showCloseDialog();
             }}
           >
             <svg
@@ -612,6 +615,11 @@ function App() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showSecurityInfo, setIsShowSecurityInfo] = useState(false);
   const [securityInfo, setSecurityInfo] = useState<IHostSecurity | null>(null);
+  const [showCloseDialog, setIsShowCloseDialog] = useState(false);
+
+  const handleShowCloseDialog = useCallback(() => {
+    setIsShowCloseDialog(true)
+  }, [])
 
   const handleClick = async () => {
     setIsExpanded(!isExpanded);
@@ -670,6 +678,7 @@ function App() {
       {showSecurityInfo && securityInfo ? (
         <SecurityInfo
           securityInfo={securityInfo}
+          showCloseDialog={handleShowCloseDialog}
           onClose={() => {
             setIsExpanded(false);
             setIsShowSecurityInfo(false);
@@ -679,7 +688,16 @@ function App() {
         <IconButton
           onClick={handleClick}
           isExpanded={isExpanded}
+          isShowCloseDialog={showCloseDialog}
+          showCloseDialog={handleShowCloseDialog}
           dataLoaded={!!securityInfo}
+        />
+      )}
+      {!isExpanded && showCloseDialog && (
+        <CloseDialog
+          onClose={() => {
+            setIsShowCloseDialog(false);
+          }}
         />
       )}
     </div>

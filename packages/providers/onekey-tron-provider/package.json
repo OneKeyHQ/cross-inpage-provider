@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/onekey-tron-provider",
-  "version": "2.1.23",
+  "version": "2.2.0",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -29,10 +29,10 @@
   },
   "dependencies": {
     "@noble/secp256k1": "1.7.1",
-    "@onekeyfe/cross-inpage-provider-core": "2.1.23",
-    "@onekeyfe/cross-inpage-provider-errors": "2.1.23",
-    "@onekeyfe/cross-inpage-provider-types": "2.1.23",
-    "@onekeyfe/extension-bridge-injected": "2.1.23",
+    "@onekeyfe/cross-inpage-provider-core": "2.2.0",
+    "@onekeyfe/cross-inpage-provider-errors": "2.2.0",
+    "@onekeyfe/cross-inpage-provider-types": "2.2.0",
+    "@onekeyfe/extension-bridge-injected": "2.2.0",
     "querystring": "^0.2.1",
     "sunweb": "^1.0.7",
     "tronweb": "^5.3.2"

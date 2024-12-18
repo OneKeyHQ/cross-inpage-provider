@@ -89,11 +89,11 @@ class ProviderPrivate extends ProviderBase {
           this.notifyNetworkChanged(params as {networkChangedText: string})
         } else if (method === METHODS.wallet_events_floating_icon_changed) {
           console.log('wallet_events_floating_icon_changed ===>>>> : ', params);
-          // this._listeners.forEach((listener) => {
-          //   if (listener.type === method) {
-          //     listener.callback(params)
-          //   }
-          // })
+          this._listeners.forEach((listener) => {
+            if (listener.type === method) {
+              listener.callback(params)
+            }
+          })
         }
       });
     } catch (e) {

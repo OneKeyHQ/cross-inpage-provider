@@ -372,21 +372,6 @@ function SecurityRiskDetectionRow({
         }}
       >
         {securityElement}
-        <svg
-          width="13"
-          height="14"
-          viewBox="0 0 13 14"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M5.15621 4.48971C5.36449 4.28143 5.70218 4.28143 5.91046 4.48971L7.66667 6.24592C8.08323 6.66247 8.08323 7.33785 7.66667 7.75441L5.91046 9.51062C5.70218 9.7189 5.36449 9.7189 5.15621 9.51062C4.94793 9.30234 4.94793 8.96465 5.15621 8.75637L6.91242 7.00016L5.15621 5.24395C4.94793 5.03567 4.94793 4.69799 5.15621 4.48971Z"
-            fill="#006B3B"
-            fillOpacity="0.906"
-          />
-        </svg>
       </div>
     </SecurityInfoRow>
   );
@@ -552,6 +537,9 @@ function SecurityInfo({
           padding: '8px 0',
           background: 'rgba(249, 249, 249, 1)',
           borderBottomLeftRadius: '12px',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         <span

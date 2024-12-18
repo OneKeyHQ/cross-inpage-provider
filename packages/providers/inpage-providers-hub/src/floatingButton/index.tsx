@@ -113,6 +113,7 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
           color: 'rgba(0, 0, 0, 1)',
           fontSize: '12px',
           fontWeight: '400',
+          cursor: 'pointer',
         }}
         onClick={handleHideOnSite}
       >
@@ -125,6 +126,7 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
           color: 'rgba(0, 0, 0, 1)',
           fontSize: '12px',
           fontWeight: '400',
+          cursor: 'pointer',
         }}
         onClick={handleDisable}
       >
@@ -504,7 +506,9 @@ function SecurityInfo({
             }}
             onClick={() => {
               onClose();
-              showCloseDialog();
+              setTimeout(() => {
+                showCloseDialog();
+              }, 800)
             }}
           >
             <svg

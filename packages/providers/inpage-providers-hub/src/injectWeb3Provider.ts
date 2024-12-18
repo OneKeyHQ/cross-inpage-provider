@@ -307,7 +307,9 @@ function injectWeb3Provider({ showFloatingButton = false }: { showFloatingButton
   }
   setTimeout(() => {
     void detectWebsiteRiskLevel();
-    void injectFloatingButton();
+    if (showFloatingButton) {
+      void injectFloatingButton();
+    }
     void hackAllConnectButtons();
     void listenPageFocus();
   }, 1000);

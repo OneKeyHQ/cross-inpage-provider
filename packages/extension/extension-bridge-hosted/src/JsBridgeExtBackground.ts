@@ -11,7 +11,7 @@ import * as uuid from 'uuid';
 
 import { JsBridgeBase, consts } from '@onekeyfe/cross-inpage-provider-core';
 
-const { EXT_PORT_OFFSCREEN_TO_BG, EXT_PORT_CS_TO_BG, EXT_PORT_UI_TO_BG, ONEKEY_ALIGN_PRIMARY_ACCOUNT } = consts;
+const { EXT_PORT_OFFSCREEN_TO_BG, EXT_PORT_CS_TO_BG, EXT_PORT_UI_TO_BG, ONEKEY_REQUEST_TO_ALL_CS } = consts;
 
 class JsBridgeExtBackground extends JsBridgeBase {
   constructor(config: IJsBridgeConfig) {
@@ -143,7 +143,7 @@ class JsBridgeExtBackground extends JsBridgeBase {
           data = await data({ origin });
         }
         // Send a notification to the port of the specified origin
-        if (!targetOrigin || targetOrigin === origin || targetOrigin === ONEKEY_ALIGN_PRIMARY_ACCOUNT) {
+        if (!targetOrigin || targetOrigin === origin || targetOrigin === ONEKEY_REQUEST_TO_ALL_CS) {
           // TODO check ports disconnected
           this.requestSync({
             data,

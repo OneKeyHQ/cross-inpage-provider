@@ -88,11 +88,12 @@ class ProviderPrivate extends ProviderBase {
         } else if (method === METHODS.wallet_events_dapp_network_changed) {
           this.notifyNetworkChanged(params as {networkChangedText: string})
         } else if (method === METHODS.wallet_events_floating_icon_changed) {
-          this._listeners.forEach((listener) => {
-            if (listener.type === method) {
-              listener.callback(params)
-            }
-          })
+          console.log('wallet_events_floating_icon_changed ===>>>> : ', params);
+          // this._listeners.forEach((listener) => {
+          //   if (listener.type === method) {
+          //     listener.callback(params)
+          //   }
+          // })
         }
       });
     } catch (e) {

@@ -4,6 +4,7 @@ import {
   IHostSecurity,
   EHostSecurityLevel,
 } from './type'
+import { Logo } from './images';
 
 let isInjected = false;
 interface i18nText {
@@ -143,10 +144,7 @@ function IconButton({
         onClick();
       }}
     >
-      <img
-        src="https://asset.onekey-asset.com/app-monorepo/bb7a4e71aba56b405faf9278776d57d73b829708/favicon.png"
-        style={logoStyle}
-      />
+      <Logo style={logoStyle} />
       {!dataLoaded && (
         <span style={textStyle}>
           {isExpanded ? 'Fetching dApp info...' : ''}
@@ -551,8 +549,7 @@ function SecurityInfo({
         >
           Powered by
         </span>
-        <img
-          src="https://asset.onekey-asset.com/app-monorepo/bb7a4e71aba56b405faf9278776d57d73b829708/favicon.png"
+        <Logo
           style={{
             width: '12.83px',
             height: '12.83px',

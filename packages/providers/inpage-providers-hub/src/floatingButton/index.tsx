@@ -1,11 +1,10 @@
 import { render } from 'preact';
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useEffect, useMemo, useCallback, useRef, useState } from 'preact/hooks';
 import {
   IHostSecurity,
   EHostSecurityLevel,
 } from './type'
 import { Logo } from './images';
-import { useCallback } from 'react';
 
 let isInjected = false;
 interface i18nText {
@@ -621,7 +620,7 @@ function App() {
     setIsShowCloseDialog(true)
   }, [])
 
-  const handleClick = async () => {
+  const handleClick = useCallback(async () => {
     setIsExpanded(!isExpanded);
     setIsShowSecurityInfo(true);
     if (!securityInfo) {
@@ -638,7 +637,7 @@ function App() {
       });
       setSecurityInfo(result.securityInfo);
     }
-  };
+  }, [isExpanded, securityInfo]);
 
   const borderStyle = useMemo(
     () =>

@@ -508,7 +508,7 @@ function SecurityInfo({
               onClose();
               setTimeout(() => {
                 showCloseDialog();
-              }, 800)
+              }, 200)
             }}
           >
             <svg

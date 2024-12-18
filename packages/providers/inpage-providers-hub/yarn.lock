@@ -1897,6 +1897,11 @@ playwright@1.44.1, playwright@^1.43.1:
   optionalDependencies:
     fsevents "2.3.2"
 
+preact@^10.25.1:
+  version "10.25.2"
+  resolved "https://registry.yarnpkg.com/preact/-/preact-10.25.2.tgz#e141e18a547ae0082dae48d044e0d8267e2547d2"
+  integrity sha512-GEts1EH3oMnqdOIeXhlbBSddZ9nrINd070WBOiPO2ous1orrKGUM4SMDbwyjSWD1iMS2dBvaDjAa5qUhz3TXqw==
+
 prepend-http@^1.0.1:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/prepend-http/-/prepend-http-1.0.4.tgz#d4f4562b0ce3696e41ac52d0e002e57a635dc6dc"

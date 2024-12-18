@@ -670,7 +670,7 @@ function App() {
       style={{
         position: 'fixed',
         zIndex: 999_999,
-        top: '75%',
+        bottom: '25%',
         right: '-146px',
         background: 'rgba(255, 255, 255, 1)',
         borderWidth: '0.33px',

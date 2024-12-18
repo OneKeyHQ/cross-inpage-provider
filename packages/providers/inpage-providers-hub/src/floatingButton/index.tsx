@@ -461,6 +461,7 @@ function SecurityInfo({
               color: 'rgba(0, 0, 0, 0.88)',
               fontSize: '13px',
               fontWeight: '500',
+              overflow: 'hidden',
             }}
           >
             {securityInfo?.dapp?.logo ? (
@@ -500,13 +501,17 @@ function SecurityInfo({
                 />
               </svg>
             )}
-            {securityInfo?.dapp?.name || securityInfo?.host}
+            <span style={{ width: '100%', overflow: 'hidden' }}>
+              {securityInfo?.dapp?.name || securityInfo?.host}
+            </span>
           </div>
           <div
             style={{
               width: "24",
               height: "24",
-              cursor: "pointer"
+              cursor: "pointer",
+              display: 'flex',
+              alignItems: 'center',
             }}
             onClick={() => {
               onClose();

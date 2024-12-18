@@ -502,7 +502,13 @@ function SecurityInfo({
                 />
               </svg>
             )}
-            <span style={{ width: '100%', overflow: 'hidden' }}>
+            <span 
+              style={{ 
+                width: '100%', 
+                overflow: 'hidden', 
+                textOverflow: 'ellipsis' 
+              }}
+            >
               {securityInfo?.dapp?.name || securityInfo?.host}
             </span>
           </div>

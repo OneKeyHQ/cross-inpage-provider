@@ -3,6 +3,8 @@
   "include": ["./src"],
   "exclude": ["./src/**/*.spec.ts", "./src/**/__tests__"],
   "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
     "outDir": "./dist"
   }
 }

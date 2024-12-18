@@ -30,6 +30,7 @@ import { ProviderBtc, ProviderBtcWallet } from '@onekeyfe/onekey-btc-provider';
 import { ProviderAlgo } from '@onekeyfe/onekey-algo-provider';
 import { hackAllConnectButtons } from './connectButtonHack';
 import { detectWebsiteRiskLevel, listenPageFocus } from './detectRiskWebsite';
+import { injectFloatingButton } from './floatingButton';
 import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
 
 export type IWindowOneKeyHub = {
@@ -70,7 +71,7 @@ export type IWindowOneKeyHub = {
   };
 };
 
-function injectWeb3Provider(): unknown {
+function injectWeb3Provider({ showFloatingButton = false }: { showFloatingButton?: boolean } = {}): unknown {
   if (!window?.$onekey?.jsBridge) {
     throw new Error('OneKey jsBridge not found.');
   }
@@ -306,6 +307,9 @@ function injectWeb3Provider(): unknown {
   }
   setTimeout(() => {
     void detectWebsiteRiskLevel();
+    if (showFloatingButton) {
+      void injectFloatingButton();
+    }
     void hackAllConnectButtons();
     void listenPageFocus();
   }, 1000);

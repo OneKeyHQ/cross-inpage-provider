@@ -5,6 +5,7 @@ import {
   EHostSecurityLevel,
 } from './type'
 import { Logo } from './images';
+import { useCallback } from 'react';
 
 let isInjected = false;
 interface i18nText {
@@ -39,6 +40,10 @@ const textStyle = {
 
 const containerId = 'onekey-floating-widget';
 
+const removeApp = () => {
+  document.getElementById(containerId)?.remove();
+}
+
 const useOutsideClick = (
   ref: { current?: HTMLDivElement | null },
   callback: () => void,
@@ -61,6 +66,35 @@ const useOutsideClick = (
 function CloseDialog({ onClose }: { onClose: () => void }) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
   useOutsideClick(dialogRef, onClose);
+  const handleDisable = useCallback(() => {
+    void (globalThis as unknown as {
+      $onekey: {
+        $private: {
+          request: (
+            arg: { method: string; }
+          ) => Promise<void>
+        }
+      }
+    }).$onekey.$private.request({
+      method: 'wallet_disableFloatingButton',
+    });
+    removeApp();
+  }, [])
+  const handleHideOnSite = useCallback(() => {
+    void (globalThis as unknown as {
+      $onekey: {
+        $private: {
+          request: (
+            arg: { method: string; params: { url: string } }
+          ) => Promise<void>
+        }
+      }
+    }).$onekey.$private.request({
+      method: 'wallet_hideFloatingButtonOnSite',
+      params: { url: window.location.origin },
+    });
+    removeApp();
+  }, [])
   return (
     <div
       style={{
@@ -81,6 +115,7 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
           fontSize: '12px',
           fontWeight: '400',
         }}
+        onClick={handleHideOnSite}
       >
         Hide on this site
       </div>
@@ -92,6 +127,7 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
           fontSize: '12px',
           fontWeight: '400',
         }}
+        onClick={handleDisable}
       >
         Disable
       </div>
@@ -655,7 +691,7 @@ export async function injectFloatingButton() {
     $onekey: {
       $private: {
         request: (
-          arg: { method: string; }
+          arg: { method: string; params: { url: string } }
         ) => Promise<{
           isShow: boolean,
           i18n: i18nText
@@ -664,6 +700,7 @@ export async function injectFloatingButton() {
     }
   }).$onekey.$private.request({
     method: 'wallet_isShowFloatingButton',
+    params: { url: window.location.origin },
   });
   i18n = i18nResponse
   if (!isShow) {

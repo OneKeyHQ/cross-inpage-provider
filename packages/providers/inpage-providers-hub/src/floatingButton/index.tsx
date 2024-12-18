@@ -43,8 +43,9 @@ const textStyle = {
 
 const containerId = 'onekey-floating-widget';
 
-const removeApp = () => {
+const removeIcon = () => {
   document.getElementById(containerId)?.remove();
+  isInjected = false;
 }
 
 const useOutsideClick = (
@@ -81,7 +82,7 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
     }).$onekey.$private.request({
       method: 'wallet_disableFloatingButton',
     });
-    removeApp();
+    removeIcon();
   }, [])
   const handleHideOnSite = useCallback(() => {
     void (globalThis as unknown as {
@@ -96,7 +97,7 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
       method: 'wallet_hideFloatingButtonOnSite',
       params: { url: window.location.origin },
     });
-    removeApp();
+    removeIcon();
   }, [])
   return (
     <div
@@ -671,7 +672,6 @@ function App() {
 
   return (
     <div
-      id={containerId}
       style={{
         position: 'fixed',
         zIndex: 999_999,
@@ -746,6 +746,7 @@ async function injectIcon() {
   }
   isInjected = true;
   const div = document.createElement('div');
+  div.id = containerId
   document.body.appendChild(div);
   render(<App />, document.body, div);
 }
@@ -760,7 +761,11 @@ export function injectFloatingButton() {
       }
     }
   }).$onekey.$private.onNotifyFloatingIconChanged(({ showFloatingIcon }: { showFloatingIcon: boolean }) => {
-    console.log(showFloatingIcon);
+    if (showFloatingIcon) {
+      void injectIcon();
+    } else {
+      removeIcon();
+    }
   });
   void injectIcon();
 }

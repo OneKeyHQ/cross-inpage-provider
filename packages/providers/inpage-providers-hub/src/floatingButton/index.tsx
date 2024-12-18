@@ -1,4 +1,4 @@
-import { h, render } from 'preact';
+import { render } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import {
   IHostSecurity,
@@ -440,9 +440,9 @@ function SecurityInfo({
               fontWeight: '500',
             }}
           >
-            {securityInfo?.dapp.logo ? (
+            {securityInfo?.dapp?.logo ? (
               <img
-                src={securityInfo?.dapp.logo}
+                src={securityInfo?.dapp?.logo}
                 style={{
                   height: '24px',
                   width: '24px',
@@ -477,7 +477,7 @@ function SecurityInfo({
                 />
               </svg>
             )}
-            {securityInfo?.dapp.name || securityInfo?.host}
+            {securityInfo?.dapp?.name || securityInfo?.host}
           </div>
           <div
             style={{

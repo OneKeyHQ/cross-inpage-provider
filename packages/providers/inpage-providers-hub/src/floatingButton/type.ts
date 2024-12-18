@@ -29,7 +29,7 @@ export interface IHostSecurity {
   projectName: string;
   createdAt: string;
   updatedAt?: string;
-  dapp: {
+  dapp?: {
     name: string;
     logo: string;
     description: {

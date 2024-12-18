@@ -22,6 +22,7 @@ interface i18nText {
   unknown: string;
   maliciousSiteWarning: string;
   suspectedMaliciousBehavior: string;
+  lastVerifiedAt: string;
 }
 
 let i18n: i18nText = {} as i18nText
@@ -187,7 +188,7 @@ function IconButton({
       <Logo style={logoStyle} />
       {!dataLoaded && (
         <span style={textStyle}>
-          {isExpanded ? 'Fetching dApp info...' : ''}
+          {isExpanded ? i18n.fetchingDAppInfo : ''}
         </span>
       )}
       <div
@@ -394,7 +395,7 @@ function SecurityRiskDetectionRow({
     };
   }, [securityInfo?.checkSources]);
   return (
-    <SecurityInfoRow title="Risk Detection">
+    <SecurityInfoRow title={i18n.riskDetection}>
       <div
         style={{
           display: 'flex',
@@ -557,7 +558,7 @@ function SecurityInfo({
         ) : null}
         <SecurityRiskDetectionRow securityInfo={securityInfo} />
         {securityInfo?.dapp?.origins.length ? (
-          <SecurityInfoRow title="Last Verified at">
+          <SecurityInfoRow title={i18n.lastVerifiedAt}>
             <span
               style={{
                 fontWeight: '500',

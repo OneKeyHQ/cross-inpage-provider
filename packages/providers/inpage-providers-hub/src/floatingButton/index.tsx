@@ -23,6 +23,9 @@ interface i18nText {
   maliciousSiteWarning: string;
   suspectedMaliciousBehavior: string;
   lastVerifiedAt: string;
+  disable: string;
+  hideOnThisSite: string;
+  canBeReEnabledInSettings: string;
 }
 
 let i18n: i18nText = {} as i18nText
@@ -118,7 +121,7 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
         }}
         onClick={handleHideOnSite}
       >
-        Hide on this site
+        {i18n.hideOnThisSite}
       </div>
       <div
         style={{
@@ -131,7 +134,7 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
         }}
         onClick={handleDisable}
       >
-        Disable
+        {i18n.disable}
       </div>
       <div
         style={{
@@ -140,7 +143,7 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
           fontWeight: '400',
         }}
       >
-        Can be re-enabled in settings.
+        {i18n.canBeReEnabledInSettings}
       </div>
     </div>
   );

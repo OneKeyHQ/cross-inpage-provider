@@ -711,7 +711,7 @@ function App() {
   );
 }
 
-export async function injectFloatingButton() {
+async function injectIcon() {
   const { isShow, i18n: i18nResponse } = await (globalThis as unknown as {
     $onekey: {
       $private: {
@@ -743,4 +743,19 @@ export async function injectFloatingButton() {
   const div = document.createElement('div');
   document.body.appendChild(div);
   render(<App />, document.body, div);
+}
+
+export function injectFloatingButton() {
+  (globalThis as unknown as {
+    $onekey: {
+      $private: {
+        onNotifyFloatingIconChanged: (
+          arg: ((params: { showFloatingIcon: boolean }) => void)
+        ) => void
+      }
+    }
+  }).$onekey.$private.onNotifyFloatingIconChanged(({ showFloatingIcon }: { showFloatingIcon: boolean }) => {
+    console.log(showFloatingIcon);
+  });
+  void injectIcon();
 }

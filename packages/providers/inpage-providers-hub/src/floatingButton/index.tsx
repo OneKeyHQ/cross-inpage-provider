@@ -469,7 +469,16 @@ function SecurityInfo({
                 }}
               />
             ) : (
-              <div style={{ transform: 'translate(4px, 3px)' }}>
+              <div 
+                style={{ 
+                  transform: 'translate(4px, 3px)', 
+                  height: '24px', 
+                  width: '24px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center' 
+                }}
+              >
                 <svg
                   viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"

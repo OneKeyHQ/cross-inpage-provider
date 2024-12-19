@@ -133,7 +133,6 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
       <div
         style={{
           display: 'flex',
-          alignItems: 'center',
           cursor: 'pointer',
           gap: '8px',
         }}
@@ -148,19 +147,18 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
           />
         </svg>
 
-        <div>{i18n.disable}</div>
-      </div>
-
-      <div
-        style={{
-          color: 'rgba(0, 0, 0, 0.61)',
-          fontSize: '12px',
-          lineHeight: '16px',
-          paddingTop: '8px',
-          borderTop: '1px solid rgba(0, 0, 0, 0.05)',
-        }}
-      >
-        {i18n.canBeReEnabledInSettings}
+        <div>
+          <div>{i18n.disable}</div>
+          <div
+            style={{
+              color: 'rgba(0, 0, 0, 0.61)',
+              fontSize: '12px',
+              lineHeight: '16px',
+            }}
+            >
+            {i18n.canBeReEnabledInSettings}
+          </div>
+        </div>
       </div>
     </div>
   );

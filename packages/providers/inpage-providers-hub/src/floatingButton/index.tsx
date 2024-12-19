@@ -739,6 +739,10 @@ async function injectIcon() {
 }
 
 export function injectFloatingButton() {
+  // Check if the current window is an iframe
+  if (window.top !== window.self) {
+    return
+  }
   (globalThis as unknown as {
     $onekey: {
       $private: {

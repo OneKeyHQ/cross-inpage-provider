@@ -133,6 +133,7 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
       <div
         style={{
           display: 'flex',
+          alignItems: 'center',
           cursor: 'pointer',
           gap: '8px',
         }}

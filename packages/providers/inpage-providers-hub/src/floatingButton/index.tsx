@@ -587,7 +587,7 @@ function SecurityInfo({
             lineHeight: '16px',
           }}
         >
-          Powered by
+          {i18n.maliciousDappWarningSourceMessage}
         </span>
         <Logo
           style={{

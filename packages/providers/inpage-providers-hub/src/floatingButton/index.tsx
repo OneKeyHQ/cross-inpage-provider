@@ -1,9 +1,6 @@
 import { render } from 'preact';
 import { useEffect, useMemo, useCallback, useRef, useState } from 'preact/hooks';
-import {
-  IHostSecurity,
-  EHostSecurityLevel,
-} from './type'
+import { IHostSecurity, EHostSecurityLevel } from './type';
 import { Logo } from './images';
 
 let isInjected = false;
@@ -28,16 +25,16 @@ interface i18nText {
   canBeReEnabledInSettings: string;
 }
 
-let i18n: i18nText = {} as i18nText
+let i18n: i18nText = {} as i18nText;
 
 const logoStyle = {
-  width: '28px',
-  height: '28px',
+  width: '24px',
+  height: '24px',
 };
 
 const textStyle = {
   color: 'rgba(0, 0, 0, 0.61)',
-  fontSize: '13px',
+  fontSize: '14px',
   marginLeft: '8px',
 };
 
@@ -48,16 +45,10 @@ const removeIcon = () => {
   isInjected = false;
 }
 
-const useOutsideClick = (
-  ref: { current?: HTMLDivElement | null },
-  callback: () => void,
-) => {
+const useOutsideClick = (ref: { current?: HTMLDivElement | null }, callback: () => void) => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        ref.current &&
-        !ref.current.contains(event.target as HTMLElement)
-      ) {
+      if (ref.current && !ref.current.contains(event.target as HTMLElement)) {
         callback();
       }
     };
@@ -71,29 +62,29 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
   useOutsideClick(dialogRef, onClose);
   const handleDisable = useCallback(() => {
-    void (globalThis as unknown as {
-      $onekey: {
-        $private: {
-          request: (
-            arg: { method: string; }
-          ) => Promise<void>
-        }
+    void (
+      globalThis as unknown as {
+        $onekey: {
+          $private: {
+            request: (arg: { method: string }) => Promise<void>;
+          };
+        };
       }
-    }).$onekey.$private.request({
+    ).$onekey.$private.request({
       method: 'wallet_disableFloatingButton',
     });
     removeIcon();
   }, [])
   const handleHideOnSite = useCallback(() => {
-    void (globalThis as unknown as {
-      $onekey: {
-        $private: {
-          request: (
-            arg: { method: string; params: { url: string } }
-          ) => Promise<void>
-        }
+    void (
+      globalThis as unknown as {
+        $onekey: {
+          $private: {
+            request: (arg: { method: string; params: { url: string } }) => Promise<void>;
+          };
+        };
       }
-    }).$onekey.$private.request({
+    ).$onekey.$private.request({
       method: 'wallet_hideFloatingButtonOnSite',
       params: { url: window.location.origin },
     });
@@ -102,46 +93,71 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
   return (
     <div
       style={{
-        background: 'rgba(255, 255, 255, 1)',
-        padding: '14px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        padding: '12px',
         position: 'absolute',
-        right: '134px',
-        border: '1px rgba(0, 0, 0, 0.13) solid',
-        top: '60px',
-        width: '170px',
-        borderRadius: '15px',
+        right: '100%',
+        background: '#fff',
+        top: '40px',
+        width: '196px',
+        borderRadius: '12px',
+        boxShadow:
+          '0px 0px 0px 1px rgba(0, 0, 0, 0.05),0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+        color: 'rgba(0, 0, 0, 1)',
+        fontSize: '12px',
+        lineHeight: '16px',
       }}
       ref={dialogRef}
     >
       <div
         style={{
-          color: 'rgba(0, 0, 0, 1)',
-          fontSize: '12px',
-          fontWeight: '400',
+          display: 'flex',
+          alignItems: 'center',
           cursor: 'pointer',
+          gap: '8px',
         }}
         onClick={handleHideOnSite}
       >
-        {i18n.hideOnThisSite}
+        <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M2.29312 2.2929C2.68364 1.90237 3.31681 1.90237 3.70734 2.29289L7.35069 5.9362L21.7073 20.2929C22.0979 20.6834 22.0979 21.3166 21.7073 21.7071C21.3168 22.0976 20.6836 22.0976 20.2931 21.7071L17.2031 18.617C14.684 20.0216 11.8704 20.363 9.19337 19.6107C6.27083 18.7893 3.59188 16.6894 1.6441 13.4178C1.12514 12.5461 1.12292 11.4579 1.64298 10.5841C2.63083 8.92441 3.8063 7.56606 5.10844 6.52239L2.29313 3.70711C1.9026 3.31659 1.9026 2.68342 2.29312 2.2929ZM6.53283 7.94678L7.41812 8.8321L8.5542 9.96818C8.20253 10.5636 8.00023 11.2586 8.00023 12C8.00023 14.2091 9.79109 16 12.0002 16C12.7416 16 13.4366 15.7977 14.0321 15.446L15.7203 17.1343C13.7862 18.0642 11.7083 18.24 9.73447 17.6852C7.37839 17.0231 5.08952 15.2953 3.36259 12.3947C3.21773 12.1514 3.21796 11.8483 3.36159 11.607C4.28389 10.0575 5.36713 8.84257 6.53283 7.94678ZM12.5184 13.9324L10.0678 11.4818C10.0237 11.647 10.0002 11.8207 10.0002 12C10.0002 13.1046 10.8957 14 12.0002 14C12.1796 14 12.3532 13.9765 12.5184 13.9324ZM20.6388 11.6068C18.1001 7.34166 14.3527 5.6013 10.8782 6.07652C10.331 6.15137 9.82679 5.76845 9.75195 5.22126C9.67711 4.67407 10.06 4.16981 10.6072 4.09497C15.0162 3.49193 19.4849 5.75792 22.3574 10.5838C22.8767 11.4564 22.8771 12.5429 22.3576 13.4157C21.9613 14.0815 21.535 14.6987 21.0823 15.2666C20.738 15.6985 20.1088 15.7695 19.677 15.4253C19.2451 15.081 19.1741 14.4519 19.5183 14.02C19.9123 13.5257 20.2873 12.9836 20.6389 12.3928C20.7831 12.1507 20.7831 11.8493 20.6388 11.6068Z"
+            fill="rgba(0, 0, 0, 0.61)"
+          />
+        </svg>
+        <div>{i18n.hideOnThisSite}</div>
       </div>
       <div
         style={{
-          marginTop: '4px',
-          marginBottom: '8px',
-          color: 'rgba(0, 0, 0, 1)',
-          fontSize: '12px',
-          fontWeight: '400',
+          display: 'flex',
+          alignItems: 'center',
           cursor: 'pointer',
+          gap: '8px',
         }}
         onClick={handleDisable}
       >
-        {i18n.disable}
+        <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M12 4C7.58172 4 4 7.58172 4 12C4 13.8491 4.62644 15.5506 5.68009 16.9057L16.9057 5.68009C15.5506 4.62644 13.8491 4 12 4ZM18.3199 7.0943L7.0943 18.3199C8.44939 19.3736 10.1509 20 12 20C16.4183 20 20 16.4183 20 12C20 10.1509 19.3736 8.44939 18.3199 7.0943ZM2 12C2 6.47715 6.47715 2 12 2C14.7611 2 17.2625 3.12038 19.0711 4.92893C20.8796 6.73748 22 9.23885 22 12C22 17.5228 17.5228 22 12 22C9.23885 22 6.73748 20.8796 4.92893 19.0711C3.12038 17.2625 2 14.7611 2 12Z"
+            fill="rgba(0, 0, 0, 0.61)"
+          />
+        </svg>
+
+        <div>{i18n.disable}</div>
       </div>
+
       <div
         style={{
-          color: 'rgb(156, 156, 156)',
-          fontSize: '10px',
-          fontWeight: '400',
+          color: 'rgba(0, 0, 0, 0.61)',
+          fontSize: '12px',
+          lineHeight: '16px',
+          paddingTop: '8px',
+          borderTop: '1px solid rgba(0, 0, 0, 0.05)',
         }}
       >
         {i18n.canBeReEnabledInSettings}
@@ -169,10 +185,8 @@ function IconButton({
       style={{
         display: 'flex',
         alignItems: 'center',
-        width: '184px',
         position: 'relative',
         cursor: 'pointer',
-        padding: '8px',
       }}
       onMouseEnter={() => {
         if (isExpanded || isShowCloseDialog) {
@@ -189,18 +203,22 @@ function IconButton({
         onClick();
       }}
     >
-      <Logo style={logoStyle} />
-      {!dataLoaded && (
-        <span style={textStyle}>
-          {isExpanded ? i18n.fetchingDAppInfo : ''}
-        </span>
-      )}
+      <div style={{ display: 'flex', alignItems: 'center', padding: '8px' }}>
+        <Logo style={logoStyle} />
+        {!dataLoaded && <span style={textStyle}>{isExpanded ? i18n.fetchingDAppInfo : ''}</span>}
+      </div>
       <div
         style={{
+          display: 'flex',
+          padding: '$4',
           position: 'absolute',
-          left: '0px',
+          left: '-6px',
           bottom: '-10px',
+          transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
           opacity: showCloseButton ? 1 : 0,
+          borderRadius: '9999px',
+          backgroundColor: '#fff',
+          border: '1px solid rgba(0, 0, 0, 0.1)',
         }}
         onClick={(event) => {
           event.stopPropagation();
@@ -208,18 +226,12 @@ function IconButton({
           showCloseDialog();
         }}
       >
-        <svg
-          width="15"
-          height="15"
-          viewBox="0 0 15 15"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M6.5 1.5C3.73858 1.5 1.5 3.73858 1.5 6.5C1.5 9.26142 3.73858 11.5 6.5 11.5C9.26142 11.5 11.5 9.26142 11.5 6.5C11.5 3.73858 9.26142 1.5 6.5 1.5ZM0.25 6.5C0.25 3.04822 3.04822 0.25 6.5 0.25C9.95178 0.25 12.75 3.04822 12.75 6.5C12.75 9.95178 9.95178 12.75 6.5 12.75C3.04822 12.75 0.25 9.95178 0.25 6.5ZM4.18306 4.18306C4.42714 3.93898 4.82286 3.93898 5.06694 4.18306L6.5 5.61612L7.93306 4.18306C8.17714 3.93898 8.57286 3.93898 8.81694 4.18306C9.06102 4.42714 9.06102 4.82286 8.81694 5.06694L7.38388 6.5L8.81694 7.93306C9.06102 8.17714 9.06102 8.57286 8.81694 8.81694C8.57286 9.06102 8.17714 9.06102 7.93306 8.81694L6.5 7.38388L5.06694 8.81694C4.82286 9.06102 4.42714 9.06102 4.18306 8.81694C3.93898 8.57286 3.93898 8.17714 4.18306 7.93306L5.61612 6.5L4.18306 5.06694C3.93898 4.82286 3.93898 4.42714 4.18306 4.18306Z"
-            fill="#C8C8C8"
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M7.29289 7.29289C7.68342 6.90237 8.31658 6.90237 8.70711 7.29289L12 10.5858L15.2929 7.29289C15.6834 6.90237 16.3166 6.90237 16.7071 7.29289C17.0976 7.68342 17.0976 8.31658 16.7071 8.70711L13.4142 12L16.7071 15.2929C17.0976 15.6834 17.0976 16.3166 16.7071 16.7071C16.3166 17.0976 15.6834 17.0976 15.2929 16.7071L12 13.4142L8.70711 16.7071C8.31658 17.0976 7.68342 17.0976 7.29289 16.7071C6.90237 16.3166 6.90237 15.6834 7.29289 15.2929L10.5858 12L7.29289 8.70711C6.90237 8.31658 6.90237 7.68342 7.29289 7.29289Z"
+            fill="rgba(0, 0, 0, 0.61)"
           />
         </svg>
       </div>
@@ -227,29 +239,21 @@ function IconButton({
   );
 }
 
-function SecurityInfoRow({
-  title,
-  children,
-}: {
-  title: string;
-  children: any;
-}) {
+function SecurityInfoRow({ title, children }: { title: string; children: any }) {
   return (
     <div
       style={{
         display: 'flex',
-        height: '16px',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '0 8px',
       }}
     >
       <span
         style={{
           color: 'rgba(0, 0, 0, 0.61)',
-          fontWeight: '500',
-          fontSize: '11.2px',
+          fontSize: '12px',
+          lineHeight: '16px',
         }}
       >
         {title}
@@ -259,11 +263,7 @@ function SecurityInfoRow({
   );
 }
 
-function SecurityRiskDetectionRow({
-  securityInfo,
-}: {
-  securityInfo: IHostSecurity;
-}) {
+function SecurityRiskDetectionRow({ securityInfo }: { securityInfo: IHostSecurity }) {
   const { securityElement, securityStatus } = useMemo(() => {
     const security =
       securityInfo?.checkSources
@@ -279,22 +279,24 @@ function SecurityRiskDetectionRow({
               style={{
                 color: 'rgba(0, 0, 0, 0.88)',
                 fontWeight: '500',
-                fontSize: '11.2px',
+                fontSize: '12px',
+                lineHeight: '16px',
               }}
             >
               {i18n.verifiedSite}
             </span>
             <svg
-              width="13"
-              height="14"
-              viewBox="0 0 13 14"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M5.7827 2.03938C6.21439 1.54254 6.98582 1.54254 7.41751 2.03938L8.14191 2.87311C8.14557 2.87733 8.15115 2.87935 8.15666 2.87848L9.2475 2.70544C9.89755 2.60232 10.4885 3.09819 10.4998 3.75627L10.5188 4.86059C10.5189 4.86617 10.5219 4.8713 10.5267 4.87418L11.4735 5.4428C12.0378 5.78165 12.1718 6.54136 11.7574 7.05277L11.0622 7.91094C11.0586 7.91528 11.0576 7.92112 11.0594 7.9264L11.4193 8.97061C11.6337 9.59289 11.248 10.261 10.6019 10.3864L9.51762 10.5969C9.51214 10.5979 9.5076 10.6018 9.5056 10.607L9.11004 11.6382C8.87432 12.2527 8.14941 12.5166 7.57382 12.1973L6.60796 11.6616C6.60307 11.6589 6.59714 11.6589 6.59226 11.6616L5.62639 12.1973C5.05081 12.5166 4.3259 12.2527 4.09017 11.6382L3.69462 10.607C3.69262 10.6018 3.68807 10.5979 3.68259 10.5969L2.59836 10.3864C1.95224 10.261 1.56652 9.59289 1.78095 8.97061L2.14079 7.9264C2.14261 7.92112 2.14158 7.91528 2.13806 7.91094L1.44279 7.05277C1.02846 6.54137 1.16241 5.78165 1.72667 5.4428L2.67353 4.87418C2.67831 4.8713 2.68128 4.86617 2.68137 4.86059L2.70038 3.75628C2.71171 3.09819 3.30266 2.60232 3.95272 2.70544L5.04355 2.87848C5.04907 2.87935 5.05464 2.87733 5.0583 2.87311L5.7827 2.03938ZM8.31057 6.5772C8.51885 6.36893 8.51885 6.03124 8.31057 5.82296C8.10229 5.61468 7.76461 5.61468 7.55633 5.82296L6.06678 7.3125L5.6439 6.88962C5.43562 6.68134 5.09794 6.68134 4.88966 6.88962C4.68138 7.0979 4.68138 7.43559 4.88966 7.64387L5.5011 8.25531C5.81352 8.56773 6.32005 8.56773 6.63247 8.25531L8.31057 6.5772Z"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                d="M10.4673 2.69869C11.2767 1.76711 12.7232 1.7671 13.5326 2.69868L14.8908 4.26193C14.8977 4.26983 14.9082 4.27364 14.9185 4.272L16.9638 3.94755C18.1827 3.7542 19.2907 4.68395 19.3119 5.91786L19.3476 7.98845C19.3478 7.99891 19.3533 8.00854 19.3623 8.01393L21.1377 9.08009C22.1956 9.71544 22.4468 11.1399 21.6699 12.0988L20.3663 13.7079C20.3597 13.716 20.3578 13.7269 20.3612 13.7368L21.0359 15.6947C21.4379 16.8615 20.7147 18.1142 19.5032 18.3493L17.4703 18.744C17.46 18.746 17.4515 18.7531 17.4478 18.7629L16.7061 20.6964C16.2641 21.8487 14.9049 22.3434 13.8257 21.7448L12.0147 20.7404C12.0055 20.7353 11.9944 20.7353 11.9852 20.7404L10.1742 21.7448C9.09503 22.3434 7.73582 21.8487 7.29383 20.6964L6.55216 18.7629C6.54841 18.7531 6.53989 18.746 6.52962 18.744L4.49668 18.3493C3.2852 18.1142 2.56198 16.8615 2.96404 15.6947L3.63873 13.7368C3.64214 13.7269 3.64021 13.716 3.63362 13.7079L2.32998 12.0988C1.55311 11.1399 1.80428 9.71544 2.86226 9.08009L4.63762 8.01393C4.64659 8.00854 4.65215 7.99891 4.65233 7.98845L4.68797 5.91786C4.70921 4.68395 5.81725 3.7542 7.0361 3.94755L9.08142 4.272C9.09176 4.27364 9.10221 4.26983 9.10907 4.26193L10.4673 2.69869ZM15.2071 11.2071C15.5976 10.8166 15.5976 10.1834 15.2071 9.79289C14.8166 9.40237 14.1834 9.40237 13.7929 9.79289L11 12.5858L10.2071 11.7929C9.81655 11.4024 9.18339 11.4024 8.79286 11.7929C8.40234 12.1834 8.40234 12.8166 8.79286 13.2071L9.93931 14.3536C10.5251 14.9393 11.4748 14.9393 12.0606 14.3536L15.2071 11.2071Z"
                 fill="#006B3B"
                 fillOpacity="0.906"
               />
@@ -318,7 +320,8 @@ function SecurityRiskDetectionRow({
               style={{
                 color: 'rgba(0, 0, 0, 0.88)',
                 fontWeight: '500',
-                fontSize: '11.2px',
+                fontSize: '12px',
+                lineHeight: '16px',
               }}
             >
               {i18n.maliciousSiteWarning}
@@ -345,9 +348,7 @@ function SecurityRiskDetectionRow({
 
     const mediumSecurity =
       securityInfo?.checkSources
-        .filter((item) =>
-          EHostSecurityLevel.Medium == item.riskLevel,
-        )
+        .filter((item) => EHostSecurityLevel.Medium == item.riskLevel)
         .map((item) => item.name)
         .join(' & ') || '';
     if (mediumSecurity) {
@@ -359,7 +360,8 @@ function SecurityRiskDetectionRow({
               style={{
                 color: 'rgba(0, 0, 0, 0.88)',
                 fontWeight: '500',
-                fontSize: '11.2px',
+                fontSize: '12px',
+                lineHeight: '16px',
               }}
             >
               {i18n.suspectedMaliciousBehavior}
@@ -390,7 +392,8 @@ function SecurityRiskDetectionRow({
           style={{
             color: 'rgba(0, 0, 0, 0.88)',
             fontWeight: '500',
-            fontSize: '11.2px',
+            fontSize: '12px',
+            lineHeight: '16px',
           }}
         >
           {i18n.unknown}
@@ -417,7 +420,6 @@ function SecurityInfo({
   securityInfo,
   onClose,
   showCloseDialog,
-
 }: {
   securityInfo: IHostSecurity;
   onClose: () => void;
@@ -431,26 +433,22 @@ function SecurityInfo({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        width: '234px',
-        borderTopLeftRadius: '12px',
-        borderBottomLeftRadius: '12px',
-        paddingTop: '8px',
       }}
     >
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '8px',
         }}
       >
         <div
           style={{
-            padding: '0 8px',
+            padding: '8px',
             display: 'flex',
             alignItems: 'center',
             flexDirection: 'row',
             justifyContent: 'space-between',
+            borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
           }}
         >
           <div
@@ -460,7 +458,7 @@ function SecurityInfo({
               alignItems: 'center',
               gap: '8px',
               color: 'rgba(0, 0, 0, 0.88)',
-              fontSize: '13px',
+              fontSize: '14px',
               fontWeight: '500',
               overflow: 'hidden',
             }}
@@ -471,15 +469,12 @@ function SecurityInfo({
                 style={{
                   height: '24px',
                   width: '24px',
-                  borderRadius: '4px',
+                  borderRadius: '8px',
                 }}
               />
             ) : (
               <svg
-                width="18"
-                height="19"
-                viewBox="0 0 18 19"
-                fill="none"
+                viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
                 style={{
                   width: '24px',
@@ -514,113 +509,105 @@ function SecurityInfo({
           </div>
           <div
             style={{
-              width: "24",
-              height: "24",
-              cursor: "pointer",
               display: 'flex',
-              alignItems: 'center',
+              width: '24',
+              height: '24',
+              cursor: 'pointer',
             }}
             onClick={() => {
               onClose();
               setTimeout(() => {
                 showCloseDialog();
-              }, 200)
+              }, 200);
             }}
           >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+            <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path
                 fillRule="evenodd"
                 clipRule="evenodd"
                 d="M7.29289 7.29289C7.68342 6.90237 8.31658 6.90237 8.70711 7.29289L12 10.5858L15.2929 7.29289C15.6834 6.90237 16.3166 6.90237 16.7071 7.29289C17.0976 7.68342 17.0976 8.31658 16.7071 8.70711L13.4142 12L16.7071 15.2929C17.0976 15.6834 17.0976 16.3166 16.7071 16.7071C16.3166 17.0976 15.6834 17.0976 15.2929 16.7071L12 13.4142L8.70711 16.7071C8.31658 17.0976 7.68342 17.0976 7.29289 16.7071C6.90237 16.3166 6.90237 15.6834 7.29289 15.2929L10.5858 12L7.29289 8.70711C6.90237 8.31658 6.90237 7.68342 7.29289 7.29289Z"
-                fill="#BABABA"
+                fill="rgba(0, 0, 0, 0.61)"
               />
             </svg>
           </div>
         </div>
-        <div
-          style={{
-            background: 'rgba(0, 0, 0, 0.13)',
-            height: '0.33px',
-            width: '100%',
-          }}
-        />
-        {securityInfo?.dapp?.origins.length ? (
-          <SecurityInfoRow title={i18n.dappListedBy}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '2px',
-              }}
-            >
-              {securityInfo?.dapp?.origins.map((item) => (
-                <img
-                  src={item.logo}
-                  style={{
-                    width: '16px',
-                    height: '16px',
-                  }}
-                />
-              ))}
-            </div>
-          </SecurityInfoRow>
-        ) : null}
-        <SecurityRiskDetectionRow securityInfo={securityInfo} />
-        {securityInfo?.dapp?.origins.length ? (
-          <SecurityInfoRow title={i18n.lastVerifiedAt}>
-            <span
-              style={{
-                fontWeight: '500',
-                fontSize: '11.2px',
-                color: 'rgba(0, 0, 0, 0.88)',
-              }}
-            >
-              {securityInfo.updatedAt}
-            </span>
-          </SecurityInfoRow>
-        ) : null}
+        <div style={{ display: 'flex', flexDirection: 'column', padding: '12px 8px', gap: '12px' }}>
+          {securityInfo?.dapp?.origins.length ? (
+            <SecurityInfoRow title={i18n.dappListedBy}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '2px',
+                }}
+              >
+                {securityInfo?.dapp?.origins.map((item) => (
+                  <img
+                    src={item.logo}
+                    style={{
+                      border: '1px solid rgba(0, 0, 0, 0.1)',
+                      borderRadius: '9999px',
+                      width: '16px',
+                      height: '16px',
+                    }}
+                  />
+                ))}
+              </div>
+            </SecurityInfoRow>
+          ) : null}
+          <SecurityRiskDetectionRow securityInfo={securityInfo} />
+          {securityInfo?.dapp?.origins.length ? (
+            <SecurityInfoRow title={i18n.lastVerifiedAt}>
+              <span
+                style={{
+                  fontWeight: '500',
+                  fontSize: '12px',
+                  lineHeight: '16px',
+                  color: 'rgba(0, 0, 0, 0.88)',
+                }}
+              >
+                {securityInfo.updatedAt}
+              </span>
+            </SecurityInfoRow>
+          ) : null}
+        </div>
       </div>
       <div
         style={{
-          marginTop: '8px',
-          textAlign: 'center',
-          padding: '8px 0',
-          background: 'rgba(249, 249, 249, 1)',
+          display: 'flex',
+          gap: '8px',
+          padding: '12px 8px',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#F9F9F9',
           borderBottomLeftRadius: '12px',
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          borderBottomRightRadius: '12px',
+          borderTop: '1px solid rgba(0, 0, 0, 0.05)',
         }}
       >
         <span
           style={{
+            flex: 1,
             color: 'rgba(0, 0, 0, 0.61)',
             fontWeight: '400',
-            fontSize: '11.2px',
+            fontSize: '12px',
+            lineHeight: '16px',
           }}
         >
           Powered by
         </span>
         <Logo
           style={{
-            width: '12.83px',
-            height: '12.83px',
-            marginLeft: '5.6px',
-            marginRight: '4.2px',
-            verticalAlign: 'middle',
+            width: '14px',
+            height: '14px',
           }}
         />
         <span
           style={{
             color: 'rgba(0, 0, 0, 0.88)',
-            fontWeight: '600',
-            fontSize: '11.2px',
+            fontWeight: '500',
+            fontSize: '12px',
+            lineHeight: '16px',
           }}
         >
           OneKey
@@ -637,21 +624,25 @@ function App() {
   const [showCloseDialog, setIsShowCloseDialog] = useState(false);
 
   const handleShowCloseDialog = useCallback(() => {
-    setIsShowCloseDialog(true)
-  }, [])
+    setIsShowCloseDialog(true);
+  }, []);
 
   const handleClick = useCallback(async () => {
     setIsExpanded(!isExpanded);
     setIsShowSecurityInfo(true);
     if (!securityInfo) {
-      const result = await (window as unknown as {
-        $onekey: {
-          $private: {
-            request: (arg: { method: string; params: { url: string } }) =>
-              Promise<{ securityInfo: IHostSecurity }>
-          }
+      const result = await (
+        window as unknown as {
+          $onekey: {
+            $private: {
+              request: (arg: {
+                method: string;
+                params: { url: string };
+              }) => Promise<{ securityInfo: IHostSecurity }>;
+            };
+          };
         }
-      }).$onekey.$private.request({
+      ).$onekey.$private.request({
         method: 'wallet_detectRiskLevel',
         params: { url: window.location.origin },
       });
@@ -659,39 +650,25 @@ function App() {
     }
   }, [isExpanded, securityInfo]);
 
-  const borderStyle = useMemo(
-    () =>
-      isExpanded
-        ? {
-          borderTopLeftRadius: '12px',
-          borderBottomLeftRadius: '12px',
-          borderTopRightRadius: '0px',
-          borderBottomRightRadius: '0px',
-        }
-        : {
-          boxShadow: '0px 8.57px 17.14px 0px rgba(0, 0, 0, 0.09)',
-          transition: 'transform 0.3s ease-in-out',
-          borderRadius: '100px',
-        },
-    [isExpanded],
-  );
-
   return (
     <div
       id={containerId}
       style={{
         position: 'fixed',
         zIndex: 999_999,
-        bottom: '25%',
-        right: '-146px',
-        background: 'rgba(255, 255, 255, 1)',
-        borderWidth: '0.33px',
-        borderColor: 'rgba(0, 0, 0, 0.13)',
-        borderStyle: 'solid',
-        boxShadow: '0px 8.57px 17.14px 0px rgba(0, 0, 0, 0.09)',
-        transition: 'transform 0.3s ease-in-out',
-        transform: isExpanded ? 'translateX(-146px)' : 'translateX(0)',
-        ...borderStyle,
+        top: '75%',
+        right: '0px',
+        width: '256px',
+        background: '#fff',
+        borderRadius: '12px',
+        transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
+        boxShadow:
+          '0px 0px 0px 1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+        transform: isExpanded ? 'translateX(-20px)' : 'translateX(216px)',
+        fontFamily:
+          '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
+        WebkitTextSizeAdjust: '100%',
+        fontSmooth: 'antialiased',
       }}
     >
       {showSecurityInfo && securityInfo ? (
@@ -724,22 +701,24 @@ function App() {
 }
 
 async function injectIcon() {
-  const { isShow, i18n: i18nResponse } = await (globalThis as unknown as {
-    $onekey: {
-      $private: {
-        request: (
-          arg: { method: string; params: { url: string } }
-        ) => Promise<{
-          isShow: boolean,
-          i18n: i18nText
-        }>
+  const { isShow, i18n: i18nResponse } = await (
+    globalThis as unknown as {
+      $onekey: {
+        $private: {
+          request: (
+            arg: { method: string; params: { url: string } }
+          ) => Promise<{
+            isShow: boolean,
+            i18n: i18nText
+          }>
+        }
       }
     }
-  }).$onekey.$private.request({
+  ).$onekey.$private.request({
     method: 'wallet_isShowFloatingButton',
     params: { url: window.location.origin },
   });
-  i18n = i18nResponse
+  i18n = i18nResponse;
   if (!isShow) {
     return;
   }

@@ -701,15 +701,17 @@ function App() {
 }
 
 async function injectIcon() {
-  const { isShow, i18n: i18nResponse } = await (globalThis as unknown as {
-    $onekey: {
-      $private: {
-        request: (
-          arg: { method: string; params: { url: string } }
-        ) => Promise<{
-          isShow: boolean,
-          i18n: i18nText
-        }>
+  const { isShow, i18n: i18nResponse } = await (
+    globalThis as unknown as {
+      $onekey: {
+        $private: {
+          request: (
+            arg: { method: string; params: { url: string } }
+          ) => Promise<{
+            isShow: boolean,
+            i18n: i18nText
+          }>
+        }
       }
     }
   ).$onekey.$private.request({

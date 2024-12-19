@@ -40,9 +40,10 @@ const textStyle = {
 
 const containerId = 'onekey-floating-widget';
 
-const removeApp = () => {
+const removeIcon = () => {
   document.getElementById(containerId)?.remove();
-};
+  isInjected = false;
+}
 
 const useOutsideClick = (ref: { current?: HTMLDivElement | null }, callback: () => void) => {
   useEffect(() => {
@@ -72,8 +73,8 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
     ).$onekey.$private.request({
       method: 'wallet_disableFloatingButton',
     });
-    removeApp();
-  }, []);
+    removeIcon();
+  }, [])
   const handleHideOnSite = useCallback(() => {
     void (
       globalThis as unknown as {
@@ -87,8 +88,8 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
       method: 'wallet_hideFloatingButtonOnSite',
       params: { url: window.location.origin },
     });
-    removeApp();
-  }, []);
+    removeIcon();
+  }, [])
   return (
     <div
       style={{
@@ -459,6 +460,7 @@ function SecurityInfo({
               color: 'rgba(0, 0, 0, 0.88)',
               fontSize: '14px',
               fontWeight: '500',
+              overflow: 'hidden',
             }}
           >
             {securityInfo?.dapp?.logo ? (
@@ -495,7 +497,15 @@ function SecurityInfo({
                 />
               </svg>
             )}
-            {securityInfo?.dapp?.name || securityInfo?.host}
+            <span 
+              style={{ 
+                width: '100%', 
+                overflow: 'hidden', 
+                textOverflow: 'ellipsis' 
+              }}
+            >
+              {securityInfo?.dapp?.name || securityInfo?.host}
+            </span>
           </div>
           <div
             style={{
@@ -690,17 +700,17 @@ function App() {
   );
 }
 
-export async function injectFloatingButton() {
-  const { isShow, i18n: i18nResponse } = await (
-    globalThis as unknown as {
-      $onekey: {
-        $private: {
-          request: (arg: { method: string; params: { url: string } }) => Promise<{
-            isShow: boolean;
-            i18n: i18nText;
-          }>;
-        };
-      };
+async function injectIcon() {
+  const { isShow, i18n: i18nResponse } = await (globalThis as unknown as {
+    $onekey: {
+      $private: {
+        request: (
+          arg: { method: string; params: { url: string } }
+        ) => Promise<{
+          isShow: boolean,
+          i18n: i18nText
+        }>
+      }
     }
   ).$onekey.$private.request({
     method: 'wallet_isShowFloatingButton',
@@ -722,4 +732,23 @@ export async function injectFloatingButton() {
   const div = document.createElement('div');
   document.body.appendChild(div);
   render(<App />, document.body, div);
+}
+
+export function injectFloatingButton() {
+  (globalThis as unknown as {
+    $onekey: {
+      $private: {
+        onNotifyFloatingIconChanged: (
+          arg: ((params: { showFloatingIcon: boolean }) => void)
+        ) => void
+      }
+    }
+  }).$onekey.$private.onNotifyFloatingIconChanged(({ showFloatingIcon }: { showFloatingIcon: boolean }) => {
+    if (showFloatingIcon) {
+      void injectIcon();
+    } else {
+      removeIcon();
+    }
+  });
+  void injectIcon();
 }

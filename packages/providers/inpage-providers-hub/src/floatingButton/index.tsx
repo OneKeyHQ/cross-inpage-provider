@@ -678,6 +678,7 @@ function App() {
 
   return (
     <div
+      id={containerId}
       style={{
         position: 'fixed',
         zIndex: 999_999,
@@ -752,7 +753,6 @@ async function injectIcon() {
   }
   isInjected = true;
   const div = document.createElement('div');
-  div.id = containerId
   document.body.appendChild(div);
   render(<App />, document.body, div);
 }

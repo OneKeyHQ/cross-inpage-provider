@@ -300,6 +300,7 @@ const SECURITY_INFO = {
 
 function SecurityRiskDetectionRow({ securityInfo }: { securityInfo: IHostSecurity }) {
   const { securityElement, securityStatus } = useMemo(() => {
+    securityInfo.level = EHostSecurityLevel.Unknown
     if (securityInfo.level === EHostSecurityLevel.Unknown) {
       return {
         securityStatus: EHostSecurityLevel.Unknown,
@@ -318,6 +319,10 @@ function SecurityRiskDetectionRow({ securityInfo }: { securityInfo: IHostSecurit
       }
     }
 
+    const securityInfoItem = securityInfo?.level ? SECURITY_INFO[securityInfo.level] as {
+      titleId: string;
+      icon: string;
+    } : undefined
     return {
       securityStatus: securityInfo.level,
       securityElement: (
@@ -330,13 +335,13 @@ function SecurityRiskDetectionRow({ securityInfo }: { securityInfo: IHostSecurit
               lineHeight: '16px',
             }}
           >
-            {securityInfo?.level ? i18n[SECURITY_INFO[securityInfo.level].titleId as keyof typeof i18n] : i18n.unknown}
+            {securityInfoItem ? i18n[securityInfoItem.titleId as keyof typeof i18n] : i18n.unknown}
           </span>
-          {securityInfo?.level ? SECURITY_INFO[securityInfo.level].icon : null}
+          {securityInfoItem ? securityInfoItem.icon : null}
         </>
       )
     }
-  }, [securityInfo.level]);
+  }, [securityInfo]);
   return (
     <SecurityInfoRow title={i18n.riskDetection}>
       <div

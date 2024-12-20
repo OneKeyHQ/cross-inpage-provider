@@ -13,7 +13,6 @@ import params from './params';
 import { createTransferTransaction, createVersionedTransaction, createTokenTransferTransaction } from './builder';
 import nacl from 'tweetnacl';
 import { toast } from '../../ui/use-toast';
-// import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
 const NETWORK = clusterApiUrl('mainnet-beta');
 

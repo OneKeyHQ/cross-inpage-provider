@@ -318,6 +318,10 @@ function SecurityRiskDetectionRow({ securityInfo }: { securityInfo: IHostSecurit
       }
     }
 
+    const securityInfoItem = securityInfo?.level ? SECURITY_INFO[securityInfo.level] as unknown as {
+      titleId: string;
+      icon: string;
+    } : undefined
     return {
       securityStatus: securityInfo.level,
       securityElement: (
@@ -330,13 +334,13 @@ function SecurityRiskDetectionRow({ securityInfo }: { securityInfo: IHostSecurit
               lineHeight: '16px',
             }}
           >
-            {securityInfo?.level ? i18n[SECURITY_INFO[securityInfo.level].titleId as keyof typeof i18n] : i18n.unknown}
+            {securityInfoItem ? i18n[securityInfoItem.titleId as keyof typeof i18n] : i18n.unknown}
           </span>
-          {securityInfo?.level ? SECURITY_INFO[securityInfo.level].icon : null}
+          {securityInfoItem ? securityInfoItem.icon : null}
         </>
       )
     }
-  }, [securityInfo.level]);
+  }, [securityInfo]);
   return (
     <SecurityInfoRow title={i18n.riskDetection}>
       <div
@@ -409,36 +413,17 @@ function SecurityInfo({
             ) : (
               <div 
                 style={{ 
-                  transform: 'translate(4px, 3px)', 
-                  height: '24px', 
-                  width: '24px', 
+                  height: '16px', 
+                  width: '16px', 
                   display: 'flex', 
                   alignItems: 'center', 
                   justifyContent: 'center' 
                 }}
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                  }}
-                >
-                  <path
-                    d="M6.6234 6.17768C6.6234 4.79769 7.73338 3.66333 9.1234 3.66333C10.5134 3.66333 11.6234 4.79769 11.6234 6.17768C11.6234 7.30559 10.8798 7.89399 10.4435 8.19056C10.3054 8.28442 10.2138 8.36716 10.1499 8.45311C10.092 8.53086 10.0368 8.63774 10.0107 8.81185C9.92866 9.35801 9.41941 9.73426 8.87325 9.65224C8.3271 9.57021 7.95084 9.06096 8.03287 8.5148C8.19122 7.4605 8.81104 6.8819 9.31912 6.53656C9.47624 6.42975 9.54878 6.36136 9.58594 6.31084C9.60107 6.29027 9.60813 6.27529 9.61242 6.26261C9.61657 6.25036 9.6234 6.22488 9.6234 6.17768C9.6234 5.88426 9.39093 5.66333 9.1234 5.66333C8.85586 5.66333 8.6234 5.88426 8.6234 6.17768C8.6234 6.72996 8.17568 7.17768 7.6234 7.17768C7.07111 7.17768 6.6234 6.72996 6.6234 6.17768Z"
-                    fill="#3C3C3C"
-                  />
-                  <path
-                    d="M7.74976 11.5C7.74976 12.1904 8.3094 12.75 8.99976 12.75C9.69011 12.75 10.2498 12.1904 10.2498 11.5C10.2498 10.8096 9.69011 10.25 8.99976 10.25C8.3094 10.25 7.74976 10.8096 7.74976 11.5Z"
-                    fill="#3C3C3C"
-                  />
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M3.00195 2.00272e-05L15.0019 0C16.6588 -2.7418e-06 18.002 1.34314 18.002 3V13.0358C18.002 14.6926 16.6588 16.0357 15.002 16.0358L12.3757 16.0358L8.99393 18.8375L5.65157 16.0358H3.00195C1.3451 16.0358 0.00195312 14.6926 0.00195312 13.0358V3.00002C0.00195312 1.34317 1.34509 2.2769e-05 3.00195 2.00272e-05ZM15.002 2L3.00195 2.00002C2.44967 2.00002 2.00195 2.44774 2.00195 3.00002V13.0358C2.00195 13.5881 2.44967 14.0358 3.00195 14.0358H5.65157C6.12143 14.0358 6.57629 14.2012 6.93638 14.503L9.00143 16.2341L11.0997 14.4957C11.4585 14.1984 11.9098 14.0358 12.3757 14.0358L15.002 14.0358C15.5542 14.0358 16.002 13.588 16.002 13.0358V3C16.002 2.44772 15.5542 2 15.002 2Z"
-                    fill="#3C3C3C"
-                  />
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2ZM0 10C0 4.47715 4.47715 0 10 0C15.5228 0 20 4.47715 20 10C20 15.5228 15.5228 20 10 20C4.47715 20 0 15.5228 0 10Z" fill="black" fill-opacity="0.447"/>
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M10 7C9.62267 7 9.29263 7.2086 9.12147 7.52152C8.85645 8.00606 8.24881 8.18401 7.76426 7.91899C7.27972 7.65396 7.10177 7.04632 7.36679 6.56178C7.87463 5.63331 8.86263 5 10 5C11.5147 5 12.5669 6.00643 12.8664 7.189C13.1676 8.37786 12.7101 9.76299 11.3416 10.4472C11.1323 10.5519 11 10.7659 11 11C11 11.5523 10.5523 12 10 12C9.44772 12 9 11.5523 9 11C9 10.0084 9.56027 9.10183 10.4472 8.65836C10.902 8.43099 11.0188 8.03973 10.9277 7.6801C10.835 7.31417 10.5283 7 10 7Z" fill="black" fill-opacity="0.447"/>
+                  <path d="M11 14C11 14.5523 10.5523 15 10 15C9.44772 15 9 14.5523 9 14C9 13.4477 9.44772 13 10 13C10.5523 13 11 13.4477 11 14Z" fill="black" fill-opacity="0.447"/>
                 </svg>
               </div>
             )}

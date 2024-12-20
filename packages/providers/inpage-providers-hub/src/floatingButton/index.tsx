@@ -1,7 +1,7 @@
 import { render } from 'preact';
 import { useEffect, useMemo, useCallback, useRef, useState } from 'preact/hooks';
 import { IHostSecurity, EHostSecurityLevel } from './type';
-import { Logo } from './images';
+import { HighRisk, Logo } from './images';
 
 let isInjected = false;
 interface i18nText {
@@ -287,21 +287,7 @@ const SECURITY_INFO = {
   [EHostSecurityLevel.High]: {
     titleId: 'maliciousSiteWarning',
     icon: (
-      <svg
-        width="18"
-        height="16"
-        viewBox="0 0 18 16"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M6.83981 2.21151C7.8045 0.557753 10.194 0.557748 11.1587 2.21151L17.007 12.2371C17.9792 13.9038 16.777 15.9968 14.8475 15.9968H3.15098C1.22151 15.9968 0.0193263 13.9038 0.991535 12.2371L6.83981 2.21151ZM9.00008 5.99683C9.46032 5.99683 9.83342 6.36992 9.83342 6.83016V9.33016C9.83342 9.7904 9.46032 10.1635 9.00008 10.1635C8.53984 10.1635 8.16675 9.7904 8.16675 9.33016V6.83016C8.16675 6.36992 8.53984 5.99683 9.00008 5.99683ZM7.95842 11.8302C7.95842 11.2549 8.42478 10.7885 9.00008 10.7885C9.57538 10.7885 10.0417 11.2549 10.0417 11.8302C10.0417 12.4055 9.57538 12.8718 9.00008 12.8718C8.42478 12.8718 7.95842 12.4055 7.95842 11.8302Z"
-          fill="#BB0007"
-          fillOpacity="0.836"
-        />
-      </svg>
+      <HighRisk style={{ width: 16, height: 16}} />
     ),
   },
   [EHostSecurityLevel.Medium]: {

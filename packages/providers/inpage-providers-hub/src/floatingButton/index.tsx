@@ -318,7 +318,7 @@ function SecurityRiskDetectionRow({ securityInfo }: { securityInfo: IHostSecurit
       }
     }
 
-    const securityInfoItem = securityInfo?.level ? SECURITY_INFO[securityInfo.level] as {
+    const securityInfoItem = securityInfo?.level ? SECURITY_INFO[securityInfo.level] as unknown as {
       titleId: string;
       icon: string;
     } : undefined

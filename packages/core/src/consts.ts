@@ -11,4 +11,4 @@ export const EXT_PORT_UI_TO_BG = 'onekey@EXT_PORT_UI_TO_BG';
 export const DEBUG_LOGGER_STORAGE_KEY = '$$ONEKEY_DEBUG_LOGGER';
 export const WALLET_INFO_LOACAL_KEY = 'onekey_wallet_info_local_key'
 export const WALLET_INFO_LOACAL_KEY_V5 = "onekey_wallet_info_local_key_v5";
-export const ONEKEY_ALIGN_PRIMARY_ACCOUNT = '$$ONEKEY_ALIGN_PRIMARY_ACCOUNT';
+export const ONEKEY_REQUEST_TO_ALL_CS = '$$ONEKEY_REQUEST_TO_ALL_CS';

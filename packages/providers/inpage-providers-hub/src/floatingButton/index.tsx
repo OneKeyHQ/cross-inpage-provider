@@ -300,7 +300,6 @@ const SECURITY_INFO = {
 
 function SecurityRiskDetectionRow({ securityInfo }: { securityInfo: IHostSecurity }) {
   const { securityElement, securityStatus } = useMemo(() => {
-    securityInfo.level = EHostSecurityLevel.Unknown
     if (securityInfo.level === EHostSecurityLevel.Unknown) {
       return {
         securityStatus: EHostSecurityLevel.Unknown,

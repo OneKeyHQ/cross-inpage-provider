@@ -346,21 +346,24 @@ function SecurityRiskDetectionRow({ securityInfo }: { securityInfo: IHostSecurit
       }
     }
 
-    return (
-      <>
-        <span
-          style={{
-            color: 'rgba(0, 0, 0, 0.88)',
-            fontWeight: '500',
-            fontSize: '12px',
-            lineHeight: '16px',
-          }}
-        >
-          {securityInfo?.level ? i18n[SECURITY_INFO[securityInfo.level].titleId as keyof typeof i18n] : i18n.unknown}
-        </span>
-        {securityInfo?.level ? SECURITY_INFO[securityInfo.level].icon : null}
-      </>
-    )
+    return {
+      securityStatus: securityInfo.level,
+      securityElement: (
+        <>
+          <span
+            style={{
+              color: 'rgba(0, 0, 0, 0.88)',
+              fontWeight: '500',
+              fontSize: '12px',
+              lineHeight: '16px',
+            }}
+          >
+            {securityInfo?.level ? i18n[SECURITY_INFO[securityInfo.level].titleId as keyof typeof i18n] : i18n.unknown}
+          </span>
+          {securityInfo?.level ? SECURITY_INFO[securityInfo.level].icon : null}
+        </>
+      )
+    }
   }, [securityInfo.level]);
   return (
     <SecurityInfoRow title={i18n.riskDetection}>

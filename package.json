@@ -58,10 +58,5 @@
     "ts-jest": "^27.0.5",
     "typescript": "^5"
   },
-  "dependencies": {
-    "@benfen/bfc.js": "^0.2.7",
-    "@solana/spl-token": "^0.4.9",
-    "lodash-es": "^4.17.21"
-  },
   "packageManager": "yarn@1.22.21+sha1.1959a18351b811cdeedbd484a8f86c3cc3bbaf72"
 }

@@ -60,5 +60,5 @@ test('Bing search test', async ({ page }) => {
   await expect(secondResult).toBeVisible();
 
   // 设置浏览器在测试完成后保持打开状态
-  await page.pause();
+  // await page.pause();
 });

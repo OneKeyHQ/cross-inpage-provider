@@ -255,7 +255,7 @@ export function ClientContextProvider({ children }: { children: ReactNode | Reac
 
   useEffect(() => {
     const claimedOrigin = localStorage.getItem('wallet_connect_dapp_origin') || origin;
-    let interval: NodeJS.Timer;
+    let interval: ReturnType<typeof setInterval>;
     // simulates `UNKNOWN` validation by removing the verify iframe thus preventing POST message
     if (claimedOrigin === 'unknown') {
       //The interval is needed as Verify tries to init new iframe(with different urls) multiple times

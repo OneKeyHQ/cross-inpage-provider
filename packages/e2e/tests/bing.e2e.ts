@@ -9,7 +9,7 @@ declare global {
 
 import { expect, test } from '@playwright/test';
 
-test.skip('Bing search test', async ({ page }) => {
+test('Bing search test', async ({ page }) => {
   // 打开 Bing
   await page.goto('https://www.baidu.com');
 

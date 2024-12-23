@@ -24,8 +24,8 @@
     "example-build": "cd ./packages/example && yarn --registry 'https://registry.npmjs.org' && yarn build",
     "update-version": "lerna version --no-git-tag-version --exact",
     "swap-lock-registry": "npx swap-lock-registry --yarn --parallel --url https://registry.yarnpkg.com yarn.lock",
-    "test:e2e": "cd ./packages/e2e && yarn test:headed",
-    "test:e2e:hub": "cd ./packages/providers/inpage-providers-hub && yarn test:headed"
+    "test:e2e:headed": "cd ./packages/e2e && yarn test:headed",
+    "test:e2e": "cd ./packages/e2e && yarn test"
   },
   "devDependencies": {
     "@testing-library/react-hooks": "^7.0.2",

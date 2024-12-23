@@ -26,9 +26,9 @@
   "scripts": {
     "env": "node dotEnvInit.js",
     "report": "yarn env && npx playwright show-report",
-    "test": "yarn env && npx playwright test",
-    "test:headed": "yarn env && npx playwright test  --headed && yarn report",
-    "test:ui": "yarn env && npx playwright test --ui"
+    "test": "yarn env && npx playwright test ",
+    "test:headed": "yarn env && npx playwright test --headed ",
+    "test:ui": "yarn env && npx playwright test --ui "
   },
   "dependencies": {
     "@onekeyfe/inpage-providers-hub": "2.1.23",

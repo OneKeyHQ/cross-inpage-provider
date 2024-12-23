@@ -1,6 +1,6 @@
 import { test as base, chromium, type BrowserContext } from '@playwright/test';
-import path from 'path';
 import env from 'dotenv';
+import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 env.config({ path: path.resolve(`${__dirname}/../../../../../../../../.env`) });
 

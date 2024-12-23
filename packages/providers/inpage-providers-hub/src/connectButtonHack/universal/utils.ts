@@ -66,6 +66,7 @@ export function createWalletId(provider: IInjectedProviderNames, updatedName: st
     /onekey/i,
     'onekey-',
   );
+  // data-wallet-id="ethereum-onekey-metamask"
   const walletIdSelector = `[data-wallet-id="${walletId}"]`;
   return {
     walletId,

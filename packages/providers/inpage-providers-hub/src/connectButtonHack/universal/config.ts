@@ -224,6 +224,7 @@ const petraForRainbowKit: WalletInfo = {
 
 export const sitesConfig: SitesInfo[] = [
   {
+    // only: true,
     urls: ['app.turbos.finance'],
     testPath: [':text("I accept the")', ':text("Continue")', ':text("Connect Wallet")'],
     walletsForProvider: {
@@ -236,6 +237,7 @@ export const sitesConfig: SitesInfo[] = [
     },
   },
   {
+    // only: true,
     urls: ['app.defisaver.com'],
     testPath: ['button:text("ACCEPT")'],
     walletsForProvider: {
@@ -260,6 +262,7 @@ export const sitesConfig: SitesInfo[] = [
     },
   },
   {
+    // only: true,
     urls: ['haedal.xyz'],
     testPath: [':text("Stake Now")', ':text("Connect Wallet")'],
     walletsForProvider: {

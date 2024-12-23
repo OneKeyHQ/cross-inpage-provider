@@ -48,6 +48,7 @@
     "@onekeyfe/onekey-ton-provider": "2.2.6",
     "@onekeyfe/onekey-tron-provider": "2.2.6",
     "@onekeyfe/onekey-webln-provider": "2.2.6",
+    "lodash-es": "^4.17.21",
     "preact": "^10.25.1",
     "web3": "^1.7.3"
   },

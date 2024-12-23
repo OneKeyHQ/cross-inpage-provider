@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 const path = require('path');
 const webpack = require('webpack');
 const packageJson = require('./package.json');
@@ -9,10 +12,8 @@ const IS_PRD = process.env.NODE_ENV === 'production';
 console.log('============ , IS_PRD', IS_PRD, process.env.NODE_ENV);
 
 const createAnalyzer = (name) => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
   return new BundleAnalyzerPlugin({
     analyzerMode: 'static',
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     reportFilename: `${name}.bundle-report.html`,
     openAnalyzer: false,
   });

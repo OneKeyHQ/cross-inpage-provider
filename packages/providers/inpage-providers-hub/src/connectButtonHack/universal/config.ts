@@ -4296,4 +4296,74 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
+  {
+    urls: ['app.degate.com'],
+    testPath: [':text("Connect Wallet")'],
+    // Add mutation observer to watch for DOM changes during loading
+    mutationObserverOptions: {
+      childList: true,
+      subtree: true,
+      attributes: true,
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => {
+            // Wait for the loading screen to disappear
+            const loadingLogo = document.querySelector('img[alt="Degate"]');
+            if (loadingLogo) {
+              return null;
+            }
+            
+            // Try different possible selectors for the wallet connection
+            const selectors = [
+              'div[role="dialog"]',
+              'div.wallet-modal',
+              'div.connect-wallet-modal',
+              'div[class*="modal"]'
+            ];
+            
+            for (const selector of selectors) {
+              const modal = getConnectWalletModalByTitle(selector, 'Connect Wallet');
+              if (modal) {
+                return modal;
+              }
+            }
+            
+            // If no modal found, try finding the connect button itself
+            const connectButton = document.querySelector('button:has-text("Connect Wallet")');
+            return connectButton?.parentElement || null;
+          },
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: () => {
+            // Duplicate the container logic for WalletConnect
+            const loadingLogo = document.querySelector('img[alt="Degate"]');
+            if (loadingLogo) {
+              return null;
+            }
+            
+            const selectors = [
+              'div[role="dialog"]',
+              'div.wallet-modal',
+              'div.connect-wallet-modal',
+              'div[class*="modal"]'
+            ];
+            
+            for (const selector of selectors) {
+              const modal = getConnectWalletModalByTitle(selector, 'Connect Wallet');
+              if (modal) {
+                return modal;
+              }
+            }
+            
+            const connectButton = document.querySelector('button:has-text("Connect Wallet")');
+            return connectButton?.parentElement || null;
+          },
+        },
+      ],
+    },
+  },
 ];

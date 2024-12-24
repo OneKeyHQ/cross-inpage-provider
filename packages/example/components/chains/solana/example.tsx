@@ -234,6 +234,8 @@ export default function Example() {
             const tx = Transaction.from(Buffer.from(result, 'hex'));
             const verified = tx.verifySignatures();
 
+            // TODO: type error, may be passed wrong options
+            // @ts-expect-error
             const res = await connection.simulateTransaction(tx, {
               sigVerify: false,
             });

@@ -449,7 +449,7 @@ function Example() {
           description="USDC代币转账签名"
           presupposeParams={signTokenTransactionParams}
           onExecute={async (request: string) => {
-            const { from, to, amount ,token} = JSON.parse(request);
+            const { from, to, amount ,token} = JSON.parse(request) as { from: string, to: string, amount: number, token: string };
 
             const transfer = new TransactionBlock();
             transfer.setSender(from);
@@ -485,7 +485,7 @@ function Example() {
             return JSON.stringify(res);
           }}
           onValidate={async (request: string, result: string) => {
-            const { transactionBlockBytes, signature } = JSON.parse(result);
+            const { transactionBlockBytes, signature } = JSON.parse(result) as { transactionBlockBytes: string, signature: string };
             const publicKey = await verifyTransactionBlock(
               Buffer.from(transactionBlockBytes, 'base64'),
               signature,
@@ -502,7 +502,7 @@ function Example() {
           description="USDC代币转账签名并执行"
           presupposeParams={signTokenTransactionParams}
           onExecute={async (request: string) => {
-            const { from, to, amount, token } = JSON.parse(request);
+            const { from, to, amount, token } = JSON.parse(request) as { from: string, to: string, amount: number, token: string };
 
             const transfer = new TransactionBlock();
             transfer.setSender(from);

@@ -23,7 +23,9 @@
     "example": "cd ./packages/example && yarn dev",
     "example-build": "cd ./packages/example && yarn --registry 'https://registry.npmjs.org' && yarn build",
     "update-version": "lerna version --no-git-tag-version --exact",
-    "swap-lock-registry": "npx swap-lock-registry --yarn --parallel --url https://registry.yarnpkg.com yarn.lock"
+    "swap-lock-registry": "npx swap-lock-registry --yarn --parallel --url https://registry.yarnpkg.com yarn.lock",
+    "test:e2e:headed": "cd ./packages/e2e && yarn test:headed",
+    "test:e2e": "cd ./packages/e2e && yarn test"
   },
   "devDependencies": {
     "@testing-library/react-hooks": "^7.0.2",
@@ -32,7 +34,7 @@
     "@types/jest": "^27.0.2",
     "@types/lodash": "^4.14.178",
     "@types/lodash-es": "^4.17.12",
-    "@types/node": "^16.9.0",
+    "@types/node": "^20.12.7",
     "@types/react": "^17.0.21",
     "@types/react-native": "^0.67.6",
     "@typescript-eslint/eslint-plugin": "^5.7.0",
@@ -48,6 +50,7 @@
     "jest": "^27.2.4",
     "lerna": "^5.6.2",
     "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
     "patch-package": "^8.0.0",
     "postinstall-postinstall": "^2.1.0",
     "prettier": "2.3.2",
@@ -55,11 +58,6 @@
     "react-test-renderer": "^17.0.2",
     "ts-jest": "^27.0.5",
     "typescript": "^5"
-  },
-  "dependencies": {
-    "@benfen/bfc.js": "^0.2.7",
-    "@solana/spl-token": "^0.4.9",
-    "lodash-es": "^4.17.21"
   },
   "packageManager": "yarn@1.22.21+sha1.1959a18351b811cdeedbd484a8f86c3cc3bbaf72"
 }

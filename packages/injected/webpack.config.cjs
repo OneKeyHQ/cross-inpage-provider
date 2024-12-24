@@ -1,11 +1,23 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 const path = require('path');
 const webpack = require('webpack');
 const packageJson = require('./package.json');
 const { merge } = require('webpack-merge');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 const IS_PRD = process.env.NODE_ENV === 'production';
 
 console.log('============ , IS_PRD', IS_PRD, process.env.NODE_ENV);
+
+const createAnalyzer = (name) => {
+  return new BundleAnalyzerPlugin({
+    analyzerMode: 'static',
+    reportFilename: `${name}.bundle-report.html`,
+    openAnalyzer: false,
+  });
+};
 
 const commonConfig = {
   mode: IS_PRD ? 'production' : 'development', // development, production
@@ -16,6 +28,10 @@ const commonConfig = {
       // secp256k1 required in @solana/web3.js index.iife.js
       // './precomputed/secp256k1': path.resolve(__dirname, 'development/resolveAlias/secp256k1-mock'),
       // '@solana/web3.js': path.resolve(__dirname, 'development/resolveAlias/@solana-web3'),
+      tronweb: path.resolve(
+        __dirname,
+        'node_modules/@onekeyfe/inpage-providers-hub/node_modules/@onekeyfe/onekey-tron-provider/node_modules/tronweb/dist/TronWeb.js',
+      ),
     },
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.d.ts'],
     fallback: {
@@ -51,7 +67,7 @@ const commonConfig = {
       },
     ],
   },
-  plugins: [],
+  plugins: [].filter(Boolean),
 
   devtool: IS_PRD ? undefined : 'inline-source-map',
   output: {
@@ -76,6 +92,7 @@ const extensionConfig = merge(commonConfig, {
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
     }),
+    createAnalyzer('extension-and-native'),
   ],
   entry: {
     injectedExtension: './src/injectedExtension.ts',
@@ -83,7 +100,7 @@ const extensionConfig = merge(commonConfig, {
   },
 });
 
-const nativeConfig = merge(commonConfig, {
+const desktopConfig = merge(commonConfig, {
   target: 'web',
   entry: {
     injectedDesktop: './src/injectedDesktop.ts',
@@ -91,6 +108,7 @@ const nativeConfig = merge(commonConfig, {
   externals: {
     electron: 'commonjs electron', // 将 Electron 标记为外部模块
   },
+  plugins: [createAnalyzer('desktop')],
 });
 
-module.exports = [extensionConfig, nativeConfig];
+module.exports = [extensionConfig, desktopConfig];

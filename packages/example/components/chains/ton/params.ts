@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const { Address, beginCell } = require("@ton/core");
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const { TonClient, JettonMaster } = require("@ton/ton");
 
 const client = new TonClient({
@@ -16,7 +18,9 @@ async function getJettonWalletAddress(jettonMasterAddressStr: string, userAddres
             throw new Error('Wallet address is empty');
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         console.log('Wallet Address:', walletAddress.toString());
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return walletAddress.toString();
     } catch (error) {
         console.error('Error in getJettonWalletAddress:', error);

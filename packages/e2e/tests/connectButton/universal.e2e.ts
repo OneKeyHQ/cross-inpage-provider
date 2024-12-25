@@ -28,11 +28,15 @@ test.describe('Connect Button Hack', () => {
   // const startWebSite = 'app.vesper.finance';
   // const startIdx = sitesConfig.findIndex((e) => e.urls.includes(startWebSite));
   // const availableSites = sitesConfig.slice(startIdx == -1 ? 0 : startIdx);
-  const availableSites = sitesConfig
+  const siteFilter = process.env.SITE;
+  const availableSites = siteFilter
+    ? sitesConfig.filter(site => site.urls.includes(siteFilter))
+    : sitesConfig;
   const sitesOnly = availableSites.filter((e) => e.only);
   const sites = sitesOnly.length > 0 ? sitesOnly : availableSites;
-  const sitesWithoutSkip = sites.filter((e) => (typeof e.skip === 'boolean' ? !e.skip : true))
+  const sitesWithoutSkip = sites.filter((e) => (typeof e.skip === 'boolean' ? !e.skip : true));
 
+  let testCounter = 0;
   for (const site of sitesWithoutSkip) {
     const {
       urls,
@@ -42,7 +46,8 @@ test.describe('Connect Button Hack', () => {
       testUrls,
     } = site;
     for (const url of testUrls || urls) {
-      test(url, async ({ page }, testInfo) => {
+      testCounter++;
+      test(`${url} (${sitesConfig.findIndex((e) => e.urls.includes(url))}-${testCounter})`, async ({ page }, testInfo) => {
         const { project: { name }, } = testInfo;
         const index = sitesConfig.findIndex((e) => e.urls.includes(url));
         // @ts-ignore

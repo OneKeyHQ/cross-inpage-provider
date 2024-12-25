@@ -6,6 +6,7 @@
 
 ```bash
 yarn
+yarn bootstrap  # Run bootstrap twice to resolve fast-safe-stringify dependency
 yarn bootstrap
 yarn build
 ```

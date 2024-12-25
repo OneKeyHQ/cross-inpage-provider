@@ -47,11 +47,15 @@ test.describe('Connect Button Hack', () => {
     } = site;
     for (const url of testUrls || urls) {
       testCounter++;
-      test(`${url} (${sitesConfig.findIndex((e) => e.urls.includes(url))}-${testCounter})`, async ({ page }, testInfo) => {
+      const index = sitesConfig.findIndex((e) => (e.testUrls || e.urls).includes(url));
+
+      test(`${url} (${index}-${testCounter})`, async ({ page }, testInfo) => {
         const { project: { name }, } = testInfo;
-        const index = sitesConfig.findIndex((e) => e.urls.includes(url));
         // @ts-ignore
-        testInfo['index'] = index;
+        testInfo['siteIndex'] = index;
+        // @ts-ignore
+        testInfo['siteUrl'] = url;
+
         const device = name.includes('Mobile') ? 'mobile' : 'desktop';
         if (typeof skip === 'object' && skip !== null && skip[device] === true) {
           return;
@@ -104,18 +108,18 @@ test.describe('Connect Button Hack', () => {
     }
   }
   //@ts-ignore
-  test.afterEach(async ({ page }, { project: { name }, status, index }) => {
+  test.afterEach(async ({ page }, { project: { name }, status, siteIndex, siteUrl }) => {
     const isMobile = name.includes('Mobile');
-    const url = page.url() || 'unknown-url';
-    let hostname = url;
+    // const url = page.url() || 'unknown-url';
+    let hostname = siteUrl as string;
     try {
-      hostname = new URL(url).hostname;
+      hostname = new URL(siteUrl as string).hostname;
     } catch (error) {
       console.error('Failed to parse URL:', error);
     }
 
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    const screenshotPath = `test-results/screenshots/connectButton/universal/${status}/${index}-${hostname}-${isMobile ? 'mobile' : 'desktop'}-${status}.png`
+    const screenshotPath = `test-results/screenshots/connectButton/universal/${status}/${siteIndex}-${hostname}-${isMobile ? 'mobile' : 'desktop'}-${status}.png`
     
     await page.screenshot({
       path: screenshotPath,

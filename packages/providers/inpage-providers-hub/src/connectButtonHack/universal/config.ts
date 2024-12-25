@@ -156,7 +156,8 @@ export type WalletInfo = {
   skip?: boolean | ((page: Page) => Promise<boolean>) | { mobile?: boolean; desktop?: boolean };
 };
 export type SitesInfo = {
-  urls: string[];
+  urls: string[]; // www.ankr.com
+  testUrls?: string[]; // url for e2e testing, like:  www.ankr.com/staking/stake/
   walletsForProvider: {
     [k in IInjectedProviderNames]?: WalletInfo[];
   };
@@ -170,7 +171,6 @@ export type SitesInfo = {
    * path for connect wallet modal used for testing
    */
   testPath?: string[] | { mobile?: string[]; desktop?: string[] } | ((page: Page) => Promise<void>);
-  testUrls?: string[];
   only?: boolean;
   skip?: boolean | { mobile?: boolean; desktop?: boolean };
 };

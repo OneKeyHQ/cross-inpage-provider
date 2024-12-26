@@ -1,5 +1,5 @@
 import { type IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
-import { expect, test } from '@playwright/test';
+import { expect, test, TestInfo } from '@playwright/test';
 import * as path from 'node:path';
 import { Locator } from 'playwright/test';
 
@@ -52,10 +52,13 @@ test.describe('Connect Button Hack', () => {
 
       test(`${url} (${index}-${testCounter})`, async ({ page }, testInfo) => {
         const { project: { name }, } = testInfo;
-        // @ts-ignore
-        testInfo['siteIndex'] = index;
-        // @ts-ignore
-        testInfo['siteUrl'] = url;
+        // Extend testInfo with custom properties
+        interface CustomTestInfo {
+          siteIndex?: number;
+          siteUrl?: string;
+        }
+        (testInfo as CustomTestInfo).siteIndex = index;
+        (testInfo as CustomTestInfo).siteUrl = url;
 
         const device = name.includes('Mobile') ? 'mobile' : 'desktop';
         if (typeof skip === 'object' && skip !== null && skip[device] === true) {
@@ -116,19 +119,29 @@ test.describe('Connect Button Hack', () => {
       });
     }
   }
-  //@ts-ignore
-  test.afterEach(async ({ page }, { project: { name }, status, siteIndex, siteUrl }) => {
+  test.afterEach(async ({ page }, testInfo: TestInfo) => {
+    const { project: { name }, status } = testInfo;
+    // Access custom properties safely using type assertion with interface
+    interface ExtendedTestInfo extends TestInfo {
+      siteIndex?: number;
+      siteUrl?: string;
+    }
+    const extendedInfo = testInfo as ExtendedTestInfo;
+    const siteIndex = extendedInfo.siteIndex;
+    const siteUrl = extendedInfo.siteUrl;
     const isMobile = name.includes('Mobile');
     // const url = page.url() || 'unknown-url';
     let hostname = siteUrl as string;
     try {
       // Handle domain-only URLs by adding https:// if needed
-      const urlString = siteUrl.startsWith('http') ? siteUrl : `https://${siteUrl}`;
-      hostname = new URL(urlString).hostname;
+      if (typeof siteUrl === 'string') {
+        const urlString = siteUrl.startsWith('http') ? siteUrl : `https://${siteUrl}`;
+        hostname = new URL(urlString).hostname;
+      }
     } catch (error) {
       console.error('Failed to parse URL:', error);
       // Keep the original hostname if parsing fails
-      hostname = siteUrl.replace(/^https?:\/\//, '');
+      hostname = typeof siteUrl === 'string' ? siteUrl.replace(/^https?:\/\//, '') : 'unknown-hostname';
     }
 
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

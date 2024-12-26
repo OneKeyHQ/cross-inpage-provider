@@ -248,7 +248,7 @@ export const sitesConfig: SitesInfo[] = [
             ];
 
             for (const selector of selectors) {
-              const elements = Array.from(modal.querySelectorAll(selector)) as HTMLElement[];
+              const elements = Array.from(modal.querySelectorAll(selector)).filter((el): el is HTMLElement => el instanceof HTMLElement);
               console.log(`[dbg]: Found ${elements.length} elements with selector ${selector}`);
               
               for (const element of elements) {

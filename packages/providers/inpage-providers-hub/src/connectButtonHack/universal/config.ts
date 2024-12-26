@@ -50,7 +50,7 @@ export const basicWalletInfo = {
   [WALLET_NAMES.suiwallet]: {
     updatedIcon: WALLET_CONNECT_INFO.suiwallet.icon,
     updatedName: WALLET_CONNECT_INFO.suiwallet.text,
-    name: /^(sui|Sui\s?Wallet)$/i,
+    name: /^(sui|Sui\s?Wallet|SUI)$/i,
   },
   [WALLET_NAMES.phantom]: {
     updatedIcon: WALLET_CONNECT_INFO.phantom.icon,
@@ -224,6 +224,69 @@ const petraForRainbowKit: WalletInfo = {
 
 export const sitesConfig: SitesInfo[] = [
   {
+    urls: ['app.turbos.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.sui]: [
+        {
+          ...basicWalletInfo[WALLET_NAMES.suiwallet],
+          findIconAndName() {
+            const modal = document.querySelector('div[role="dialog"]');
+            if (!modal) {
+              console.log('[dbg]: No modal found');
+              return null;
+            }
+            console.log('[dbg]: Modal found, searching for wallet elements');
+
+            // Try different selectors to find wallet elements
+            const selectors = [
+              '.rc-dialog-body [class*="wallet"]',
+              '.rc-dialog-body [class*="connect"]',
+              '.rc-dialog-body button',
+              '.rc-dialog-body [role="button"]',
+              '[class*="wallet-list"] button',
+              '[class*="connect-list"] button'
+            ];
+
+            for (const selector of selectors) {
+              const elements = Array.from(modal.querySelectorAll(selector)) as HTMLElement[];
+              console.log(`[dbg]: Found ${elements.length} elements with selector ${selector}`);
+              
+              for (const element of elements) {
+                const result = findIconAndNameByName(
+                  element,
+                  /^(sui|Sui\s?Wallet|SUI)$/i,
+                  'auto-search-icon',
+                  {
+                    text: [isClickable],
+                    icon: [isWalletIconLessEqualThan, isClickable],
+                  }
+                );
+                if (result) {
+                  console.log('[dbg]: Found wallet element:', result);
+                  return result;
+                }
+              }
+            }
+
+            // If no elements found with specific selectors, try the entire modal
+            const result = findIconAndNameByName(
+              modal as HTMLElement,
+              /^(sui|Sui\s?Wallet|SUI)$/i,
+              'auto-search-icon',
+              {
+                text: [isClickable],
+                icon: [isWalletIconLessEqualThan, isClickable],
+              }
+            );
+            console.log('[dbg]: Search result from modal:', result);
+            return result;
+          },
+        },
+      ],
+    },
+    testPath: [":text-matches('Connect Wallet|Connect','i')"],
+  },
+  {
     // only: true,
     urls: ['app.turbos.finance'],
     testPath: [':text("I accept the")', ':text("Continue")', ':text("Connect Wallet")'],
@@ -231,7 +294,31 @@ export const sitesConfig: SitesInfo[] = [
       [IInjectedProviderNames.sui]: [
         {
           ...basicWalletInfo['suiwallet'],
-          container: "div[role='dialog'] .rc-dialog-body",
+          name: /^(Sui|Sui\s?Wallet|SUI)$/i,
+          container: () => {
+            const modal = document.querySelector("div[role='dialog']") as HTMLElement;
+            const walletList = modal?.querySelector('.rc-dialog-body') as HTMLElement;
+            return walletList || null;
+          },
+          findIconAndName({ name }) {
+            const modal = document.querySelector("div[role='dialog']") as HTMLElement;
+            if (!modal) return null;
+            const walletList = modal.querySelector('.rc-dialog-body') as HTMLElement;
+            if (!walletList) return null;
+            
+            // Try to find wallet elements with different strategies
+            const walletElements = [
+              ...Array.from(walletList.querySelectorAll('button')),
+              ...Array.from(walletList.querySelectorAll('div[role="button"]')),
+              ...Array.from(walletList.querySelectorAll('[class*="wallet"]')),
+            ];
+            
+            for (const element of walletElements) {
+              const result = findIconAndNameByName(element as HTMLElement, name);
+              if (result) return result;
+            }
+            return null;
+          },
         },
       ],
     },
@@ -239,7 +326,7 @@ export const sitesConfig: SitesInfo[] = [
   {
     // only: true,
     urls: ['app.defisaver.com'],
-    testPath: ['button:text("ACCEPT")'],
+    testPath: [':text("Connect wallet")', ':text("BROWSER")', ':text("MOBILE & DESKTOP")'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -277,7 +364,7 @@ export const sitesConfig: SitesInfo[] = [
 
   {
     urls: ['trade.bluefin.io'],
-    testPath: [':text("View your")', ':text("Connect Account")'],
+    testPath: ['button:has-text("Do not show again")', ':text("Get Started")', 'button:has-text("Connect")'],
     walletsForProvider: {
       [IInjectedProviderNames.sui]: [
         {
@@ -316,6 +403,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.venus.io'],
+    testPath: ['button:has-text("Connect wallet")'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -333,7 +421,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.uncx.network'],
-    testPath: ['button:has-text("Connect")'],
+    testPath: ['button:has-text("Accept")', 'button:has-text("Connect")'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {

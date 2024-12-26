@@ -27,8 +27,12 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         viewport: { width: 1440, height: 800 },
         launchOptions: {
-          args: ['--no-sandbox', '--disable-setuid-sandbox']
-        }
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+          headless: true
+        },
+        actionTimeout: 120000,
+        navigationTimeout: 120000,
+        testTimeout: 120000,
       },
     },
     {

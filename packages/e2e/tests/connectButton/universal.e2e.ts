@@ -1,6 +1,6 @@
 import { type IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { expect, test } from '@playwright/test';
-import path from 'node:path';
+import * as path from 'node:path';
 import { Locator } from 'playwright/test';
 
 import * as fs from 'fs';
@@ -24,6 +24,7 @@ async function dbg(locator: Locator) {
   });
 }
 test.describe('Connect Button Hack', () => {
+  test.setTimeout(120000); // Increase timeout to 2 minutes
   console.log('total sites:', sitesConfig.length);
   // const startWebSite = 'app.vesper.finance';
   // const startIdx = sitesConfig.findIndex((e) => e.urls.includes(startWebSite));
@@ -94,7 +95,15 @@ test.describe('Connect Button Hack', () => {
             }
             const walletId = createWalletId(provider as IInjectedProviderNames, updatedName);
             const locator = page.locator(walletId.walletIdSelector).first();
-            const existed = await locator.evaluate((el) => !!el );
+            // Debug: Log the modal content
+            const modalContent = await page.evaluate(() => {
+              const modal = document.querySelector("div[role='dialog']");
+              console.log('[dbg]: modal content', modal?.innerHTML);
+              return modal?.innerHTML;
+            });
+            console.log('[dbg]: modal content from test', modalContent);
+            
+            const existed = await locator.evaluate((el) => !!el);
             console.log('[dbg]: walletId found existed', walletId.walletId, existed);
 
             if(!existed){
@@ -113,9 +122,13 @@ test.describe('Connect Button Hack', () => {
     // const url = page.url() || 'unknown-url';
     let hostname = siteUrl as string;
     try {
-      hostname = new URL(siteUrl as string).hostname;
+      // Handle domain-only URLs by adding https:// if needed
+      const urlString = siteUrl.startsWith('http') ? siteUrl : `https://${siteUrl}`;
+      hostname = new URL(urlString).hostname;
     } catch (error) {
       console.error('Failed to parse URL:', error);
+      // Keep the original hostname if parsing fails
+      hostname = siteUrl.replace(/^https?:\/\//, '');
     }
 
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

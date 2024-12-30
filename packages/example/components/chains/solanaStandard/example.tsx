@@ -17,6 +17,7 @@ import { verifySignIn } from '@solana/wallet-standard-util';
 import nacl from 'tweetnacl';
 import { Transaction, VersionedTransaction } from '@solana/web3.js';
 import base58 from 'bs58';
+import { OffchainMessage } from './OffchainMessage';
 
 function Example() {
   const { setProvider } = useWallet();
@@ -123,7 +124,23 @@ function Example() {
               publicKey.toBytes(),
             );
 
-            return Promise.resolve(isValidSignature.toString());
+            if(isValidSignature) {
+              return Promise.resolve('Phantom: true (软件钱包标准)')
+            }else{
+              const offchainMessage = new OffchainMessage({
+                message: Buffer.from(request, 'utf8'),
+              });
+              const isValidSignature = nacl.sign.detached.verify(
+                offchainMessage.serialize(),
+                signatureObj,
+                publicKey.toBytes(),
+              );
+              if(isValidSignature) {
+                return Promise.resolve('OffchainMessage: true (Ledger 硬件钱包标准)')
+              }
+            }
+
+            return Promise.resolve('false')
           }}
         />
         <ApiPayload

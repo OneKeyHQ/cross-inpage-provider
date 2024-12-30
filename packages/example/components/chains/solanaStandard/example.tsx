@@ -16,7 +16,7 @@ import { createTransferTransaction, createVersionedTransaction } from '../solana
 import { verifySignIn } from '@solana/wallet-standard-util';
 import nacl from 'tweetnacl';
 import { Transaction, VersionedTransaction } from '@solana/web3.js';
-import base58 from 'bs58';
+import { OffchainMessage } from './OffchainMessage';
 
 function Example() {
   const { setProvider } = useWallet();
@@ -106,6 +106,15 @@ function Example() {
             return JSON.stringify(res);
           }}
         />
+        <ApiPayload
+          title="getChainInfosWithoutEndpoints"
+          description="获取链信息 (Keplr 私有方法)"
+          disableRequestContent
+          onExecute={async () => {
+            // @ts-ignore
+            return await window.keplr?.getChainInfosWithoutEndpoints();
+          }}
+        />
       </ApiGroup>
       <ApiGroup title="Sign Message">
         <ApiPayload
@@ -123,7 +132,23 @@ function Example() {
               publicKey.toBytes(),
             );
 
-            return Promise.resolve(isValidSignature.toString());
+            if(isValidSignature) {
+              return Promise.resolve('Phantom: true (软件钱包标准)')
+            }else{
+              const offchainMessage = new OffchainMessage({
+                message: Buffer.from(request, 'utf8'),
+              });
+              const isValidSignature = nacl.sign.detached.verify(
+                offchainMessage.serialize(),
+                signatureObj,
+                publicKey.toBytes(),
+              );
+              if(isValidSignature) {
+                return Promise.resolve('OffchainMessage: true (Ledger 硬件钱包标准)')
+              }
+            }
+
+            return Promise.resolve('false')
           }}
         />
         <ApiPayload

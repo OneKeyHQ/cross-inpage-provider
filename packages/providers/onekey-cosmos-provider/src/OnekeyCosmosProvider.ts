@@ -13,6 +13,7 @@ import type { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 import type {
   AminoSignResponse,
   BroadcastMode,
+  ChainInfoWithoutEndpoints,
   DirectSignResponse,
   DirectSignResponseHex,
   EthSignType,
@@ -101,6 +102,8 @@ export type CosmosRequest = {
     data: string | Uint8Array,
     type: EthSignType,
   ) => Promise<string>;
+
+  'getChainInfosWithoutEndpoints':() => Promise<ChainInfoWithoutEndpoints[]>;
 
   // 'suggestToken'(
   //   chainId: string,
@@ -200,6 +203,8 @@ export interface IProviderCosmos {
   getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner;
   getOfflineSignerOnlyAmino(chainId: string): OfflineAminoSigner;
   getOfflineSignerAuto(chainId: string): Promise<OfflineAminoSigner | OfflineDirectSigner>;
+
+  getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]>;
 }
 
 export type OneKeySuiProviderProps = IInpageProviderConfig & {
@@ -541,6 +546,13 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
       return new CosmJSOfflineSignerOnlyAmino(chainId, this);
     }
     return new CosmJSOfflineSigner(chainId, this);
+  }
+
+  async getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
+    return this._callBridge({
+      method: 'getChainInfosWithoutEndpoints',
+      params: undefined,
+    });
   }
 }
 

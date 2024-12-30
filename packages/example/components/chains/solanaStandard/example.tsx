@@ -16,7 +16,6 @@ import { createTransferTransaction, createVersionedTransaction } from '../solana
 import { verifySignIn } from '@solana/wallet-standard-util';
 import nacl from 'tweetnacl';
 import { Transaction, VersionedTransaction } from '@solana/web3.js';
-import base58 from 'bs58';
 import { OffchainMessage } from './OffchainMessage';
 
 function Example() {
@@ -105,6 +104,15 @@ function Example() {
           onExecute={async () => {
             const res = await disconnect();
             return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="getChainInfosWithoutEndpoints"
+          description="获取链信息 (Keplr 私有方法)"
+          disableRequestContent
+          onExecute={async () => {
+            // @ts-ignore
+            return await window.keplr?.getChainInfosWithoutEndpoints();
           }}
         />
       </ApiGroup>

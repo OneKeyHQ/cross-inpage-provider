@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/onekey-private-provider",
-  "version": "2.2.6",
+  "version": "2.2.7-alpha.0",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -28,9 +28,9 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "2.2.6",
-    "@onekeyfe/cross-inpage-provider-errors": "2.2.6",
-    "@onekeyfe/cross-inpage-provider-types": "2.2.6",
-    "@onekeyfe/extension-bridge-injected": "2.2.6"
+    "@onekeyfe/cross-inpage-provider-core": "2.2.7-alpha.0",
+    "@onekeyfe/cross-inpage-provider-errors": "2.2.7-alpha.0",
+    "@onekeyfe/cross-inpage-provider-types": "2.2.7-alpha.0",
+    "@onekeyfe/extension-bridge-injected": "2.2.7-alpha.0"
   }
 }

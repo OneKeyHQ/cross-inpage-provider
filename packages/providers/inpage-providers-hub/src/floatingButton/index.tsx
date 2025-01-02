@@ -58,7 +58,7 @@ const useOutsideClick = (ref: { current?: HTMLDivElement | null }, callback: () 
     };
   }, [callback, ref]);
 };
-function CloseDialog({ onClose }: { onClose: () => void }) {
+function CloseDialog({ onClose, side }: { onClose: () => void; side: 'left' | 'right' }) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
   useOutsideClick(dialogRef, onClose);
   const handleDisable = useCallback(() => {
@@ -98,7 +98,7 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
         gap: '8px',
         padding: '12px',
         position: 'absolute',
-        right: '100%',
+        [side]: '100%',
         background: '#fff',
         top: '40px',
         width: '196px',
@@ -180,7 +180,7 @@ function IconButton({
   dataLoaded: boolean;
   showCloseDialog: () => void;
   isDragging: boolean;
-  side?: 'left' | 'right';
+  side: 'left' | 'right';
 }) {
   const [showCloseButton, setIsShowCloseButton] = useState(false);
   return (
@@ -218,7 +218,7 @@ function IconButton({
               display: 'flex',
               padding: '$4',
               position: 'absolute',
-              [side === 'left' ? 'right' : 'left']: '-6px',
+              [side]: '-6px',
               bottom: '-10px',
               transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
               opacity: showCloseButton ? 1 : 0,
@@ -717,6 +717,7 @@ function App() {
       )}
       {!isExpanded && showCloseDialog && (
         <CloseDialog
+          side={side}
           onClose={() => {
             setIsShowCloseDialog(false);
           }}

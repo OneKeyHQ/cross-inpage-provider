@@ -605,7 +605,9 @@ function App() {
       clearTimeout(isDraggingTimerIdRef.current)
     }
     if (isDragging) {
-      setIsDragging(false);
+      setTimeout(() => {
+        setIsDragging(false);
+      }, 50)
       const halfWidth = window.innerWidth / 2;
       if (position.x < halfWidth) {
         setPosition(prev => ({ ...prev, x: 0 }));
@@ -635,15 +637,15 @@ function App() {
         top: position.y,
         left: isDragging ? position.x : (side === 'left' ? '0px' : 'auto'),
         right: isDragging ? 'auto' : (side === 'right' ? '0px' : 'auto'),
-        width: '256px',
+        width: isDragging ? '40px' : '256px',
         background: '#fff',
-        borderRadius: '12px',
+        borderRadius: isDragging ? '100%' : '12px',
         transition: isDragging ? 'none' : 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
         boxShadow:
           '0px 0px 0px 1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-        transform: isExpanded ? 
+        transform: isDragging ? "unset": (isExpanded ? 
           `translateX(${side === 'right' ? '-20px' : '20px'})` : 
-          `translateX(${side === 'right' ? '216px' : '-216px'})`,
+          `translateX(${side === 'right' ? '216px' : '-216px'})`),
         fontFamily:
           '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
         WebkitTextSizeAdjust: '100%',
@@ -669,7 +671,7 @@ function App() {
           dataLoaded={!!securityInfo}
         />
       )}
-      {!isExpanded && showCloseDialog && (
+      {!isDragging && !isExpanded && showCloseDialog && (
         <CloseDialog
           onClose={() => {
             setIsShowCloseDialog(false);

@@ -218,7 +218,7 @@ function IconButton({
               display: 'flex',
               padding: '$4',
               position: 'absolute',
-              [side]: '-6px',
+              [side === 'left' ? 'right' : 'left']: '-6px',
               bottom: '-10px',
               transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
               opacity: showCloseButton ? 1 : 0,

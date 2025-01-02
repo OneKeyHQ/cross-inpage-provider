@@ -172,6 +172,7 @@ function IconButton({
   isShowCloseDialog,
   isDragging,
   showCloseDialog,
+  side,
 }: {
   isExpanded: boolean;
   isShowCloseDialog: boolean;
@@ -179,6 +180,7 @@ function IconButton({
   dataLoaded: boolean;
   showCloseDialog: () => void;
   isDragging: boolean;
+  side?: 'left' | 'right';
 }) {
   const [showCloseButton, setIsShowCloseButton] = useState(false);
   return (
@@ -188,6 +190,7 @@ function IconButton({
         alignItems: 'center',
         position: 'relative',
         cursor: 'pointer',
+        flexDirection: side === 'left' ? 'row-reverse' : 'row',
       }}
       onMouseEnter={() => {
         if (isDragging || isExpanded || isShowCloseDialog) {
@@ -204,7 +207,7 @@ function IconButton({
         onClick();
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', padding: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', padding: '8px', flexDirection: side === 'left' ? 'row-reverse' : 'row' }}>
         <Logo style={logoStyle} />
         {!dataLoaded && <span style={textStyle}>{isExpanded ? i18n.fetchingDAppInfo : ''}</span>}
       </div>
@@ -215,7 +218,7 @@ function IconButton({
               display: 'flex',
               padding: '$4',
               position: 'absolute',
-              left: '-6px',
+              [side === 'left' ? 'right' : 'left']: '-6px',
               bottom: '-10px',
               transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
               opacity: showCloseButton ? 1 : 0,
@@ -672,6 +675,7 @@ function App() {
       ) : (
         <IconButton
           onClick={handleClick}
+          side={side}
           isExpanded={isExpanded}
           isShowCloseDialog={showCloseDialog}
           isDragging={isDragging}

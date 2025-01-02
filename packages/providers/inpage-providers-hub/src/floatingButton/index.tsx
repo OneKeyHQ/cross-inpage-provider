@@ -1,7 +1,7 @@
 import { render } from 'preact';
 import { useEffect, useMemo, useCallback, useRef, useState } from 'preact/hooks';
 import { IHostSecurity, EHostSecurityLevel } from './type';
-import { HighRisk, Logo, MediumRsik } from './images';
+import { HighRisk, Logo, MediumRsik, Image } from './images';
 
 let isInjected = false;
 interface i18nText {
@@ -402,7 +402,7 @@ function SecurityInfo({
             }}
           >
             {securityInfo?.dapp?.logo ? (
-              <img
+              <Image
                 src={securityInfo?.dapp?.logo}
                 style={{
                   height: '24px',
@@ -467,7 +467,7 @@ function SecurityInfo({
                 }}
               >
                 {securityInfo?.dapp?.origins.map((item) => (
-                  <img
+                  <Image
                     src={item.logo}
                     style={{
                       border: '1px solid rgba(0, 0, 0, 0.1)',
@@ -547,33 +547,82 @@ function App() {
   const [showSecurityInfo, setIsShowSecurityInfo] = useState(false);
   const [securityInfo, setSecurityInfo] = useState<IHostSecurity | null>(null);
   const [showCloseDialog, setIsShowCloseDialog] = useState(false);
+  const [position, setPosition] = useState({ x: window.innerWidth - 40, y: window.innerHeight * 0.75 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+  const [side, setSide] = useState<'left'|'right'>('right');
+  const isDraggingTimerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const handleShowCloseDialog = useCallback(() => {
     setIsShowCloseDialog(true);
   }, []);
 
   const handleClick = useCallback(async () => {
-    setIsExpanded(!isExpanded);
-    setIsShowSecurityInfo(true);
-    if (!securityInfo) {
-      const result = await (
-        window as unknown as {
-          $onekey: {
-            $private: {
-              request: (arg: {
-                method: string;
-                params: { url: string };
-              }) => Promise<{ securityInfo: IHostSecurity }>;
+    if (!isDragging) {
+      setIsExpanded(!isExpanded);
+      setIsShowSecurityInfo(true);
+      if (!securityInfo) {
+        const result = await (
+          window as unknown as {
+            $onekey: {
+              $private: {
+                request: (arg: {
+                  method: string;
+                  params: { url: string };
+                }) => Promise<{ securityInfo: IHostSecurity }>;
+              };
             };
-          };
-        }
-      ).$onekey.$private.request({
-        method: 'wallet_detectRiskLevel',
-        params: { url: window.location.origin },
-      });
-      setSecurityInfo(result.securityInfo);
+          }
+        ).$onekey.$private.request({
+          method: 'wallet_detectRiskLevel',
+          params: { url: window.location.origin },
+        });
+        setSecurityInfo(result.securityInfo);
+      }
     }
-  }, [isExpanded, securityInfo]);
+  }, [isExpanded, securityInfo, isDragging]);
+
+  const handleMouseDown = useCallback((e: MouseEvent) => {
+    isDraggingTimerIdRef.current = setTimeout(() => {
+      setIsDragging(true);
+      setIsExpanded(false);
+      setStartPos({ x: e.clientX - position.x, y: e.clientY - position.y });
+    }, 200)
+  }, [position]);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (isDragging) {
+      const newX = Math.min(Math.max(e.clientX - startPos.x, 0), window.innerWidth - 40);
+      const newY = Math.min(Math.max(e.clientY - startPos.y, 0), window.innerHeight - 100);
+      setPosition({ x: newX, y: newY });
+    }
+  }, [isDragging, startPos]);
+
+  const handleMouseUp = useCallback(() => {
+    if (isDraggingTimerIdRef.current) {
+      clearTimeout(isDraggingTimerIdRef.current)
+    }
+    if (isDragging) {
+      setIsDragging(false);
+      const halfWidth = window.innerWidth / 2;
+      if (position.x < halfWidth) {
+        setPosition(prev => ({ ...prev, x: 0 }));
+        setSide('left');
+      } else {
+        setPosition(prev => ({ ...prev, x: window.innerWidth - 40 }));
+        setSide('right');
+      }
+    }
+  }, [isDragging, position.x]);
+
+  useEffect(() => {
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [handleMouseMove, handleMouseUp]);
 
   return (
     <div
@@ -581,20 +630,25 @@ function App() {
       style={{
         position: 'fixed',
         zIndex: 999_999,
-        bottom: '25%',
-        right: '0px',
+        top: position.y,
+        left: isDragging ? position.x : (side === 'left' ? '0px' : 'auto'),
+        right: isDragging ? 'auto' : (side === 'right' ? '0px' : 'auto'),
         width: '256px',
         background: '#fff',
         borderRadius: '12px',
-        transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
+        transition: isDragging ? 'none' : 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
         boxShadow:
           '0px 0px 0px 1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-        transform: isExpanded ? 'translateX(-20px)' : 'translateX(216px)',
+        transform: isExpanded ? 
+          `translateX(${side === 'right' ? '-20px' : '20px'})` : 
+          `translateX(${side === 'right' ? '216px' : '-216px'})`,
         fontFamily:
           '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
         WebkitTextSizeAdjust: '100%',
         fontSmooth: 'antialiased',
+        cursor: isDragging ? 'grabbing' : 'grab',
       }}
+      onMouseDown={handleMouseDown}
     >
       {showSecurityInfo && securityInfo ? (
         <SecurityInfo

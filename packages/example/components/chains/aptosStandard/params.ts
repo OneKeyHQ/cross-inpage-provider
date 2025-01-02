@@ -54,7 +54,7 @@ export default {
           type_arguments: [
             '0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::USDC',
           ],
-          arguments: [address, 100000],
+          arguments: [address, 10000],
         },
       }),
     },
@@ -69,7 +69,7 @@ export default {
           arguments: [
             '0x357b0b74bc833e95a115ad22604854d6b0fca151cecd94111770e5d6ffc9dc2b',
             address,
-            100000,
+            10000,
           ],
         },
       }),

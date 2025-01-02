@@ -555,7 +555,6 @@ function App() {
   const [showCloseDialog, setIsShowCloseDialog] = useState(false);
   const [position, setPosition] = useState({ x: window.innerWidth - 40, y: window.innerHeight * 0.75 });
   const [isDragging, setIsDragging] = useState(false);
-  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const [side, setSide] = useState<'left' | 'right'>('right');
   const isDraggingTimerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -594,17 +593,16 @@ function App() {
     }
     isDraggingTimerIdRef.current = setTimeout(() => {
       setIsDragging(true);
-      setStartPos({ x: e.clientX - position.x, y: e.clientY - position.y });
     }, 200)
-  }, [position, isExpanded]);
+  }, [isExpanded]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (isDragging) {
-      const newX = Math.min(Math.max(e.clientX - startPos.x, 0), window.innerWidth - 40);
-      const newY = Math.min(Math.max(e.clientY - startPos.y, 0), window.innerHeight - 100);
+      const newX = Math.min(Math.max(e.clientX, 0), window.innerWidth - 40);
+      const newY = Math.min(Math.max(e.clientY, 0), window.innerHeight - 100);
       setPosition({ x: newX, y: newY });
     }
-  }, [isDragging, startPos]);
+  }, [isDragging]);
 
   const handleMouseUp = useCallback(() => {
     if (isDraggingTimerIdRef.current) {

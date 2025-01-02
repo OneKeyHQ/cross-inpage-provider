@@ -50,7 +50,7 @@ export const basicWalletInfo = {
   [WALLET_NAMES.suiwallet]: {
     updatedIcon: WALLET_CONNECT_INFO.suiwallet.icon,
     updatedName: WALLET_CONNECT_INFO.suiwallet.text,
-    name: /^(sui|Sui\s?Wallet)$/i,
+    name: /^(sui|Sui\s?Wallet|SUI)$/i,
   },
   [WALLET_NAMES.phantom]: {
     updatedIcon: WALLET_CONNECT_INFO.phantom.icon,
@@ -156,7 +156,8 @@ export type WalletInfo = {
   skip?: boolean | ((page: Page) => Promise<boolean>) | { mobile?: boolean; desktop?: boolean };
 };
 export type SitesInfo = {
-  urls: string[];
+  urls: string[]; // www.ankr.com
+  testUrls?: string[]; // url for e2e testing, like:  www.ankr.com/staking/stake/
   walletsForProvider: {
     [k in IInjectedProviderNames]?: WalletInfo[];
   };
@@ -170,7 +171,6 @@ export type SitesInfo = {
    * path for connect wallet modal used for testing
    */
   testPath?: string[] | { mobile?: string[]; desktop?: string[] } | ((page: Page) => Promise<void>);
-  testUrls?: string[];
   only?: boolean;
   skip?: boolean | { mobile?: boolean; desktop?: boolean };
 };
@@ -224,6 +224,69 @@ const petraForRainbowKit: WalletInfo = {
 
 export const sitesConfig: SitesInfo[] = [
   {
+    urls: ['app.turbos.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.sui]: [
+        {
+          ...basicWalletInfo[WALLET_NAMES.suiwallet],
+          findIconAndName() {
+            const modal = document.querySelector('div[role="dialog"]');
+            if (!modal) {
+              console.log('[dbg]: No modal found');
+              return null;
+            }
+            console.log('[dbg]: Modal found, searching for wallet elements');
+
+            // Try different selectors to find wallet elements
+            const selectors = [
+              '.rc-dialog-body [class*="wallet"]',
+              '.rc-dialog-body [class*="connect"]',
+              '.rc-dialog-body button',
+              '.rc-dialog-body [role="button"]',
+              '[class*="wallet-list"] button',
+              '[class*="connect-list"] button'
+            ];
+
+            for (const selector of selectors) {
+              const elements = Array.from(modal.querySelectorAll(selector)).filter((el): el is HTMLElement => el instanceof HTMLElement);
+              console.log(`[dbg]: Found ${elements.length} elements with selector ${selector}`);
+              
+              for (const element of elements) {
+                const result = findIconAndNameByName(
+                  element,
+                  /^(sui|Sui\s?Wallet|SUI)$/i,
+                  'auto-search-icon',
+                  {
+                    text: [isClickable],
+                    icon: [isWalletIconLessEqualThan, isClickable],
+                  }
+                );
+                if (result) {
+                  console.log('[dbg]: Found wallet element:', result);
+                  return result;
+                }
+              }
+            }
+
+            // If no elements found with specific selectors, try the entire modal
+            const result = findIconAndNameByName(
+              modal as HTMLElement,
+              /^(sui|Sui\s?Wallet|SUI)$/i,
+              'auto-search-icon',
+              {
+                text: [isClickable],
+                icon: [isWalletIconLessEqualThan, isClickable],
+              }
+            );
+            console.log('[dbg]: Search result from modal:', result);
+            return result;
+          },
+        },
+      ],
+    },
+    testPath: [":text-matches('Connect Wallet|Connect','i')"],
+  },
+  {
     // only: true,
     urls: ['app.turbos.finance'],
     testPath: [':text("I accept the")', ':text("Continue")', ':text("Connect Wallet")'],
@@ -231,7 +294,31 @@ export const sitesConfig: SitesInfo[] = [
       [IInjectedProviderNames.sui]: [
         {
           ...basicWalletInfo['suiwallet'],
-          container: "div[role='dialog'] .rc-dialog-body",
+          name: /^(Sui|Sui\s?Wallet|SUI)$/i,
+          container: () => {
+            const modal = document.querySelector("div[role='dialog']") as HTMLElement;
+            const walletList = modal?.querySelector('.rc-dialog-body') as HTMLElement;
+            return walletList || null;
+          },
+          findIconAndName({ name }) {
+            const modal = document.querySelector("div[role='dialog']") as HTMLElement;
+            if (!modal) return null;
+            const walletList = modal.querySelector('.rc-dialog-body') as HTMLElement;
+            if (!walletList) return null;
+            
+            // Try to find wallet elements with different strategies
+            const walletElements = [
+              ...Array.from(walletList.querySelectorAll('button')),
+              ...Array.from(walletList.querySelectorAll('div[role="button"]')),
+              ...Array.from(walletList.querySelectorAll('[class*="wallet"]')),
+            ];
+            
+            for (const element of walletElements) {
+              const result = findIconAndNameByName(element as HTMLElement, name);
+              if (result) return result;
+            }
+            return null;
+          },
         },
       ],
     },
@@ -239,7 +326,7 @@ export const sitesConfig: SitesInfo[] = [
   {
     // only: true,
     urls: ['app.defisaver.com'],
-    testPath: ['button:text("ACCEPT")'],
+    testPath: [':text("Connect wallet")', ':text("BROWSER")', ':text("MOBILE & DESKTOP")'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -277,7 +364,7 @@ export const sitesConfig: SitesInfo[] = [
 
   {
     urls: ['trade.bluefin.io'],
-    testPath: [':text("View your")', ':text("Connect Account")'],
+    testPath: ['button:has-text("Do not show again")', ':text("Get Started")', 'button:has-text("Connect")'],
     walletsForProvider: {
       [IInjectedProviderNames.sui]: [
         {
@@ -316,6 +403,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.venus.io'],
+    testPath: ['button:has-text("Connect wallet")'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -333,7 +421,7 @@ export const sitesConfig: SitesInfo[] = [
   },
   {
     urls: ['app.uncx.network'],
-    testPath: ['button:has-text("Connect")'],
+    testPath: ['button:has-text("Accept")', 'button:has-text("Connect")'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -1363,54 +1451,6 @@ export const sitesConfig: SitesInfo[] = [
     },
   },
   {
-    urls: ['app.degate.com'],
-    testPath: async (page: Page) => {
-      const frame = page.locator('iframe').contentFrame();
-      await frame?.locator('button:has-text("Connect Wallet")')?.first()?.click();
-    },
-    testUrls: ['app.degate.com/trade/USDC/ETH'],
-    walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [
-        {
-          ...basicWalletInfo['metamask'],
-          findIconAndName(wallet) {
-            const modal = getConnectWalletModalByTitle(
-              'section.mantine-Modal-content',
-              'Connect Wallet',
-            );
-            return (
-              modal &&
-              findIconAndNameByIcon(
-                'img[src*="metamask"]',
-                (icon) => icon.parentElement?.parentElement,
-                wallet.name,
-                modal,
-              )
-            );
-          },
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName(wallet) {
-            const modal = getConnectWalletModalByTitle(
-              'section.mantine-Modal-content',
-              'Connect Wallet',
-            );
-            return (
-              modal &&
-              findIconAndNameByIcon(
-                'img[src*="walletConnect"]',
-                (icon) => icon.parentElement?.parentElement,
-                wallet.name,
-                modal,
-              )
-            );
-          },
-        },
-      ],
-    },
-  },
-  {
     urls: ['tranchess.com'],
     testPath: {
       desktop: [':text("Liquid Staking")', ':text("Ethereum")', ':text("Connect Wallet")'],
@@ -1463,8 +1503,8 @@ export const sitesConfig: SitesInfo[] = [
     },
   },
   {
-    urls: ['app-v2.alpacafinance.org'],
-    testPath: [':text("Connect Wallet")'],
+    urls: ['app.alpacafinance.org'],
+    testPath: [':text("Connect to Wallet")'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
         {
@@ -1472,12 +1512,17 @@ export const sitesConfig: SitesInfo[] = [
           findIconAndName(wallet) {
             const modal = getConnectWalletModalByTitle(
               'div.chakra-modal__content-container',
-              'Select a wallet',
+              'Connect Wallet',
             );
             return (
               modal &&
-              findIconAndNameByIcon('img[alt="MetaMask"]', 'auto-search-text', wallet.name, modal)
+              findIconAndNameByIcon('img[src*="metamask"]', 'auto-search-text', wallet.name, modal)
             );
+          },
+          afterUpdate(textNode, img) {
+            if (textNode?.parentElement) {
+              makeTextAlignCenter(textNode.parentElement);
+            }
           },
         },
         {
@@ -1485,12 +1530,17 @@ export const sitesConfig: SitesInfo[] = [
           findIconAndName({ name }) {
             const modal = getConnectWalletModalByTitle(
               'div.chakra-modal__content-container',
-              'Select a wallet',
+              'Connect Wallet',
             );
             return (
               modal &&
-              findIconAndNameByIcon('img[alt="WalletConnect"]', 'auto-search-text', name, modal)
+              findIconAndNameByIcon('img[src*="walletconnect"]', 'auto-search-text', name, modal)
             );
+          },
+          afterUpdate(textNode, img) {
+            if (textNode?.parentElement) {
+              makeTextAlignCenter(textNode.parentElement);
+            }
           },
         },
       ],
@@ -4292,6 +4342,507 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['suiwallet'],
           container: 'div#connectWallet div.wallet-list',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app-v2.alpacafinance.org'],
+    testPath: [':text("Connect Wallet")', 'button:has-text("Connect Wallet")'],
+    mutationObserverOptions: {
+      childList: true,
+      subtree: true,
+      attributes: true,
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName(wallet: WalletInfo): FindResultType | null {
+            // Wait for app initialization with more flexible selectors
+            const appContent = document.querySelector('.app-container, .main-content, #root, .app, [role="main"]');
+            if (!appContent) {
+              console.log('[universal]: waiting for alpaca app content to initialize');
+              return null;
+            }
+
+            // Try multiple connect button selectors with more variations
+            const connectButton = document.querySelector([
+              'button:has-text("Connect Wallet")',
+              '[data-testid="connect-wallet-button"]',
+              '.connect-wallet-btn',
+              '.wallet-connect-button',
+              'button:has-text("Connect")',
+              'button[class*="connect"]',
+              'div[class*="connect"]'
+            ].join(', '));
+
+            if (connectButton?.parentElement) {
+              console.log('[universal]: found alpaca connect button');
+              return findIconAndNameByIcon(
+                'img[src*="metamask" i], img[alt*="metamask" i], img[src*="wallet" i], img[class*="wallet"]',
+                'auto-search-text',
+                wallet.name,
+                connectButton.parentElement,
+                { text: [], icon: [isWalletIconLessEqualThan] }
+              );
+            }
+
+            // Try finding wallet modal with expanded selectors
+            const modalSelectors = [
+              'div[role="dialog"]',
+              '.wallet-modal',
+              '.connect-modal',
+              '.modal-content',
+              '[class*="modal"]',
+              '[class*="wallet"]',
+              '[class*="connect"]'
+            ];
+
+            for (const selector of modalSelectors) {
+              const modal = document.querySelector(selector);
+              if (modal instanceof HTMLElement) {
+                console.log('[universal]: found alpaca wallet modal');
+                return findIconAndNameByIcon(
+                  'img[src*="metamask" i], img[alt*="metamask" i], img[src*="wallet" i], img[class*="wallet"]',
+                  'auto-search-text',
+                  wallet.name,
+                  modal,
+                  { text: [], icon: [isWalletIconLessEqualThan] }
+                );
+              }
+            }
+
+            console.log('[universal]: no alpaca wallet elements found');
+            return null;
+          },
+          afterUpdate(textNode) {
+            if (textNode?.parentElement) {
+              makeTextAlignCenter(textNode.parentElement);
+              makeTextWordBreak(textNode.parentElement);
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    urls: ['app.mav.xyz'],
+    testPath: [
+      ':text("Connect Wallet")',
+      'button:has-text("Connect Wallet")',
+      '[data-testid="connect-wallet-button"]',
+      'button.connect-wallet-button'
+    ],
+    mutationObserverOptions: {
+      childList: true,
+      subtree: true,
+      attributes: true,
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName(wallet: WalletInfo): FindResultType | null {
+            // Wait for the app to initialize
+            const appContent = document.querySelector('.navbar, .swap-container');
+            if (!appContent) {
+              console.log('[universal]: waiting for app content to initialize');
+              return null;
+            }
+
+            // Try finding the connect button first (preferred)
+            const connectButton = document.querySelector('button:has-text("Connect Wallet"), [data-testid="connect-wallet-button"], button.connect-wallet-button');
+            if (connectButton?.parentElement) {
+              console.log('[universal]: found connect button');
+              return findIconAndNameByIcon(
+                'img[src*="metamask"]',
+                'auto-search-text',
+                wallet.name,
+                connectButton.parentElement,
+                { text: [], icon: [isWalletIconLessEqualThan] }
+              );
+            }
+
+            // If no button, try finding the modal
+            const selectors = [
+              'div[role="dialog"]',
+              '.modal-content',
+              'div.wallet-modal',
+              'div.connect-wallet-modal'
+            ];
+            
+            for (const selector of selectors) {
+              const modal = document.querySelector(selector);
+              if (modal instanceof HTMLElement) {
+                console.log('[universal]: found wallet modal');
+                return findIconAndNameByIcon(
+                  'img[src*="metamask"]',
+                  'auto-search-text',
+                  wallet.name,
+                  modal,
+                  { text: [], icon: [isWalletIconLessEqualThan] }
+                );
+              }
+            }
+
+            console.log('[universal]: no wallet elements found');
+            return null;
+          },
+          afterUpdate(textNode) {
+            if (textNode?.parentElement) {
+              makeTextAlignCenter(textNode.parentElement);
+              makeTextWordBreak(textNode.parentElement);
+            }
+          }
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          findIconAndName(wallet: WalletInfo): FindResultType | null {
+            // Wait for the app to initialize
+            const appContent = document.querySelector('.navbar, .swap-container');
+            if (!appContent) {
+              console.log('[universal]: waiting for app content to initialize');
+              return null;
+            }
+
+            // Try finding the connect button first (preferred)
+            const connectButton = document.querySelector('button:has-text("Connect Wallet"), [data-testid="connect-wallet-button"], button.connect-wallet-button');
+            if (connectButton?.parentElement) {
+              console.log('[universal]: found connect button');
+              return findIconAndNameByIcon(
+                'img[src*="walletconnect"]',
+                'auto-search-text',
+                wallet.name,
+                connectButton.parentElement,
+                { text: [], icon: [isWalletIconLessEqualThan] }
+              );
+            }
+
+            // If no button, try finding the modal
+            const selectors = [
+              'div[role="dialog"]',
+              '.modal-content', 
+              'div.wallet-modal',
+              'div.connect-wallet-modal'
+            ];
+            
+            for (const selector of selectors) {
+              const modal = document.querySelector(selector);
+              if (modal instanceof HTMLElement) {
+                console.log('[universal]: found wallet modal');
+                return findIconAndNameByIcon(
+                  'img[src*="walletconnect"]',
+                  'auto-search-text',
+                  wallet.name,
+                  modal,
+                  { text: [], icon: [isWalletIconLessEqualThan] }
+                );
+              }
+            }
+
+            console.log('[universal]: no wallet elements found');
+            return null;
+          },
+          afterUpdate(textNode) {
+            if (textNode?.parentElement) {
+              makeTextAlignCenter(textNode.parentElement);
+              makeTextWordBreak(textNode.parentElement);
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    urls: ['autofarm.network'],
+    testPath: [':text("Connect Wallet")', 'button:has-text("Connect Wallet")'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('.modal-content', 'Connect Wallet');
+            return (
+              modal &&
+              findIconAndNameByIcon(
+                'img[src*="metamask"]',
+                'auto-search-text',
+                name,
+                modal,
+                { text: [], icon: [isWalletIconLessEqualThan] }
+              )
+            );
+          }
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('.modal-content', 'Connect Wallet');
+            return (
+              modal &&
+              findIconAndNameByIcon(
+                'img[src*="walletconnect"]',
+                'auto-search-text',
+                name,
+                modal,
+                { text: [], icon: [isWalletIconLessEqualThan] }
+              )
+            );
+          }
+        }
+      ]
+    }
+  },
+  {
+    urls: ['klayswap.com'],
+    testPath: [':text("Connect Wallet")', 'button:has-text("Connect Wallet")'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('.modal-dialog', 'Connect Wallet');
+            return (
+              modal &&
+              findIconAndNameByIcon(
+                'img[src*="metamask"]',
+                'auto-search-text',
+                name,
+                modal,
+                { text: [], icon: [isWalletIconLessEqualThan] }
+              )
+            );
+          }
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('.modal-dialog', 'Connect Wallet');
+            return (
+              modal &&
+              findIconAndNameByIcon(
+                'img[src*="walletconnect"]',
+                'auto-search-text',
+                name,
+                modal,
+                { text: [], icon: [isWalletIconLessEqualThan] }
+              )
+            );
+          }
+        }
+      ]
+    }
+  },
+  {
+    urls: ['app.mav.xyz'],
+    testPath: [':text("Connect Wallet")', 'button:has-text("Connect Wallet")'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('[role="dialog"]', 'Connect Wallet');
+            return (
+              modal &&
+              findIconAndNameByIcon(
+                'img[src*="metamask"]',
+                'auto-search-text',
+                name,
+                modal,
+                { text: [], icon: [isWalletIconLessEqualThan] }
+              )
+            );
+          },
+          afterUpdate(textNode) {
+            if (textNode?.parentElement) {
+              makeTextAlignCenter(textNode.parentElement);
+            }
+          }
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('[role="dialog"]', 'Connect Wallet');
+            return (
+              modal &&
+              findIconAndNameByIcon(
+                'img[src*="walletconnect"]',
+                'auto-search-text',
+                name,
+                modal,
+                { text: [], icon: [isWalletIconLessEqualThan] }
+              )
+            );
+          },
+          afterUpdate(textNode) {
+            if (textNode?.parentElement) {
+              makeTextAlignCenter(textNode.parentElement);
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    urls: ['app.mav.xyz'],
+    testPath: [':text("Connect Wallet")', 'button:has-text("Connect Wallet")'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('.modal-content', 'Connect a Wallet');
+            return (
+              modal &&
+              findIconAndNameByIcon(
+                'img[src*="metamask"]',
+                'auto-search-text',
+                name,
+                modal,
+                { text: [], icon: [isWalletIconLessEqualThan] }
+              )
+            );
+          }
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('.modal-content', 'Connect a Wallet');
+            return (
+              modal &&
+              findIconAndNameByIcon(
+                'img[src*="walletconnect"]',
+                'auto-search-text',
+                name,
+                modal,
+                { text: [], icon: [isWalletIconLessEqualThan] }
+              )
+            );
+          }
+        }
+      ]
+    }
+  },
+  {
+    urls: ['app.degate.com'],
+    testPath: [
+      'iframe button:has-text("Connect Wallet")',
+      'button:has-text("Connect Wallet")'
+    ],
+    // Add mutation observer to watch for DOM changes during loading
+    mutationObserverOptions: {
+      childList: true,
+      subtree: true,
+      attributes: true,
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName(wallet: WalletInfo): FindResultType | null {
+            // Wait for the app to initialize
+            const appRoot = document.querySelector('#root');
+            if (!appRoot || appRoot.children.length === 0) {
+              console.log('[universal]: waiting for app root to initialize');
+              return null;
+            }
+
+            // Check if still in loading state
+            const loadingLogo = document.querySelector('img[alt="Degate"]');
+            if (loadingLogo) {
+              console.log('[universal]: waiting for loading screen to disappear');
+              return null;
+            }
+
+
+            // Try finding the connect button first (preferred)
+            const connectButton = document.querySelector('button:has-text("Connect Wallet")');
+            if (connectButton?.parentElement) {
+              console.log('[universal]: found connect button');
+              return findIconAndNameByIcon(
+                'img[src*="metamask"]',
+                'auto-search-text',
+                wallet.name,
+                connectButton.parentElement
+              );
+            }
+
+            // If no button, try finding the modal
+            const selectors = [
+              'div[role="dialog"]',
+              'div.wallet-modal',
+              'div.connect-wallet-modal',
+              'div[class*="modal"]'
+            ];
+            
+            for (const selector of selectors) {
+              const modal = document.querySelector(selector);
+              if (modal instanceof HTMLElement) {
+                console.log('[universal]: found wallet modal');
+                return findIconAndNameByIcon(
+                  'img[src*="metamask"]',
+                  'auto-search-text',
+                  wallet.name,
+                  modal
+                );
+              }
+            }
+
+            console.log('[universal]: no wallet elements found');
+            return null;
+          },
+        },
+        {
+          ...basicWalletInfo['walletconnect'],
+          findIconAndName(wallet: WalletInfo): FindResultType | null {
+            // Duplicate the findIconAndName logic for WalletConnect for type safety
+            const appRoot = document.querySelector('#root');
+            if (!appRoot || appRoot.children.length === 0) {
+              console.log('[universal]: waiting for app root to initialize');
+              return null;
+            }
+
+            const loadingLogo = document.querySelector('img[alt="Degate"]');
+            if (loadingLogo) {
+              console.log('[universal]: waiting for loading screen to disappear');
+              return null;
+            }
+
+            const connectButton = document.querySelector('button:has-text("Connect Wallet")');
+            if (connectButton?.parentElement) {
+              console.log('[universal]: found connect button');
+              return findIconAndNameByIcon(
+                'img[src*="walletconnect"]',
+                'auto-search-text',
+                wallet.name,
+                connectButton.parentElement
+              );
+            }
+
+            const selectors = [
+              'div[role="dialog"]',
+              'div.wallet-modal',
+              'div.connect-wallet-modal',
+              'div[class*="modal"]'
+            ];
+            
+            for (const selector of selectors) {
+              const modal = document.querySelector(selector);
+              if (modal instanceof HTMLElement) {
+                console.log('[universal]: found wallet modal');
+                return findIconAndNameByIcon(
+                  'img[src*="walletconnect"]',
+                  'auto-search-text',
+                  wallet.name,
+                  modal
+                );
+              }
+            }
+
+            console.log('[universal]: no wallet elements found');
+            return null;
+          },
         },
       ],
     },

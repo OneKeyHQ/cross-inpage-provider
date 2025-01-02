@@ -23,11 +23,26 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 800 } },
+      use: { 
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1440, height: 800 },
+        launchOptions: {
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+          headless: true
+        },
+        actionTimeout: 120000,
+        navigationTimeout: 120000,
+        testTimeout: 120000,
+      },
     },
     {
       name: 'Mobile Chrome',
-      use: { ...devices['iPhone 6'] },
+      use: { 
+        ...devices['iPhone 6'],
+        launchOptions: {
+          args: ['--no-sandbox', '--disable-setuid-sandbox']
+        }
+      },
     },
   ],
 });

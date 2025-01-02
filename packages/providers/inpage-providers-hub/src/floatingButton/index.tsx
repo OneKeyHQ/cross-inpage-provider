@@ -27,6 +27,14 @@ interface i18nText {
 
 let i18n: i18nText = {} as i18nText;
 
+let defaultPosition: {
+  side: 'left' | 'right';
+  bottom: string;
+} = {
+  side: 'right',
+  bottom: '30%',
+}
+
 const logoStyle = {
   width: '24px',
   height: '24px',
@@ -551,24 +559,24 @@ function SecurityInfo({
   );
 }
 
-const savePosition = (side: 'left' | 'right', y: number) => {
-  localStorage.setItem('onekey-floating-button-position', JSON.stringify({ side, y }));
-};
-
-const readPosition = (): { side: 'left' | 'right'; y: number } => {
-  try {
-    const savedPosition = localStorage.getItem('onekey-floating-button-position') as string;
-    if (savedPosition) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return JSON.parse(savedPosition);
+const savePosition = (params: {
+  side: 'left' | 'right';
+  bottom: string;
+}) => {
+  void (
+    globalThis as unknown as {
+      $onekey: {
+        $private: {
+          request: (
+            arg: { method: string; params: { side: 'left' | 'right'; bottom: string } }
+          ) => Promise<void>
+        }
+      }
     }
-  } catch (error) {
-    // ignore error
-  }
-  return {
-    side: 'right',
-    y: window.innerHeight * 0.75
-  };
+  ).$onekey.$private.request({
+    method: 'wallet_saveFloatingIconPosition',
+    params,
+  });
 };
 
 function App() {
@@ -576,18 +584,14 @@ function App() {
   const [showSecurityInfo, setIsShowSecurityInfo] = useState(false);
   const [securityInfo, setSecurityInfo] = useState<IHostSecurity | null>(null);
   const [showCloseDialog, setIsShowCloseDialog] = useState(false);
-  const [position, setPosition] = useState(() => {
-    const { y } = readPosition();
-    return {
-      x: 0,
-      y,
-    }
-  });
-  const positionRef = useRef(position);
-  positionRef.current = position;
-  const [isDragging, setIsDragging] = useState((false));
-  const [side, setSide] = useState<'left' | 'right'>(() => readPosition().side);
-  const isDraggingTimerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [position, setPosition] = useState<{
+    side: 'left' | 'right';
+    bottom: string;
+  }>(defaultPosition);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const containerPositionRef = useRef({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const isDraggingTimerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleShowCloseDialog = useCallback(() => {
     setIsShowCloseDialog(true);
@@ -626,15 +630,33 @@ function App() {
       setIsDragging(true);
       const newX = e.clientX - 20;
       const newY = e.clientY - 20;
-      setPosition({ x: newX, y: newY });
+      if (containerRef.current) {
+        containerRef.current.style.left = `${newX}px`;
+        containerRef.current.style.top = `${newY}px`;
+        containerRef.current.style.right = 'auto';
+        containerRef.current.style.bottom = 'auto';
+        containerPositionRef.current = {
+          x: newX,
+          y: newY,
+        }
+      }
     }, 200)
   }, [isExpanded]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (isDragging) {
       const newX = Math.min(Math.max(e.clientX - 20, 0), window.innerWidth - 40);
-      const newY = Math.min(Math.max(e.clientY - 20, 0), window.innerHeight - 100);
-      setPosition({ x: newX, y: newY });
+      const newY = Math.min(Math.max(e.clientY - 20, 40), window.innerHeight - 40);
+      if (containerRef.current) {
+        containerRef.current.style.left = `${newX}px`;
+        containerRef.current.style.top = `${newY}px`;
+        containerRef.current.style.right = 'auto';
+        containerRef.current.style.bottom = 'auto';
+        containerPositionRef.current = {
+          x: newX,
+          y: newY,
+        }
+      }
     }
   }, [isDragging]);
 
@@ -648,18 +670,28 @@ function App() {
       }, 50)
       const {
         x, y
-      } = positionRef.current || {}
+      } = containerPositionRef.current
       const halfWidth = window.innerWidth / 2;
-      if (x < halfWidth) {
-        setPosition(prev => ({ ...prev, x: 0 }));
-        setSide('left');
-      } else {
-        setPosition(prev => ({ ...prev, x: window.innerWidth - 40 }));
-        setSide('right');
-      }
-      savePosition(side, y)
+      const side = x < halfWidth ? 'left' : 'right';
+      const bottom = `${(100 - y / window.innerHeight * 100).toFixed()}%`;
+      setTimeout(() => {
+        if (containerRef.current) {
+          containerRef.current.style.left = side === 'left' ? '0px' : 'auto';
+          containerRef.current.style.right = side === 'right' ? '0px' : 'auto';
+          containerRef.current.style.top = 'auto';
+          containerRef.current.style.bottom = bottom;
+        }
+      }, 10)
+      setPosition({
+        bottom,
+        side
+      })
+      savePosition({
+        side,
+        bottom,
+      })
     }
-  }, [isDragging, side]);
+  }, [isDragging]);
 
   useEffect(() => {
     document.addEventListener('mousemove', handleMouseMove);
@@ -670,15 +702,18 @@ function App() {
     };
   }, [handleMouseMove, handleMouseUp]);
 
+  const { side, bottom } = position
   return (
     <div
       id={containerId}
+      ref={containerRef}
       style={{
         position: 'fixed',
         zIndex: 999_999,
-        top: position.y,
-        left: isDragging ? position.x : (side === 'left' ? '0px' : 'auto'),
-        right: isDragging ? 'auto' : (side === 'right' ? '0px' : 'auto'),
+        top: 'auto',
+        bottom,
+        left: isDragging ? "auto" : side === 'left' ? '0px' : 'auto',
+        right: isDragging ? "auto" : side === 'right' ? '0px' : 'auto',
         width: isDragging ? '40px' : '256px',
         background: '#fff',
         borderRadius: isDragging ? '100%' : '12px',
@@ -728,7 +763,7 @@ function App() {
 }
 
 async function injectIcon() {
-  const { isShow, i18n: i18nResponse } = await (
+  const { isShow, i18n: i18nResponse, position } = await (
     globalThis as unknown as {
       $onekey: {
         $private: {
@@ -736,6 +771,9 @@ async function injectIcon() {
             arg: { method: string; params: { url: string } }
           ) => Promise<{
             isShow: boolean,
+            position: {
+              side: 'left' | 'right'; bottom: string;
+            },
             i18n: i18nText
           }>
         }
@@ -756,6 +794,12 @@ async function injectIcon() {
 
   if (!document.body) {
     return;
+  }
+  if (position) {
+    defaultPosition = {
+      ...defaultPosition,
+      ...position,
+    };
   }
   isInjected = true;
   const div = document.createElement('div');

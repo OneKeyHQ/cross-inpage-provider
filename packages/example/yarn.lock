@@ -30,7 +30,11 @@
 
 "@adraffy/ens-normalize@1.10.1":
   version "1.10.1"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/@adraffy/ens-normalize/-/ens-normalize-1.10.1.tgz#63430d04bd8c5e74f8d7d049338f1cd9d4f02069"
+=======
+  resolved "https://registry.npmmirror.com/@adraffy/ens-normalize/-/ens-normalize-1.10.1.tgz#63430d04bd8c5e74f8d7d049338f1cd9d4f02069"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-96Z2IP3mYmF1Xg2cDm8f1gWGf/HUVedQ3FMifV4kG/PQ4yEP51xDtRAEfhVNt5f/uzpNkZHwWQuUcu6D6K+Ekw==
 
 "@alephium/get-extension-wallet@^1.4.0":
@@ -1057,7 +1061,11 @@
 
 "@babel/runtime@^7.25.0", "@babel/runtime@^7.4.5":
   version "7.26.0"
+<<<<<<< HEAD
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.26.0.tgz#8600c2f595f277c60815256418b85356a65173c1"
+=======
+  resolved "https://registry.npmmirror.com/@babel/runtime/-/runtime-7.26.0.tgz#8600c2f595f277c60815256418b85356a65173c1"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-FDSOghenHTiToteC/QRlv2q3DhPZ/oOXTBoirfWNx1Cx3TMVcGWQtMMmQcSvb/JjpNeGzx8Pq/b4fKEJuWm1sw==
   dependencies:
     regenerator-runtime "^0.14.0"
@@ -2813,7 +2821,11 @@
 
 "@mysten/bcs@0.7.4":
   version "0.7.4"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/@mysten/bcs/-/bcs-0.7.4.tgz#1e32ec3d1fa68a0ed98323e604a741728927e421"
+=======
+  resolved "https://registry.npmmirror.com/@mysten/bcs/-/bcs-0.7.4.tgz#1e32ec3d1fa68a0ed98323e604a741728927e421"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-6DKzM4L10Au3Og5EJRBqJZmXWZ7hS/clVjbVUH4sA0aFtS3AZo2xc+r5fUFfdJbaWZUxVaDiQ8BNiEZWkAnEOw==
   dependencies:
     bs58 "^5.0.0"
@@ -2837,7 +2849,11 @@
 
 "@mysten/sui.js@0.41.2":
   version "0.41.2"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/@mysten/sui.js/-/sui.js-0.41.2.tgz#0ef09ce8777f254c1a25f4108fb55c4755a60943"
+=======
+  resolved "https://registry.npmmirror.com/@mysten/sui.js/-/sui.js-0.41.2.tgz#0ef09ce8777f254c1a25f4108fb55c4755a60943"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-00Kkk4don9H9iRWBqXfRC4wUPY0hqAvmzxhwaYZIHj9Tmb71Nx51zLLFsxeA7dlR6cJFaXFMbZkt6WR2vP8WLQ==
   dependencies:
     "@mysten/bcs" "0.7.4"
@@ -2879,7 +2895,11 @@
 
 "@mysten/wallet-standard@^0.7.2":
   version "0.7.2"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/@mysten/wallet-standard/-/wallet-standard-0.7.2.tgz#8e2019214f59e69a897a0b30cef4dea30be091fb"
+=======
+  resolved "https://registry.npmmirror.com/@mysten/wallet-standard/-/wallet-standard-0.7.2.tgz#8e2019214f59e69a897a0b30cef4dea30be091fb"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-uePMPtQcSRX+ZQ44DO4U65QxFXVa9tB/cPnEGqe+YOn76hzR2Al4wQQciex/Y1EZK7GYATAzrFLzNSIJYE7QSA==
   dependencies:
     "@mysten/sui.js" "0.41.2"
@@ -3060,6 +3080,7 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
+<<<<<<< HEAD
 "@onekeyfe/cross-inpage-provider-core@2.2.6":
   version "2.2.6"
   resolved "https://registry.npmjs.org/@onekeyfe/cross-inpage-provider-core/-/cross-inpage-provider-core-2.2.6.tgz#dbcca8aeffad8449037e789d8db0a923c47c0463"
@@ -3068,10 +3089,21 @@
     "@onekeyfe/cross-inpage-provider-errors" "2.2.6"
     "@onekeyfe/cross-inpage-provider-events" "2.2.6"
     "@onekeyfe/cross-inpage-provider-types" "2.2.6"
+=======
+"@onekeyfe/cross-inpage-provider-core@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.npmmirror.com/@onekeyfe/cross-inpage-provider-core/-/cross-inpage-provider-core-2.2.0.tgz#5e51ce62349908156abf5319285efae863b03041"
+  integrity sha512-wMCMKuzAjnV53f1RDCWdu+SOwfaqZmUFuJDKsxeCo3FrruB5NQKSHBaotvIcNbkyVcNZxaekup3/fOtAHClpsw==
+  dependencies:
+    "@onekeyfe/cross-inpage-provider-errors" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-events" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.0"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
     events "^3.3.0"
     lodash-es "^4.17.21"
     ms "^2.1.3"
 
+<<<<<<< HEAD
 "@onekeyfe/cross-inpage-provider-errors@2.2.6":
   version "2.2.6"
   resolved "https://registry.npmjs.org/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-2.2.6.tgz#fd4d3cb45182d7e366b89b6c7c1774f85226da50"
@@ -3140,10 +3172,81 @@
     "@onekeyfe/cross-inpage-provider-errors" "2.2.6"
     "@onekeyfe/cross-inpage-provider-types" "2.2.6"
     "@onekeyfe/extension-bridge-injected" "2.2.6"
+=======
+"@onekeyfe/cross-inpage-provider-errors@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.npmmirror.com/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-2.2.0.tgz#6c78b8013f00ada69ec6d539379e4dd5c6d2e824"
+  integrity sha512-zGY+OZYqZ+X4PD2PrWdoIVZx4YUXq/Js6lD1+poFa22rnF/9/k1F3NJEUpdsm06btxV8qmtlBLx7AnnDzmxcRw==
+  dependencies:
+    fast-safe-stringify "^2.0.6"
+
+"@onekeyfe/cross-inpage-provider-events@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.npmmirror.com/@onekeyfe/cross-inpage-provider-events/-/cross-inpage-provider-events-2.2.0.tgz#5def6ca39e5752fb9233761f410644207dc19518"
+  integrity sha512-KPXGlB9n4kfu/Pr7LRuTXDCdlGVXMgZAUUCFY6oLuRnyO92HlRKd/BW1CZRYtjtxtrPNXExjojAf3dR234m85w==
+
+"@onekeyfe/cross-inpage-provider-types@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.npmmirror.com/@onekeyfe/cross-inpage-provider-types/-/cross-inpage-provider-types-2.2.0.tgz#66682e0c2dd96ffd0c2171f959784e6916e0dfbf"
+  integrity sha512-p4eiML7BdLyvuAyr4NuunZDgPykli5BHEYsBY1QNM8sz24ewNa7xWeH92u57izYl1EaIA9MPl836dnMXB9WJnw==
+
+"@onekeyfe/extension-bridge-injected@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.npmmirror.com/@onekeyfe/extension-bridge-injected/-/extension-bridge-injected-2.2.0.tgz#013e46f53aee16387c7bc5f23a8dd616b1cd41ed"
+  integrity sha512-8AqTgNP14I0vJnSoXAmNo3l7+B5hl0S3KOX3sG1MFqTb4vyvQADEEy3eFgY67qsdYEGvP7BRnNZ5PqisJpoPcw==
+  dependencies:
+    "@onekeyfe/cross-inpage-provider-core" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.0"
+
+"@onekeyfe/onekey-aptos-provider@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.npmmirror.com/@onekeyfe/onekey-aptos-provider/-/onekey-aptos-provider-2.2.0.tgz#c559151f17cd8c8ce66135c2566a9c0606267df4"
+  integrity sha512-nemQLN/GLKSeT399fAlLtr/Lg2/nuOFYq0uxok8cxElu3dotyrAAOV/DVvbdBrF91pwVyOJWwdn+uiQquOSglw==
+  dependencies:
+    "@aptos-labs/wallet-standard" "^0.2.0"
+    "@onekeyfe/cross-inpage-provider-core" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-errors" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.0"
+    "@onekeyfe/extension-bridge-injected" "2.2.0"
+    "@wallet-standard/core" "1.0.3"
+    eth-rpc-errors "^4.0.3"
+
+"@onekeyfe/onekey-cardano-provider@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.npmmirror.com/@onekeyfe/onekey-cardano-provider/-/onekey-cardano-provider-2.2.0.tgz#c95c07b8571ade39cf8b152953112cc40c73156b"
+  integrity sha512-sQYZhduyYnVsfnVRtIGnzAIg84SOu+wNW+njLam8hsxu4V+hBJUdllmnUzFSucBiviO6XzZLejIGSIFjB6UebA==
+  dependencies:
+    "@onekeyfe/cross-inpage-provider-core" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-errors" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.0"
+    "@onekeyfe/extension-bridge-injected" "2.2.0"
+
+"@onekeyfe/onekey-conflux-provider@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.npmmirror.com/@onekeyfe/onekey-conflux-provider/-/onekey-conflux-provider-2.2.0.tgz#acdc16af6a89d1e001a36c8f4ffe026b85efc186"
+  integrity sha512-ZAFyoDyQ4yijX3LbcMNJh4Hn+6XBGhE8utiyvLcY1Jy/JKagCK9BT9U8JQYihkQIrLG/0avFxN8DhP7otB9Yhg==
+  dependencies:
+    "@onekeyfe/cross-inpage-provider-core" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-errors" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.0"
+    "@onekeyfe/extension-bridge-injected" "2.2.0"
+
+"@onekeyfe/onekey-cosmos-provider@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.npmmirror.com/@onekeyfe/onekey-cosmos-provider/-/onekey-cosmos-provider-2.2.0.tgz#6bf485ad64ab191461cd2f16eb27f76d73e7672c"
+  integrity sha512-NcI6VeGtXOpC+8VNKw9NPoI0ReGbP6lrpgv9qj2Wo9KDxlDpYMYfggvOO0ilPGrmqq1IBtzD5MFohazspEX/nQ==
+  dependencies:
+    "@noble/hashes" "^1.3.0"
+    "@onekeyfe/cross-inpage-provider-core" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-errors" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.0"
+    "@onekeyfe/extension-bridge-injected" "2.2.0"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
     eth-rpc-errors "^4.0.3"
     long "^5.2.1"
     mitt "^3.0.0"
 
+<<<<<<< HEAD
 "@onekeyfe/onekey-near-provider@2.2.6":
   version "2.2.6"
   resolved "https://registry.npmjs.org/@onekeyfe/onekey-near-provider/-/onekey-near-provider-2.2.6.tgz#922dda1e2c5e0834dd50124290e62fab082fd35a"
@@ -3153,10 +3256,22 @@
     "@onekeyfe/cross-inpage-provider-errors" "2.2.6"
     "@onekeyfe/cross-inpage-provider-types" "2.2.6"
     "@onekeyfe/extension-bridge-injected" "2.2.6"
+=======
+"@onekeyfe/onekey-near-provider@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.npmmirror.com/@onekeyfe/onekey-near-provider/-/onekey-near-provider-2.2.0.tgz#2f0b57ecea351032b2a174d7ec4d557f69d52b08"
+  integrity sha512-uBDDKAnHzVp/xu7iPTrmghrcLUz/i7HYLvcjms366yAWFrqfUurp/JFNZ7Pj9V863c+sgFqH3Bje+pueGaL1Eg==
+  dependencies:
+    "@onekeyfe/cross-inpage-provider-core" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-errors" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.0"
+    "@onekeyfe/extension-bridge-injected" "2.2.0"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
     borsh "^0.6.0"
     depd "^2.0.0"
     tweetnacl "^1.0.3"
 
+<<<<<<< HEAD
 "@onekeyfe/onekey-solana-provider@2.2.6":
   version "2.2.6"
   resolved "https://registry.npmjs.org/@onekeyfe/onekey-solana-provider/-/onekey-solana-provider-2.2.6.tgz#26b1bb6d0eed84ce5d70b381da16c09ec953565b"
@@ -3166,11 +3281,23 @@
     "@onekeyfe/cross-inpage-provider-errors" "2.2.6"
     "@onekeyfe/cross-inpage-provider-types" "2.2.6"
     "@onekeyfe/extension-bridge-injected" "2.2.6"
+=======
+"@onekeyfe/onekey-solana-provider@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.npmmirror.com/@onekeyfe/onekey-solana-provider/-/onekey-solana-provider-2.2.0.tgz#5c60b00d63589307ec040074e6172b4bd4b6604a"
+  integrity sha512-FRe0mQgir5rK8yRBacYsEAG04ZcCQUkkzDwi1QP1nwh44NaReyd4Tj1dTUmQdXkt6EbxySiNPOXk7KDVa9fNQA==
+  dependencies:
+    "@onekeyfe/cross-inpage-provider-core" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-errors" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.0"
+    "@onekeyfe/extension-bridge-injected" "2.2.0"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
     "@solana/wallet-standard-features" "^1.1.0"
     "@solana/web3.js" "^1.41.3"
     "@wallet-standard/base" "^1.0.1"
     bs58 "^5.0.0"
 
+<<<<<<< HEAD
 "@onekeyfe/onekey-sui-provider@2.2.6":
   version "2.2.6"
   resolved "https://registry.npmjs.org/@onekeyfe/onekey-sui-provider/-/onekey-sui-provider-2.2.6.tgz#ef5588c258d3849283925d1f6fc0bf7f96dd1635"
@@ -3194,10 +3321,36 @@
     "@onekeyfe/cross-inpage-provider-errors" "2.2.6"
     "@onekeyfe/cross-inpage-provider-types" "2.2.6"
     "@onekeyfe/extension-bridge-injected" "2.2.6"
+=======
+"@onekeyfe/onekey-sui-provider@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.npmmirror.com/@onekeyfe/onekey-sui-provider/-/onekey-sui-provider-2.2.0.tgz#fa6878b6a22f59cb514c56567b74fe8f09461c22"
+  integrity sha512-bNUojGlgLGhnB2kzCCGVNSLOOp2zhWSGGovhdPSR0gaZC0sOSfwZDV6YfJpVoMPAQhHWD+NGXvhAjCiZaVFPVQ==
+  dependencies:
+    "@mysten/wallet-standard" "^0.7.2"
+    "@onekeyfe/cross-inpage-provider-core" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-errors" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.0"
+    "@onekeyfe/extension-bridge-injected" "2.2.0"
+    eth-rpc-errors "^4.0.3"
+    mitt "^3.0.0"
+
+"@onekeyfe/onekey-tron-provider@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.npmmirror.com/@onekeyfe/onekey-tron-provider/-/onekey-tron-provider-2.2.0.tgz#dfb968f621e1ece481d419be37a8939f282e63f1"
+  integrity sha512-6EJEHxG6I4+4BFD2O0wd/j5qHI4dtF8oOpXxDkAMelutkn4bpzOuA9rDpAyJr4KrcI364DSwDMrRz1xp7aXMGQ==
+  dependencies:
+    "@noble/secp256k1" "1.7.1"
+    "@onekeyfe/cross-inpage-provider-core" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-errors" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.0"
+    "@onekeyfe/extension-bridge-injected" "2.2.0"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
     querystring "^0.2.1"
     sunweb "^1.0.7"
     tronweb "^5.3.2"
 
+<<<<<<< HEAD
 "@onekeyfe/onekey-webln-provider@2.2.6":
   version "2.2.6"
   resolved "https://registry.npmjs.org/@onekeyfe/onekey-webln-provider/-/onekey-webln-provider-2.2.6.tgz#7f0d563bc47fcdfc78e14725058bf80a68c4b66e"
@@ -3207,6 +3360,17 @@
     "@onekeyfe/cross-inpage-provider-errors" "2.2.6"
     "@onekeyfe/cross-inpage-provider-types" "2.2.6"
     "@onekeyfe/extension-bridge-injected" "2.2.6"
+=======
+"@onekeyfe/onekey-webln-provider@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.npmmirror.com/@onekeyfe/onekey-webln-provider/-/onekey-webln-provider-2.2.0.tgz#6a2977e34ba8a7b463dca2bb22f00b31039ad035"
+  integrity sha512-GOnI/co/VIu0FOgMuTJcFlzHU2KgsrkGYbzk+Jkw3YGhsCZukyD0hvS39+TwlsJfkNauGXTeaMSsLaEzj1Bm/Q==
+  dependencies:
+    "@onekeyfe/cross-inpage-provider-core" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-errors" "2.2.0"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.0"
+    "@onekeyfe/extension-bridge-injected" "2.2.0"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
 
 "@open-draft/deferred-promise@^2.2.0":
   version "2.2.0"
@@ -5937,6 +6101,27 @@
     rpc-websockets "^7.11.0"
     superstruct "^0.14.2"
 
+"@solana/web3.js@^1.41.3":
+  version "1.98.0"
+  resolved "https://registry.npmmirror.com/@solana/web3.js/-/web3.js-1.98.0.tgz#21ecfe8198c10831df6f0cfde7f68370d0405917"
+  integrity sha512-nz3Q5OeyGFpFCR+erX2f6JPt3sKhzhYcSycBCSPkWjzSVDh/Rr1FqTVMRe58FKO16/ivTUcuJjeS5MyBvpkbzA==
+  dependencies:
+    "@babel/runtime" "^7.25.0"
+    "@noble/curves" "^1.4.2"
+    "@noble/hashes" "^1.4.0"
+    "@solana/buffer-layout" "^4.0.1"
+    agentkeepalive "^4.5.0"
+    bigint-buffer "^1.1.5"
+    bn.js "^5.2.1"
+    borsh "^0.7.0"
+    bs58 "^4.0.1"
+    buffer "6.0.3"
+    fast-stable-stringify "^1.0.0"
+    jayson "^4.1.1"
+    node-fetch "^2.7.0"
+    rpc-websockets "^9.0.2"
+    superstruct "^2.0.2"
+
 "@solflare-wallet/metamask-sdk@^1.0.2":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@solflare-wallet/metamask-sdk/-/metamask-sdk-1.0.3.tgz#3baaa22de2c86515e6ba6025285cd1f5d74b04e5"
@@ -6212,7 +6397,11 @@
 
 "@swc/helpers@^0.5.11":
   version "0.5.15"
+<<<<<<< HEAD
   resolved "https://registry.yarnpkg.com/@swc/helpers/-/helpers-0.5.15.tgz#79efab344c5819ecf83a43f3f9f811fc84b516d7"
+=======
+  resolved "https://registry.npmmirror.com/@swc/helpers/-/helpers-0.5.15.tgz#79efab344c5819ecf83a43f3f9f811fc84b516d7"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==
   dependencies:
     tslib "^2.8.0"
@@ -6675,7 +6864,11 @@
 
 "@tronweb3/google-protobuf@^3.21.2":
   version "3.21.2"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/@tronweb3/google-protobuf/-/google-protobuf-3.21.2.tgz#0964cf83ed7826d31c3cb4e4ecf07655681631c9"
+=======
+  resolved "https://registry.npmmirror.com/@tronweb3/google-protobuf/-/google-protobuf-3.21.2.tgz#0964cf83ed7826d31c3cb4e4ecf07655681631c9"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-IVcT2GfWX3K6tHUVhs14NP5uzKhQt4KeDya1g9ACxuZsUzsaoGUIGzceK2Ltu7xp1YV94AaHOf4yxLAivlvEkQ==
 
 "@types/bn.js@^4.11.3":
@@ -6857,6 +7050,13 @@
   dependencies:
     undici-types "~6.19.2"
 
+"@types/node@22.7.5":
+  version "22.7.5"
+  resolved "https://registry.npmmirror.com/@types/node/-/node-22.7.5.tgz#cfde981727a7ab3611a481510b473ae54442b92b"
+  integrity sha512-jML7s2NAzMWc//QSJ1a3prpk78cOPchGvXJsC3C6R6PSMoooztvRVQEz89gmBTBY1SPMaqo5teB4uNHPdetShQ==
+  dependencies:
+    undici-types "~6.19.2"
+
 "@types/node@>=13.7.0":
   version "20.12.12"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-20.12.12.tgz#7cbecdf902085cec634fdb362172dfe12b8f2050"
@@ -7003,7 +7203,11 @@
 
 "@types/ws@^8.2.2":
   version "8.5.13"
+<<<<<<< HEAD
   resolved "https://registry.yarnpkg.com/@types/ws/-/ws-8.5.13.tgz#6414c280875e2691d0d1e080b05addbf5cb91e20"
+=======
+  resolved "https://registry.npmmirror.com/@types/ws/-/ws-8.5.13.tgz#6414c280875e2691d0d1e080b05addbf5cb91e20"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-osM/gWBTPKgHV8XkTunnegTRIsvF6owmf5w+JtAfOw472dptdm0dlGv4xCt6GwQRcC2XVOvvRE/0bAoQcL2QkA==
   dependencies:
     "@types/node" "*"
@@ -7678,7 +7882,11 @@ aes-js@3.0.0:
 
 aes-js@4.0.0-beta.5:
   version "4.0.0-beta.5"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/aes-js/-/aes-js-4.0.0-beta.5.tgz#8d2452c52adedebc3a3e28465d858c11ca315873"
+=======
+  resolved "https://registry.npmmirror.com/aes-js/-/aes-js-4.0.0-beta.5.tgz#8d2452c52adedebc3a3e28465d858c11ca315873"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-G965FqalsNyrPqgEGON7nIx1e/OVENSgiEIzyC63haUMuvNnwIgIjMs52hlTCKhkBny7A2ORNlfY9Zu+jmGk1Q==
 
 agent-base@6, agent-base@^6.0.2:
@@ -8114,7 +8322,11 @@ axios@^1.6.0:
 
 axios@^1.6.2:
   version "1.7.9"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/axios/-/axios-1.7.9.tgz#d7d071380c132a24accda1b2cfc1535b79ec650a"
+=======
+  resolved "https://registry.npmmirror.com/axios/-/axios-1.7.9.tgz#d7d071380c132a24accda1b2cfc1535b79ec650a"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-LhLcE7Hbiryz8oMDdDptSrWowmB4Bl6RCt6sIJKpRB4XtVf0iEgewX3au/pJqm+Py1kCASkb/FFKjxQaLtxJvw==
   dependencies:
     follow-redirects "^1.15.6"
@@ -8216,7 +8428,11 @@ babel-plugin-transform-flow-enums@^0.0.2:
 
 babel-runtime@^6.26.0:
   version "6.26.0"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/babel-runtime/-/babel-runtime-6.26.0.tgz#965c7058668e82b55d7bfe04ff2337bc8b5647fe"
+=======
+  resolved "https://registry.npmmirror.com/babel-runtime/-/babel-runtime-6.26.0.tgz#965c7058668e82b55d7bfe04ff2337bc8b5647fe"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-ITKNuq2wKlW1fJg9sSW52eepoYgZBggvOAHC0u/CYu/qxQ9EVzThCgR69BnSXLHjy2f7SY5zaQ4yt7H9ZVxY2g==
   dependencies:
     core-js "^2.4.0"
@@ -8830,14 +9046,14 @@ camelize@^1.0.0:
   integrity sha512-dU+Tx2fsypxTgtLoE36npi3UqcjSSMNYfkqgmoEhtZrraP5VWq0K7FkWVTYa8eMPtnU/G2txVsfdCJTn9uzpuQ==
 
 caniuse-lite@^1.0.30001406:
-  version "1.0.30001486"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001486.tgz#56a08885228edf62cbe1ac8980f2b5dae159997e"
-  integrity sha512-uv7/gXuHi10Whlj0pp5q/tsK/32J2QSqVRKQhs2j8VsDCjgyruAh/eEXHF822VqO9yT6iZKw3nRwZRSPBE9OQg==
+  version "1.0.30001690"
+  resolved "https://registry.npmmirror.com/caniuse-lite/-/caniuse-lite-1.0.30001690.tgz"
+  integrity sha512-5ExiE3qQN6oF8Clf8ifIDcMRCRE/dMGcETG/XGMD8/XiXm6HXQgQTh1yZYLXXpSOsEUlJm1Xr7kGULZTuGtP/w==
 
 caniuse-lite@^1.0.30001587, caniuse-lite@^1.0.30001599:
-  version "1.0.30001620"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001620.tgz#78bb6f35b8fe315b96b8590597094145d0b146b4"
-  integrity sha512-WJvYsOjd1/BYUY6SNGUosK9DUidBPDTnOARHp3fSmFO1ekdxaY6nKRttEVrfMmYi80ctS0kz1wiWmm14fVc3ew==
+  version "1.0.30001690"
+  resolved "https://registry.npmmirror.com/caniuse-lite/-/caniuse-lite-1.0.30001690.tgz"
+  integrity sha512-5ExiE3qQN6oF8Clf8ifIDcMRCRE/dMGcETG/XGMD8/XiXm6HXQgQTh1yZYLXXpSOsEUlJm1Xr7kGULZTuGtP/w==
 
 capability@^0.2.5:
   version "0.2.5"
@@ -9285,7 +9501,11 @@ core-js-compat@^3.36.1:
 
 core-js@^2.4.0:
   version "2.6.12"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/core-js/-/core-js-2.6.12.tgz#d9333dfa7b065e347cc5682219d6f690859cc2ec"
+=======
+  resolved "https://registry.npmmirror.com/core-js/-/core-js-2.6.12.tgz#d9333dfa7b065e347cc5682219d6f690859cc2ec"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-Kb2wC0fvsWfQrgk8HU5lW6U/Lcs8+9aaYcy4ZFc6DDlo4nZ7n70dEgE5rtR0oG6ufKDUnrwfWL1mXR5ljDatrQ==
 
 core-util-is@~1.0.0:
@@ -10562,7 +10782,11 @@ ethers@5.7.2:
 
 ethers@^6.6.0:
   version "6.13.4"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/ethers/-/ethers-6.13.4.tgz#bd3e1c3dc1e7dc8ce10f9ffb4ee40967a651b53c"
+=======
+  resolved "https://registry.npmmirror.com/ethers/-/ethers-6.13.4.tgz#bd3e1c3dc1e7dc8ce10f9ffb4ee40967a651b53c"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-21YtnZVg4/zKkCQPjrDj38B1r4nQvTZLopUGMLQ1ePU2zV/joCfDC3t3iKQjWRzjjjbzR+mdAIoikeBRNkdllA==
   dependencies:
     "@adraffy/ens-normalize" "1.10.1"
@@ -10593,7 +10817,11 @@ event-target-shim@^5.0.0, event-target-shim@^5.0.1:
 
 eventemitter3@^3.1.0:
   version "3.1.2"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/eventemitter3/-/eventemitter3-3.1.2.tgz#2d3d48f9c346698fce83a85d7d664e98535df6e7"
+=======
+  resolved "https://registry.npmmirror.com/eventemitter3/-/eventemitter3-3.1.2.tgz#2d3d48f9c346698fce83a85d7d664e98535df6e7"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-tvtQIeLVHjDkJYnzf2dgVMxfuSGJeM/7UCG17TT4EumTfNtF+0nebF/4zWOIkCreAbtNqhGEboB6BWrwqNaw4Q==
 
 eventemitter3@^4.0.7:
@@ -11661,7 +11889,11 @@ inherits@=2.0.1:
 
 injectpromise@^1.0.0:
   version "1.0.0"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/injectpromise/-/injectpromise-1.0.0.tgz#c621f7df2bbfc1164d714f1fb229adec2079da39"
+=======
+  resolved "https://registry.npmmirror.com/injectpromise/-/injectpromise-1.0.0.tgz#c621f7df2bbfc1164d714f1fb229adec2079da39"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-qNq5wy4qX4uWHcVFOEU+RqZkoVG65FhvGkyDWbuBxILMjK6A1LFf5A1mgXZkD4nRx5FCorD81X/XvPKp/zVfPA==
 
 int64-buffer@^1.0.1:
@@ -12180,7 +12412,11 @@ jayson@^4.1.0:
 
 jayson@^4.1.1:
   version "4.1.3"
+<<<<<<< HEAD
   resolved "https://registry.yarnpkg.com/jayson/-/jayson-4.1.3.tgz#db9be2e4287d9fef4fc05b5fe367abe792c2eee8"
+=======
+  resolved "https://registry.npmmirror.com/jayson/-/jayson-4.1.3.tgz#db9be2e4287d9fef4fc05b5fe367abe792c2eee8"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-LtXh5aYZodBZ9Fc3j6f2w+MTNcnxteMOrb+QgIouguGOulWi0lieEkOUg+HkjjFs0DGoWDds6bi4E9hpNFLulQ==
   dependencies:
     "@types/connect" "^3.4.33"
@@ -12854,7 +13090,11 @@ long@^4.0.0:
 
 long@^5.0.0, long@^5.2.1, long@^5.2.3:
   version "5.2.3"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/long/-/long-5.2.3.tgz#a3ba97f3877cf1d778eccbcb048525ebb77499e1"
+=======
+  resolved "https://registry.npmmirror.com/long/-/long-5.2.3.tgz#a3ba97f3877cf1d778eccbcb048525ebb77499e1"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-lcHwpNoggQTObv5apGNCTdJrO69eHOZMi4BNC+rTLER8iHAqGrUVeLh/irVIM7zTw2bOXA8T6uNPeujwOLg/2Q==
 
 loose-envify@^1.0.0, loose-envify@^1.1.0, loose-envify@^1.4.0:
@@ -13334,7 +13574,7 @@ ms@2.1.2:
 
 ms@2.1.3, ms@^2.0.0, ms@^2.1.1, ms@^2.1.3:
   version "2.1.3"
-  resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
+  resolved "https://registry.npmmirror.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
   integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
 msw@^2.4.1:
@@ -14536,7 +14776,11 @@ query-string@7.1.3:
 
 querystring-es3@^0.2.1:
   version "0.2.1"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/querystring-es3/-/querystring-es3-0.2.1.tgz#9ec61f79049875707d69414596fd907a4d711e73"
+=======
+  resolved "https://registry.npmmirror.com/querystring-es3/-/querystring-es3-0.2.1.tgz#9ec61f79049875707d69414596fd907a4d711e73"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-773xhDQnZBMFobEiztv8LIl70ch5MSF/jUQVlhwFyBILqq96anmoctVIYz+ZRp0qbCKATTn6ev02M3r7Ga5vqA==
 
 querystring@^0.2.1:
@@ -14949,7 +15193,11 @@ regenerate@^1.4.2:
 
 regenerator-runtime@^0.11.0:
   version "0.11.1"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/regenerator-runtime/-/regenerator-runtime-0.11.1.tgz#be05ad7f9bf7d22e056f9726cee5017fbf19e2e9"
+=======
+  resolved "https://registry.npmmirror.com/regenerator-runtime/-/regenerator-runtime-0.11.1.tgz#be05ad7f9bf7d22e056f9726cee5017fbf19e2e9"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-MguG95oij0fC3QV3URf4V2SDYGJhJnJGqvIIgdECeODCT98wSWDAJ94SSuVpYQUoTcGUIL6L4yNB7j1DFFHSBg==
 
 regenerator-runtime@^0.13.10:
@@ -15216,7 +15464,11 @@ rpc-websockets@^7.11.0:
 
 rpc-websockets@^9.0.2:
   version "9.0.4"
+<<<<<<< HEAD
   resolved "https://registry.yarnpkg.com/rpc-websockets/-/rpc-websockets-9.0.4.tgz#9d8ee82533b5d1e13d9ded729e3e38d0d8fa083f"
+=======
+  resolved "https://registry.npmmirror.com/rpc-websockets/-/rpc-websockets-9.0.4.tgz#9d8ee82533b5d1e13d9ded729e3e38d0d8fa083f"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-yWZWN0M+bivtoNLnaDbtny4XchdAIF5Q4g/ZsC5UC61Ckbp0QczwO8fg44rV3uYmY4WHd+EZQbn90W1d8ojzqQ==
   dependencies:
     "@swc/helpers" "^0.5.11"
@@ -16069,7 +16321,11 @@ sudo-prompt@^9.0.0:
 
 sunweb@^1.0.7:
   version "1.1.0"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/sunweb/-/sunweb-1.1.0.tgz#7d00dbd610f9fd7d3380f71ae1fa03dabd882094"
+=======
+  resolved "https://registry.npmmirror.com/sunweb/-/sunweb-1.1.0.tgz#7d00dbd610f9fd7d3380f71ae1fa03dabd882094"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-RoQHMAE3EMM04/y9XHDOhmnf4prhes2yYsRMi5mYANSHohpPvLl+v5I7xD0M5f5W6dMz2eSY7b0NsIyfH/1V/g==
   dependencies:
     "@babel/runtime" "^7.4.5"
@@ -16110,7 +16366,11 @@ superstruct@^1.0.3:
 
 superstruct@^2.0.2:
   version "2.0.2"
+<<<<<<< HEAD
   resolved "https://registry.yarnpkg.com/superstruct/-/superstruct-2.0.2.tgz#3f6d32fbdc11c357deff127d591a39b996300c54"
+=======
+  resolved "https://registry.npmmirror.com/superstruct/-/superstruct-2.0.2.tgz#3f6d32fbdc11c357deff127d591a39b996300c54"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-uV+TFRZdXsqXTL2pRvujROjdZQ4RAlBUS5BTh9IGm+jTqQntYThciG/qu57Gs69yjnVUSqdxF9YLmSnpupBW9A==
 
 supports-color@^5.3.0, supports-color@^5.5.0:
@@ -16360,7 +16620,11 @@ tr46@~0.0.3:
 
 tronweb@^5.3.2:
   version "5.3.2"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/tronweb/-/tronweb-5.3.2.tgz#393b0fa0290e2c5aa7a3b3b82956f53ca65a764f"
+=======
+  resolved "https://registry.npmmirror.com/tronweb/-/tronweb-5.3.2.tgz#393b0fa0290e2c5aa7a3b3b82956f53ca65a764f"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-iPcIjMCxb6H7FXMntAj47F3L+7jSideyQ7ZOvRj9MeZBh46SHevMrDDR57HzakUa/tT8VvlPFHtqFK4hzTLkXw==
   dependencies:
     "@babel/runtime" "^7.0.0"
@@ -16409,7 +16673,11 @@ tslib@1.14.1, tslib@^1.11.0, tslib@^1.9.0:
 
 tslib@2.7.0:
   version "2.7.0"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/tslib/-/tslib-2.7.0.tgz#d9b40c5c40ab59e8738f297df3087bf1a2690c01"
+=======
+  resolved "https://registry.npmmirror.com/tslib/-/tslib-2.7.0.tgz#d9b40c5c40ab59e8738f297df3087bf1a2690c01"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-gLXCKdN1/j47AiHiOkJN69hJmcbGTHI0ImLmbYLHykhgeN0jVGola9yVjFgzCUklsZQMW55o+dW7IXv3RCXDzA==
 
 tslib@^2.0.0, tslib@^2.0.1, tslib@^2.0.3, tslib@^2.3.0, tslib@^2.3.1, tslib@^2.6.1, tslib@^2.6.2:
@@ -16429,7 +16697,11 @@ tslib@^2.4.0, tslib@^2.5.0:
 
 tslib@^2.8.0:
   version "2.8.1"
+<<<<<<< HEAD
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.8.1.tgz#612efe4ed235d567e8aba5f2a5fab70280ade83f"
+=======
+  resolved "https://registry.npmmirror.com/tslib/-/tslib-2.8.1.tgz#612efe4ed235d567e8aba5f2a5fab70280ade83f"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==
 
 tweetnacl-util@^0.15.0, tweetnacl-util@^0.15.1:
@@ -16834,7 +17106,11 @@ valibot@^0.25.0:
 
 validator@^13.7.0:
   version "13.12.0"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/validator/-/validator-13.12.0.tgz#7d78e76ba85504da3fee4fd1922b385914d4b35f"
+=======
+  resolved "https://registry.npmmirror.com/validator/-/validator-13.12.0.tgz#7d78e76ba85504da3fee4fd1922b385914d4b35f"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-c1Q0mCiPlgdTVVVIJIrBuxNicYE+t/7oKeI9MWLj3fh/uq2Pxh/3eeWbVZ4OcGW1TUf53At0njHw5SMdA3tmMg==
 
 valtio@1.10.5:
@@ -17148,7 +17424,11 @@ ws@7.4.6:
 
 ws@8.17.1:
   version "8.17.1"
+<<<<<<< HEAD
   resolved "https://registry.npmjs.org/ws/-/ws-8.17.1.tgz#9293da530bb548febc95371d90f9c878727d919b"
+=======
+  resolved "https://registry.npmmirror.com/ws/-/ws-8.17.1.tgz#9293da530bb548febc95371d90f9c878727d919b"
+>>>>>>> b1bde0ea (aptos/cardano/conflux/scdo)
   integrity sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==
 
 ws@^6.2.2:

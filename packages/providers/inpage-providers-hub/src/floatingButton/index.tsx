@@ -156,7 +156,7 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
               fontSize: '12px',
               lineHeight: '16px',
             }}
-            >
+          >
             {i18n.canBeReEnabledInSettings}
           </div>
         </div>
@@ -170,6 +170,7 @@ function IconButton({
   onClick,
   dataLoaded,
   isShowCloseDialog,
+  isDragging,
   showCloseDialog,
 }: {
   isExpanded: boolean;
@@ -177,6 +178,7 @@ function IconButton({
   onClick: () => void;
   dataLoaded: boolean;
   showCloseDialog: () => void;
+  isDragging: boolean;
 }) {
   const [showCloseButton, setIsShowCloseButton] = useState(false);
   return (
@@ -188,14 +190,14 @@ function IconButton({
         cursor: 'pointer',
       }}
       onMouseEnter={() => {
-        if (isExpanded || isShowCloseDialog) {
+        if (isDragging || isExpanded || isShowCloseDialog) {
           return;
         }
         setIsShowCloseButton(true);
       }}
       onMouseLeave={() => setIsShowCloseButton(false)}
       onClick={() => {
-        if (isShowCloseDialog) {
+        if (isDragging || isShowCloseDialog) {
           return;
         }
         setIsShowCloseButton(false);
@@ -206,34 +208,38 @@ function IconButton({
         <Logo style={logoStyle} />
         {!dataLoaded && <span style={textStyle}>{isExpanded ? i18n.fetchingDAppInfo : ''}</span>}
       </div>
-      <div
-        style={{
-          display: 'flex',
-          padding: '$4',
-          position: 'absolute',
-          left: '-6px',
-          bottom: '-10px',
-          transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
-          opacity: showCloseButton ? 1 : 0,
-          borderRadius: '9999px',
-          backgroundColor: '#fff',
-          border: '1px solid rgba(0, 0, 0, 0.1)',
-        }}
-        onClick={(event) => {
-          event.stopPropagation();
-          setIsShowCloseButton(false);
-          showCloseDialog();
-        }}
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path
-            fill-rule="evenodd"
-            clip-rule="evenodd"
-            d="M7.29289 7.29289C7.68342 6.90237 8.31658 6.90237 8.70711 7.29289L12 10.5858L15.2929 7.29289C15.6834 6.90237 16.3166 6.90237 16.7071 7.29289C17.0976 7.68342 17.0976 8.31658 16.7071 8.70711L13.4142 12L16.7071 15.2929C17.0976 15.6834 17.0976 16.3166 16.7071 16.7071C16.3166 17.0976 15.6834 17.0976 15.2929 16.7071L12 13.4142L8.70711 16.7071C8.31658 17.0976 7.68342 17.0976 7.29289 16.7071C6.90237 16.3166 6.90237 15.6834 7.29289 15.2929L10.5858 12L7.29289 8.70711C6.90237 8.31658 6.90237 7.68342 7.29289 7.29289Z"
-            fill="rgba(0, 0, 0, 0.61)"
-          />
-        </svg>
-      </div>
+      {
+        isDragging ? null : (
+          <div
+            style={{
+              display: 'flex',
+              padding: '$4',
+              position: 'absolute',
+              left: '-6px',
+              bottom: '-10px',
+              transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
+              opacity: showCloseButton ? 1 : 0,
+              borderRadius: '9999px',
+              backgroundColor: '#fff',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+            }}
+            onClick={(event) => {
+              event.stopPropagation();
+              setIsShowCloseButton(false);
+              showCloseDialog();
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M7.29289 7.29289C7.68342 6.90237 8.31658 6.90237 8.70711 7.29289L12 10.5858L15.2929 7.29289C15.6834 6.90237 16.3166 6.90237 16.7071 7.29289C17.0976 7.68342 17.0976 8.31658 16.7071 8.70711L13.4142 12L16.7071 15.2929C17.0976 15.6834 17.0976 16.3166 16.7071 16.7071C16.3166 17.0976 15.6834 17.0976 15.2929 16.7071L12 13.4142L8.70711 16.7071C8.31658 17.0976 7.68342 17.0976 7.29289 16.7071C6.90237 16.3166 6.90237 15.6834 7.29289 15.2929L10.5858 12L7.29289 8.70711C6.90237 8.31658 6.90237 7.68342 7.29289 7.29289Z"
+                fill="rgba(0, 0, 0, 0.61)"
+              />
+            </svg>
+          </div>
+        )
+      }
     </div>
   );
 }
@@ -287,13 +293,13 @@ const SECURITY_INFO = {
   [EHostSecurityLevel.High]: {
     titleId: 'maliciousSiteWarning',
     icon: (
-      <HighRisk style={{ width: 16, height: 16}} />
+      <HighRisk style={{ width: 16, height: 16 }} />
     ),
   },
   [EHostSecurityLevel.Medium]: {
     titleId: 'suspectedMaliciousBehavior',
     icon: (
-      <MediumRsik style={{ width: 16, height: 16}} />
+      <MediumRsik style={{ width: 16, height: 16 }} />
     ),
   },
 };
@@ -411,27 +417,27 @@ function SecurityInfo({
                 }}
               />
             ) : (
-              <div 
-                style={{ 
-                  height: '16px', 
-                  width: '16px', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center' 
+              <div
+                style={{
+                  height: '16px',
+                  width: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
               >
                 <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path fill-rule="evenodd" clip-rule="evenodd" d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2ZM0 10C0 4.47715 4.47715 0 10 0C15.5228 0 20 4.47715 20 10C20 15.5228 15.5228 20 10 20C4.47715 20 0 15.5228 0 10Z" fill="black" fill-opacity="0.447"/>
-                  <path fill-rule="evenodd" clip-rule="evenodd" d="M10 7C9.62267 7 9.29263 7.2086 9.12147 7.52152C8.85645 8.00606 8.24881 8.18401 7.76426 7.91899C7.27972 7.65396 7.10177 7.04632 7.36679 6.56178C7.87463 5.63331 8.86263 5 10 5C11.5147 5 12.5669 6.00643 12.8664 7.189C13.1676 8.37786 12.7101 9.76299 11.3416 10.4472C11.1323 10.5519 11 10.7659 11 11C11 11.5523 10.5523 12 10 12C9.44772 12 9 11.5523 9 11C9 10.0084 9.56027 9.10183 10.4472 8.65836C10.902 8.43099 11.0188 8.03973 10.9277 7.6801C10.835 7.31417 10.5283 7 10 7Z" fill="black" fill-opacity="0.447"/>
-                  <path d="M11 14C11 14.5523 10.5523 15 10 15C9.44772 15 9 14.5523 9 14C9 13.4477 9.44772 13 10 13C10.5523 13 11 13.4477 11 14Z" fill="black" fill-opacity="0.447"/>
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2ZM0 10C0 4.47715 4.47715 0 10 0C15.5228 0 20 4.47715 20 10C20 15.5228 15.5228 20 10 20C4.47715 20 0 15.5228 0 10Z" fill="black" fill-opacity="0.447" />
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M10 7C9.62267 7 9.29263 7.2086 9.12147 7.52152C8.85645 8.00606 8.24881 8.18401 7.76426 7.91899C7.27972 7.65396 7.10177 7.04632 7.36679 6.56178C7.87463 5.63331 8.86263 5 10 5C11.5147 5 12.5669 6.00643 12.8664 7.189C13.1676 8.37786 12.7101 9.76299 11.3416 10.4472C11.1323 10.5519 11 10.7659 11 11C11 11.5523 10.5523 12 10 12C9.44772 12 9 11.5523 9 11C9 10.0084 9.56027 9.10183 10.4472 8.65836C10.902 8.43099 11.0188 8.03973 10.9277 7.6801C10.835 7.31417 10.5283 7 10 7Z" fill="black" fill-opacity="0.447" />
+                  <path d="M11 14C11 14.5523 10.5523 15 10 15C9.44772 15 9 14.5523 9 14C9 13.4477 9.44772 13 10 13C10.5523 13 11 13.4477 11 14Z" fill="black" fill-opacity="0.447" />
                 </svg>
               </div>
             )}
-            <span 
-              style={{ 
-                width: '100%', 
-                overflow: 'hidden', 
-                textOverflow: 'ellipsis' 
+            <span
+              style={{
+                width: '100%',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
               }}
             >
               {securityInfo?.dapp?.name || securityInfo?.host}
@@ -550,7 +556,7 @@ function App() {
   const [position, setPosition] = useState({ x: window.innerWidth - 40, y: window.innerHeight * 0.75 });
   const [isDragging, setIsDragging] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
-  const [side, setSide] = useState<'left'|'right'>('right');
+  const [side, setSide] = useState<'left' | 'right'>('right');
   const isDraggingTimerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const handleShowCloseDialog = useCallback(() => {
@@ -643,8 +649,8 @@ function App() {
         transition: isDragging ? 'none' : 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
         boxShadow:
           '0px 0px 0px 1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-        transform: isDragging ? "unset": (isExpanded ? 
-          `translateX(${side === 'right' ? '-20px' : '20px'})` : 
+        transform: isDragging ? "unset" : (isExpanded ?
+          `translateX(${side === 'right' ? '-20px' : '20px'})` :
           `translateX(${side === 'right' ? '216px' : '-216px'})`),
         fontFamily:
           '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
@@ -667,11 +673,12 @@ function App() {
           onClick={handleClick}
           isExpanded={isExpanded}
           isShowCloseDialog={showCloseDialog}
+          isDragging={isDragging}
           showCloseDialog={handleShowCloseDialog}
           dataLoaded={!!securityInfo}
         />
       )}
-      {!isDragging && !isExpanded && showCloseDialog && (
+      {!isExpanded && showCloseDialog && (
         <CloseDialog
           onClose={() => {
             setIsShowCloseDialog(false);

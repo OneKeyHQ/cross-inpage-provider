@@ -593,13 +593,16 @@ function App() {
     }
     isDraggingTimerIdRef.current = setTimeout(() => {
       setIsDragging(true);
+      const newX = e.clientX - 20;
+      const newY = e.clientY - 20;
+      setPosition({ x: newX, y: newY });
     }, 200)
   }, [isExpanded]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (isDragging) {
-      const newX = Math.min(Math.max(e.clientX, 0), window.innerWidth - 40);
-      const newY = Math.min(Math.max(e.clientY, 0), window.innerHeight - 100);
+      const newX = Math.min(Math.max(e.clientX - 20, 0), window.innerWidth - 40);
+      const newY = Math.min(Math.max(e.clientY - 20, 0), window.innerHeight - 100);
       setPosition({ x: newX, y: newY });
     }
   }, [isDragging]);

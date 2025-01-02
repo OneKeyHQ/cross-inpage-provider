@@ -583,12 +583,14 @@ function App() {
   }, [isExpanded, securityInfo, isDragging]);
 
   const handleMouseDown = useCallback((e: MouseEvent) => {
+    if (isExpanded) {
+      return;
+    }
     isDraggingTimerIdRef.current = setTimeout(() => {
       setIsDragging(true);
-      setIsExpanded(false);
       setStartPos({ x: e.clientX - position.x, y: e.clientY - position.y });
     }, 200)
-  }, [position]);
+  }, [position, isExpanded]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (isDragging) {
@@ -646,7 +648,7 @@ function App() {
           '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
         WebkitTextSizeAdjust: '100%',
         fontSmooth: 'antialiased',
-        cursor: isDragging ? 'grabbing' : 'grab',
+        cursor: isDragging ? 'grabbing' : (isExpanded ? 'default' : 'grab'),
       }}
       onMouseDown={handleMouseDown}
     >

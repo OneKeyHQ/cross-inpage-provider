@@ -551,14 +551,42 @@ function SecurityInfo({
   );
 }
 
+const savePosition = (side: 'left' | 'right', y: number) => {
+  localStorage.setItem('onekey-floating-button-position', JSON.stringify({ side, y }));
+};
+
+const readPosition = (): { side: 'left' | 'right'; y: number } => {
+  try {
+    const savedPosition = localStorage.getItem('onekey-floating-button-position') as string;
+    if (savedPosition) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return JSON.parse(savedPosition);
+    }
+  } catch (error) {
+    // ignore error
+  }
+  return {
+    side: 'right',
+    y: window.innerHeight * 0.75
+  };
+};
+
 function App() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showSecurityInfo, setIsShowSecurityInfo] = useState(false);
   const [securityInfo, setSecurityInfo] = useState<IHostSecurity | null>(null);
   const [showCloseDialog, setIsShowCloseDialog] = useState(false);
-  const [position, setPosition] = useState({ x: window.innerWidth - 40, y: window.innerHeight * 0.75 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [side, setSide] = useState<'left' | 'right'>('right');
+  const [position, setPosition] = useState(() => {
+    const { y } = readPosition();
+    return {
+      x: 0,
+      y,
+    }
+  });
+  const positionRef = useRef(position);
+  positionRef.current = position;
+  const [isDragging, setIsDragging] = useState((false));
+  const [side, setSide] = useState<'left' | 'right'>(() => readPosition().side);
   const isDraggingTimerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const handleShowCloseDialog = useCallback(() => {
@@ -618,16 +646,20 @@ function App() {
       setTimeout(() => {
         setIsDragging(false);
       }, 50)
+      const {
+        x, y
+      } = positionRef.current || {}
       const halfWidth = window.innerWidth / 2;
-      if (position.x < halfWidth) {
+      if (x < halfWidth) {
         setPosition(prev => ({ ...prev, x: 0 }));
         setSide('left');
       } else {
         setPosition(prev => ({ ...prev, x: window.innerWidth - 40 }));
         setSide('right');
       }
+      savePosition(side, y)
     }
-  }, [isDragging, position.x]);
+  }, [isDragging, side]);
 
   useEffect(() => {
     document.addEventListener('mousemove', handleMouseMove);

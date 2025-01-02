@@ -646,16 +646,16 @@ function App() {
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (isDragging) {
       const newX = Math.min(Math.max(e.clientX - 20, 0), window.innerWidth - 40);
-      const newY = Math.min(Math.max(e.clientY - 20, 40), window.innerHeight - 40);
+      const newY = Math.min(Math.max(e.clientY - 20, 60), window.innerHeight - 60);
+      containerPositionRef.current = {
+        x: newX,
+        y: newY,
+      }
       if (containerRef.current) {
         containerRef.current.style.left = `${newX}px`;
         containerRef.current.style.top = `${newY}px`;
         containerRef.current.style.right = 'auto';
         containerRef.current.style.bottom = 'auto';
-        containerPositionRef.current = {
-          x: newX,
-          y: newY,
-        }
       }
     }
   }, [isDragging]);
@@ -673,13 +673,14 @@ function App() {
       } = containerPositionRef.current
       const halfWidth = window.innerWidth / 2;
       const side = x < halfWidth ? 'left' : 'right';
-      const bottom = `${(100 - y / window.innerHeight * 100).toFixed()}%`;
+      const bottomNumber = 100 - y / window.innerHeight * 100
+      const bottom = `${(bottomNumber).toFixed(4)}%`;
       setTimeout(() => {
         if (containerRef.current) {
           containerRef.current.style.left = side === 'left' ? '0px' : 'auto';
           containerRef.current.style.right = side === 'right' ? '0px' : 'auto';
-          containerRef.current.style.top = 'auto';
-          containerRef.current.style.bottom = bottom;
+          containerRef.current.style.top = bottomNumber > 50 ? `${100 - bottomNumber}%` : 'auto';
+          containerRef.current.style.bottom = bottomNumber > 50 ? 'auto' : bottom;
         }
       }, 10)
       setPosition({
@@ -703,6 +704,7 @@ function App() {
   }, [handleMouseMove, handleMouseUp]);
 
   const { side, bottom } = position
+  const bottomNumber = parseFloat(bottom)
   return (
     <div
       id={containerId}
@@ -710,8 +712,9 @@ function App() {
       style={{
         position: 'fixed',
         zIndex: 999_999,
-        top: 'auto',
-        bottom,
+        top: bottomNumber > 50 ? `${100 - bottomNumber}%` : 'auto',
+        bottom: bottomNumber > 50 ? 'auto' : bottom,
+        userSelect: 'none',
         left: isDragging ? "auto" : side === 'left' ? '0px' : 'auto',
         right: isDragging ? "auto" : side === 'right' ? '0px' : 'auto',
         width: isDragging ? '40px' : '256px',

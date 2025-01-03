@@ -13,6 +13,7 @@ import params from './params';
 import { createTransferTransaction, createVersionedTransaction, createTokenTransferTransaction } from './builder';
 import nacl from 'tweetnacl';
 import { toast } from '../../ui/use-toast';
+import { OffchainMessage } from '../solanaStandard/OffchainMessage';
 
 const NETWORK = clusterApiUrl('mainnet-beta');
 
@@ -180,6 +181,43 @@ export default function Example() {
             return Promise.resolve(isValidSignature.toString());
           }}
         />
+          <ApiPayload
+          title="solSignOffchainMessage"
+          description="签名消息(OneKey 私有方法)"
+          presupposeParams={params.signMessage}
+          onExecute={async (request: string) => {
+            return await provider?.solSignOffchainMessage(Buffer.from(request, 'utf8'));
+          }}
+          onValidate={(request: string, result: string) => {
+            // const message = bs58.decode(request).toString();
+            const {
+              signature,
+              publicKey,
+            }: {
+              signature: any;
+              publicKey: string;
+            } = JSON.parse(result);
+
+            let signatureObj;
+            if(Array.isArray(signature)) {
+              signatureObj = new Uint8Array(signature)
+            } else {
+              signatureObj = new Uint8Array(signature.data)
+            }
+            const publicKeyObj = new PublicKey(publicKey);
+
+            const offchainMessage = new OffchainMessage({
+              message: Buffer.from(request, 'utf8'),
+            });
+            const isValidSignature = nacl.sign.detached.verify(
+              offchainMessage.serialize(),
+              signatureObj,
+              publicKeyObj.toBytes(),
+            );
+
+            return Promise.resolve(isValidSignature.toString());
+          }}
+        />
       </ApiGroup>
       <ApiGroup title="Transfer">
         <ApiPayload
@@ -337,7 +375,7 @@ export default function Example() {
               amount: number;
               decimals: number;
             } = JSON.parse(request);
-            
+
             const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
             const transaction = await createTokenTransferTransaction(
               connection,

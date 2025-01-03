@@ -26,6 +26,11 @@ export type SolanaRequest = {
     publicKey: string;
   }>;
 
+  'solSignOffchainMessage': (params: { message: string; version?: number }) => Promise<{
+    signature: string;
+    publicKey: string;
+  }>;
+
   'signTransaction': (params: { message: string }) => Promise<Transaction>;
 
   'signAllTransactions': (params: { message: string[] }) => Promise<Transaction[]>;
@@ -336,6 +341,27 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
     publicKey: PublicKey;
   }> {
     return this._handleSignMessage({ message, display });
+  }
+
+  async solSignOffchainMessage(
+    message: Uint8Array,
+    version?: number,
+  ): Promise<{
+    signature: Uint8Array;
+    publicKey: PublicKey;
+  }> {
+    const result = await this._callBridge({
+      method: 'solSignOffchainMessage',
+      params: {
+        message: typeof message === 'string' ? message : base58.encode(message),
+        version,
+      },
+    });
+
+    return {
+      signature: base58.decode(result.signature),
+      publicKey: new PublicKey(result.publicKey),
+    };
   }
 
   private async _handleSignMessage(params: {

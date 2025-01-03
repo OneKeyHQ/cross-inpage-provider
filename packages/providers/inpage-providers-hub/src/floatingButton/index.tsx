@@ -1,7 +1,7 @@
 import { render } from 'preact';
 import { useEffect, useMemo, useCallback, useRef, useState } from 'preact/hooks';
 import { IHostSecurity, EHostSecurityLevel } from './type';
-import { HighRisk, Logo, MediumRsik, Image } from './images';
+import { HighRisk, Logo, MediumRisk, Image } from './images';
 
 let isInjected = false;
 interface i18nText {
@@ -316,7 +316,7 @@ const SECURITY_INFO = {
   [EHostSecurityLevel.Medium]: {
     titleId: 'suspectedMaliciousBehavior',
     icon: (
-      <MediumRsik style={{ width: 16, height: 16 }} />
+      <MediumRisk style={{ width: 16, height: 16 }} />
     ),
   },
 };
@@ -575,14 +575,16 @@ const savePosition = (params: {
       $onekey: {
         $private: {
           request: (
-            arg: { method: string; params: { side: 'left' | 'right'; bottom: string } }
+            arg: { method: string; params: IFloatingIconSettings }
           ) => Promise<void>
         }
       }
     }
   ).$onekey.$private.request({
     method: 'wallet_saveFloatingIconSettings',
-    params,
+    params: {
+      position: params
+    },
   });
 };
 
@@ -711,7 +713,7 @@ function App() {
   }, [handleMouseMove, handleMouseUp]);
 
   const { side, bottom } = settings.position
-  const bottomNumber = parseFloat(bottom)
+  const bottomNumber = Number.parseFloat(bottom)
   return (
     <div
       id={containerId}

@@ -431,7 +431,8 @@ function SecurityInfo({
               style={{ 
                 width: '100%', 
                 overflow: 'hidden', 
-                textOverflow: 'ellipsis' 
+                textOverflow: 'ellipsis',
+                color: 'rgba(0, 0, 0, 0.88)',
               }}
             >
               {securityInfo?.dapp?.name || securityInfo?.host}

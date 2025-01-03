@@ -28,7 +28,7 @@ export const HighRisk = ({ style }: { style: any }) => (
   />
 )
 
-export const MediumRsik = ({ style }: { style: any }) => (
+export const MediumRisk = ({ style }: { style: any }) => (
   <Image
     style={style}
     src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB8AAAAfCAYAAAAfrhY5AAABk0lEQVRIDe2XPU7DQBCF3zqRaEgukAuEAyS0AaWhA1qkhJ5cAA6DZEu0IaKhAQ4QDoAvkAvEDRTx8mbJILceJyshsZK1uyPNfLMz+zN2qLSrM3TbnzhHgn5FvLOh93insWX2hpUYdWr5eoR+mSDlvKuyPfUCvqMDywCfnKJHwZzfvsFhPd6hcB4Xicw4uYkFFh7BHXazAOdkKMLIbRDghErYY7eewmODA88M5z7JNwc4ppWxjC3em+HcJ9nDM9ZyZmUcFc4L4/ci4soHFrie8w+LMqFL0bOelrYFqjpWqOpbcz5lro/ko6F4G845vMq9rN5H3XAlMJTXT+FN+tphZ547rS/MJyOMm4BFtzZ8C+xRUx6HRs0KbwRV5X+4RiJq/zfD7iq7XY6fJWTmu730mE1PfpB8YKQGrN3McFktobe1iRUFzfm6Ios2VHgRjbgFeSBX+CI2PEnwGODtQ6TMn6kINDq9Sl+QBfj9U/h9mdFQjAgsWPVeitOhhqt6L281n0wtDnfyM+FaWPsNCkJzqXiV9w3zlWKqZDoCQAAAAABJRU5ErkJggg=="

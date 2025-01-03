@@ -598,6 +598,8 @@ function App() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const containerPositionRef = useRef({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const isDraggingRef = useRef(isDragging)
+  isDraggingRef.current = isDragging
   const isDraggingTimerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleShowCloseDialog = useCallback(() => {
@@ -605,7 +607,7 @@ function App() {
   }, []);
 
   const handleClick = useCallback(async () => {
-    if (!isDragging) {
+    if (!isDraggingRef.current) {
       setIsExpanded(!isExpanded);
       setIsShowSecurityInfo(true);
       if (!securityInfo) {
@@ -627,7 +629,7 @@ function App() {
         setSecurityInfo(result.securityInfo);
       }
     }
-  }, [isExpanded, securityInfo, isDragging]);
+  }, [isExpanded, securityInfo]);
 
   const handleMouseDown = useCallback((e: MouseEvent) => {
     if (isExpanded) {
@@ -652,7 +654,7 @@ function App() {
 
   const handleMouseMove = useCallback(
     throttle((e: MouseEvent) => {
-      if (isDragging) {
+      if (isDraggingRef.current) {
         const newX = Math.min(Math.max(e.clientX - 20, 0), window.innerWidth - 40);
         const newY = Math.min(Math.max(e.clientY - 20, 60), window.innerHeight - 60);
         containerPositionRef.current = {
@@ -667,17 +669,14 @@ function App() {
         }
       }
     }, 16),
-    [isDragging]
+    []
   );
 
   const handleMouseUp = useCallback(() => {
     if (isDraggingTimerIdRef.current) {
       clearTimeout(isDraggingTimerIdRef.current)
     }
-    if (isDragging) {
-      setTimeout(() => {
-        setIsDragging(false);
-      }, 50)
+    if (isDraggingRef.current) {
       const {
         x, y
       } = containerPositionRef.current
@@ -685,14 +684,19 @@ function App() {
       const side = x < halfWidth ? 'left' : 'right';
       const bottomNumber = 100 - y / window.innerHeight * 100
       const bottom = `${(bottomNumber).toFixed(4)}%`;
-      setTimeout(() => {
+
+      const resetPosition = () => {
         if (containerRef.current) {
           containerRef.current.style.left = side === 'left' ? '0px' : 'auto';
           containerRef.current.style.right = side === 'right' ? '0px' : 'auto';
           containerRef.current.style.top = bottomNumber > 50 ? `${100 - bottomNumber}%` : 'auto';
           containerRef.current.style.bottom = bottomNumber > 50 ? 'auto' : bottom;
         }
-      }, 10)
+      }
+
+      setTimeout(() => {
+        resetPosition()
+      }, 20)
       setSettings(prev => ({
         ...prev,
         position: {
@@ -704,8 +708,12 @@ function App() {
         side,
         bottom,
       })
+
+      setTimeout(() => {
+        resetPosition()
+      }, 800)
     }
-  }, [isDragging]);
+  }, []);
 
   useEffect(() => {
     document.addEventListener('mousemove', handleMouseMove);

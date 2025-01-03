@@ -27,12 +27,18 @@ interface i18nText {
 
 let i18n: i18nText = {} as i18nText;
 
-let defaultPosition: {
-  side: 'left' | 'right';
-  bottom: string;
-} = {
-  side: 'right',
-  bottom: '30%',
+export interface IFloatingIconSettings {
+  position: {
+    side: 'left' | 'right';
+    bottom: string;
+  };
+}
+
+let defaultSettings: IFloatingIconSettings = {
+  position: {
+    side: 'right',
+    bottom: '30%',
+  }
 }
 
 const logoStyle = {
@@ -575,7 +581,7 @@ const savePosition = (params: {
       }
     }
   ).$onekey.$private.request({
-    method: 'wallet_saveFloatingIconPosition',
+    method: 'wallet_saveFloatingIconSettings',
     params,
   });
 };
@@ -585,10 +591,7 @@ function App() {
   const [showSecurityInfo, setIsShowSecurityInfo] = useState(false);
   const [securityInfo, setSecurityInfo] = useState<IHostSecurity | null>(null);
   const [showCloseDialog, setIsShowCloseDialog] = useState(false);
-  const [position, setPosition] = useState<{
-    side: 'left' | 'right';
-    bottom: string;
-  }>(defaultPosition);
+  const [settings, setSettings] = useState<IFloatingIconSettings>(defaultSettings);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const containerPositionRef = useRef({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -684,10 +687,13 @@ function App() {
           containerRef.current.style.bottom = bottomNumber > 50 ? 'auto' : bottom;
         }
       }, 10)
-      setPosition({
-        bottom,
-        side
-      })
+      setSettings(prev => ({
+        ...prev,
+        position: {
+          bottom,
+          side,
+        },
+      }))
       savePosition({
         side,
         bottom,
@@ -704,7 +710,7 @@ function App() {
     };
   }, [handleMouseMove, handleMouseUp]);
 
-  const { side, bottom } = position
+  const { side, bottom } = settings.position
   const bottomNumber = parseFloat(bottom)
   return (
     <div
@@ -767,7 +773,7 @@ function App() {
 }
 
 async function injectIcon() {
-  const { isShow, i18n: i18nResponse, position } = await (
+  const { isShow, i18n: i18nResponse, settings } = await (
     globalThis as unknown as {
       $onekey: {
         $private: {
@@ -775,9 +781,7 @@ async function injectIcon() {
             arg: { method: string; params: { url: string } }
           ) => Promise<{
             isShow: boolean,
-            position: {
-              side: 'left' | 'right'; bottom: string;
-            },
+            settings: IFloatingIconSettings,
             i18n: i18nText
           }>
         }
@@ -799,10 +803,10 @@ async function injectIcon() {
   if (!document.body) {
     return;
   }
-  if (position) {
-    defaultPosition = {
-      ...defaultPosition,
-      ...position,
+  if (settings) {
+    defaultSettings = {
+      ...defaultSettings,
+      ...settings,
     };
   }
   isInjected = true;

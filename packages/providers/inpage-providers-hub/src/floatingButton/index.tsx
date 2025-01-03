@@ -637,6 +637,7 @@ function App() {
     }
     isDraggingTimerIdRef.current = setTimeout(() => {
       setIsDragging(true);
+      isDraggingRef.current = true;
       const newX = e.clientX - 20;
       const newY = e.clientY - 20;
       if (containerRef.current) {
@@ -676,7 +677,11 @@ function App() {
     if (isDraggingTimerIdRef.current) {
       clearTimeout(isDraggingTimerIdRef.current)
     }
-    if (isDraggingRef.current) {
+    if (isDraggingRef.current) { 
+      isDraggingRef.current = false
+      setTimeout(() => {
+        setIsDragging(false);
+      }, 50)
       const {
         x, y
       } = containerPositionRef.current

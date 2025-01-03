@@ -2,6 +2,7 @@ import { render } from 'preact';
 import { useEffect, useMemo, useCallback, useRef, useState } from 'preact/hooks';
 import { IHostSecurity, EHostSecurityLevel } from './type';
 import { HighRisk, Logo, MediumRisk, Image } from './images';
+import { throttle } from 'lodash';
 
 let isInjected = false;
 interface i18nText {
@@ -649,22 +650,25 @@ function App() {
     }, 200)
   }, [isExpanded]);
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (isDragging) {
-      const newX = Math.min(Math.max(e.clientX - 20, 0), window.innerWidth - 40);
-      const newY = Math.min(Math.max(e.clientY - 20, 60), window.innerHeight - 60);
-      containerPositionRef.current = {
-        x: newX,
-        y: newY,
+  const handleMouseMove = useCallback(
+    throttle((e: MouseEvent) => {
+      if (isDragging) {
+        const newX = Math.min(Math.max(e.clientX - 20, 0), window.innerWidth - 40);
+        const newY = Math.min(Math.max(e.clientY - 20, 60), window.innerHeight - 60);
+        containerPositionRef.current = {
+          x: newX,
+          y: newY,
+        }
+        if (containerRef.current) {
+          containerRef.current.style.left = `${newX}px`;
+          containerRef.current.style.top = `${newY}px`;
+          containerRef.current.style.right = 'auto';
+          containerRef.current.style.bottom = 'auto';
+        }
       }
-      if (containerRef.current) {
-        containerRef.current.style.left = `${newX}px`;
-        containerRef.current.style.top = `${newY}px`;
-        containerRef.current.style.right = 'auto';
-        containerRef.current.style.bottom = 'auto';
-      }
-    }
-  }, [isDragging]);
+    }, 16),
+    [isDragging]
+  );
 
   const handleMouseUp = useCallback(() => {
     if (isDraggingTimerIdRef.current) {

@@ -714,6 +714,7 @@ function App() {
         bottom,
       })
 
+      // Provide a fallback correction for the misalignment of the floating icon.
       setTimeout(() => {
         resetPosition()
       }, 800)

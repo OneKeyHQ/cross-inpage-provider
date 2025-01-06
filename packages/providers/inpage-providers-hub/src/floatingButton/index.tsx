@@ -78,28 +78,24 @@ function CloseDialog({ onClose, side }: { onClose: () => void; side: 'left' | 'r
   useOutsideClick(dialogRef, onClose);
   const handleDisable = useCallback(() => {
     void (
-      globalThis as unknown as {
-        $onekey: {
-          $private: {
-            request: (arg: { method: string }) => Promise<void>;
-          };
+      window.$onekey as {
+        $private: {
+          request: (arg: { method: string }) => Promise<void>;
         };
       }
-    ).$onekey.$private.request({
+    ).$private.request({
       method: 'wallet_disableFloatingButton',
     });
     removeIcon();
   }, [])
   const handleHideOnSite = useCallback(() => {
     void (
-      globalThis as unknown as {
-        $onekey: {
-          $private: {
-            request: (arg: { method: string; params: { url: string } }) => Promise<void>;
-          };
+      window.$onekey as {
+        $private: {
+          request: (arg: { method: string; params: { url: string } }) => Promise<void>;
         };
       }
-    ).$onekey.$private.request({
+    ).$private.request({
       method: 'wallet_hideFloatingButtonOnSite',
       params: { url: window.location.origin },
     });
@@ -572,16 +568,14 @@ const savePosition = (params: {
   bottom: string;
 }) => {
   void (
-    globalThis as unknown as {
-      $onekey: {
-        $private: {
-          request: (
-            arg: { method: string; params: IFloatingIconSettings }
-          ) => Promise<void>
-        }
+    window.$onekey as {
+      $private: {
+        request: (
+          arg: { method: string; params: IFloatingIconSettings }
+        ) => Promise<void>
       }
     }
-  ).$onekey.$private.request({
+  ).$private.request({
     method: 'wallet_saveFloatingIconSettings',
     params: {
       position: params
@@ -611,18 +605,14 @@ function App() {
       setIsExpanded(!isExpanded);
       setIsShowSecurityInfo(true);
       if (!securityInfo) {
-        const result = await (
-          window as unknown as {
-            $onekey: {
-              $private: {
-                request: (arg: {
-                  method: string;
-                  params: { url: string };
-                }) => Promise<{ securityInfo: IHostSecurity }>;
-              };
-            };
-          }
-        ).$onekey.$private.request({
+        const result = await (window.$onekey as {
+          $private: {
+            request: (arg: {
+              method: string;
+              params: { url: string };
+            }) => Promise<{ securityInfo: IHostSecurity }>;
+          };
+        }).$private.request({
           method: 'wallet_detectRiskLevel',
           params: { url: window.location.origin },
         });
@@ -677,7 +667,7 @@ function App() {
     if (isDraggingTimerIdRef.current) {
       clearTimeout(isDraggingTimerIdRef.current)
     }
-    if (isDraggingRef.current) { 
+    if (isDraggingRef.current) {
       isDraggingRef.current = false
       setTimeout(() => {
         setIsDragging(false);
@@ -794,20 +784,18 @@ function App() {
 
 async function injectIcon() {
   const { isShow, i18n: i18nResponse, settings } = await (
-    globalThis as unknown as {
-      $onekey: {
-        $private: {
-          request: (
-            arg: { method: string; params: { url: string } }
-          ) => Promise<{
-            isShow: boolean,
-            settings: IFloatingIconSettings,
-            i18n: i18nText
-          }>
-        }
+    window.$onekey as {
+      $private: {
+        request: (
+          arg: { method: string; params: { url: string } }
+        ) => Promise<{
+          isShow: boolean,
+          settings: IFloatingIconSettings,
+          i18n: i18nText
+        }>
       }
     }
-  ).$onekey.$private.request({
+  ).$private.request({
     method: 'wallet_isShowFloatingButton',
     params: { url: window.location.origin },
   });
@@ -840,15 +828,13 @@ export function injectFloatingButton() {
   if (window.top !== window.self) {
     return
   }
-  (globalThis as unknown as {
-    $onekey: {
-      $private: {
-        onNotifyFloatingIconChanged: (
-          arg: ((params: { showFloatingIcon: boolean }) => void)
-        ) => void
-      }
+  (window.$onekey as {
+    $private: {
+      onNotifyFloatingIconChanged: (
+        arg: ((params: { showFloatingIcon: boolean }) => void)
+      ) => void
     }
-  }).$onekey.$private.onNotifyFloatingIconChanged(({ showFloatingIcon }: { showFloatingIcon: boolean }) => {
+  }).$private.onNotifyFloatingIconChanged(({ showFloatingIcon }: { showFloatingIcon: boolean }) => {
     if (showFloatingIcon) {
       void injectIcon();
     } else {

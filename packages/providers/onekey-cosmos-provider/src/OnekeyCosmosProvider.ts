@@ -105,6 +105,8 @@ export type CosmosRequest = {
 
   'getChainInfosWithoutEndpoints':() => Promise<ChainInfoWithoutEndpoints[]>;
 
+  'getChainInfoWithoutEndpoints':(chainId: string) => Promise<ChainInfoWithoutEndpoints>;
+
   // 'suggestToken'(
   //   chainId: string,
   //   contractAddress: string,
@@ -552,6 +554,13 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
     return this._callBridge({
       method: 'getChainInfosWithoutEndpoints',
       params: undefined,
+    });
+  }
+
+  async getChainInfoWithoutEndpoints(chainId: string): Promise<ChainInfoWithoutEndpoints> {
+    return this._callBridge({
+      method: 'getChainInfoWithoutEndpoints',
+      params: chainId,
     });
   }
 }

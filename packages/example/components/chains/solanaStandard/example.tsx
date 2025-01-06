@@ -106,15 +106,6 @@ function Example() {
             return JSON.stringify(res);
           }}
         />
-        <ApiPayload
-          title="getChainInfosWithoutEndpoints"
-          description="获取链信息 (Keplr 私有方法)"
-          disableRequestContent
-          onExecute={async () => {
-            // @ts-ignore
-            return await window.keplr?.getChainInfosWithoutEndpoints();
-          }}
-        />
       </ApiGroup>
       <ApiGroup title="Sign Message">
         <ApiPayload

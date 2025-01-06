@@ -1,7 +1,8 @@
 import { render } from 'preact';
 import { useEffect, useMemo, useCallback, useRef, useState } from 'preact/hooks';
 import { IHostSecurity, EHostSecurityLevel } from './type';
-import { HighRisk, Logo, MediumRsik } from './images';
+import { HighRisk, Logo, MediumRisk, Image } from './images';
+import { throttle } from 'lodash';
 
 let isInjected = false;
 interface i18nText {
@@ -26,6 +27,20 @@ interface i18nText {
 }
 
 let i18n: i18nText = {} as i18nText;
+
+export interface IFloatingIconSettings {
+  position: {
+    side: 'left' | 'right';
+    bottom: string;
+  };
+}
+
+let defaultSettings: IFloatingIconSettings = {
+  position: {
+    side: 'right',
+    bottom: '30%',
+  }
+}
 
 const logoStyle = {
   width: '24px',
@@ -58,33 +73,29 @@ const useOutsideClick = (ref: { current?: HTMLDivElement | null }, callback: () 
     };
   }, [callback, ref]);
 };
-function CloseDialog({ onClose }: { onClose: () => void }) {
+function CloseDialog({ onClose, side }: { onClose: () => void; side: 'left' | 'right' }) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
   useOutsideClick(dialogRef, onClose);
   const handleDisable = useCallback(() => {
     void (
-      globalThis as unknown as {
-        $onekey: {
-          $private: {
-            request: (arg: { method: string }) => Promise<void>;
-          };
+      window.$onekey as {
+        $private: {
+          request: (arg: { method: string }) => Promise<void>;
         };
       }
-    ).$onekey.$private.request({
+    ).$private.request({
       method: 'wallet_disableFloatingButton',
     });
     removeIcon();
   }, [])
   const handleHideOnSite = useCallback(() => {
     void (
-      globalThis as unknown as {
-        $onekey: {
-          $private: {
-            request: (arg: { method: string; params: { url: string } }) => Promise<void>;
-          };
+      window.$onekey as {
+        $private: {
+          request: (arg: { method: string; params: { url: string } }) => Promise<void>;
         };
       }
-    ).$onekey.$private.request({
+    ).$private.request({
       method: 'wallet_hideFloatingButtonOnSite',
       params: { url: window.location.origin },
     });
@@ -98,7 +109,7 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
         gap: '8px',
         padding: '12px',
         position: 'absolute',
-        right: '100%',
+        [side]: '100%',
         background: '#fff',
         top: '40px',
         width: '196px',
@@ -156,7 +167,7 @@ function CloseDialog({ onClose }: { onClose: () => void }) {
               fontSize: '12px',
               lineHeight: '16px',
             }}
-            >
+          >
             {i18n.canBeReEnabledInSettings}
           </div>
         </div>
@@ -170,13 +181,17 @@ function IconButton({
   onClick,
   dataLoaded,
   isShowCloseDialog,
+  isDragging,
   showCloseDialog,
+  side,
 }: {
   isExpanded: boolean;
   isShowCloseDialog: boolean;
   onClick: () => void;
   dataLoaded: boolean;
   showCloseDialog: () => void;
+  isDragging: boolean;
+  side: 'left' | 'right';
 }) {
   const [showCloseButton, setIsShowCloseButton] = useState(false);
   return (
@@ -186,54 +201,59 @@ function IconButton({
         alignItems: 'center',
         position: 'relative',
         cursor: 'pointer',
+        flexDirection: side === 'left' ? 'row-reverse' : 'row',
       }}
       onMouseEnter={() => {
-        if (isExpanded || isShowCloseDialog) {
+        if (isDragging || isExpanded || isShowCloseDialog) {
           return;
         }
         setIsShowCloseButton(true);
       }}
       onMouseLeave={() => setIsShowCloseButton(false)}
       onClick={() => {
-        if (isShowCloseDialog) {
+        if (isDragging || isShowCloseDialog) {
           return;
         }
         setIsShowCloseButton(false);
         onClick();
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', padding: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', padding: '8px', flexDirection: side === 'left' ? 'row-reverse' : 'row' }}>
         <Logo style={logoStyle} />
         {!dataLoaded && <span style={textStyle}>{isExpanded ? i18n.fetchingDAppInfo : ''}</span>}
       </div>
-      <div
-        style={{
-          display: 'flex',
-          padding: '$4',
-          position: 'absolute',
-          left: '-6px',
-          bottom: '-10px',
-          transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
-          opacity: showCloseButton ? 1 : 0,
-          borderRadius: '9999px',
-          backgroundColor: '#fff',
-          border: '1px solid rgba(0, 0, 0, 0.1)',
-        }}
-        onClick={(event) => {
-          event.stopPropagation();
-          setIsShowCloseButton(false);
-          showCloseDialog();
-        }}
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path
-            fill-rule="evenodd"
-            clip-rule="evenodd"
-            d="M7.29289 7.29289C7.68342 6.90237 8.31658 6.90237 8.70711 7.29289L12 10.5858L15.2929 7.29289C15.6834 6.90237 16.3166 6.90237 16.7071 7.29289C17.0976 7.68342 17.0976 8.31658 16.7071 8.70711L13.4142 12L16.7071 15.2929C17.0976 15.6834 17.0976 16.3166 16.7071 16.7071C16.3166 17.0976 15.6834 17.0976 15.2929 16.7071L12 13.4142L8.70711 16.7071C8.31658 17.0976 7.68342 17.0976 7.29289 16.7071C6.90237 16.3166 6.90237 15.6834 7.29289 15.2929L10.5858 12L7.29289 8.70711C6.90237 8.31658 6.90237 7.68342 7.29289 7.29289Z"
-            fill="rgba(0, 0, 0, 0.61)"
-          />
-        </svg>
-      </div>
+      {
+        isDragging ? null : (
+          <div
+            style={{
+              display: 'flex',
+              padding: '$4',
+              position: 'absolute',
+              [side === 'left' ? 'right' : 'left']: '-6px',
+              bottom: '-10px',
+              transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
+              opacity: showCloseButton ? 1 : 0,
+              borderRadius: '9999px',
+              backgroundColor: '#fff',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+            }}
+            onClick={(event) => {
+              event.stopPropagation();
+              setIsShowCloseButton(false);
+              showCloseDialog();
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M7.29289 7.29289C7.68342 6.90237 8.31658 6.90237 8.70711 7.29289L12 10.5858L15.2929 7.29289C15.6834 6.90237 16.3166 6.90237 16.7071 7.29289C17.0976 7.68342 17.0976 8.31658 16.7071 8.70711L13.4142 12L16.7071 15.2929C17.0976 15.6834 17.0976 16.3166 16.7071 16.7071C16.3166 17.0976 15.6834 17.0976 15.2929 16.7071L12 13.4142L8.70711 16.7071C8.31658 17.0976 7.68342 17.0976 7.29289 16.7071C6.90237 16.3166 6.90237 15.6834 7.29289 15.2929L10.5858 12L7.29289 8.70711C6.90237 8.31658 6.90237 7.68342 7.29289 7.29289Z"
+                fill="rgba(0, 0, 0, 0.61)"
+              />
+            </svg>
+          </div>
+        )
+      }
     </div>
   );
 }
@@ -287,13 +307,13 @@ const SECURITY_INFO = {
   [EHostSecurityLevel.High]: {
     titleId: 'maliciousSiteWarning',
     icon: (
-      <HighRisk style={{ width: 16, height: 16}} />
+      <HighRisk style={{ width: 16, height: 16 }} />
     ),
   },
   [EHostSecurityLevel.Medium]: {
     titleId: 'suspectedMaliciousBehavior',
     icon: (
-      <MediumRsik style={{ width: 16, height: 16}} />
+      <MediumRisk style={{ width: 16, height: 16 }} />
     ),
   },
 };
@@ -402,7 +422,7 @@ function SecurityInfo({
             }}
           >
             {securityInfo?.dapp?.logo ? (
-              <img
+              <Image
                 src={securityInfo?.dapp?.logo}
                 style={{
                   height: '24px',
@@ -411,26 +431,26 @@ function SecurityInfo({
                 }}
               />
             ) : (
-              <div 
-                style={{ 
-                  height: '16px', 
-                  width: '16px', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center' 
+              <div
+                style={{
+                  height: '16px',
+                  width: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
               >
                 <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path fill-rule="evenodd" clip-rule="evenodd" d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2ZM0 10C0 4.47715 4.47715 0 10 0C15.5228 0 20 4.47715 20 10C20 15.5228 15.5228 20 10 20C4.47715 20 0 15.5228 0 10Z" fill="black" fill-opacity="0.447"/>
-                  <path fill-rule="evenodd" clip-rule="evenodd" d="M10 7C9.62267 7 9.29263 7.2086 9.12147 7.52152C8.85645 8.00606 8.24881 8.18401 7.76426 7.91899C7.27972 7.65396 7.10177 7.04632 7.36679 6.56178C7.87463 5.63331 8.86263 5 10 5C11.5147 5 12.5669 6.00643 12.8664 7.189C13.1676 8.37786 12.7101 9.76299 11.3416 10.4472C11.1323 10.5519 11 10.7659 11 11C11 11.5523 10.5523 12 10 12C9.44772 12 9 11.5523 9 11C9 10.0084 9.56027 9.10183 10.4472 8.65836C10.902 8.43099 11.0188 8.03973 10.9277 7.6801C10.835 7.31417 10.5283 7 10 7Z" fill="black" fill-opacity="0.447"/>
-                  <path d="M11 14C11 14.5523 10.5523 15 10 15C9.44772 15 9 14.5523 9 14C9 13.4477 9.44772 13 10 13C10.5523 13 11 13.4477 11 14Z" fill="black" fill-opacity="0.447"/>
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2ZM0 10C0 4.47715 4.47715 0 10 0C15.5228 0 20 4.47715 20 10C20 15.5228 15.5228 20 10 20C4.47715 20 0 15.5228 0 10Z" fill="black" fill-opacity="0.447" />
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M10 7C9.62267 7 9.29263 7.2086 9.12147 7.52152C8.85645 8.00606 8.24881 8.18401 7.76426 7.91899C7.27972 7.65396 7.10177 7.04632 7.36679 6.56178C7.87463 5.63331 8.86263 5 10 5C11.5147 5 12.5669 6.00643 12.8664 7.189C13.1676 8.37786 12.7101 9.76299 11.3416 10.4472C11.1323 10.5519 11 10.7659 11 11C11 11.5523 10.5523 12 10 12C9.44772 12 9 11.5523 9 11C9 10.0084 9.56027 9.10183 10.4472 8.65836C10.902 8.43099 11.0188 8.03973 10.9277 7.6801C10.835 7.31417 10.5283 7 10 7Z" fill="black" fill-opacity="0.447" />
+                  <path d="M11 14C11 14.5523 10.5523 15 10 15C9.44772 15 9 14.5523 9 14C9 13.4477 9.44772 13 10 13C10.5523 13 11 13.4477 11 14Z" fill="black" fill-opacity="0.447" />
                 </svg>
               </div>
             )}
-            <span 
-              style={{ 
-                width: '100%', 
-                overflow: 'hidden', 
+            <span
+              style={{
+                width: '100%',
+                overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 color: 'rgba(0, 0, 0, 0.88)',
               }}
@@ -468,7 +488,7 @@ function SecurityInfo({
                 }}
               >
                 {securityInfo?.dapp?.origins.map((item) => (
-                  <img
+                  <Image
                     src={item.logo}
                     style={{
                       border: '1px solid rgba(0, 0, 0, 0.1)',
@@ -543,59 +563,193 @@ function SecurityInfo({
   );
 }
 
+const savePosition = (params: {
+  side: 'left' | 'right';
+  bottom: string;
+}) => {
+  void (
+    window.$onekey as {
+      $private: {
+        request: (
+          arg: { method: string; params: IFloatingIconSettings }
+        ) => Promise<void>
+      }
+    }
+  ).$private.request({
+    method: 'wallet_saveFloatingIconSettings',
+    params: {
+      position: params
+    },
+  });
+};
+
 function App() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showSecurityInfo, setIsShowSecurityInfo] = useState(false);
   const [securityInfo, setSecurityInfo] = useState<IHostSecurity | null>(null);
   const [showCloseDialog, setIsShowCloseDialog] = useState(false);
+  const [settings, setSettings] = useState<IFloatingIconSettings>(defaultSettings);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const containerPositionRef = useRef({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const isDraggingRef = useRef(isDragging)
+  isDraggingRef.current = isDragging
+  const isDraggingTimerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleShowCloseDialog = useCallback(() => {
     setIsShowCloseDialog(true);
   }, []);
 
   const handleClick = useCallback(async () => {
-    setIsExpanded(!isExpanded);
-    setIsShowSecurityInfo(true);
-    if (!securityInfo) {
-      const result = await (
-        window as unknown as {
-          $onekey: {
-            $private: {
-              request: (arg: {
-                method: string;
-                params: { url: string };
-              }) => Promise<{ securityInfo: IHostSecurity }>;
-            };
+    if (!isDraggingRef.current) {
+      setIsExpanded(!isExpanded);
+      setIsShowSecurityInfo(true);
+      if (!securityInfo) {
+        const result = await (window.$onekey as {
+          $private: {
+            request: (arg: {
+              method: string;
+              params: { url: string };
+            }) => Promise<{ securityInfo: IHostSecurity }>;
           };
-        }
-      ).$onekey.$private.request({
-        method: 'wallet_detectRiskLevel',
-        params: { url: window.location.origin },
-      });
-      setSecurityInfo(result.securityInfo);
+        }).$private.request({
+          method: 'wallet_detectRiskLevel',
+          params: { url: window.location.origin },
+        });
+        setSecurityInfo(result.securityInfo);
+      }
     }
   }, [isExpanded, securityInfo]);
 
+  const handleMouseDown = useCallback((e: MouseEvent) => {
+    if (isExpanded) {
+      return;
+    }
+    isDraggingTimerIdRef.current = setTimeout(() => {
+      setIsDragging(true);
+      isDraggingRef.current = true;
+      const newX = e.clientX - 20;
+      const newY = e.clientY - 20;
+      if (containerRef.current) {
+        containerRef.current.style.left = `${newX}px`;
+        containerRef.current.style.top = `${newY}px`;
+        containerRef.current.style.right = 'auto';
+        containerRef.current.style.bottom = 'auto';
+        containerPositionRef.current = {
+          x: newX,
+          y: newY,
+        }
+      }
+    }, 200)
+  }, [isExpanded]);
+
+  const handleMouseMove = useCallback(
+    throttle((e: MouseEvent) => {
+      if (isDraggingRef.current) {
+        const newX = Math.min(Math.max(e.clientX - 20, 0), window.innerWidth - 40);
+        const newY = Math.min(Math.max(e.clientY - 20, 60), window.innerHeight - 60);
+        containerPositionRef.current = {
+          x: newX,
+          y: newY,
+        }
+        if (containerRef.current) {
+          containerRef.current.style.left = `${newX}px`;
+          containerRef.current.style.top = `${newY}px`;
+          containerRef.current.style.right = 'auto';
+          containerRef.current.style.bottom = 'auto';
+        }
+      }
+    }, 16),
+    []
+  );
+
+  const handleMouseUp = useCallback(() => {
+    if (isDraggingTimerIdRef.current) {
+      clearTimeout(isDraggingTimerIdRef.current)
+    }
+    if (isDraggingRef.current) {
+      isDraggingRef.current = false
+      setTimeout(() => {
+        setIsDragging(false);
+      }, 50)
+      const {
+        x, y
+      } = containerPositionRef.current
+      const halfWidth = window.innerWidth / 2;
+      const side = x < halfWidth ? 'left' : 'right';
+      const bottomNumber = 100 - y / window.innerHeight * 100
+      const bottom = `${(bottomNumber).toFixed(4)}%`;
+
+      const resetPosition = () => {
+        if (containerRef.current) {
+          containerRef.current.style.left = side === 'left' ? '0px' : 'auto';
+          containerRef.current.style.right = side === 'right' ? '0px' : 'auto';
+          containerRef.current.style.top = bottomNumber > 50 ? `${100 - bottomNumber}%` : 'auto';
+          containerRef.current.style.bottom = bottomNumber > 50 ? 'auto' : bottom;
+        }
+      }
+
+      setTimeout(() => {
+        resetPosition()
+      }, 20)
+      setSettings(prev => ({
+        ...prev,
+        position: {
+          bottom,
+          side,
+        },
+      }))
+      savePosition({
+        side,
+        bottom,
+      })
+
+      // Provide a fallback correction for the misalignment of the floating icon.
+      setTimeout(() => {
+        resetPosition()
+      }, 800)
+    }
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [handleMouseMove, handleMouseUp]);
+
+  const { side, bottom } = settings.position
+  const bottomNumber = Number.parseFloat(bottom)
   return (
     <div
       id={containerId}
+      ref={containerRef}
       style={{
         position: 'fixed',
         zIndex: 999_999,
-        bottom: '25%',
-        right: '0px',
-        width: '256px',
+        top: bottomNumber > 50 ? `${100 - bottomNumber}%` : 'auto',
+        bottom: bottomNumber > 50 ? 'auto' : bottom,
+        userSelect: 'none',
+        left: isDragging ? "auto" : side === 'left' ? '0px' : 'auto',
+        right: isDragging ? "auto" : side === 'right' ? '0px' : 'auto',
+        width: isDragging ? '40px' : '256px',
         background: '#fff',
-        borderRadius: '12px',
-        transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
+        borderRadius: isDragging ? '100%' : '12px',
+        transition: isDragging ? 'none' : 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
         boxShadow:
           '0px 0px 0px 1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-        transform: isExpanded ? 'translateX(-20px)' : 'translateX(216px)',
+        transform: isDragging ? "unset" : (isExpanded ?
+          `translateX(${side === 'right' ? '-20px' : '20px'})` :
+          `translateX(${side === 'right' ? '216px' : '-216px'})`),
         fontFamily:
           '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
         WebkitTextSizeAdjust: '100%',
         fontSmooth: 'antialiased',
+        cursor: isDragging ? 'grabbing' : (isExpanded ? 'default' : 'grab'),
       }}
+      onMouseDown={handleMouseDown}
     >
       {showSecurityInfo && securityInfo ? (
         <SecurityInfo
@@ -608,14 +762,17 @@ function App() {
       ) : (
         <IconButton
           onClick={handleClick}
+          side={side}
           isExpanded={isExpanded}
           isShowCloseDialog={showCloseDialog}
+          isDragging={isDragging}
           showCloseDialog={handleShowCloseDialog}
           dataLoaded={!!securityInfo}
         />
       )}
       {!isExpanded && showCloseDialog && (
         <CloseDialog
+          side={side}
           onClose={() => {
             setIsShowCloseDialog(false);
           }}
@@ -626,20 +783,19 @@ function App() {
 }
 
 async function injectIcon() {
-  const { isShow, i18n: i18nResponse } = await (
-    globalThis as unknown as {
-      $onekey: {
-        $private: {
-          request: (
-            arg: { method: string; params: { url: string } }
-          ) => Promise<{
-            isShow: boolean,
-            i18n: i18nText
-          }>
-        }
+  const { isShow, i18n: i18nResponse, settings } = await (
+    window.$onekey as {
+      $private: {
+        request: (
+          arg: { method: string; params: { url: string } }
+        ) => Promise<{
+          isShow: boolean,
+          settings: IFloatingIconSettings,
+          i18n: i18nText
+        }>
       }
     }
-  ).$onekey.$private.request({
+  ).$private.request({
     method: 'wallet_isShowFloatingButton',
     params: { url: window.location.origin },
   });
@@ -655,6 +811,12 @@ async function injectIcon() {
   if (!document.body) {
     return;
   }
+  if (settings) {
+    defaultSettings = {
+      ...defaultSettings,
+      ...settings,
+    };
+  }
   isInjected = true;
   const div = document.createElement('div');
   document.body.appendChild(div);
@@ -666,15 +828,13 @@ export function injectFloatingButton() {
   if (window.top !== window.self) {
     return
   }
-  (globalThis as unknown as {
-    $onekey: {
-      $private: {
-        onNotifyFloatingIconChanged: (
-          arg: ((params: { showFloatingIcon: boolean }) => void)
-        ) => void
-      }
+  (window.$onekey as {
+    $private: {
+      onNotifyFloatingIconChanged: (
+        arg: ((params: { showFloatingIcon: boolean }) => void)
+      ) => void
     }
-  }).$onekey.$private.onNotifyFloatingIconChanged(({ showFloatingIcon }: { showFloatingIcon: boolean }) => {
+  }).$private.onNotifyFloatingIconChanged(({ showFloatingIcon }: { showFloatingIcon: boolean }) => {
     if (showFloatingIcon) {
       void injectIcon();
     } else {

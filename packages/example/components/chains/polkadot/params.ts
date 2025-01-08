@@ -12,7 +12,7 @@ export default {
       name: 'signAndSend',
       value: JSON.stringify({
         to: address,
-        value: '10000',
+        value: '1000',
       }),
     },
   ],

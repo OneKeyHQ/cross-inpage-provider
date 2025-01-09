@@ -10,11 +10,11 @@ export const networks = [
     url: 'wss://kusama-rpc.polkadot.io',
     // url: 'wss://1rpc.io/ksm',
   },
-  {
-    name: 'Westend',
-    addressPrefix: 42,
-    url: 'wss://westend-rpc.polkadot.io',
-  },
+  // {
+  //   name: 'Westend',
+  //   addressPrefix: 42,
+  //   url: 'wss://westend-rpc.polkadot.io',
+  // },
   {
     name: 'Astar',
     addressPrefix: 5,

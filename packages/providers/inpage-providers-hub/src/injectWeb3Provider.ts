@@ -252,7 +252,9 @@ function injectWeb3Provider({
   defineWindowProperty('getOfflineSignerAuto', cosmos.getOfflineSignerAuto.bind(cosmos));
 
   // cosmos babylon
-  defineWindowProperty('bbnwallet', bbnCosmos);
+  if (checkWalletSwitchEnable()) {
+    defineWindowProperty('bbnwallet', bbnCosmos);
+  }
 
   // Lightning Network
   defineWindowProperty('webln', webln);

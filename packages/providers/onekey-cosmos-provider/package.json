@@ -35,10 +35,12 @@
     "@onekeyfe/extension-bridge-injected": "2.2.7-alpha.2",
     "eth-rpc-errors": "^4.0.3",
     "lodash-es": "^4.17.21",
-    "long": "^5.2.1",
+    "long": "^4.0.0",
     "mitt": "^3.0.0"
   },
   "devDependencies": {
-    "@types/lodash-es": "^4.17.12"
+    "@types/lodash-es": "^4.17.12",
+    "@keplr-wallet/types": "^0.12.172",
+    "@types/long": "^4.0.0"
   }
 }

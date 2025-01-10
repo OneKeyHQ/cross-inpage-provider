@@ -49,6 +49,12 @@ type CosmosProviderEventsMap = {
 };
 
 export type CosmosRequest = {
+  // babylon
+  'babylonConnectWallet': () => Promise<string>;
+
+  'babylonGetKey': () => Promise<KeyHex>;
+
+  // keplr
   'enable': (chainIds: string[]) => Promise<void>;
 
   'disconnect': (chainIds: string[]) => Promise<void>;
@@ -155,6 +161,10 @@ export interface IProviderCosmos {
   defaultOptions: KeplrIntereactionOptions;
 
   enable(chainIds: string | string[]): Promise<void>;
+
+  babylonConnectWallet(): Promise<string>;
+
+  babylonGetKey(): Promise<Key>;
 
   getKey(chainId: string): Promise<Key>;
 
@@ -370,6 +380,27 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
       method: 'enable',
       params: isArray(chainIds) ? chainIds : [chainIds],
     });
+  }
+
+  babylonConnectWallet(): Promise<string> {
+    return this._callBridge({
+      method: 'babylonConnectWallet',
+      params: undefined,
+    });
+  }
+
+  async babylonGetKey(): Promise<Key> {
+    const key = await this._callBridge({
+      method: 'babylonGetKey',
+      params: undefined,
+    });
+    return {
+      ...key,
+      // @ts-expect-error
+      pubKey: hexToBytes(key.pubKey),
+      // @ts-expect-error
+      address: hexToBytes(key.address),
+    };
   }
 
   disconnect(): Promise<void> {

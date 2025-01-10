@@ -14,7 +14,7 @@ import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
 import { ProviderAlph, registerAlephiumProvider } from '@onekeyfe/onekey-alph-provider';
 import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
 import { ProviderCardano, defineWindowCardanoProperty } from '@onekeyfe/onekey-cardano-provider';
-import { ProviderCosmos } from '@onekeyfe/onekey-cosmos-provider';
+import { ProviderCosmos, BBNProviderCosmos } from '@onekeyfe/onekey-cosmos-provider';
 import { ProviderPolkadot, registerPolkadot } from '@onekeyfe/onekey-polkadot-provider';
 import {
   defineWindowProperty,
@@ -71,7 +71,9 @@ export type IWindowOneKeyHub = {
   };
 };
 
-function injectWeb3Provider({ showFloatingButton = false }: { showFloatingButton?: boolean } = {}): unknown {
+function injectWeb3Provider({
+  showFloatingButton = false,
+}: { showFloatingButton?: boolean } = {}): unknown {
   if (!window?.$onekey?.jsBridge) {
     throw new Error('OneKey jsBridge not found.');
   }
@@ -128,6 +130,11 @@ function injectWeb3Provider({ showFloatingButton = false }: { showFloatingButton
     bridge,
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  const bbnCosmos = new BBNProviderCosmos(cosmos, {
+    logo: WALLET_CONNECT_INFO.onekey.icon,
+  });
+
   const polkadot = new ProviderPolkadot({
     bridge,
   });
@@ -165,6 +172,7 @@ function injectWeb3Provider({ showFloatingButton = false }: { showFloatingButton
     cardano,
     alephium,
     cosmos,
+    bbnCosmos,
     scdo,
     webln,
     nostr,
@@ -242,6 +250,9 @@ function injectWeb3Provider({ showFloatingButton = false }: { showFloatingButton
   defineWindowProperty('getOfflineSigner', cosmos.getOfflineSigner.bind(cosmos));
   defineWindowProperty('getOfflineSignerOnlyAmino', cosmos.getOfflineSignerOnlyAmino.bind(cosmos));
   defineWindowProperty('getOfflineSignerAuto', cosmos.getOfflineSignerAuto.bind(cosmos));
+
+  // cosmos babylon
+  defineWindowProperty('bbnwallet', bbnCosmos);
 
   // Lightning Network
   defineWindowProperty('webln', webln);

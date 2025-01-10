@@ -14,6 +14,43 @@
   resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.3.0.tgz#085fd70f6d7d9d109671090ccae1d3bec62554a1"
   integrity sha512-ilHEACi9DwqJB0pw7kv+Apvh50jiiSyR/cQ3y4W7lOR5mhvn/50FLUfsnfJz0BDZtl/RR16kXvptiv6q1msYZg==
 
+"@onekeyfe/cross-inpage-provider-core@2.2.7-alpha.2":
+  version "2.2.7-alpha.2"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-core/-/cross-inpage-provider-core-2.2.7-alpha.2.tgz#943ded8bb099a7dff872bc87fbbaddc1e178a49a"
+  integrity sha512-GP1eNxX41UuOhIR5+7RnxKjnkqZ4VTobZxSQwAY5URlRwaMODKXgG3G4/CgsAa9K3O7w36NT6VO+rnsVN4jrjA==
+  dependencies:
+    "@onekeyfe/cross-inpage-provider-errors" "2.2.7-alpha.2"
+    "@onekeyfe/cross-inpage-provider-events" "2.2.7-alpha.2"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.7-alpha.2"
+    events "^3.3.0"
+    lodash-es "^4.17.21"
+    ms "^2.1.3"
+
+"@onekeyfe/cross-inpage-provider-errors@2.2.7-alpha.2":
+  version "2.2.7-alpha.2"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-2.2.7-alpha.2.tgz#98afed517fe7ccfc1a1cbba641d73c37b6bb90aa"
+  integrity sha512-k0QvdVO8UtF6cXqHUu8zM3kPdh/wCnX3g1K8JSQ60fEf4Nju6C4kIX6hbSnr+Cz1VeGIlXZY7k16mRTz7rd4hA==
+  dependencies:
+    fast-safe-stringify "^2.0.6"
+
+"@onekeyfe/cross-inpage-provider-events@2.2.7-alpha.2":
+  version "2.2.7-alpha.2"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-events/-/cross-inpage-provider-events-2.2.7-alpha.2.tgz#6fde27a4d9f2832592d42e853664365b71972dd6"
+  integrity sha512-hfuS+hJnhRAJFnuNVhKb/N1JEqxQN6K0AZhSuTRotvbCYysgjtnvBMqRcvaqV8lLWPn6Q0fQGMsYgyWSZkH4Zg==
+
+"@onekeyfe/cross-inpage-provider-types@2.2.7-alpha.2":
+  version "2.2.7-alpha.2"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-types/-/cross-inpage-provider-types-2.2.7-alpha.2.tgz#2b6b1a12dad4c188b72b0e5c417ee1c2d5c8d1d0"
+  integrity sha512-2uhJSnG32SQYXtdS6G3+G6ektr8n/cmimYD9fAf2dQijngCSrC47l6n44RQfqeq71f0fgRJ95kCGi49fVMf+nw==
+
+"@onekeyfe/extension-bridge-injected@2.2.7-alpha.2":
+  version "2.2.7-alpha.2"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/extension-bridge-injected/-/extension-bridge-injected-2.2.7-alpha.2.tgz#bf68bd03d58bfa1a66e3aab0bd6e8f7f2da8db29"
+  integrity sha512-ubPHQzfR4JCI1krpeMhxeS2ztlBWEceMp2lL2ohxWpfWf4BcohlHvl/mWPQqXXH8nYPQ4F5QPI+HprBgvXja5w==
+  dependencies:
+    "@onekeyfe/cross-inpage-provider-core" "2.2.7-alpha.2"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.7-alpha.2"
+
 "@polkadot/extension-inject@^0.46.3":
   version "0.46.3"
   resolved "https://registry.yarnpkg.com/@polkadot/extension-inject/-/extension-inject-0.46.3.tgz#822b25f34c5a5d9da2cdaf2549ab5e92ed14905e"
@@ -323,6 +360,11 @@ eventemitter3@^5.0.1:
   resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-5.0.1.tgz#53f5ffd0a492ac800721bb42c66b841de96423c4"
   integrity sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA==
 
+events@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
+  integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
+
 fast-safe-stringify@^2.0.6:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.1.1.tgz#c406a83b6e70d9e35ce3b30a81141df30aeba884"
@@ -348,15 +390,15 @@ json-stringify-safe@^5.0.1:
   resolved "https://registry.yarnpkg.com/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz#1296a2d58fd45f19a0f6ce01d65701e2c735b6eb"
   integrity sha512-ZClg6AaYvamvYEE82d3Iyd3vSSIjQ+odgjaTzRuO3s7toCdFKczob2i0zCh7JE8kWn17yvAWhUVxvqGwUalsRA==
 
+lodash-es@^4.17.21:
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.21.tgz#43e626c46e6591b7750beb2b50117390c609e3ee"
+  integrity sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==
+
 lodash@^4.17.21:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
-
-long@^5.2.1:
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/long/-/long-5.2.1.tgz#e27595d0083d103d2fa2c20c7699f8e0c92b897f"
-  integrity sha512-GKSNGeNAtw8IryjjkhZxuKB3JzlcLTwjtiQCHKvqQet81I93kXslhDQruGI/QsddO83mcDToBVy7GqGS/zYf/A==
 
 mitt@^3.0.0:
   version "3.0.0"
@@ -372,6 +414,11 @@ ms@2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
+
+ms@^2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
+  integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
 nock@^13.3.1:
   version "13.3.1"

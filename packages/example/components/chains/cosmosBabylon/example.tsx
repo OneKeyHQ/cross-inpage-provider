@@ -206,7 +206,6 @@ export default function Example() {
               msgs: obj.msgs,
             };
             const signer = await provider?.getOfflineSigner();
-            console.log('======>>>>>> ', account.address, requestObj);
             return await signer.signAmino(account.address, requestObj);
           }}
           onValidate={async (request: string, response: string) => {
@@ -311,12 +310,6 @@ export default function Example() {
             console.log('authInfoBytes', authInfoBytes);
 
             const signer = await provider?.getOfflineSigner();
-            console.log('======>>>>>> ', account.address, {
-              bodyBytes: bodyBytes,
-              authInfoBytes: authInfoBytes,
-              chainId: network.id,
-              accountNumber: Long.fromString(accountInfo?.account_number),
-            });
             const res = await signer.signDirect(account.address, {
               bodyBytes: bodyBytes,
               authInfoBytes: authInfoBytes,

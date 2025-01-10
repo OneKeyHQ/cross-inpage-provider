@@ -39,7 +39,6 @@
     "mitt": "^3.0.0"
   },
   "devDependencies": {
-    "@keplr-wallet/types": "^0.12.172",
     "@types/lodash-es": "^4.17.12",
     "@types/long": "^4.0.0"
   }

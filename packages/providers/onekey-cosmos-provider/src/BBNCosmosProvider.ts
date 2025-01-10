@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable tsdoc/syntax */
-import type { OfflineAminoSigner, OfflineDirectSigner } from '@keplr-wallet/types';
 import { ProviderCosmos } from './OnekeyCosmosProvider';
+import { OfflineAminoSigner, OfflineDirectSigner } from './types';
 
 export type PolkadotRequest = {
   babylonConnectWallet: () => Promise<string>;

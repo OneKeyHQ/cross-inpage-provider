@@ -304,17 +304,33 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
   async signTransaction(
     transaction: Transaction | VersionedTransaction,
   ): Promise<Transaction | VersionedTransaction> {
-    return this._handleSignTransaction({
-      message: encodeTransaction(transaction),
-    });
+    const hasVersionedTx = 'version' in transaction;
+    return this._handleSignTransaction(
+      {
+        message: encodeTransaction(transaction),
+      },
+      {
+        onlyVersionedTx: hasVersionedTx,
+      },
+    );
   }
 
-  private async _handleSignTransaction(params: { message: string }) {
+  private async _handleSignTransaction(
+    params: {
+      message: string;
+    },
+    options?: { onlyVersionedTx?: boolean },
+  ) {
+    const { onlyVersionedTx } = options || {};
+
     const result = await this._callBridge({
       method: 'signTransaction',
       params,
     });
-    return decodeSignedTransaction(result);
+    return decodeSignedTransaction({
+      message: result,
+      onlyVersionedTx,
+    });
   }
 
   async signAllTransactions(
@@ -330,7 +346,7 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
       method: 'signAllTransactions',
       params,
     });
-    return result.map(decodeSignedTransaction);
+    return result.map((message) => decodeSignedTransaction({ message }));
   }
 
   async signMessage(

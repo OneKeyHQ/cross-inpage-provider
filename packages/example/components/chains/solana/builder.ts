@@ -31,6 +31,43 @@ export const createTransferTransaction = (
   return transaction;
 };
 
+export const hasVersionedTx = (tx: Transaction | VersionedTransaction) => {
+  return 'version' in tx;
+};
+
+export const createVersionedLegacyTransaction = (
+  publicKey: PublicKey,
+  receiverPublicKey: string,
+  recentBlockhash: string,
+  amount: number,
+) => {
+  const receiver = new PublicKey(receiverPublicKey);
+
+  const instructions = [
+    SystemProgram.createAccount({
+      fromPubkey: publicKey,
+      newAccountPubkey: receiver,
+      lamports: amount,
+      space: 0,
+      programId: SystemProgram.programId,
+    }),
+    SystemProgram.transfer({
+      fromPubkey: publicKey,
+      toPubkey: receiver,
+      lamports: amount,
+    }),
+  ];
+
+  const messageV0 = new TransactionMessage({
+    payerKey: publicKey,
+    recentBlockhash: recentBlockhash,
+    instructions,
+  }).compileToLegacyMessage();
+
+  const transaction = new VersionedTransaction(messageV0);
+  return transaction;
+};
+
 export const createVersionedTransaction = (
   publicKey: PublicKey,
   receiverPublicKey: string,
@@ -68,12 +105,12 @@ export const createTokenTransferTransaction = async (
   decimals: number
 ): Promise<Transaction> => {
   const transaction = new Transaction();
-  
+
   const fromTokenAccount = await getAssociatedTokenAddress(
     tokenMint,
     fromPubkey
   );
-  
+
   const toTokenAccount = await getAssociatedTokenAddress(
     tokenMint,
     toPubkey

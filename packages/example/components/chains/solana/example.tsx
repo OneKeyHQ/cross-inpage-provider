@@ -10,7 +10,7 @@ import type { IKnownWallet } from '../../connect/types';
 import DappList from '../../DAppList';
 import { Connection, PublicKey, Transaction, VersionedTransaction, clusterApiUrl } from '@solana/web3.js';
 import params from './params';
-import { createTransferTransaction, createVersionedTransaction, createTokenTransferTransaction } from './builder';
+import { createTransferTransaction, createVersionedTransaction, createTokenTransferTransaction, hasVersionedTx, createVersionedLegacyTransaction } from './builder';
 import nacl from 'tweetnacl';
 import { toast } from '../../ui/use-toast';
 import { OffchainMessage } from '../solanaStandard/OffchainMessage';
@@ -266,6 +266,9 @@ export default function Example() {
               amount,
             );
             const res = await provider?.signTransaction(transafe);
+            if(!hasVersionedTx(res)) {
+              return 'error: Tx is legacy Transaction';
+            }
             return Buffer.from(res.serialize()).toString('hex')
           }}
           onValidate={async (request: string, result: string) => {
@@ -307,6 +310,11 @@ export default function Example() {
               amount,
             );
             const res = await provider?.signTransaction(transafe);
+
+            if(!hasVersionedTx(res)) {
+              return 'error: Tx is legacy Transaction';
+            }
+
             return Buffer.from(res.serialize()).toString('hex')
           }}
           onValidate={async (request: string, result: string) => {
@@ -318,6 +326,35 @@ export default function Example() {
               tryRun: res,
               tx
             }
+          }}
+        />
+        <ApiPayload
+          title="signTransaction (Versioned legacy)"
+          description="签署 Versioned legacy 交易, legacy 旧版本交易，但是返回值是 Versioned 的 Tx"
+          presupposeParams={params.signAndSendTransaction(account?.publicKey)}
+          onExecute={async (request: string) => {
+            const {
+              toPubkey,
+              amount,
+            }: {
+              toPubkey: string;
+              amount: number;
+            } = JSON.parse(request);
+            const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+            const transfer = createVersionedLegacyTransaction(
+              new PublicKey(account?.publicKey),
+              toPubkey,
+              recentBlockhash,
+              amount,
+            );
+            console.log('transfer', transfer);
+            const res = await provider?.signTransaction(transfer);
+            console.log('res', res);
+            if(!hasVersionedTx(res)) {
+              return 'error:Tx is legacy Transaction';
+            }
+            return Buffer.from(res.serialize()).toString('hex');
           }}
         />
         <ApiPayload

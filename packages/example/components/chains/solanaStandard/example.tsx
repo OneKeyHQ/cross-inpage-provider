@@ -12,7 +12,7 @@ import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useConnection, useWallet as useSolWallet } from '@solana/wallet-adapter-react';
 import InfoLayout from '../../../components/InfoLayout';
-import { createTransferTransaction, createVersionedTransaction } from '../solana/builder';
+import { createTransferTransaction, createVersionedLegacyTransaction, createVersionedTransaction, hasVersionedTx } from '../solana/builder';
 import { verifySignIn } from '@solana/wallet-standard-util';
 import nacl from 'tweetnacl';
 import { Transaction, VersionedTransaction } from '@solana/web3.js';
@@ -123,9 +123,9 @@ function Example() {
               publicKey.toBytes(),
             );
 
-            if(isValidSignature) {
-              return Promise.resolve('Phantom: true (软件钱包标准)')
-            }else{
+            if (isValidSignature) {
+              return Promise.resolve('Phantom: true (软件钱包标准)');
+            } else {
               const offchainMessage = new OffchainMessage({
                 message: Buffer.from(request, 'utf8'),
               });
@@ -134,12 +134,12 @@ function Example() {
                 signatureObj,
                 publicKey.toBytes(),
               );
-              if(isValidSignature) {
-                return Promise.resolve('OffchainMessage: true (Ledger 硬件钱包标准)')
+              if (isValidSignature) {
+                return Promise.resolve('OffchainMessage: true (Ledger 硬件钱包标准)');
               }
             }
 
-            return Promise.resolve('false')
+            return Promise.resolve('false');
           }}
         />
         <ApiPayload
@@ -238,19 +238,22 @@ function Example() {
               amount,
             );
             const res = await signTransaction(transafe);
-            return Buffer.from(res.serialize()).toString('hex')
+            if(hasVersionedTx(res)) {
+              return 'error: Tx is VersionedTransaction';
+            }
+            return Buffer.from(res.serialize()).toString('hex');
           }}
           onValidate={async (request: string, result: string) => {
-            const tx = Transaction.from(Buffer.from(result, 'hex'))
-            const verified = tx.verifySignatures()
+            const tx = Transaction.from(Buffer.from(result, 'hex'));
+            const verified = tx.verifySignatures();
 
-            const res = await connection.simulateTransaction(tx)
+            const res = await connection.simulateTransaction(tx);
             return {
               success: res.value.err === null,
               verified,
               tryRun: res,
-              tx
-            }
+              tx,
+            };
           }}
         />
         <ApiPayload
@@ -274,17 +277,59 @@ function Example() {
               amount,
             );
             const res = await signTransaction(transfer);
-            return Buffer.from(res.serialize()).toString('hex')
+            if(!hasVersionedTx(res)) {
+              return 'error: Tx is legacy Transaction';
+            }
+            return Buffer.from(res.serialize()).toString('hex');
           }}
           onValidate={async (request: string, result: string) => {
-            const tx = VersionedTransaction.deserialize(Buffer.from(result, 'hex'))
+            const tx = VersionedTransaction.deserialize(Buffer.from(result, 'hex'));
 
-            const res = await connection.simulateTransaction(tx)
+            const res = await connection.simulateTransaction(tx);
             return {
               success: res.value.err === null,
               tryRun: res,
-              tx
+              tx,
+            };
+          }}
+        />
+        <ApiPayload
+          title="signTransaction (Versioned legacy)"
+          description="签署 Versioned legacy 交易, legacy 旧版本交易，但是返回值是 Versioned 的 Tx"
+          presupposeParams={params.signAndSendTransaction(publicKey?.toBase58())}
+          onExecute={async (request: string) => {
+            const {
+              toPubkey,
+              amount,
+            }: {
+              toPubkey: string;
+              amount: number;
+            } = JSON.parse(request);
+            const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+            const transfer = createVersionedLegacyTransaction(
+              publicKey,
+              toPubkey,
+              recentBlockhash,
+              amount,
+            );
+            console.log('transfer', transfer);
+            const res = await signTransaction(transfer);
+            console.log('res', res);
+            if(!hasVersionedTx(res)) {
+              return 'error:Tx is legacy Transaction';
             }
+            return Buffer.from(res.serialize()).toString('hex');
+          }}
+          onValidate={async (request: string, result: string) => {
+            const tx = VersionedTransaction.deserialize(Buffer.from(result, 'hex'));
+
+            const res = await connection.simulateTransaction(tx);
+            return {
+              success: res.value.err === null,
+              tryRun: res,
+              tx,
+            };
           }}
         />
         {/* <ApiPayload
@@ -325,22 +370,22 @@ function Example() {
               );
             });
             const res = await signAllTransactions(trans);
-            return res.map(r => Buffer.from(r.serialize()).toString('hex'))
+            return res.map((r) => Buffer.from(r.serialize()).toString('hex'));
           }}
           onValidate={async (request: string, result: string) => {
-            const txArray = JSON.parse(result) as string[]
-            const txs = txArray.map(r => Transaction.from(Buffer.from(r, 'hex')))
-            const verifiedResult = []
+            const txArray = JSON.parse(result) as string[];
+            const txs = txArray.map((r) => Transaction.from(Buffer.from(r, 'hex')));
+            const verifiedResult = [];
             for (const tx of txs) {
-              const verified = tx.verifySignatures()
-              const res = await connection.simulateTransaction(tx)
+              const verified = tx.verifySignatures();
+              const res = await connection.simulateTransaction(tx);
               verifiedResult.push({
                 success: res.value.err === null,
                 verified,
                 tryRun: res,
-              })
+              });
             }
-            return verifiedResult
+            return verifiedResult;
           }}
         />
       </ApiGroup>

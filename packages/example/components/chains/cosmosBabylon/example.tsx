@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-type-assertion, @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return */
 import { dapps } from './dapps.config';
-import ConnectButton from '../../../components/connect/ConnectButton';
+import ConnectButton from '../../connect/ConnectButton';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
+import { hexToBytes } from '@noble/hashes/utils';
 import { SignMode } from 'cosmjs-types/cosmos/tx/signing/v1beta1/signing';
 import { get } from 'lodash-es';
 
@@ -16,21 +16,14 @@ import { AuthInfo, Fee, SignerInfo, Tx, TxBody, TxRaw } from 'cosmjs-types/cosmo
 
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
-import { useWallet } from '../../../components/connect/WalletContext';
-import type { IKnownWallet } from '../../../components/connect/types';
-import DappList from '../../../components/DAppList';
-import InfoLayout from '../../../components/InfoLayout';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../../components/ui/select';
+import { useWallet } from '../../connect/WalletContext';
+import type { IKnownWallet } from '../../connect/types';
+import DappList from '../../DAppList';
+import InfoLayout from '../../InfoLayout';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import params, { networks } from './params';
 import { CosmosNodeClient } from './rpc';
 import { toast } from '../../ui/use-toast';
-import { Textarea } from '../../ui/textarea';
 
 function removeNull(obj: any): any {
   if (obj !== null && typeof obj === 'object') {
@@ -54,12 +47,12 @@ export default function Example() {
     {
       uuid: 'injected',
       name: 'Injected Wallet',
-      inject: 'keplr',
+      inject: 'bbnwallet',
     },
     {
       uuid: 'injected-onekey',
       name: 'Injected OneKey',
-      inject: '$onekey.cosmos',
+      inject: '$onekey.bbnwallet',
     },
   ]);
 
@@ -98,24 +91,19 @@ export default function Example() {
 
       console.log('connect network', network.id);
 
-      await provider?.enable(network.id);
+      await provider?.connectWallet();
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, no-unsafe-optional-chaining
-      const { bech32Address, pubKey } = await provider?.getKey(network.id);
+      const pubKey = await provider?.getPublicKeyHex();
+      const address = await provider?.getAddress();
 
       return {
         provider,
-        address: bech32Address,
-        publicKey: bytesToHex(pubKey),
+        address: address,
+        publicKey: pubKey,
       };
     },
     [network.id],
   );
-
-  const onDisconnectWallet = useCallback(async () => {
-    if (provider) {
-      await provider?.disconnect();
-    }
-  }, [provider]);
 
   return (
     <>
@@ -154,100 +142,44 @@ export default function Example() {
           );
         }}
         onConnect={onConnectWallet}
-        onDisconnect={onDisconnectWallet}
       />
 
       <ApiGroup title="Basics">
         <ApiPayload
-          title="enable"
-          description="enable"
-          presupposeParams={params.enable}
+          title="connectWallet"
+          description="connectWallet"
           onExecute={async (request: string) => {
-            const obj = JSON.parse(request);
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            const res = await provider?.enable(obj);
+            const res = await provider?.connectWallet();
             return JSON.stringify(res);
           }}
         />
         <ApiPayload
           title="getKey"
           description="获取账户权限"
-          presupposeParams={[
-            {
-              id: 'getKey',
-              name: 'getKey',
-              value: network.id,
-            },
-          ]}
           onExecute={async (request: string) => {
-            return await provider?.getKey(network.id);
+            return await provider?.getPublicKeyHex();
           }}
         />
         <ApiPayload
-          title="experimentalSuggestChain"
-          description="获取账户权限"
-          presupposeParams={[
-            {
-              id: 'experimentalSuggestChain',
-              name: 'experimentalSuggestChain',
-              value: network.id,
-            },
-          ]}
+          title="getAddress"
+          description="获取账户地址"
           onExecute={async (request: string) => {
-            const res = await provider?.experimentalSuggestChain(network.id);
-            return JSON.stringify(res);
+            return await provider?.getAddress();
           }}
         />
         <ApiPayload
-           title="getChainInfosWithoutEndpoints"
-           description="获取链信息 (Keplr 私有方法)"
-           disableRequestContent
-           onExecute={async () => {
-             // @ts-ignore
-             return await window.keplr?.getChainInfosWithoutEndpoints();
-           }}
-        />
-        <ApiPayload
-           title="getChainInfoWithoutEndpoints"
-           description="根据 ID、获取链信息 (Keplr 私有方法)"
-           disableRequestContent
-           presupposeParams={[
-            {
-              id: 'getChainInfoWithoutEndpoints',
-              name: 'getChainInfoWithoutEndpoints',
-              value: network.id,
-            },
-          ]}
-           onExecute={async (request: string) => {
-             // @ts-ignore
-             return await window.keplr?.getChainInfosWithoutEndpoints(request);
-           }}
-        />
-      </ApiGroup>
-
-      <ApiGroup title="Sign Message">
-        <ApiPayload
-          title="signArbitrary"
-          description="signArbitrary"
-          presupposeParams={params.signArbitrary}
+          title="getWalletProviderName"
+          description="获取钱包提供者名称"
           onExecute={async (request: string) => {
-            const res = await provider?.signArbitrary(network.id, account.address, request);
-            return JSON.stringify(res);
+            return await provider?.getWalletProviderName();
           }}
         />
         <ApiPayload
-          title="verifyArbitrary"
-          description="verifyArbitrary"
-          presupposeParams={params.signArbitrary}
+          title="getWalletProviderIcon"
+          description="获取钱包提供者图标"
           onExecute={async (request: string) => {
-            const res = await provider?.signArbitrary(network.id, account.address, request);
-            const verifyRes = await provider?.verifyArbitrary(
-              network.id,
-              account.address,
-              request,
-              res,
-            );
-            return JSON.stringify(verifyRes);
+            return await provider?.getWalletProviderIcon();
           }}
         />
       </ApiGroup>
@@ -273,8 +205,8 @@ export default function Example() {
               memo: obj.memo,
               msgs: obj.msgs,
             };
-
-            return await provider?.signAmino(network.id, account.address, requestObj);
+            const signer = await provider?.getOfflineSigner();
+            return await signer.signAmino(account.address, requestObj);
           }}
           onValidate={async (request: string, response: string) => {
             return await nodeClient.encodeAmino(response);
@@ -302,42 +234,42 @@ export default function Example() {
 
             const msgs:
               | {
-                typeUrl: string;
-                value: Uint8Array;
-              }[]
+                  typeUrl: string;
+                  value: Uint8Array;
+                }[]
               | undefined = obj.msgs?.map((msg: { type: string; value: any }) => {
-                const value = msg.value;
-                if (msg.type === '/cosmos.bank.v1beta1.MsgSend') {
-                  return {
-                    typeUrl: '/cosmos.bank.v1beta1.MsgSend',
-                    value: MsgSend.encode(
-                      MsgSend.fromPartial({
-                        fromAddress: value.from_address,
-                        toAddress: value.to_address,
-                        amount: value.amount?.map((amount: any) => ({
-                          amount: amount.amount,
-                          denom: amount.denom,
-                        })),
-                      }),
-                    ).finish(),
-                  };
-                } else if (msg.type === '/cosmwasm.wasm.v1.MsgExecuteContract') {
-                  return {
-                    typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
-                    value: MsgExecuteContract.encode(
-                      MsgExecuteContract.fromPartial({
-                        sender: value.sender,
-                        contract: value.contract,
-                        msg: Buffer.from(JSON.stringify(removeNull(value.msg))),
-                        funds: value.funds?.map((amount: any) => ({
-                          amount: amount.amount,
-                          denom: amount.denom,
-                        })),
-                      }),
-                    ).finish(),
-                  };
-                }
-              });
+              const value = msg.value;
+              if (msg.type === '/cosmos.bank.v1beta1.MsgSend') {
+                return {
+                  typeUrl: '/cosmos.bank.v1beta1.MsgSend',
+                  value: MsgSend.encode(
+                    MsgSend.fromPartial({
+                      fromAddress: value.from_address,
+                      toAddress: value.to_address,
+                      amount: value.amount?.map((amount: any) => ({
+                        amount: amount.amount,
+                        denom: amount.denom,
+                      })),
+                    }),
+                  ).finish(),
+                };
+              } else if (msg.type === '/cosmwasm.wasm.v1.MsgExecuteContract') {
+                return {
+                  typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+                  value: MsgExecuteContract.encode(
+                    MsgExecuteContract.fromPartial({
+                      sender: value.sender,
+                      contract: value.contract,
+                      msg: Buffer.from(JSON.stringify(removeNull(value.msg))),
+                      funds: value.funds?.map((amount: any) => ({
+                        amount: amount.amount,
+                        denom: amount.denom,
+                      })),
+                    }),
+                  ).finish(),
+                };
+              }
+            });
 
             if (!msgs) return JSON.stringify({ error: 'msgs is null' });
 
@@ -377,7 +309,8 @@ export default function Example() {
 
             console.log('authInfoBytes', authInfoBytes);
 
-            const res = await provider?.signDirect(network.id, account.address, {
+            const signer = await provider?.getOfflineSigner();
+            const res = await signer.signDirect(account.address, {
               bodyBytes: bodyBytes,
               authInfoBytes: authInfoBytes,
               chainId: network.id,
@@ -387,46 +320,6 @@ export default function Example() {
           }}
           onValidate={async (request: string, response: string) => {
             const tx = hexToBytes(response);
-            // @ts-expect-error
-            const res = await provider?.sendTx(network.id, tx, 'Sync');
-            return JSON.stringify(res);
-          }}
-        />
-        <ApiPayload
-          title="sendTx"
-          description="sendTx"
-          generateRequestFrom={() => {
-            return <Textarea name="tx" placeholder="将 signDirect 的执行结果复制粘贴到这里" />;
-          }}
-          // eslint-disable-next-line @typescript-eslint/require-await
-          onGenerateRequest={async (fromData: Record<string, any>) => {
-            const requestTx = JSON.parse(fromData?.['tx'] as string);
-
-            let encodeTx = '';
-            if (requestTx?.signed?.bodyBytes && requestTx?.signed?.authInfoBytes) {
-              // Direct sign
-              const bodyBytes = new Uint8Array(Buffer.from(requestTx?.signed?.bodyBytes));
-              const authInfoBytes = new Uint8Array(Buffer.from(requestTx?.signed?.authInfoBytes));
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-              const signatures = [Buffer.from(requestTx?.signature?.signature ?? '', 'base64')];
-
-              const txRaw = TxRaw.encode(
-                TxRaw.fromPartial({
-                  bodyBytes: bodyBytes,
-                  authInfoBytes: authInfoBytes,
-                  signatures,
-                }),
-              ).finish();
-              encodeTx = Buffer.from(txRaw).toString('hex');
-            } else {
-              // Amino sign
-              throw new Error('Not support generate amino Tx');
-            }
-
-            return encodeTx;
-          }}
-          onExecute={async (request: string) => {
-            const tx = hexToBytes(request);
             // @ts-expect-error
             const res = await provider?.sendTx(network.id, tx, 'Sync');
             return JSON.stringify(res);

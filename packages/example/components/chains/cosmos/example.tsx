@@ -262,9 +262,7 @@ export default function Example() {
             if (!account) return JSON.stringify({ error: 'account is null' });
 
             const accountInfo = await nodeClient.getAccountInfo(account?.address);
-
             const obj = JSON.parse(request);
-
             const requestObj = {
               chain_id: network.id,
               account_number: accountInfo?.account_number,
@@ -277,7 +275,35 @@ export default function Example() {
             return await provider?.signAmino(network.id, account.address, requestObj);
           }}
           onValidate={async (request: string, response: string) => {
-            return await nodeClient.encodeAmino(response);
+            try {
+              if (!nodeClient) {
+                throw new Error('nodeClient is not initialized');
+              }
+              
+              // 检查 response 是否有效
+              if (!response) {
+                throw new Error('Response is empty');
+              }
+
+              // 解析 response
+              const parsedResponse = JSON.parse(response);
+              console.log('Response to encode:', parsedResponse);
+
+              // 检查必要字段
+              if (!parsedResponse.signed || !parsedResponse.signature) {
+                throw new Error('Invalid response format: missing signed or signature');
+              }
+
+              const result = await nodeClient.encodeAmino(response);
+              return result;
+            } catch (error) {
+              console.error('Validation error:', error);
+              return JSON.stringify({
+                error: (error as Error).message,
+                details: (error as Error).stack,
+                response: response
+              });
+            }
           }}
         />
         <ApiPayload
@@ -386,17 +412,42 @@ export default function Example() {
             return res;
           }}
           onValidate={async (request: string, response: string) => {
-            const tx = hexToBytes(response);
-            // @ts-expect-error
-            const res = await provider?.sendTx(network.id, tx, 'Sync');
-            return JSON.stringify(res);
+            try {
+              const parsedResponse = JSON.parse(response);
+              
+              // 构建 TxRaw
+              const bodyBytes = new Uint8Array(Buffer.from(parsedResponse.signed.bodyBytes));
+              const authInfoBytes = new Uint8Array(Buffer.from(parsedResponse.signed.authInfoBytes));
+              const signatures = [Buffer.from(parsedResponse.signature.signature, 'base64')];
+
+              const txRaw = TxRaw.encode(
+                TxRaw.fromPartial({
+                  bodyBytes,
+                  authInfoBytes,
+                  signatures,
+                }),
+              ).finish();
+
+              // 确保生成正确的十六进制字符串
+              const txBytes = Buffer.from(txRaw).toString('hex');
+              
+              // @ts-expect-error
+              const res = await provider?.sendTx(network.id, hexToBytes(txBytes), 'Sync');
+              return JSON.stringify(res);
+            } catch (error) {
+              console.error('Validation error:', error);
+              return JSON.stringify({
+                error: (error as Error).message,
+                details: (error as Error).stack
+              });
+            }
           }}
         />
         <ApiPayload
           title="sendTx"
           description="sendTx"
           generateRequestFrom={() => {
-            return <Textarea name="tx" placeholder="将 signDirect 的执行结果复制粘贴到这里" />;
+            return <Textarea name="tx" placeholder="将 signDirect 的执行结果(未进行Validate前)复制粘贴到这里" />;
           }}
           // eslint-disable-next-line @typescript-eslint/require-await
           onGenerateRequest={async (fromData: Record<string, any>) => {

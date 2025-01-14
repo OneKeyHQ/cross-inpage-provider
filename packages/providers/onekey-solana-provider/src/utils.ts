@@ -10,8 +10,17 @@ export const encodeTransaction = (transaction: Transaction | VersionedTransactio
   return base58.encode(transaction.serialize({ requireAllSignatures: false }));
 };
 
-export const decodeSignedTransaction = (message: string): Transaction | VersionedTransaction => {
+export const decodeSignedTransaction = ({
+  message,
+  onlyVersionedTx,
+}: {
+  message: string;
+  onlyVersionedTx?: boolean;
+}): Transaction | VersionedTransaction => {
   const txByte = base58.decode(message);
+  if (onlyVersionedTx) {
+    return VersionedTransaction.deserialize(txByte);
+  }
   try {
     return Transaction.from(txByte);
   } catch {

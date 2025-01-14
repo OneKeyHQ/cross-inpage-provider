@@ -10,9 +10,10 @@ import type { IKnownWallet } from '../../connect/types';
 import DappList from '../../DAppList';
 import { Connection, PublicKey, Transaction, VersionedTransaction, clusterApiUrl } from '@solana/web3.js';
 import params from './params';
-import { createTransferTransaction, createVersionedTransaction, createTokenTransferTransaction } from './builder';
+import { createTransferTransaction, createVersionedTransaction, createTokenTransferTransaction, hasVersionedTx, createVersionedLegacyTransaction } from './builder';
 import nacl from 'tweetnacl';
 import { toast } from '../../ui/use-toast';
+import { OffchainMessage } from '../solanaStandard/OffchainMessage';
 
 const NETWORK = clusterApiUrl('mainnet-beta');
 
@@ -180,6 +181,43 @@ export default function Example() {
             return Promise.resolve(isValidSignature.toString());
           }}
         />
+          <ApiPayload
+          title="solSignOffchainMessage"
+          description="签名消息(OneKey 私有方法)"
+          presupposeParams={params.signMessage}
+          onExecute={async (request: string) => {
+            return await provider?.solSignOffchainMessage(Buffer.from(request, 'utf8'));
+          }}
+          onValidate={(request: string, result: string) => {
+            // const message = bs58.decode(request).toString();
+            const {
+              signature,
+              publicKey,
+            }: {
+              signature: any;
+              publicKey: string;
+            } = JSON.parse(result);
+
+            let signatureObj;
+            if(Array.isArray(signature)) {
+              signatureObj = new Uint8Array(signature)
+            } else {
+              signatureObj = new Uint8Array(signature.data)
+            }
+            const publicKeyObj = new PublicKey(publicKey);
+
+            const offchainMessage = new OffchainMessage({
+              message: Buffer.from(request, 'utf8'),
+            });
+            const isValidSignature = nacl.sign.detached.verify(
+              offchainMessage.serialize(),
+              signatureObj,
+              publicKeyObj.toBytes(),
+            );
+
+            return Promise.resolve(isValidSignature.toString());
+          }}
+        />
       </ApiGroup>
       <ApiGroup title="Transfer">
         <ApiPayload
@@ -228,6 +266,9 @@ export default function Example() {
               amount,
             );
             const res = await provider?.signTransaction(transafe);
+            if(!hasVersionedTx(res)) {
+              return 'error: Tx is legacy Transaction';
+            }
             return Buffer.from(res.serialize()).toString('hex')
           }}
           onValidate={async (request: string, result: string) => {
@@ -269,6 +310,11 @@ export default function Example() {
               amount,
             );
             const res = await provider?.signTransaction(transafe);
+
+            if(!hasVersionedTx(res)) {
+              return 'error: Tx is legacy Transaction';
+            }
+
             return Buffer.from(res.serialize()).toString('hex')
           }}
           onValidate={async (request: string, result: string) => {
@@ -280,6 +326,35 @@ export default function Example() {
               tryRun: res,
               tx
             }
+          }}
+        />
+        <ApiPayload
+          title="signTransaction (Versioned legacy)"
+          description="签署 Versioned legacy 交易, legacy 旧版本交易，但是返回值是 Versioned 的 Tx"
+          presupposeParams={params.signAndSendTransaction(account?.publicKey)}
+          onExecute={async (request: string) => {
+            const {
+              toPubkey,
+              amount,
+            }: {
+              toPubkey: string;
+              amount: number;
+            } = JSON.parse(request);
+            const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+            const transfer = createVersionedLegacyTransaction(
+              new PublicKey(account?.publicKey),
+              toPubkey,
+              recentBlockhash,
+              amount,
+            );
+            console.log('transfer', transfer);
+            const res = await provider?.signTransaction(transfer);
+            console.log('res', res);
+            if(!hasVersionedTx(res)) {
+              return 'error:Tx is legacy Transaction';
+            }
+            return Buffer.from(res.serialize()).toString('hex');
           }}
         />
         <ApiPayload
@@ -337,7 +412,7 @@ export default function Example() {
               amount: number;
               decimals: number;
             } = JSON.parse(request);
-            
+
             const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
             const transaction = await createTokenTransferTransaction(
               connection,

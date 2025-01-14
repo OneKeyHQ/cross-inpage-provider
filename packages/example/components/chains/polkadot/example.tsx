@@ -100,7 +100,7 @@ export default function Example() {
     const [isValid, endPos, ss58Length, ss58Decoded] = checkAddressChecksum(decoded);
 
     const networkInfo = networks.find((n) => n.addressPrefix === ss58Decoded);
-    setNetworkAddressPrefix(networkInfo.addressPrefix);
+    setNetworkAddressPrefix(networkInfo?.addressPrefix ?? networks[0].addressPrefix);
   }, [account?.address, provider]);
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
@@ -225,10 +225,10 @@ export default function Example() {
           disableRequestContent
           onExecute={async (request: string) => {
             // serialization provider
-            JSON.stringify(provider)
+            JSON.stringify(provider);
             // get accounts
-            const localProvider = provider
-            const accountProvider = localProvider?.accounts
+            const localProvider = provider;
+            const accountProvider = localProvider?.accounts;
             const res = await accountProvider?.get();
             return JSON.stringify(res);
           }}
@@ -243,7 +243,7 @@ export default function Example() {
             const injector = await web3FromSource(account?.meta?.source);
             const res = await injector.signer.signRaw({
               data: message,
-              address: currentAddress,
+              address: dynamicAddress,
               type: 'bytes',
             });
             return JSON.stringify(res);
@@ -288,7 +288,8 @@ export default function Example() {
                   resolve(status);
                 })
                 .catch((e) => {
-                  reject(e);
+                  const { message } = e || {};
+                  reject(message || e);
                 });
             });
           }}

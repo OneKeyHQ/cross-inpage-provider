@@ -26,6 +26,11 @@ export type SolanaRequest = {
     publicKey: string;
   }>;
 
+  'solSignOffchainMessage': (params: { message: string; version?: number }) => Promise<{
+    signature: string;
+    publicKey: string;
+  }>;
+
   'signTransaction': (params: { message: string }) => Promise<Transaction>;
 
   'signAllTransactions': (params: { message: string[] }) => Promise<Transaction[]>;
@@ -299,17 +304,33 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
   async signTransaction(
     transaction: Transaction | VersionedTransaction,
   ): Promise<Transaction | VersionedTransaction> {
-    return this._handleSignTransaction({
-      message: encodeTransaction(transaction),
-    });
+    const hasVersionedTx = 'version' in transaction;
+    return this._handleSignTransaction(
+      {
+        message: encodeTransaction(transaction),
+      },
+      {
+        onlyVersionedTx: hasVersionedTx,
+      },
+    );
   }
 
-  private async _handleSignTransaction(params: { message: string }) {
+  private async _handleSignTransaction(
+    params: {
+      message: string;
+    },
+    options?: { onlyVersionedTx?: boolean },
+  ) {
+    const { onlyVersionedTx } = options || {};
+
     const result = await this._callBridge({
       method: 'signTransaction',
       params,
     });
-    return decodeSignedTransaction(result);
+    return decodeSignedTransaction({
+      message: result,
+      onlyVersionedTx,
+    });
   }
 
   async signAllTransactions(
@@ -325,7 +346,7 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
       method: 'signAllTransactions',
       params,
     });
-    return result.map(decodeSignedTransaction);
+    return result.map((message) => decodeSignedTransaction({ message }));
   }
 
   async signMessage(
@@ -336,6 +357,27 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
     publicKey: PublicKey;
   }> {
     return this._handleSignMessage({ message, display });
+  }
+
+  async solSignOffchainMessage(
+    message: Uint8Array,
+    version?: number,
+  ): Promise<{
+    signature: Uint8Array;
+    publicKey: PublicKey;
+  }> {
+    const result = await this._callBridge({
+      method: 'solSignOffchainMessage',
+      params: {
+        message: typeof message === 'string' ? message : base58.encode(message),
+        version,
+      },
+    });
+
+    return {
+      signature: base58.decode(result.signature),
+      publicKey: new PublicKey(result.publicKey),
+    };
   }
 
   private async _handleSignMessage(params: {

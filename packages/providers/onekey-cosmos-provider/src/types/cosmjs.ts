@@ -1,4 +1,4 @@
-
+import Long from 'long';
 
 export declare enum BroadcastMode {
   /** Return after tx commit */
@@ -82,7 +82,7 @@ export interface SignDoc {
    */
   chainId: string;
   /** account_number is the account number of the account in state */
-  accountNumber: string;
+  accountNumber: Long;
 }
 
 export type SignDocHex =  {

@@ -49,6 +49,12 @@ type CosmosProviderEventsMap = {
 };
 
 export type CosmosRequest = {
+  // babylon
+  'babylonConnectWallet': () => Promise<string>;
+
+  'babylonGetKey': () => Promise<KeyHex>;
+
+  // keplr
   'enable': (chainIds: string[]) => Promise<void>;
 
   'disconnect': (chainIds: string[]) => Promise<void>;
@@ -105,6 +111,8 @@ export type CosmosRequest = {
 
   'getChainInfosWithoutEndpoints':() => Promise<ChainInfoWithoutEndpoints[]>;
 
+  'getChainInfoWithoutEndpoints':(chainId: string) => Promise<ChainInfoWithoutEndpoints>;
+
   // 'suggestToken'(
   //   chainId: string,
   //   contractAddress: string,
@@ -153,6 +161,10 @@ export interface IProviderCosmos {
   defaultOptions: KeplrIntereactionOptions;
 
   enable(chainIds: string | string[]): Promise<void>;
+
+  babylonConnectWallet(): Promise<string>;
+
+  babylonGetKey(): Promise<Key>;
 
   getKey(chainId: string): Promise<Key>;
 
@@ -370,6 +382,27 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
     });
   }
 
+  babylonConnectWallet(): Promise<string> {
+    return this._callBridge({
+      method: 'babylonConnectWallet',
+      params: undefined,
+    });
+  }
+
+  async babylonGetKey(): Promise<Key> {
+    const key = await this._callBridge({
+      method: 'babylonGetKey',
+      params: undefined,
+    });
+    return {
+      ...key,
+      // @ts-expect-error
+      pubKey: hexToBytes(key.pubKey),
+      // @ts-expect-error
+      address: hexToBytes(key.address),
+    };
+  }
+
   disconnect(): Promise<void> {
     return this._callBridge({
       method: 'disconnect',
@@ -552,6 +585,13 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
     return this._callBridge({
       method: 'getChainInfosWithoutEndpoints',
       params: undefined,
+    });
+  }
+
+  async getChainInfoWithoutEndpoints(chainId: string): Promise<ChainInfoWithoutEndpoints> {
+    return this._callBridge({
+      method: 'getChainInfoWithoutEndpoints',
+      params: chainId,
     });
   }
 }

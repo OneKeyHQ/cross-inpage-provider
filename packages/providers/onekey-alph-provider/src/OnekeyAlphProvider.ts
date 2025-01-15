@@ -35,6 +35,8 @@ function isWalletEventMethodMatch({ method, name }: { method: string; name: stri
 }
 
 export class ProviderAlph extends InteractiveSignerProvider implements AlephiumWindowObject {
+  _base: ProviderAlphBase
+
   id = 'alephium';
   name = 'Alephium';
   // id = 'onekey';
@@ -42,8 +44,6 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
   icon = 'https://uni.onekey-asset.com/static/logo/onekey.png';
   version = '0.9.4';
   _accountInfo: Account | undefined;
-
-  _base: ProviderAlphBase
 
   onDisconnected: (() => void | Promise<void>) | undefined = undefined
   #nodeProvider: NodeProvider | undefined = undefined
@@ -57,6 +57,7 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
       bridge: props.bridge || getOrCreateExtInjectedJsBridge({ timeout: props.timeout }),
     });
 
+    this.version = this._base.version;
     this._registerEvents();
   }
 

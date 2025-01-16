@@ -12,6 +12,11 @@ import permitWitnessTransferFrom from './permitWitnessTransferFrom';
 import order from './order';
 import orderComponents from './orderComponents';
 
+import openseaOrder from './openseaOrder';
+import oneInchOrder from './oneInchOrder';
+import cowswapOrder from './cowswapOrder';
+import safeMultiSig from './safeMultiSig';
+
 import type {IEIP712Params} from '../../types';
 
 export default (params: IEIP712Params) => [
@@ -26,4 +31,8 @@ export default (params: IEIP712Params) => [
   permitBatchTransferFrom(params),
   order(params),
   orderComponents(params),
+  openseaOrder(params),
+  oneInchOrder(params),
+  cowswapOrder(params),
+  safeMultiSig(params),
 ];

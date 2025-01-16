@@ -55,27 +55,27 @@ export default (params: IEIP712Params) => ({
     },
     domain: {
       name: 'Permit2',
-      verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+      verifyingContract: '0x000000000022d473030f116ddee9f6b43ac78ba3',
       chainId: params.chainId.toString(),
     },
     primaryType: 'PermitBatch',
     message: {
       details: [
         {
-          token: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-          amount: '1461501637330902918203684832716283019655932542975',
-          expiration: '1722887542',
-          nonce: '5',
+          token: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
+          amount: '1000000', // 1 USDC
+          expiration: '1731399262',
+          nonce: '0',
         },
         {
-          token: '0xb0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-          amount: '1461501637330902918203684832716283019655932542975',
-          expiration: '1722887642',
-          nonce: '6',
+          token: '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT
+          amount: '1000000', // 1 USDT
+          expiration: '1731399262',
+          nonce: '0',
         },
       ],
-      spender: '0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad',
-      sigDeadline: '1720297342',
+      spender: '0x000000000022d473030f116ddee9f6b43ac78ba3', // Permit2 contract
+      sigDeadline: '1731399262',
     },
   }),
 });

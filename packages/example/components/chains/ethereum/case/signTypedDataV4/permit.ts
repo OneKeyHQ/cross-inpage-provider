@@ -49,17 +49,17 @@ export default (params: IEIP712Params) => ({
     },
     primaryType: 'Permit',
     domain: {
-      name: 'MyToken',
+      name: 'USDT',
       version: '1',
-      verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+      verifyingContract: '0xdac17f958d2ee523a2206206994597c13d831ec7',
       chainId: params.chainId.toString(),
     },
     message: {
-      owner: '0xd6e8058cd3a5e5b90eacdc350e1246de4a39d411',
-      spender: '0x5B38Da6a701c568545dCfcB03FcB875f56beddC4',
-      value: 3000,
+      owner: '0x76f3f64cb3cd19debee51436df630a342b736c24',
+      spender: '0x000000000022d473030f116ddee9f6b43ac78ba3',
+      value: '0',
       nonce: 0,
-      deadline: 50000000000,
+      deadline: 1731399262,
     },
   }),
 });

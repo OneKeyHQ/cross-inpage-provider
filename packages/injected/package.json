@@ -25,11 +25,14 @@
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "tsc && tsc --project tsconfig.cjs.json && yarn webpack",
+    "build-prod": "tsc && tsc --project tsconfig.cjs.json && NODE_ENV=production yarn webpack",
     "start": "tsc --watch",
     "webpack": "webpack",
     "webpack-dev": "NODE_ENV=development webpack"
   },
   "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@babel/preset-env": "^7.20.0",
     "babel-loader": "^8.2.3",
     "babel-plugin-lodash": "^3.3.4",
     "electron": "^17.2.0",

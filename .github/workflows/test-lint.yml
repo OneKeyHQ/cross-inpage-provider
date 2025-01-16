@@ -36,3 +36,4 @@ jobs:
       - run: yarn build
       - run: yarn test
       - run: yarn lint
+      - run: cd packages/injected && yarn lint:dist

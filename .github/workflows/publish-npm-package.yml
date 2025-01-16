@@ -28,6 +28,7 @@ jobs:
           NODE_ENV=production yarn build
           yarn test
           yarn lint
+          cd packages/injected && yarn lint:dist && cd - 
 
       - name: Publish
         env:

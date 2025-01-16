@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/cross-inpage-provider-injected",
-  "version": "2.2.7-alpha.3",
+  "version": "2.2.7-alpha.4",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -25,11 +25,14 @@
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "tsc && tsc --project tsconfig.cjs.json && yarn webpack",
+    "build-prod": "tsc && tsc --project tsconfig.cjs.json && NODE_ENV=production yarn webpack",
     "start": "tsc --watch",
     "webpack": "webpack",
     "webpack-dev": "NODE_ENV=development webpack"
   },
   "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@babel/preset-env": "^7.20.0",
     "babel-loader": "^8.2.3",
     "babel-plugin-lodash": "^3.3.4",
     "electron": "^17.2.0",
@@ -43,12 +46,12 @@
     "electron": "*"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "2.2.7-alpha.3",
-    "@onekeyfe/cross-inpage-provider-types": "2.2.7-alpha.3",
-    "@onekeyfe/desktop-bridge-injected": "2.2.7-alpha.3",
-    "@onekeyfe/extension-bridge-injected": "2.2.7-alpha.3",
-    "@onekeyfe/inpage-providers-hub": "2.2.7-alpha.3",
-    "@onekeyfe/native-bridge-injected": "2.2.7-alpha.3",
+    "@onekeyfe/cross-inpage-provider-core": "2.2.7-alpha.4",
+    "@onekeyfe/cross-inpage-provider-types": "2.2.7-alpha.4",
+    "@onekeyfe/desktop-bridge-injected": "2.2.7-alpha.4",
+    "@onekeyfe/extension-bridge-injected": "2.2.7-alpha.4",
+    "@onekeyfe/inpage-providers-hub": "2.2.7-alpha.4",
+    "@onekeyfe/native-bridge-injected": "2.2.7-alpha.4",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0"
   }

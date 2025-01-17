@@ -55,27 +55,27 @@ export default (params: IEIP712Params) => ({
     },
     domain: {
       name: 'Permit2',
-      verifyingContract: '0x000000000022d473030f116ddee9f6b43ac78ba3',
+      verifyingContract: '0x0000000000000000000000000000000000000000',
       chainId: params.chainId.toString(),
     },
     primaryType: 'PermitBatch',
     message: {
       details: [
         {
-          token: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
-          amount: '1000000', // 1 USDC
-          expiration: '1731399262',
-          nonce: '0',
+          token: '0x0000000000000000000000000000000000000001',
+          amount: '1000000000000000000',
+          expiration: '2000000000',
+          nonce: '1',
         },
         {
-          token: '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT
-          amount: '1000000', // 1 USDT
-          expiration: '1731399262',
-          nonce: '0',
+          token: '0x0000000000000000000000000000000000000002',
+          amount: '1000000000000000000',
+          expiration: '2000000000',
+          nonce: '2',
         },
       ],
-      spender: '0x000000000022d473030f116ddee9f6b43ac78ba3', // Permit2 contract
-      sigDeadline: '1731399262',
+      spender: '0x0000000000000000000000000000000000000003',
+      sigDeadline: '2000000000',
     },
   }),
 });

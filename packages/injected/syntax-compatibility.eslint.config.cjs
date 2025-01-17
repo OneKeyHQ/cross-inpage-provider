@@ -11,18 +11,19 @@ module.exports = {
     browser: true
   },
   rules: {
+    // 'operator-assignment': ['error', 'never'],
     'no-restricted-syntax': [
       'error',
       {
-        selector: "LogicalExpression[operator='||=']",
+        selector: "AssignmentExpression[operator='||=']",
         message: 'Logical OR assignment (||=) is not allowed.',
       },
       {
-        selector: "LogicalExpression[operator='&&=']",
+        selector: "AssignmentExpression[operator='&&=']",
         message: 'Logical AND assignment (&&=) is not allowed.',
       },
       {
-        selector: "LogicalExpression[operator='??=']",
+        selector: "AssignmentExpression[operator='??=']",
         message: 'Nullish coalescing assignment (??=) is not allowed.',
       },
       {

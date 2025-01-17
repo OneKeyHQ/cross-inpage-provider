@@ -4,9 +4,6 @@ on:
   pull_request:
     branches:
       - master
-  push:
-    branches:
-      - master
 
 jobs:
   lint:
@@ -33,6 +30,7 @@ jobs:
       - run: yarn
       - run: yarn bootstrap
       - run: yarn bootstrap
-      - run: yarn build
+      - run: NODE_ENV=production yarn build
       - run: yarn test
       - run: yarn lint
+      - run: cd packages/injected && yarn lint:dist && cd -

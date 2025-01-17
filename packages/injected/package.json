@@ -24,8 +24,9 @@
   "main": "./dist/cjs/index.js",
   "scripts": {
     "prebuild": "rm -rf dist",
+    "lint:dist": "NODE_OPTIONS=\"--max-old-space-size=8192\" npx eslint --config syntax-compatibility.eslint.config.cjs ./dist/injected/injectedNative.js",
     "build": "tsc && tsc --project tsconfig.cjs.json && yarn webpack",
-    "build-prod": "tsc && tsc --project tsconfig.cjs.json && NODE_ENV=production yarn webpack",
+    "build-prod": "tsc && tsc --project tsconfig.cjs.json && NODE_ENV=production yarn webpack && yarn lint:dist",
     "start": "tsc --watch",
     "webpack": "webpack",
     "webpack-dev": "NODE_ENV=development webpack"

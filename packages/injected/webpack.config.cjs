@@ -50,8 +50,8 @@ const commonConfig = {
         test: /\.(c|m)?(js|jsx)$/,
         exclude: (modulePath) => {
           const includeModules = [
-            //
-           '@solana/web3.js'
+            // force third party library to compile
+           '@solana/web3.js',
           ];
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           if (includeModules.some((module) => modulePath.includes(module))) {

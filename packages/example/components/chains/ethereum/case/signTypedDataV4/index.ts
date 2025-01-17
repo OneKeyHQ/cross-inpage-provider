@@ -17,6 +17,10 @@ import oneInchOrder from './oneInchOrder';
 import cowswapOrder from './cowswapOrder';
 import safeMultiSig from './safeMultiSig';
 
+import permitNew from './permitNew';
+import permitBatchNew from './permitBatchNew';
+import safeMultiSigNew from './safeMultiSigNew';
+
 import type {IEIP712Params} from '../../types';
 
 export default (params: IEIP712Params) => [
@@ -35,4 +39,7 @@ export default (params: IEIP712Params) => [
   oneInchOrder(params),
   cowswapOrder(params),
   safeMultiSig(params),
+  permitNew(params),
+  permitBatchNew(params),
+  safeMultiSigNew(params),
 ];

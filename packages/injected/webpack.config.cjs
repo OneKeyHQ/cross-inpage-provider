@@ -47,9 +47,21 @@ const commonConfig = {
         use: ['raw-loader'],
       },
       {
-        test: /\.(js|jsx)$/,
-        // exclude: /node_modules/,
-        exclude: [/node_modules/, /\.text\.(js|jsx|ts|tsx)$/],
+        test: /\.(c|m)?(js|jsx)$/,
+        exclude: (modulePath) => {
+          const includeModules = [
+            // force third party library to compile
+           '@solana/web3.js',
+          ];
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          if (includeModules.some((module) => modulePath.includes(module))) {
+            console.log('webpack babel loader includeModules: ', modulePath);
+            return false;
+          }
+          const excludeModulesRegex = [/node_modules/, /\.text\.(js|jsx|ts|tsx)$/];
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          return excludeModulesRegex.some((regex) => regex.test(modulePath));
+        },
         use: [
           {
             loader: 'babel-loader',

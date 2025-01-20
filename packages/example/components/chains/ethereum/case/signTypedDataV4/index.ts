@@ -16,6 +16,12 @@ import openseaOrder from './openseaOrder';
 import oneInchOrder from './oneInchOrder';
 import cowswapOrder from './cowswapOrder';
 import safeMultiSig from './safeMultiSig';
+import permitToEOA from './permitToEOA';
+import permitInfiniteAmount from './permitInfiniteAmount';
+import permitForever from './permitForever';
+import permit2 from './permit2';
+import permit2ToEOA from './permit2ToEOA';
+import unknownType from './unknownType';
 
 import permitNew from './permitNew';
 import permitBatchNew from './permitBatchNew';
@@ -39,6 +45,12 @@ export default (params: IEIP712Params) => [
   oneInchOrder(params),
   cowswapOrder(params),
   safeMultiSig(params),
+  permitToEOA(params),
+  permitInfiniteAmount(params),
+  permitForever(params),
+  permit2(params),
+  permit2ToEOA(params),
+  unknownType(params),
   permitNew(params),
   permitBatchNew(params),
   safeMultiSigNew(params),

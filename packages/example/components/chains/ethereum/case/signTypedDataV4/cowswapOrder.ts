@@ -31,13 +31,13 @@ export default (params: IEIP712Params) => ({
       name: 'Gnosis Protocol',
       version: 'v2',
       chainId: params.chainId.toString(),
-      verifyingContract: '0x9008d19f58aabd9ed0d60971565aa8510560ab41'
+      verifyingContract: '0x0000000000000000000000000000000000000000'
     },
     primaryType: 'Order',
     message: {
-      sellToken: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
-      buyToken: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
-      receiver: '0x6fc702d32e6cb268f7dc68766e6b0fe94520499d',
+      sellToken: '0x0000000000000000000000000000000000000001', // Token A
+      buyToken: '0x0000000000000000000000000000000000000002', // Token B
+      receiver: '0x0000000000000000000000000000000000000003',
       sellAmount: '1000000', // 1 USDC
       buyAmount: '500000000000000000', // 0.5 ETH
       validTo: 1684022400,

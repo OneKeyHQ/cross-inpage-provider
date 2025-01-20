@@ -31,16 +31,16 @@ export default (params: IEIP712Params) => ({
       name: '1inch Limit Order Protocol',
       version: '1',
       chainId: params.chainId.toString(),
-      verifyingContract: '0x1111111254eeb25477b68fb85ed929f73a960582'
+      verifyingContract: '0x0000000000000000000000000000000000000000'
     },
     primaryType: 'Order',
     message: {
-      maker: '0x6fc702d32e6cb268f7dc68766e6b0fe94520499d',
-      tokenIn: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
-      tokenOut: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
-      amountIn: '1000000', // 1 USDC
-      amountOut: '500000000000000000', // 0.5 ETH
-      recipient: '0x6fc702d32e6cb268f7dc68766e6b0fe94520499d',
+      maker: '0x0000000000000000000000000000000000000001',
+      tokenIn: '0x0000000000000000000000000000000000000002', // Token A
+      tokenOut: '0x0000000000000000000000000000000000000003', // Token B
+      amountIn: '1000000', // 1 Token A
+      amountOut: '500000000000000000', // 0.5 Token B
+      recipient: '0x0000000000000000000000000000000000000001',
       startTime: '1683936000',
       endTime: '1684022400',
       stopPrice: '0',

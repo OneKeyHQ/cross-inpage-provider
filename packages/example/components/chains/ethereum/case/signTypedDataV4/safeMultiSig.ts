@@ -25,13 +25,13 @@ export default (params: IEIP712Params) => ({
     },
     domain: {
       chainId: params.chainId.toString(),
-      verifyingContract: '0x76f3f64cb3cd19debee51436df630a342b736c24' // Safe contract address
+      verifyingContract: '0x0000000000000000000000000000000000000000' // Safe contract address
     },
     primaryType: 'SafeTx',
     message: {
-      to: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC contract
+      to: '0x0000000000000000000000000000000000000001', // Token contract
       value: '0',
-      data: '0xa9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045000000000000000000000000000000000000000000000000000000000000000064', // transfer(address,uint256)
+      data: '0x', // Empty data for example
       operation: 0, // Call
       safeTxGas: '0',
       baseGas: '0',

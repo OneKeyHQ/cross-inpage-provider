@@ -3,7 +3,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return */
 import { dapps } from './dapps.config';
 import TokenList from '@uniswap/default-token-list';
-import { ethers } from 'ethers';
 import ConnectButton from '../../../components/connect/ConnectButton';
 import { useEffect, useRef } from 'react';
 import { get } from 'lodash';
@@ -20,472 +19,61 @@ import {
   recoverTypedSignature,
 } from '@metamask/eth-sig-util';
 import { toast } from '../../ui/use-toast';
-import { Input } from '../../ui/input';
-import { isEqChainId, parseChainId } from './utils';
-import { ApiForm, ApiFormRef, ApiComboboxRef } from '../../ApiForm';
-import Contract721 from './case/contract/contract721.json';
-import Contract1155 from './case/contract/contract1155.json';
+import { parseChainId } from './utils';
 import maliciousCases from './case/transfer/malicious';
 import malformedCases from './case/transfer/malformed';
-import { checkSupportNetwork, getSupportNetworkNames, MALICIOUS_ADDRESS } from './case/contract/SampleContracts';
-import TabCard from '../../TabCard';
+import uniswapV2Cases from './case/transfer/uniswapV2';
+import uniswapUniversalCases from './case/transfer/uniswapUniversal';
+import sushiSwapCases from './case/transfer/sushiswap';
+import morphoCases from './case/transfer/morpho';
+import inchV5Cases from './case/transfer/inchV5';
+import inchV6Cases from './case/transfer/inchV6';
+import okxCases from './case/transfer/okx';
+import {
+  checkSupportNetwork,
+  getSupportNetworkNames,
+  MALICIOUS_ADDRESS,
+} from './case/contract/SampleContracts';
+import { IOption } from '../../ApiForm/ApiCombobox';
+import { WalletWatchAsset, WrapAssets } from './components/ERC20';
+import { WalletWatchAssetERC721 } from './components/ERC721';
+import { WalletWatchAssetERC1155 } from './components/ERC1155';
 
-const {
-  nftsAbi,
-  nftsBytecode
-} = Contract721;
+type ITokenOption = {
+  type: string;
+  options: {
+    address: string;
+    symbol: string;
+    decimals: number;
+    image: string;
+  };
+};
 
-const {
-  erc1155Abi,
-  erc1155Bytecode
-} = Contract1155;
-
-const WalletWatchAsset = ({ chainId }: { chainId: string | undefined }) => {
-  const apiFromRef = useRef<ApiFormRef>(null);
-  const apiFromComboboxRef = useRef<ApiComboboxRef>(null);
-
-  const { provider } = useWallet<IEthereumProvider>();
-
-  useEffect(() => {
-    const tokens = TokenList.tokens.filter((token) => parseChainId(chainId) === token.chainId);
-    const tokenOptions = tokens.map((token) => ({
-      value: token.address,
-      label: `${token.name} - ${token.address}`,
-      extra: {
-        type: 'ERC20',
-        options: {
-          address: token.address,
-          symbol: token.symbol,
-          decimals: token.decimals,
-          image: token.logoURI,
-        }
-      }
-    }));
-    apiFromComboboxRef.current?.setOptions(tokenOptions);
-  }, [chainId]);
-
-  return <ApiForm title="wallet_watchAsset ERC20" description='添加 ERC20 资产' ref={apiFromRef}>
-    <ApiForm.Combobox
-      ref={apiFromComboboxRef}
-      id="tokenSelector"
-      label="预设参数"
-      placeholder="请选择 ERC20 Token"
-      onOptionChange={(option) => {
-        apiFromRef.current?.setJsonValue('request', option?.extra);
-      }}
-    />
-
-    <ApiForm.JsonEdit
-      id="request"
-      label="请求(可以手动编辑)"
-      required
-    />
-
-    <ApiForm.Button
-      id="watchButton"
-      label="观察 Asset"
-      onClick={async () => {
-        const res = await provider?.request({
-          'method': 'wallet_watchAsset',
-          'params': JSON.parse(apiFromRef.current?.getValue('request') ?? ''),
-        });
-        apiFromRef.current?.setValue('response', JSON.stringify(res, null, 2));
-      }}
-      validation={{
-        fields: ['request'],
-        validator: (values) => {
-          if (!values.request) {
-            return '请选择 ERC20 Token';
-          }
-        }
-      }}
-    />
-
-    <ApiForm.TextArea
-      id="response"
-      label="执行结果"
-    />
-  </ApiForm>
-}
-
-const WalletWatchAssetERC721 = ({ chainId }: { chainId: string | undefined }) => {
-  const apiFromRef = useRef<ApiFormRef>(null);
-
-  const { provider, account } = useWallet<IEthereumProvider>();
-
-  let nftsContract: ethers.Contract
-  let nftsFactory: ethers.ContractFactory
-
-  return <ApiForm title="wallet_watchAsset ERC721" description='添加 ERC721 资产' ref={apiFromRef}>
-    <TabCard tabs={[
-      {
-        label: '部署合约',
-        value: 'deploy',
-        title: '部署 ERC721 合约',
-        description: '部署 ERC721 合约，用于测试 wallet_watchAsset ERC721，尽量使用手续费低的链',
-        content: <><ApiForm.Button
-          id="deployButton"
-          label="部署 ERC721 合约"
-          onClick={async () => {
-            try {
-              const ethersProvider = new ethers.providers.Web3Provider(provider, 'any');
-
-              nftsFactory = new ethers.ContractFactory(
-                nftsAbi,
-                nftsBytecode,
-                ethersProvider.getSigner(),
-              );
-
-              nftsContract = await nftsFactory.deploy();
-              await nftsContract.deployTransaction.wait();
-            } catch (error) {
-              const reason = get(error, 'reason', undefined);
-              const message = get(error, 'message', undefined);
-              apiFromRef.current?.setJsonValue('deployResponse', reason || message);
-              throw error;
-            }
-
-            if (nftsContract.address === undefined) {
-              return;
-            }
-
-            console.log(
-              `Contract mined! address: ${nftsContract.address} transactionHash: ${nftsContract.deployTransaction.hash}`,
-            );
-
-            apiFromRef.current?.setValue('deployResponse', nftsContract.address);
-          }}
-        />
-
-          <ApiForm.TextArea
-            id="deployResponse"
-            label="部署结果"
-          />
-
-          <ApiForm.Separator />
-
-          <ApiForm.Field
-            id="mintAmount"
-            label="铸造数量"
-            defaultValue="3"
-            type="number"
-            required
-          />
-
-          <ApiForm.Button
-            id="mintButton"
-            label="铸造"
-            onClick={async () => {
-              const mintAmount = apiFromRef.current?.getValue('mintAmount');
-              try {
-                let result = await nftsContract.mintNFTs(mintAmount, {
-                  from: account?.address,
-                });
-                result = await result.wait();
-              } catch (error) {
-                apiFromRef.current?.setJsonValue('mintResponse', error);
-                throw error;
-              }
-
-              if (nftsContract.address === undefined) {
-                return;
-              }
-
-              apiFromRef.current?.setValue('mintResponse', nftsContract.address);
-            }}
-            availableDependencyFields={['mintAmount']}
-            validation={{
-              fields: ['mintAmount'],
-              validator: (values) => {
-                if (!values.mintAmount.value) {
-                  return '请输入铸造数量';
-                }
-                if (!account) {
-                  return '请连接钱包';
-                }
-                if (!nftsContract) {
-                  return '请部署 ERC721 合约';
-                }
-              }
-            }}
-          />
-
-          <ApiForm.TextArea
-            id="mintResponse"
-            label="铸造结果"
-          /></>,
+const getTokens = (chainId: string) => {
+  const tokens = TokenList.tokens.filter((token) => parseChainId(chainId) === token.chainId);
+  const tokenOptions: IOption<ITokenOption>[] = tokens.map((token) => ({
+    value: token.address,
+    label: `${token.name} - ${token.address}`,
+    extra: {
+      type: 'ERC20',
+      options: {
+        address: token.address,
+        symbol: token.symbol,
+        decimals: token.decimals,
+        image: token.logoURI,
       },
-      {
-        label: '使用 ERC721 合约',
-        value: 'use',
-        title: '使用 ERC721 合约',
-        description: '使用当前帐户已经部署的 ERC721 合约，测试 wallet_watchAsset ERC721，在区块浏览器中查找 Owner 为当前帐户的 ERC721 资产，填写 Contract Address 和 TokenId 进行观察',
-        content: <ApiForm.Field
-          id="watchContractAddress"
-          label="已经部署的 ERC721 合约地址"
-        />,
-      },
-    ]} />
-
-    <ApiForm.Field
-      id="watchTokenId"
-      label="观察 TokenId"
-      defaultValue="1"
-      type="number"
-      required
-    />
-
-    <ApiForm.Button
-      id="watchButton"
-      label="观察 Asset"
-      onClick={async () => {
-        const watchTokenId = apiFromRef.current?.getValue('watchTokenId');
-        const watchContractAddress = apiFromRef.current?.getValue('watchContractAddress');
-        const nftsContractAddress = nftsContract?.address ?? watchContractAddress;
-
-        let watchNftsResult;
-        try {
-          watchNftsResult = await provider?.request({
-            method: 'wallet_watchAsset',
-            params: {
-              type: 'ERC721',
-              options: {
-                address: nftsContractAddress,
-                tokenId: watchTokenId,
-              },
-            },
-          }
-          );
-        } catch (error) {
-          console.error(error);
-        }
-
-        apiFromRef.current?.setValue('watchResponse', JSON.stringify(watchNftsResult, null, 2));
-      }}
-      availableDependencyFields={['watchTokenId']}
-      validation={{
-        fields: ['watchTokenId', 'watchContractAddress'],
-        validator: (values) => {
-          if (!values.watchTokenId?.value) {
-            return '请输入观察 TokenId';
-          }
-          if (!account) {
-            return '请连接钱包';
-          }
-          if (!nftsContract && !values.watchContractAddress?.value) {
-            return '请部署 ERC721 合约 或 填写已经部署的 ERC721 合约地址';
-          }
-        }
-      }}
-    />
-
-    <ApiForm.TextArea
-      id="watchResponse"
-      label="观察结果"
-    />
-  </ApiForm>
-}
-
-const WalletWatchAssetERC1155 = ({ chainId }: { chainId: string | undefined }) => {
-  const apiFromRef = useRef<ApiFormRef>(null);
-
-  const { provider, account } = useWallet<IEthereumProvider>();
-
-  let erc1155Contract: ethers.Contract
-  let erc1155Factory: ethers.ContractFactory
-
-  return <ApiForm title="wallet_watchAsset ERC1155" description='添加 ERC1155 资产 尽量使用手续费低的链' ref={apiFromRef}>
-    <TabCard tabs={[
-      {
-        label: '部署合约',
-        value: 'deploy',
-        title: '部署 ERC1155 合约',
-        description: '部署 ERC1155 合约，用于测试 wallet_watchAsset ERC1155，尽量使用手续费低的链',
-        content: <><ApiForm.Button
-          id="deployButton"
-          label="部署 ERC1155 合约"
-          onClick={async () => {
-            try {
-              const ethersProvider = new ethers.providers.Web3Provider(provider, 'any');
-
-              erc1155Factory = new ethers.ContractFactory(
-                erc1155Abi,
-                erc1155Bytecode,
-                ethersProvider.getSigner(),
-              );
-
-              erc1155Contract = await erc1155Factory.deploy();
-              await erc1155Contract.deployTransaction.wait();
-            } catch (error) {
-              const reason = get(error, 'reason', undefined);
-              const message = get(error, 'message', undefined);
-              apiFromRef.current?.setJsonValue('deployResponse', reason || message);
-              throw error;
-            }
-
-            if (erc1155Contract.address === undefined) {
-              return;
-            }
-
-            console.log(
-              `Contract mined! address: ${erc1155Contract.address} transactionHash: ${erc1155Contract.deployTransaction.hash}`,
-            );
-
-            apiFromRef.current?.setValue('deployResponse', erc1155Contract.address);
-          }}
-        />
-
-          <ApiForm.TextArea
-            id="deployResponse"
-            label="部署结果"
-          />
-
-          <ApiForm.Separator />
-
-          <ApiForm.Field
-            id="mintTokenId"
-            label="铸造的 Token IDs"
-            defaultValue="1, 2, 3"
-            required
-          />
-
-          <ApiForm.Field
-            id="mintAmount"
-            label="Token IDs 对应铸造数量"
-            defaultValue="1, 10, 100"
-            required
-          />
-
-          <ApiForm.Button
-            id="mintButton"
-            label="铸造"
-            onClick={async () => {
-              const mintTokenIds = apiFromRef.current?.getValue('mintTokenId');
-              const mintAmounts = apiFromRef.current?.getValue('mintAmount');
-              try {
-                const params = [
-                  account?.address,
-                  mintTokenIds.split(',').map(Number),
-                  mintAmounts.split(',').map(Number),
-                  '0x',
-                ];
-                let result = await erc1155Contract.mintBatch(...params);
-                result = await result.wait();
-
-                console.log('mint success', result);
-              } catch (error) {
-                const reason = get(error, 'reason', undefined);
-                const message = get(error, 'message', undefined);
-                apiFromRef.current?.setJsonValue('mintResponse', reason || message);
-                throw error;
-              }
-
-              if (erc1155Contract.address === undefined) {
-                return;
-              }
-
-              apiFromRef.current?.setValue('mintResponse', erc1155Contract.address);
-            }}
-            availableDependencyFields={['mintTokenId', 'mintAmount']}
-            validation={{
-              fields: ['mintTokenId', 'mintAmount'],
-              validator: (values) => {
-                if (!values.mintTokenId.value) {
-                  return '请输入铸造的 Token IDs';
-                }
-                if (!values.mintAmount.value) {
-                  return '请输入铸造数量';
-                }
-
-                if (values.mintTokenId.value.split(',').length !== values.mintAmount.value.split(',').length) {
-                  return '铸造的 Token IDs 和铸造数量数量不一致';
-                }
-
-                if (!account) {
-                  return '请连接钱包';
-                }
-                if (!erc1155Contract) {
-                  return '请部署 ERC1155 合约';
-                }
-              }
-            }}
-          />
-
-          <ApiForm.TextArea
-            id="mintResponse"
-            label="铸造结果"
-          /></>,
-      },
-      {
-        label: '使用 ERC1155 合约',
-        value: 'use',
-        title: '使用 ERC1155 合约',
-        description: '使用当前帐户已经部署的 ERC1155 合约，测试 wallet_watchAsset ERC1155，在区块浏览器中查找 Owner 为当前帐户的 ERC1155 资产，填写 Contract Address 和 TokenId 进行观察',
-        content: <ApiForm.Field
-          id="watchContractAddress"
-          label="已经部署的 ERC1155 合约地址"
-        />,
-      },
-    ]} />
-
-    <ApiForm.Field
-      id="watchTokenId"
-      label="观察 TokenId"
-      defaultValue="1"
-      type="number"
-      required
-    />
-
-    <ApiForm.Button
-      id="watchButton"
-      label="观察 Asset"
-      onClick={async () => {
-        const watchContractAddress = apiFromRef.current?.getValue('watchContractAddress');
-        const nftsContractAddress = erc1155Contract?.address ?? watchContractAddress;
-
-        const watchTokenId = apiFromRef.current?.getValue('watchTokenId');
-        let watchNftsResult;
-        try {
-          watchNftsResult = await provider?.request({
-            method: 'wallet_watchAsset',
-            params: {
-              type: 'ERC1155',
-              options: {
-                address: nftsContractAddress,
-                tokenId: watchTokenId,
-              },
-            },
-          }
-          );
-        } catch (error) {
-          console.error(error);
-        }
-
-        apiFromRef.current?.setValue('watchResponse', JSON.stringify(watchNftsResult, null, 2));
-      }}
-      availableDependencyFields={['watchTokenId']}
-      validation={{
-        fields: ['watchTokenId', 'watchContractAddress'],
-        validator: (values) => {
-          if (!values.watchTokenId.value) {
-            return '请输入观察 TokenId';
-          }
-          if (!account) {
-            return '请连接钱包';
-          }
-          if (!erc1155Contract && !values.watchContractAddress?.value) {
-            return '请部署 ERC1155 合约 或 填写已经部署的 ERC1155 合约地址';
-          }
-        }
-      }}
-    />
-
-    <ApiForm.TextArea
-      id="watchResponse"
-      label="观察结果"
-    />
-  </ApiForm>
-}
+    },
+  }));
+  // 排序 USDC、USDT、DAI、WETH 优先
+  tokenOptions.sort((a, b) => {
+    const aName = a.extra.options.symbol;
+    const bName = b.extra.options.symbol;
+    const aPriority = ['USDC', 'USDT', 'WETH'].includes(aName) ? 0 : 1;
+    const bPriority = ['USDC', 'USDT', 'WETH'].includes(bName) ? 0 : 1;
+    return aPriority - bPriority;
+  });
+  return tokenOptions;
+};
 
 export default function Example() {
   const walletsRef = useRef<IEIP6963ProviderDetail[]>([
@@ -615,118 +203,6 @@ export default function Example() {
       provider?.removeListener('disconnect', disconnectHandler);
     };
   }, [account, provider, setAccount]);
-
-  const getTokenTransferFrom = (chainId: string | undefined, approve: boolean = false) => {
-    const tokens: {
-      name: string;
-      address: string;
-    }[] = [];
-    // EVM MainNet
-    if (isEqChainId(chainId, '0x1')) {
-      tokens.push({
-        name: 'USDC',
-        address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-      });
-      tokens.push({
-        name: 'USDT',
-        address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-      });
-    }
-    // Polygon
-    if (isEqChainId(chainId, '0x89')) {
-      tokens.push({
-        name: 'USDC.e',
-        address: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
-      });
-      tokens.push({
-        name: 'USDT',
-        address: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
-      });
-      tokens.push({
-        name: 'USDC',
-        address: '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359',
-      });
-    }
-    // BSC
-    if (isEqChainId(chainId, '0x38')) {
-      tokens.push({
-        name: 'USDC',
-        address: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',
-      });
-      tokens.push({
-        name: 'anyUSDC',
-        address: '0x8965349fb649A33a30cbFDa057D8eC2C48AbE2A2',
-      });
-    }
-    // arb
-    if (isEqChainId(chainId, '0xa4b1')) {
-      tokens.push({
-        name: 'USDC',
-        address: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
-      });
-      tokens.push({
-        name: 'USDT.e',
-        address: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
-      });
-      tokens.push({
-        name: 'USDT',
-        address: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
-      });
-    }
-    // Optimism
-    if (isEqChainId(chainId, '0xa')) {
-      tokens.push({
-        name: 'USDC',
-        address: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85',
-      });
-      tokens.push({
-        name: 'USDC.e',
-        address: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
-      });
-      tokens.push({
-        name: 'USDT',
-        address: '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58',
-      });
-    }
-
-    if (!tokens.length) {
-      tokens.push({
-        name: 'MainNet USDC',
-        address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-      });
-    }
-    return (
-      <>
-        <Input
-          label="收款地址"
-          type="text"
-          name="toAddress"
-          defaultValue={account?.address ?? ''}
-        />
-        <Input label="金额" type="number" name="amount" defaultValue="10000" />
-
-        {approve && (
-          <>
-            <div>
-              <input id="max_approve" name="maxApprove" type="checkbox" />
-              <label htmlFor="max_approve">无限授权</label>
-            </div>
-            <div>
-              <input id="mock_uniswap" name="mockUniSwap" type="checkbox" />
-              <label htmlFor="mock_uniswap">模拟 UniSwap（不传 Value）</label>
-            </div>
-          </>
-        )}
-
-        <select name="tokenAddress" className="select">
-          <option selected>选择 Token</option>
-          {tokens.map((token) => (
-            <option value={token.address}>{token.name}</option>
-          ))}
-        </select>
-      </>
-    );
-  };
 
   const requestSendTransactionCommon = async (request: string) => {
     return await provider?.request({
@@ -900,27 +376,31 @@ export default function Example() {
             return JSON.stringify(res);
           }}
         />
-        
+
         <ApiPayload
           title="添加自定义网络"
           description="添加并切换到自定义 EVM 网络，请替换rpc和chainId"
           presupposeParams={[
             {
-              id: "networkConfig",
-              name: "网络配置",
-              value: JSON.stringify({
-                chainId: "0x32", // 80
-                // chainName: "XDC",
-                // nativeCurrency: {
-                //   name: "XDC",
-                //   symbol: "XDC",
-                //   decimals: 18
-                // },
-                rpcUrls: ["https://rpc1.xinfin.network"],
-                // blockExplorerUrls: ["https://explorer.testnet.test"]
-              }, null, 2),
-              description: "自定义网络配置（可编辑）"
-            }
+              id: 'networkConfig',
+              name: '网络配置',
+              value: JSON.stringify(
+                {
+                  chainId: '0x32', // 80
+                  // chainName: "XDC",
+                  // nativeCurrency: {
+                  //   name: "XDC",
+                  //   symbol: "XDC",
+                  //   decimals: 18
+                  // },
+                  rpcUrls: ['https://rpc1.xinfin.network'],
+                  // blockExplorerUrls: ["https://explorer.testnet.test"]
+                },
+                null,
+                2,
+              ),
+              description: '自定义网络配置（可编辑）',
+            },
           ]}
           onExecute={async (request: string) => {
             try {
@@ -929,14 +409,14 @@ export default function Example() {
                 method: 'wallet_addEthereumChain',
                 params: [JSON.parse(request)],
               });
-              
+
               // 添加成功后再切换网络
               await provider?.request({
                 method: 'wallet_switchEthereumChain',
                 params: [{ chainId: JSON.parse(request).chainId }],
               });
-              
-              return "网络添加并切换成功";
+
+              return '网络添加并切换成功';
             } catch (error: any) {
               console.error('添加/切换网络失败:', error);
               throw error;
@@ -947,29 +427,14 @@ export default function Example() {
         <ApiPayload
           title="添加自定义代币"
           description="添加当前网络的自定义代币(默认添加Sepolia USDT)"
-          presupposeParams={[
-            {
-              id: "tokenConfig",
-              name: "代币配置",
-              value: JSON.stringify({
-                type: 'ERC20',
-                options: {
-                  address: '0xFB122130C4d28860dbC050A8e024A71a558eB0C1', // USDT
-                  symbol: 'USDT',
-                  decimals: 18,
-                  // image: 'https://assets.coingecko.com/coins/images/325/small/Tether.png',
-                }
-              }, null, 2),
-              description: "代币配置（可编辑）"
-            }
-          ]}
+          presupposeParams={params.watchAssets(getTokens(account?.chainId ?? ''))}
           onExecute={async (request: string) => {
             try {
               const result = await provider?.request({
                 method: 'wallet_watchAsset',
-                params: JSON.parse(request)
+                params: JSON.parse(request),
               });
-              
+
               return `代币添加${result ? '成功' : '失败'}`;
             } catch (error: any) {
               console.error('添加代币失败:', error);
@@ -1154,95 +619,126 @@ export default function Example() {
         />
       </ApiGroup>
 
-      <ApiGroup title="eth_sendTransaction">
-        <ApiPayload
-          title="eth_sendTransaction"
-          description="发送 ERC20 Token"
-          onExecute={requestSendTransactionCommon}
-          generateRequestFrom={() => getTokenTransferFrom(account?.chainId)}
-          // @ts-expect-error
-          onGenerateRequest={(fromData: Record<string, any>) => {
-            const from = account?.address ?? '';
-            const to = fromData.toAddress ?? from;
-            const amount = fromData.amount;
-            const tokenAddress = fromData.tokenAddress;
-
-            if (!amount) {
-              return 'Amount is required';
-            }
-            if (!tokenAddress) {
-              return 'Token address is required';
-            }
-
-            return JSON.stringify({
-              from: from,
-              to: tokenAddress,
-              data: `0xa9059cbb${to.substring(2).padStart(64, '0')}${BigInt(amount)
-                .toString(16)
-                .padStart(64, '0')}`,
-              value: '0x0',
-              gasLimit: '0x186a0',
-              gasPrice: '0xbebc200',
-            });
-          }}
-        />
-        <ApiPayload
-          title="eth_sendTransaction"
-          description="授权 ERC20 Token，金额为 0 时表示取消授权"
-          onExecute={requestSendTransactionCommon}
-          generateRequestFrom={() => getTokenTransferFrom(account?.chainId, true)}
-          // @ts-expect-error
-          onGenerateRequest={(fromData: Record<string, any>) => {
-            const from = account?.address ?? '';
-            const to = fromData.toAddress ?? from;
-            const amount = fromData.amount;
-            const tokenAddress = fromData.tokenAddress;
-            const maxApprove = fromData.maxApprove;
-            const mockUniSwap = fromData.mockUniSwap;
-
-            if (!amount) {
-              return 'Amount is required';
-            }
-            if (!tokenAddress) {
-              return 'Token address is required';
-            }
-
-            // maxApprove
-            let approveAmount;
-            if (maxApprove) {
-              // 使用最大值 2^256 - 1 表示无限额度
-              approveAmount = 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
-            } else {
-              approveAmount = BigInt(amount).toString(16).padStart(64, '0');
-            }
-
-            const data = `0x095ea7b3${to.substring(2).padStart(64, '0')}${approveAmount}`;
-
-            if (mockUniSwap) {
-              return JSON.stringify({
-                from: from,
-                to: tokenAddress,
-                data,
-                gas: '0xc049',
-              });
-            }
-
-            return JSON.stringify({
-              from: from,
-              to: tokenAddress,
-              data,
-              value: '0x0',
-              gasLimit: '0x186a0',
-              gasPrice: '0xbebc200',
-            });
-          }}
-        />
-      </ApiGroup>
-
-      <ApiGroup title="wallet_watchAsset (EIP 747)">
+      <ApiGroup title="ERC20、ERC721、ERC1155 代币操作">
         <WalletWatchAsset chainId={account?.chainId} />
         <WalletWatchAssetERC721 chainId={account?.chainId} />
         <WalletWatchAssetERC1155 chainId={account?.chainId} />
+        <WrapAssets chainId={account?.chainId} />
+      </ApiGroup>
+
+      <ApiGroup title="主流 dApp 操作模拟,只能验证交易解析，大部分用例无法执行交易">
+        <ApiPayload
+          title="UniSwap V2"
+          description="测试 UniSwap V2 交易"
+          presupposeParams={uniswapV2Cases.sendTransaction(
+            account?.address ?? '',
+            account?.address ?? '',
+            account?.chainId,
+          )}
+          onExecute={async (request: string) => {
+            const res = await provider?.request({
+              'method': 'eth_sendTransaction',
+              'params': [JSON.parse(request)],
+            });
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="UniSwap Universal"
+          description="测试 UniSwap Universal 交易"
+          presupposeParams={uniswapUniversalCases.sendTransaction(
+            account?.address ?? '',
+            account?.address ?? '',
+            account?.chainId,
+          )}
+          onExecute={async (request: string) => {
+            const res = await provider?.request({
+              'method': 'eth_sendTransaction',
+              'params': [JSON.parse(request)],
+            });
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="SushiSwap"
+          description="测试 SushiSwap 交易"
+          presupposeParams={sushiSwapCases.sendTransaction(
+            account?.address ?? '',
+            account?.address ?? '',
+            account?.chainId,
+          )}
+          onExecute={async (request: string) => {
+            const res = await provider?.request({
+              'method': 'eth_sendTransaction',
+              'params': [JSON.parse(request)],
+            });
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="Morpho"
+          description="测试 Morpho 交易"
+          presupposeParams={morphoCases.sendTransaction(
+            account?.address ?? '',
+            account?.address ?? '',
+            account?.chainId,
+          )}
+          onExecute={async (request: string) => {
+            const res = await provider?.request({
+              'method': 'eth_sendTransaction',
+              'params': [JSON.parse(request)],
+            });
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="InchV5"
+          description="测试 InchV5 交易"
+          presupposeParams={inchV5Cases.sendTransaction(
+            account?.address ?? '',
+            account?.address ?? '',
+            account?.chainId,
+          )}
+          onExecute={async (request: string) => {
+            const res = await provider?.request({
+              'method': 'eth_sendTransaction',
+              'params': [JSON.parse(request)],
+            });
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="InchV6"
+          description="测试 InchV6 交易"
+          presupposeParams={inchV6Cases.sendTransaction(
+            account?.address ?? '',
+            account?.address ?? '',
+            account?.chainId,
+          )}
+          onExecute={async (request: string) => {
+            const res = await provider?.request({
+              'method': 'eth_sendTransaction',
+              'params': [JSON.parse(request)],
+            });
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="OKX"
+          description="测试 OKX 交易"
+          presupposeParams={okxCases.sendTransaction(
+            account?.address ?? '',
+            account?.address ?? '',
+            account?.chainId,
+          )}
+          onExecute={async (request: string) => {
+            const res = await provider?.request({
+              'method': 'eth_sendTransaction',
+              'params': [JSON.parse(request)],
+            });
+            return JSON.stringify(res);
+          }}
+        />
       </ApiGroup>
 
       <ApiGroup title="PPOM 恶意交易签名测试">
@@ -1250,7 +746,10 @@ export default function Example() {
           title="eth_sendTransaction"
           description="测试风险 Native 交易"
           onExecute={requestSendTransactionCommon}
-          presupposeParams={maliciousCases.sendTransaction(account?.address ?? '', MALICIOUS_ADDRESS)}
+          presupposeParams={maliciousCases.sendTransaction(
+            account?.address ?? '',
+            MALICIOUS_ADDRESS,
+          )}
         />
 
         <ApiPayload
@@ -1278,7 +777,7 @@ export default function Example() {
             return await provider?.request({
               'method': 'eth_signTypedData_v4',
               'params': [account.address, request],
-            })
+            });
           }}
           presupposeParams={maliciousCases.signTypedData(
             account?.address ?? '',
@@ -1292,7 +791,10 @@ export default function Example() {
           title="eth_sendTransaction"
           description="测试参数错误的 Native 交易"
           onExecute={requestSendTransactionCommon}
-          presupposeParams={malformedCases.sendTransaction(account?.address ?? '', MALICIOUS_ADDRESS)}
+          presupposeParams={malformedCases.sendTransaction(
+            account?.address ?? '',
+            MALICIOUS_ADDRESS,
+          )}
         />
 
         <ApiPayload
@@ -1302,7 +804,7 @@ export default function Example() {
             return await provider?.request({
               'method': 'eth_signTypedData_v4',
               'params': [account.address, request],
-            })
+            });
           }}
           presupposeParams={malformedCases.signTypedData(
             account?.address ?? '',

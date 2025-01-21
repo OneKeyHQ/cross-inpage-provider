@@ -66,7 +66,7 @@ function AssetInfoView({ viewRef, client }: { viewRef: ApiFormRef | undefined, c
   if (!context) throw new Error('ApiField must be used within ApiForm');
 
   const { store } = context;
-  const [field] = useAtom(store.fieldsAtom('asset'));
+  const [field] = useAtom(store.fieldAtom('asset'));
 
   useEffect(() => {
     if (viewRef) {
@@ -185,7 +185,7 @@ function TransferForm() {
     <AssetInfoView viewRef={apiFromRef.current} client={client} />
     <ApiForm.Field id='to' label='to' placeholder='请输入转账地址' />
     <ApiForm.Field id='amount' label='转账金额' defaultValue='0.0001' />
-    <ApiForm.Button id='transfer' label='transfer' onClick={handleTransfer} availableDependencyFields={['asset', 'to', 'amount']} />
+    <ApiForm.Button id='transfer' label='transfer' onClick={handleTransfer} availableDependencyFields={[{ fieldIds: ['asset', 'to', 'amount'] }]} />
     <ApiForm.AutoHeightTextArea id='result' />
   </ApiForm>
 }
@@ -453,7 +453,7 @@ function Example() {
 
             const transfer = new TransactionBlock();
             transfer.setSender(from);
-            
+
             const { data: coins } = await client.getCoins({
               owner: from,
               coinType: token,
@@ -506,7 +506,7 @@ function Example() {
 
             const transfer = new TransactionBlock();
             transfer.setSender(from);
-            
+
             const { data: coins } = await client.getCoins({
               owner: from,
               coinType: token,
@@ -535,7 +535,7 @@ function Example() {
               transactionBlock: tx,
               account: currentAccount,
             });
-            
+
             return JSON.stringify(res);
           }}
         />

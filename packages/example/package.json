@@ -103,7 +103,7 @@
     "js-conflux-sdk": "^2.1.8",
     "lodash-es": "^4.17.21",
     "long": "^4.0.0",
-    "lucid-cardano": "^0.10.7",
+    "lucid-cardano": "^0.10.11",
     "lucide-react": "^0.378.0",
     "msw": "^2.4.1",
     "near-api-js": "^0.44.2",

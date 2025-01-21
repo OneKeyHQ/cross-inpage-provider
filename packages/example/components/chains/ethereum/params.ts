@@ -217,6 +217,45 @@ export default {
       }),
     };
   }),
+  watchAssets: (
+    tokens: {
+      value: string;
+      label: string;
+      extra: {
+        type: string;
+        options: {
+          address: string;
+          symbol: string;
+          decimals: number;
+          image: string;
+        };
+      };
+    }[],
+  ) => {
+    return tokens.map((token) => {
+      const { value, label, extra } = token;
+      const { address, symbol, decimals, image } = extra.options;
+
+      return {
+        id: `watchAsset-${value}`,
+        name: label,
+        value: JSON.stringify(
+          {
+            type: 'ERC20',
+            options: {
+              address: address,
+              symbol: symbol,
+              decimals: decimals,
+              image: image,
+            },
+          },
+          null,
+          2,
+        ),
+        description: '代币配置（可编辑）',
+      };
+    });
+  },
   watchAsset: [
     {
       'id': 'watchAsset erc20 foo',

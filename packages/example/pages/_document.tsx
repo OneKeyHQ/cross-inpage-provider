@@ -30,6 +30,9 @@ export default function Document() {
         `,
           }}
         />
+        {/* <script src="https://cdn.jsdelivr.net/npm/eruda"/> */}
+        {/* <script>eruda.init();</script> */}
+
       </Head>
       <body>
         <Main />

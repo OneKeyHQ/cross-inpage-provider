@@ -277,6 +277,8 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
           }
         }
 
+        console.log('=====>>>>> connect result', result);
+
         if (!result) {
           return {
             event: 'connect_error',
@@ -350,7 +352,12 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
   }
 
   connect(protocolVersion?: number, message?: ConnectRequest): Promise<ConnectEvent> {
-    return this._connect(protocolVersion, message);
+    try {
+      return this._connect(protocolVersion, message);
+    } catch (error) {
+      console.error('=====>>>>> connect error', error);
+      throw error;
+    }
   }
 
   restoreConnection(): Promise<ConnectEvent> {

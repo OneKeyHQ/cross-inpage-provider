@@ -10,6 +10,9 @@ import { ApiSwitch } from './ApiSwitch';
 import { ApiCombobox } from './ApiCombobox';
 import { ApiSeparator } from './ApiSeparator';
 import { ApiText } from './ApiText';
+import { useField } from './hooks/useField';
+import { useForm } from './hooks/useForm';
+import { useFormContext } from './hooks/useFormContext';
 
 const Form = ApiForm as typeof ApiForm & {
   Field: typeof ApiField;
@@ -23,6 +26,9 @@ const Form = ApiForm as typeof ApiForm & {
   Combobox: typeof ApiCombobox;
   Separator: typeof ApiSeparator;
   Text: typeof ApiText;
+  useField: typeof useField;
+  useForm: typeof useForm;
+  useFormContext: typeof useFormContext;
 };
 
 Form.Field = ApiField;
@@ -36,6 +42,9 @@ Form.Switch = ApiSwitch;
 Form.Combobox = ApiCombobox;
 Form.Separator = ApiSeparator;
 Form.Text = ApiText;
+Form.useField = useField;
+Form.useForm = useForm;
+Form.useFormContext = useFormContext;
 
 export { Form as ApiForm };
 export type { ApiFormProps, ApiFormRef } from './ApiForm';

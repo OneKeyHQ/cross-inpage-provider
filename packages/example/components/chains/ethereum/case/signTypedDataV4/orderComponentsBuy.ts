@@ -5,6 +5,13 @@ export default (params: IEIP712Params) => ({
   name: 'order: Opensea Shell NFT OrderComponents 方法',
   description: 'SignTypedDataV4 Opensea Shell NFT OrderComponents 方法',
   value: JSON.stringify({
+    domain: {
+      name: 'Seaport',
+      version: '1.6',
+      chainId: '1',
+      verifyingContract: '0x0000000000000068F116a894984e2DB1123eB395',
+    },
+    primaryType: 'OrderComponents',
     types: {
       EIP712Domain: [
         { name: 'name', type: 'string' },
@@ -41,41 +48,43 @@ export default (params: IEIP712Params) => ({
         { name: 'recipient', type: 'address' },
       ],
     },
-    primaryType: 'OrderComponents',
-    domain: {
-      name: 'Seaport',
-      version: '1.1',
-      chainId: params.chainId.toString(),
-      verifyingContract: '0x00000000006c3852cbEf3e08E8dF289169EdE581', // Seaport 1.1 contract address
-    },
     message: {
-      offerer: '0x0000000000000000000000000000000000000000',
-      zone: '0x0000000000000000000000000000000000000000',
+      offerer: '0x25F258841532F4bD43A7be72f4a5d6DBDc0225de',
       offer: [
         {
-          itemType: 2, // ERC721
-          token: '0x0000000000000000000000000000000000000000',
-          identifierOrCriteria: '1',
-          startAmount: '1',
-          endAmount: '1',
+          itemType: '1',
+          token: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+          identifierOrCriteria: '0',
+          startAmount: '195000000000000000',
+          endAmount: '195000000000000000',
         },
       ],
       consideration: [
         {
-          itemType: 0, // ETH
-          token: '0x0000000000000000000000000000000000000000',
+          itemType: '2',
+          token: '0xd00dE8ce9eA7A0E5573CC6bc6F97cb0c293CB16e',
+          identifierOrCriteria: '84',
+          startAmount: '1',
+          endAmount: '1',
+          recipient: '0x25F258841532F4bD43A7be72f4a5d6DBDc0225de',
+        },
+        {
+          itemType: '1',
+          token: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
           identifierOrCriteria: '0',
-          startAmount: '1000000000000000000',
-          endAmount: '1000000000000000000',
-          recipient: '0x0000000000000000000000000000000000000000',
+          startAmount: '4875000000000000',
+          endAmount: '4875000000000000',
+          recipient: '0x0000a26b00c1F0DF003000390027140000fAa719',
         },
       ],
-      orderType: 0, // FULL_OPEN
-      startTime: '1640995200', // 2022-01-01 00:00:00 UTC
-      endTime: '1672531200', // 2023-01-01 00:00:00 UTC
+      startTime: '1732518621',
+      endTime: '1732777809',
+      orderType: '2',
+      zone: '0x000056F7000000EcE9003ca63978907a00FFD100',
       zoneHash: '0x0000000000000000000000000000000000000000000000000000000000000000',
-      salt: '0',
-      conduitKey: '0x0000000000000000000000000000000000000000000000000000000000000000',
+      salt: '24446860302761739304752683030156737591518664810215442929812175597397955425206',
+      conduitKey: '0x0000007b02230091a7ed01230072f7006a004d60a8d4e71d599b8104250f0000',
+      totalOriginalConsiderationItems: '2',
       counter: '0',
     },
   }),

@@ -20,7 +20,9 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 );
 Textarea.displayName = 'Textarea';
 
-export type AutoHeightTextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>;
+export type AutoHeightTextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
+  maxHeight?: number;
+};
 
 const AutoHeightTextarea: React.FC<AutoHeightTextareaProps> = (props) => {
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
@@ -29,9 +31,13 @@ const AutoHeightTextarea: React.FC<AutoHeightTextareaProps> = (props) => {
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = 'auto'; // 重置高度允许缩小
-      textarea.style.height = `${textarea.scrollHeight}px`; // 设置新高度基于内容高度
+      if (props.maxHeight) {
+        textarea.style.height = `${Math.min(textarea.scrollHeight, props.maxHeight)}px`;
+      } else {
+        textarea.style.height = `${textarea.scrollHeight}px`; // 设置新高度基于内容高度
+      }
     }
-  }, []);
+  }, [props.maxHeight]);
 
   React.useEffect(() => {
     adjustHeight();

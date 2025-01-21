@@ -12,7 +12,13 @@ import permitWitnessTransferFrom from './permitWitnessTransferFrom';
 import order from './order';
 import orderComponents from './orderComponents';
 
-import type {IEIP712Params} from '../../types';
+import type { IEIP712Params } from '../../types';
+import orderComponentsBuy from './orderComponentsBuy';
+import orderUniswap from './orderUniswap';
+import orderCosSwap from './orderCosSwap';
+import orderUniswap2 from './orderUniswap2';
+import orderBlur from './orderBlur';
+import order1Inch from './order1Inch';
 
 export default (params: IEIP712Params) => [
   normal(params),
@@ -26,4 +32,10 @@ export default (params: IEIP712Params) => [
   permitBatchTransferFrom(params),
   order(params),
   orderComponents(params),
+  orderComponentsBuy(params),
+  orderUniswap(params),
+  orderUniswap2(params),
+  orderCosSwap(params),
+  orderBlur(params),
+  order1Inch(params),
 ];

@@ -1,9 +1,7 @@
-import React, { memo, useContext, useEffect } from 'react';
-import { useAtom } from 'jotai';
+import React, { memo } from 'react';
 import { Label } from '../ui/label';
-import { ApiFormContext } from './ApiForm';
 import { Textarea } from '../ui/textarea';
-
+import { useField } from './hooks/useField';
 
 interface TextAreaProps {
   id: string;
@@ -12,36 +10,26 @@ interface TextAreaProps {
   required?: boolean;
 }
 
-const TextArea = memo(({
-  id,
-  placeholder,
-  label,
-  required
-}: TextAreaProps) => {
-  const context = useContext(ApiFormContext);
-  if (!context) throw new Error('ApiField must be used within ApiForm');
+const TextArea = memo(({ id, placeholder, label, required }: TextAreaProps) => {
+  const { field, setValue } = useField<string>({
+    id,
+    name: label,
+    required,
+  });
 
-  const { store } = context;
-  const [field, setField] = useAtom(store.fieldsAtom(id));
-
-  useEffect(() => {
-    field.name = label;
-    field.required = required;
-  }, []);
-
-  return <>
-    <Textarea
-      id={id}
-      value={field.value}
-      onChange={(e) => setField({ ...field, value: e.target.value })}
-      placeholder={placeholder}
-      disabled={field.disabled}
-      style={{ overflow: 'hidden' }}
-    />
-    {field.error && (
-      <div className="text-sm text-red-500">{field.error}</div>
-    )}
-  </>
+  return (
+    <>
+      <Textarea
+        id={id}
+        value={field?.value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder={placeholder}
+        disabled={field?.disabled}
+        style={{ overflow: 'hidden' }}
+      />
+      {field?.error && <div className="text-sm text-red-500">{field.error}</div>}
+    </>
+  );
 });
 
 export interface ApiTextAreaProps extends TextAreaProps {
@@ -50,12 +38,7 @@ export interface ApiTextAreaProps extends TextAreaProps {
   required?: boolean;
 }
 
-export const ApiTextArea = memo(({
-  id,
-  label,
-  placeholder,
-  required
-}: ApiTextAreaProps) => {
+export const ApiTextArea = memo(({ id, label, placeholder, required }: ApiTextAreaProps) => {
   return (
     <div>
       {label && (

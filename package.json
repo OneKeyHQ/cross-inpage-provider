@@ -34,7 +34,7 @@
     "@types/jest": "^27.0.2",
     "@types/lodash": "^4.14.178",
     "@types/lodash-es": "^4.17.12",
-    "@types/node": "^20.12.7",
+    "@types/node": "^16.9.0",
     "@types/react": "^17.0.21",
     "@types/react-native": "^0.67.6",
     "@typescript-eslint/eslint-plugin": "^5.7.0",
@@ -50,7 +50,6 @@
     "jest": "^27.2.4",
     "lerna": "^5.6.2",
     "lodash": "^4.17.21",
-    "lodash-es": "^4.17.21",
     "patch-package": "^8.0.0",
     "postinstall-postinstall": "^2.1.0",
     "prettier": "2.3.2",
@@ -58,6 +57,15 @@
     "react-test-renderer": "^17.0.2",
     "ts-jest": "^27.0.5",
     "typescript": "^5"
+  },
+  "dependencies": {
+    "@aptos-labs/ts-sdk": "^1.33.1",
+    "@aptos-labs/wallet-adapter-core": "^4.23.0",
+    "@aptos-labs/wallet-adapter-react": "^3.7.9",
+    "@benfen/bfc.js": "^0.2.7",
+    "@solana/spl-token": "^0.4.9",
+    "ethereumjs-util": "^7.1.5",
+    "lodash-es": "^4.17.21"
   },
   "packageManager": "yarn@1.22.21+sha1.1959a18351b811cdeedbd484a8f86c3cc3bbaf72"
 }

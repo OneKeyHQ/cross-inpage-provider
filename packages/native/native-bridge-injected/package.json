@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/native-bridge-injected",
-  "version": "2.2.7",
+  "version": "2.2.8",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -28,7 +28,7 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "2.2.7",
-    "@onekeyfe/cross-inpage-provider-types": "2.2.7"
+    "@onekeyfe/cross-inpage-provider-core": "2.2.8",
+    "@onekeyfe/cross-inpage-provider-types": "2.2.8"
   }
 }

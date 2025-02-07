@@ -4,7 +4,7 @@ import { CrossEventEmitter } from './CrossEventEmitter';
 import { appDebugLogger, consoleErrorInDev } from './loggers';
 
 import type { Web3ProviderError } from '@onekeyfe/cross-inpage-provider-errors';
-import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
+import { web3Errors, toNativeErrorObject } from '@onekeyfe/cross-inpage-provider-errors';
 import {
   IDebugLogger,
   IInjectedProviderNamesStrings,
@@ -408,7 +408,8 @@ abstract class JsBridgeBase extends CrossEventEmitter {
       if (callbackInfo) {
         try {
           if (error) {
-            this.rejectCallback(id, error);
+            const errorObject = toNativeErrorObject(error); 
+            this.rejectCallback(id, errorObject);
           } else {
             this.resolveCallback(id, data);
           }

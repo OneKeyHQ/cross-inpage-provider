@@ -1,5 +1,5 @@
 import { Web3RpcError, Web3ProviderError } from './classes';
-import { serializeError, getMessageFromCode } from './utils';
+import { serializeError, getMessageFromCode, toNativeErrorObject } from './utils';
 import { web3Errors } from './errors';
 import { errorCodes } from './error-constants';
 
@@ -10,4 +10,5 @@ export {
   Web3ProviderError,
   serializeError,
   getMessageFromCode,
+  toNativeErrorObject,
 };

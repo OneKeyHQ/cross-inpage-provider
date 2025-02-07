@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/onekey-bfc-provider",
-  "version": "2.2.8",
+  "version": "2.2.9",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -29,10 +29,10 @@
   },
   "dependencies": {
     "@benfen/bfc.js": "0.2.7",
-    "@onekeyfe/cross-inpage-provider-core": "2.2.8",
-    "@onekeyfe/cross-inpage-provider-errors": "2.2.8",
-    "@onekeyfe/cross-inpage-provider-types": "2.2.8",
-    "@onekeyfe/extension-bridge-injected": "2.2.8",
+    "@onekeyfe/cross-inpage-provider-core": "2.2.9",
+    "@onekeyfe/cross-inpage-provider-errors": "2.2.9",
+    "@onekeyfe/cross-inpage-provider-types": "2.2.9",
+    "@onekeyfe/extension-bridge-injected": "2.2.9",
     "eth-rpc-errors": "^4.0.3",
     "mitt": "^3.0.0"
   },

@@ -51,24 +51,29 @@ export function Example() {
       <InfoLayout title="Base Info">
         <div>
           <p>伪装欺诈模式</p>
-          <Switch checked={!!scamEnable} onCheckedChange={async (checked) => {
-            if (tonConnectUI.connected) {
-              await tonConnectUI?.disconnect();
-              TonProofDemoApi.reset();
-            }
-            if (checked) {
-              localStorage.setItem(TON_SCAM_DAPP_ENABLE_KEY, 'true');
-            } else {
-              localStorage.removeItem(TON_SCAM_DAPP_ENABLE_KEY);
-            }
-            window.location.reload();
-          }} />
+          <Switch
+            checked={!!scamEnable}
+            onCheckedChange={async (checked) => {
+              if (tonConnectUI.connected) {
+                await tonConnectUI?.disconnect();
+                TonProofDemoApi.reset();
+              }
+              if (checked) {
+                localStorage.setItem(TON_SCAM_DAPP_ENABLE_KEY, 'true');
+              } else {
+                localStorage.removeItem(TON_SCAM_DAPP_ENABLE_KEY);
+              }
+              window.location.reload();
+            }}
+          />
         </div>
         {userFriendlyAddress && <p>userFriendlyAddress: {userFriendlyAddress}</p>}
         {rawAddress && <p>rawAddress: {rawAddress}</p>}
         {wallet?.account && <p>Wallet Account PublicKey: {wallet?.account.publicKey}</p>}
         {wallet?.account && <p>Wallet Account Chain: {wallet?.account.chain}</p>}
-        {wallet?.account && <p>Wallet Account WalletStateInit: {wallet?.account.walletStateInit}</p>}
+        {wallet?.account && (
+          <p>Wallet Account WalletStateInit: {wallet?.account.walletStateInit}</p>
+        )}
 
         {wallet?.device?.appName && <p>Wallet AppName: {wallet?.device?.appName}</p>}
         {wallet?.device?.appVersion && <p>Wallet appVersion: {wallet?.device?.appVersion}</p>}
@@ -78,7 +83,7 @@ export function Example() {
         )}
       </InfoLayout>
 
-      <ApiGroup title='Sign Proof 按步骤作'>
+      <ApiGroup title="Sign Proof 按步骤作">
         <ApiPayload
           title="步骤1: Loading Proof Data"
           description="步骤1: 断开连接，生成 Proof Payload"
@@ -114,30 +119,33 @@ export function Example() {
           onValidate={async (request: string, response: string) => {
             if (wallet.connectItems?.tonProof && 'proof' in wallet.connectItems.tonProof) {
               try {
-                const result = await TonProofDemoApi.checkProof(wallet.connectItems.tonProof.proof, wallet.account);
+                const result = await TonProofDemoApi.checkProof(
+                  wallet.connectItems.tonProof.proof,
+                  wallet.account,
+                );
 
                 if (!result) {
                   toast({
                     variant: 'destructive',
-                    title: 'Proof 签名验证失败'
+                    title: 'Proof 签名验证失败',
                   });
                 }
                 if (result && scamEnable) {
                   toast({
                     title: '当前处于伪���欺诈模式，不应该成功连接账户',
-                    variant: 'destructive'
+                    variant: 'destructive',
                   });
                 }
 
                 return JSON.stringify({
                   success: result,
-                  proof: wallet.connectItems.tonProof.proof
+                  proof: wallet.connectItems.tonProof.proof,
                 });
               } catch (e: any) {
                 return JSON.stringify({
                   success: false,
                   errorMessage: e?.message,
-                  proof: null
+                  proof: null,
                 });
               }
             }
@@ -166,10 +174,12 @@ export function Example() {
             return JSON.stringify(res);
           }}
         />
+
         <ApiPayload
           title="sendTransaction"
+          description="错误例子测试，这个用例所有请求都应该报错"
           allowCallWithoutProvider={!!userFriendlyAddress}
-          presupposeParams={params.sendTransactionWithBody(userFriendlyAddress || '')}
+          presupposeParams={params.sendTransactionWithError(userFriendlyAddress || '')}
           onExecute={async (request: string) => {
             const res = await tonConnectUI?.sendTransaction(JSON.parse(request));
             return JSON.stringify(res);
@@ -196,26 +206,29 @@ export function Example() {
 }
 
 export default function App() {
-
   const enable = localStorage.getItem(TON_SCAM_DAPP_ENABLE_KEY);
 
-  const manifestUrl = enable ? "https://dapp-example.onekeytest.com/scam-tonconnect-manifest.json" : "https://dapp-example.onekeytest.com/tonconnect-manifest.json";
+  const manifestUrl = enable
+    ? 'https://dapp-example.onekeytest.com/scam-tonconnect-manifest.json'
+    : 'https://dapp-example.onekeytest.com/tonconnect-manifest.json';
 
   return (
     <>
-      <TonConnectUIProvider manifestUrl={manifestUrl}
+      <TonConnectUIProvider
+        manifestUrl={manifestUrl}
         walletsListConfiguration={{
           includeWallets: [
             {
-              appName: "onekey",
-              name: "OneKey",
-              imageUrl: "https://common.onekey-asset.com/logo/onekey-x288.png",
-              aboutUrl: "https://onekey.so",
-              jsBridgeKey: "onekeyTonWallet",
-              platforms: ["chrome"]
+              appName: 'onekey',
+              name: 'OneKey',
+              imageUrl: 'https://common.onekey-asset.com/logo/onekey-x288.png',
+              aboutUrl: 'https://onekey.so',
+              jsBridgeKey: 'onekeyTonWallet',
+              platforms: ['chrome'],
             },
-          ]
-        }}>
+          ],
+        }}
+      >
         {/* <TonConnectUIProvider manifestUrl="https://ton-connect.github.io/demo-dapp-with-react-ui/tonconnect-manifest.json"> */}
         <Example />
       </TonConnectUIProvider>

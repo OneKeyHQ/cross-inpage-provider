@@ -16,6 +16,7 @@ import {
   WalletEvent,
   WalletResponse,
   WalletResponseSuccess,
+  WalletResponseError,
 } from '@tonconnect/protocol';
 import {
   AccountInfo,
@@ -110,6 +111,7 @@ export function createTonProvider(
   });
 }
 
+// Doc: https://github.com/ton-blockchain/ton-connect/blob/main/requests-responses.md
 export class ProviderTon extends ProviderTonBase implements IProviderTon {
   private _accountInfo: AccountInfo | null = null;
 
@@ -239,9 +241,8 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     return this._network === undefined || network !== this._network;
   }
 
-  private _id = 0;
   async _connect(protocolVersion?: number, message?: ConnectRequest): Promise<ConnectEvent> {
-    const id = ++this._id;
+    const id = Date.now();
     const isGetTonAddr =
       !message || (message && message.items.some((item) => item.name === 'ton_addr'));
     const proofItem =
@@ -256,10 +257,25 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
           ...this._accountInfo,
         });
       } else {
-        const result = await this._callBridge({
-          method: 'connect',
-          params: protocolVersion && message ? [protocolVersion, message] : [],
-        });
+        let result: AccountInfo | undefined;
+        try {
+          result = await this._callBridge({
+            method: 'connect',
+            params: protocolVersion && message ? [protocolVersion, message] : [],
+          });
+        } catch (error) {
+          const { code } = error as { code?: number; message?: string };
+          if (code === 4001) {
+            return {
+              event: 'connect_error',
+              id,
+              payload: {
+                code: CONNECT_EVENT_ERROR_CODES.USER_REJECTS_ERROR,
+                message: ConnectEventErrorMessage.USER_DECLINED,
+              },
+            };
+          }
+        }
 
         if (!result) {
           return {
@@ -280,14 +296,29 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     }
 
     if (proofItem) {
-      const result = await this._callBridge({
-        method: 'signProof',
-        params: [
-          {
-            payload: proofItem.payload,
-          },
-        ],
-      });
+      let result: SignProofResult | undefined;
+      try {
+        result = await this._callBridge({
+          method: 'signProof',
+          params: [
+            {
+              payload: proofItem.payload,
+            },
+          ],
+        });
+      } catch (error) {
+        const { code } = error as { code?: number; message?: string };
+        if (code === 4001) {
+          return {
+            event: 'connect_error',
+            id,
+            payload: {
+              code: CONNECT_EVENT_ERROR_CODES.USER_REJECTS_ERROR,
+              message: ConnectEventErrorMessage.USER_DECLINED,
+            },
+          };
+        }
+      }
       if (!result) {
         return {
           event: 'connect_error',
@@ -298,6 +329,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
           },
         };
       }
+
       items.push({
         name: 'ton_proof',
         proof: {
@@ -325,31 +357,57 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     return this._connect();
   }
 
-  async send<T extends RpcMethod>(message: AppRequest<T>): Promise<WalletResponse<T>> {
-    const id = message.id;
-
-    let res: unknown;
-    const params = message.params.map((p) => {
-      if (typeof p === 'string') {
-        return JSON.parse(p) as unknown;
-      }
-      return p;
-    });
-    if (message.method === 'sendTransaction') {
-      res = await this._sendTransaction(params[0] as TransactionRequest);
-    } else if (message.method === 'signData') {
-      res = await this._signData(params[0] as SignDataRequest);
-    } else if (message.method === 'disconnect') {
-      await this._disconnect();
-      res = '';
+  convertError<T extends RpcMethod>(id: string, error: unknown): WalletResponseError<T> {
+    const { code, message } = error as { code?: number; message?: string };
+    if (code === 4001) {
+      return {
+        id,
+        error: {
+          code: SEND_TRANSACTION_ERROR_CODES.USER_REJECTS_ERROR,
+          message: ConnectEventErrorMessage.USER_DECLINED,
+        },
+      } as WalletResponseError<T>;
     } else {
       return {
         id,
         error: {
-          code: SEND_TRANSACTION_ERROR_CODES.METHOD_NOT_SUPPORTED,
-          message: SendTransactionErrorMessage.METHOD_NOT_SUPPORTED,
+          code: SEND_TRANSACTION_ERROR_CODES.UNKNOWN_APP_ERROR,
+          message: message ?? '',
         },
-      };
+      } as WalletResponseError<T>;
+    }
+  }
+
+  async send<T extends RpcMethod>(message: AppRequest<T>): Promise<WalletResponse<T>> {
+    const id = message.id;
+
+    let res: unknown;
+    try {
+      const params = message.params.map((p) => {
+        if (typeof p === 'string') {
+          return JSON.parse(p) as unknown;
+        }
+        return p;
+      });
+      if (message.method === 'sendTransaction') {
+        res = await this._sendTransaction(params[0] as TransactionRequest);
+      } else if (message.method === 'signData') {
+        res = await this._signData(params[0] as SignDataRequest);
+      } else if (message.method === 'disconnect') {
+        await this._disconnect();
+        // @ts-expect-error
+        return;
+      } else {
+        return {
+          id,
+          error: {
+            code: SEND_TRANSACTION_ERROR_CODES.METHOD_NOT_SUPPORTED,
+            message: SendTransactionErrorMessage.METHOD_NOT_SUPPORTED,
+          },
+        } as WalletResponseError<T>;
+      }
+    } catch (error) {
+      return this.convertError(id, error);
     }
 
     if (res === undefined) {
@@ -359,7 +417,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
           code: SEND_TRANSACTION_ERROR_CODES.UNKNOWN_ERROR,
           message: SendTransactionErrorMessage.UNKNOWN_ERROR,
         },
-      };
+      } as WalletResponseError<T>;
     }
 
     return {
@@ -368,13 +426,11 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     } as WalletResponseSuccess<T>;
   }
 
-  private async _sendTransaction(request: TransactionRequest): Promise<Uint8Array> {
-    const txid = await this._callBridge({
+  private async _sendTransaction(request: TransactionRequest): Promise<string> {
+    return await this._callBridge({
       method: 'sendTransaction',
       params: [request],
     });
-
-    return Buffer.from(txid, 'hex');
   }
 
   private async _signData(request: SignDataRequest): Promise<SignDataResult> {

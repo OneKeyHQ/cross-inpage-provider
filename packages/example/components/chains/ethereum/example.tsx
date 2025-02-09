@@ -900,6 +900,83 @@ export default function Example() {
             return JSON.stringify(res);
           }}
         />
+        
+        <ApiPayload
+          title="添加自定义网络"
+          description="添加并切换到自定义 EVM 网络，请替换rpc和chainId"
+          presupposeParams={[
+            {
+              id: "networkConfig",
+              name: "网络配置",
+              value: JSON.stringify({
+                chainId: "0x32", // 80
+                // chainName: "XDC",
+                // nativeCurrency: {
+                //   name: "XDC",
+                //   symbol: "XDC",
+                //   decimals: 18
+                // },
+                rpcUrls: ["https://rpc1.xinfin.network"],
+                // blockExplorerUrls: ["https://explorer.testnet.test"]
+              }, null, 2),
+              description: "自定义网络配置（可编辑）"
+            }
+          ]}
+          onExecute={async (request: string) => {
+            try {
+              // 先尝试添加网络
+              await provider?.request({
+                method: 'wallet_addEthereumChain',
+                params: [JSON.parse(request)],
+              });
+              
+              // 添加成功后再切换网络
+              await provider?.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: JSON.parse(request).chainId }],
+              });
+              
+              return "网络添加并切换成功";
+            } catch (error: any) {
+              console.error('添加/切换网络失败:', error);
+              throw error;
+            }
+          }}
+        />
+
+        <ApiPayload
+          title="添加自定义代币"
+          description="添加当前网络的自定义代币(默认添加Sepolia USDT)"
+          presupposeParams={[
+            {
+              id: "tokenConfig",
+              name: "代币配置",
+              value: JSON.stringify({
+                type: 'ERC20',
+                options: {
+                  address: '0xFB122130C4d28860dbC050A8e024A71a558eB0C1', // USDT
+                  symbol: 'USDT',
+                  decimals: 18,
+                  // image: 'https://assets.coingecko.com/coins/images/325/small/Tether.png',
+                }
+              }, null, 2),
+              description: "代币配置（可编辑）"
+            }
+          ]}
+          onExecute={async (request: string) => {
+            try {
+              const result = await provider?.request({
+                method: 'wallet_watchAsset',
+                params: JSON.parse(request)
+              });
+              
+              return `代币添加${result ? '成功' : '失败'}`;
+            } catch (error: any) {
+              console.error('添加代币失败:', error);
+              throw error;
+            }
+          }}
+        />
       </ApiGroup>
 
       <ApiGroup title="Sign Message">
@@ -1233,6 +1310,7 @@ export default function Example() {
           )}
         />
       </ApiGroup>
+
       <DappList dapps={dapps} />
     </>
   );

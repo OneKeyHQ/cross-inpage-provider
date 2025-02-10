@@ -4296,4 +4296,33 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
+  {
+    urls: ['app.solayer.org'],
+    constraintMap: {
+      icon: [
+        isWalletIconLessEqualThan,
+        (icon: HTMLElement) => {
+          icon.style.width = '26px';
+          icon.style.height = '26px';
+          return true;
+        }
+      ],
+      text: [],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.solana]: [
+        {
+          ...basicWalletInfo['phantom'],
+          container: 'div.wallet-list',
+          afterUpdate(textNode) {
+            const ledgerInput = document.getElementById('connect-ledger-wallet-with-phantom');
+            const ledgerText = ledgerInput?.nextElementSibling as HTMLSpanElement;
+            if (ledgerText) {
+              ledgerText.textContent = 'I am using my ledger/onekey with one of these wallets';
+            }
+          }
+        },
+      ],
+    },
+  },
 ];

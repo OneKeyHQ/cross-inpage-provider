@@ -233,7 +233,7 @@ export default function Example() {
             try {
               console.log('签名交易请求:', request);
               console.log('签名交易响应:', response);
-              
+
               const res = JSON.parse(response) as {
                 "Data": {
                   "Type": number,
@@ -294,10 +294,10 @@ export default function Example() {
             try {
               console.log('签名交易请求:', request);
               console.log('签名交易响应:', response);
-              
+
               const tx = JSON.parse(response);
               console.log('解析后的交易数据:', tx);
-              
+
               // 检查交易数据结构
               if (!tx.Data || !tx.Hash || !tx.Signature?.Sig) {
                 throw new Error('交易数据格式不正确');
@@ -310,26 +310,27 @@ export default function Example() {
                   throw new Error(`缺少必要字段: ${field}`);
                 }
               }
-              
+
               // 检查 nonce 值
               const currentNonce = await client.getNonce(tx.Data.From);
               console.log('当前 nonce:', currentNonce, '交易 nonce:', tx.Data.AccountNonce);
-              
+
               if (tx.Data.AccountNonce < currentNonce) {
                 throw new Error(`Nonce 值过低，当前 nonce: ${currentNonce}`);
               }
-              
+
               // 使用 client 广播交易
               const success = await client.pushTransaction(tx.Data.From, tx);
               console.log('广播交易结果:', success);
-              
+
               if (!success) {
                 throw new Error('交易广播失败，请检查：\n1. 账户余额是否充足\n2. Gas 费用是否足够\n3. Nonce 值是否正确');
               }
-              
+
               toast({
                 title: '交易广播成功',
-                description: `交易哈希: ${tx.Hash}`,
+                // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                description: `交易哈希: ${get(tx, 'Hash', '')}`,
               });
               return true;
             } catch (error) {

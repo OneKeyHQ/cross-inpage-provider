@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return */
 import { dapps } from './dapps.config';
-import TokenList from '@uniswap/default-token-list';
 import ConnectButton from '../../../components/connect/ConnectButton';
 import { useEffect, useRef } from 'react';
 import { get } from 'lodash';
@@ -34,46 +33,9 @@ import {
   getSupportNetworkNames,
   MALICIOUS_ADDRESS,
 } from './case/contract/SampleContracts';
-import { IOption } from '../../ApiForm/ApiCombobox';
 import { WalletWatchAsset, WrapAssets } from './components/ERC20';
 import { WalletWatchAssetERC721 } from './components/ERC721';
 import { WalletWatchAssetERC1155 } from './components/ERC1155';
-
-type ITokenOption = {
-  type: string;
-  options: {
-    address: string;
-    symbol: string;
-    decimals: number;
-    image: string;
-  };
-};
-
-const getTokens = (chainId: string) => {
-  const tokens = TokenList.tokens.filter((token) => parseChainId(chainId) === token.chainId);
-  const tokenOptions: IOption<ITokenOption>[] = tokens.map((token) => ({
-    value: token.address,
-    label: `${token.name} - ${token.address}`,
-    extra: {
-      type: 'ERC20',
-      options: {
-        address: token.address,
-        symbol: token.symbol,
-        decimals: token.decimals,
-        image: token.logoURI,
-      },
-    },
-  }));
-  // 排序 USDC、USDT、DAI、WETH 优先
-  tokenOptions.sort((a, b) => {
-    const aName = a.extra.options.symbol;
-    const bName = b.extra.options.symbol;
-    const aPriority = ['USDC', 'USDT', 'WETH'].includes(aName) ? 0 : 1;
-    const bPriority = ['USDC', 'USDT', 'WETH'].includes(bName) ? 0 : 1;
-    return aPriority - bPriority;
-  });
-  return tokenOptions;
-};
 
 export default function Example() {
   const walletsRef = useRef<IEIP6963ProviderDetail[]>([
@@ -419,25 +381,6 @@ export default function Example() {
               return '网络添加并切换成功';
             } catch (error: any) {
               console.error('添加/切换网络失败:', error);
-              throw error;
-            }
-          }}
-        />
-
-        <ApiPayload
-          title="添加自定义代币"
-          description="添加当前网络的自定义代币(默认添加Sepolia USDT)"
-          presupposeParams={params.watchAssets(getTokens(account?.chainId ?? ''))}
-          onExecute={async (request: string) => {
-            try {
-              const result = await provider?.request({
-                method: 'wallet_watchAsset',
-                params: JSON.parse(request),
-              });
-
-              return `代币添加${result ? '成功' : '失败'}`;
-            } catch (error: any) {
-              console.error('添加代币失败:', error);
               throw error;
             }
           }}

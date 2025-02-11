@@ -101,6 +101,7 @@ export const WalletWatchAssetERC1155 = ({ chainId }: { chainId: string | undefin
                       let result = await erc1155Contract.mintBatch(...params);
                       result = await result.wait();
 
+                      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                       console.log('mint success', result);
                     } catch (error) {
                       const reason = get(error, 'reason', undefined);

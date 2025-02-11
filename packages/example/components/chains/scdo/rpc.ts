@@ -6,7 +6,7 @@ export class ScdoNodeClient {
   public readonly axios: AxiosInstance;
   private readonly rpcUrl: string;
 
-  constructor(rpcUrl: string = 'https://mainnet.scdo.org:8137') {
+  constructor(rpcUrl = 'https://mainnet.scdo.org:8137') {
     this.rpcUrl = rpcUrl;
     this.axios = Axios.create({
       timeout: 30 * 1000,
@@ -59,8 +59,8 @@ export class ScdoNodeClient {
           jsonrpc: '2.0',
           method: 'scdo_addTx',
           params: [tx],
-          id: 1
-        })
+          id: 1,
+        }),
       });
 
       if (!response.ok) {
@@ -69,14 +69,16 @@ export class ScdoNodeClient {
       }
 
       const result = await response.json();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       console.log('RPC 响应:', result);
 
-      if (result.error) {
-        if (result.error.code === -32000 && result.error.message === 'Tx already exists') {
+      const { error } = result as { error: { code: number; message: string } };
+      if (error) {
+        if (error.code === -32000 && error.message === 'Tx already exists') {
           console.log('交易已存在于网络中');
           return true;
         }
-        console.error('RPC 错误:', result.error);
+        console.error('RPC 错误:', error);
         return false;
       }
 

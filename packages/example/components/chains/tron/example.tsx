@@ -12,18 +12,29 @@ import DappList from '../../../components/DAppList';
 import params from './params';
 import { InputWithSave } from '../../InputWithSave';
 import { toast } from '../../ui/use-toast';
-import { ApiComboboxRef, ApiForm, ApiFormRef } from '../../ApiForm';
+import { ApiComboboxRef, ApiForm, ApiFormRef, ComboboxOption } from '../../ApiForm';
 import { okLinkRequest } from '../utils/OkLink';
+
+type ITokenOption = {
+  type: string;
+  options: {
+    address: string;
+    symbol: string;
+    decimals: string;
+    image: string;
+  };
+};
+
 
 const WalletWatchAsset = memo(() => {
   const apiFromRef = useRef<ApiFormRef>(null);
-  const apiFromComboboxRef = useRef<ApiComboboxRef>(null);
+  const apiFromComboboxRef = useRef<ApiComboboxRef<ITokenOption>>(null);
 
   const { provider } = useWallet<IProviderApi>();
 
   useEffect(() => {
     void okLinkRequest.getTokenList('TRON', 'TRC20').then((tokens) => {
-      const tokenOptions = tokens.map((token) => ({
+      const tokenOptions: ComboboxOption<ITokenOption>[] = tokens.map((token) => ({
         value: token.tokenContractAddress,
         label: `${token.token} - ${token.tokenContractAddress}`,
         extra: {

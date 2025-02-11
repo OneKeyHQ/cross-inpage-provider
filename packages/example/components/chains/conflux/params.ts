@@ -156,7 +156,7 @@ export default {
     if (!from || !to) {
       return [];
     }
-    
+
     return [
       {
         'id': 'sendTransaction',
@@ -182,25 +182,37 @@ export default {
         'id': 'sendTransaction-crc20-moon',
         'name': 'CRC20 Token Transfer(Moon)',
         'description': '发送 CRC20 代币 Moon',
-        'value': JSON.stringify({
-          from: from,
-          to: "cfx:achcuvuasx3t8zcumtwuf35y51sksewvca0h0hj71a",
-          data: "0xa9059cbb" +
-                address.decodeCfxAddress(to).hexAddress.toString('hex').slice(2).padStart(64, '0') +
-                "00000000000000000000000000000000000000000000000000005af3107a4000",
-        }, null, 2)
+        'value': JSON.stringify(
+          {
+            from: from,
+            to: 'cfx:achcuvuasx3t8zcumtwuf35y51sksewvca0h0hj71a',
+            data: [
+              '0xa9059cbb',
+              address.decodeCfxAddress(to).hexAddress.toString('hex').slice(2).padStart(64, '0'),
+              '00000000000000000000000000000000000000000000000000005af3107a4000',
+            ].join(''),
+          },
+          null,
+          2,
+        ),
       },
       {
         'id': 'sendTransaction-crc20-usdt',
         'name': 'CRC20 Token Transfer(USDT)',
         'description': '发送 CRC20 代币 USDT',
-        'value': JSON.stringify({
-          from: from,
-          to: "cfx:acf2rcsh8payyxpg6xj7b0ztswwh81ute60tsw35j7",
-          data: "0xa9059cbb" +
-                address.decodeCfxAddress(to).hexAddress.toString('hex').slice(2).padStart(64, '0') +
-                "00000000000000000000000000000000000000000000000000005af3107a4000",
-        }, null, 2)
+        'value': JSON.stringify(
+          {
+            from: from,
+            to: 'cfx:acf2rcsh8payyxpg6xj7b0ztswwh81ute60tsw35j7',
+            data: [
+              '0xa9059cbb',
+              address.decodeCfxAddress(to).hexAddress.toString('hex').slice(2).padStart(64, '0'),
+              '00000000000000000000000000000000000000000000000000005af3107a4000',
+            ].join(''),
+          },
+          null,
+          2,
+        ),
       },
     ];
   },

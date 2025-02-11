@@ -42,7 +42,7 @@ import { sponsorTransaction } from './utils';
 import { ApiComboboxRef, ApiForm, ApiFormRef } from '../../ApiForm';
 import BigNumber from 'bignumber.js';
 import { useAtom } from 'jotai';
-import { ApiFormContext } from '../../ApiForm/ApiForm';
+import { useFormContext } from '../../ApiForm/hooks/useFormContext';
 
 export function normalizeSuiCoinType(coinType: string): string {
   if (coinType !== SUI_TYPE_ARG) {
@@ -62,11 +62,8 @@ export function normalizeSuiCoinType(coinType: string): string {
 
 function AssetInfoView({ viewRef, client }: { viewRef: ApiFormRef | undefined, client: SuiClient }) {
 
-  const context = useContext(ApiFormContext);
-  if (!context) throw new Error('ApiField must be used within ApiForm');
-
-  const { store } = context;
-  const [field] = useAtom(store.fieldAtom('asset'));
+  const { store } = useFormContext();
+  const [field] = useAtom(store.fieldAtom<string>('asset'));
 
   useEffect(() => {
     if (viewRef) {
@@ -87,7 +84,7 @@ function TransferForm() {
   const { mutateAsync: signAndExecuteTransactionBlock } = useSignAndExecuteTransactionBlock();
 
   const apiFromRef = useRef<ApiFormRef>(null);
-  const assetsComboboxRef = useRef<ApiComboboxRef>(null);
+  const assetsComboboxRef = useRef<ApiComboboxRef<CoinStruct[]>>(null);
 
   const getCoins = async () => {
     const coins = await client.getAllCoins({ owner: currentAccount?.address });
@@ -492,7 +489,7 @@ function Example() {
             );
 
             return (
-              bytesToHex(currentAccount.publicKey) === bytesToHex(publicKey.toRawBytes())
+              bytesToHex(new Uint8Array(currentAccount.publicKey)) === bytesToHex(publicKey.toRawBytes())
             ).toString();
           }}
         />

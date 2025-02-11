@@ -1,9 +1,7 @@
-import React, { memo, useContext, useEffect } from 'react';
-import { useAtom } from 'jotai';
+import React, { memo } from 'react';
 import { Label } from '../ui/label';
-import { ApiFormContext } from './ApiForm';
 import JsonEditor from '../ui/jsonEditor';
-
+import { useField } from './hooks/useField';
 
 interface JsonEditProps {
   id: string;
@@ -12,34 +10,23 @@ interface JsonEditProps {
   required?: boolean;
 }
 
-const JsonEdit = memo(({
-  id,
-  placeholder,
-  label,
-  required
-}: JsonEditProps) => {
+const JsonEdit = memo(({ id, placeholder, label, required }: JsonEditProps) => {
+  const { field, setValue } = useField<string>({
+    id,
+    name: label,
+    required,
+  });
 
-  const context = useContext(ApiFormContext);
-  if (!context) throw new Error('ApiField must be used within ApiForm');
-
-  const { store } = context;
-  const [field, setField] = useAtom(store.fieldsAtom(id));
-
-  useEffect(() => {
-    field.name = label;
-    field.required = required;
-  }, []);
-
-  return <>
-    <JsonEditor
-      value={field.value ?? ''}
-      onChange={(e) => setField({ ...field, value: e })}
-      placeholder={placeholder}
-    />
-    {field.error && (
-      <div className="text-sm text-red-500">{field.error}</div>
-    )}
-  </>
+  return (
+    <>
+      <JsonEditor
+        value={field?.value ?? ''}
+        onChange={(e) => setValue(e)}
+        placeholder={placeholder}
+      />
+      {field?.error && <div className="text-sm text-red-500">{field.error}</div>}
+    </>
+  );
 });
 
 export interface ApiJsonEditProps extends JsonEditProps {
@@ -48,12 +35,7 @@ export interface ApiJsonEditProps extends JsonEditProps {
   required?: boolean;
 }
 
-export const ApiJsonEdit = memo(({
-  id,
-  label,
-  placeholder,
-  required
-}: ApiJsonEditProps) => {
+export const ApiJsonEdit = memo(({ id, label, placeholder, required }: ApiJsonEditProps) => {
   return (
     <div>
       {label && (

@@ -17,13 +17,23 @@ import { address, Message } from 'js-conflux-sdk';
 import * as cfxUtil from 'cfx-util';
 import { getMessage } from 'cip-23';
 import { keccak256 } from 'ethereumjs-util';
-import { ApiComboboxRef, ApiForm, ApiFormRef } from '../../ApiForm';
+import { ApiComboboxRef, ApiForm, ApiFormRef, ComboboxOption } from '../../ApiForm';
 
 function recoverPublicKey(hash: Buffer, sig: string): Buffer {
   const signature = cfxUtil.toBuffer(sig);
   const sigParams = cfxUtil.fromRpcSig(cfxUtil.addHexPrefix(signature.toString('hex')));
   return cfxUtil.ecrecover(hash, sigParams.v, sigParams.r, sigParams.s);
 }
+
+type IAssets = {
+  type: string;
+  options: {
+    address: string;
+    symbol: string;
+    decimals: number;
+    image: string;
+  };
+};
 
 function recoverAddress(hash: Buffer, sig: string): string {
   const publicKey = recoverPublicKey(hash, sig);
@@ -33,82 +43,79 @@ function recoverAddress(hash: Buffer, sig: string): string {
 
 const WalletWatchAsset = ({ chainId }: { chainId: string | undefined }) => {
   const apiFromRef = useRef<ApiFormRef>(null);
-  const apiFromComboboxRef = useRef<ApiComboboxRef>(null);
+  const apiFromComboboxRef = useRef<ApiComboboxRef<IAssets>>(null);
 
   const { provider } = useWallet<IProviderApi>();
 
   useEffect(() => {
     // https://testingcf.jsdelivr.net/gh/conflux-fans/token-list@master/cfx.fluent.json
-    void axios.get('https://testingcf.jsdelivr.net/gh/conflux-fans/token-list@master/cfx.fluent.json').then((res) => {
-      const tokens = res.data.tokens as {
-        chainId: number;
-        address: string;
-        name: string;
-        symbol: string;
-        decimals: number;
-        logoURI: string;
-      }[]
-      const tokenOptions = tokens.map((token) => ({
-        value: token.address,
-        label: `${token.name} - ${token.address}`,
-        extra: {
-          type: 'CRC20',
-          options: {
-            address: token.address,
-            symbol: token.symbol,
-            decimals: token.decimals,
-            image: token.logoURI,
-          }
-        }
-      }));
+    void axios
+      .get('https://testingcf.jsdelivr.net/gh/conflux-fans/token-list@master/cfx.fluent.json')
+      .then((res) => {
+        const tokens = res.data.tokens as {
+          chainId: number;
+          address: string;
+          name: string;
+          symbol: string;
+          decimals: number;
+          logoURI: string;
+        }[];
+        const tokenOptions: ComboboxOption<IAssets>[] = tokens.map((token) => ({
+          value: token.address,
+          label: `${token.name} - ${token.address}`,
+          extra: {
+            type: 'CRC20',
+            options: {
+              address: token.address,
+              symbol: token.symbol,
+              decimals: token.decimals,
+              image: token.logoURI,
+            },
+          },
+        }));
 
-      apiFromComboboxRef.current?.setOptions(tokenOptions);
-    })
+        apiFromComboboxRef.current?.setOptions(tokenOptions);
+      });
   }, [chainId]);
 
-  return <ApiForm title="wallet_watchAsset CRC20" description='添加 CRC20 资产' ref={apiFromRef}>
-    <ApiForm.Combobox
-      ref={apiFromComboboxRef}
-      id="tokenSelector"
-      label="预设参数"
-      placeholder="请选择 CRC20 Token"
-      onOptionChange={(option) => {
-        apiFromRef.current?.setJsonValue('request', option?.extra);
-      }}
-    />
+  return (
+    <ApiForm title="wallet_watchAsset CRC20" description="添加 CRC20 资产" ref={apiFromRef}>
+      <ApiForm.Combobox<IAssets>
+        ref={apiFromComboboxRef}
+        id="tokenSelector"
+        label="预设参数"
+        placeholder="请选择 CRC20 Token"
+        onOptionChange={(option) => {
+          apiFromRef.current?.setJsonValue('request', option?.extra);
+        }}
+      />
 
-    <ApiForm.JsonEdit
-      id="request"
-      label="请求(可以手动编辑)"
-      required
-    />
+      <ApiForm.JsonEdit id="request" label="请求(可以手动编辑)" required />
 
-    <ApiForm.Button
-      id="watchButton"
-      label="观察 Asset"
-      onClick={async () => {
-        const res = await provider?.request({
-          'method': 'wallet_watchAsset',
-          'params': JSON.parse(apiFromRef.current?.getValue('request') ?? ''),
-        });
-        apiFromRef.current?.setValue('response', JSON.stringify(res, null, 2));
-      }}
-      validation={{
-        fields: ['request'],
-        validator: (values) => {
-          if (!values.request) {
-            return '请选择 CRC20 Token';
-          }
-        }
-      }}
-    />
+      <ApiForm.Button
+        id="watchButton"
+        label="观察 Asset"
+        onClick={async () => {
+          const res = await provider?.request({
+            'method': 'wallet_watchAsset',
+            'params': JSON.parse(apiFromRef.current?.getValue('request') ?? ''),
+          });
+          apiFromRef.current?.setValue('response', JSON.stringify(res, null, 2));
+        }}
+        validation={{
+          fields: ['request'],
+          validator: (values) => {
+            if (!values.request) {
+              return '请选择 CRC20 Token';
+            }
+          },
+        }}
+      />
 
-    <ApiForm.TextArea
-      id="response"
-      label="执行结果"
-    />
-  </ApiForm>
-}
+      <ApiForm.TextArea id="response" label="执行结果" />
+    </ApiForm>
+  );
+};
 
 export default function BTCExample() {
   const walletsRef = useRef<IProviderInfo[]>([

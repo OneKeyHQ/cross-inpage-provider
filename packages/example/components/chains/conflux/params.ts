@@ -1,3 +1,5 @@
+import { address } from 'js-conflux-sdk';
+
 const chainIdInt = 1029;
 
 export default {
@@ -151,11 +153,15 @@ export default {
     },
   ],
   sendTransaction: (from: string, to: string) => {
+    if (!from || !to) {
+      return [];
+    }
+
     return [
       {
         'id': 'sendTransaction',
         'name': 'sendTransaction',
-        'description': 'sendTransaction',
+        'description': '发送原生代币',
         'value': JSON.stringify({
           from: from,
           to: to,
@@ -165,12 +171,48 @@ export default {
       {
         'id': 'sendTransaction-eip1559',
         'name': 'sendTransaction EIP1559',
-        'description': 'sendTransaction',
+        'description': '发送原生代币(EIP1559)',
         'value': JSON.stringify({
           from: from,
           to: to,
           value: '0x1',
         }),
+      },
+      {
+        'id': 'sendTransaction-crc20-moon',
+        'name': 'CRC20 Token Transfer(Moon)',
+        'description': '发送 CRC20 代币 Moon',
+        'value': JSON.stringify(
+          {
+            from: from,
+            to: 'cfx:achcuvuasx3t8zcumtwuf35y51sksewvca0h0hj71a',
+            data: [
+              '0xa9059cbb',
+              address.decodeCfxAddress(to).hexAddress.toString('hex').slice(2).padStart(64, '0'),
+              '00000000000000000000000000000000000000000000000000005af3107a4000',
+            ].join(''),
+          },
+          null,
+          2,
+        ),
+      },
+      {
+        'id': 'sendTransaction-crc20-usdt',
+        'name': 'CRC20 Token Transfer(USDT)',
+        'description': '发送 CRC20 代币 USDT',
+        'value': JSON.stringify(
+          {
+            from: from,
+            to: 'cfx:acf2rcsh8payyxpg6xj7b0ztswwh81ute60tsw35j7',
+            data: [
+              '0xa9059cbb',
+              address.decodeCfxAddress(to).hexAddress.toString('hex').slice(2).padStart(64, '0'),
+              '00000000000000000000000000000000000000000000000000005af3107a4000',
+            ].join(''),
+          },
+          null,
+          2,
+        ),
       },
     ];
   },

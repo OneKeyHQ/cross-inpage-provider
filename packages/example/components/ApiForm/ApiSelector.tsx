@@ -1,8 +1,9 @@
-import React, { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo } from 'react';
-import { useAtom } from 'jotai';
-import { ApiFormContext } from './ApiForm';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Label } from '../ui/label';
+import { useField } from './hooks/useField';
+import { ApiFormRef } from './ApiForm';
+import { useFormContext } from './hooks/useFormContext';
 
 interface IOption<T> {
   value: string;
@@ -11,25 +12,27 @@ interface IOption<T> {
   remark?: string;
 }
 
-export interface ApiSelectorProps<T = any> {
+export interface ApiSelectorProps<T = string> {
   id: string;
   label?: string;
   required?: boolean;
   defaultValue?: string;
   placeholder?: string;
-  onRequestOptions?: () => Promise<IOption<T>[]>
-  onValueChange?: (value: string | null) => void;
-  onOptionChange?: (option: IOption<T> | null) => void;
+  onRequestOptions?: () => Promise<IOption<T>[]>;
+  onValueChange?: (value: string | null, formRef: ApiFormRef | null | undefined) => void;
+  onOptionChange?: (option: IOption<T> | null, formRef: ApiFormRef | null | undefined) => void;
 }
 
-export interface ApiSelectorRef<T = any> {
+export interface ApiSelectorRef<T = string> {
   getCurrentValue: () => string | undefined;
   getCurrentOption: () => IOption<T> | undefined;
   getOptions: () => IOption<T>[];
   setValue: (value: string) => void;
 }
 
-export const ApiSelector = forwardRef<ApiSelectorRef, ApiSelectorProps>(function ApiSelector<T = any>(
+export const ApiSelector = forwardRef<ApiSelectorRef, ApiSelectorProps>(function ApiSelector<
+  T = string,
+>(
   {
     id,
     label,
@@ -38,38 +41,36 @@ export const ApiSelector = forwardRef<ApiSelectorRef, ApiSelectorProps>(function
     placeholder,
     onRequestOptions,
     onValueChange,
-    onOptionChange
+    onOptionChange,
   }: ApiSelectorProps<T>,
   ref: React.Ref<ApiSelectorRef<T>>,
 ) {
-  const context = useContext(ApiFormContext);
-  if (!context) throw new Error('ApiField must be used within ApiForm');
-
-  const { store } = context;
-  const [field, setField] = useAtom(store.fieldsAtom(id));
-  const options = field.extra?.options as IOption<T>[] | undefined;
+  const {
+    getFromApi,
+    field,
+    setValue: setField,
+    setExtra,
+  } = useField<string, { options: IOption<T>[] | undefined }>({
+    id,
+    name: label,
+    required,
+  });
+  const options = field.extra?.options;
 
   const getCurrentOption = useCallback(() => {
-    return options?.find(opt => opt.value === field.value);
+    return options?.find((opt) => opt.value === field.value);
   }, [options, field.value]);
 
   const currentOption = useMemo(() => getCurrentOption(), [getCurrentOption]);
 
-  const setOptions = useCallback((options: IOption<T>[]) => {
-    setField({
-      ...field, extra: {
-        options
-      }
-    });
-  }, [setField]);
-
-  useEffect(() => {
-    if (defaultValue) {
-      setField({ ...field, value: defaultValue });
-    }
-    field.name = label;
-    field.required = required;
-  }, []);
+  const setOptions = useCallback(
+    (options: IOption<T>[]) => {
+      setExtra({
+        options,
+      });
+    },
+    [setExtra],
+  );
 
   useEffect(() => {
     if (onRequestOptions) {
@@ -77,59 +78,56 @@ export const ApiSelector = forwardRef<ApiSelectorRef, ApiSelectorProps>(function
         setOptions(options);
       });
     }
-  }, [onRequestOptions]);
+  }, [onRequestOptions, setOptions]);
 
-  const setValue = useCallback((value: string | null) => {
-    setField({ ...field, value });
-    onValueChange?.(value);
-    onOptionChange?.(options?.find(opt => opt.value === value) ?? null);
-  }, [setField, onValueChange, onOptionChange, options]);
+  const setValue = useCallback(
+    (value: string | null) => {
+      setField(value);
+      onValueChange?.(value, getFromApi());
+      onOptionChange?.(options?.find((opt) => opt.value === value) ?? null, getFromApi());
+    },
+    [setField, onValueChange, getFromApi, onOptionChange, options],
+  );
 
-  useEffect(() => {
-    if (defaultValue) {
-      setField({ ...field, value: defaultValue });
-    }
-  }, []);
+  useImperativeHandle(
+    ref,
+    () => ({
+      setValue,
+      getCurrentValue: () => currentOption?.value,
+      getCurrentOption: () => currentOption,
+      getOptions: () => options,
+      setOptions,
+    }),
+    [currentOption, options, setOptions, setValue],
+  );
 
-  useImperativeHandle(ref, () => ({
-    setValue,
-    getCurrentValue: () => currentOption?.value,
-    getCurrentOption: () => currentOption,
-    getOptions: () => options,
-    setOptions,
-  }), [currentOption]);
-
-  return <div>
-    {label && (
-      <Label htmlFor={id}>
-        {label}
-        {required && <span className="text-red-500">*</span>}
-      </Label>
-    )}
-    <Select
-      defaultValue={defaultValue}
-      value={field.value}
-      onValueChange={setValue}
-    >
-      {placeholder && (
-        <SelectTrigger className="w-full">
-          <SelectValue className="text-base font-medium" placeholder={placeholder} />
-        </SelectTrigger>
+  return (
+    <div>
+      {label && (
+        <Label htmlFor={id}>
+          {label}
+          {required && <span className="text-red-500">*</span>}
+        </Label>
       )}
-      <SelectContent>
-        {options?.map((option) => (
-          <SelectItem key={option.value} value={option.value} className="text-base font-medium">
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-    {currentOption?.remark && (
-      <span className="px-1 text-sm text-muted-foreground">
-        {currentOption.remark}
-      </span>
-    )}
-  </div>
+      <Select defaultValue={defaultValue} value={field.value} onValueChange={setValue}>
+        {placeholder && (
+          <SelectTrigger className="w-full">
+            <SelectValue className="text-base font-medium" placeholder={placeholder} />
+          </SelectTrigger>
+        )}
+        <SelectContent>
+          {options?.map((option) => (
+            <SelectItem key={option.value} value={option.value} className="text-base font-medium">
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {currentOption?.remark && (
+        <span className="px-1 text-sm text-muted-foreground">{currentOption.remark}</span>
+      )}
+    </div>
+  );
 });
 
 ApiSelector.displayName = 'ApiSelector';

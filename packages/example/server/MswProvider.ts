@@ -11,7 +11,14 @@ export default function MswProvider({ children }: { children: React.ReactNode })
       void import('msw/browser').then((a) => {
         void a
           .setupWorker(...handlers(window.location.origin))
-          .start()
+          .start({
+            onUnhandledRequest: (req) => {
+              if (req.url.includes('webpack-hot-update.json')) {
+                return;
+              }
+              console.warn('Found an unhandled %s request to %s', req.method, req.url);
+            },
+          })
           .then(() => setMocksReady(true));
       });
     }

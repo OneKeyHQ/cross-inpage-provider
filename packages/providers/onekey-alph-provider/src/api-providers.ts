@@ -149,7 +149,7 @@ export class NodeProvider implements NodeProviderBase {
     return response;
   }
 
-  private isValidNodeInfo(response: unknown): response is NodeInfo {
+  private isValidNodeInfo = (response: unknown): response is NodeInfo => {
     return typeof response === 'object' && response !== null &&
       'buildInfo' in response && typeof response.buildInfo === 'object' &&
       response.buildInfo !== null && 'releaseVersion' in response.buildInfo &&

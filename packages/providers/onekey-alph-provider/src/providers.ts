@@ -1,2 +1,3 @@
-// Re-export types from types.ts
+// Re-export types and implementations
 export { SignerProvider, InteractiveSignerProvider } from './types';
+export { NodeProvider, ExplorerProvider } from './api-providers';

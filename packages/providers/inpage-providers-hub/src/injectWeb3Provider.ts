@@ -52,7 +52,7 @@ export type IWindowOneKeyHub = {
   ton?: ProviderTon;
   unisat?: ProviderBtc;
   btcwallet?: ProviderBtcWallet;
-  alephium?: ProviderAlph;
+  alephium?: ProviderAlph | null;
   scdo?: ProviderScdo;
   $private?: ProviderPrivate;
   $walletInfo?: {

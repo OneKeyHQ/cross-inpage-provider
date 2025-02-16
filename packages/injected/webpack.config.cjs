@@ -116,11 +116,17 @@ const desktopConfig = merge(commonConfig, {
   target: 'web',
   entry: {
     injectedDesktop: './src/injectedDesktop.ts',
+    injectedDesktopNoAlph: './src/injectedDesktopNoAlph.ts', // Bundle without Alephium provider for aerodrome.finance/liquidity
   },
   externals: {
     electron: 'commonjs electron', // 将 Electron 标记为外部模块
   },
-  plugins: [createAnalyzer('desktop')],
+  plugins: [
+    createAnalyzer('desktop'),
+    new webpack.DefinePlugin({
+      'process.env.DISABLE_ALEPHIUM': JSON.stringify(false),
+    }),
+  ],
 });
 
 module.exports = [extensionConfig, desktopConfig];

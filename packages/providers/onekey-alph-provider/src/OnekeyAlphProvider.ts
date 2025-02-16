@@ -33,7 +33,7 @@ function isWalletEventMethodMatch({ method, name }: { method: string; name: stri
   return method === `wallet_events_${name}`;
 }
 
-export class ProviderAlph extends AlephiumWindowObject {
+export class ProviderAlph extends InteractiveSignerProvider implements AlephiumWindowObject {
   id = 'alephium';
   name = 'Alephium';
   icon = 'https://uni.onekey-asset.com/static/logo/onekey.png';

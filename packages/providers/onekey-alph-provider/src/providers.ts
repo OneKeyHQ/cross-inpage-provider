@@ -27,7 +27,21 @@ export abstract class SignerProvider {
   }
 
   static validateAccount(account: Account): void {
-    // Account validation will be implemented in utility functions
+    if (!account || typeof account !== 'object') {
+      throw new Error('Invalid account object');
+    }
+    if (typeof account.address !== 'string' || !account.address) {
+      throw new Error('Invalid account address');
+    }
+    if (typeof account.publicKey !== 'string' || !account.publicKey) {
+      throw new Error('Invalid account public key');
+    }
+    if (typeof account.keyType !== 'string' || !['default', 'bip340-schnorr'].includes(account.keyType)) {
+      throw new Error('Invalid account key type');
+    }
+    if (typeof account.group !== 'number' || account.group < 0) {
+      throw new Error('Invalid account group');
+    }
   }
 
   abstract signAndSubmitTransferTx(params: SignTransferTxParams): Promise<SignTransferTxResult>;
@@ -44,8 +58,19 @@ export abstract class InteractiveSignerProvider extends SignerProvider {
   async enable(opt?: EnableOptionsBase): Promise<Account> {
     const account = await this.unsafeEnable(opt);
     SignerProvider.validateAccount(account);
+    if (opt?.onDisconnected) {
+      this.onDisconnected = opt.onDisconnected;
+    }
     return account;
   }
+
+  onDisconnected?: () => void | Promise<void>;
   
   abstract disconnect(): Promise<void>;
+  
+  protected _handleDisconnected(): void {
+    if (this.onDisconnected) {
+      void this.onDisconnected();
+    }
+  }
 }

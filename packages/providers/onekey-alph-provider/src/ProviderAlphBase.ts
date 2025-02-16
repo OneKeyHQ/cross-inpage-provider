@@ -1,5 +1,5 @@
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
-import { ProviderBase, IInpageProviderConfig, CrossEventEmitter } from '@onekeyfe/cross-inpage-provider-core';
+import { IInpageProviderConfig, CrossEventEmitter } from '@onekeyfe/cross-inpage-provider-core';
 import {
   Account,
   EnableOptionsBase,
@@ -18,49 +18,43 @@ import {
   InteractiveSignerProvider
 } from './types';
 
-export abstract class ProviderAlphBase extends ProviderBase implements InteractiveSignerProvider {
+export abstract class ProviderAlphBase extends InteractiveSignerProvider {
   protected providerName = IInjectedProviderNames.alephium;
   protected bridge: IInpageProviderConfig['bridge'];
-  protected onDisconnected?: () => void | Promise<void>;
+  private emitter = new CrossEventEmitter();
 
   constructor(props: IInpageProviderConfig) {
-    super(props);
+    super();
+    this.bridge = props.bridge;
   }
 
-  protected bridgeRequest(data: unknown) {
+  emit(eventName: string, ...args: unknown[]): boolean {
+    return this.emitter.emit(eventName, ...args);
+  }
+
+  on(eventName: string, listener: (...args: unknown[]) => void): this {
+    this.emitter.on(eventName, listener);
+    return this;
+  }
+
+  off(eventName: string, listener: (...args: unknown[]) => void): this {
+    this.emitter.off(eventName, listener);
+    return this;
+  }
+
+  protected bridgeRequest(data: unknown): Promise<unknown> {
     if (!this.bridge) {
       throw new Error('Bridge not initialized');
     }
     return this.bridge.request({
       data,
       scope: this.providerName,
-    });
+    }) as Promise<unknown>;
   }
-
-  request(data: unknown) {
-    return this.bridgeRequest(data);
-  }
-
-  async enable(opt?: EnableOptionsBase): Promise<Account> {
-    const account = await this.unsafeEnable(opt);
-    if (opt?.onDisconnected) {
-      this.onDisconnected = opt.onDisconnected;
-    }
-    return account;
-  }
-
-  protected async _handleDisconnected(): Promise<void> {
-    if (this.onDisconnected) {
-      await this.onDisconnected();
-    }
-  }
-
-  // Event handling is inherited from ProviderBase
 
   abstract get nodeProvider(): NodeProvider | undefined;
   abstract get explorerProvider(): ExplorerProvider | undefined;
-  protected abstract unsafeGetSelectedAccount(): Promise<Account>;
-  protected abstract unsafeEnable(opt?: EnableOptionsBase): Promise<Account>;
+  abstract enable(opt?: EnableOptionsBase): Promise<Account>;
   abstract disconnect(): Promise<void>;
   abstract signAndSubmitTransferTx(params: SignTransferTxParams): Promise<SignTransferTxResult>;
   abstract signAndSubmitDeployContractTx(params: SignDeployContractTxParams): Promise<SignDeployContractTxResult>;
@@ -68,4 +62,18 @@ export abstract class ProviderAlphBase extends ProviderBase implements Interacti
   abstract signAndSubmitUnsignedTx(params: SignUnsignedTxParams): Promise<SignUnsignedTxResult>;
   abstract signUnsignedTx(params: SignUnsignedTxParams): Promise<SignUnsignedTxResult>;
   abstract signMessage(params: SignMessageParams): Promise<SignMessageResult>;
+  protected abstract unsafeGetSelectedAccount(): Promise<Account>;
+  protected abstract unsafeEnable(opt?: EnableOptionsBase): Promise<Account>;
+
+  onDisconnected?: () => void | Promise<void>;
+
+  protected async _handleDisconnected(): Promise<void> {
+    try {
+      if (this.onDisconnected) {
+        await this.onDisconnected();
+      }
+    } catch (error) {
+      console.error('Disconnect error:', error);
+    }
+  }
 }

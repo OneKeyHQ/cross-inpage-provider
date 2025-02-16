@@ -1,6 +1,6 @@
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
-import { AlephiumWindowObject, EnableOptions, RequestMessage } from '@alephium/get-extension-wallet';
+import { EnableOptions, RequestMessage } from '@alephium/get-extension-wallet';
 import {
   EnableOptionsBase,
   Account,
@@ -13,8 +13,7 @@ import {
   SignUnsignedTxParams,
   SignUnsignedTxResult,
   SignMessageParams,
-  SignMessageResult,
-  InteractiveSignerProvider
+  SignMessageResult
 } from './types';
 import { ProviderAlphBase } from './ProviderAlphBase';
 import { NodeProvider as NodeProviderImpl, ExplorerProvider as ExplorerProviderImpl } from './api-providers';
@@ -33,18 +32,92 @@ function isWalletEventMethodMatch({ method, name }: { method: string; name: stri
   return method === `wallet_events_${name}`;
 }
 
-export class ProviderAlph extends InteractiveSignerProvider implements AlephiumWindowObject {
-  id = 'alephium';
-  name = 'Alephium';
-  icon = 'https://uni.onekey-asset.com/static/logo/onekey.png';
-  version = '0.9.4';
+export class ProviderAlph extends ProviderAlphBase {
+  public connectionStatus: 'connected' | 'disconnected' = 'disconnected';
+  private _id = 'alephium';
+  private _name = 'Alephium';
+  private _icon = 'https://uni.onekey-asset.com/static/logo/onekey.png';
+  private _version = '0.9.4';
+
+  get id(): string {
+    return this._id;
+  }
+
+  get name(): string {
+    return this._name;
+  }
+
+  get icon(): string {
+    return this._icon;
+  }
+
+  get version(): string {
+    return this._version;
+  }
+
+  public isConnectionStatusChanged(status: 'connected' | 'disconnected'): boolean {
+    return this.connectionStatus !== status;
+  }
+
+  public async enable(opt?: EnableOptionsBase): Promise<Account> {
+    const response = await this.bridgeRequest({
+      method: 'enable',
+      params: {
+        id: this.id,
+        networkId: 'mainnet',
+        symbol: 'ALPH',
+        decimals: 18,
+        name: this.name,
+        type: 'alph'
+      }
+    } as unknown as RequestMessage);
+    if (opt?.onDisconnected) {
+      this.onDisconnected = opt.onDisconnected;
+    }
+    return response  as Account;
+  }
+
+  protected async unsafeEnable(opt?: EnableOptionsBase): Promise<Account> {
+    const response = await this.bridgeRequest({
+      method: 'unsafeEnable',
+      params: opt
+    });
+    if (opt?.onDisconnected) {
+      this.onDisconnected = opt.onDisconnected;
+    }
+    return response as Account;
+  }
+
+  emit(eventName: string, ...args: unknown[]): boolean {
+    return super.emit(eventName, ...args);
+  }
+
+  on(eventName: string, listener: (...args: unknown[]) => void): this {
+    return super.on(eventName, listener);
+  }
+
+  off(eventName: string, listener: (...args: unknown[]) => void): this {
+    return super.off(eventName, listener);
+  }
+  // Properties moved to private fields with getters
   _accountInfo: Account | undefined;
 
-  _base: ProviderAlphBase;
-
-  onDisconnected: (() => void | Promise<void>) | undefined = undefined;
   private _nodeProvider: NodeProviderImpl | undefined = undefined;
   private _explorerProvider: ExplorerProviderImpl | undefined = undefined;
+
+  get nodeProvider(): NodeProviderImpl | undefined {
+    if (!this._nodeProvider) {
+      this._nodeProvider = new NodeProviderImpl('https://node.mainnet.alephium.org');
+    }
+    return this._nodeProvider;
+  }
+
+  get explorerProvider(): ExplorerProviderImpl | undefined {
+    if (!this._explorerProvider) {
+      this._explorerProvider = new ExplorerProviderImpl('https://backend.mainnet.alephium.org');
+    }
+    return this._explorerProvider;
+  }
 
   isPreauthorized = (options: EnableOptions): Promise<boolean> => {
     return this.bridgeRequest({
@@ -70,67 +143,79 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
     }) as Promise<Account | undefined>;
   };
 
-  request = (message: RequestMessage): Promise<boolean> => {
-    return this.bridgeRequest({ method: 'addNewToken', params: message.params }) as Promise<boolean>;
-  };
+  // Using bridgeRequest from base class
 
   constructor(props: OneKeyTonProviderProps) {
-    super();
-
-    this._base = new ProviderAlphBase({
+    const config = {
       ...props,
       bridge: props.bridge || getOrCreateExtInjectedJsBridge({ timeout: props.timeout }),
-    });
-
+    };
+    super(config);
     this._registerEvents();
   }
 
-  private bridgeRequest(data: unknown) {
-    return this._base.request(data);
-  }
+  // Removed duplicate bridgeRequest implementation
 
-  on(eventName: string | symbol, listener: (...args: unknown[]) => void) {
-    this._base.on(eventName, listener);
-  }
-
-  off(eventName: string | symbol, listener: (...args: unknown[]) => void) {
-    this._base.off(eventName, listener);
-  }
-
-  emit(eventName: string, ...args: unknown[]) {
-    return this._base.emit(eventName, ...args);
-  }
+  // Event handling is inherited from ProviderBase
 
   private _registerEvents() {
     window.addEventListener('onekey_bridge_disconnect', () => {
-      this._handleDisconnected();
+      // Use void to explicitly mark floating promise
+      void this._handleDisconnectedEvent().catch(error => {
+        console.error('Disconnect event error:', error);
+      });
     });
 
-    this.on(PROVIDER_EVENTS.message_low_level, (payload) => {
+    this.on(PROVIDER_EVENTS.message_low_level, (...args: unknown[]) => {
+      const [payload] = args as [{ method: string; params: unknown }];
       if (!payload) return;
       const { method, params } = payload as { method: string; params: unknown };
 
       if (isWalletEventMethodMatch({ method, name: PROVIDER_EVENTS.accountChanged })) {
-        this._handleAccountChange(params as Account);
+        // Use void to explicitly mark floating promise
+        void this._handleAccountChange(params as Account).catch(error => {
+          console.error('Account change event error:', error);
+        });
       }
     });
   }
 
-  private _handleConnected(accountInfo: Account, options: { emit: boolean } = { emit: true }) {
-    this._accountInfo = accountInfo;
-    if (options.emit && this._base.isConnectionStatusChanged('connected')) {
-      this._base.connectionStatus = 'connected';
-      const address = accountInfo.address ?? null;
-      this.emit('accountChanged', address);
+  private async _handleConnected(accountInfo: Account, options: { emit: boolean } = { emit: true }) {
+    try {
+      // Validate account info
+      if (!accountInfo || typeof accountInfo.address !== 'string') {
+        throw new Error('Invalid account info');
+      }
+
+      // Ensure async context for state updates
+      await Promise.resolve();
+
+      this._accountInfo = accountInfo;
+      if (options.emit && this.isConnectionStatusChanged('connected')) {
+        this.connectionStatus = 'connected';
+        const address = accountInfo.address ?? null;
+        this.emit('accountChanged', address);
+        // Wait for event emission to complete
+        await new Promise(resolve => setTimeout(resolve, 0));
+      }
+    } catch (error) {
+      console.error('Connection error:', error);
+      throw error;
     }
   }
 
-  private _handleDisconnected(options: { emit: boolean } = { emit: true }) {
-    this._accountInfo = undefined;
+  private async _handleDisconnectedEvent(options: { emit: boolean } = { emit: true }) {
+    try {
+      this._accountInfo = undefined;
 
-    if (options.emit && this._base.isConnectionStatusChanged('disconnected')) {
-      this._base.connectionStatus = 'disconnected';
-      this.emit('accountChanged', null);
+      if (options.emit && this.isConnectionStatusChanged('disconnected')) {
+        this.connectionStatus = 'disconnected';
+        this.emit('accountChanged', null);
+      }
+      await this._handleDisconnected();
+    } catch (error) {
+      console.error('Disconnect event error:', error);
+      throw error;
     }
   }
 
@@ -139,29 +224,35 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
   }
 
   // trigger by bridge account change event
-  private _handleAccountChange(payload: Account) {
-    const accountInfo = payload;
-    if (this._isAccountsChanged(accountInfo)) {
-      this.emit('accountChanged', accountInfo?.address || null);
-    }
-    if (!accountInfo) {
-      this._handleDisconnected();
-      return;
-    }
+  private async _handleAccountChange(payload: Account) {
+    try {
+      const accountInfo = payload;
+      if (this._isAccountsChanged(accountInfo)) {
+        this.emit('accountChanged', accountInfo?.address || null);
+      }
+      if (!accountInfo) {
+        await this._handleDisconnected();
+        return;
+      }
 
-    this._handleConnected(accountInfo, { emit: false });
+      await this._handleConnected(accountInfo, { emit: false });
+    } catch (error) {
+      console.error('Account change error:', error);
+    }
   }
 
   async disconnect(): Promise<void> {
-    await this.bridgeRequest({
-      method: 'disconnect',
-      params: [],
-    });
-    if (this.onDisconnected !== undefined) {
-      await this.onDisconnected()
+    try {
+      await this.bridgeRequest({
+        method: 'disconnect',
+        params: [],
+      });
+      await this._handleDisconnected();
+      await this._handleDisconnectedEvent();
+    } catch (error) {
+      console.error('Disconnect error:', error);
+      throw error;
     }
-    this.onDisconnected = undefined;
-    this._handleDisconnected();
   }
 
   get connectedAccount(): Account | undefined {
@@ -172,36 +263,7 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
     return "mainnet";
   }
 
-  protected unsafeEnable(opt?: EnableOptionsBase | undefined): Promise<Account> {
-    let params: Record<string, unknown> = {};
-    if (opt) {
-      if (opt.onDisconnected) {
-        this.onDisconnected = opt.onDisconnected;
-      }
-      params = {};
-      Object.keys(opt).forEach((key) => {
-        if (opt[key as keyof EnableOptionsBase] instanceof Function) {
-          return;
-        }
-        params[key] = opt[key as keyof EnableOptionsBase];
-      });
-    }
-    return this.bridgeRequest({ method: 'unsafeEnable', params }) as Promise<Account>;
-  }
-
-  get nodeProvider(): NodeProviderImpl | undefined {
-    if (!this._nodeProvider) {
-      this._nodeProvider = new NodeProviderImpl('https://node.mainnet.alephium.org');
-    }
-    return this._nodeProvider;
-  }
-
-  get explorerProvider(): ExplorerProviderImpl | undefined {
-    if (!this._explorerProvider) {
-      this._explorerProvider = new ExplorerProviderImpl('https://backend.mainnet.alephium.org');
-    }
-    return this._explorerProvider;
-  }
+  // All required abstract methods are implemented
 
   getSelectedAccount(): Promise<Account> {
     return this.unsafeGetSelectedAccount();

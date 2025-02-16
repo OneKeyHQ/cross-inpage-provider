@@ -1,5 +1,6 @@
 // Basic types
-export type Number256 = string | bigint;
+// Use string type to avoid BigInt conversion issues with dapps
+export type Number256 = string;
 export type Address = string;
 export type KeyType = 'default' | 'bip340-schnorr';
 export type NetworkId = 'mainnet' | 'testnet' | 'devnet';
@@ -50,8 +51,9 @@ export interface SignTransferTxResult {
   unsignedTx: string;
   txId: string;
   signature: string;
+  // Keep number type for compatibility with AlephiumWindowObject
   gasAmount: number;
-  gasPrice: Number256;
+  gasPrice: string;
 }
 
 export interface SignDeployContractTxParams extends SignerAddress {
@@ -71,8 +73,9 @@ export interface SignDeployContractTxResult {
   signature: string;
   contractId: string;
   contractAddress: string;
+  // Keep number type for compatibility with AlephiumWindowObject
   gasAmount: number;
-  gasPrice: Number256;
+  gasPrice: string;
 }
 
 export interface SignExecuteScriptTxParams extends SignerAddress {
@@ -89,8 +92,9 @@ export interface SignExecuteScriptTxResult {
   unsignedTx: string;
   txId: string;
   signature: string;
+  // Keep number type for compatibility with AlephiumWindowObject
   gasAmount: number;
-  gasPrice: Number256;
+  gasPrice: string;
   simulatedOutputs: Output[];
 }
 
@@ -139,6 +143,10 @@ export interface EnableOptionsBase {
   keyType?: KeyType;
   networkId?: NetworkId;
   onDisconnected: () => Promise<void> | void;
+  // All numeric fields use string type to avoid BigInt conversion issues
+  gasAmount?: string;
+  gasPrice?: string;
+  attoAlphAmount?: string;
 }
 
 // Output types
@@ -176,10 +184,51 @@ export abstract class InteractiveSignerProvider extends SignerProvider {
 }
 
 // Provider interfaces (will be implemented in api-providers.ts)
-export interface NodeProvider {
-  request(args: any): Promise<any>;
+import {
+  NodeInfo,
+  NodeVersion,
+  ChainParams,
+  SelfClique,
+  InterCliquePeerInfo,
+  BrokerInfo,
+  PeerMisbehavior,
+  MisbehaviorAction,
+  DiscoveryAction,
+  HashRateResponse,
+  CurrentDifficulty,
+  MinerAddresses,
+  ExplorerInfo
+} from './api-types';
+
+export interface NodeProvider extends NodeProviderBase {
+  request(data: unknown): Promise<unknown>;
 }
 
-export interface ExplorerProvider {
-  request(args: any): Promise<any>;
+export interface ExplorerProvider extends ExplorerProviderBase {
+  request(data: unknown): Promise<unknown>;
+}
+
+export interface NodeProviderBase {
+  baseUrl: string;
+  apiKey?: string;
+  getNodeInfo(): Promise<NodeInfo>;
+  getNodeVersion(): Promise<NodeVersion>;
+  getChainParams(): Promise<ChainParams>;
+  getSelfClique(): Promise<SelfClique>;
+  getInterCliquePeerInfo(): Promise<InterCliquePeerInfo[]>;
+  getDiscoveredNeighbors(): Promise<BrokerInfo[]>;
+  getMisbehaviors(): Promise<PeerMisbehavior[]>;
+  postMisbehaviors(action: MisbehaviorAction): Promise<void>;
+  getUnreachable(): Promise<string[]>;
+  postDiscovery(action: DiscoveryAction): Promise<void>;
+  getHistoryHashrate(fromTs: string, toTs?: string): Promise<HashRateResponse>;
+  getCurrentHashrate(timespan?: string): Promise<HashRateResponse>;
+  getCurrentDifficulty(): Promise<CurrentDifficulty>;
+  getMinerAddresses(): Promise<MinerAddresses>;
+}
+
+export interface ExplorerProviderBase {
+  baseUrl: string;
+  apiKey?: string;
+  getExplorerInfo(): Promise<ExplorerInfo>;
 }

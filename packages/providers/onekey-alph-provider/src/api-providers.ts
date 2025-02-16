@@ -156,52 +156,52 @@ export class NodeProvider implements NodeProviderBase {
       'commit' in response.buildInfo && 'upnp' in response;
   }
 
-  private isValidNodeVersion(response: unknown): response is NodeVersion {
+  private isValidNodeVersion = (response: unknown): response is NodeVersion => {
     return typeof response === 'object' && response !== null &&
       'version' in response && typeof response.version === 'string';
   }
 
-  private isValidChainParams(response: unknown): response is ChainParams {
+  private isValidChainParams = (response: unknown): response is ChainParams => {
     return typeof response === 'object' && response !== null &&
       'networkId' in response && 'numZerosAtLeastInHash' in response &&
       'groupNumPerBroker' in response && 'groups' in response;
   }
 
-  private isValidSelfClique(response: unknown): response is SelfClique {
+  private isValidSelfClique = (response: unknown): response is SelfClique => {
     return typeof response === 'object' && response !== null &&
       'cliqueId' in response && 'nodes' in response &&
       'networkId' in response && 'selfReady' in response &&
       'synced' in response;
   }
 
-  private isValidInterCliquePeerInfo(info: unknown): info is InterCliquePeerInfo {
+  private isValidInterCliquePeerInfo = (info: unknown): info is InterCliquePeerInfo => {
     return typeof info === 'object' && info !== null &&
       'cliqueId' in info && 'brokerId' in info &&
       'groupNumPerBroker' in info && 'brokerNum' in info &&
       'address' in info && 'isSynced' in info;
   }
 
-  private isValidBrokerInfo(info: unknown): info is BrokerInfo {
+  private isValidBrokerInfo = (info: unknown): info is BrokerInfo => {
     return typeof info === 'object' && info !== null &&
       'cliqueId' in info && 'brokerId' in info && 'address' in info;
   }
 
-  private isValidPeerMisbehavior(misbehavior: unknown): misbehavior is PeerMisbehavior {
+  private isValidPeerMisbehavior = (misbehavior: unknown): misbehavior is PeerMisbehavior => {
     return typeof misbehavior === 'object' && misbehavior !== null &&
       'peer' in misbehavior && 'status' in misbehavior;
   }
 
-  private isValidHashRateResponse(response: unknown): response is HashRateResponse {
+  private isValidHashRateResponse = (response: unknown): response is HashRateResponse => {
     return typeof response === 'object' && response !== null &&
       'hashrate' in response && typeof response.hashrate === 'string';
   }
 
-  private isValidCurrentDifficulty(response: unknown): response is CurrentDifficulty {
+  private isValidCurrentDifficulty = (response: unknown): response is CurrentDifficulty => {
     return typeof response === 'object' && response !== null &&
       'value' in response && typeof response.value === 'string';
   }
 
-  private isValidMinerAddresses(response: unknown): response is MinerAddresses {
+  private isValidMinerAddresses = (response: unknown): response is MinerAddresses => {
     return typeof response === 'object' && response !== null &&
       'addresses' in response && Array.isArray(response.addresses) &&
       response.addresses.every(addr => typeof addr === 'string');
@@ -255,7 +255,7 @@ export class ExplorerProvider implements ExplorerProviderBase {
     return response;
   }
 
-  private isValidExplorerInfo(response: unknown): response is ExplorerInfo {
+  private isValidExplorerInfo = (response: unknown): response is ExplorerInfo => {
     return typeof response === 'object' && response !== null &&
       'releaseVersion' in response && 'commit' in response &&
       'networkId' in response;

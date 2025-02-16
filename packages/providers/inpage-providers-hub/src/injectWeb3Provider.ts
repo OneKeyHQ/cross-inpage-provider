@@ -118,7 +118,9 @@ function injectWeb3Provider({
     bridge,
   });
 
-  const alephium = new ProviderAlph({
+  // Skip Alephium provider for aerodrome.finance/liquidity to avoid BigInt conflicts
+  const shouldSkipAlephium = window.location.href.includes('aerodrome.finance/liquidity');
+  const alephium = shouldSkipAlephium ? null : new ProviderAlph({
     bridge,
   });
 
@@ -170,7 +172,7 @@ function injectWeb3Provider({
     bfc,
     tonconnect,
     cardano,
-    alephium,
+    ...(shouldSkipAlephium ? {} : { alephium }),
     cosmos,
     bbnCosmos,
     scdo,
@@ -218,11 +220,13 @@ function injectWeb3Provider({
   defineWindowProperty('petra', martian, { enumerable: true });
   defineWindowProperty('martian', martianProxy, { enumerable: true });
   defineWindowProperty('conflux', conflux);
-  defineWindowProperty('alephium', alephium);
-  defineWindowProperty('alephiumProviders', {
-    alephium,
-  });
-  registerAlephiumProvider(alephium);
+  if (!shouldSkipAlephium && alephium) {
+    defineWindowProperty('alephium', alephium);
+    defineWindowProperty('alephiumProviders', {
+      alephium,
+    });
+    registerAlephiumProvider(alephium);
+  }
   defineWindowProperty('tronLink', tron);
   defineWindowProperty('suiWallet', sui);
   defineWindowProperty('bfcWallet', bfc);

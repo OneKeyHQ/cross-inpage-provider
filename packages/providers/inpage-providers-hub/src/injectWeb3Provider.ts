@@ -298,6 +298,15 @@ function injectWeb3Provider({
     });
   }
 
+  if (checkWalletSwitchEnable()) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    registerAptosWallet(martian, {
+      name: 'Pontem Wallet',
+      logo: WALLET_CONNECT_INFO.petra.icon as WalletIcon,
+      url: 'https://pontem.network/pontem-wallet',
+    });
+  }
+
   // Override the SuiWallet Standard Wallet
   if (checkWalletSwitchEnable()) {
     registerSuiWallet(sui, {

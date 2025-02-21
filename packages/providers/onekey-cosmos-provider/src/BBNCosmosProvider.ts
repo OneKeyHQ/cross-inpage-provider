@@ -96,7 +96,6 @@ export class BBNProviderCosmos implements IProviderBBNCosmos {
     if (!this._state.chainId) {
       throw new Error('Need connect wallet first');
     }
-    // @ts-expect-error
-    return Promise.resolve(this._provider.getOfflineSignerAuto(this._state.chainId));
+    return Promise.resolve(this._provider.getOfflineSigner(this._state.chainId));
   }
 }

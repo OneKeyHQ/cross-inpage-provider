@@ -183,15 +183,15 @@ function injectWeb3Provider({
 
   defineWindowProperty('$onekey', $onekey, { enumerable: true, alwaysInject: true });
 
-  const martianProxy = new Proxy(martian, {
-    get: (target, property, ...args) => {
-      if (property === 'aptosProviderType') {
-        return 'martian';
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return Reflect.get(target, property, ...args);
-    },
-  });
+  // const martianProxy = new Proxy(martian, {
+  //   get: (target, property, ...args) => {
+  //     if (property === 'aptosProviderType') {
+  //       return 'martian';
+  //     }
+  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  //     return Reflect.get(target, property, ...args);
+  //   },
+  // });
 
   defineWindowProperty('ethereum', ethereum);
   // OneKey Ethereum EIP6963 Provider
@@ -216,7 +216,7 @@ function injectWeb3Provider({
   // defineWindowProperty('starcoin', starcoin);
   defineWindowProperty('aptos', martian);
   defineWindowProperty('petra', martian, { enumerable: true });
-  defineWindowProperty('martian', martianProxy, { enumerable: true });
+  // defineWindowProperty('martian', martianProxy, { enumerable: true });
   defineWindowProperty('conflux', conflux);
   defineWindowProperty('alephium', alephium);
   defineWindowProperty('alephiumProviders', {
@@ -292,9 +292,18 @@ function injectWeb3Provider({
   if (checkWalletSwitchEnable()) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     registerAptosWallet(martian, {
-      name: 'Petra',
-      logo: WALLET_CONNECT_INFO.petra.icon as WalletIcon,
-      url: 'https://chrome.google.com/webstore/detail/petra-aptos-wallet/ejjladinnckdgjemekebdpeokbikhfci',
+      name: 'Martian',
+      logo: WALLET_CONNECT_INFO.martian.icon as WalletIcon,
+      url: 'https://chrome.google.com/webstore/detail/martian-wallet/efbglgofoippbgcjepnhiblaibcnclgk',
+    });
+  }
+
+  if (checkWalletSwitchEnable()) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    registerAptosWallet(martian, {
+      name: 'Pontem Wallet',
+      logo: WALLET_CONNECT_INFO.pontem.icon as WalletIcon,
+      url: 'https://pontem.network/pontem-wallet',
     });
   }
 

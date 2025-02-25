@@ -1899,10 +1899,6 @@ export const sitesConfig: SitesInfo[] = [
     walletsForProvider: {
       [IInjectedProviderNames.aptos]: [
         {
-          ...basicWalletInfo['martian'],
-          container: 'div.ant-modal.wallet-modal',
-        },
-        {
           ...basicWalletInfo['petra'],
           container: 'div.ant-modal.wallet-modal',
         },
@@ -2091,23 +2087,6 @@ export const sitesConfig: SitesInfo[] = [
               modal &&
               findIconAndNameByIcon(
                 'img[src*="wallets/petra.png"]',
-                'auto-search-text',
-                name,
-                modal,
-                { text: [], icon: [] },
-                5,
-              )
-            );
-          },
-        },
-        {
-          ...basicWalletInfo['martian'],
-          findIconAndName({ name }) {
-            const modal = getConnectWalletModalByTitle('#portal-root', 'Connect Wallet');
-            return (
-              modal &&
-              findIconAndNameByIcon(
-                'img[src*="wallets/martian.png"]',
                 'auto-search-text',
                 name,
                 modal,

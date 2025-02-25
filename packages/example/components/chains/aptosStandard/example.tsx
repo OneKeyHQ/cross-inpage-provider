@@ -394,7 +394,10 @@ function AptosConnectButton() {
 
   const walletsRef = useRef<(Wallet | AptosStandardSupportedWallet)[]>([]);
   walletsRef.current = wallets.filter((wallet) => wallet.readyState === WalletReadyState.Installed);
-  console.log('Aptos Standard Wallets:', walletsRef.current);
+
+  useEffect(() => {
+    console.log('Aptos Standard Wallets:', wallets);
+  }, [wallets]);
 
   const onConnectWallet = useCallback(
     async (selectedWallet: IKnownWallet) => {

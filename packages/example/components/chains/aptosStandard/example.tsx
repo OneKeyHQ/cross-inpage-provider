@@ -400,6 +400,7 @@ function AptosConnectButton() {
   }, [wallets]);
 
   const onConnectWallet = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async (selectedWallet: IKnownWallet) => {
       const wallet = walletsRef.current.find((w) => w.name === selectedWallet.id);
       if (!wallet) {

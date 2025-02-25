@@ -129,7 +129,7 @@
     "@jridgewell/gen-mapping" "^0.3.5"
     "@jridgewell/trace-mapping" "^0.3.24"
 
-"@aptos-connect/wallet-adapter-plugin@2.4.1":
+"@aptos-connect/wallet-adapter-plugin@^2.3.2":
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/@aptos-connect/wallet-adapter-plugin/-/wallet-adapter-plugin-2.4.1.tgz#1f99d10a0205f4c1b681e5418b12ad5d759e453e"
   integrity sha512-jFuOEtnNWvi8VjvrXrNFp4iI2dci8Jv0l1FIuC5khMZKj2sDHLNF1dbZtcXNTRbD32KDrzl0Lngi42K0gReX8Q==
@@ -161,7 +161,7 @@
   dependencies:
     commander "^12.1.0"
 
-"@aptos-labs/aptos-client@^0.1.0", "@aptos-labs/aptos-client@^0.1.1":
+"@aptos-labs/aptos-client@^0.1.0":
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@aptos-labs/aptos-client/-/aptos-client-0.1.1.tgz#cbcd2a73bad252e344318baec32ecc54d8136ee0"
   integrity sha512-kJsoy4fAPTOhzVr7Vwq8s/AUg6BQiJDa7WOqRzev4zsuIS3+JCuIZ6vUd7UBsjnxtmguJJulMRs9qWCzVBt2XA==
@@ -169,13 +169,31 @@
     axios "1.7.4"
     got "^11.8.6"
 
+"@aptos-labs/aptos-client@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@aptos-labs/aptos-client/-/aptos-client-1.0.0.tgz#5999e893b48b519ca97fa57af9d33cad33c5817f"
+  integrity sha512-P/U/xz9w7+tTQDkaeAc693lDFcADO15bjD5RtP/2sa5FSIYbAyGI5A1RfSNPESuBjvskHBa6s47wajgSt4yX7g==
+
+"@aptos-labs/aptos-dynamic-transaction-composer@^0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@aptos-labs/aptos-dynamic-transaction-composer/-/aptos-dynamic-transaction-composer-0.1.3.tgz#7aa7c80c48d2a9540ade74a4a687820080953c3c"
+  integrity sha512-bJl+Zq5QbhpcPIJakAkl9tnT3T02mxCYhZThQDhUmjsOZ5wMRlKJ0P7aaq1dmlybSHkVj7vRgOy2t86/NDKKng==
+
+"@aptos-labs/script-composer-pack@^0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@aptos-labs/script-composer-pack/-/script-composer-pack-0.0.9.tgz#e838514eab239c90bb5c4c60e3d55bb2905a0786"
+  integrity sha512-Y3kA1rgF65HETgoTn2omDymsgO+fnZouPLrKJZ9sbxTGdOekIIHtGee3A2gk84eCqa02ZKBumZmP+IDCXRtU/g==
+  dependencies:
+    "@aptos-labs/aptos-dynamic-transaction-composer" "^0.1.3"
+
 "@aptos-labs/ts-sdk@^1.26.0", "@aptos-labs/ts-sdk@^1.33.0", "@aptos-labs/ts-sdk@^1.9.1":
-  version "1.33.0"
-  resolved "https://registry.yarnpkg.com/@aptos-labs/ts-sdk/-/ts-sdk-1.33.0.tgz#4da4501d04ad38381630b06d7d8a29bc4b3f1855"
-  integrity sha512-svdlPH5r2dlSue2D9WXaaTslsmX18WLytAho6IRZJxQjEssglk64I6c1G9S8BTjRQj/ug6ahTwp6lx3eWuyd8Q==
+  version "1.35.0"
+  resolved "https://registry.yarnpkg.com/@aptos-labs/ts-sdk/-/ts-sdk-1.35.0.tgz#06d66626019466ec9a7097772ee049f64203d2c2"
+  integrity sha512-ChW2Lvi6lKfEb0AYo0HAa98bYf0+935nMdjl40wFMWsR+mxFhtNA4EYINXsHVTMPfE/WV9sXEvDInvscJFrALQ==
   dependencies:
     "@aptos-labs/aptos-cli" "^1.0.2"
-    "@aptos-labs/aptos-client" "^0.1.1"
+    "@aptos-labs/aptos-client" "^1.0.0"
+    "@aptos-labs/script-composer-pack" "^0.0.9"
     "@noble/curves" "^1.4.0"
     "@noble/hashes" "^1.4.0"
     "@scure/bip32" "^1.4.0"
@@ -186,25 +204,25 @@
     jwt-decode "^4.0.0"
     poseidon-lite "^0.2.0"
 
-"@aptos-labs/wallet-adapter-core@5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@aptos-labs/wallet-adapter-core/-/wallet-adapter-core-5.1.0.tgz#165f8a1fe33b0103f59578b64d60f1b89ff4534b"
-  integrity sha512-7A1+iL2GV4+cdq4ySnxd7I4gjZ/WJY4ITjeQF93LrRs22M+BdBMDOke/9qKMJf35/dZMHNF6a4DUpuIKbCDPpw==
+"@aptos-labs/wallet-adapter-core@4.25.0":
+  version "4.25.0"
+  resolved "https://registry.yarnpkg.com/@aptos-labs/wallet-adapter-core/-/wallet-adapter-core-4.25.0.tgz#1c40f5681d30e9da2fd0e9c2b449e53d59c90a1b"
+  integrity sha512-TMiHvteU/DvL9p8npna32kRjCsJdiQgP83QhFLoZKV1rGhvB9NwCs1BnPzoCSTCkgfGkWqZGjVmhynX2p+HZEA==
   dependencies:
-    "@aptos-connect/wallet-adapter-plugin" "2.4.1"
-    "@aptos-labs/wallet-standard" "^0.3.0"
+    "@aptos-connect/wallet-adapter-plugin" "^2.3.2"
+    "@aptos-labs/wallet-standard" "^0.2.0"
     "@atomrigslab/aptos-wallet-adapter" "^0.1.20"
     "@mizuwallet-sdk/aptos-wallet-adapter" "^0.3.2"
     buffer "^6.0.3"
     eventemitter3 "^4.0.7"
     tweetnacl "^1.0.3"
 
-"@aptos-labs/wallet-adapter-react@^4.1.0":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@aptos-labs/wallet-adapter-react/-/wallet-adapter-react-4.1.0.tgz#f79b64d24ef6018c7d121bafaf23919fab841c64"
-  integrity sha512-9I8zqSrQl6xqFRKhnbbJhuv+UrVf+9pY9aLmurJXVhV2cH8HQcpFDUgKxffewL3sQcdtVNUUdou9U4qOtC4g3A==
+"@aptos-labs/wallet-adapter-react@^3.8.0":
+  version "3.8.0"
+  resolved "https://registry.yarnpkg.com/@aptos-labs/wallet-adapter-react/-/wallet-adapter-react-3.8.0.tgz#74828eab9c1b46f1e41ba73d09201e6125960fe8"
+  integrity sha512-g+mU6PROwCm14ihuLWgBUEKcBheAmQj7c67SBrc6wUD0EPTRreq0J2lkE+yQ+J9m78XHAdXxoi5Fg5EoxrGqiw==
   dependencies:
-    "@aptos-labs/wallet-adapter-core" "5.1.0"
+    "@aptos-labs/wallet-adapter-core" "4.25.0"
     "@radix-ui/react-slot" "^1.0.2"
 
 "@aptos-labs/wallet-standard@0.0.11":
@@ -219,11 +237,6 @@
   version "0.1.0-ms.1"
   resolved "https://registry.yarnpkg.com/@aptos-labs/wallet-standard/-/wallet-standard-0.1.0-ms.1.tgz#3b6e218c22ceb463862fa6133fac0f424bf26389"
   integrity sha512-3aWEmdqMcll8D2lzhBZuYUW1o49TDpqw4QRAkHk00tSC3SwAkuukoW8g/M9lB5nHFxaX7UzuxeaYv8l6/mhJVQ==
-
-"@aptos-labs/wallet-standard@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@aptos-labs/wallet-standard/-/wallet-standard-0.1.0.tgz#ff78486866ef911f3edf1851e3e66c6486122896"
-  integrity sha512-DC4cWuvgXKBVQC+seGQc/nwIZoggZmGOIoN8EtEKHBSBMijwVfgRjD6cXPx8xWaXANyr5d32BGnWvYfMyWk3Pg==
 
 "@aptos-labs/wallet-standard@^0.2.0":
   version "0.2.0"
@@ -3068,8 +3081,8 @@
 
 "@onekeyfe/cross-inpage-provider-core@2.2.14":
   version "2.2.14"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-core/-/cross-inpage-provider-core-2.2.14.tgz#71b3d6528840c72c9d0f1ed3f682e11f7d58c495"
-  integrity sha512-PeUFFMIsU0ftSkp4xp7aI7AXwMXYoKc8VPjP9i0h8++N/Juyif4ASXodhFa+ZXpyVwgxdFSiDOOgy+lRCtm5IA==
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-core/-/cross-inpage-provider-core-2.2.14.tgz#15c0c38b5f0aa707b99c42c009cf24cbd498b992"
+  integrity sha512-WwpS+LijWfBBc5Nwf5MYUGQeHAlFRIN4yr0Av0y9o+BTo1Qll5zTNMkXXb1zbHYnHGK25ePDYyATLh0trask0g==
   dependencies:
     "@onekeyfe/cross-inpage-provider-errors" "2.2.14"
     "@onekeyfe/cross-inpage-provider-events" "2.2.14"
@@ -3080,33 +3093,33 @@
 
 "@onekeyfe/cross-inpage-provider-errors@2.2.14":
   version "2.2.14"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-2.2.14.tgz#c9ca978498747f63213d548a408b730ddba256ec"
-  integrity sha512-gZ3Xz2rfNhnU/59DzTmJYpgT+0MbEiFuWB+9YjWLNZWn2U1s05CIl8CPg1EMKmk8Xs5tPxq0g3re7Fudl5SG1A==
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-2.2.14.tgz#ae32b81aed98ea8e18525b0578ac76495e65dcfc"
+  integrity sha512-triSNzso0HrbpuuD9LGHhluk//e82mE2g3lSyFkGan6YdUFtg81GiM7+0Mn4mSOrpHj8k1IGhu2OmQiBNRqN6Q==
   dependencies:
     fast-safe-stringify "^2.0.6"
 
 "@onekeyfe/cross-inpage-provider-events@2.2.14":
   version "2.2.14"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-events/-/cross-inpage-provider-events-2.2.14.tgz#7ad143d247eba37dc23d433116f5f7dbbcc6de2e"
-  integrity sha512-NhdFgmMSRCiW/lhY7NaD2EmLUUEnNq6P4YZ8S7P9ENtuKR+ySREsx8KJpdb/2mh83wmXGqTeGJ0sCVWIngrREw==
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-events/-/cross-inpage-provider-events-2.2.14.tgz#dd85d5b0ec01d4dad525933432a5adcbf969e016"
+  integrity sha512-j14Hj2wB4gZkkCnI0+uWhOkv8YysbhHpjY0BK4C6KFs+oZ2uSHXns24I1FpAB6esHxHwLiAg0vu5CEVJsvOaeQ==
 
 "@onekeyfe/cross-inpage-provider-types@2.2.14":
   version "2.2.14"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-types/-/cross-inpage-provider-types-2.2.14.tgz#c23aa800a8ef3405aadb6bdc019abbc474ca6ed3"
-  integrity sha512-IjQptS/usTFWVOP2hG5AfsDzrsWNDU765gpisQFsLGFQwVJi8N/Bw6KyQJw/qADTxLZxWkHxNFVQMQ7YZsnphw==
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-types/-/cross-inpage-provider-types-2.2.14.tgz#6a9cc3df8e8e7bc49bc6b903d0c46e484abc24b7"
+  integrity sha512-Q0buu80uvOE1K5/wEoC5Xgovd+tQZYB/6vQHVlnFrv8wOaz9Eha1uQdlpcx5Dc9FG/5goowwVo6DbrEIf80tgQ==
 
 "@onekeyfe/extension-bridge-injected@2.2.14":
   version "2.2.14"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/extension-bridge-injected/-/extension-bridge-injected-2.2.14.tgz#d27fc2c339e4a52d443cecd731d24f2149446766"
-  integrity sha512-rIOF6R4fsqopRj+0UiZCY9adqQ0HKpMbLIigAejunG0j7KFhlYLXz6dQ9Bqh4yRjE8UYcFfyATElz/p4iPZepQ==
+  resolved "https://registry.yarnpkg.com/@onekeyfe/extension-bridge-injected/-/extension-bridge-injected-2.2.14.tgz#5630778de4ed094c8dc7b73993ad0500cbc0ee83"
+  integrity sha512-mIIhhimTPvKAOQ/F7+drzxCEb+vstno73MjgtBpqLH0Upxdm2FeO4/iAlL1imwif3HMzP9v2iMF8QsNGEQnYAA==
   dependencies:
     "@onekeyfe/cross-inpage-provider-core" "2.2.14"
     "@onekeyfe/cross-inpage-provider-types" "2.2.14"
 
 "@onekeyfe/onekey-aptos-provider@2.2.14":
   version "2.2.14"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/onekey-aptos-provider/-/onekey-aptos-provider-2.2.14.tgz#d8ab265f0947f497f3ecba94a565f8f19295ed73"
-  integrity sha512-L1csUCgJE8bV25gKdS/s/3+n7Vg/C/regaHwCkWTKxhydk86k4pUUmUUfT0Y10v1SH8x55BbcZsHjVqaxltQtA==
+  resolved "https://registry.yarnpkg.com/@onekeyfe/onekey-aptos-provider/-/onekey-aptos-provider-2.2.14.tgz#d4354dbe91d5674545b0309202f2974e5571a43e"
+  integrity sha512-4eWbbWnKmwohitHc+jGAW/xrKYaMbZyq4Q1iggAM9GmGhP5DLv3num7UCWmRyqas9UWLbVHCksGy9C+KGkct6g==
   dependencies:
     "@aptos-labs/wallet-standard" "^0.2.0"
     "@onekeyfe/cross-inpage-provider-core" "2.2.14"
@@ -3118,8 +3131,8 @@
 
 "@onekeyfe/onekey-cardano-provider@2.2.14":
   version "2.2.14"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/onekey-cardano-provider/-/onekey-cardano-provider-2.2.14.tgz#d7ec4858c7f8d04067f3b5a1cb6568640e29ea87"
-  integrity sha512-gzo/80V+YHO2+kr94A6roWpImxgucnmtVwpGE3M55Uqmt6iopE+XfxxlE9EexBusjEfKkmZ7rGUGfQ4+Z8AarA==
+  resolved "https://registry.yarnpkg.com/@onekeyfe/onekey-cardano-provider/-/onekey-cardano-provider-2.2.14.tgz#8766adb986efe3ab2b93e08acbf31ee66608cda5"
+  integrity sha512-Hs3uaKMBcheOT3wLWehKuEmkwd6DOaLwDq7JB7WRm299gwyzQlWGtej+x1uIv6vbyVbvfITuKFmyCGS6QatcdA==
   dependencies:
     "@onekeyfe/cross-inpage-provider-core" "2.2.14"
     "@onekeyfe/cross-inpage-provider-errors" "2.2.14"
@@ -3128,8 +3141,8 @@
 
 "@onekeyfe/onekey-conflux-provider@2.2.14":
   version "2.2.14"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/onekey-conflux-provider/-/onekey-conflux-provider-2.2.14.tgz#2da24aa871dadfe236f22bd15be4202b8a0b99be"
-  integrity sha512-nEjGDYHM+fYk3l+hwgCRjkvPiamT01YWlPTi5jdcDj/oJ05I8IAW3Qqdre7RFeRgcHEaGhoMifswE1sUU9ZYGw==
+  resolved "https://registry.yarnpkg.com/@onekeyfe/onekey-conflux-provider/-/onekey-conflux-provider-2.2.14.tgz#9ccac5af289f932989e1990c4fa6e7450fcbf22a"
+  integrity sha512-IIeedPpaBYevQazSxcBKKdEEG2x0l3ZgaAv3FX1MrFjJFQ1TktScR9uAhtNNI7boZMlkRZeZquYJTWX5emenDQ==
   dependencies:
     "@onekeyfe/cross-inpage-provider-core" "2.2.14"
     "@onekeyfe/cross-inpage-provider-errors" "2.2.14"
@@ -3138,8 +3151,8 @@
 
 "@onekeyfe/onekey-cosmos-provider@2.2.14":
   version "2.2.14"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/onekey-cosmos-provider/-/onekey-cosmos-provider-2.2.14.tgz#c7dcde5bee7461862b499510ac5d21248328742c"
-  integrity sha512-9pws2EtYqByQAAxqBP4p0eb4Vox2f+8kCJeOT1Ohkka6kJdaxcW+bXRanaDtjK1ycvvWGfoDLwtOk9s8SL0oLA==
+  resolved "https://registry.yarnpkg.com/@onekeyfe/onekey-cosmos-provider/-/onekey-cosmos-provider-2.2.14.tgz#b557bfaad0a0515d6c3a0d997267485db4660968"
+  integrity sha512-IMzwBDIH3gIqAqWA5Ux9Kclkiiu6PrppKJz6cmlD4QoCxTcu8kVBpnRl+hZYXoMYUBtgP2TVkuo/KHXuKOTL+g==
   dependencies:
     "@noble/hashes" "^1.3.0"
     "@onekeyfe/cross-inpage-provider-core" "2.2.14"
@@ -3153,8 +3166,8 @@
 
 "@onekeyfe/onekey-near-provider@2.2.14":
   version "2.2.14"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/onekey-near-provider/-/onekey-near-provider-2.2.14.tgz#34f507af656e9bad4a5e788d2154a720705292d0"
-  integrity sha512-dvE2rUSzV9uAuLa8yOAG1sb8+smHe7RnA63oCjCc/MVUmSFhFV96bUBKy6c0GB7X8Xrwtp14OKtKjGmfCgCm4w==
+  resolved "https://registry.yarnpkg.com/@onekeyfe/onekey-near-provider/-/onekey-near-provider-2.2.14.tgz#70a8560d0061c2c2adbe4543805fdfc90b5a89f7"
+  integrity sha512-Z+TVTI80fFx62zJPocuQV8rS6oiMcrxHXtFmyudXbkJfBpveqDDBJ0/62E+T4OsAevcyosXdB65gtk7yKLYNJQ==
   dependencies:
     "@onekeyfe/cross-inpage-provider-core" "2.2.14"
     "@onekeyfe/cross-inpage-provider-errors" "2.2.14"
@@ -3166,8 +3179,8 @@
 
 "@onekeyfe/onekey-solana-provider@2.2.14":
   version "2.2.14"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/onekey-solana-provider/-/onekey-solana-provider-2.2.14.tgz#a49047fbc7cd9298566a95c2b7f152e4dd8be76c"
-  integrity sha512-BuYLiakbzNDsjo/Xk9AZNt2Emc/waWdh6KNd0JxuaNdL1pvV5GfJys/Ysa1l+8ZNn6iYByrGNbCVuDvJMDtILw==
+  resolved "https://registry.yarnpkg.com/@onekeyfe/onekey-solana-provider/-/onekey-solana-provider-2.2.14.tgz#81311a83c9c1a5c5d9b6c091851f78ec7ce574ac"
+  integrity sha512-pkZ1aDiLMBqQjpgeNzIxL1B5j4Xq+JQ8mb3zEJLQxYe3cZyCLpdxiyzMv713SobzVmPGz4Ry0xBVhsXm302U+A==
   dependencies:
     "@onekeyfe/cross-inpage-provider-core" "2.2.14"
     "@onekeyfe/cross-inpage-provider-errors" "2.2.14"
@@ -3180,8 +3193,8 @@
 
 "@onekeyfe/onekey-sui-provider@2.2.14":
   version "2.2.14"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/onekey-sui-provider/-/onekey-sui-provider-2.2.14.tgz#09097fc318731a0a755de28a25f97536fd832217"
-  integrity sha512-DtL16kJMMjV7rUj0tUbBXEVwW5Wp2fc1xT8yUyMzDEqQ72AL6WRnKTg+DOOib22YwTaypO9wsngiOPIaDdPGXg==
+  resolved "https://registry.yarnpkg.com/@onekeyfe/onekey-sui-provider/-/onekey-sui-provider-2.2.14.tgz#62e40db4e7c89b89b338180c04caf6967698842f"
+  integrity sha512-oIB8qZ+CyqGhTPL5fUxgXWIVs8bEeOD0Bqd0W8+bKV9jQ3Eyj5h2lW3bJHucJWMYYqlSfHy627H+y7LCUwlsvg==
   dependencies:
     "@mysten/wallet-standard" "^0.7.2"
     "@onekeyfe/cross-inpage-provider-core" "2.2.14"
@@ -3193,8 +3206,8 @@
 
 "@onekeyfe/onekey-tron-provider@2.2.14":
   version "2.2.14"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/onekey-tron-provider/-/onekey-tron-provider-2.2.14.tgz#447689d75f9abf075a4559fde7139932f52cc20e"
-  integrity sha512-dx8uxfUmSxSBMgpRm7JDK8XyIQp8z3gO59DsEp0yfnRhMKQc0KHjFMswDtQmgJhZpmw5O4tNDuRSlINo9vTwnA==
+  resolved "https://registry.yarnpkg.com/@onekeyfe/onekey-tron-provider/-/onekey-tron-provider-2.2.14.tgz#c00d017efc1feb1511c4929d00e8e4e1f3c9aed0"
+  integrity sha512-8It2y39IIc23UbSg3Pzg/i4ltnKVZZSkkx0+VT5eKoX5Y0y9R9yK9WSOKCQrtfKxilDoX+6cEx49tTsPvXlqxA==
   dependencies:
     "@noble/secp256k1" "1.7.1"
     "@onekeyfe/cross-inpage-provider-core" "2.2.14"
@@ -3208,8 +3221,8 @@
 
 "@onekeyfe/onekey-webln-provider@2.2.14":
   version "2.2.14"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/onekey-webln-provider/-/onekey-webln-provider-2.2.14.tgz#7fdcf529088fed12770269b4aff01b3531961153"
-  integrity sha512-FYnCjJHH1HM5uLzUNq+ZYy7PJRSdc3vIAhBoEFGDZZKf0t74DQjSL5zPIrQS+JAgvsSMnGXCZClyBeYONxvW6w==
+  resolved "https://registry.yarnpkg.com/@onekeyfe/onekey-webln-provider/-/onekey-webln-provider-2.2.14.tgz#3c1a6e8f0e7832b29bf543083919df5fe9a29aa8"
+  integrity sha512-T1Uw5Un1oEjCsv62b0ZPopoy8FmEH5dg7AibdqZBQUV6/4FyYhGuZ2E6BJ45xXFnXxT60iDUC9mnMSuJnvVjmw==
   dependencies:
     "@onekeyfe/cross-inpage-provider-core" "2.2.14"
     "@onekeyfe/cross-inpage-provider-errors" "2.2.14"

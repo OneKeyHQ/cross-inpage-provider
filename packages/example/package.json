@@ -15,8 +15,8 @@
   "dependencies": {
     "@alephium/web3-react": "^1.4.0",
     "@aptos-labs/ts-sdk": "^1.33.0",
-    "@aptos-labs/wallet-adapter-react": "^4.1.0",
-    "@aptos-labs/wallet-standard": "^0.1.0",
+    "@aptos-labs/wallet-adapter-react": "^3.8.0",
+    "@aptos-labs/wallet-standard": "^0.3.0",
     "@benfen/bfc.js": "0.2.7",
     "@benfen/dapp-kit": "^0.0.3",
     "@benfen/wallet-kit": "^0.1.6",

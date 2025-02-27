@@ -2,7 +2,7 @@
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { ProviderNeoBase } from './ProviderNeoBase';
-import { IN3DapiMethods } from './types';
+import { INeoProviderMethods, INeoGetProviderResponse } from './types';
 import { versionInfo } from '@onekeyfe/cross-inpage-provider-core'
 
 const PROVIDER_EVENTS = {
@@ -31,7 +31,7 @@ function emitNeoReadyEvent(): void {
 class NEOLineN3 {
   static instance: ProviderNeo | null = null;
 
-  static Init = class Init implements IN3DapiMethods {
+  static Init = class Init implements INeoProviderMethods {
     public provider: ProviderNeo;
 
     constructor() {
@@ -41,7 +41,7 @@ class NEOLineN3 {
       this.provider = NEOLineN3.instance;
     }
 
-    async getProvider(): Promise<{ name: string; website: string; version: string; compatibility: string[] }> {
+    async getProvider(): Promise<INeoGetProviderResponse> {
       return this.provider.getProvider();
     }
   }
@@ -50,7 +50,7 @@ class NEOLineN3 {
 /**
  * ProviderNeo is the core implementation that communicates with OneKey Wallet
  */
-class ProviderNeo extends ProviderNeoBase implements IN3DapiMethods {
+class ProviderNeo extends ProviderNeoBase implements INeoProviderMethods {
   constructor(props: IInpageProviderConfig & { timeout?: number }) {
     super({
       ...props,
@@ -58,7 +58,7 @@ class ProviderNeo extends ProviderNeoBase implements IN3DapiMethods {
     });
   }
 
-  getProvider(): Promise<{ name: string; website: string; version: string; compatibility: string[] }> {
+  getProvider(): Promise<INeoGetProviderResponse> {
     return Promise.resolve({
       name: 'OneKey Wallet',
       website: 'https://onekey.so',

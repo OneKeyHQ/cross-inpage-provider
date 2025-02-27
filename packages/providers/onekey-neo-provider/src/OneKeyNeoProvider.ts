@@ -2,7 +2,29 @@
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { ProviderNeoBase } from './ProviderNeoBase';
-import { INeoProviderMethods, INeoGetProviderResponse, NeoProviderEventsMap, JsBridgeRequest, JsBridgeRequestParams, JsBridgeRequestResponse, INeoNetworkResponse } from './types';
+import {
+  INeoProviderMethods,
+  INeoGetProviderResponse,
+  NeoProviderEventsMap,
+  JsBridgeRequest,
+  JsBridgeRequestParams,
+  JsBridgeRequestResponse,
+  INeoNetworkResponse,
+  IGetAccountResponse,
+  IGetPublicKeyResponse,
+  IGetBalanceParams, 
+  IGetBalanceResponse, 
+  IGetStorageParams, 
+  IGetStorageResponse, 
+  IVerifyMessageV2Params, 
+  IVerifyMessageV2Response, 
+  ISignMessageV2Params, 
+  ISignMessageV2Response, 
+  ISignMessageWithoutSaltV2Params, 
+  ISignMessageWithoutSaltV2Response, 
+  ISignTransactionParams, 
+  ISignTransactionResponse
+} from './types';
 import { versionInfo } from '@onekeyfe/cross-inpage-provider-core'
 
 const PROVIDER_EVENTS = {
@@ -52,6 +74,38 @@ class NEOLineN3 {
 
     async getNetworks(): Promise<INeoNetworkResponse> {
       return this.provider.getNetworks();
+    }
+
+    async getAccount(): Promise<IGetAccountResponse> {
+      return this.provider.getAccount();
+    }
+
+    async getPublicKey(): Promise<IGetPublicKeyResponse> {
+      return this.provider.getPublicKey();
+    }
+
+    async getBalance(params?: IGetBalanceParams): Promise<IGetBalanceResponse> {
+      return this.provider.getBalance(params);
+    }
+
+    async getStorage(params?: IGetStorageParams): Promise<IGetStorageResponse> {
+      return this.provider.getStorage(params);
+    }
+
+    async verifyMessageV2(params: IVerifyMessageV2Params): Promise<IVerifyMessageV2Response> {
+      return this.provider.verifyMessageV2(params);
+    }
+
+    async signMessageV2(params: ISignMessageV2Params): Promise<ISignMessageV2Response> {
+      return this.provider.signMessageV2(params);
+    }
+
+    async signMessageWithoutSaltV2(params: ISignMessageWithoutSaltV2Params): Promise<ISignMessageWithoutSaltV2Response> {
+      return this.provider.signMessageWithoutSaltV2(params);
+    }
+
+    async signTransaction(params: ISignTransactionParams): Promise<ISignTransactionResponse> {
+      return this.provider.signTransaction(params);
     }
   }
 }
@@ -131,6 +185,38 @@ class ProviderNeo extends ProviderNeoBase implements INeoProviderMethods {
 
   async getNetworks(): Promise<INeoNetworkResponse> {
     return this._callBridge({ method: 'getNetworks' });
+  }
+
+  async getAccount(): Promise<IGetAccountResponse> {
+    return this._callBridge({ method: 'getAccount' });
+  }
+
+  async getPublicKey(): Promise<IGetPublicKeyResponse> {
+    return this._callBridge({ method: 'getPublicKey' });
+  }
+
+  async getBalance(params?: IGetBalanceParams): Promise<IGetBalanceResponse> {
+    return this._callBridge({ method: 'getBalance', params });
+  }
+
+  async getStorage(params?: IGetStorageParams): Promise<IGetStorageResponse> {
+    return this._callBridge({ method: 'getStorage', params });
+  }
+
+  async verifyMessageV2(params: IVerifyMessageV2Params): Promise<IVerifyMessageV2Response> {
+    return this._callBridge({ method: 'verifyMessageV2', params });
+  }
+
+  async signMessageV2(params: ISignMessageV2Params): Promise<ISignMessageV2Response> {
+    return this._callBridge({ method: 'signMessageV2', params });
+  }
+
+  async signMessageWithoutSaltV2(params: ISignMessageWithoutSaltV2Params): Promise<ISignMessageWithoutSaltV2Response> {
+    return this._callBridge({ method: 'signMessageWithoutSaltV2', params });
+  }
+
+  async signTransaction(params: ISignTransactionParams): Promise<ISignTransactionResponse> {
+    return this._callBridge({ method: 'signTransaction', params });
   }
 }
 

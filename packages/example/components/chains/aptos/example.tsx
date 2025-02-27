@@ -229,6 +229,24 @@ export default function Example() {
             return JSON.stringify(res);
           }}
         />
+        {/* <ApiPayload
+          title="transferToken"
+          description="代币转账"
+          presupposeParams={params.transferToken(account?.address ?? '')}
+          onExecute={async (request: string) => {
+            const payload = JSON.parse(request);
+            // 将amount转换为原子单位 (1 APT = 100000000 原子单位)
+            const amount = Number(payload.arguments[1]) * 100000000;
+            
+            const transaction = {
+              ...payload,
+              arguments: [payload.arguments[0], amount.toString()],
+            };
+
+            const res = await provider?.signAndSubmitTransaction(transaction);
+            return JSON.stringify(res);
+          }}
+        /> */}
       </ApiGroup>
 
       <DappList dapps={dapps} />

@@ -1,10 +1,11 @@
-export interface IFormField<T> {
-  value: T;
+export interface IFormField<T, E = string | undefined> {
+  value?: T;
+  defaultValue?: T;
   name?: string;
   disabled?: boolean;
   error?: string;
   required?: boolean;
-  extra?: Record<string, any>;
+  extra?: E;
 }
 
 export interface IApiFormState<T> {

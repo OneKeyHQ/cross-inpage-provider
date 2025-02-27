@@ -212,7 +212,7 @@ function injectWeb3Provider({
   }
 
   defineWindowProperty('solana', solana);
-  defineWindowProperty('phantom', { solana });
+  defineWindowProperty('phantom', { solana, ethereum });
   // defineWindowProperty('starcoin', starcoin);
   defineWindowProperty('aptos', martian);
   defineWindowProperty('petra', martian, { enumerable: true });

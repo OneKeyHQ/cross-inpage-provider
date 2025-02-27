@@ -810,7 +810,7 @@ export const sitesConfig: SitesInfo[] = [
     },
   },
   {
-    urls: ['app.arrakis.fi'],
+    urls: ['app.arrakis.finance'],
     testPath: [':text("For Users")', ':text("Connect Wallet")'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
@@ -2941,10 +2941,27 @@ export const sitesConfig: SitesInfo[] = [
     },
   },
   {
-    urls: ['blast.wasabi.xyz'],
-    testPath: [':text("STAKE NOW")', ':text("CONNECT WALLET")'],
+    urls: ['app.wasabi.xyz'],
+    testPath: [':text("CONNECT WALLET")'],
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () =>getConnectWalletModalByTitle(
+            '#headlessui-portal-root div[id*="headlessui-dialog-"]',
+            ['Connect Wallet', 'Wallet Overview'],
+          ),
+        },
+      ],
+      [IInjectedProviderNames.solana]: [
+        {
+          ...basicWalletInfo['phantom'],
+          container: () =>getConnectWalletModalByTitle(
+            '#headlessui-portal-root div[id*="headlessui-dialog-"]',
+            ['Connect Wallet', 'Wallet Overview'],
+          ),
+        },
+      ],
     },
   },
   {
@@ -4284,7 +4301,7 @@ export const sitesConfig: SitesInfo[] = [
           icon.style.width = '26px';
           icon.style.height = '26px';
           return true;
-        }
+        },
       ],
       text: [],
     },
@@ -4299,7 +4316,30 @@ export const sitesConfig: SitesInfo[] = [
             if (ledgerText) {
               ledgerText.textContent = 'I am using my ledger/onekey with one of these wallets';
             }
-          }
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['www.desyn.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = document.querySelector<HTMLElement>('div.modal div.modal-body');
+            const text = modal && findWalletTextByParent(modal, name, []);
+            const icon = text?.parentElement?.parentElement?.querySelector(
+              'img',
+            ) as HTMLElement | null;
+            return (
+              text && {
+                textNode: text,
+                iconNode: icon ?? null,
+              }
+            );
+          },
         },
       ],
     },

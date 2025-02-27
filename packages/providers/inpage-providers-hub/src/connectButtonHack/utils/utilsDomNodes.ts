@@ -81,7 +81,7 @@ function findTextNode(
           : NodeFilter.FILTER_SKIP;
       },
     });
-    
+
     if (selectAll) {
       while (walker.nextNode()) {
         result.push(walker.currentNode as Text);

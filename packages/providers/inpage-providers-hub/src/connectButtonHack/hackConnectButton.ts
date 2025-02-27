@@ -303,7 +303,6 @@ function hackConnectButton({
   callbackDelay?: number;
 }) {
   const isUrlMatched = () => Boolean(urls.includes(window.location.hostname) || urls.includes('*'));
-
   const getEnabledInjectedProviders = () => {
     if (!isUrlMatched()) {
       return;

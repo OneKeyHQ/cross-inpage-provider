@@ -27,9 +27,11 @@ import {
   ISwitchWalletNetworkParams,
   ISwitchWalletNetworkResponse,
   IInvokeMultipleParams,
-  IInvokeMultipleResponse
+  IInvokeParams,
+  IInvokeResponse,
+  ISendParams,
+  ISendResponse
 } from './types';
-import { versionInfo } from '@onekeyfe/cross-inpage-provider-core'
 
 const PROVIDER_EVENTS = {
   'connect': 'connect',
@@ -102,8 +104,28 @@ class NEOLineN3 {
       return this.provider.verifyMessageV2(params);
     }
 
+    async send(params: ISendParams): Promise<ISendResponse> {
+      return this.provider.send(params);
+    }
+        
+    async invoke(params: IInvokeParams): Promise<IInvokeResponse> {
+      return this.provider.invoke(params);
+    }
+
+    async invokeMultiple(params: IInvokeMultipleParams): Promise<IInvokeResponse> {
+      return this.provider.invokeMultiple(params);
+    }
+
+    async signMessage(params: ISignMessageV2Params): Promise<ISignMessageV2Response> {
+      return this.provider.signMessage(params);
+    }
+
     async signMessageV2(params: ISignMessageV2Params): Promise<ISignMessageV2Response> {
       return this.provider.signMessageV2(params);
+    }
+
+    async signMessageWithoutSalt(params: ISignMessageWithoutSaltV2Params): Promise<ISignMessageWithoutSaltV2Response> {
+      return this.provider.signMessageWithoutSalt(params);
     }
 
     async signMessageWithoutSaltV2(params: ISignMessageWithoutSaltV2Params): Promise<ISignMessageWithoutSaltV2Response> {
@@ -120,10 +142,6 @@ class NEOLineN3 {
 
     async switchWalletAccount(): Promise<IGetAccountResponse> {
       return this.provider.switchWalletAccount();
-    }
-
-    async invokeMultiple(params: IInvokeMultipleParams): Promise<IInvokeMultipleResponse> {
-      return this.provider.invokeMultiple(params);
     }
   }
 }
@@ -219,9 +237,29 @@ class ProviderNeo extends ProviderNeoBase implements INeoProviderMethods {
   async verifyMessageV2(params: IVerifyMessageV2Params): Promise<IVerifyMessageV2Response> {
     return this._callBridge({ method: 'verifyMessageV2', params });
   }
+   
+  async send(params: ISendParams): Promise<ISendResponse> {
+    return this._callBridge({ method: 'send', params });
+  } 
+  
+  async invoke(params: IInvokeParams): Promise<IInvokeResponse> {
+    return this._callBridge({ method: 'invoke', params });
+  }
+
+  async invokeMultiple(params: IInvokeMultipleParams): Promise<IInvokeResponse> {
+    return this._callBridge({ method: 'invokeMultiple', params });
+  }
+
+  async signMessage(params: ISignMessageV2Params): Promise<ISignMessageV2Response> {
+    return this._callBridge({ method: 'signMessage', params });
+  }
 
   async signMessageV2(params: ISignMessageV2Params): Promise<ISignMessageV2Response> {
     return this._callBridge({ method: 'signMessageV2', params });
+  }
+
+  async signMessageWithoutSalt(params: ISignMessageWithoutSaltV2Params): Promise<ISignMessageWithoutSaltV2Response> {
+    return this._callBridge({ method: 'signMessageWithoutSalt', params });
   }
 
   async signMessageWithoutSaltV2(params: ISignMessageWithoutSaltV2Params): Promise<ISignMessageWithoutSaltV2Response> {
@@ -238,10 +276,6 @@ class ProviderNeo extends ProviderNeoBase implements INeoProviderMethods {
 
   async switchWalletAccount(): Promise<IGetAccountResponse> {
     return this._callBridge({ method: 'switchWalletAccount' });
-  }
-
-  async invokeMultiple(params: IInvokeMultipleParams): Promise<IInvokeMultipleResponse> {
-    return this._callBridge({ method: 'invokeMultiple', params });
   }
 }
 

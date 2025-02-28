@@ -137,26 +137,59 @@ export interface IInvokeMultipleParams {
   signers: ISigners[];
 }
 
-export interface IInvokeMultipleResponse {
+export interface IInvokeParams {
+  scriptHash: string;
+  operation: string;
+  args: IArgument[];
+  fee?: string;
+  extraSystemFee?: string;
+  overrideSystemFee?: string;
+  broadcastOverride?: boolean;
+  signers: ISigners[];
+}
+
+export interface IInvokeResponse {
   txid?: string;
   nodeURL?: string;
   signedTx?: string;
 }
 
+export interface ISendParams {
+  fromAddress: string;
+  toAddress: string;
+  asset: string;
+  amount: string;
+  fee?: string;
+  broadcastOverride?: boolean;
+}
+
+export interface ISendResponse {
+  txid: string;
+  nodeURL?: string;
+  signedTx?: string;
+}
+
 export interface INeoProviderMethods {
-  getProvider(): Promise<INeoGetProviderResponse>;
+  /** Common Methods */
   getNetworks(): Promise<INeoNetworkResponse>;
   getAccount(): Promise<IGetAccountResponse>;
   getPublicKey(): Promise<IGetPublicKeyResponse>;
+  /** Read Methods */
+  getProvider(): Promise<INeoGetProviderResponse>;
   getBalance(params?: IGetBalanceParams): Promise<IGetBalanceResponse>;
   getStorage(params?: IGetStorageParams): Promise<IGetStorageResponse>;
   verifyMessageV2(params: IVerifyMessageV2Params): Promise<IVerifyMessageV2Response>;
+  /** Write Methods */
+  send(params: ISendParams): Promise<ISendResponse>;
+  invoke(params: IInvokeParams): Promise<IInvokeResponse>;
+  invokeMultiple(params: IInvokeMultipleParams): Promise<IInvokeResponse>;
+  signMessage(params: ISignMessageV2Params): Promise<ISignMessageV2Response>;
   signMessageV2(params: ISignMessageV2Params): Promise<ISignMessageV2Response>;
+  signMessageWithoutSalt(params: ISignMessageWithoutSaltV2Params): Promise<ISignMessageWithoutSaltV2Response>;
   signMessageWithoutSaltV2(params: ISignMessageWithoutSaltV2Params): Promise<ISignMessageWithoutSaltV2Response>;
   signTransaction(params: ISignTransactionParams): Promise<ISignTransactionResponse>;
   switchWalletNetwork(params: ISwitchWalletNetworkParams): Promise<ISwitchWalletNetworkResponse>;
   switchWalletAccount(): Promise<IGetAccountResponse>;
-  invokeMultiple(params: IInvokeMultipleParams): Promise<IInvokeMultipleResponse>;
 }
 
 export interface NeoProviderEventsMap {

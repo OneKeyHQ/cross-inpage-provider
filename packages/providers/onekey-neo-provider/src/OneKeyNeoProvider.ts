@@ -23,7 +23,11 @@ import {
   ISignMessageWithoutSaltV2Params, 
   ISignMessageWithoutSaltV2Response, 
   ISignTransactionParams, 
-  ISignTransactionResponse
+  ISignTransactionResponse,
+  ISwitchWalletNetworkParams,
+  ISwitchWalletNetworkResponse,
+  IInvokeMultipleParams,
+  IInvokeMultipleResponse
 } from './types';
 import { versionInfo } from '@onekeyfe/cross-inpage-provider-core'
 
@@ -50,6 +54,8 @@ function emitNeoReadyEvent(): void {
   
   const readyEvent = new Event('NEOLine.N3.EVENT.READY');
   window.dispatchEvent(readyEvent);
+  const neoReadyEvent = new Event('NEOLine.NEO.EVENT.READY');
+  window.dispatchEvent(neoReadyEvent);
 }
 
 /**
@@ -106,6 +112,18 @@ class NEOLineN3 {
 
     async signTransaction(params: ISignTransactionParams): Promise<ISignTransactionResponse> {
       return this.provider.signTransaction(params);
+    }
+
+    async switchWalletNetwork(params: ISwitchWalletNetworkParams): Promise<ISwitchWalletNetworkResponse> {
+      return this.provider.switchWalletNetwork(params);
+    }
+
+    async switchWalletAccount(): Promise<IGetAccountResponse> {
+      return this.provider.switchWalletAccount();
+    }
+
+    async invokeMultiple(params: IInvokeMultipleParams): Promise<IInvokeMultipleResponse> {
+      return this.provider.invokeMultiple(params);
     }
   }
 }
@@ -175,12 +193,7 @@ class ProviderNeo extends ProviderNeoBase implements INeoProviderMethods {
   }
 
   getProvider(): Promise<INeoGetProviderResponse> {
-    return Promise.resolve({
-      name: 'OneKey Wallet',
-      website: 'https://onekey.so',
-      version: versionInfo.version || '1.0.0',
-      compatibility: [],
-    });
+    return this._callBridge({ method: 'getProvider' });
   }
 
   async getNetworks(): Promise<INeoNetworkResponse> {
@@ -217,6 +230,18 @@ class ProviderNeo extends ProviderNeoBase implements INeoProviderMethods {
 
   async signTransaction(params: ISignTransactionParams): Promise<ISignTransactionResponse> {
     return this._callBridge({ method: 'signTransaction', params });
+  }
+
+  async switchWalletNetwork(params: ISwitchWalletNetworkParams): Promise<ISwitchWalletNetworkResponse> {
+    return this._callBridge({ method: 'switchWalletNetwork', params });
+  }
+
+  async switchWalletAccount(): Promise<IGetAccountResponse> {
+    return this._callBridge({ method: 'switchWalletAccount' });
+  }
+
+  async invokeMultiple(params: IInvokeMultipleParams): Promise<IInvokeMultipleResponse> {
+    return this._callBridge({ method: 'invokeMultiple', params });
   }
 }
 

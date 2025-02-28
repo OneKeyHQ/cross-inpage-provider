@@ -54,6 +54,7 @@ export type IWindowOneKeyHub = {
   alephium?: ProviderAlph;
   scdo?: ProviderScdo;
   NEOLineN3?: NEOLineN3; 
+  NEOLine?: NEOLineN3;
   $private?: ProviderPrivate;
   $walletInfo?: {
     buildNumber: string;
@@ -250,6 +251,7 @@ function injectWeb3Provider({
 
   // NEO N3
   defineWindowProperty('NEOLineN3', NEOLineN3);
+  defineWindowProperty('NEOLine', NEOLineN3);
   emitNeoReadyEvent();
 
   // ** shim or inject real web3

@@ -102,6 +102,47 @@ export interface ISignTransactionResponse {
   transaction: TransactionLike; // Signed transaction
 }
 
+export interface ISwitchWalletNetworkParams {
+  chainId: number;     // Switch the chainId of the network
+}
+
+export interface ISwitchWalletNetworkResponse {
+  result: boolean;     // Whether the network switch was successful
+}
+
+export interface IArgument {
+  type: 'String' | 'Boolean' | 'Hash160' | 'Hash256' | 'Integer' | 'ByteArray' | 'Array' | 'Address';
+  value: any;
+}
+
+export interface IInvokeArguments {
+  scriptHash: string;
+  operation: string;
+  args: IArgument[];
+}
+
+export interface ISigners {
+  account: string;
+  scopes: string;
+  allowedContracts?: string[];
+  allowedGroups?: string[];
+}
+
+export interface IInvokeMultipleParams {
+  fee?: string;
+  extraSystemFee?: string;
+  overrideSystemFee?: string;
+  invokeArgs?: IInvokeArguments[];
+  broadcastOverride?: boolean;
+  signers: ISigners[];
+}
+
+export interface IInvokeMultipleResponse {
+  txid?: string;
+  nodeURL?: string;
+  signedTx?: string;
+}
+
 export interface INeoProviderMethods {
   getProvider(): Promise<INeoGetProviderResponse>;
   getNetworks(): Promise<INeoNetworkResponse>;
@@ -113,6 +154,9 @@ export interface INeoProviderMethods {
   signMessageV2(params: ISignMessageV2Params): Promise<ISignMessageV2Response>;
   signMessageWithoutSaltV2(params: ISignMessageWithoutSaltV2Params): Promise<ISignMessageWithoutSaltV2Response>;
   signTransaction(params: ISignTransactionParams): Promise<ISignTransactionResponse>;
+  switchWalletNetwork(params: ISwitchWalletNetworkParams): Promise<ISwitchWalletNetworkResponse>;
+  switchWalletAccount(): Promise<IGetAccountResponse>;
+  invokeMultiple(params: IInvokeMultipleParams): Promise<IInvokeMultipleResponse>;
 }
 
 export interface NeoProviderEventsMap {

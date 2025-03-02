@@ -4,7 +4,6 @@ import { JsBridgeBase } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderEthereum, shimWeb3, registerEIP6963Provider } from '@onekeyfe/onekey-eth-provider';
 import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
 import { ProviderSolana, registerSolanaWallet, WalletIcon } from '@onekeyfe/onekey-solana-provider';
-// import { ProviderStarcoin } from '@onekeyfe/onekey-starcoin-provider';
 import {
   ProviderAptos,
   ProviderAptosMartian,
@@ -28,6 +27,7 @@ import { createTonProviderOpenMask, ProviderTon } from '@onekeyfe/onekey-ton-pro
 import { ProviderNostr } from '@onekeyfe/onekey-nostr-provider';
 import { ProviderBtc, ProviderBtcWallet } from '@onekeyfe/onekey-btc-provider';
 import { ProviderAlgo } from '@onekeyfe/onekey-algo-provider';
+import { ProviderNeo, NEOLineN3, emitNeoReadyEvent } from '@onekeyfe/onekey-neo-provider';
 import { hackAllConnectButtons } from './connectButtonHack';
 import { detectWebsiteRiskLevel, listenPageFocus } from './detectRiskWebsite';
 import { injectFloatingButton } from './floatingButton';
@@ -39,7 +39,6 @@ export type IWindowOneKeyHub = {
   ethereum?: ProviderEthereum;
   solana?: ProviderSolana;
   phantom?: { solana?: ProviderSolana };
-  // starcoin?: any;
   aptos?: ProviderAptos;
   petra?: ProviderAptos;
   martian?: ProviderAptosMartian;
@@ -54,6 +53,8 @@ export type IWindowOneKeyHub = {
   btcwallet?: ProviderBtcWallet;
   alephium?: ProviderAlph;
   scdo?: ProviderScdo;
+  NEOLineN3?: NEOLineN3; 
+  NEOLine?: NEOLineN3;
   $private?: ProviderPrivate;
   $walletInfo?: {
     buildNumber: string;
@@ -89,10 +90,6 @@ function injectWeb3Provider({
   const solana = new ProviderSolana({
     bridge,
   });
-
-  // const starcoin = new ProviderStarcoin({
-  //   bridge,
-  // });
 
   const martian = new ProviderAptosMartian({
     bridge,
@@ -153,6 +150,9 @@ function injectWeb3Provider({
   const algorand = new ProviderAlgo({ bridge });
 
   const scdo = new ProviderScdo({ bridge });
+  
+  const neo = new ProviderNeo({ bridge });
+  NEOLineN3.instance = neo;
 
   // providerHub
   const $onekey = {
@@ -179,19 +179,10 @@ function injectWeb3Provider({
     btc,
     btcwallet: btcWallet,
     algorand,
+    neo: NEOLineN3,
   };
 
   defineWindowProperty('$onekey', $onekey, { enumerable: true, alwaysInject: true });
-
-  // const martianProxy = new Proxy(martian, {
-  //   get: (target, property, ...args) => {
-  //     if (property === 'aptosProviderType') {
-  //       return 'martian';
-  //     }
-  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  //     return Reflect.get(target, property, ...args);
-  //   },
-  // });
 
   defineWindowProperty('ethereum', ethereum);
   // OneKey Ethereum EIP6963 Provider
@@ -213,10 +204,8 @@ function injectWeb3Provider({
 
   defineWindowProperty('solana', solana);
   defineWindowProperty('phantom', { solana, ethereum });
-  // defineWindowProperty('starcoin', starcoin);
   defineWindowProperty('aptos', martian);
   defineWindowProperty('petra', martian, { enumerable: true });
-  // defineWindowProperty('martian', martianProxy, { enumerable: true });
   defineWindowProperty('conflux', conflux);
   defineWindowProperty('alephium', alephium);
   defineWindowProperty('alephiumProviders', {
@@ -259,6 +248,11 @@ function injectWeb3Provider({
   // Lightning Network
   defineWindowProperty('webln', webln);
   defineWindowProperty('nostr', nostr);
+
+  // NEO N3
+  defineWindowProperty('NEOLineN3', NEOLineN3);
+  defineWindowProperty('NEOLine', NEOLineN3);
+  emitNeoReadyEvent();
 
   // ** shim or inject real web3
   //

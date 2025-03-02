@@ -126,6 +126,12 @@ export interface ISigners {
   scopes: string;
   allowedContracts?: string[];
   allowedGroups?: string[];
+  rules?: IWitnessRule[];
+}
+
+export interface IWitnessRule {
+  action: string;
+  condition: any;
 }
 
 export interface IInvokeMultipleParams {
@@ -169,6 +175,76 @@ export interface ISendResponse {
   signedTx?: string;
 }
 
+export interface IInvokeReadParams {
+  scriptHash: string;
+  operation: string;
+  args: IArgument[];
+  signers: ISigners[];
+}
+
+export interface IInvokeReadResponse {
+  script: string;
+  state: string;
+  gas_consumed: string;
+  stack: IArgument[];
+}
+
+export interface IInvokeReadMultiParams {
+  invokeReadArgs: {
+    scriptHash: string;
+    operation: string;
+    args: IArgument[];
+  }[]
+  signers: ISigners[];
+}
+
+export interface IVerifyMessageParams {
+  message: string;
+  data: string;
+  publicKey: string;
+}
+
+export interface IVerifyMessageResponse {
+  result: boolean;
+}
+
+export interface IGetBlockParams {
+  blockHeight: number;
+}
+
+export interface IGetTransactionParams {
+  txid: string;
+}
+
+export interface IGetApplicationLogParams {
+  txid: string;
+}
+
+export interface IPickAddressResponse {
+  label: string;
+  address: string;
+}
+
+export interface IAddressToScriptHashParams {
+  address: string;
+}
+
+export interface IAddressToScriptHashResponse {
+  scriptHash: string;
+}
+
+export interface IScriptHashToAddressParams {
+  scriptHash: string;
+}
+
+export interface IScriptHashToAddressResponse {
+  address: string;
+}
+
+export interface IRpcResponse {
+  [key: string]: any;
+}
+
 export interface INeoProviderMethods {
   /** Common Methods */
   getNetworks(): Promise<INeoNetworkResponse>;
@@ -178,7 +254,16 @@ export interface INeoProviderMethods {
   getProvider(): Promise<INeoGetProviderResponse>;
   getBalance(params?: IGetBalanceParams): Promise<IGetBalanceResponse>;
   getStorage(params?: IGetStorageParams): Promise<IGetStorageResponse>;
+  getBlock(params: IGetBlockParams): Promise<IRpcResponse>;
+  getTransaction(params: IGetTransactionParams): Promise<IRpcResponse>;
+  getApplicationLog(params: IGetApplicationLogParams): Promise<IRpcResponse>;
+  verifyMessage(params: IVerifyMessageParams): Promise<IVerifyMessageResponse>;
   verifyMessageV2(params: IVerifyMessageV2Params): Promise<IVerifyMessageV2Response>;
+  invokeRead(params: IInvokeReadParams): Promise<IInvokeReadResponse>;
+  invokeReadMulti(params: IInvokeReadMultiParams): Promise<IInvokeReadResponse>;
+  pickAddress(): Promise<IPickAddressResponse>;
+  AddressToScriptHash(params: IAddressToScriptHashParams): Promise<IAddressToScriptHashResponse>;
+  ScriptHashToAddress(params: IScriptHashToAddressParams): Promise<IScriptHashToAddressResponse>;
   /** Write Methods */
   send(params: ISendParams): Promise<ISendResponse>;
   invoke(params: IInvokeParams): Promise<IInvokeResponse>;

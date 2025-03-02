@@ -15,7 +15,18 @@ import {
   IGetBalanceParams, 
   IGetBalanceResponse, 
   IGetStorageParams, 
-  IGetStorageResponse, 
+  IGetStorageResponse,
+  IGetBlockParams,
+  IGetTransactionParams,
+  IGetApplicationLogParams,
+  IPickAddressResponse,
+  IAddressToScriptHashParams,
+  IAddressToScriptHashResponse,
+  IScriptHashToAddressParams,
+  IScriptHashToAddressResponse,
+  IRpcResponse,
+  IVerifyMessageParams,
+  IVerifyMessageResponse,
   IVerifyMessageV2Params, 
   IVerifyMessageV2Response, 
   ISignMessageV2Params, 
@@ -30,7 +41,10 @@ import {
   IInvokeParams,
   IInvokeResponse,
   ISendParams,
-  ISendResponse
+  ISendResponse,
+  IInvokeReadParams,
+  IInvokeReadResponse,
+  IInvokeReadMultiParams
 } from './types';
 
 const PROVIDER_EVENTS = {
@@ -92,12 +106,48 @@ class NEOLineN3 {
       return this.provider.getPublicKey();
     }
 
+    async pickAddress(): Promise<IPickAddressResponse> {
+      return this.provider.pickAddress();
+    }
+
+    async AddressToScriptHash(params: IAddressToScriptHashParams): Promise<IAddressToScriptHashResponse> {
+      return this.provider.AddressToScriptHash(params);
+    }
+
+    async ScriptHashToAddress(params: IScriptHashToAddressParams): Promise<IScriptHashToAddressResponse> {
+      return this.provider.ScriptHashToAddress(params);
+    }
+
     async getBalance(params?: IGetBalanceParams): Promise<IGetBalanceResponse> {
       return this.provider.getBalance(params);
     }
 
     async getStorage(params?: IGetStorageParams): Promise<IGetStorageResponse> {
       return this.provider.getStorage(params);
+    }
+
+    async getBlock(params: IGetBlockParams): Promise<IRpcResponse> {
+      return this.provider.getBlock(params);
+    }
+
+    async getTransaction(params: IGetTransactionParams): Promise<IRpcResponse> {
+      return this.provider.getTransaction(params);
+    }
+
+    async getApplicationLog(params: IGetApplicationLogParams): Promise<IRpcResponse> {
+      return this.provider.getApplicationLog(params);
+    }
+
+    async invokeRead(params: IInvokeReadParams): Promise<IInvokeReadResponse> {
+      return this.provider.invokeRead(params);
+    }
+    
+    async invokeReadMulti(params: IInvokeReadMultiParams): Promise<IInvokeReadResponse> {
+      return this.provider.invokeReadMulti(params);
+    }
+
+    async verifyMessage(params: IVerifyMessageParams): Promise<IVerifyMessageResponse> {
+      return this.provider.verifyMessage(params);
     }
 
     async verifyMessageV2(params: IVerifyMessageV2Params): Promise<IVerifyMessageV2Response> {
@@ -234,8 +284,44 @@ class ProviderNeo extends ProviderNeoBase implements INeoProviderMethods {
     return this._callBridge({ method: 'getStorage', params });
   }
 
+  async getBlock(params: IGetBlockParams): Promise<IRpcResponse> {
+    return this._callBridge({ method: 'getBlock', params });
+  }
+
+  async getTransaction(params: IGetTransactionParams): Promise<IRpcResponse> {
+    return this._callBridge({ method: 'getTransaction', params });
+  }
+
+  async getApplicationLog(params: IGetApplicationLogParams): Promise<IRpcResponse> {
+    return this._callBridge({ method: 'getApplicationLog', params });
+  }
+
+  async invokeRead(params: IInvokeReadParams): Promise<IInvokeReadResponse> {
+    return this._callBridge({ method: 'invokeRead', params });
+  }
+
+  async invokeReadMulti(params: IInvokeReadMultiParams): Promise<IInvokeReadResponse> {
+    return this._callBridge({ method: 'invokeReadMulti', params });
+  }
+
+  async verifyMessage(params: IVerifyMessageParams): Promise<IVerifyMessageResponse> {
+    return this._callBridge({ method: 'verifyMessage', params });
+  }
+
   async verifyMessageV2(params: IVerifyMessageV2Params): Promise<IVerifyMessageV2Response> {
     return this._callBridge({ method: 'verifyMessageV2', params });
+  }
+
+  async pickAddress(): Promise<IPickAddressResponse> {
+    return this._callBridge({ method: 'pickAddress' });
+  }
+
+  async AddressToScriptHash(params: IAddressToScriptHashParams): Promise<IAddressToScriptHashResponse> {
+    return this._callBridge({ method: 'AddressToScriptHash', params });
+  }
+
+  async ScriptHashToAddress(params: IScriptHashToAddressParams): Promise<IScriptHashToAddressResponse> {
+    return this._callBridge({ method: 'ScriptHashToAddress', params });
   }
    
   async send(params: ISendParams): Promise<ISendResponse> {

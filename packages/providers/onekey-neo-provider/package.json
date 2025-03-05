@@ -1,5 +1,5 @@
 {
-  "name": "@onekeyfe/onekey-tron-provider",
+  "name": "@onekeyfe/onekey-neo-provider",
   "version": "2.2.15",
   "keywords": [
     "cross-inpage-provider"
@@ -28,17 +28,9 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@noble/secp256k1": "1.7.1",
     "@onekeyfe/cross-inpage-provider-core": "2.2.15",
     "@onekeyfe/cross-inpage-provider-errors": "2.2.15",
     "@onekeyfe/cross-inpage-provider-types": "2.2.15",
-    "@onekeyfe/extension-bridge-injected": "2.2.15",
-    "lodash-es": "^4.17.21",
-    "querystring": "^0.2.1",
-    "sunweb": "^1.0.7",
-    "tronweb": "^5.3.2"
-  },
-  "devDependencies": {
-    "@types/lodash-es": "^4.17.12"
+    "@onekeyfe/extension-bridge-injected": "2.2.15"
   }
 }

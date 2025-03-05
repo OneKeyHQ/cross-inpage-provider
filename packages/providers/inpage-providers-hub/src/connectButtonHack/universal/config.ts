@@ -4313,10 +4313,23 @@ export const sitesConfig: SitesInfo[] = [
           afterUpdate(textNode) {
             const ledgerInput = document.getElementById('connect-ledger-wallet-with-phantom');
             const ledgerText = ledgerInput?.nextElementSibling as HTMLSpanElement;
-            if (ledgerText) {
-              ledgerText.textContent = 'I am using my ledger/onekey with one of these wallets';
+            // if (ledgerText) {
+            //   ledgerText.textContent = 'I am using my ledger/onekey with one of these wallets';
+            // }
+            if (textNode) {
+              textNode.textContent = 'OneKey Hardware & Phantom';
             }
-          },
+            const label = ledgerInput?.parentElement as HTMLLabelElement;
+            if (label) {
+              const span = label.querySelector('span');
+              if (span) {
+                span.textContent = 'I am using my ledger/onekey hardware with one of these wallets';
+              }
+              label.style.padding = '20px';
+              label.style.display = 'flex';
+              label.style.alignItems = 'center';
+            }
+          },           
         },
       ],
     },
@@ -4344,4 +4357,324 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
+  
+  {
+    urls: ['stake.lido.fi'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: '#reef-knot-modal-root',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['bridge.arbitrum.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'div[role="document"]',
+          findIconAndName({ name, container }) {
+            const modal = getConnectWalletModalByTitle(
+              container as string,
+              'Connect a Wallet',
+            );
+            return (modal && findIconAndNameByName(modal, name, 'auto-search-icon')) ?? null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.optimism.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'div[role="document"]',
+        },
+      ],
+    },
+  },
+  {
+    urls: ['stake.rocketpool.net'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = document.querySelector('div[role="dialog"].fixed.inset-0');
+            return modal && findIconAndNameByIcon(
+              'img[alt="MetaMask"]',
+              'auto-search-text',
+              name,
+              modal as HTMLElement
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.solv.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'div[role="dialog"]',
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle(
+              'div[role="dialog"]',
+              'Connect your wallet'
+            );
+            return (modal && findIconAndNameByName(modal, name, 'auto-search-icon', {
+              icon: [
+                isWalletIconLessEqualThan,
+                (icon: HTMLElement) => icon.getAttribute('aria-hidden') !== 'true'
+              ],
+              text: []
+            })) ?? null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.symbiotic.fi'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'div[data-dialog-wrapper="true"]',
+          findIconAndName({ name, container }) {
+            const modal = getConnectWalletModalByTitle(
+              container as string,
+              'CONNECT WALLET',
+            );
+            return (modal && findIconAndNameByName(modal, name, 'auto-search-icon')) ?? null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['desyn.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name, container }) {
+            const modal = getConnectWalletModalByTitle(
+              container as string,
+              'Connect Wallet ',
+            );
+            return (modal && findIconAndNameByName(modal, name, 'auto-search-icon')) ?? null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.free.tech', 'core.app', 'blast.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            return findIconAndNameByName(document.body, name, 'auto-search-icon') ?? null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['yieldlayer.cian.app'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: () =>
+            getConnectWalletModalByTitle('div[role="dialog"]', 'Connect Wallet'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.unirouter.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.btc]: [
+        {
+          ...basicWalletInfo['unisat'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('div.dropdown.dropdown-end', 'Connect Wallet');
+            return modal && findIconAndNameByIcon(
+              'img[alt="Unisat Wallet"]',
+              'auto-search-text',
+              name,
+              modal as HTMLElement
+            );
+          },
+          afterUpdate(textNode, iconNode) {
+            if (textNode) {
+              textNode.textContent = 'OneKey&UniSat';
+            }
+            if (iconNode) {
+              iconNode.style.width = '28px';
+              iconNode.style.height = '28px';
+            }
+          }
+        },
+      ],
+    },
+  },
+  {
+    urls: ['sunswap.com'],
+    walletsForProvider: {
+      [IInjectedProviderNames.tron]: [
+        {
+          ...basicWalletInfo['tronlink'],
+          container: () => {
+            return getConnectWalletModalByTitle(
+              'div.ant-modal-content',
+              'Connect to Wallet',
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['dashboard.threshold.network'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            return findIconAndNameByName(document.body, name, 'auto-search-icon', {
+              icon: [
+                (icon: HTMLElement) => icon.classList.contains('chakra-icon')
+              ],
+              text: []
+            }) ?? null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.pell.network'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            return findIconAndNameByName(document.body, name, 'auto-search-icon') ?? null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['www.bitlayer.org'],
+    walletsForProvider: {
+      [IInjectedProviderNames.btc]: [
+        {
+          ...basicWalletInfo['unisat'],
+          findIconAndName({ name }) {
+            return findIconAndNameByName(document.body, name, 'auto-search-icon') ?? null;
+          },
+          afterUpdate(textNode, iconNode) {
+            if (iconNode) {
+              iconNode.style.width = '26px';
+              iconNode.style.height = '26px';
+            }
+          }
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.abex.fi'],
+    walletsForProvider: {
+      [IInjectedProviderNames.sui]: [
+        {
+          ...basicWalletInfo['suiwallet'],
+          container: "div[role='dialog'].wkit-dialog__content",
+        },
+      ],
+    },
+  },
+  {
+    urls: ['dex.bluemove.net'],
+    walletsForProvider: {
+      [IInjectedProviderNames.sui]: [
+        {
+          ...basicWalletInfo['suiwallet'],
+          findIconAndName({ name }) {
+            return findIconAndNameByName(document.body, name, 'auto-search-icon') ?? null;
+          },
+          afterUpdate(textNode, iconNode) {
+            if (iconNode) {
+              iconNode.style.width = '32px';
+              iconNode.style.height = '32px';
+            }
+          }
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.sudo.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.sui]: [
+        {
+          ...basicWalletInfo['suiwallet'],
+          container: "div[role='dialog'].wkit-dialog__content",
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.streamflow.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.sui]: [
+        {
+          ...basicWalletInfo['suiwallet'],
+          container: "div.w-full.sm\\:w-100",
+        },
+      ],
+    },
+  },
+  {
+    urls: ['farm.bucketprotocol.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.sui]: [
+        {
+          ...basicWalletInfo['suiwallet'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('div[role="dialog"]', 'Connect a Wallet from list');
+            return modal && findIconAndNameByIcon(
+              'img[alt="Sui Wallet"]',
+              'auto-search-text',
+              name,
+              modal as HTMLElement
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['stake.volosui.com'],
+    walletsForProvider: {
+      [IInjectedProviderNames.sui]: [
+        {
+          ...basicWalletInfo['suiwallet'],
+          container: "div[role='dialog'].wkit-dialog__content",
+        },
+      ],
+    },
+  }
 ];

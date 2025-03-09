@@ -1,37 +1,11 @@
 export default {
-  switchNetwork: [
-    {
-      id: 'switchNetwork MainNet',
-      name: 'switchNetwork MainNet',
-      value: 'MainNet',
-    },
-    {
-      id: 'switchNetwork TestNet',
-      name: 'switchNetwork TestNet',
-      value: 'TestNet',
-    },
-  ],
-  getBalance: [
-    {
-      id: 'getBalance',
-      name: 'Get GAS Balance',
-      value: JSON.stringify({
-        params: [
-          {
-            address: 'NaUjKgf5vMuFt7Ffgfffcpc41uH3adx1jq',
-            contracts: ['d2a4cff31913016155e38e474a2c06d08be276cf'], // GAS contract
-          },
-        ],
-      }),
-    },
-  ],
   getStorage: [
     {
       id: 'getStorage',
       name: 'Get Storage',
       value: JSON.stringify({
-        scriptHash: 'd2a4cff31913016155e38e474a2c06d08be276cf',
-        key: '746f74616c537570706c79', // totalSupply in hex
+        scriptHash: '006b26dd0d2aa076b11082847a094772450f05af',
+        key: 'token0',
       }),
     },
   ],
@@ -88,6 +62,28 @@ export default {
       }),
     },
   ],
+  verifyMessage: [
+    {
+      id: 'verifyMessage',
+      name: 'Verify Message',
+      value: JSON.stringify({
+        data: "b80f79abe2e471ca7211accce2e2ad36388a10754aa9dddeb0237d5c604ce9b613f6ae3cfd328a01fdccbad9f70abfc50caecd1e3656b1885e2b72d5bda9a5a6",
+        message: "Hello world",
+        publicKey: "02c6fcfe9e91155521414442d73a005f200c6f92cbc70f2c9085fd89b2a2534459"
+      }),
+    },
+  ],
+  verifyMessageV2: [
+    {
+      id: 'verifyMessageV2',
+      name: 'Verify Message V2',
+      value: JSON.stringify({
+        data: "e376e3d593a18cac008af01e0919a41e9c3e29f546643d92e4e8db58ffa18f1cf1655be099ea707e4432bb82d78fe32fce83a153a5b605515c735b2ec8909cd8",
+        message: "Hello world",
+        publicKey: "02c6fcfe9e91155521414442d73a005f200c6f92cbc70f2c9085fd89b2a2534459"
+      }),
+    },
+  ],
   getBlock: [
     {
       id: 'getBlock',
@@ -112,17 +108,6 @@ export default {
       name: 'Get Application Log',
       value: JSON.stringify({
         txid: '0x7da6ae7ff9d0b7af3d32f3a2feb2aa96c2a27ef9d651b4f0c6e32cac65c12aa2',
-      }),
-    },
-  ],
-  verifyMessage: [
-    {
-      id: 'verifyMessage',
-      name: 'Verify Message',
-      value: JSON.stringify({
-        message: 'Hello OneKey NEO Wallet',
-        data: 'abcdef1234567890', // Example signature
-        publicKey: '0271d28f45de9f8d3c476f8ffe6c34b3a4ff74b51a78137c4afe22cb22ca39d8c4', // Example public key
       }),
     },
   ],
@@ -277,10 +262,38 @@ export default {
   ],
   switchWalletNetwork: [
     {
-      id: 'switchWalletNetwork',
-      name: 'Switch Wallet Network',
+      id: 'switchNetwork N3 MainNet',
+      name: 'switchNetwork N3 MainNet',
+      value: JSON.stringify({
+        chainId: 3,
+      }),
+    },
+    {
+      id: 'switchNetwork N3 TestNet',
+      name: 'switchNetwork N3 TestNet',
+      value: JSON.stringify({
+        chainId: 6,
+      }),
+    },
+    {
+      id: 'switchNetwork Neo2 MainNet',
+      name: 'switchNetwork Neo2 MainNet',
       value: JSON.stringify({
         chainId: 1,
+      }),
+    },
+    {
+      id: 'switchNetwork Neo2 TestNet',
+      name: 'switchNetwork Neo2 TestNet',
+      value: JSON.stringify({
+        chainId: 2,
+      }),
+    },
+    {
+      id: 'switchNetwork N3 Private',
+      name: 'switchNetwork N3 Private',
+      value: JSON.stringify({
+        chainId: 0,
       }),
     },
   ],

@@ -1,6 +1,6 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
-import { WalletProvider } from '../../components/connect/WalletContext';
+import PageLayout from '../../components/PageLayout';
 
 const NeoExample = dynamic(() => import('../../components/chains/neo/example'), {
   ssr: false,
@@ -8,8 +8,8 @@ const NeoExample = dynamic(() => import('../../components/chains/neo/example'), 
 
 export default function Neo() {
   return (
-    <WalletProvider>
+    <PageLayout title={'NEO DApp Example'}>
       <NeoExample />
-    </WalletProvider>
+    </PageLayout>
   );
 }

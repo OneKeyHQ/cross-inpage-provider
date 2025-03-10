@@ -29,14 +29,17 @@ export default function NeoExample() {
   const [neolineN3Loaded, setNeolineN3Loaded] = useState(false);
   const neolineRef = useRef<any>(null);
   const neolineN3Ref = useRef<any>(null);
-
-  const walletsRef = useRef<IProviderInfo[]>([
-    {
-      uuid: 'injected',
-      name: 'NeoLine Wallet',
-      inject: 'neolineN3',
-    },
-  ]);
+  const [signedMessageResult, setSignedMessageResult] = useState<{
+    publicKey: string;
+    data: string;
+    salt: string;
+    message: string;
+  } | null>(null);
+  const [signedMessageV2Result, setSignedMessageV2Result] = useState<{
+    publicKey: string;
+    data: string;
+    message: string;
+  } | null>(null);
 
   const { provider, setAccount, account } = useWallet<IProviderApi>();
 
@@ -121,7 +124,6 @@ export default function NeoExample() {
 
     const account = await provider.getAccount();
     const networks = await provider?.getNetworks();
-
     return {
       provider,
       address: account.address,
@@ -225,26 +227,6 @@ export default function NeoExample() {
           }}
         />
         <ApiPayload
-          title="verifyMessage"
-          description="Verify a signed message"
-          presupposeParams={params.verifyMessage}
-          onExecute={async (request: string) => {
-            const params = JSON.parse(request);
-            const res = await neolineN3Ref.current.verifyMessage(params);
-            return JSON.stringify(res);
-          }}
-        />
-        <ApiPayload
-          title="verifyMessageV2"
-          description="Verify a signed message V2"
-          presupposeParams={params.verifyMessageV2}
-          onExecute={async (request: string) => {
-            const params = JSON.parse(request);
-            const res = await neolineN3Ref.current.verifyMessageV2(params);
-            return JSON.stringify(res);
-          }}
-        />
-        <ApiPayload
           title="getBlock"
           description="Get block information"
           presupposeParams={params.getBlock}
@@ -254,7 +236,6 @@ export default function NeoExample() {
             return JSON.stringify(res);
           }}
         />
-
         <ApiPayload
           title="getTransaction"
           description="Get transaction information"
@@ -265,7 +246,6 @@ export default function NeoExample() {
             return JSON.stringify(res);
           }}
         />
-
         <ApiPayload
           title="getApplicationLog"
           description="Get application log for a transaction"
@@ -285,7 +265,6 @@ export default function NeoExample() {
             return JSON.stringify(res);
           }}
         />
-
         <ApiPayload
           title="AddressToScriptHash"
           description="Convert address to script hash"
@@ -296,7 +275,6 @@ export default function NeoExample() {
             return JSON.stringify(res);
           }}
         />
-
         <ApiPayload
           title="ScriptHashToAddress"
           description="Convert script hash to address"
@@ -313,10 +291,13 @@ export default function NeoExample() {
         <ApiPayload
           title="send"
           description="Send NEO or GAS"
-          presupposeParams={params.send}
+          presupposeParams={params.send.map(item => ({
+            ...item,
+            value: typeof item.value === 'function' ? item.value(account?.address) : item.value
+          }))}
           onExecute={async (request: string) => {
             const params = JSON.parse(request);
-            const res = await provider?.send(params);
+            const res = await neolineN3Ref.current.send(params);
             return JSON.stringify(res);
           }}
         />
@@ -327,7 +308,7 @@ export default function NeoExample() {
           presupposeParams={params.invoke}
           onExecute={async (request: string) => {
             const params = JSON.parse(request);
-            const res = await provider?.invoke(params);
+            const res = await neolineN3Ref.current.invoke(params);
             return JSON.stringify(res);
           }}
         />
@@ -338,40 +319,7 @@ export default function NeoExample() {
           presupposeParams={params.invokeMultiple}
           onExecute={async (request: string) => {
             const params = JSON.parse(request);
-            const res = await provider?.invokeMultiple(params);
-            return JSON.stringify(res);
-          }}
-        />
-
-        <ApiPayload
-          title="signMessage"
-          description="Sign a message"
-          presupposeParams={params.signMessage}
-          onExecute={async (request: string) => {
-            const params = JSON.parse(request);
-            const res = await provider?.signMessage(params);
-            return JSON.stringify(res);
-          }}
-        />
-
-        <ApiPayload
-          title="signMessageV2"
-          description="Sign a message (V2)"
-          presupposeParams={params.signMessageV2}
-          onExecute={async (request: string) => {
-            const params = JSON.parse(request);
-            const res = await provider?.signMessageV2(params);
-            return JSON.stringify(res);
-          }}
-        />
-
-        <ApiPayload
-          title="signMessageWithoutSalt"
-          description="Sign a message without salt"
-          presupposeParams={params.signMessageWithoutSalt}
-          onExecute={async (request: string) => {
-            const params = JSON.parse(request);
-            const res = await provider?.signMessageWithoutSalt(params);
+            const res = await neolineN3Ref.current.invokeMultiple(params);
             return JSON.stringify(res);
           }}
         />
@@ -382,7 +330,7 @@ export default function NeoExample() {
           presupposeParams={params.signTransaction}
           onExecute={async (request: string) => {
             const params = JSON.parse(request);
-            const res = await provider?.signTransaction(params);
+            const res = await neolineN3Ref.current.signTransaction(params);
             return JSON.stringify(res);
           }}
         />
@@ -393,7 +341,7 @@ export default function NeoExample() {
           presupposeParams={params.switchWalletNetwork}
           onExecute={async (request: string) => {
             const params = JSON.parse(request);
-            const res = await provider?.switchWalletNetwork(params);
+            const res = await neolineN3Ref.current.switchWalletNetwork(params);
             return JSON.stringify(res);
           }}
         />
@@ -403,12 +351,94 @@ export default function NeoExample() {
           description="Switch wallet account"
           disableRequestContent
           onExecute={async () => {
-            const res = await provider?.switchWalletAccount();
+            const res = await neolineN3Ref.current.switchWalletAccount();
             return JSON.stringify(res);
           }}
         />
       </ApiGroup>
 
+      <ApiGroup title="Sign Message Methods">
+        <ApiPayload
+            title="signMessage"
+            description="Sign a message"
+            presupposeParams={params.signMessage}
+            onExecute={async (request: string) => {
+              const params = JSON.parse(request);
+              const res = await neolineN3Ref.current.signMessage(params);
+              setSignedMessageResult(res);
+              return JSON.stringify(res);
+            }}
+          />
+          <ApiPayload
+            title="signMessageWithoutSalt"
+            description="Sign a message without salt"
+            presupposeParams={params.signMessageWithoutSalt}
+            onExecute={async (request: string) => {
+              const params = JSON.parse(request);
+              const res = await neolineN3Ref.current.signMessageWithoutSalt(params);
+              setSignedMessageResult(res);
+              return JSON.stringify(res);
+            }}
+          />
+          <ApiPayload
+            title="verifyMessage"
+            description="Verify a signed message"
+            presupposeParams={signedMessageResult ? [{
+              id: 'verifyMessage',
+              name: 'Verify Message',
+              value: JSON.stringify({
+                data: signedMessageResult.data,
+                message: signedMessageResult.message,
+                publicKey: signedMessageResult.publicKey
+              }),
+            }]: []}
+            onExecute={async (request: string) => {
+              const params = JSON.parse(request);
+              const res = await neolineN3Ref.current.verifyMessage(params);
+              return JSON.stringify(res);
+            }}
+          />
+          <ApiPayload
+            title="signMessageV2"
+            description="Sign a message (V2)"
+            presupposeParams={params.signMessageV2}
+            onExecute={async (request: string) => {
+              const params = JSON.parse(request);
+              const res = await neolineN3Ref.current.signMessageV2(params);
+              setSignedMessageV2Result(res);
+              return JSON.stringify(res);
+            }}
+          />
+          <ApiPayload
+            title="signMessageWithoutSaltV2"
+            description="Sign a message without salt (V2)"
+            presupposeParams={params.signMessageWithoutSaltV2}
+            onExecute={async (request: string) => {
+              const params = JSON.parse(request);
+              const res = await neolineN3Ref.current.signMessageWithoutSaltV2(params);
+              setSignedMessageV2Result(res);
+              return JSON.stringify(res);
+            }}
+          />
+          <ApiPayload
+            title="verifyMessageV2"
+            description="Verify a signed message V2"
+            presupposeParams={signedMessageV2Result ? [{
+              id: 'verifyMessageV2',
+              name: 'Verify Message V2',
+              value: JSON.stringify({
+                data: signedMessageV2Result.data,
+                message: signedMessageV2Result.message,
+                publicKey: signedMessageV2Result.publicKey
+              }),
+            }] : []}
+            onExecute={async (request: string) => {
+              const params = JSON.parse(request);
+              const res = await neolineN3Ref.current.verifyMessageV2(params);
+              return JSON.stringify(res);
+            }}
+          />
+        </ApiGroup>
       <DappList dapps={dapps} />
     </>
   );

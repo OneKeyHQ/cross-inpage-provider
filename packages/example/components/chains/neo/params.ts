@@ -62,28 +62,6 @@ export default {
       }),
     },
   ],
-  verifyMessage: [
-    {
-      id: 'verifyMessage',
-      name: 'Verify Message',
-      value: JSON.stringify({
-        data: "b80f79abe2e471ca7211accce2e2ad36388a10754aa9dddeb0237d5c604ce9b613f6ae3cfd328a01fdccbad9f70abfc50caecd1e3656b1885e2b72d5bda9a5a6",
-        message: "Hello world",
-        publicKey: "02c6fcfe9e91155521414442d73a005f200c6f92cbc70f2c9085fd89b2a2534459"
-      }),
-    },
-  ],
-  verifyMessageV2: [
-    {
-      id: 'verifyMessageV2',
-      name: 'Verify Message V2',
-      value: JSON.stringify({
-        data: "e376e3d593a18cac008af01e0919a41e9c3e29f546643d92e4e8db58ffa18f1cf1655be099ea707e4432bb82d78fe32fce83a153a5b605515c735b2ec8909cd8",
-        message: "Hello world",
-        publicKey: "02c6fcfe9e91155521414442d73a005f200c6f92cbc70f2c9085fd89b2a2534459"
-      }),
-    },
-  ],
   getBlock: [
     {
       id: 'getBlock',
@@ -133,13 +111,13 @@ export default {
     {
       id: 'send',
       name: 'Send NEO',
-      value: JSON.stringify({
-        fromAddress: 'NaUjKgf5vMuFt7Ffgfffcpc41uH3adx1jq',
-        toAddress: 'NaUjKgf5vMuFt7Ffgfffcpc41uH3adx1jq',
-        asset: 'd2a4cff31913016155e38e474a2c06d08be276cf', // GAS
-        amount: '0.00000001',
-        fee: '0.0001',
-      }),
+      value: (address: string) => JSON.stringify({
+        fromAddress: address || '',
+        toAddress: 'NNvDHVMwJhhGK5muXDXWGgFUCoGKGmV64x',
+        asset: 'GAS',
+        amount: '0.00001',
+        broadcastOverride: false
+      })
     },
   ],
   invoke: [
@@ -147,33 +125,37 @@ export default {
       id: 'invoke',
       name: 'Invoke Contract',
       value: JSON.stringify({
-        scriptHash: 'd2a4cff31913016155e38e474a2c06d08be276cf',
+        scriptHash: '0x1415ab3b409a95555b77bc4ab6a7d9d7be0eddbd',
         operation: 'transfer',
         args: [
-          {
-            type: 'Address',
-            value: 'NaUjKgf5vMuFt7Ffgfffcpc41uH3adx1jq',
-          },
-          {
-            type: 'Address',
-            value: 'NaUjKgf5vMuFt7Ffgfffcpc41uH3adx1jq',
-          },
-          {
-            type: 'Integer',
-            value: '1',
-          },
-          {
-            type: 'String',
-            value: '',
-          },
+            {
+                type: "Address",
+                value: "NaUjKgf5vMuFt7Ffgfffcpc41uH3adx1jq",
+            },
+            {
+                type: "Address",
+                value: "NaUjKgf5vMuFt7Ffgfffcpc41uH3adx1jq",
+            },
+            {
+                type: "Integer",
+                value: "1",
+            },
+            {
+                type: "Any",
+                value: null,
+            }
         ],
+        fee: '0.0001',
+        broadcastOverride: false,
         signers: [
-          {
-            account: '2cab903ff032ac693f8514581665be534beac39f',
-            scopes: 1,
-          },
-        ],
-      }),
+            {
+                account: "2cab903ff032ac693f8514581665be534beac39f",
+                scopes: 16,
+                allowedContracts: ["0x1415ab3b409a95555b77bc4ab6a7d9d7be0eddbd", "0xef4073a0f2b305a38ec4050e4d3d28bc40ea63f5"],
+                allowedGroups: []
+            }
+        ]
+    }),
     },
   ],
   invokeMultiple: [
@@ -182,36 +164,60 @@ export default {
       name: 'Invoke Multiple',
       value: JSON.stringify({
         invokeArgs: [
-          {
-            scriptHash: 'd2a4cff31913016155e38e474a2c06d08be276cf',
-            operation: 'transfer',
-            args: [
-              {
-                type: 'Address',
-                value: 'NaUjKgf5vMuFt7Ffgfffcpc41uH3adx1jq',
-              },
-              {
-                type: 'Address',
-                value: 'NaUjKgf5vMuFt7Ffgfffcpc41uH3adx1jq',
-              },
-              {
-                type: 'Integer',
-                value: '1',
-              },
-              {
-                type: 'String',
-                value: '',
-              },
-            ],
-          },
+            {
+                scriptHash: "ef4073a0f2b305a38ec4050e4d3d28bc40ea63f5",
+                operation: "transfer",
+                args: [
+                    {
+                        type: "Address",
+                        value: "NaUjKgf5vMuFt7Ffgfffcpc41uH3adx1jq",
+                    },
+                    {
+                        type: "Address",
+                        value: "NaUjKgf5vMuFt7Ffgfffcpc41uH3adx1jq",
+                    },
+                    {
+                        type: "Integer",
+                        value: "1",
+                    },
+                    {
+                        type: "Any",
+                        value: null
+                    }
+                ]
+            },
+            {
+                scriptHash: "ef4073a0f2b305a38ec4050e4d3d28bc40ea63f5",
+                operation: "transfer",
+                args: [
+                    {
+                        type: "Address",
+                        value: "NaUjKgf5vMuFt7Ffgfffcpc41uH3adx1jq",
+                    },
+                    {
+                        type: "Address",
+                        value: "NPsCvedTnzGcwSYuoxjh7Sec5Zem2vgVmX",
+                    },
+                    {
+                        type: "Integer",
+                        value: "1",
+                    },
+                    {
+                        type: "Any",
+                        value: null
+                    }
+                ]
+            }
         ],
+        fee: '0.001',
+        broadcastOverride: true,
         signers: [
-          {
-            account: '2cab903ff032ac693f8514581665be534beac39f',
-            scopes: 1,
-          },
-        ],
-      }),
+            {
+                account: "2cab903ff032ac693f8514581665be534beac39f",
+                scopes: 1
+            }
+        ]
+    }),
     },
   ],
   signMessage: [
@@ -233,6 +239,15 @@ export default {
     },
   ],
   signMessageWithoutSalt: [
+    {
+      id: 'signMessageWithoutSalt',
+      name: 'Sign Message Without Salt',
+      value: JSON.stringify({
+        message: 'Hello OneKey NEO Wallet',
+      }),
+    },
+  ],
+  signMessageWithoutSaltV2: [
     {
       id: 'signMessageWithoutSalt',
       name: 'Sign Message Without Salt',

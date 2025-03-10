@@ -261,17 +261,9 @@ export default {
       id: 'signTransaction',
       name: 'Sign Transaction',
       value: JSON.stringify({
-        transaction: {
-          version: 0,
-          nonce: 1234,
-          sender: '2cab903ff032ac693f8514581665be534beac39f',
-          systemFee: '0.0001',
-          networkFee: '0.0001',
-          validUntilBlock: 1000,
-          attributes: [],
-          script: 'abcdef1234567890',
-          witnesses: [],
-        },
+        toAddress: 'NNvDHVMwJhhGK5muXDXWGgFUCoGKGmV64x',
+        amount: '10000',
+        tokenAddress: '0xd2a4cff31913016155e38e474a2c06d08be276cf'
       }),
     },
   ],

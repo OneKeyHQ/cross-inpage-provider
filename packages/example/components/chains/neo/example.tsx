@@ -4,14 +4,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import React, { useEffect, useRef, useState } from 'react';
 import { dapps } from './dapps.config';
+import { rpc, sc, tx, u, wallet } from '@cityofzion/neon-core';
 import ConnectButton from '../../../components/connect/ConnectButton';
-import { IProviderApi, IProviderInfo } from './types';
+import { IProviderApi } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import { useWallet } from '../../../components/connect/WalletContext';
 import type { IKnownWallet } from '../../../components/connect/types';
 import DappList from '../../../components/DAppList';
 import params from './params';
 import { toast } from '../../ui/use-toast';
+import BigNumber from 'bignumber.js';
 
 declare global {
   interface Window {
@@ -330,7 +332,51 @@ export default function NeoExample() {
           presupposeParams={params.signTransaction}
           onExecute={async (request: string) => {
             const params = JSON.parse(request);
-            const res = await neolineN3Ref.current.signTransaction(params);
+            const { toAddress, amount, tokenAddress } = params;
+            const fromAddress = account?.address;
+            if (!fromAddress || !toAddress || !amount || !tokenAddress) {
+              toast({
+                title: 'Invalid parameters',
+                description: 'Please provide a valid toAddress and amount',
+              });
+              return;
+            }
+            const rpcClient = new rpc.RPCClient('http://seed1.neo.org:10332/');
+            const blockCount = await rpcClient.getBlockCount();
+            const scriptHash = wallet.getScriptHashFromAddress(fromAddress);
+        
+            const script = sc.createScript({
+              scriptHash: tokenAddress,
+              operation: 'transfer',
+              args: [
+                sc.ContractParam.hash160(fromAddress),
+                sc.ContractParam.hash160(toAddress),
+                sc.ContractParam.integer(amount),
+                sc.ContractParam.any(null),
+              ],
+            });
+          
+            const buildedTx = new tx.Transaction({
+              signers: [
+                {
+                  account: scriptHash,
+                  scopes: tx.WitnessScope.CalledByEntry,
+                }
+              ],
+              validUntilBlock: Number(blockCount) + 100,
+              systemFee: 0,
+              networkFee: 0,
+              script, 
+            })
+
+            const txJson = buildedTx.toJson();
+            const txJsonByHexScript = {
+              ...txJson,
+              script: Buffer.from(txJson.script, 'base64').toString('hex'),
+            }
+            const res = await neolineN3Ref.current.signTransaction({
+              transaction: txJsonByHexScript,
+            });
             return JSON.stringify(res);
           }}
         />

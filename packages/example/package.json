@@ -20,6 +20,7 @@
     "@benfen/bfc.js": "0.2.7",
     "@benfen/dapp-kit": "^0.0.3",
     "@benfen/wallet-kit": "^0.1.6",
+    "@cityofzion/neon-core": "^5.7.0",
     "@codemirror/lang-json": "^6.0.1",
     "@codemirror/lint": "^6.8.0",
     "@cosmjs/amino": "^0.32.3",

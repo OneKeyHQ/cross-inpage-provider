@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import React, { useEffect, useRef, useState } from 'react';
 import { dapps } from './dapps.config';
@@ -241,15 +244,13 @@ export default function NeoExample() {
             return JSON.stringify(res);
           }}
         />
-
-
         <ApiPayload
           title="getBlock"
           description="Get block information"
           presupposeParams={params.getBlock}
           onExecute={async (request: string) => {
             const params = JSON.parse(request);
-            const res = await provider?.getBlock(params);
+            const res = await neolineN3Ref.current.getBlock(params);
             return JSON.stringify(res);
           }}
         />
@@ -260,7 +261,7 @@ export default function NeoExample() {
           presupposeParams={params.getTransaction}
           onExecute={async (request: string) => {
             const params = JSON.parse(request);
-            const res = await provider?.getTransaction(params);
+            const res = await neolineN3Ref.current.getTransaction(params);
             return JSON.stringify(res);
           }}
         />
@@ -271,20 +272,16 @@ export default function NeoExample() {
           presupposeParams={params.getApplicationLog}
           onExecute={async (request: string) => {
             const params = JSON.parse(request);
-            const res = await provider?.getApplicationLog(params);
+            const res = await neolineN3Ref.current.getApplicationLog(params);
             return JSON.stringify(res);
           }}
         />
-
-
-
-
         <ApiPayload
           title="pickAddress"
           description="Pick an address from the wallet"
           disableRequestContent
           onExecute={async () => {
-            const res = await provider?.pickAddress();
+            const res = await neolineN3Ref.current.pickAddress();
             return JSON.stringify(res);
           }}
         />
@@ -295,7 +292,7 @@ export default function NeoExample() {
           presupposeParams={params.addressToScriptHash}
           onExecute={async (request: string) => {
             const params = JSON.parse(request);
-            const res = await provider?.AddressToScriptHash(params);
+            const res = await neolineN3Ref.current.AddressToScriptHash(params);
             return JSON.stringify(res);
           }}
         />
@@ -306,7 +303,7 @@ export default function NeoExample() {
           presupposeParams={params.scriptHashToAddress}
           onExecute={async (request: string) => {
             const params = JSON.parse(request);
-            const res = await provider?.ScriptHashToAddress(params);
+            const res = await neolineN3Ref.current.ScriptHashToAddress(params);
             return JSON.stringify(res);
           }}
         />

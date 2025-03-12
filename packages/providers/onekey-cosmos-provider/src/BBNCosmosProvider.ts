@@ -3,10 +3,6 @@
 import { ProviderCosmos } from './OnekeyCosmosProvider';
 import { OfflineAminoSigner, OfflineDirectSigner } from './types';
 
-export type PolkadotRequest = {
-  babylonConnectWallet: () => Promise<string>;
-};
-
 export interface IProviderBBNCosmos {
   /**
    * Connects to the wallet and returns the instance of the wallet provider.
@@ -47,6 +43,16 @@ export interface IProviderBBNCosmos {
    * @throws {Error} If wallet connection is not established or signer cannot be retrieved
    */
   getOfflineSigner(): Promise<OfflineAminoSigner & OfflineDirectSigner>;
+
+  /**
+   * Retrieves an offline signer that supports either Amino or Direct signing methods.
+   * This is required for compatibility with older wallets and hardware wallets (like Ledger) that do not support both signing methods.
+   * This signer is used for signing transactions offline before broadcasting them to the network.
+   *
+   * @returns {Promise<OfflineAminoSigner & OfflineDirectSigner>} A promise that resolves to a signer supporting either Amino or Direct signing
+   * @throws {Error} If wallet connection is not established or signer cannot be retrieved
+   */
+  getOfflineSignerAuto?(): Promise<OfflineAminoSigner | OfflineDirectSigner>;
 }
 
 export class BBNProviderCosmos implements IProviderBBNCosmos {
@@ -95,6 +101,17 @@ export class BBNProviderCosmos implements IProviderBBNCosmos {
   getOfflineSigner(): Promise<OfflineAminoSigner & OfflineDirectSigner> {
     if (!this._state.chainId) {
       throw new Error('Need connect wallet first');
+    }
+    return Promise.resolve(this._provider.getOfflineSigner(this._state.chainId));
+  }
+
+  async getOfflineSignerAuto(): Promise<OfflineAminoSigner | OfflineDirectSigner> {
+    if (!this._state.chainId) {
+      throw new Error('Need connect wallet first');
+    }
+    const key = await this._provider.getKey(this._state.chainId);
+    if (key.isNanoLedger) {
+      return this._provider.getOfflineSignerOnlyAmino(this._state.chainId);
     }
     return Promise.resolve(this._provider.getOfflineSigner(this._state.chainId));
   }

@@ -24,9 +24,7 @@ import ord from './sites/ord';
 import ordinalswallet from './sites/ordinalswallet';
 import ordinalsmarket from './sites/ordinalsmarket';
 import sating from './sites/sating';
-import lidofi from './sites/lidofi';
 import eigenlayer from './sites/eigenlayer';
-import rocketpool from './sites/rocketpool';
 import liteInstadapp from './sites/liteInstadapp';
 import methMantle from './sites/methMantle';
 import balancerFi from './sites/balancerFi';
@@ -35,7 +33,6 @@ import renzoprotocol from './sites/renzoprotocol';
 import boringdao from './sites/boringdao';
 import hope from './sites/hope';
 import hyperliquid from './sites/hyperliquid';
-import solv from './sites/solv';
 import silo from './sites/silo';
 import mux from './sites/mux';
 import stargateFinance from './sites/stargateFinance';
@@ -67,9 +64,7 @@ function hackAllConnectButtons() {
   ordinalswallet()
   ordinalsmarket()
   sating()
-  lidofi()
   eigenlayer()
-  rocketpool()
   liteInstadapp()
   methMantle()
   balancerFi()
@@ -78,7 +73,6 @@ function hackAllConnectButtons() {
   boringdao()
   hope()
   hyperliquid()
-  solv()
   silo()
   mux()
   stargateFinance()

@@ -228,7 +228,7 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
   private _handleAccountChange(payload: AptosAccountInfo) {
     const account = payload;
     if (this.isAccountsChanged(account)) {
-      this.emit('accountChanged', account?.address || null);
+      this.emit('accountChanged', account?.address ?? null);
       this.emit('accountChangedV2', account);
     }
     if (!account) {

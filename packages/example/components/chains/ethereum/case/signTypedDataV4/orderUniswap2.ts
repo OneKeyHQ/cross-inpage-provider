@@ -12,6 +12,11 @@ export default (params: IEIP712Params) => ({
     },
     primaryType: 'PermitWitnessTransferFrom',
     types: {
+      EIP712Domain: [
+        { name: 'name', type: 'string' },
+        { name: 'chainId', type: 'uint256' },
+        { name: 'verifyingContract', type: 'address' },
+      ],
       TokenPermissions: [
         { name: 'token', type: 'address' },
         { name: 'amount', type: 'uint256' },

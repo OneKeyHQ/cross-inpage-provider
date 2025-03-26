@@ -399,7 +399,7 @@ export default function App() {
   const network = WalletAdapterNetwork.Mainnet;
 
   // You can also provide a custom RPC endpoint.
-  const endpoint = useMemo(() => 'https://node.onekey.so/sol', [network]);
+  const endpoint = useMemo(() => 'https://go.getblock.io/d60799984fed48669b56fb8e3c6af98b', []);
 
   const wallets = useMemo(
     () => [],

@@ -276,10 +276,7 @@ export default function Example() {
             const verified = tx.verifySignatures();
 
             // TODO: type error, may be passed wrong options
-            // @ts-expect-error
-            const res = await connection.simulateTransaction(tx, {
-              sigVerify: false,
-            });
+            const res = await connection.simulateTransaction(tx);
 
             return {
               success: res.value.err === null,

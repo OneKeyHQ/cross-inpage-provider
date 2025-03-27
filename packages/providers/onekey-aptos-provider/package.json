@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/onekey-aptos-provider",
-  "version": "2.2.17",
+  "version": "2.2.18",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -29,10 +29,10 @@
   },
   "dependencies": {
     "@aptos-labs/wallet-standard": "^0.2.0",
-    "@onekeyfe/cross-inpage-provider-core": "2.2.17",
-    "@onekeyfe/cross-inpage-provider-errors": "2.2.17",
-    "@onekeyfe/cross-inpage-provider-types": "2.2.17",
-    "@onekeyfe/extension-bridge-injected": "2.2.17",
+    "@onekeyfe/cross-inpage-provider-core": "2.2.18",
+    "@onekeyfe/cross-inpage-provider-errors": "2.2.18",
+    "@onekeyfe/cross-inpage-provider-types": "2.2.18",
+    "@onekeyfe/extension-bridge-injected": "2.2.18",
     "@wallet-standard/core": "1.0.3",
     "eth-rpc-errors": "^4.0.3"
   },

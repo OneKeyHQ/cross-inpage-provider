@@ -20,7 +20,11 @@ import {
   Ed25519PublicKey,
   Ed25519Signature,
 } from '@aptos-labs/ts-sdk';
-import { AptosSignAndSubmitTransactionOutput } from '@aptos-labs/wallet-standard';
+import {
+  AptosSignAndSubmitTransactionInput,
+  AptosSignAndSubmitTransactionOutput,
+} from '@aptos-labs/wallet-standard';
+import { serializeTransactionPayload } from './utils';
 
 export type AptosProviderType = 'petra' | 'martian';
 
@@ -116,7 +120,9 @@ export interface IProviderAptos extends ProviderAptosBase {
   signTransaction(transactions: any): Promise<any>;
 
   signTransactionV2(params: SignTransactionV2Params): Promise<AccountAuthenticator>;
-  signAndSubmitTransactionV2(params: string): Promise<AptosSignAndSubmitTransactionOutput>;
+  signAndSubmitTransactionV2(
+    params: AptosSignAndSubmitTransactionInput,
+  ): Promise<AptosSignAndSubmitTransactionOutput>;
 
   /**
    * Sign message
@@ -326,10 +332,18 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     throw new Error('Unsupported sign type');
   }
 
-  async signAndSubmitTransactionV2(params: string): Promise<AptosSignAndSubmitTransactionOutput> {
+  async signAndSubmitTransactionV2(
+    params: AptosSignAndSubmitTransactionInput,
+  ): Promise<AptosSignAndSubmitTransactionOutput> {
+    const serialize = serializeTransactionPayload(params.payload);
+    const param = {
+      gasUnitPrice: params.gasUnitPrice,
+      maxGasAmount: params.maxGasAmount,
+      payload: serialize,
+    };
     return this._callBridge({
       method: 'signAndSubmitTransactionV2',
-      params,
+      params: JSON.stringify(param),
     });
   }
 

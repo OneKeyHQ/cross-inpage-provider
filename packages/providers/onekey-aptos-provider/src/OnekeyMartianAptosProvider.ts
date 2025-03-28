@@ -118,15 +118,27 @@ class ProviderAptosMartian extends ProviderAptos {
     return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
   }
 
+  hasStandardV2SignAndSubmitTransaction(transaction: string | Types.TransactionPayload): boolean {
+    if (typeof transaction === 'object' && 'payload' in transaction && !('type' in transaction)) {
+      return true;
+    }
+    return false;
+  }
+
   async signAndSubmitTransaction(
     transaction: string | Types.TransactionPayload,
   ): Promise<string | Types.Transaction> {
+    console.log('=====>>>>> provider signAndSubmitTransaction', transaction);
     if (typeof transaction === 'string') {
       return await this._callMartianBridge({
         method: 'martianSignAndSubmitTransaction',
         params: transaction,
       });
     } else {
+      if (this.hasStandardV2SignAndSubmitTransaction(transaction)) {
+        // @ts-expect-error
+        return await this.signAndSubmitTransactionV2(transaction);
+      }
       const res = await this._callMartianBridge({
         method: 'signAndSubmitTransaction',
         params: transaction,
@@ -154,6 +166,7 @@ class ProviderAptosMartian extends ProviderAptos {
     // V2 sign transaction as fee payer
     asFeePayer?: boolean,
   ): Promise<string | Uint8Array> {
+    console.log('=====>>>>> provider signTransaction', transaction);
     if (typeof transaction === 'string') {
       return this._callMartianBridge({
         method: 'martianSignTransaction',

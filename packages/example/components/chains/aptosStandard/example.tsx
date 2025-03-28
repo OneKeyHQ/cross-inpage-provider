@@ -29,6 +29,8 @@ import {
   U64,
   U256,
   isEncodedEntryFunctionArgument,
+  FixedBytes,
+  Serialized,
 } from '@aptos-labs/ts-sdk';
 import {
   WalletReadyState,
@@ -41,6 +43,7 @@ import { AptosWalletAdapterProvider, Wallet } from '@aptos-labs/wallet-adapter-r
 import InfoLayout from '../../InfoLayout';
 import { jsonToUint8Array } from '../../../lib/uint8array';
 import { get } from 'lodash';
+import { formatFunctionArgument } from './utils';
 
 function Example() {
   const {
@@ -374,6 +377,33 @@ function Example() {
                     coinType,
                     AccountAddress.from(recipient as string),
                     new U64(amount as number),
+                  ],
+                },
+              }),
+            };
+          }}
+        />
+
+        <ApiPayload
+          title="signAndSubmitTransaction Script"
+          description="Script 测试"
+          presupposeParams={[
+            {
+              id: 'sign with script payload',
+              name: 'with script payload',
+              value: '',
+            },
+          ]}
+          onExecute={async (request: string) => {
+            return {
+              result: await signAndSubmitTransaction({
+                sender: account?.address ?? '',
+                data: {
+                  bytecode:
+                    'a11ceb0b060000000701000402040a030e0c041a04051e20073e30086e2000000001010204010001000308000104030401000105050601000002010203060c0305010b0001080101080102060c03010b0001090002050b00010900000a6170746f735f636f696e04636f696e04436f696e094170746f73436f696e087769746864726177076465706f7369740000000000000000000000000000000000000000000000000000000000000001000001080b000b0138000c030b020b03380102',
+                  functionArguments: [
+                    new U64(1),
+                    AccountAddress.from(account?.address ?? ('' as string)),
                   ],
                 },
               }),

@@ -1,3 +1,4 @@
+import { EntryFunctionArgumentTypes, SimpleEntryFunctionArgumentTypes } from '@aptos-labs/ts-sdk';
 import type { SignMessagePayload, SignMessageRequest } from './types';
 
 export const APTOS_SIGN_MESSAGE_PREFIX = 'APTOS';
@@ -51,4 +52,41 @@ export function formatSignMessageRequest(
   request.fullMessage = formatFullMessage(request);
 
   return request;
+}
+
+export function formatFunctionArgument(
+  functionArg: EntryFunctionArgumentTypes | SimpleEntryFunctionArgumentTypes,
+): EntryFunctionArgumentTypes | SimpleEntryFunctionArgumentTypes {
+  if (functionArg) {
+    if (Array.isArray(functionArg)) return functionArg.map(formatFunctionArgument);
+    if (
+      typeof functionArg === 'string' ||
+      typeof functionArg === 'number' ||
+      typeof functionArg === 'boolean'
+    ) {
+      return functionArg;
+    }
+    if (typeof functionArg === 'bigint') {
+      return functionArg.toString();
+    }
+    if (functionArg instanceof Uint8Array) {
+      return functionArg;
+    }
+    if (functionArg instanceof ArrayBuffer) {
+      return new Uint8Array(functionArg);
+    }
+    if ('values' in functionArg) {
+      return functionArg.values.map(formatFunctionArgument);
+    }
+    if ('data' in functionArg) {
+      return functionArg.toString();
+    }
+    if (functionArg.value) {
+      return functionArg.value instanceof Uint8Array
+        ? functionArg.value
+        : functionArg.value.toString();
+    }
+  }
+
+  return functionArg;
 }

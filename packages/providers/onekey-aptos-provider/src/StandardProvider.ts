@@ -218,6 +218,7 @@ export class AptosStandardProvider implements AptosWallet {
   signAndSubmitTransaction: AptosSignAndSubmitTransactionMethod = async (
     input: AptosSignAndSubmitTransactionInput,
   ): Promise<UserResponse<AptosSignAndSubmitTransactionOutput>> => {
+    console.log('=====>>>>> provider standard signAndSubmitTransaction', input);
     const { payload } = input;
 
     const existsBscEncodedArg = payload.functionArguments.find((arg) =>
@@ -228,7 +229,7 @@ export class AptosStandardProvider implements AptosWallet {
       throw new Error('Unsupported Function Arguments type');
     }
 
-    const result = await this.provider.signAndSubmitTransactionV2(JSON.stringify(input));
+    const result = await this.provider.signAndSubmitTransactionV2(input);
 
     return Promise.resolve({
       status: UserResponseStatus.APPROVED,

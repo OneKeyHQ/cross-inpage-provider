@@ -7,6 +7,7 @@ import type * as TypeUtils from './type-utils';
 import { AptosProviderType, ProviderAptos } from './OnekeyAptosProvider';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
 import { get } from 'lodash';
+import { serializeTransactionPayload } from './serializer';
 
 type AnyNumber = bigint | number;
 
@@ -128,7 +129,6 @@ class ProviderAptosMartian extends ProviderAptos {
   async signAndSubmitTransaction(
     transaction: string | Types.TransactionPayload,
   ): Promise<string | Types.Transaction> {
-    console.log('=====>>>>> provider signAndSubmitTransaction', transaction);
     if (typeof transaction === 'string') {
       return await this._callMartianBridge({
         method: 'martianSignAndSubmitTransaction',
@@ -139,14 +139,8 @@ class ProviderAptosMartian extends ProviderAptos {
         // @ts-expect-error
         return await this.signAndSubmitTransactionV2(transaction);
       }
-      const res = await this._callMartianBridge({
-        method: 'signAndSubmitTransaction',
-        params: transaction,
-      });
-      if (!res) throw web3Errors.provider.unauthorized();
-
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return JSON.parse(res);
+      return super.signAndSubmitTransaction(transaction);
     }
   }
 
@@ -166,7 +160,6 @@ class ProviderAptosMartian extends ProviderAptos {
     // V2 sign transaction as fee payer
     asFeePayer?: boolean,
   ): Promise<string | Uint8Array> {
-    console.log('=====>>>>> provider signTransaction', transaction);
     if (typeof transaction === 'string') {
       return this._callMartianBridge({
         method: 'martianSignTransaction',
@@ -193,13 +186,8 @@ class ProviderAptosMartian extends ProviderAptos {
         });
       } else {
         // aptos V1 sign transaction
-        const res = await this._callMartianBridge({
-          method: 'signTransaction',
-          params: transaction,
-        });
-        if (!res) throw web3Errors.provider.unauthorized();
-
-        return new Uint8Array(Buffer.from(res, 'hex'));
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return super.signTransaction(transaction);
       }
     }
   }

@@ -1,6 +1,5 @@
 import {
   EntryFunctionArgumentTypes,
-  Serializable,
   Serializer,
   Deserializer,
   SimpleEntryFunctionArgumentTypes,
@@ -15,8 +14,24 @@ import {
   U32,
   U256,
   Serialized,
+  MoveString,
+  FixedBytes,
+  InputEntryFunctionData,
+  TypeTag,
+  standardizeTypeTags,
+  InputScriptData,
+  ScriptFunctionArgumentTypes,
 } from '@aptos-labs/ts-sdk';
 import { hexToBytes, bytesToHex } from '@noble/hashes/utils';
+import type { Types } from 'aptos';
+
+export enum TransactionPayloadType {
+  SCRIPT = 0,
+  ENTRY_FUNCTION = 1,
+  SCRIPT_LEGACY = 2, // V1 SDK Script Params
+  ENTRY_FUNCTION_LEGACY = 3, // V1 SDK Entry Function Params
+  SCRIPT_LEGACY_WORMHOLE = 4, // V1 SDK Script Params Bridge Wormhole
+}
 
 // OneKey Primitive Types
 export enum ArgumentType {
@@ -30,6 +45,10 @@ export enum ArgumentType {
   ARRAY_BUFFER = 10007,
   ARRAY = 10008,
   MOVE_OPTION = 10009,
+  MOVE_STRING = 10010,
+  MOVE_FIXED_BYTES = 10011,
+  MOVE_VECTOR = 10012,
+  V1SDK_ACCOUNT_ADDRESS = 10013,
 }
 
 /**
@@ -100,8 +119,13 @@ export function serializeArgument(
   }
 
   if (typeof arg === 'number') {
-    serializer.serializeU32AsUleb128(ArgumentType.NUMBER);
-    serializer.serializeU64(arg);
+    if (arg > Number.MAX_SAFE_INTEGER) {
+      serializer.serializeU32AsUleb128(ArgumentType.BIGINT);
+      serializer.serializeU256(BigInt(arg));
+    } else {
+      serializer.serializeU32AsUleb128(ArgumentType.NUMBER);
+      serializer.serializeU64(arg);
+    }
     return;
   }
 
@@ -113,7 +137,7 @@ export function serializeArgument(
 
   if (typeof arg === 'string') {
     serializer.serializeU32AsUleb128(ArgumentType.STRING);
-    serializer.serializeStr(arg);
+    serializer.serializeOption(arg);
     return;
   }
 
@@ -143,12 +167,50 @@ export function serializeArgument(
       serializeArgument(serializer, arg.value);
     }
     return;
-  } else {
-    arg.serializeForScriptFunction(serializer);
+  }
+
+  if (arg instanceof MoveString) {
+    serializer.serializeU32AsUleb128(ArgumentType.MOVE_STRING);
+    serializer.serializeOption(arg.value);
     return;
   }
 
-  throw new Error('Unsupported argument type');
+  if (arg instanceof FixedBytes) {
+    serializer.serializeU32AsUleb128(ArgumentType.MOVE_FIXED_BYTES);
+    serializer.serializeBytes(arg.value);
+    return;
+  }
+
+  if (arg instanceof MoveVector) {
+    serializer.serializeU32AsUleb128(ArgumentType.MOVE_VECTOR);
+    serializer.serializeU32(arg.values.length);
+    arg.values.forEach((item) => serializeArgument(serializer, item));
+    return;
+  }
+
+  try {
+    if ('serializeForScriptFunction' in arg) {
+      // V2 SDK Serializer
+      arg.serializeForScriptFunction(serializer);
+    } else if ('value' in arg) {
+      // fix wormhole v1 sdk
+      // @ts-expect-error
+      const value = arg.value as SimpleEntryFunctionArgumentTypes;
+      if (
+        typeof value === 'object' &&
+        value !== null &&
+        'address' in value &&
+        value.address instanceof Uint8Array
+      ) {
+        serializer.serializeU32AsUleb128(ArgumentType.V1SDK_ACCOUNT_ADDRESS);
+        serializer.serializeBytes(value.address);
+      } else {
+        serializeArgument(serializer, value);
+      }
+    }
+  } catch (error) {
+    console.log('==>> error ', typeof arg, arg, error);
+  }
 }
 
 export function deserializeArgument(
@@ -171,18 +233,15 @@ export function deserializeArgument(
       if (value <= BigInt(Number.MAX_SAFE_INTEGER)) {
         return Number(value);
       }
-      throw new Error('Number out of range');
-    }
-
-    case ArgumentType.BIGINT: {
-      const value = deserializer.deserializeU256();
       return value;
     }
 
+    case ArgumentType.BIGINT: {
+      return deserializer.deserializeU256();
+    }
+
     case ArgumentType.STRING: {
-      const str = deserializer.deserializeOption('string');
-      console.log('str', str);
-      return str;
+      return deserializer.deserializeOption('string');
     }
 
     case ArgumentType.UINT8_ARRAY: {
@@ -210,11 +269,30 @@ export function deserializeArgument(
       if (!isSome) {
         return new MoveOption();
       }
-      const value = deserializeArgument(deserializer);
-      if (value instanceof Serializable) {
-        return new MoveOption(value);
+      const value = deserializeArgument(deserializer) as EntryFunctionArgumentTypes;
+      return new MoveOption(value);
+    }
+
+    case ArgumentType.MOVE_STRING: {
+      return new MoveString(deserializer.deserializeOption('string') ?? '');
+    }
+
+    case ArgumentType.MOVE_FIXED_BYTES: {
+      const bytes = deserializer.deserializeBytes();
+      return new FixedBytes(new Uint8Array(bytes));
+    }
+
+    case ArgumentType.MOVE_VECTOR: {
+      const length = deserializer.deserializeU32();
+      const values: (SimpleEntryFunctionArgumentTypes | EntryFunctionArgumentTypes)[] = [];
+      for (let i = 0; i < length; i++) {
+        values.push(deserializeArgument(deserializer));
       }
-      throw new Error('MoveOption value must be a Serializable type');
+      return new MoveVector<any>(values);
+    }
+
+    case ArgumentType.V1SDK_ACCOUNT_ADDRESS: {
+      return new AccountAddress(deserializer.deserializeBytes());
     }
 
     default: {
@@ -244,4 +322,260 @@ export function serializeArguments(
   serializer.serializeU32(args.length);
   args.forEach((arg) => serializeArgument(serializer, arg));
   return bytesToHex(serializer.toUint8Array());
+}
+
+function serializeTransactionPayloadScript(args: InputScriptData, serializer: Serializer) {
+  const { bytecode, typeArguments, functionArguments } = args;
+  serializer.serializeU32AsUleb128(TransactionPayloadType.SCRIPT);
+  const bytecodeBytes = typeof bytecode === 'string' ? bytecode : bytesToHex(bytecode);
+  serializer.serializeOption(bytecodeBytes);
+  serializer.serializeVector<TypeTag>(standardizeTypeTags(typeArguments));
+  const hex = serializeArguments(functionArguments);
+  serializer.serializeOption(hex ?? '');
+}
+
+function deserializeTransactionPayloadScript(deserializer: Deserializer): InputScriptData {
+  const bytecode = deserializer.deserializeOption('string');
+  const typeArguments = deserializer.deserializeVector(TypeTag);
+  const args = deserializeArguments(
+    deserializer.deserializeOption('string') ?? '',
+  ) as ScriptFunctionArgumentTypes[];
+  return {
+    bytecode: bytecode ?? '',
+    typeArguments,
+    functionArguments: args,
+  };
+}
+
+function serializeTransactionPayloadEntryFunction(
+  args: InputEntryFunctionData,
+  serializer: Serializer,
+) {
+  const { function: functionName, typeArguments, functionArguments } = args;
+  serializer.serializeU32AsUleb128(TransactionPayloadType.ENTRY_FUNCTION);
+  serializer.serializeOption(functionName);
+  serializer.serializeVector<TypeTag>(standardizeTypeTags(typeArguments));
+  const hex = serializeArguments(functionArguments);
+  serializer.serializeOption(hex ?? '');
+}
+
+function deserializeTransactionPayloadEntryFunction(
+  deserializer: Deserializer,
+): InputEntryFunctionData {
+  const functionName = deserializer.deserializeOption('string');
+  const typeArguments = deserializer.deserializeVector(TypeTag);
+  const functionArguments = deserializeArguments(deserializer.deserializeOption('string') ?? '');
+  return {
+    function: functionName as `${string}::${string}::${string}`,
+    typeArguments,
+    functionArguments,
+  };
+}
+
+// V1 SDK Script Wormhole Params
+function serializableTransactionPayloadV1ScriptWormhole(args: ScriptV1SDK, serializer: Serializer) {
+  serializer.serializeU32AsUleb128(TransactionPayloadType.SCRIPT_LEGACY_WORMHOLE);
+  serializer.serializeBytes(args.code);
+  serializer.serializeVector<TypeTag>(args.ty_args);
+  serializer.serializeOption(serializeArguments(args.args));
+}
+
+function deserializableTransactionPayloadV1ScriptWormhole(
+  deserializer: Deserializer,
+): InputScriptData {
+  const code = deserializer.deserializeBytes();
+  const ty_args = deserializer.deserializeVector(TypeTag);
+  const args = deserializeArguments(deserializer.deserializeOption('string') ?? '');
+
+  // @ts-expect-error
+  const convertArgs: ScriptFunctionArgumentTypes[] = args.map(
+    (arg: EntryFunctionArgumentTypes | SimpleEntryFunctionArgumentTypes) => {
+      if (typeof arg === 'number') {
+        if (arg > Number.MAX_SAFE_INTEGER) {
+          return new U256(arg);
+        }
+        return new U64(arg);
+      }
+      if (typeof arg === 'bigint') {
+        return new U256(arg);
+      }
+      if (typeof arg === 'string') {
+        return new MoveString(arg);
+      }
+      if (arg instanceof Uint8Array) {
+        return MoveVector.U8(arg);
+      }
+      if (arg instanceof ArrayBuffer) {
+        return MoveVector.U8(new Uint8Array(arg));
+      }
+      if (typeof arg === 'boolean') {
+        return new Bool(arg);
+      }
+
+      if (Array.isArray(arg)) {
+        // @ts-expect-error
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return new MoveVector(arg.map((item) => convertArgs(item)));
+      }
+      return arg;
+    },
+  );
+
+  return {
+    bytecode: code,
+    typeArguments: ty_args,
+    functionArguments: convertArgs,
+  };
+}
+
+// V1 SDK Legacy Params
+function serializableTransactionPayloadV1Legacy(
+  args: Types.TransactionPayload,
+  serializer: Serializer,
+) {
+  if (args.type === 'script_payload') {
+    serializer.serializeU32AsUleb128(TransactionPayloadType.SCRIPT_LEGACY);
+    // @ts-expect-error
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    serializer.serializeOption(args.code.bytecode);
+    // @ts-expect-error
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+    const length = args.type_arguments.length as number;
+    serializer.serializeU32(length);
+    for (let i = 0; i < length; i++) {
+      // @ts-expect-error
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      serializer.serializeOption(args.type_arguments[i]);
+    }
+    // @ts-expect-error
+    serializer.serializeOption(serializeArguments(args.args as Array<ScriptFunctionArgumentTypes>));
+  } else if (args.type === 'entry_function_payload') {
+    serializer.serializeU32AsUleb128(TransactionPayloadType.ENTRY_FUNCTION_LEGACY);
+    // @ts-expect-error
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    serializer.serializeOption(args.function);
+    // @ts-expect-error
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+    const length = args.type_arguments.length as number;
+    serializer.serializeU32(length);
+    for (let i = 0; i < length; i++) {
+      // @ts-expect-error
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      serializer.serializeOption(args.type_arguments[i]);
+    }
+    serializer.serializeOption(
+      // @ts-expect-error
+      serializeArguments(args.arguments as Array<ScriptFunctionArgumentTypes>),
+    );
+  }
+}
+
+function deserializableTransactionPayloadV1ScriptLegacy(
+  deserializer: Deserializer,
+): InputScriptData {
+  const bytecode = deserializer.deserializeOption('string') ?? '';
+  const length = deserializer.deserializeU32();
+  const typeArguments: Array<string> = [];
+  for (let i = 0; i < length; i++) {
+    typeArguments.push(deserializer.deserializeOption('string') ?? '');
+  }
+  const args = deserializeArguments(deserializer.deserializeOption('string') ?? '');
+  return {
+    bytecode,
+    typeArguments: length === 0 ? undefined : typeArguments,
+    functionArguments: args as Array<ScriptFunctionArgumentTypes>,
+  };
+}
+
+function deserializableTransactionPayloadV1EntryFunctionLegacy(
+  deserializer: Deserializer,
+): InputEntryFunctionData {
+  const function_name = deserializer.deserializeOption('string') ?? '';
+  const length = deserializer.deserializeU32();
+  const typeArguments: Array<string> = [];
+  for (let i = 0; i < length; i++) {
+    typeArguments.push(deserializer.deserializeOption('string') ?? '');
+  }
+  const args = deserializeArguments(deserializer.deserializeOption('string') ?? '');
+  return {
+    // @ts-expect-error
+    function: function_name,
+    typeArguments,
+    functionArguments: args as Array<SimpleEntryFunctionArgumentTypes>,
+  };
+}
+
+// type
+export type ScriptV1SDK = {
+  code: Uint8Array;
+  ty_args: Array<TypeTag>;
+  args: Array<Uint8Array>;
+};
+
+export type TransactionPayloadV1Script = {
+  value: ScriptV1SDK;
+};
+
+export type EntryFunctionV1SDK = {
+  module_name: string;
+  function_name: string;
+  ty_args: Array<TypeTag>;
+  args: Array<Uint8Array>;
+};
+
+export type TransactionPayloadV1EntryFunction = {
+  value: EntryFunctionV1SDK;
+};
+
+export type TransactionPayloadV1SDK =
+  | Types.TransactionPayload
+  | TransactionPayloadV1Script
+  | TransactionPayloadV1EntryFunction;
+
+export type TransactionPayloadV2SDK = InputScriptData | InputEntryFunctionData;
+
+export function serializeTransactionPayload(
+  args: TransactionPayloadV1SDK | TransactionPayloadV2SDK,
+) {
+  const serializer = new Serializer();
+  if (!('type' in args) && 'function' in args && !('multisigAddress' in args)) {
+    // V2 SDK Entry Function Params
+    serializeTransactionPayloadEntryFunction(args, serializer);
+  } else if (!('type' in args) && 'bytecode' in args) {
+    // V2 SDK Script Params
+    serializeTransactionPayloadScript(args, serializer);
+  } else if (!('type' in args) && 'value' in args) {
+    // fix wormhole v1 sdk
+    // not support complex type
+    const value = args.value;
+    if ('code' in value) {
+      serializableTransactionPayloadV1ScriptWormhole(value, serializer);
+    } else {
+      throw new Error('Invalid transaction payload type');
+    }
+  } else if ('type' in args) {
+    // V1 SDK Legacy Params
+    serializableTransactionPayloadV1Legacy(args, serializer);
+  } else {
+    throw new Error('Invalid transaction payload type');
+  }
+  return bytesToHex(serializer.toUint8Array());
+}
+
+export function deserializeTransactionPayload(hex: string): TransactionPayloadV2SDK {
+  const deserializer = new Deserializer(hexToBytes(hex));
+  const type = deserializer.deserializeUleb128AsU32();
+  if (type === TransactionPayloadType.ENTRY_FUNCTION) {
+    return deserializeTransactionPayloadEntryFunction(deserializer);
+  } else if (type === TransactionPayloadType.SCRIPT) {
+    return deserializeTransactionPayloadScript(deserializer);
+  } else if (type === TransactionPayloadType.SCRIPT_LEGACY) {
+    return deserializableTransactionPayloadV1ScriptLegacy(deserializer);
+  } else if (type === TransactionPayloadType.ENTRY_FUNCTION_LEGACY) {
+    return deserializableTransactionPayloadV1EntryFunctionLegacy(deserializer);
+  } else if (type === TransactionPayloadType.SCRIPT_LEGACY_WORMHOLE) {
+    return deserializableTransactionPayloadV1ScriptWormhole(deserializer);
+  } else {
+    throw new Error('Invalid transaction payload type');
+  }
 }

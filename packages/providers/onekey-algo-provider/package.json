@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/onekey-algo-provider",
-  "version": "2.2.18",
+  "version": "2.2.19",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -28,9 +28,9 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "2.2.18",
-    "@onekeyfe/cross-inpage-provider-errors": "2.2.18",
-    "@onekeyfe/cross-inpage-provider-types": "2.2.18",
-    "@onekeyfe/extension-bridge-injected": "2.2.18"
+    "@onekeyfe/cross-inpage-provider-core": "2.2.19",
+    "@onekeyfe/cross-inpage-provider-errors": "2.2.19",
+    "@onekeyfe/cross-inpage-provider-types": "2.2.19",
+    "@onekeyfe/extension-bridge-injected": "2.2.19"
   }
 }

@@ -1,10 +1,4 @@
-import {
-  Ed25519Signature,
-  Ed25519PublicKey,
-  Network,
-  AccountAddress,
-  isEncodedEntryFunctionArgument,
-} from '@aptos-labs/ts-sdk';
+import { Ed25519Signature, Ed25519PublicKey, Network, AccountAddress } from '@aptos-labs/ts-sdk';
 import {
   APTOS_CHAINS,
   AccountInfo,
@@ -218,17 +212,7 @@ export class AptosStandardProvider implements AptosWallet {
   signAndSubmitTransaction: AptosSignAndSubmitTransactionMethod = async (
     input: AptosSignAndSubmitTransactionInput,
   ): Promise<UserResponse<AptosSignAndSubmitTransactionOutput>> => {
-    const { payload } = input;
-
-    const existsBscEncodedArg = payload.functionArguments.find((arg) =>
-      isEncodedEntryFunctionArgument(arg),
-    );
-
-    if (existsBscEncodedArg) {
-      throw new Error('Unsupported Function Arguments type');
-    }
-
-    const result = await this.provider.signAndSubmitTransactionV2(JSON.stringify(input));
+    const result = await this.provider.signAndSubmitTransactionV2(input);
 
     return Promise.resolve({
       status: UserResponseStatus.APPROVED,

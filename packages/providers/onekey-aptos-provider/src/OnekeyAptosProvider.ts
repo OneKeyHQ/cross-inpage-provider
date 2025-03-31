@@ -20,7 +20,12 @@ import {
   Ed25519PublicKey,
   Ed25519Signature,
 } from '@aptos-labs/ts-sdk';
-import { AptosSignAndSubmitTransactionOutput } from '@aptos-labs/wallet-standard';
+import {
+  AptosSignAndSubmitTransactionInput,
+  AptosSignAndSubmitTransactionOutput,
+} from '@aptos-labs/wallet-standard';
+import { serializeTransactionPayload } from './serializer';
+import type { TransactionPayloadV1SDK } from './serializer';
 
 export type AptosProviderType = 'petra' | 'martian';
 
@@ -61,9 +66,9 @@ export type AptosRequest = {
 
   'signMessage': (payload: SignMessagePayloadCompatible) => Promise<SignMessageResponseCompatible>;
 
-  'signAndSubmitTransaction': (transactions: Types.TransactionPayload) => Promise<string>;
+  'signAndSubmitTransaction': (transactions: string) => Promise<string>;
 
-  'signTransaction': (transactions: Types.TransactionPayload) => Promise<string>;
+  'signTransaction': (transactions: string) => Promise<string>;
 
   'signTransactionV2': (params: SignTransactionV2Params) => Promise<{
     type: 'ed25519' | 'multi_ed25519' | 'secp256k1';
@@ -116,7 +121,9 @@ export interface IProviderAptos extends ProviderAptosBase {
   signTransaction(transactions: any): Promise<any>;
 
   signTransactionV2(params: SignTransactionV2Params): Promise<AccountAuthenticator>;
-  signAndSubmitTransactionV2(params: string): Promise<AptosSignAndSubmitTransactionOutput>;
+  signAndSubmitTransactionV2(
+    params: AptosSignAndSubmitTransactionInput,
+  ): Promise<AptosSignAndSubmitTransactionOutput>;
 
   /**
    * Sign message
@@ -285,9 +292,10 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
   }
 
   async signAndSubmitTransaction(transactions: any): Promise<any> {
+    const serialize = serializeTransactionPayload(transactions as TransactionPayloadV1SDK);
     const res = await this._callBridge({
       method: 'signAndSubmitTransaction',
-      params: transactions as Types.TransactionPayload,
+      params: serialize,
     });
     if (!res) throw web3Errors.provider.unauthorized();
 
@@ -295,10 +303,12 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     return JSON.parse(res);
   }
 
-  async signTransaction(transactions: any): Promise<any> {
+  async signTransaction(transactions: Types.TransactionPayload): Promise<any> {
+    const serialize = serializeTransactionPayload(transactions);
+
     const res = await this._callBridge({
       method: 'signTransaction',
-      params: transactions as Types.TransactionPayload,
+      params: serialize,
     });
     if (!res) throw web3Errors.provider.unauthorized();
 
@@ -326,10 +336,18 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     throw new Error('Unsupported sign type');
   }
 
-  async signAndSubmitTransactionV2(params: string): Promise<AptosSignAndSubmitTransactionOutput> {
+  async signAndSubmitTransactionV2(
+    params: AptosSignAndSubmitTransactionInput,
+  ): Promise<AptosSignAndSubmitTransactionOutput> {
+    const serialize = serializeTransactionPayload(params.payload);
+    const param = {
+      gasUnitPrice: params.gasUnitPrice,
+      maxGasAmount: params.maxGasAmount,
+      payload: serialize,
+    };
     return this._callBridge({
       method: 'signAndSubmitTransactionV2',
-      params,
+      params: JSON.stringify(param),
     });
   }
 

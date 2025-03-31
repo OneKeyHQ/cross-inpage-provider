@@ -19,7 +19,7 @@ import {
   EntryFunctionArgumentTypes,
   FixedBytes,
 } from '@aptos-labs/ts-sdk';
-import { serializeArguments, deserializeArguments } from '../serializer';
+import { serializeArguments, deserializeArguments } from '../../serializer';
 import { hexToBytes } from '@noble/hashes/utils';
 import { Types } from 'aptos';
 

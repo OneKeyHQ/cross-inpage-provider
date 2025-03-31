@@ -16,7 +16,7 @@ import {
   MoveOption,
   MoveString,
 } from '@aptos-labs/ts-sdk';
-import { serializeTransactionPayload, deserializeTransactionPayload } from '../serializer';
+import { serializeTransactionPayload, deserializeTransactionPayload } from '../../serializer';
 import { hexToBytes } from '@noble/hashes/utils';
 import { TxnBuilderTypes, Types } from 'aptos';
 import { get } from 'lodash';

@@ -12,7 +12,6 @@ import DappList from '../../../components/DAppList';
 import params from './params';
 import nacl from 'tweetnacl';
 import { stripHexPrefix } from 'ethereumjs-util';
-import { toast } from '../../ui/use-toast';
 import {
   Network,
   Aptos,
@@ -27,10 +26,6 @@ import {
   AccountAuthenticatorEd25519,
   AccountAddress,
   U64,
-  U256,
-  isEncodedEntryFunctionArgument,
-  FixedBytes,
-  Serialized,
 } from '@aptos-labs/ts-sdk';
 import {
   WalletReadyState,
@@ -43,7 +38,6 @@ import { AptosWalletAdapterProvider, Wallet } from '@aptos-labs/wallet-adapter-r
 import InfoLayout from '../../InfoLayout';
 import { jsonToUint8Array } from '../../../lib/uint8array';
 import { get } from 'lodash';
-import { formatFunctionArgument } from './utils';
 
 function Example() {
   const {

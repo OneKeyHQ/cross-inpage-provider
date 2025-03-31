@@ -15,6 +15,7 @@ import nacl from 'tweetnacl';
 import { stripHexPrefix } from 'ethereumjs-util';
 import { toast } from '../../ui/use-toast';
 import { TxnBuilderTypes } from 'aptos';
+import type { Types } from 'aptos';
 
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([
@@ -231,8 +232,8 @@ export default function Example() {
           }}
         />
         <ApiPayload
-          title="signAndSubmitTransaction-Wormhole-Script"
-          description="signAndSubmitTransaction-Wormhole-Script"
+          title="signAndSubmitTransaction-Script"
+          description="signAndSubmitTransaction-Script (会报错，是正常的)"
           presupposeParams={[
             {
               id: 'script',
@@ -284,7 +285,7 @@ export default function Example() {
         />
         <ApiPayload
           title="signAndSubmitTransaction-mock-Wormhole-Claim"
-          description="signAndSubmitTransaction-mock-Wormhole-Claim"
+          description="signAndSubmitTransaction-mock-Wormhole-Claim (会报错，是正常的)"
           presupposeParams={[
             {
               id: 'script',
@@ -314,7 +315,9 @@ export default function Example() {
             );
 
             const payload = new TxnBuilderTypes.TransactionPayloadScript(script);
-            const res = await provider?.signAndSubmitTransaction(payload);
+            const res = await provider?.signAndSubmitTransaction({
+              payload,
+            });
             return JSON.stringify(res);
           }}
         />

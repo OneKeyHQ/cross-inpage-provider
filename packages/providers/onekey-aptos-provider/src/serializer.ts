@@ -28,9 +28,8 @@ import type { Types } from 'aptos';
 export enum TransactionPayloadType {
   SCRIPT = 0,
   ENTRY_FUNCTION = 1,
-  SCRIPT_LEGACY = 2, // V1 SDK Script Params
+  SCRIPT_LEGACY = 2, // V1 SDK Script Params Petra
   ENTRY_FUNCTION_LEGACY = 3, // V1 SDK Entry Function Params
-  SCRIPT_LEGACY_WORMHOLE = 4, // V1 SDK Script Params Bridge Wormhole
 }
 
 // OneKey Primitive Types
@@ -66,6 +65,79 @@ export enum ScriptArgumentType {
   U32 = 7,
   U256 = 8,
   Serialized = 9,
+}
+
+// type
+export type ScriptV1SDK = {
+  code: Uint8Array;
+  ty_args: Array<TypeTag>;
+  args: Array<Uint8Array>;
+};
+
+export type TransactionPayloadV1Script = {
+  value: ScriptV1SDK;
+};
+
+export type EntryFunctionV1SDK = {
+  module_name: string;
+  function_name: string;
+  ty_args: Array<TypeTag>;
+  args: Array<Uint8Array>;
+};
+
+export type TransactionPayloadV1EntryFunction = {
+  value: EntryFunctionV1SDK;
+};
+
+export type TransactionPayloadV1SDK =
+  | Types.TransactionPayload
+  | TransactionPayloadV1Script
+  | TransactionPayloadV1EntryFunction;
+
+export type TransactionPayloadV2SDK = InputScriptData | InputEntryFunctionData;
+
+export function serializeTransactionPayload(
+  args: TransactionPayloadV1SDK | TransactionPayloadV2SDK,
+) {
+  const serializer = new Serializer();
+  if (!('type' in args) && 'function' in args && !('multisigAddress' in args)) {
+    // V2 SDK Entry Function Params
+    serializeTransactionPayloadEntryFunction(args, serializer);
+  } else if (!('type' in args) && 'bytecode' in args) {
+    // V2 SDK Script Params
+    serializeTransactionPayloadScript(args, serializer);
+  } else if (!('type' in args) && 'value' in args) {
+    // fix wormhole v1 sdk
+    // not support complex type
+    const value = args.value;
+    if ('code' in value) {
+      serializableTransactionPayloadV1ScriptLegacy(value, serializer);
+    } else {
+      throw new Error('Invalid transaction payload type');
+    }
+  } else if ('type' in args) {
+    // V1 SDK Legacy Params
+    serializableTransactionPayloadV1Legacy(args, serializer);
+  } else {
+    throw new Error('Invalid transaction payload type');
+  }
+  return bytesToHex(serializer.toUint8Array());
+}
+
+export function deserializeTransactionPayload(hex: string): TransactionPayloadV2SDK {
+  const deserializer = new Deserializer(hexToBytes(hex));
+  const type = deserializer.deserializeUleb128AsU32();
+  if (type === TransactionPayloadType.ENTRY_FUNCTION) {
+    return deserializeTransactionPayloadEntryFunction(deserializer);
+  } else if (type === TransactionPayloadType.SCRIPT) {
+    return deserializeTransactionPayloadScript(deserializer);
+  } else if (type === TransactionPayloadType.ENTRY_FUNCTION_LEGACY) {
+    return deserializableTransactionPayloadV1EntryFunctionLegacy(deserializer);
+  } else if (type === TransactionPayloadType.SCRIPT_LEGACY) {
+    return deserializableTransactionPayloadV1ScriptLegacy(deserializer);
+  } else {
+    throw new Error('Invalid transaction payload type');
+  }
 }
 
 // https://github.com/aptos-labs/aptos-ts-sdk/blob/289f944ef157a6bd13b1cb0949065ee4330a8c36/src/transactions/instances/transactionPayload.ts#L28-L29
@@ -373,14 +445,14 @@ function deserializeTransactionPayloadEntryFunction(
 }
 
 // V1 SDK Script Wormhole Params
-function serializableTransactionPayloadV1ScriptWormhole(args: ScriptV1SDK, serializer: Serializer) {
-  serializer.serializeU32AsUleb128(TransactionPayloadType.SCRIPT_LEGACY_WORMHOLE);
+function serializableTransactionPayloadV1ScriptLegacy(args: ScriptV1SDK, serializer: Serializer) {
+  serializer.serializeU32AsUleb128(TransactionPayloadType.SCRIPT_LEGACY);
   serializer.serializeBytes(args.code);
   serializer.serializeVector<TypeTag>(args.ty_args);
   serializer.serializeOption(serializeArguments(args.args));
 }
 
-function deserializableTransactionPayloadV1ScriptWormhole(
+function deserializableTransactionPayloadV1ScriptLegacy(
   deserializer: Deserializer,
 ): InputScriptData {
   const code = deserializer.deserializeBytes();
@@ -433,58 +505,26 @@ function serializableTransactionPayloadV1Legacy(
   args: Types.TransactionPayload,
   serializer: Serializer,
 ) {
-  if (args.type === 'script_payload') {
-    serializer.serializeU32AsUleb128(TransactionPayloadType.SCRIPT_LEGACY);
-    // @ts-expect-error
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    serializer.serializeOption(args.code.bytecode);
-    // @ts-expect-error
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-    const length = args.type_arguments.length as number;
-    serializer.serializeU32(length);
-    for (let i = 0; i < length; i++) {
-      // @ts-expect-error
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      serializer.serializeOption(args.type_arguments[i]);
-    }
-    // @ts-expect-error
-    serializer.serializeOption(serializeArguments(args.args as Array<ScriptFunctionArgumentTypes>));
-  } else if (args.type === 'entry_function_payload') {
+  if (args.type === 'entry_function_payload') {
     serializer.serializeU32AsUleb128(TransactionPayloadType.ENTRY_FUNCTION_LEGACY);
-    // @ts-expect-error
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    serializer.serializeOption(args.function);
-    // @ts-expect-error
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-    const length = args.type_arguments.length as number;
+
+    const {
+      function: functionName,
+      type_arguments,
+      arguments: functionArguments,
+    } = args as Types.TransactionPayload_EntryFunctionPayload;
+
+    serializer.serializeOption(functionName);
+    const length = type_arguments.length;
     serializer.serializeU32(length);
     for (let i = 0; i < length; i++) {
-      // @ts-expect-error
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      serializer.serializeOption(args.type_arguments[i]);
+      serializer.serializeOption(type_arguments[i]);
     }
     serializer.serializeOption(
-      // @ts-expect-error
-      serializeArguments(args.arguments as Array<ScriptFunctionArgumentTypes>),
+      serializeArguments(functionArguments as Array<ScriptFunctionArgumentTypes>),
     );
   }
-}
-
-function deserializableTransactionPayloadV1ScriptLegacy(
-  deserializer: Deserializer,
-): InputScriptData {
-  const bytecode = deserializer.deserializeOption('string') ?? '';
-  const length = deserializer.deserializeU32();
-  const typeArguments: Array<string> = [];
-  for (let i = 0; i < length; i++) {
-    typeArguments.push(deserializer.deserializeOption('string') ?? '');
-  }
-  const args = deserializeArguments(deserializer.deserializeOption('string') ?? '');
-  return {
-    bytecode,
-    typeArguments: length === 0 ? undefined : typeArguments,
-    functionArguments: args as Array<ScriptFunctionArgumentTypes>,
-  };
+  // not exist type script_payload
 }
 
 function deserializableTransactionPayloadV1EntryFunctionLegacy(
@@ -503,79 +543,4 @@ function deserializableTransactionPayloadV1EntryFunctionLegacy(
     typeArguments,
     functionArguments: args as Array<SimpleEntryFunctionArgumentTypes>,
   };
-}
-
-// type
-export type ScriptV1SDK = {
-  code: Uint8Array;
-  ty_args: Array<TypeTag>;
-  args: Array<Uint8Array>;
-};
-
-export type TransactionPayloadV1Script = {
-  value: ScriptV1SDK;
-};
-
-export type EntryFunctionV1SDK = {
-  module_name: string;
-  function_name: string;
-  ty_args: Array<TypeTag>;
-  args: Array<Uint8Array>;
-};
-
-export type TransactionPayloadV1EntryFunction = {
-  value: EntryFunctionV1SDK;
-};
-
-export type TransactionPayloadV1SDK =
-  | Types.TransactionPayload
-  | TransactionPayloadV1Script
-  | TransactionPayloadV1EntryFunction;
-
-export type TransactionPayloadV2SDK = InputScriptData | InputEntryFunctionData;
-
-export function serializeTransactionPayload(
-  args: TransactionPayloadV1SDK | TransactionPayloadV2SDK,
-) {
-  const serializer = new Serializer();
-  if (!('type' in args) && 'function' in args && !('multisigAddress' in args)) {
-    // V2 SDK Entry Function Params
-    serializeTransactionPayloadEntryFunction(args, serializer);
-  } else if (!('type' in args) && 'bytecode' in args) {
-    // V2 SDK Script Params
-    serializeTransactionPayloadScript(args, serializer);
-  } else if (!('type' in args) && 'value' in args) {
-    // fix wormhole v1 sdk
-    // not support complex type
-    const value = args.value;
-    if ('code' in value) {
-      serializableTransactionPayloadV1ScriptWormhole(value, serializer);
-    } else {
-      throw new Error('Invalid transaction payload type');
-    }
-  } else if ('type' in args) {
-    // V1 SDK Legacy Params
-    serializableTransactionPayloadV1Legacy(args, serializer);
-  } else {
-    throw new Error('Invalid transaction payload type');
-  }
-  return bytesToHex(serializer.toUint8Array());
-}
-
-export function deserializeTransactionPayload(hex: string): TransactionPayloadV2SDK {
-  const deserializer = new Deserializer(hexToBytes(hex));
-  const type = deserializer.deserializeUleb128AsU32();
-  if (type === TransactionPayloadType.ENTRY_FUNCTION) {
-    return deserializeTransactionPayloadEntryFunction(deserializer);
-  } else if (type === TransactionPayloadType.SCRIPT) {
-    return deserializeTransactionPayloadScript(deserializer);
-  } else if (type === TransactionPayloadType.SCRIPT_LEGACY) {
-    return deserializableTransactionPayloadV1ScriptLegacy(deserializer);
-  } else if (type === TransactionPayloadType.ENTRY_FUNCTION_LEGACY) {
-    return deserializableTransactionPayloadV1EntryFunctionLegacy(deserializer);
-  } else if (type === TransactionPayloadType.SCRIPT_LEGACY_WORMHOLE) {
-    return deserializableTransactionPayloadV1ScriptWormhole(deserializer);
-  } else {
-    throw new Error('Invalid transaction payload type');
-  }
 }

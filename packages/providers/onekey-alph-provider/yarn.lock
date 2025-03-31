@@ -60,43 +60,6 @@
   resolved "https://registry.yarnpkg.com/@noble/secp256k1/-/secp256k1-1.7.1.tgz#b251c70f824ce3ca7f8dc3df08d58f005cc0507c"
   integrity sha512-hOUk6AyBFmqVrv7k5WAw/LpszxVbj9gGN4JRkIX52fdFAj1UA61KXmZDvqVEm+pOyec3+fIeZB02LYa/pWOArw==
 
-"@onekeyfe/cross-inpage-provider-core@2.2.11":
-  version "2.2.11"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-core/-/cross-inpage-provider-core-2.2.11.tgz#3e5fdb3a62cf97b3805d97aa8a1bd7585830725d"
-  integrity sha512-yWV7558zhtctmFO1zPiUgJ7poeMHBpNLWliEeT4TOb4mVdBKmwRSRNngyqWzuzj8bUiu97CQpagolnwY4nMbKQ==
-  dependencies:
-    "@onekeyfe/cross-inpage-provider-errors" "2.2.11"
-    "@onekeyfe/cross-inpage-provider-events" "2.2.11"
-    "@onekeyfe/cross-inpage-provider-types" "2.2.11"
-    events "^3.3.0"
-    lodash-es "^4.17.21"
-    ms "^2.1.3"
-
-"@onekeyfe/cross-inpage-provider-errors@2.2.11":
-  version "2.2.11"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-2.2.11.tgz#c5ea1b4720d0a352762b8017910601d3b9717837"
-  integrity sha512-ZQjnxISIzh9eTTpnTG82vkHZ4n1Yid+KGbJFUsrKN8+uD2rpOI49EN0l4cgiaix8sU3lEtBiGtI4zIzpxFdelQ==
-  dependencies:
-    fast-safe-stringify "^2.0.6"
-
-"@onekeyfe/cross-inpage-provider-events@2.2.11":
-  version "2.2.11"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-events/-/cross-inpage-provider-events-2.2.11.tgz#8ff13bef08ac67ff168fdb0d14cb45104e014fe9"
-  integrity sha512-c80Mnq4J2yU8MK4VAtsGzaSBULzcZATBq3H8hrQe6Lf8GMmEQGpEMyXx1NpdnZ5tU/b6COraE32mmU20v5Jx9Q==
-
-"@onekeyfe/cross-inpage-provider-types@2.2.11":
-  version "2.2.11"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-types/-/cross-inpage-provider-types-2.2.11.tgz#7845220417d22ffe807cc798e59ed8dfbc57676f"
-  integrity sha512-2az61s+tEWoTB0hzx26Q5138ZOUzEvj5eZ8JRzhgsw/oGltGZ7Dk9vHI70lHIesnNDFiNzDeMV2faxVAHziSIQ==
-
-"@onekeyfe/extension-bridge-injected@2.2.11":
-  version "2.2.11"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/extension-bridge-injected/-/extension-bridge-injected-2.2.11.tgz#bacc1e35eb354a2c5cfbbbb2515a602f71893b36"
-  integrity sha512-IMnRmy/rZmAxR8CMJMU+hGsUBo6GxcBdBRAJAaBLCIIe73hynv3fSmRbSpNteP8edhrozTbTfO/lttlH2iNA9w==
-  dependencies:
-    "@onekeyfe/cross-inpage-provider-core" "2.2.11"
-    "@onekeyfe/cross-inpage-provider-types" "2.2.11"
-
 "@parcel/watcher-android-arm64@2.4.1":
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/@parcel/watcher-android-arm64/-/watcher-android-arm64-2.4.1.tgz#c2c19a3c442313ff007d2d7a9c2c1dd3e1c9ca84"
@@ -1083,11 +1046,6 @@ fast-redact@^3.0.0:
   resolved "https://registry.yarnpkg.com/fast-redact/-/fast-redact-3.5.0.tgz#e9ea02f7e57d0cd8438180083e93077e496285e4"
   integrity sha512-dwsoQlS7h9hMeYUq1W++23NDcBLV4KqONnITDV9DjfS3q1SgDGVrBdvvTLUotWtPSD7asWDV9/CmsZPy8Hf70A==
 
-fast-safe-stringify@^2.0.6:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.1.1.tgz#c406a83b6e70d9e35ce3b30a81141df30aeba884"
-  integrity sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==
-
 fill-range@^7.1.1:
   version "7.1.1"
   resolved "https://registry.yarnpkg.com/fill-range/-/fill-range-7.1.1.tgz#44265d3cac07e3ea7dc247516380643754a05292"
@@ -1459,11 +1417,6 @@ listhen@^1.7.2:
     untun "^0.1.3"
     uqr "^0.1.2"
 
-lodash-es@^4.17.21:
-  version "4.17.21"
-  resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.21.tgz#43e626c46e6591b7750beb2b50117390c609e3ee"
-  integrity sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==
-
 lodash.isequal@4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/lodash.isequal/-/lodash.isequal-4.5.0.tgz#415c4478f2bcc30120c22ce10ed3226f7d3e18e0"
@@ -1555,11 +1508,6 @@ mri@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/mri/-/mri-1.2.0.tgz#6721480fec2a11a4889861115a48b6cbe7cc8f0b"
   integrity sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA==
-
-ms@^2.1.3:
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
-  integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
 multiformats@^9.4.2:
   version "9.9.0"

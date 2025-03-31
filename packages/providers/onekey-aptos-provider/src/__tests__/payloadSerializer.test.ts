@@ -18,10 +18,43 @@ import {
 } from '@aptos-labs/ts-sdk';
 import { serializeTransactionPayload, deserializeTransactionPayload } from '../serializer';
 import { hexToBytes } from '@noble/hashes/utils';
-import { TxnBuilderTypes } from 'aptos';
+import { TxnBuilderTypes, Types } from 'aptos';
 import { get } from 'lodash';
 
 describe('TransactionPayloadSerializer', () => {
+  it('serialize v1 payload', () => {
+    const payload: Types.TransactionPayload_ScriptPayload = {
+      type: 'script_payload',
+      code: {
+        bytecode: '0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20',
+      },
+      type_arguments: [],
+      arguments: [
+        1,
+        '18446744073709551615',
+        '340282366920938463463374607431768211455',
+        true,
+        '1'.repeat(64),
+        '0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20',
+      ],
+    };
+
+    const serialized = serializeTransactionPayload(payload);
+    const deserialized = deserializeTransactionPayload(serialized);
+
+    expect(get(deserialized, 'bytecode')).toEqual(payload.code.bytecode);
+    const sourceArgs = payload.arguments;
+    const deserializedArgs = deserialized.functionArguments;
+
+    expect(deserializedArgs.length).toEqual(sourceArgs.length);
+    for (let i = 0; i < sourceArgs.length; i++) {
+      const currentSourceArg = sourceArgs[i];
+      const currentDeserializedArg = deserializedArgs[i];
+
+      expect(currentDeserializedArg?.toString()).toEqual(currentSourceArg.toString());
+    }
+  });
+
   it('serialize v1 wormhole payload', () => {
     const script = new TxnBuilderTypes.Script(
       hexToBytes('0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20'),

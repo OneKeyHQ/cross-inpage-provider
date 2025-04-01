@@ -136,14 +136,14 @@ function Example() {
       setProvider('cosmos');
       setAccount({
         address: tomowalletState.cosmos.address,
-        chainId: tomowalletState.cosmos.chainId.toString()
+        chainId: tomowalletState.cosmos.chainId.toString(),
       });
     }
     if (tomowalletState?.bitcoin?.connected) {
       setProvider('bitcoin');
       setAccount({
         address: tomowalletState.bitcoin.address,
-        chainId: tomowalletState.bitcoin.chainId.toString()
+        chainId: tomowalletState.bitcoin.chainId.toString(),
       });
     }
   }, [setAccount, setProvider, tomowalletState]);
@@ -551,98 +551,10 @@ function Example() {
 
             const obj = JSON.parse(request);
 
-            const pubKeyAny = Any.fromPartial({
-              typeUrl: '/cosmos.crypto.secp256k1.PubKey',
-              value: Uint8Array.from(
-                PubKey.encode(
-                  PubKey.fromPartial({
-                    key: hexToBytes(account.publicKey),
-                  }),
-                ).finish(),
-              ),
-            });
-
-            const msgs:
-              | {
-                  typeUrl: string;
-                  value: Uint8Array;
-                }[]
-              | undefined = obj.msgs?.map((msg: { type: string; value: any }) => {
-              const value = msg.value;
-              if (msg.type === '/cosmos.bank.v1beta1.MsgSend') {
-                return {
-                  typeUrl: '/cosmos.bank.v1beta1.MsgSend',
-                  value: MsgSend.encode(
-                    MsgSend.fromPartial({
-                      fromAddress: value.from_address,
-                      toAddress: value.to_address,
-                      amount: value.amount?.map((amount: any) => ({
-                        amount: amount.amount,
-                        denom: amount.denom,
-                      })),
-                    }),
-                  ).finish(),
-                };
-              } else if (msg.type === '/cosmwasm.wasm.v1.MsgExecuteContract') {
-                return {
-                  typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
-                  value: MsgExecuteContract.encode(
-                    MsgExecuteContract.fromPartial({
-                      sender: value.sender,
-                      contract: value.contract,
-                      msg: Buffer.from(JSON.stringify(removeNull(value.msg))),
-                      funds: value.funds?.map((amount: any) => ({
-                        amount: amount.amount,
-                        denom: amount.denom,
-                      })),
-                    }),
-                  ).finish(),
-                };
-              }
-            });
-
-            if (!msgs) return JSON.stringify({ error: 'msgs is null' });
-
-            const bodyBytes = TxBody.encode(
-              TxBody.fromPartial({
-                messages: msgs?.map((msg) => ({
-                  typeUrl: msg.typeUrl,
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                  value: msg.value,
-                })),
-                memo: obj.memo,
-              }),
-            ).finish();
-
-            console.log('bodyBytes', bodyBytes);
-            const authInfoBytes = AuthInfo.encode({
-              signerInfos: [
-                SignerInfo.fromPartial({
-                  publicKey: pubKeyAny,
-                  modeInfo: {
-                    single: {
-                      mode: SignMode.SIGN_MODE_DIRECT,
-                    },
-                  },
-                  sequence: BigInt(accountInfo?.sequence),
-                }),
-              ],
-              fee: Fee.fromPartial({
-                amount: obj.fee.amount.map((amount: any) => ({
-                  amount: amount.amount,
-                  denom: amount.denom,
-                })),
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                gasLimit: BigInt(get<string>(obj, 'fee.gas', '0')),
-              }),
-            }).finish();
-
-            console.log('authInfoBytes', authInfoBytes);
-
             const signer = await providerCosmos?.getOfflineSigner();
             const res = await signer.signDirect(account.address, {
-              bodyBytes: bodyBytes,
-              authInfoBytes: authInfoBytes,
+              bodyBytes: Buffer.from(obj.signDoc.bodyBytes, 'hex'),
+              authInfoBytes: Buffer.from(obj.signDoc.authInfoBytes, 'hex'),
               chainId: chainId,
               accountNumber: Long.fromNumber(accountInfo?.accountNumber),
             });

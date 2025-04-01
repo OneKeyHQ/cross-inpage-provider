@@ -4183,17 +4183,6 @@ export const sitesConfig: SitesInfo[] = [
     },
   },
   {
-    urls: ['app.panora.exchange'],
-    walletsForProvider: {
-      [IInjectedProviderNames.aptos]: [
-        {
-          ...basicWalletInfo['petra'],
-          container: 'div#full-width-tabpanel-0 .MuiBox-root',
-        },
-      ],
-    },
-  },
-  {
     urls: ['trade.echelon.market'],
     walletsForProvider: {
       [IInjectedProviderNames.aptos]: [
@@ -4491,7 +4480,7 @@ export const sitesConfig: SitesInfo[] = [
               'img[alt="Unisat Wallet"]',
               'auto-search-text',
               name,
-              modal 
+              modal
             );
           },
           afterUpdate(textNode, iconNode) {
@@ -4637,7 +4626,7 @@ export const sitesConfig: SitesInfo[] = [
               'img[alt="Sui Wallet"]',
               'auto-search-text',
               name,
-              modal 
+              modal
             );
           },
         },
@@ -4710,7 +4699,7 @@ export const sitesConfig: SitesInfo[] = [
         },
       ],
     },
-  }, 
+  },
   {
     urls: ['app.aptoslaunch.io'],
     walletsForProvider: {
@@ -4722,7 +4711,7 @@ export const sitesConfig: SitesInfo[] = [
               () =>
                 Array.from(
                   document.querySelectorAll<HTMLElement>(
-                    'img[alt="Petra icon"]',  
+                    'img[alt="Petra icon"]',
                   ),
                 ).filter((e) => isVisible(e))?.[0],
               'auto-search-text',
@@ -4744,7 +4733,7 @@ export const sitesConfig: SitesInfo[] = [
               () =>
                 Array.from(
                   document.querySelectorAll<HTMLElement>(
-                    'img[src*="./static/media/petra"]',  
+                    'img[src*="./static/media/petra"]',
                   ),
                 ).filter((e) => isVisible(e))?.[0],
               'auto-search-text',
@@ -4773,5 +4762,5 @@ export const sitesConfig: SitesInfo[] = [
         },
       ],
     },
-  }, 
+  },
 ];

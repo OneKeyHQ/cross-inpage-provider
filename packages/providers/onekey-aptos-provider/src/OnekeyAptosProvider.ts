@@ -14,7 +14,7 @@ import type * as TypeUtils from './type-utils';
 import { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
 import type { Types } from 'aptos';
-import type { AccountAuthenticator } from '@aptos-labs/ts-sdk';
+import type { AccountAuthenticator, PendingTransactionResponse } from '@aptos-labs/ts-sdk';
 import {
   AccountAuthenticatorEd25519,
   Ed25519PublicKey,
@@ -76,7 +76,10 @@ export type AptosRequest = {
     publicKey: string;
   }>;
 
+  // Standard Wallet V1.1.0
   'signAndSubmitTransactionV2': (params: string) => Promise<AptosSignAndSubmitTransactionOutput>;
+  // Standard Wallet V1.0.0
+  'signAndSubmitTransactionStandardV1': (params: string) => Promise<string>;
 };
 
 type JsBridgeRequest = {
@@ -124,6 +127,8 @@ export interface IProviderAptos extends ProviderAptosBase {
   signAndSubmitTransactionV2(
     params: AptosSignAndSubmitTransactionInput,
   ): Promise<AptosSignAndSubmitTransactionOutput>;
+
+  signAndSubmitTransactionStandardV1(params: string): Promise<PendingTransactionResponse>;
 
   /**
    * Sign message
@@ -349,6 +354,17 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
       method: 'signAndSubmitTransactionV2',
       params: JSON.stringify(param),
     });
+  }
+
+  async signAndSubmitTransactionStandardV1(params: string): Promise<PendingTransactionResponse> {
+    const res = await this._callBridge({
+      method: 'signAndSubmitTransactionStandardV1',
+      params,
+    });
+    if (!res) throw web3Errors.provider.unauthorized();
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return JSON.parse(res);
   }
 
   async signMessageCompatible(

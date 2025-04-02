@@ -1,10 +1,18 @@
-import { Ed25519Signature, Ed25519PublicKey, Network, AccountAddress } from '@aptos-labs/ts-sdk';
+import {
+  Ed25519Signature,
+  Ed25519PublicKey,
+  Network,
+  AccountAddress,
+  SimpleTransaction,
+  Serializer,
+} from '@aptos-labs/ts-sdk';
 import {
   APTOS_CHAINS,
   AccountInfo,
   registerWallet,
   UserResponseStatus,
 } from '@aptos-labs/wallet-standard';
+import { bytesToHex } from '@noble/hashes/utils';
 
 import type {
   Account,
@@ -212,6 +220,19 @@ export class AptosStandardProvider implements AptosWallet {
   signAndSubmitTransaction: AptosSignAndSubmitTransactionMethod = async (
     input: AptosSignAndSubmitTransactionInput,
   ): Promise<UserResponse<AptosSignAndSubmitTransactionOutput>> => {
+    if (!!input && 'rawTransaction' in input) {
+      // Support standard sign and send transaction 1.0.0
+      const serializer = new Serializer();
+      (input as unknown as SimpleTransaction).serialize(serializer);
+      const payload = serializer.toUint8Array();
+      const result = await this.provider.signAndSubmitTransactionStandardV1(bytesToHex(payload));
+      return {
+        status: UserResponseStatus.APPROVED,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        args: result,
+      };
+    }
+
     const result = await this.provider.signAndSubmitTransactionV2(input);
 
     return Promise.resolve({

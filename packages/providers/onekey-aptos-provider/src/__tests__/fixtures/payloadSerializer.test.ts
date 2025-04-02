@@ -15,8 +15,9 @@ import {
   MoveVector,
   MoveOption,
   MoveString,
+  InputEntryFunctionData,
 } from '@aptos-labs/ts-sdk';
-import { serializeTransactionPayload, deserializeTransactionPayload } from '../../serializer';
+import { serializeTransactionPayload, deserializeTransactionPayload, TransactionPayloadV2SDK } from '../../serializer';
 import { hexToBytes } from '@noble/hashes/utils';
 import { TxnBuilderTypes, Types } from 'aptos';
 import { get } from 'lodash';
@@ -40,7 +41,7 @@ describe('TransactionPayloadSerializer', () => {
     };
 
     const serialized = serializeTransactionPayload(payload);
-    const deserialized = deserializeTransactionPayload(serialized);
+    const deserialized = deserializeTransactionPayload(serialized) as TransactionPayloadV2SDK;
 
     expect(get(deserialized, 'bytecode')).toEqual(payload.code.bytecode);
     const sourceArgs = payload.arguments;
@@ -78,7 +79,7 @@ describe('TransactionPayloadSerializer', () => {
     const payload = new TxnBuilderTypes.TransactionPayloadScript(script);
     // @ts-expect-error
     const serialized = serializeTransactionPayload(payload);
-    const deserialized = deserializeTransactionPayload(serialized);
+    const deserialized = deserializeTransactionPayload(serialized) as TransactionPayloadV2SDK;
 
     expect(get(deserialized, 'bytecode')).toEqual(script.code);
     const sourceArgs = script.args;
@@ -123,6 +124,32 @@ describe('TransactionPayloadSerializer', () => {
       } else {
         throw new Error('Unknown argument type');
       }
+    }
+  });
+
+  it('serialize v2 payload', () => {
+    const payload: InputEntryFunctionData = {
+      function:
+        '0xe52923154e25c258d9befb0237a30b4001c63dc3bb73011c29cb3739befffcef::router_v2dot1::swap_exact_input',
+      typeArguments: [
+        '0x1::aptos_coin::AptosCoin',
+        '0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::USDC',
+      ],
+      functionArguments: ['2272000', '61199'],
+    };
+    const serialized = serializeTransactionPayload(payload);
+    const deserialized = deserializeTransactionPayload(serialized) as TransactionPayloadV2SDK;
+
+    expect(get(deserialized, 'function')).toEqual(payload.function);
+    const sourceArgs = payload.functionArguments;
+    const deserializedArgs = deserialized.functionArguments;
+
+    expect(deserializedArgs.length).toEqual(sourceArgs.length);
+    for (let i = 0; i < sourceArgs.length; i++) {
+      const currentSourceArg = sourceArgs[i];
+      const currentDeserializedArg = deserializedArgs[i];
+
+      expect(currentDeserializedArg).toEqual(currentSourceArg);
     }
   });
 });

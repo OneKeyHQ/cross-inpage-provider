@@ -53,7 +53,7 @@ export type IWindowOneKeyHub = {
   btcwallet?: ProviderBtcWallet;
   alephium?: ProviderAlph;
   scdo?: ProviderScdo;
-  NEOLineN3?: NEOLineN3; 
+  NEOLineN3?: NEOLineN3;
   NEOLine?: NEOLineN3;
   $private?: ProviderPrivate;
   $walletInfo?: {
@@ -150,7 +150,7 @@ function injectWeb3Provider({
   const algorand = new ProviderAlgo({ bridge });
 
   const scdo = new ProviderScdo({ bridge });
-  
+
   const neo = new ProviderNeo({ bridge });
   NEOLineN3.instance = neo;
 
@@ -199,6 +199,11 @@ function injectWeb3Provider({
       rdns: 'io.metamask',
       image: WALLET_CONNECT_INFO.metamask.icon,
       provider: ethereum,
+    });
+    defineWindowProperty('mmsdk', {
+      getProvider() {
+        return ethereum;
+      },
     });
   }
 

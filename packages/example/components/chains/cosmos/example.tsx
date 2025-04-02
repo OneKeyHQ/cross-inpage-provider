@@ -294,14 +294,8 @@ export default function Example() {
             const obj = JSON.parse(request);
 
             const pubKeyAny = Any.fromPartial({
-              typeUrl: '/cosmos.crypto.secp256k1.PubKey',
-              value: Uint8Array.from(
-                PubKey.encode(
-                  PubKey.fromPartial({
-                    key: hexToBytes(account.publicKey),
-                  }),
-                ).finish(),
-              ),
+              typeUrl: accountInfo.pub_key['@type'],
+              value: Buffer.from(accountInfo.pub_key.key, 'base64'),
             });
 
             const msgs:
@@ -405,8 +399,8 @@ export default function Example() {
             const signDoc = obj.signDoc;
 
             const res = await provider?.signDirect(network.id, account.address, {
-              bodyBytes: signDoc.bodyBytes,
-              authInfoBytes: signDoc.authInfoBytes,
+              bodyBytes: Buffer.from(signDoc.bodyBytes, 'hex'),
+              authInfoBytes: Buffer.from(signDoc.authInfoBytes, 'hex'),
               chainId: signDoc.chainId,
               accountNumber: Long.fromString(signDoc.accountNumber),
             });

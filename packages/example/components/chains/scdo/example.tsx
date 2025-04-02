@@ -60,8 +60,9 @@ export default function Example() {
     }[] = [];
 
     tokens.push({
-      name: 'Test Token',
-      address: '1S015daca201b66f96f74b4230916f9db8db0c0002',
+      name: ' SCDO TEST0',
+      // address: '1S015daca201b66f96f74b4230916f9db8db0c0002',
+      address:'1S01f0daaf7a59fb5eb90256112bf5d080ff290022'
     });
 
     return (
@@ -107,13 +108,18 @@ export default function Example() {
       return 'Amount is required';
     }
 
+    // 获取最新的 nonce
     const nonce = await client.getNonce(from);
+    if (nonce === null) {
+      throw new Error('获取 nonce 失败');
+    }
+    console.log('使用 nonce:', nonce);
 
-    if (tokenAddress && tokenAddress !== '选择 Token') {
+    if (tokenAddress && tokenAddress !== 'SCDO') {
       const payload = encodeTokenTransferPayload({ address: to, amount });
 
       return JSON.stringify({
-        accountNonce: nonce,
+        accountNonce: nonce,  // 使用最新的 nonce
         from: from,
         to: tokenAddress,
         amount: 0,
@@ -124,7 +130,7 @@ export default function Example() {
     }
 
     return JSON.stringify({
-      accountNonce: nonce,
+      accountNonce: nonce,  // 使用最新的 nonce
       from: from,
       to: to,
       amount: new BigNumber(amount).toNumber(),
@@ -224,40 +230,53 @@ export default function Example() {
             });
           }}
           onValidate={async (request: string, response: string) => {
-            const res = JSON.parse(response) as {
-              "Data": {
-                "Type": number,
-                "From": string,
-                "To": string,
-                "Amount": number,
-                "AccountNonce": number,
-                "GasPrice": number,
-                "GasLimit": number,
-                "Timestamp": number,
-                "Payload": string
-              },
-              "Hash": string,
-              "Signature": {
-                "Sig": string
-              }
-            }
-            return await provider?.request<string>({
-              method: 'scdo_estimateGas',
-              params: [{
-                'accountNonce': res.Data.AccountNonce,
-                'amount': res.Data.Amount,
-                'from': res.Data.From,
-                'to': res.Data.To,
-                'gasLimit': res.Data.GasLimit,
-                'gasPrice': res.Data.GasPrice,
-                'hash': res.Hash,
-                'payload': res.Data.Payload,
-                'signature': {
-                  'Sig': res.Signature.Sig,
-                },
+            try {
+              console.log('签名交易请求:', request);
+              console.log('签名交易响应:', response);
 
-              }],
-            });
+              const res = JSON.parse(response) as {
+                "Data": {
+                  "Type": number,
+                  "From": string,
+                  "To": string,
+                  "Amount": number,
+                  "AccountNonce": number,
+                  "GasPrice": number,
+                  "GasLimit": number,
+                  "Timestamp": number,
+                  "Payload": string
+                },
+                "Hash": string,
+                "Signature": {
+                  "Sig": string
+                }
+              }
+              return await provider?.request<string>({
+                method: 'scdo_estimateGas',
+                params: [{
+                  'accountNonce': res.Data.AccountNonce,
+                  'amount': res.Data.Amount,
+                  'from': res.Data.From,
+                  'to': res.Data.To,
+                  'gasLimit': res.Data.GasLimit,
+                  'gasPrice': res.Data.GasPrice,
+                  'hash': res.Hash,
+                  'payload': res.Data.Payload,
+                  'signature': {
+                    'Sig': res.Signature.Sig,
+                  },
+
+                }],
+              });
+            } catch (error) {
+              console.error('估算 Gas 失败:', error);
+              toast({
+                title: '估算 Gas 失败',
+                description: error instanceof Error ? error.message : '未知错误',
+                variant: 'destructive',
+              });
+              return false;
+            }
           }}
         />
         <ApiPayload
@@ -272,16 +291,57 @@ export default function Example() {
             });
           }}
           onValidate={async (request: string, response: string) => {
-            const tx = JSON.parse(response);
-            const success = await client.pushTransaction(account?.address ?? '', tx);
-            if (!success) {
+            try {
+              console.log('签名交易请求:', request);
+              console.log('签名交易响应:', response);
+
+              const tx = JSON.parse(response);
+              console.log('解析后的交易数据:', tx);
+
+              // 检查交易数据结构
+              if (!tx.Data || !tx.Hash || !tx.Signature?.Sig) {
+                throw new Error('交易数据格式不正确');
+              }
+
+              // 检查必要字段
+              const requiredFields = ['From', 'To', 'Amount', 'AccountNonce', 'GasPrice', 'GasLimit'];
+              for (const field of requiredFields) {
+                if (tx.Data[field] === undefined) {
+                  throw new Error(`缺少必要字段: ${field}`);
+                }
+              }
+
+              // 检查 nonce 值
+              const currentNonce = await client.getNonce(tx.Data.From);
+              console.log('当前 nonce:', currentNonce, '交易 nonce:', tx.Data.AccountNonce);
+
+              if (tx.Data.AccountNonce < currentNonce) {
+                throw new Error(`Nonce 值过低，当前 nonce: ${currentNonce}`);
+              }
+
+              // 使用 client 广播交易
+              const success = await client.pushTransaction(tx.Data.From, tx);
+              console.log('广播交易结果:', success);
+
+              if (!success) {
+                throw new Error('交易广播失败，请检查：\n1. 账户余额是否充足\n2. Gas 费用是否足够\n3. Nonce 值是否正确');
+              }
+
               toast({
-                title: '广播交易失败',
-                description: '请检查交易是否正确',
+                title: '交易广播成功',
+                // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                description: `交易哈希: ${get(tx, 'Hash', '')}`,
+              });
+              return true;
+            } catch (error) {
+              console.error('验证交易失败:', error);
+              toast({
+                title: '验证交易失败',
+                description: error instanceof Error ? error.message : '未知错误',
                 variant: 'destructive',
               });
+              return false;
             }
-            return success;
           }}
           generateRequestFrom={() => getTokenTransferFrom(account?.chainId)}
           onGenerateRequest={tokenTransferFromToTx}

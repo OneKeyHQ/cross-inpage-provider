@@ -111,9 +111,11 @@ export async function createPSBT(
 
   let url: string;
   if (network === bitcoin.networks.bitcoin) {
-    url = 'https://node.onekey.so/btc';
+    // url = 'https://btc1.trezor.io';
+    url = 'https://go.getblock.io/80f0e77bd1b04080a0d20ef4702be1ba';
   } else if (network === bitcoin.networks.testnet) {
-    url = 'https://node.onekey.so/tbtc';
+    // url = 'https://tbtc1.trezor.io';
+    url = 'https://go.getblock.io/e15e85170a3940419ebf13d3b82f78ab';
   }
   if (!url) {
     throw new Error('unsupported network');

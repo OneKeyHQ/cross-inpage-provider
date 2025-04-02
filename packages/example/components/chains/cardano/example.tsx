@@ -25,6 +25,18 @@ function cborToAddress(cbor: string) {
   return C.Address.from_bytes(hexToBytes(cbor)).to_bech32(undefined);
 }
 
+// 添加代币配置
+const TOKENS: Record<string, { unit: string; decimals: number }> = {
+  ADA: {
+    unit: 'lovelace',
+    decimals: 6
+  },
+  MIN: {
+    unit: '29d222ce763455e3d7a09a665ce554f00ac89d2e99a1a83d267170c64d494e',
+    decimals: 6
+  }
+};
+
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([
     {
@@ -390,9 +402,9 @@ export default function Example() {
             const signedTx = await lucid.fromTx(request).sign().complete();
             return signedTx.toString();
           }}
-          onValidate={async (request: string, response: string) => {
-            return await walletApi?.submitTx(response);
-          }}
+          // onValidate={async (request: string, response: string) => {
+          //   return await walletApi?.submitTx(response);
+          // }}
           generateRequestFrom={() => {
             return (
               <>
@@ -402,9 +414,17 @@ export default function Example() {
                   name="toAddress"
                   defaultValue={account?.address ?? ''}
                 />
-                <Input label="币种" type="text" name="coin" defaultValue={'ADA'} />
+                <select
+                  name="coin"
+                  defaultValue="ADA"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  {Object.keys(TOKENS).map(token => (
+                    <option key={token} value={token}>{token}</option>
+                  ))}
+                </select>
                 <Input
-                  label="转账金额(最小值大约 0.96 ADA)"
+                  label="转账金额(转ADA最小值大约 0.96 ADA)"
                   type="number"
                   name="amount"
                   defaultValue="1000000"
@@ -415,10 +435,7 @@ export default function Example() {
           onGenerateRequest={async (fromData: Record<string, any>) => {
             const toAddress = fromData['toAddress'] as string;
             const amount = parseInt(fromData['amount'] as string);
-            const coin = fromData['coin'] as string;
-
-            console.log('toAddress', toAddress);
-            console.log('amount', amount);
+            const coin = (fromData['coin'] as string)?.toUpperCase();
 
             if (!walletApi) {
               throw new Error('walletApi is required');
@@ -429,16 +446,23 @@ export default function Example() {
             }
 
             try {
-              let unit = 'ada';
-              if (coin?.toUpperCase() === 'ADA') {
-                unit = 'lovelace';
-              } else {
-                unit = coin;
+              // 查找代币配置
+              const tokenConfig = TOKENS[coin];
+              if (!tokenConfig) {
+                throw new Error(`不支持的代币: ${coin}`);
+              }
+
+              // 构建支付金额
+              const assets: { [key: string]: bigint } = { [tokenConfig.unit]: BigInt(amount) };
+              
+              // 如果不是 ADA，需要添加最小 ADA 作为交易费
+              if (coin !== 'ADA') {
+                assets.lovelace = BigInt(2000000); // 添加 2 ADA 作为最小 ADA 要求
               }
 
               const tx = await lucid
                 .newTx()
-                .payToAddress(toAddress, { [unit]: BigInt(amount) })
+                .payToAddress(toAddress, assets)
                 .complete({
                   coinSelection: true,
                 });

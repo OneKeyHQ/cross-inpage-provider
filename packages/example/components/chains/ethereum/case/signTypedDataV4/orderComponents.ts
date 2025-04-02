@@ -1,9 +1,9 @@
 import type { IEIP712Params } from '../../types';
 
 export default (params: IEIP712Params) => ({
-  id: 'signTypedDataV4-orderComponents',
-  name: 'order: OrderComponents 方法',
-  description: 'SignTypedDataV4 OrderComponents 方法',
+  id: 'signTypedDataV4-opensea-shell-nft-orderComponents',
+  name: 'order: Opensea Shell NFT OrderComponents 方法',
+  description: 'SignTypedDataV4 Opensea Shell NFT OrderComponents 方法',
   value: JSON.stringify({
     types: {
       EIP712Domain: [

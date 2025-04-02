@@ -69,6 +69,12 @@ export const registeredChains: IChainInfo[] = [
   },
   {
     id: uuid.v4(),
+    name: 'Babylon',
+    href: '/babylon',
+    icon: 'https://uni.onekey-asset.com/static/logo/babylon.png',
+  },
+  {
+    id: uuid.v4(),
     name: 'Benfen',
     href: '/benfen',
     icon: 'https://uni.onekey-asset.com/static/chain/bfc.png',
@@ -128,12 +134,12 @@ export const registeredChains: IChainInfo[] = [
     href: '/nostr',
     icon: 'https://uni.onekey-asset.com/static/chain/nostr.png',
   },
-  // {
-  //   id: uuid.v4(),
-  //   name: 'NEAR',
-  //   href: '/near',
-  //   icon: 'https://uni.onekey-asset.com/static/chain/near.png',
-  // },
+  {
+    id: uuid.v4(),
+    name: 'NEO',
+    href: '/neo',
+    icon: 'https://uni.onekey-asset.com/static/chain/neon3.png',
+  },
   {
     id: uuid.v4(),
     name: 'Polkadot',

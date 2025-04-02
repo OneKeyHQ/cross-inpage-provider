@@ -52,7 +52,7 @@ export default function Example() {
     {
       uuid: 'injected-onekey',
       name: 'Injected OneKey',
-      inject: '$onekey.bbnwallet',
+      inject: '$onekey.bbnCosmos',
     },
   ]);
 
@@ -214,22 +214,20 @@ export default function Example() {
         />
         <ApiPayload
           title="signDirect"
-          description="signDirect"
-          presupposeParams={params.signDirect(account?.address, account?.address, network.denom)}
+          description="signDirect simple"
+          presupposeParams={params.signDirect_simple(
+            account?.address,
+            account?.address,
+            network.denom,
+          )}
           onExecute={async (request: string) => {
             const accountInfo = await nodeClient.getAccountInfo(account?.address);
 
             const obj = JSON.parse(request);
 
             const pubKeyAny = Any.fromPartial({
-              typeUrl: '/cosmos.crypto.secp256k1.PubKey',
-              value: Uint8Array.from(
-                PubKey.encode(
-                  PubKey.fromPartial({
-                    key: hexToBytes(account.publicKey),
-                  }),
-                ).finish(),
-              ),
+              typeUrl: accountInfo.pub_key['@type'],
+              value: Buffer.from(accountInfo.pub_key.key, 'base64'),
             });
 
             const msgs:
@@ -315,6 +313,29 @@ export default function Example() {
               authInfoBytes: authInfoBytes,
               chainId: network.id,
               accountNumber: Long.fromString(accountInfo?.account_number),
+            });
+            return res;
+          }}
+          onValidate={async (request: string, response: string) => {
+            const tx = hexToBytes(response);
+            // @ts-expect-error
+            const res = await provider?.sendTx(network.id, tx, 'Sync');
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="signDirect-purity"
+          description="signDirect 直接调用接口"
+          presupposeParams={params.signDirect(account?.address, account?.address, network.denom)}
+          onExecute={async (request: string) => {
+            const obj = JSON.parse(request);
+            const signDoc = obj.signDoc;
+            const signer = await provider?.getOfflineSigner();
+            const res = await signer.signDirect(account.address, {
+              bodyBytes: Buffer.from(signDoc.bodyBytes, 'hex'),
+              authInfoBytes: Buffer.from(signDoc.authInfoBytes, 'hex'),
+              chainId: signDoc.chainId,
+              accountNumber: Long.fromString(signDoc.accountNumber),
             });
             return res;
           }}

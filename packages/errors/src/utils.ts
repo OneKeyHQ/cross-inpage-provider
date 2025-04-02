@@ -143,3 +143,22 @@ function assignOriginalError(error: unknown): unknown {
 function hasKey(obj: Record<string, unknown>, key: string) {
   return Object.prototype.hasOwnProperty.call(obj, key);
 }
+
+export function toNativeErrorObject(error: unknown) {
+  if (error instanceof Error) {
+    return error;
+  }
+  const plainErrorObject = error as {
+    name: string;
+    stack: string;
+    message: string;
+    autoToast: boolean;
+  };
+  const newError = new Error(plainErrorObject.message);
+  const keys = Object.keys(plainErrorObject);
+  for (const key of keys) {
+    (newError as unknown as Record<string, unknown>)[key] =
+      plainErrorObject[key as keyof typeof plainErrorObject];
+  }
+  return newError;
+}

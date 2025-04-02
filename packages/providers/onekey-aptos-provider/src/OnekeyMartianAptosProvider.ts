@@ -6,6 +6,8 @@ import { TxnPayload, TxnOptions } from './types';
 import type * as TypeUtils from './type-utils';
 import { AptosProviderType, ProviderAptos } from './OnekeyAptosProvider';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
+import { get } from 'lodash';
+import { serializeTransactionPayload } from './serializer';
 
 type AnyNumber = bigint | number;
 
@@ -117,6 +119,13 @@ class ProviderAptosMartian extends ProviderAptos {
     return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
   }
 
+  hasStandardV2SignAndSubmitTransaction(transaction: string | Types.TransactionPayload): boolean {
+    if (typeof transaction === 'object' && 'payload' in transaction && !('type' in transaction)) {
+      return true;
+    }
+    return false;
+  }
+
   async signAndSubmitTransaction(
     transaction: string | Types.TransactionPayload,
   ): Promise<string | Types.Transaction> {
@@ -126,19 +135,30 @@ class ProviderAptosMartian extends ProviderAptos {
         params: transaction,
       });
     } else {
-      const res = await this._callMartianBridge({
-        method: 'signAndSubmitTransaction',
-        params: transaction,
-      });
-      if (!res) throw web3Errors.provider.unauthorized();
-
+      if (this.hasStandardV2SignAndSubmitTransaction(transaction)) {
+        // @ts-expect-error
+        return await this.signAndSubmitTransactionV2(transaction);
+      }
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return JSON.parse(res);
+      return super.signAndSubmitTransaction(transaction);
     }
+  }
+
+  hasStandardV2SignTransaction(transaction: string | Types.TransactionPayload): boolean {
+    if (
+      typeof transaction === 'object' &&
+      'bcsToHex' in transaction &&
+      'rawTransaction' in transaction
+    ) {
+      return true;
+    }
+    return false;
   }
 
   async signTransaction(
     transaction: string | Types.TransactionPayload,
+    // V2 sign transaction as fee payer
+    asFeePayer?: boolean,
   ): Promise<string | Uint8Array> {
     if (typeof transaction === 'string') {
       return this._callMartianBridge({
@@ -146,13 +166,29 @@ class ProviderAptosMartian extends ProviderAptos {
         params: transaction,
       });
     } else {
-      const res = await this._callMartianBridge({
-        method: 'signTransaction',
-        params: transaction,
-      });
-      if (!res) throw web3Errors.provider.unauthorized();
+      // aptos standard wallet v2
+      // adapter @aptos-labs/wallet-adapter-core 3.x
+      if (this.hasStandardV2SignTransaction(transaction)) {
+        let transactionType: 'simple' | 'multi_agent';
+        if (get(transaction, 'rawTransaction.secondarySignerAddresses')) {
+          transactionType = 'multi_agent';
+        } else {
+          transactionType = 'simple';
+        }
 
-      return new Uint8Array(Buffer.from(res, 'hex'));
+        // @ts-expect-error
+        return this.signTransactionV2({
+          // @ts-expect-error
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+          transaction: transaction.bcsToHex().toStringWithoutPrefix(),
+          transactionType,
+          asFeePayer,
+        });
+      } else {
+        // aptos V1 sign transaction
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return super.signTransaction(transaction);
+      }
     }
   }
 

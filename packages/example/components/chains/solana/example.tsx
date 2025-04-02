@@ -37,7 +37,7 @@ export default function Example() {
   ]);
 
   const { provider, setAccount, account } = useWallet<IProviderApi>();
-  const connection = useMemo(() => new Connection('https://node.onekey.so/sol'), []);
+  const connection = useMemo(() => new Connection('https://go.getblock.io/d60799984fed48669b56fb8e3c6af98b'), []);
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -266,8 +266,8 @@ export default function Example() {
               amount,
             );
             const res = await provider?.signTransaction(transafe);
-            if(!hasVersionedTx(res)) {
-              return 'error: Tx is legacy Transaction';
+            if(hasVersionedTx(res)) {
+              return 'error: Tx is Versioned Transaction';
             }
             return Buffer.from(res.serialize()).toString('hex')
           }}
@@ -276,10 +276,7 @@ export default function Example() {
             const verified = tx.verifySignatures();
 
             // TODO: type error, may be passed wrong options
-            // @ts-expect-error
-            const res = await connection.simulateTransaction(tx, {
-              sigVerify: false,
-            });
+            const res = await connection.simulateTransaction(tx);
 
             return {
               success: res.value.err === null,

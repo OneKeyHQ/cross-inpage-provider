@@ -12,7 +12,6 @@ import DappList from '../../../components/DAppList';
 import params from './params';
 import nacl from 'tweetnacl';
 import { stripHexPrefix } from 'ethereumjs-util';
-import { toast } from '../../ui/use-toast';
 import {
   Network,
   Aptos,
@@ -27,8 +26,6 @@ import {
   AccountAuthenticatorEd25519,
   AccountAddress,
   U64,
-  U256,
-  isEncodedEntryFunctionArgument,
 } from '@aptos-labs/ts-sdk';
 import {
   WalletReadyState,
@@ -380,6 +377,33 @@ function Example() {
             };
           }}
         />
+
+        <ApiPayload
+          title="signAndSubmitTransaction Script"
+          description="Script 测试"
+          presupposeParams={[
+            {
+              id: 'sign with script payload',
+              name: 'with script payload',
+              value: '',
+            },
+          ]}
+          onExecute={async (request: string) => {
+            return {
+              result: await signAndSubmitTransaction({
+                sender: account?.address ?? '',
+                data: {
+                  bytecode:
+                    'a11ceb0b060000000701000402040a030e0c041a04051e20073e30086e2000000001010204010001000308000104030401000105050601000002010203060c0305010b0001080101080102060c03010b0001090002050b00010900000a6170746f735f636f696e04636f696e04436f696e094170746f73436f696e087769746864726177076465706f7369740000000000000000000000000000000000000000000000000000000000000001000001080b000b0138000c030b020b03380102',
+                  functionArguments: [
+                    new U64(1),
+                    AccountAddress.from(account?.address ?? ('' as string)),
+                  ],
+                },
+              }),
+            };
+          }}
+        />
       </ApiGroup>
 
       <DappList dapps={dapps} />
@@ -394,9 +418,13 @@ function AptosConnectButton() {
 
   const walletsRef = useRef<(Wallet | AptosStandardSupportedWallet)[]>([]);
   walletsRef.current = wallets.filter((wallet) => wallet.readyState === WalletReadyState.Installed);
-  console.log('Aptos Standard Wallets:', walletsRef.current);
+
+  useEffect(() => {
+    console.log('Aptos Standard Wallets:', wallets);
+  }, [wallets]);
 
   const onConnectWallet = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async (selectedWallet: IKnownWallet) => {
       const wallet = walletsRef.current.find((w) => w.name === selectedWallet.id);
       if (!wallet) {

@@ -199,29 +199,29 @@ export default function Example() {
           }}
         />
         <ApiPayload
-           title="getChainInfosWithoutEndpoints"
-           description="获取链信息 (Keplr 私有方法)"
-           disableRequestContent
-           onExecute={async () => {
-             // @ts-ignore
-             return await window.keplr?.getChainInfosWithoutEndpoints();
-           }}
+          title="getChainInfosWithoutEndpoints"
+          description="获取链信息 (Keplr 私有方法)"
+          disableRequestContent
+          onExecute={async () => {
+            // @ts-ignore
+            return await window.keplr?.getChainInfosWithoutEndpoints();
+          }}
         />
         <ApiPayload
-           title="getChainInfoWithoutEndpoints"
-           description="根据 ID、获取链信息 (Keplr 私有方法)"
-           disableRequestContent
-           presupposeParams={[
+          title="getChainInfoWithoutEndpoints"
+          description="根据 ID、获取链信息 (Keplr 私有方法)"
+          disableRequestContent
+          presupposeParams={[
             {
               id: 'getChainInfoWithoutEndpoints',
               name: 'getChainInfoWithoutEndpoints',
               value: network.id,
             },
           ]}
-           onExecute={async (request: string) => {
-             // @ts-ignore
-             return await window.keplr?.getChainInfosWithoutEndpoints(request);
-           }}
+          onExecute={async (request: string) => {
+            // @ts-ignore
+            return await window.keplr?.getChainInfosWithoutEndpoints(request);
+          }}
         />
       </ApiGroup>
 
@@ -281,63 +281,61 @@ export default function Example() {
           }}
         />
         <ApiPayload
-          title="signDirect"
+          title="signDirect-simple"
           description="signDirect"
-          presupposeParams={params.signDirect(account?.address, account?.address, network.denom)}
+          presupposeParams={params.signDirect_simple(
+            account?.address,
+            account?.address,
+            network.denom,
+          )}
           onExecute={async (request: string) => {
             const accountInfo = await nodeClient.getAccountInfo(account?.address);
 
             const obj = JSON.parse(request);
 
             const pubKeyAny = Any.fromPartial({
-              typeUrl: '/cosmos.crypto.secp256k1.PubKey',
-              value: Uint8Array.from(
-                PubKey.encode(
-                  PubKey.fromPartial({
-                    key: hexToBytes(account.publicKey),
-                  }),
-                ).finish(),
-              ),
+              typeUrl: accountInfo.pub_key['@type'],
+              value: Buffer.from(accountInfo.pub_key.key, 'base64'),
             });
 
             const msgs:
               | {
-                typeUrl: string;
-                value: Uint8Array;
-              }[]
+                  typeUrl: string;
+                  value: Uint8Array;
+                }[]
               | undefined = obj.msgs?.map((msg: { type: string; value: any }) => {
-                const value = msg.value;
-                if (msg.type === '/cosmos.bank.v1beta1.MsgSend') {
-                  return {
-                    typeUrl: '/cosmos.bank.v1beta1.MsgSend',
-                    value: MsgSend.encode(
-                      MsgSend.fromPartial({
-                        fromAddress: value.from_address,
-                        toAddress: value.to_address,
-                        amount: value.amount?.map((amount: any) => ({
-                          amount: amount.amount,
-                          denom: amount.denom,
-                        })),
-                      }),
-                    ).finish(),
-                  };
-                } else if (msg.type === '/cosmwasm.wasm.v1.MsgExecuteContract') {
-                  return {
-                    typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
-                    value: MsgExecuteContract.encode(
-                      MsgExecuteContract.fromPartial({
-                        sender: value.sender,
-                        contract: value.contract,
-                        msg: Buffer.from(JSON.stringify(removeNull(value.msg))),
-                        funds: value.funds?.map((amount: any) => ({
-                          amount: amount.amount,
-                          denom: amount.denom,
-                        })),
-                      }),
-                    ).finish(),
-                  };
-                }
-              });
+              const value = msg.value;
+              if (msg.type === '/cosmos.bank.v1beta1.MsgSend') {
+                return {
+                  typeUrl: '/cosmos.bank.v1beta1.MsgSend',
+                  value: MsgSend.encode(
+                    MsgSend.fromPartial({
+                      fromAddress: value.from_address,
+                      toAddress: value.to_address,
+                      amount: value.amount?.map((amount: any) => ({
+                        amount: amount.amount,
+                        denom: amount.denom,
+                      })),
+                    }),
+                  ).finish(),
+                };
+              } else if (msg.type === '/cosmwasm.wasm.v1.MsgExecuteContract') {
+                return {
+                  typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+                  value: MsgExecuteContract.encode(
+                    MsgExecuteContract.fromPartial({
+                      sender: value.sender,
+                      contract: value.contract,
+                      msg: Buffer.from(JSON.stringify(removeNull(value.msg))),
+                      funds: value.funds?.map((amount: any) => ({
+                        amount: amount.amount,
+                        denom: amount.denom,
+                      })),
+                    }),
+                  ).finish(),
+                };
+              }
+            });
 
             if (!msgs) return JSON.stringify({ error: 'msgs is null' });
 
@@ -382,6 +380,29 @@ export default function Example() {
               authInfoBytes: authInfoBytes,
               chainId: network.id,
               accountNumber: Long.fromString(accountInfo?.account_number),
+            });
+            return res;
+          }}
+          onValidate={async (request: string, response: string) => {
+            const tx = hexToBytes(response);
+            // @ts-expect-error
+            const res = await provider?.sendTx(network.id, tx, 'Sync');
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="signDirect-purity"
+          description="signDirect 直接调用接口"
+          presupposeParams={params.signDirect(account?.address, account?.address, network.denom)}
+          onExecute={async (request: string) => {
+            const obj = JSON.parse(request);
+            const signDoc = obj.signDoc;
+
+            const res = await provider?.signDirect(network.id, account.address, {
+              bodyBytes: Buffer.from(signDoc.bodyBytes, 'hex'),
+              authInfoBytes: Buffer.from(signDoc.authInfoBytes, 'hex'),
+              chainId: signDoc.chainId,
+              accountNumber: Long.fromString(signDoc.accountNumber),
             });
             return res;
           }}

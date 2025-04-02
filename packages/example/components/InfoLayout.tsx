@@ -9,7 +9,7 @@ export default function InfoLayout({ title, children }: InfoLayoutProps) {
   return (
     <Card>
       {title && <CardHeader className="font-medium">{title}</CardHeader>}
-      <CardContent className="flex flex-col flex-wrap gap-3">{children}</CardContent>
+      <CardContent className="flex flex-col flex-wrap gap-3 break-all">{children}</CardContent>
     </Card>
   );
 }

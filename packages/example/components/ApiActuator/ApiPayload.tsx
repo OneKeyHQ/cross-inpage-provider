@@ -105,7 +105,7 @@ function ApiExecute({
   allowCallWithoutProvider,
   onExecute,
   onValidate,
-  timeout = 60 * 1000,
+  timeout = 5 * 60 * 1000,
 }: IApiExecuteProps) {
   const { provider } = useWallet<IEthereumProvider>();
   const { execute } = useApiExecutor({ onExecute, onValidate });
@@ -137,7 +137,9 @@ function ApiExecute({
     try {
       const { result, error } = await Promise.race([
         execute(request),
-        new Promise<IExecuteResult>((_, rej) => setTimeout(() => rej(`call timeout ${timeout}ms`), timeout)),
+        new Promise<IExecuteResult>((_, rej) =>
+          setTimeout(() => rej(`call timeout ${timeout}ms`), timeout),
+        ),
       ]);
       if (error) {
         handleSetResult(`Error: ${error}`);

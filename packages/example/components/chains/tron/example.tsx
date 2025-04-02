@@ -12,18 +12,29 @@ import DappList from '../../../components/DAppList';
 import params from './params';
 import { InputWithSave } from '../../InputWithSave';
 import { toast } from '../../ui/use-toast';
-import { ApiComboboxRef, ApiForm, ApiFormRef } from '../../ApiForm';
+import { ApiComboboxRef, ApiForm, ApiFormRef, ComboboxOption } from '../../ApiForm';
 import { okLinkRequest } from '../utils/OkLink';
+
+type ITokenOption = {
+  type: string;
+  options: {
+    address: string;
+    symbol: string;
+    decimals: string;
+    image: string;
+  };
+};
+
 
 const WalletWatchAsset = memo(() => {
   const apiFromRef = useRef<ApiFormRef>(null);
-  const apiFromComboboxRef = useRef<ApiComboboxRef>(null);
+  const apiFromComboboxRef = useRef<ApiComboboxRef<ITokenOption>>(null);
 
   const { provider } = useWallet<IProviderApi>();
 
   useEffect(() => {
     void okLinkRequest.getTokenList('TRON', 'TRC20').then((tokens) => {
-      const tokenOptions = tokens.map((token) => ({
+      const tokenOptions: ComboboxOption<ITokenOption>[] = tokens.map((token) => ({
         value: token.tokenContractAddress,
         label: `${token.token} - ${token.tokenContractAddress}`,
         extra: {
@@ -33,57 +44,56 @@ const WalletWatchAsset = memo(() => {
             symbol: token.token,
             decimals: token.precision,
             image: token.logoUrl,
-          }
-        }
+          },
+        },
       }));
 
       apiFromComboboxRef.current?.setOptions(tokenOptions);
-    })
+    });
   }, []);
 
-  return <ApiForm title="wallet_watchAsset TRC20" description='(V5 不支持) 添加 TRC20 资产' ref={apiFromRef}>
-    <ApiForm.Combobox
-      ref={apiFromComboboxRef}
-      id="tokenSelector"
-      label="预设参数"
-      placeholder="请选择 TRC20 Token"
-      onOptionChange={(option) => {
-        apiFromRef.current?.setJsonValue('request', option?.extra);
-      }}
-    />
+  return (
+    <ApiForm
+      title="wallet_watchAsset TRC20"
+      description="(V5 不支持) 添加 TRC20 资产"
+      ref={apiFromRef}
+    >
+      <ApiForm.Combobox
+        ref={apiFromComboboxRef}
+        id="tokenSelector"
+        label="预设参数"
+        placeholder="请选择 TRC20 Token"
+        onOptionChange={(option) => {
+          apiFromRef.current?.setJsonValue('request', option?.extra);
+        }}
+      />
 
-    <ApiForm.JsonEdit
-      id="request"
-      label="请求(可以手动编辑)"
-      required
-    />
+      <ApiForm.JsonEdit id="request" label="请求(可以手动编辑)" required />
 
-    <ApiForm.Button
-      id="watchButton"
-      label="观察 Asset"
-      onClick={async () => {
-        const res = await provider?.request({
-          'method': 'wallet_watchAsset',
-          'params': JSON.parse(apiFromRef.current?.getValue('request') ?? ''),
-        });
-        apiFromRef.current?.setValue('response', JSON.stringify(res, null, 2));
-      }}
-      availableDependencyFields={['request']}
-      validation={{
-        fields: ['request'],
-        validator: (values) => {
-          if (!values.request) {
-            return '请选择 TRC20 Token';
-          }
-        }
-      }}
-    />
+      <ApiForm.Button
+        id="watchButton"
+        label="观察 Asset"
+        onClick={async () => {
+          const res = await provider?.request({
+            'method': 'wallet_watchAsset',
+            'params': JSON.parse(apiFromRef.current?.getValue('request') ?? ''),
+          });
+          apiFromRef.current?.setValue('response', JSON.stringify(res, null, 2));
+        }}
+        availableDependencyFields={[{ fieldIds: ['request'] }]}
+        validation={{
+          fields: ['request'],
+          validator: (values) => {
+            if (!values.request) {
+              return '请选择 TRC20 Token';
+            }
+          },
+        }}
+      />
 
-    <ApiForm.TextArea
-      id="response"
-      label="执行结果"
-    />
-  </ApiForm>
+      <ApiForm.TextArea id="response" label="执行结果" />
+    </ApiForm>
+  );
 });
 
 export default function Example() {

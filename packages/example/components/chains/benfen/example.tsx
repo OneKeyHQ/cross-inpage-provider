@@ -124,7 +124,8 @@ function Example() {
             const publicKey = await verifyPersonalMessage(Buffer.from(bytes, 'base64'), signature);
 
             return (
-              bytesToHex(currentAccount.publicKey) === bytesToHex(publicKey.toRawBytes())
+              bytesToHex(new Uint8Array(currentAccount?.publicKey)) ===
+              bytesToHex(publicKey.toRawBytes())
             ).toString();
           }}
         />
@@ -178,7 +179,8 @@ function Example() {
             );
 
             return (
-              bytesToHex(currentAccount.publicKey) === bytesToHex(publicKey.toRawBytes())
+              bytesToHex(new Uint8Array(currentAccount?.publicKey)) ===
+              bytesToHex(publicKey.toRawBytes())
             ).toString();
           }}
         />
@@ -277,7 +279,8 @@ function Example() {
             );
 
             return (
-              bytesToHex(currentAccount.publicKey) === bytesToHex(publicKey.toRawBytes())
+              bytesToHex(new Uint8Array(currentAccount?.publicKey)) ===
+              bytesToHex(publicKey.toRawBytes())
             ).toString();
           }}
         />
@@ -287,11 +290,16 @@ function Example() {
           description="BUSD代币转账签名"
           presupposeParams={signTokenTransactionParams}
           onExecute={async (request: string) => {
-            const { from, to, amount ,token} = JSON.parse(request) as { from: string, to: string, amount: number, token: string };
+            const { from, to, amount, token } = JSON.parse(request) as {
+              from: string;
+              to: string;
+              amount: number;
+              token: string;
+            };
 
             const transfer = new TransactionBlock();
             transfer.setSender(from);
-            
+
             const { data: coins } = await client.getCoins({
               owner: from,
               coinType: token,
@@ -301,10 +309,9 @@ function Example() {
               throw new Error('No BUSD coins found');
             }
 
-            const [coin] = transfer.splitCoins(
-              transfer.object(coins[0].coinObjectId),
-              [transfer.pure(amount)]
-            );
+            const [coin] = transfer.splitCoins(transfer.object(coins[0].coinObjectId), [
+              transfer.pure(amount),
+            ]);
             transfer.transferObjects([coin], transfer.pure(to));
 
             const tx = await sponsorTransaction(
@@ -323,14 +330,18 @@ function Example() {
             return JSON.stringify(res);
           }}
           onValidate={async (request: string, result: string) => {
-            const { transactionBlockBytes, signature } = JSON.parse(result) as { transactionBlockBytes: string, signature: string };
+            const { transactionBlockBytes, signature } = JSON.parse(result) as {
+              transactionBlockBytes: string;
+              signature: string;
+            };
             const publicKey = await verifyTransactionBlock(
               Buffer.from(transactionBlockBytes, 'base64'),
               signature,
             );
 
             return (
-              bytesToHex(currentAccount.publicKey) === bytesToHex(publicKey.toRawBytes())
+              bytesToHex(new Uint8Array(currentAccount?.publicKey)) ===
+              bytesToHex(publicKey.toRawBytes())
             ).toString();
           }}
         />
@@ -340,11 +351,16 @@ function Example() {
           description="BUSD代币转账签名并执行"
           presupposeParams={signTokenTransactionParams}
           onExecute={async (request: string) => {
-            const { from, to, amount, token } = JSON.parse(request) as { from: string, to: string, amount: number, token: string };
+            const { from, to, amount, token } = JSON.parse(request) as {
+              from: string;
+              to: string;
+              amount: number;
+              token: string;
+            };
 
             const transfer = new TransactionBlock();
             transfer.setSender(from);
-            
+
             const { data: coins } = await client.getCoins({
               owner: from,
               coinType: token,
@@ -354,10 +370,9 @@ function Example() {
               throw new Error('No BUSD coins found');
             }
 
-            const [coin] = transfer.splitCoins(
-              transfer.object(coins[0].coinObjectId),
-              [transfer.pure(BigInt(amount))]
-            );
+            const [coin] = transfer.splitCoins(transfer.object(coins[0].coinObjectId), [
+              transfer.pure(BigInt(amount)),
+            ]);
             transfer.transferObjects([coin], transfer.pure(to));
 
             const tx = await sponsorTransaction(
@@ -373,7 +388,7 @@ function Example() {
               transactionBlock: tx,
               account: currentAccount,
             });
-            
+
             return JSON.stringify(res);
           }}
         />
@@ -402,9 +417,8 @@ function BenfenConnectButton() {
   const walletsRef = useRef<WalletWithRequiredFeatures[]>([]);
   walletsRef.current = wallets;
   console.log('Benfen Standard Wallets:', walletsRef.current);
-
   const onConnectWallet = useCallback(
-    async (selectedWallet: IKnownWallet) => {
+    async (selectedWallet: IKnownWallet): Promise<{ provider: undefined }> => {
       const wallet = walletsRef.current.find((w) => w.name === selectedWallet.id);
       if (!wallet) {
         return Promise.reject('Wallet not found');

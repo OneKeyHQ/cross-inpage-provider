@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/onekey-alph-provider",
-  "version": "2.2.8",
+  "version": "2.2.9",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -31,9 +31,9 @@
     "@alephium/get-extension-wallet": "^1.5.2",
     "@alephium/walletconnect-provider": "^1.5.2",
     "@alephium/web3": "^1.5.2",
-    "@onekeyfe/cross-inpage-provider-core": "2.2.8",
-    "@onekeyfe/cross-inpage-provider-errors": "2.2.8",
-    "@onekeyfe/cross-inpage-provider-types": "2.2.8",
-    "@onekeyfe/extension-bridge-injected": "2.2.8"
+    "@onekeyfe/cross-inpage-provider-core": "2.2.9",
+    "@onekeyfe/cross-inpage-provider-errors": "2.2.9",
+    "@onekeyfe/cross-inpage-provider-types": "2.2.9",
+    "@onekeyfe/extension-bridge-injected": "2.2.9"
   }
 }

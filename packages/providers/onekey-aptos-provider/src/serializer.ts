@@ -100,7 +100,11 @@ export function serializeTransactionPayload(
   args: TransactionPayloadV1SDK | TransactionPayloadV2SDK,
 ) {
   const serializer = new Serializer();
-  if (!('type' in args) && 'function' in args && !('multisigAddress' in args)) {
+  if ('type' in args || ('arguments' in args && 'type_arguments' in args)) {
+    // Some Dapps do not pass the type parameter.
+    // V1 SDK Legacy Params
+    serializableTransactionPayloadV1Legacy(args as Types.TransactionPayload, serializer);
+  } else if (!('type' in args) && 'function' in args && !('multisigAddress' in args)) {
     // V2 SDK Entry Function Params
     serializeTransactionPayloadEntryFunction(args, serializer);
   } else if (!('type' in args) && 'bytecode' in args) {
@@ -115,9 +119,6 @@ export function serializeTransactionPayload(
     } else {
       throw new Error('Invalid transaction payload type');
     }
-  } else if ('type' in args) {
-    // V1 SDK Legacy Params
-    serializableTransactionPayloadV1Legacy(args, serializer);
   } else {
     throw new Error('Invalid transaction payload type');
   }
@@ -505,7 +506,7 @@ function serializableTransactionPayloadV1Legacy(
   args: Types.TransactionPayload,
   serializer: Serializer,
 ) {
-  if (args.type === 'entry_function_payload') {
+  if (args.type === 'entry_function_payload' || ('arguments' in args && 'type_arguments' in args)) {
     serializer.serializeU32AsUleb128(TransactionPayloadType.ENTRY_FUNCTION_LEGACY);
 
     const {

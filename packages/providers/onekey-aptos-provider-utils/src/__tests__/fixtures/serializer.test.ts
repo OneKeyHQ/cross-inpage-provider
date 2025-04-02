@@ -21,7 +21,6 @@ import {
 } from '@aptos-labs/ts-sdk';
 import { serializeArguments, deserializeArguments } from '../../serializer';
 import { hexToBytes } from '@noble/hashes/utils';
-import { Types } from 'aptos';
 
 function deepCompare(input: any, output: any): boolean {
   if (input instanceof MoveVector && output instanceof MoveVector) {

@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/cross-inpage-provider-core",
-  "version": "2.2.21",
+  "version": "2.2.22",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -29,9 +29,9 @@
     "build-version-info": "node ./scripts/buildVersionInfo.js"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-errors": "2.2.21",
-    "@onekeyfe/cross-inpage-provider-events": "2.2.21",
-    "@onekeyfe/cross-inpage-provider-types": "2.2.21",
+    "@onekeyfe/cross-inpage-provider-errors": "2.2.22",
+    "@onekeyfe/cross-inpage-provider-events": "2.2.22",
+    "@onekeyfe/cross-inpage-provider-types": "2.2.22",
     "events": "^3.3.0",
     "lodash-es": "^4.17.21",
     "ms": "^2.1.3"

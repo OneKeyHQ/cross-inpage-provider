@@ -8,7 +8,7 @@ module.exports = {
   env: {
     es2021: true,
     node: false,
-    browser: true
+    browser: true,
   },
   rules: {
     // 'operator-assignment': ['error', 'never'],
@@ -108,8 +108,8 @@ module.exports = {
     'no-extra-semi': 'off',
     'no-constant-condition': 'off',
     'no-func-assign': 'off',
-    'no-constant':'off',
-    'no-redeclare':'off',
+    'no-constant': 'off',
+    'no-redeclare': 'off',
     'no-import-assign': 'off',
     'no-inner-declarations': 'off',
     'no-invalid-regexp': 'off',
@@ -148,5 +148,6 @@ module.exports = {
     'no-for-in-array': 'off',
     '@typescript-eslint/no-for-in-array': 'off',
     'node/no-deprecated-api': 'off',
+    'no-setter-return': 'off',
   },
 };

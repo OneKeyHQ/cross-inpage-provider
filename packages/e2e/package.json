@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@onekeyfe/e2e",
-  "version": "2.2.21",
+  "version": "2.2.22",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -31,9 +31,9 @@
     "test:ui": "yarn env && npx playwright test --ui "
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-injected": "2.2.21",
-    "@onekeyfe/cross-inpage-provider-types": "2.2.21",
-    "@onekeyfe/inpage-providers-hub": "2.2.21",
+    "@onekeyfe/cross-inpage-provider-injected": "2.2.22",
+    "@onekeyfe/cross-inpage-provider-types": "2.2.22",
+    "@onekeyfe/inpage-providers-hub": "2.2.22",
     "lodash-es": "^4.17.21"
   },
   "devDependencies": {

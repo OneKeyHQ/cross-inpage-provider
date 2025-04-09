@@ -213,6 +213,7 @@ function injectWeb3Provider({
   });
   registerAlephiumProvider(alephium);
   defineWindowProperty('tronLink', tron);
+  defineWindowProperty('tronOfTronLink', tron);
   defineWindowProperty('suiWallet', sui);
   defineWindowProperty('bfcWallet', bfc);
   defineWindowProperty('onekeyTonWallet', {

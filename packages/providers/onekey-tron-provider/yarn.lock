@@ -7,19 +7,12 @@
   resolved "https://registry.yarnpkg.com/@adraffy/ens-normalize/-/ens-normalize-1.10.1.tgz#63430d04bd8c5e74f8d7d049338f1cd9d4f02069"
   integrity sha512-96Z2IP3mYmF1Xg2cDm8f1gWGf/HUVedQ3FMifV4kG/PQ4yEP51xDtRAEfhVNt5f/uzpNkZHwWQuUcu6D6K+Ekw==
 
-"@babel/runtime@^7.0.0":
-  version "7.19.4"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.19.4.tgz#a42f814502ee467d55b38dd1c256f53a7b885c78"
-  integrity sha512-EXpLCrk55f+cYqmHsSR+yD/0gAIMxxA9QK9lnQWzhMCvt+YmoBN7Zx94s++Kv0+unHk39vxNO8t+CMA2WSS3wA==
+"@babel/runtime@^7.0.0", "@babel/runtime@^7.4.5":
+  version "7.27.0"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.27.0.tgz#fbee7cf97c709518ecc1f590984481d5460d4762"
+  integrity sha512-VtPOkrdPHZsKc/clNqyi9WUA8TINkZ4cGk63UUE3u4pmB2k+ZMQRDuIOagv8UVd6j7k0T3+RRIb7beKTebNbcw==
   dependencies:
-    regenerator-runtime "^0.13.4"
-
-"@babel/runtime@^7.4.5":
-  version "7.20.13"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.20.13.tgz#7055ab8a7cff2b8f6058bf6ae45ff84ad2aded4b"
-  integrity sha512-gt3PKXs0DBoL9xCvOIIZ2NEqAGZqHjAnmVbfQtB620V0uReIQutpel14KcneZuer7UioY8ALKZ7iocavvzTNFA==
-  dependencies:
-    regenerator-runtime "^0.13.11"
+    regenerator-runtime "^0.14.0"
 
 "@noble/curves@1.2.0":
   version "1.2.0"
@@ -50,42 +43,42 @@
   resolved "https://registry.yarnpkg.com/@noble/secp256k1/-/secp256k1-1.7.1.tgz#b251c70f824ce3ca7f8dc3df08d58f005cc0507c"
   integrity sha512-hOUk6AyBFmqVrv7k5WAw/LpszxVbj9gGN4JRkIX52fdFAj1UA61KXmZDvqVEm+pOyec3+fIeZB02LYa/pWOArw==
 
-"@onekeyfe/cross-inpage-provider-core@2.2.21":
-  version "2.2.21"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-core/-/cross-inpage-provider-core-2.2.21.tgz#c6fcc2082be10a27193ec49eba39a605e51e53ef"
-  integrity sha512-fcZxQWXuOAIDEGHsi4LcwcxpYzCjakb5Hge3GdK/aIZB5nDKyL5jBCkdteDmsrVqukJe39/jI9JcudPdyFDWbg==
+"@onekeyfe/cross-inpage-provider-core@2.2.22":
+  version "2.2.22"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-core/-/cross-inpage-provider-core-2.2.22.tgz#8548cfb00e47e5ed90ff1dc7608624e72f3c2f70"
+  integrity sha512-8aABncq9WsFpc2/JannyQ60mdckaC7jt+YqAn6d5hRfoEpnBmYjrxex5pzE5cFUXn9lQAak18XBMhZtqgw/y7w==
   dependencies:
-    "@onekeyfe/cross-inpage-provider-errors" "2.2.21"
-    "@onekeyfe/cross-inpage-provider-events" "2.2.21"
-    "@onekeyfe/cross-inpage-provider-types" "2.2.21"
+    "@onekeyfe/cross-inpage-provider-errors" "2.2.22"
+    "@onekeyfe/cross-inpage-provider-events" "2.2.22"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.22"
     events "^3.3.0"
     lodash-es "^4.17.21"
     ms "^2.1.3"
 
-"@onekeyfe/cross-inpage-provider-errors@2.2.21":
-  version "2.2.21"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-2.2.21.tgz#723848d1d5b681a52161e0a8892eb017472a7e8f"
-  integrity sha512-BKhSJsMzzr7jU3WSMie0nASle4oPgZ9LULr3rlaz09lmUhkHodW96xN4BV/MC53XT7nE4PcJ9wjHF9gXdK6Euw==
+"@onekeyfe/cross-inpage-provider-errors@2.2.22":
+  version "2.2.22"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-2.2.22.tgz#fd3d73e78ac7be9ff440269902c270455a9c4be6"
+  integrity sha512-9wrgRAyxS5Hj03c3/eFv15GsN2wU2ZoXu18s8yfLSeh/gHHHgEiaJt/iGQVmy6jy3KwvpzPaCdf5aLfwbzaZhg==
   dependencies:
     fast-safe-stringify "^2.0.6"
 
-"@onekeyfe/cross-inpage-provider-events@2.2.21":
-  version "2.2.21"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-events/-/cross-inpage-provider-events-2.2.21.tgz#761a4048383897134b3dd2406e2216fadb570386"
-  integrity sha512-QeIJ5TqOhOHqgOWCCjT4IGuNkmKOMzLKzvNAQqGaUeD0ozhpgOd2G+wP+bKPPzTlipOXXCXnXSzD66RwGMSWvA==
+"@onekeyfe/cross-inpage-provider-events@2.2.22":
+  version "2.2.22"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-events/-/cross-inpage-provider-events-2.2.22.tgz#2e2b3c17e497d75b9fc4cb31302b8d6d70455f42"
+  integrity sha512-FI6cl0SFLw+Uf3i3evnZCsFjnzVb/EgXURAIVh15E6BSFqiEwJkhb42RLumXABUINf8R3RHaH2nRTLZSHblVcw==
 
-"@onekeyfe/cross-inpage-provider-types@2.2.21":
-  version "2.2.21"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-types/-/cross-inpage-provider-types-2.2.21.tgz#adc3d2fe3686eaa40baccbe406712a91042f6f63"
-  integrity sha512-3MeIcoG6wJGzuuFtLp2tSXPcaoJRLiS2I14mRpfDGDz9eKNOoyKuzoAfkzFxiEUkc52Ih5lcT4N92dFxKwugKg==
+"@onekeyfe/cross-inpage-provider-types@2.2.22":
+  version "2.2.22"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-types/-/cross-inpage-provider-types-2.2.22.tgz#3ad60191c9e362ed49dbbbb57270198080eae1ba"
+  integrity sha512-kKbQ59UKCtsjUhRRlw/5W24nnoYPIRS23OnbzZDvU8ldpeTk80/q2xBNcoDh/m94oLNpAnYP/4s4Nz73cwJD/w==
 
-"@onekeyfe/extension-bridge-injected@2.2.21":
-  version "2.2.21"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/extension-bridge-injected/-/extension-bridge-injected-2.2.21.tgz#2773915517817c5cde8a0bad058c30b522262971"
-  integrity sha512-Yhr+4xxhmncyP/tu9NHR8RpYSaAdzyyJo0Agn5xaVlxq7NylHc7Yn6KcxGx9ZFAZ+Hg45+0OUQPKIiSqDR+TWg==
+"@onekeyfe/extension-bridge-injected@2.2.22":
+  version "2.2.22"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/extension-bridge-injected/-/extension-bridge-injected-2.2.22.tgz#3eb0ce741f9f03e2af7458bfb79be1e237b02a99"
+  integrity sha512-S7oFAN9RRVuFlDz3AaIOfBUSWPyc9FPYZHCZY6l2ksmSK7SeZeUsP09q10S/NzkLMVXHiFhYH0rMhD6dX9XGiw==
   dependencies:
-    "@onekeyfe/cross-inpage-provider-core" "2.2.21"
-    "@onekeyfe/cross-inpage-provider-types" "2.2.21"
+    "@onekeyfe/cross-inpage-provider-core" "2.2.22"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.22"
 
 "@scure/base@~1.1.6":
   version "1.1.7"
@@ -276,15 +269,10 @@ regenerator-runtime@^0.11.0:
   resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.11.1.tgz#be05ad7f9bf7d22e056f9726cee5017fbf19e2e9"
   integrity sha512-MguG95oij0fC3QV3URf4V2SDYGJhJnJGqvIIgdECeODCT98wSWDAJ94SSuVpYQUoTcGUIL6L4yNB7j1DFFHSBg==
 
-regenerator-runtime@^0.13.11:
-  version "0.13.11"
-  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.13.11.tgz#f6dca3e7ceec20590d07ada785636a90cdca17f9"
-  integrity sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg==
-
-regenerator-runtime@^0.13.4:
-  version "0.13.10"
-  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.13.10.tgz#ed07b19616bcbec5da6274ebc75ae95634bfc2ee"
-  integrity sha512-KepLsg4dU12hryUO7bp/axHAKvwGOCV0sGloQtpagJ12ai+ojVDqkeGSiRX1zlq+kjIMZ1t7gpze+26QqtdGqw==
+regenerator-runtime@^0.14.0:
+  version "0.14.1"
+  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.14.1.tgz#356ade10263f685dda125100cd862c1db895327f"
+  integrity sha512-dYnhHh0nJoMfnkZs6GmmhFknAGRrLznOu5nc9ML+EJxGvrx6H7teuevqVqCuPcPK//3eDrrjQhehXVx9cnkGdw==
 
 semver@^5.6.0:
   version "5.7.1"

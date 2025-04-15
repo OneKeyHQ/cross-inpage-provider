@@ -79,6 +79,7 @@ export default function Example() {
         chainId: network?.chainId,
       });
     });
+
     // @ts-expect-error
     provider.onAccountChange((params: { address: string; publicKey: string } | null) => {
       console.log(`aptos [onAccountChange] ${JSON.stringify(params)}`);

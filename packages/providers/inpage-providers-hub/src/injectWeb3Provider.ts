@@ -234,6 +234,7 @@ function injectWeb3Provider({
   defineWindowProperty('algorand', algorand);
   defineWindowProperty('exodus', {
     algorand,
+    ethereum
   });
 
   // Cardano chain provider injection is handled independently.

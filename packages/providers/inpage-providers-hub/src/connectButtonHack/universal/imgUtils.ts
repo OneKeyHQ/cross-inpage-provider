@@ -51,7 +51,11 @@ export function findIconNodesByParent(parent: HTMLElement) {
  * @description:
  * make sure that there is only one icon node match walletIcon to ignore hidden icon and other icon
  */
-export function findWalletIconByParent(parent: HTMLElement, constraints: ConstraintFn[]) {
+export function findWalletIconByParent(
+  parent: HTMLElement,
+  constraints: ConstraintFn[],
+  selectIconIndex?: number,
+) {
   const iconNodes = findIconNodesByParent(parent);
   if (iconNodes.length === 0) {
     universalLog.warn(`no icon node found for parent`, parent);
@@ -62,6 +66,10 @@ export function findWalletIconByParent(parent: HTMLElement, constraints: Constra
 
   if (filteredIconNodes.length === 0) {
     throw new Error('it doesnt satisfy the constraints');
+  }
+
+  if (selectIconIndex != null) {
+    return filteredIconNodes[selectIconIndex];
   }
 
   if (filteredIconNodes.length > 1) {

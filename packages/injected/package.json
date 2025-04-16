@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/cross-inpage-provider-injected",
-  "version": "2.2.22",
+  "version": "2.2.23",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -47,12 +47,12 @@
     "electron": "*"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "2.2.22",
-    "@onekeyfe/cross-inpage-provider-types": "2.2.22",
-    "@onekeyfe/desktop-bridge-injected": "2.2.22",
-    "@onekeyfe/extension-bridge-injected": "2.2.22",
-    "@onekeyfe/inpage-providers-hub": "2.2.22",
-    "@onekeyfe/native-bridge-injected": "2.2.22",
+    "@onekeyfe/cross-inpage-provider-core": "2.2.23",
+    "@onekeyfe/cross-inpage-provider-types": "2.2.23",
+    "@onekeyfe/desktop-bridge-injected": "2.2.23",
+    "@onekeyfe/extension-bridge-injected": "2.2.23",
+    "@onekeyfe/inpage-providers-hub": "2.2.23",
+    "@onekeyfe/native-bridge-injected": "2.2.23",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0"
   }

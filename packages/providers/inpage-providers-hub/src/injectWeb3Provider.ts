@@ -53,7 +53,7 @@ export type IWindowOneKeyHub = {
   btcwallet?: ProviderBtcWallet;
   alephium?: ProviderAlph;
   scdo?: ProviderScdo;
-  NEOLineN3?: NEOLineN3; 
+  NEOLineN3?: NEOLineN3;
   NEOLine?: NEOLineN3;
   $private?: ProviderPrivate;
   $walletInfo?: {
@@ -150,7 +150,7 @@ function injectWeb3Provider({
   const algorand = new ProviderAlgo({ bridge });
 
   const scdo = new ProviderScdo({ bridge });
-  
+
   const neo = new ProviderNeo({ bridge });
   NEOLineN3.instance = neo;
 
@@ -287,9 +287,9 @@ function injectWeb3Provider({
   if (checkWalletSwitchEnable()) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     registerAptosWallet(martian, {
-      name: 'Martian',
-      logo: WALLET_CONNECT_INFO.martian.icon as WalletIcon,
-      url: 'https://chrome.google.com/webstore/detail/martian-wallet/efbglgofoippbgcjepnhiblaibcnclgk',
+      name: 'Petra',
+      logo: WALLET_CONNECT_INFO.petra.icon as WalletIcon,
+      url: 'https://chromewebstore.google.com/detail/petra-aptos-wallet/ejjladinnckdgjemekebdpeokbikhfci',
     });
   }
 

@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { JsBridgeBase } from '@onekeyfe/cross-inpage-provider-core';
-import { ProviderEthereum, shimWeb3, registerEIP6963Provider } from '@onekeyfe/onekey-eth-provider';
+import {
+  ProviderEthereum,
+  shimWeb3,
+  registerEIP6963Provider,
+  MetaMaskSDK,
+} from '@onekeyfe/onekey-eth-provider';
 import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
 import { ProviderSolana, registerSolanaWallet, WalletIcon } from '@onekeyfe/onekey-solana-provider';
 import {
@@ -194,12 +199,13 @@ function injectWeb3Provider({
   // Override MetaMask EIP6963 Provider
   if (checkWalletSwitchEnable()) {
     registerEIP6963Provider({
-      uuid: '7677b54f-3486-46e2-4e37-bf8747814f',
+      uuid: '7677b54f-3486-46e2-4e37-bf8747814f12',
       name: 'MetaMask',
       rdns: 'io.metamask',
       image: WALLET_CONNECT_INFO.metamask.icon,
       provider: ethereum,
     });
+    defineWindowProperty('mmsdk', new MetaMaskSDK(ethereum));
   }
 
   defineWindowProperty('solana', solana);
@@ -228,6 +234,7 @@ function injectWeb3Provider({
   defineWindowProperty('algorand', algorand);
   defineWindowProperty('exodus', {
     algorand,
+    ethereum
   });
 
   // Cardano chain provider injection is handled independently.

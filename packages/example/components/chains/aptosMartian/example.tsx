@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
@@ -40,6 +41,7 @@ export default function Example() {
       return Promise.reject('Wallet not found');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const provider = get(window, providerDetail.inject) as IProviderApi | undefined;
 
     if (!provider) {

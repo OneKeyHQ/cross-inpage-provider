@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
 /* eslint-disable no-unsafe-optional-chaining */
 import { dapps } from './dapps.config';
@@ -145,7 +147,7 @@ export default function Example() {
     // const [address] = await provider.request<string[]>({ method: 'tron_accounts' });
     return {
       provider,
-      address: tronWeb?.defaultAddress?.base58,
+      address: tronWeb?.defaultAddress?.base58 as string | undefined,
       // address: address,
     };
   };
@@ -306,7 +308,7 @@ export default function Example() {
           disableRequestContent
           onExecute={async () => {
             const tronWeb = provider.tronWeb;
-            const res = await await tronWeb.trx.getNodeInfo();
+            const res = await tronWeb.trx.getNodeInfo();
             return JSON.stringify(res);
           }}
         />
@@ -316,7 +318,7 @@ export default function Example() {
           disableRequestContent
           onExecute={async () => {
             const tronWeb = provider.tronWeb;
-            const res = await await tronWeb.trx.listNodes();
+            const res = await tronWeb.trx.listNodes();
             return JSON.stringify(res);
           }}
         />
@@ -333,7 +335,7 @@ export default function Example() {
           onExecute={async (request: string) => {
             const tronWeb = provider.tronWeb;
             const signedString = await tronWeb.trx.sign(request);
-            return signedString as string;
+            return signedString;
           }}
           onValidate={async (request: string, result: string) => {
             const tronWeb = provider.tronWeb;
@@ -362,8 +364,8 @@ export default function Example() {
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
             const tronWeb = provider.tronWeb;
-            const signedString = await tronWeb.trx.signMessageV2(request);
-            return signedString as string;
+            const signedString = tronWeb.trx.signMessageV2(request);
+            return Promise.resolve(signedString);
           }}
           onValidate={async (request: string, result: string) => {
             const tronWeb = provider.tronWeb;
@@ -435,7 +437,7 @@ export default function Example() {
               address,
               options,
             );
-            const signedTx = await tronWeb.trx.sign(tx.transaction);
+            const signedTx = await tronWeb.trx.sign(tx);
             const broastTx = await tronWeb.trx.sendRawTransaction(signedTx);
             return JSON.stringify(broastTx);
           }}
@@ -447,9 +449,9 @@ export default function Example() {
             checkReceiveAddress();
             const tronWeb = provider.tronWeb;
             const tx = await tronWeb.transactionBuilder.cancelUnfreezeBalanceV2(
-              tronWeb.defaultAddress.base58,
+              tronWeb.defaultAddress.base58 as string,
             );
-            const signedTx = await tronWeb.trx.sign(tx.transaction);
+            const signedTx = await tronWeb.trx.sign(tx);
             const broastTx = await tronWeb.trx.sendRawTransaction(signedTx);
             return JSON.stringify(broastTx);
           }}
@@ -469,7 +471,7 @@ export default function Example() {
               address,
               options,
             );
-            const signedTx = await tronWeb.trx.sign(tx.transaction);
+            const signedTx = await tronWeb.trx.sign(tx);
             const broastTx = await tronWeb.trx.sendRawTransaction(signedTx);
             return JSON.stringify(broastTx);
           }}

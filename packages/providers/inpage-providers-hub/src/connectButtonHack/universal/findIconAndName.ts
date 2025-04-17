@@ -15,6 +15,7 @@ export function findIconAndNameByName(
   icon:
     | 'none'
     | 'auto-search-icon'
+    | 'auto-search-icon-first'
     | ((text: Text) => HTMLElement | null | undefined) = 'auto-search-icon',
   constraints: { text: ConstraintFn[]; icon: ConstraintFn[] } = {
     text: [isClickable],
@@ -34,11 +35,15 @@ export function findIconAndNameByName(
   let iconNode: HTMLImageElement | HTMLElement | undefined | null = undefined;
   if (typeof icon === 'function') {
     iconNode = icon(textNode);
-  } else if (icon === 'auto-search-icon') {
+  } else if (icon === 'auto-search-icon' || icon === 'auto-search-icon-first') {
     let parent: HTMLElement | null = textNode.parentElement;
     let level = 0;
     while (parent && parent !== containerElement?.parentElement && level++ < MAX_LEVELS) {
-      const walletIcon = findWalletIconByParent(parent, constraints.icon);
+      const walletIcon = findWalletIconByParent(
+        parent,
+        constraints.icon,
+        icon === 'auto-search-icon-first' ? 0 : undefined,
+      );
       if (!walletIcon) {
         parent = parent.parentElement;
         continue;

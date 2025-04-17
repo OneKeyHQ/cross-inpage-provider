@@ -1,6 +1,6 @@
 {
-  "name": "@onekeyfe/cross-inpage-provider-types",
-  "version": "2.2.23",
+  "name": "@onekeyfe/onekey-aptos-provider-utils",
+  "version": "2.2.19",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -26,5 +26,15 @@
     "prebuild": "rm -rf dist",
     "build": "tsc && tsc --project tsconfig.cjs.json",
     "start": "tsc --watch"
+  },
+  "dependencies": {
+  },
+  "peerDependencies": {
+    "@aptos-labs/ts-sdk": "^1.30.0",
+    "@noble/hashes": "^1.3.0"
+  },
+  "devDependencies": {
+    "@aptos-labs/ts-sdk": "^1.30.0",
+    "aptos": "^1.3.17"
   }
 }

@@ -5,7 +5,9 @@ import type { Types, MaybeHexString } from 'aptos';
 import { TxnPayload, TxnOptions } from './types';
 import type * as TypeUtils from './type-utils';
 import { AptosProviderType, ProviderAptos } from './OnekeyAptosProvider';
+import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
 import { get } from 'lodash';
+import { serializeTransactionPayload } from './serializer';
 
 type AnyNumber = bigint | number;
 

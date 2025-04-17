@@ -25,7 +25,10 @@ import {
   AptosSignAndSubmitTransactionOutput,
 } from '@aptos-labs/wallet-standard';
 import { serializeTransactionPayload } from '@onekeyfe/onekey-aptos-provider-utils';
-import type { TransactionPayloadV1SDK } from '@onekeyfe/onekey-aptos-provider-utils';
+import type {
+  TransactionPayloadV1SDK,
+  TransactionPayloadV2SDK,
+} from '@onekeyfe/onekey-aptos-provider-utils';
 
 export type AptosProviderType = 'petra' | 'martian';
 
@@ -297,7 +300,9 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
   }
 
   async signAndSubmitTransaction(transactions: any): Promise<any> {
-    const serialize = serializeTransactionPayload(transactions as TransactionPayloadV1SDK);
+    const serialize = serializeTransactionPayload(
+      transactions as TransactionPayloadV1SDK | TransactionPayloadV2SDK,
+    );
     const res = await this._callBridge({
       method: 'signAndSubmitTransaction',
       params: serialize,
@@ -309,7 +314,7 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
   }
 
   async signTransaction(transactions: Types.TransactionPayload): Promise<any> {
-    const serialize = serializeTransactionPayload(transactions);
+    const serialize = serializeTransactionPayload(transactions as TransactionPayloadV1SDK);
 
     const res = await this._callBridge({
       method: 'signTransaction',
@@ -344,7 +349,9 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
   async signAndSubmitTransactionV2(
     params: AptosSignAndSubmitTransactionInput,
   ): Promise<AptosSignAndSubmitTransactionOutput> {
-    const serialize = serializeTransactionPayload(params.payload);
+    const serialize = serializeTransactionPayload(
+      params.payload as TransactionPayloadV1SDK | TransactionPayloadV2SDK,
+    );
     const param = {
       gasUnitPrice: params.gasUnitPrice,
       maxGasAmount: params.maxGasAmount,

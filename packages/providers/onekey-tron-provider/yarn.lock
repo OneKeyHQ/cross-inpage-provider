@@ -50,43 +50,6 @@
   resolved "https://registry.yarnpkg.com/@noble/secp256k1/-/secp256k1-1.7.1.tgz#b251c70f824ce3ca7f8dc3df08d58f005cc0507c"
   integrity sha512-hOUk6AyBFmqVrv7k5WAw/LpszxVbj9gGN4JRkIX52fdFAj1UA61KXmZDvqVEm+pOyec3+fIeZB02LYa/pWOArw==
 
-"@onekeyfe/cross-inpage-provider-core@2.2.21":
-  version "2.2.21"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-core/-/cross-inpage-provider-core-2.2.21.tgz#c6fcc2082be10a27193ec49eba39a605e51e53ef"
-  integrity sha512-fcZxQWXuOAIDEGHsi4LcwcxpYzCjakb5Hge3GdK/aIZB5nDKyL5jBCkdteDmsrVqukJe39/jI9JcudPdyFDWbg==
-  dependencies:
-    "@onekeyfe/cross-inpage-provider-errors" "2.2.21"
-    "@onekeyfe/cross-inpage-provider-events" "2.2.21"
-    "@onekeyfe/cross-inpage-provider-types" "2.2.21"
-    events "^3.3.0"
-    lodash-es "^4.17.21"
-    ms "^2.1.3"
-
-"@onekeyfe/cross-inpage-provider-errors@2.2.21":
-  version "2.2.21"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-2.2.21.tgz#723848d1d5b681a52161e0a8892eb017472a7e8f"
-  integrity sha512-BKhSJsMzzr7jU3WSMie0nASle4oPgZ9LULr3rlaz09lmUhkHodW96xN4BV/MC53XT7nE4PcJ9wjHF9gXdK6Euw==
-  dependencies:
-    fast-safe-stringify "^2.0.6"
-
-"@onekeyfe/cross-inpage-provider-events@2.2.21":
-  version "2.2.21"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-events/-/cross-inpage-provider-events-2.2.21.tgz#761a4048383897134b3dd2406e2216fadb570386"
-  integrity sha512-QeIJ5TqOhOHqgOWCCjT4IGuNkmKOMzLKzvNAQqGaUeD0ozhpgOd2G+wP+bKPPzTlipOXXCXnXSzD66RwGMSWvA==
-
-"@onekeyfe/cross-inpage-provider-types@2.2.21":
-  version "2.2.21"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-types/-/cross-inpage-provider-types-2.2.21.tgz#adc3d2fe3686eaa40baccbe406712a91042f6f63"
-  integrity sha512-3MeIcoG6wJGzuuFtLp2tSXPcaoJRLiS2I14mRpfDGDz9eKNOoyKuzoAfkzFxiEUkc52Ih5lcT4N92dFxKwugKg==
-
-"@onekeyfe/extension-bridge-injected@2.2.21":
-  version "2.2.21"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/extension-bridge-injected/-/extension-bridge-injected-2.2.21.tgz#2773915517817c5cde8a0bad058c30b522262971"
-  integrity sha512-Yhr+4xxhmncyP/tu9NHR8RpYSaAdzyyJo0Agn5xaVlxq7NylHc7Yn6KcxGx9ZFAZ+Hg45+0OUQPKIiSqDR+TWg==
-  dependencies:
-    "@onekeyfe/cross-inpage-provider-core" "2.2.21"
-    "@onekeyfe/cross-inpage-provider-types" "2.2.21"
-
 "@scure/base@~1.1.6":
   version "1.1.7"
   resolved "https://registry.yarnpkg.com/@scure/base/-/base-1.1.7.tgz#fe973311a5c6267846aa131bc72e96c5d40d2b30"
@@ -205,16 +168,6 @@ eventemitter3@^3.1.0:
   resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-3.1.2.tgz#2d3d48f9c346698fce83a85d7d664e98535df6e7"
   integrity sha512-tvtQIeLVHjDkJYnzf2dgVMxfuSGJeM/7UCG17TT4EumTfNtF+0nebF/4zWOIkCreAbtNqhGEboB6BWrwqNaw4Q==
 
-events@^3.3.0:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
-  integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
-
-fast-safe-stringify@^2.0.6:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.1.1.tgz#c406a83b6e70d9e35ce3b30a81141df30aeba884"
-  integrity sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==
-
 follow-redirects@^1.15.6:
   version "1.15.6"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.6.tgz#7f815c0cda4249c74ff09e95ef97c23b5fd0399b"
@@ -255,11 +208,6 @@ mime-types@^2.1.12:
   integrity sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==
   dependencies:
     mime-db "1.52.0"
-
-ms@^2.1.3:
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
-  integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
 proxy-from-env@^1.1.0:
   version "1.1.0"

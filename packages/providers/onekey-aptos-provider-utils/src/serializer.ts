@@ -1,28 +1,30 @@
 import {
-  EntryFunctionArgumentTypes,
-  Serializer,
-  Deserializer,
-  SimpleEntryFunctionArgumentTypes,
-  MoveVector,
-  MoveOption,
-  U8,
-  U64,
-  U128,
   AccountAddress,
   Bool,
-  U16,
-  U32,
-  U256,
-  Serialized,
-  MoveString,
+  Deserializer,
   FixedBytes,
-  InputEntryFunctionData,
+  MoveOption,
+  MoveString,
+  MoveVector,
+  Serialized,
+  Serializer,
   TypeTag,
+  U128,
+  U16,
+  U256,
+  U32,
+  U64,
+  U8,
   standardizeTypeTags,
-  InputScriptData,
-  ScriptFunctionArgumentTypes,
 } from '@aptos-labs/ts-sdk';
 import { hexToBytes, bytesToHex } from '@noble/hashes/utils';
+import type {
+  EntryFunctionArgumentTypes,
+  InputEntryFunctionData,
+  InputScriptData,
+  ScriptFunctionArgumentTypes,
+  SimpleEntryFunctionArgumentTypes,
+} from '@aptos-labs/ts-sdk';
 import type { Types } from 'aptos';
 
 export enum TransactionPayloadType {

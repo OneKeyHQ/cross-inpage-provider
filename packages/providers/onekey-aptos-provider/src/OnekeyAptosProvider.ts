@@ -24,11 +24,8 @@ import {
   AptosSignAndSubmitTransactionInput,
   AptosSignAndSubmitTransactionOutput,
 } from '@aptos-labs/wallet-standard';
-import { serializeTransactionPayload } from '@onekeyfe/onekey-aptos-provider-utils';
-import type {
-  TransactionPayloadV1SDK,
-  TransactionPayloadV2SDK,
-} from '@onekeyfe/onekey-aptos-provider-utils';
+import { serializeTransactionPayload } from './serializer';
+import type { TransactionPayloadV1SDK, TransactionPayloadV2SDK } from './serializer';
 
 export type AptosProviderType = 'petra' | 'martian';
 

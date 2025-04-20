@@ -30,7 +30,7 @@
     "@metamask/eth-sig-util": "^7.0.2",
     "@metamask/onboarding": "^1.0.1",
     "@mizuwallet-sdk/core": "^1.4.0",
-    "@mysten/dapp-kit": "0.13.2",
+    "@mysten/dapp-kit": "0.15.0",
     "@onekeyfe/cross-inpage-provider-core": "2.2.23",
     "@onekeyfe/cross-inpage-provider-types": "2.2.23",
     "@onekeyfe/onekey-aptos-provider": "2.2.23",

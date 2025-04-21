@@ -12,7 +12,7 @@ import {
   registerWallet,
   UserResponseStatus,
 } from '@aptos-labs/wallet-standard';
-import { bytesToHex } from '@noble/hashes/utils';
+import { stripHexPrefix, bytesToHex } from '@onekeyfe/cross-inpage-provider-core';
 
 import type {
   Account,
@@ -47,7 +47,6 @@ import type {
 
 import type { ProviderAptos } from './OnekeyAptosProvider';
 import type { WalletInfo } from './types';
-import { stripHexPrefix } from './utils';
 
 export class WalletAccount implements AptosWalletAccount {
   address: string;

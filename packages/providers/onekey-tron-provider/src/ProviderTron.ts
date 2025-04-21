@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import dequal from 'fast-deep-equal';
-import { UnsignedTransaction, SignedTransaction, TronWeb } from 'tronweb';
+import { TronWeb } from 'tronweb';
+import type { UnsignedTransaction, SignedTransaction } from 'tronweb';
 import SunWeb from 'sunweb';
 import { isEmpty } from 'lodash-es';
 import {

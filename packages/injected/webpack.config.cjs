@@ -5,6 +5,7 @@ const path = require('path');
 const webpack = require('webpack');
 const packageJson = require('./package.json');
 const { merge } = require('webpack-merge');
+const TerserPlugin = require('terser-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 const IS_PRD = process.env.NODE_ENV === 'production';
@@ -21,6 +22,10 @@ const createAnalyzer = (name) => {
 
 const commonConfig = {
   mode: IS_PRD ? 'production' : 'development', // development, production
+  optimization: {
+    usedExports: true,
+    minimize: true,
+  },
   resolve: {
     // DO NOT need alias if injected working in all platforms
     //    alias module should be ES module export
@@ -51,7 +56,7 @@ const commonConfig = {
         exclude: (modulePath) => {
           const includeModules = [
             // force third party library to compile
-           '@solana/web3.js',
+            '@solana/web3.js',
           ];
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           if (includeModules.some((module) => modulePath.includes(module))) {

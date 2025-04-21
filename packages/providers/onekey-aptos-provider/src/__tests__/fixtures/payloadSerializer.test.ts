@@ -18,7 +18,7 @@ import {
   InputEntryFunctionData,
 } from '@aptos-labs/ts-sdk';
 import { serializeTransactionPayload, deserializeTransactionPayload, TransactionPayloadV2SDK } from '../../serializer';
-import { hexToBytes } from '@noble/hashes/utils';
+import { hexToBytes } from '@onekeyfe/cross-inpage-provider-core';
 import { TxnBuilderTypes, Types } from 'aptos';
 import { get } from 'lodash';
 

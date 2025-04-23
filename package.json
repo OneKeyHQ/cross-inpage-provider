@@ -2,7 +2,7 @@
   "private": true,
   "name": "cross-inpage-provider",
   "engines": {
-    "node": "^16 || ^18 || ^20"
+    "node": "^16 || ^18 || ^20 || ^22"
   },
   "scripts": {
     "bootstrap": "lerna bootstrap",
@@ -58,9 +58,6 @@
     "react-test-renderer": "^17.0.2",
     "ts-jest": "^27.0.5",
     "typescript": "^5"
-  },
-  "resolutions": {
-    "safe-buffer": "5.0.1"
   },
   "packageManager": "yarn@1.22.21+sha1.1959a18351b811cdeedbd484a8f86c3cc3bbaf72"
 }

@@ -1,11 +1,14 @@
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
-import { AlephiumWindowObject, EnableOptions, RequestMessage } from '@alephium/get-extension-wallet';
 import {
+  AlephiumWindowObject,
+  EnableOptions,
+  RequestMessage,
+} from '@alephium/get-extension-wallet';
+import { NodeProvider, ExplorerProvider, InteractiveSignerProvider } from '@alephium/web3';
+import type {
   EnableOptionsBase,
   Account,
-  NodeProvider,
-  ExplorerProvider,
   SignDeployContractTxParams,
   SignDeployContractTxResult,
   SignExecuteScriptTxParams,
@@ -16,7 +19,6 @@ import {
   SignUnsignedTxResult,
   SignMessageParams,
   SignMessageResult,
-  InteractiveSignerProvider
 } from '@alephium/web3';
 import { ProviderAlphBase } from './ProviderAlphBase';
 
@@ -35,7 +37,7 @@ function isWalletEventMethodMatch({ method, name }: { method: string; name: stri
 }
 
 export class ProviderAlph extends InteractiveSignerProvider implements AlephiumWindowObject {
-  _base: ProviderAlphBase
+  _base: ProviderAlphBase;
 
   id = 'alephium';
   name = 'Alephium';
@@ -45,9 +47,9 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
   version = '0.9.4';
   _accountInfo: Account | undefined;
 
-  onDisconnected: (() => void | Promise<void>) | undefined = undefined
-  #nodeProvider: NodeProvider | undefined = undefined
-  #explorerProvider: ExplorerProvider | undefined = undefined
+  onDisconnected: (() => void | Promise<void>) | undefined = undefined;
+  #nodeProvider: NodeProvider | undefined = undefined;
+  #explorerProvider: ExplorerProvider | undefined = undefined;
 
   constructor(props: OneKeyTonProviderProps) {
     super();
@@ -134,7 +136,7 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
       params: [],
     });
     if (this.onDisconnected !== undefined) {
-      await this.onDisconnected()
+      await this.onDisconnected();
     }
     this.onDisconnected = undefined;
     this._handleDisconnected();
@@ -149,7 +151,7 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
 
   enableIfConnected(options: EnableOptions): Promise<Account | undefined> {
     if (options.onDisconnected) {
-      this.onDisconnected = options.onDisconnected
+      this.onDisconnected = options.onDisconnected;
     }
     const params: Record<string, unknown> = {};
     Object.keys(options).forEach((key) => {
@@ -157,7 +159,7 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
         return;
       }
       params[key] = options[key as keyof EnableOptions];
-    })
+    });
     return this.bridgeRequest({
       method: 'enableIfConnected',
       params,
@@ -168,23 +170,23 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
     return this._accountInfo;
   }
 
-  get connectedNetworkId(): "mainnet" | "testnet" | "devnet" | undefined {
-    return "mainnet";
+  get connectedNetworkId(): 'mainnet' | 'testnet' | 'devnet' | undefined {
+    return 'mainnet';
   }
 
   unsafeEnable(opt?: EnableOptionsBase | undefined): Promise<Account> {
     let params: Record<string, unknown> = {};
     if (opt) {
       if (opt.onDisconnected) {
-        this.onDisconnected = opt.onDisconnected
+        this.onDisconnected = opt.onDisconnected;
       }
-      params = {}
+      params = {};
       Object.keys(opt).forEach((key) => {
         if (opt[key as keyof EnableOptionsBase] instanceof Function) {
           return;
         }
         params[key] = opt[key as keyof EnableOptionsBase];
-      })
+      });
     }
     return this.bridgeRequest({ method: 'unsafeEnable', params }) as Promise<Account>;
   }
@@ -207,31 +209,56 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
     return this.bridgeRequest({ method: 'unsafeGetSelectedAccount' }) as Promise<Account>;
   }
 
-  signAndSubmitDeployContractTx(params: SignDeployContractTxParams): Promise<SignDeployContractTxResult> {
-    return this.bridgeRequest({ method: 'signAndSubmitDeployContractTx', params: JSON.stringify(params) }) as Promise<SignDeployContractTxResult>;
+  signAndSubmitDeployContractTx(
+    params: SignDeployContractTxParams,
+  ): Promise<SignDeployContractTxResult> {
+    return this.bridgeRequest({
+      method: 'signAndSubmitDeployContractTx',
+      params: JSON.stringify(params),
+    }) as Promise<SignDeployContractTxResult>;
   }
 
-  signAndSubmitExecuteScriptTx(params: SignExecuteScriptTxParams): Promise<SignExecuteScriptTxResult> {
-    return this.bridgeRequest({ method: 'signAndSubmitExecuteScriptTx', params: JSON.stringify(params) }) as Promise<SignExecuteScriptTxResult>;
+  signAndSubmitExecuteScriptTx(
+    params: SignExecuteScriptTxParams,
+  ): Promise<SignExecuteScriptTxResult> {
+    return this.bridgeRequest({
+      method: 'signAndSubmitExecuteScriptTx',
+      params: JSON.stringify(params),
+    }) as Promise<SignExecuteScriptTxResult>;
   }
 
   signAndSubmitTransferTx(params: SignTransferTxParams): Promise<SignTransferTxResult> {
-    return this.bridgeRequest({ method: 'signAndSubmitTransferTx', params: JSON.stringify(params) }) as Promise<SignTransferTxResult>;
+    return this.bridgeRequest({
+      method: 'signAndSubmitTransferTx',
+      params: JSON.stringify(params),
+    }) as Promise<SignTransferTxResult>;
   }
 
   signAndSubmitUnsignedTx(params: SignUnsignedTxParams): Promise<SignUnsignedTxResult> {
-    return this.bridgeRequest({ method: 'signAndSubmitUnsignedTx', params: JSON.stringify(params) }) as Promise<SignUnsignedTxResult>;
+    return this.bridgeRequest({
+      method: 'signAndSubmitUnsignedTx',
+      params: JSON.stringify(params),
+    }) as Promise<SignUnsignedTxResult>;
   }
 
   signUnsignedTx(params: SignUnsignedTxParams): Promise<SignUnsignedTxResult> {
-    return this.bridgeRequest({ method: 'signUnsignedTx', params: JSON.stringify(params) }) as Promise<SignUnsignedTxResult>;
+    return this.bridgeRequest({
+      method: 'signUnsignedTx',
+      params: JSON.stringify(params),
+    }) as Promise<SignUnsignedTxResult>;
   }
 
   signMessage(params: SignMessageParams): Promise<SignMessageResult> {
-    return this.bridgeRequest({ method: 'signMessage', params: JSON.stringify(params) }) as Promise<SignMessageResult>;
+    return this.bridgeRequest({
+      method: 'signMessage',
+      params: JSON.stringify(params),
+    }) as Promise<SignMessageResult>;
   }
 
   request(message: RequestMessage) {
-    return this.bridgeRequest({ method: 'addNewToken', params: message.params }) as Promise<boolean>;
+    return this.bridgeRequest({
+      method: 'addNewToken',
+      params: message.params,
+    }) as Promise<boolean>;
   }
 }

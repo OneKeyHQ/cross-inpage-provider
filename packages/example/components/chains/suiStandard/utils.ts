@@ -1,10 +1,10 @@
 // Copyright (c) Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-import { SuiObjectRef, SuiClient } from '@mysten/sui.js/client';
-import { SUI_TYPE_ARG } from '@mysten/sui.js/utils';
-import { TransactionBlock } from '@mysten/sui.js/transactions';
-import type { CoinStruct } from '@mysten/sui.js/client';
+import { SuiObjectRef, SuiClient } from '@mysten/sui/client';
+import { SUI_TYPE_ARG } from '@mysten/sui/utils';
+import { Transaction } from '@mysten/sui/transactions';
+import type { CoinStruct } from '@mysten/sui/client';
 export async function sponsorTransaction(
   client: SuiClient,
   sender: string,
@@ -22,7 +22,7 @@ export async function sponsorTransaction(
     }));
   }
 
-  const tx = TransactionBlock.fromKind(transactionKindBytes);
+  const tx = Transaction.fromKind(transactionKindBytes);
   tx.setSender(sender);
   tx.setGasOwner(sender);
   tx.setGasPayment(payment);

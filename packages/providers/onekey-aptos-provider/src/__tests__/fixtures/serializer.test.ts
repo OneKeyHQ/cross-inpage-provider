@@ -20,7 +20,7 @@ import {
   FixedBytes,
 } from '@aptos-labs/ts-sdk';
 import { serializeArguments, deserializeArguments } from '../../serializer';
-import { hexToBytes } from '@noble/hashes/utils';
+import { hexToBytes } from '@onekeyfe/cross-inpage-provider-core';
 import { Types } from 'aptos';
 
 function deepCompare(input: any, output: any): boolean {

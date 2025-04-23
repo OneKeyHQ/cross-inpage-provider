@@ -2,7 +2,7 @@
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { ProviderAptosBase } from './ProviderAptosBase';
-import {
+import type {
   AptosAccountInfo,
   ProviderState,
   SignMessagePayload,

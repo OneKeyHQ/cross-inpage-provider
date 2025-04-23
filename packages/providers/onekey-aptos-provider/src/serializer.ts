@@ -22,7 +22,7 @@ import {
   InputScriptData,
   ScriptFunctionArgumentTypes,
 } from '@aptos-labs/ts-sdk';
-import { hexToBytes, bytesToHex } from '@noble/hashes/utils';
+import { hexToBytes, bytesToHex } from '@onekeyfe/cross-inpage-provider-core';
 import type { Types } from 'aptos';
 
 export enum TransactionPayloadType {

@@ -100,6 +100,21 @@ export function defineWindowProperty(
     alwaysInject?: boolean;
   },
 ) {
+  // Handle Firefox's wrappedJSObject case
+  if (typeof window !== 'undefined' && 'wrappedJSObject' in window) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        (window as any).wrappedJSObject[property] = (globalThis as any).cloneInto(
+          provider,
+          window,
+          {
+            cloneFunctions: true,
+          },
+        );
+      } catch (error) {
+        console.error('cloneInto error', error);
+      }
+  }
   if (!options?.alwaysInject) {
     if (!checkPlatformEnable(options?.disablePlatform)) return;
     if (!checkWalletSwitchEnable()) return;

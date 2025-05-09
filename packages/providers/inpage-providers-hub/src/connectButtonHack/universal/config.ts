@@ -5036,6 +5036,236 @@ export const sitesConfig: SitesInfo[] = [
         },
       ],
     },
+  }, 
+  {
+    urls: ['portal.bouncebit.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName(wallet) {
+            return findIconAndNameByIcon(
+              () =>
+                Array.from(
+                  document.querySelectorAll<HTMLElement>(
+                    'img[src*="/images/wallet/metamask.png"]',  
+                  ),
+                ).filter((e) => isVisible(e))?.[0],
+              'auto-search-text',
+              wallet.name,
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['obelisk.nodedao.com'],
+    walletsForProvider: {
+      [IInjectedProviderNames.btc]: [
+        {
+          ...basicWalletInfo['unisat'],
+          findIconAndName({ name }) {
+            return findIconAndNameByName(document.body, name, 'auto-search-icon')?? null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['dapp.tokenbridge.rootstock.io','hive.bsquared.network','portal.bouncebit.io','www.lolik.com'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            return findIconAndNameByName(document.body, name, 'auto-search-icon')?? null;
+          },   
+        },
+      ],
+    },
+  },
+  {
+    urls: ['bridge.metis.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('div.sc-iGgWBj.jEkttQ', 'Connect your wallet');
+            return (modal && findIconAndNameByName(modal, /.*meta\s*mask$/i, 'auto-search-icon')) ?? null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['lista.org'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = document.querySelector<HTMLElement>('div[role="alertdialog"]');
+            const text = modal && findWalletTextByParent(modal, name, []);
+            const icon = text?.parentElement?.parentElement?.querySelector(
+              'img',
+            ) as HTMLElement | null;
+            return (
+              text && {
+                textNode: text,
+                iconNode: icon ?? null,
+              }
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.coffer.network'],
+    walletsForProvider: {
+      [IInjectedProviderNames.btc]: [
+        {
+          ...basicWalletInfo['unisat'],
+          container: () => getConnectWalletModalByTitle('div.ant-web3-connect-modal-body.css-ccdg5a', 'Connect Wallet'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['www.stakedao.org'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName(wallet) {
+            const iconNode = Array.from(
+              document.querySelectorAll<HTMLElement>(
+                'img[alt="metamask wallet logo"]',  
+              ),
+            ).filter((e) => isVisible(e))?.[0];            
+            // 创建一个空的文本节点
+            return iconNode ? {
+              textNode: document.createTextNode(''),
+              iconNode: iconNode
+            } : null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['www.babylon.magpiexyz.io','homora-v2.alphaventuredao.io','app.yei.finance','portal.bouncebit.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            return findIconAndNameByName(document.body, name, 'auto-search-icon')?? null;
+          }, 
+        },
+      ],
+    },
+  },
+  {
+    urls: ['exsat.network'],
+    mutationObserverOptions: {
+      childList: true,
+      subtree: true,
+      attributes: true,
+    },
+    constraintMap: {
+      icon: [isWalletIconLessEqualThan],
+      text: [],
+    },
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = document.querySelector('.ant-modal-body');
+            return (modal && findIconAndNameByName(modal as HTMLElement, name, 'auto-search-icon', {
+              icon: [isWalletIconLessEqualThan],
+              text: []
+            })) ?? null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.pluto.so'],
+    walletsForProvider: {
+      [IInjectedProviderNames.solana]: [
+        {
+          ...basicWalletInfo['phantom'],
+          findIconAndName(wallet) {
+            return findIconAndNameByIcon(
+              () =>
+                Array.from(
+                  document.querySelectorAll<HTMLElement>(
+                    'img[alt="phantom wallet"]',  
+                  ),
+                ).filter((e) => isVisible(e))?.[0],
+              'auto-search-text',
+              wallet.name,
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.cega.fi','parrot.fi','app.rate-x.io','app.meteora.ag','app.fragmetric.xyz','app.apricot.one'
+    ,'dex.saros.xyz','tulip.garden'],
+    walletsForProvider: {
+      [IInjectedProviderNames.solana]: [
+        {
+          ...basicWalletInfo['phantom'],
+          findIconAndName({ name }) {
+            return findIconAndNameByName(document.body, name, 'auto-search-icon')?? null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.adrena.xyz'],
+    walletsForProvider: {
+      [IInjectedProviderNames.solana]: [
+        {
+          ...basicWalletInfo['phantom'],
+          findIconAndName({ name }) {
+            const textNodes = domUtils.findTextNode(document.body, name, 'all') as Text[];
+            const textNode = textNodes?.find(node => node.parentElement && isVisible(node.parentElement));
+            
+            return textNode?.parentElement ? {
+              textNode: textNode,
+              iconNode: textNode.parentElement
+            } : null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['swap.pump.fun'],
+    walletsForProvider: {
+      [IInjectedProviderNames.solana]: [
+        {
+          ...basicWalletInfo['phantom'],
+          findIconAndName({ name }) {
+            return findIconAndNameByName(document.body, name, 'auto-search-icon')?? null;
+          },
+          afterUpdate(textNode) {
+            if (textNode) {
+              textNode.textContent = 'Onekey&Phantom';
+            }
+          }
+        },
+      ],
+    },
   },
   {
     urls: ['goatswap.xyz'],
@@ -5076,6 +5306,203 @@ export const sitesConfig: SitesInfo[] = [
               'auto-search-text',
               wallet.name,
             );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['www.inverse.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName(wallet) {
+            return findIconAndNameByIcon(
+              () =>
+                Array.from(
+                  document.querySelectorAll<HTMLElement>(
+                    'img[src*="/assets/wallets/Metamask.webp"]',  
+                  ),
+                ).filter((e) => isVisible(e))?.[0],
+              'auto-search-text',
+              wallet.name,
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['www.inceptionlrt.com','btc.allo.xyz','www.pendle.magpiexyz.io','www.duo.exchange','app.neopin.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            return findIconAndNameByName(document.body, name, 'auto-search-icon')?? null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.kiloex.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const textNode = document.querySelector('div.wallet-name')?.firstChild as Text;
+            const iconNode = textNode?.parentElement?.previousElementSibling as HTMLElement;
+            return textNode && iconNode ? {
+              textNode,
+              iconNode
+            } : null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['cbridge.celer.network'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const dialog = document.querySelector('[role="dialog"]');
+            return (dialog && findIconAndNameByName(dialog as HTMLElement, name, 'auto-search-icon', {
+              icon: [isWalletIconLessEqualThan],
+              text: []
+            })) ?? null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.nostra.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName(wallet) {
+            return findIconAndNameByIcon(
+              () =>
+                Array.from(
+                  document.querySelectorAll<HTMLElement>(
+                    'img[alt="MetaMask]',  
+                  ),
+                ).filter((e) => isVisible(e))?.[0],
+              'auto-search-text',
+              wallet.name,
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.b14g.xyz'],
+    walletsForProvider: {
+      [IInjectedProviderNames.btc]: [
+        {
+          ...basicWalletInfo['unisat'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('div.group.relative', 'Connect Wallet');
+            return modal && findIconAndNameByIcon(
+              'img[alt="Unisat Logo"]',
+              'auto-search-text',
+              name,
+              modal
+            );
+          }
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.rate-x.io'],
+    walletsForProvider: {
+      [IInjectedProviderNames.solana]: [
+        {
+          ...basicWalletInfo['phantom'],
+          findIconAndName(wallet) {
+            return findIconAndNameByIcon(
+              () =>
+                Array.from(
+                  document.querySelectorAll<HTMLElement>(
+                    'img[src*="https://static.rate-x.io/img/v1/821978/phantom.svg"]',  
+                  ),
+                ).filter((e) => isVisible(e))?.[0],
+              'auto-search-text',
+              wallet.name,
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.somm.finance','omni.apex.exchange','app.ekubo.org','wemixstake.com','omni.apex.exchange',
+      'core.allbridge.io','bridge.arbitrum.io','zkevm.cronos.org','app.idle.finance'
+    ],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            return findIconAndNameByName(document.body, name, 'auto-search-icon')?? null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['locker.flokifi.com'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName() {
+            return findIconAndNameByName(document.body, /Browser Wallet/, 'auto-search-icon')?? null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.hydration.net'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName(wallet) {
+            return findIconAndNameByIcon(
+              () =>
+                Array.from(
+                  document.querySelectorAll<HTMLElement>(
+                    'img[src*="/assets/MetaMask-91-E9AE7.svg"]',  
+                  ),
+                ).filter((e) => isVisible(e))?.[0],
+              'auto-search-text',
+              wallet.name,
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.btc.pstake.finance'
+    ],
+    walletsForProvider: {
+      [IInjectedProviderNames.btc]: [
+        {
+          ...basicWalletInfo['unisat'],
+          findIconAndName({ name }) {
+            return findIconAndNameByName(document.body, name, 'auto-search-icon')?? null;
           },
         },
       ],

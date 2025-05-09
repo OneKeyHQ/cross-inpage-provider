@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import React from 'react';
 import { JsBridgeIframe } from '@onekeyfe/cross-inpage-provider-core';
 import { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';

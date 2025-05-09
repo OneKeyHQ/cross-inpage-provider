@@ -1,22 +1,25 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable no-unsafe-optional-chaining */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { dapps } from './dapps.config';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { hexToBytes,bytesToHex } from '@noble/hashes/utils';
+import { hexToBytes, bytesToHex } from '@noble/hashes/utils';
 import { useWallet } from '../../../components/connect/WalletContext';
 import DappList from '../../../components/DAppList';
 import params from './params';
-import { getFullnodeUrl } from '@mysten/sui.js/client';
-import { SUI_TYPE_ARG, normalizeSuiAddress } from '@mysten/sui.js/utils';
-import type { CoinStruct, SuiClient } from '@mysten/sui.js/client';
+import { getFullnodeUrl } from '@mysten/sui/client';
+import { SUI_TYPE_ARG, normalizeSuiAddress } from '@mysten/sui/utils';
+import type { CoinStruct, SuiClient } from '@mysten/sui/client';
 
 import {
   ConnectButton,
   useCurrentAccount,
-  useSignTransactionBlock,
-  useSignAndExecuteTransactionBlock,
+  useSignTransaction,
+  useSignAndExecuteTransaction,
   useSignPersonalMessage,
   useSuiClient,
   useWallets,
@@ -29,11 +32,8 @@ import {
   createNetworkConfig,
 } from '@mysten/dapp-kit';
 import InfoLayout from '../../../components/InfoLayout';
-import { TransactionBlock } from '@mysten/sui.js/transactions';
-import {
-  verifyPersonalMessage,
-  verifyTransactionBlock,
-} from '@mysten/sui.js/verify';
+import { Transaction } from '@mysten/sui/transactions';
+import { verifyPersonalMessageSignature, verifyTransactionSignature } from '@mysten/sui/verify';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@mysten/dapp-kit/dist/index.css';
 import { useSignMessage } from './useSignMessage';
@@ -49,9 +49,7 @@ export function normalizeSuiCoinType(coinType: string): string {
     const [normalAddress, module, name] = coinType.split('::');
     if (module && name) {
       try {
-        return `${normalizeSuiAddress(
-          normalAddress,
-        ).toLowerCase()}::${module}::${name}`;
+        return `${normalizeSuiAddress(normalAddress).toLowerCase()}::${module}::${name}`;
       } catch {
         // pass
       }
@@ -60,28 +58,40 @@ export function normalizeSuiCoinType(coinType: string): string {
   return coinType;
 }
 
-function AssetInfoView({ viewRef, client }: { viewRef: ApiFormRef | undefined, client: SuiClient }) {
-
+function AssetInfoView({
+  viewRef,
+  client,
+}: {
+  viewRef: ApiFormRef | undefined;
+  client: SuiClient;
+}) {
   const { store } = useFormContext();
   const [field] = useAtom(store.fieldAtom<string>('asset'));
 
   useEffect(() => {
     if (viewRef) {
       void (async () => {
-        const coinInfo = await client.getCoinMetadata({ coinType: field.value });
-        viewRef?.setValue('assetInfo', `name: ${coinInfo?.name}, symbol: ${coinInfo?.symbol}, decimals: ${coinInfo?.decimals}`);
-        viewRef?.setValue('assetDecimals', coinInfo?.decimals);
+        try {
+          const coinInfo = await client.getCoinMetadata({ coinType: field.value });
+          viewRef?.setValue(
+            'assetInfo',
+          `name: ${coinInfo?.name}, symbol: ${coinInfo?.symbol}, decimals: ${coinInfo?.decimals}`,
+          );
+          viewRef?.setValue('assetDecimals', coinInfo?.decimals);
+        } catch (error) {
+          console.error(error);
+        }
       })();
     }
   }, [client, field.value, viewRef]);
 
-  return <></>
+  return <></>;
 }
 
 function TransferForm() {
   const client = useSuiClient();
   const currentAccount = useCurrentAccount();
-  const { mutateAsync: signAndExecuteTransactionBlock } = useSignAndExecuteTransactionBlock();
+  const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
 
   const apiFromRef = useRef<ApiFormRef>(null);
   const assetsComboboxRef = useRef<ApiComboboxRef<CoinStruct[]>>(null);
@@ -102,7 +112,7 @@ function TransferForm() {
     }, new Map<string, CoinStruct[]>());
 
     return coinTypes;
-  }
+  };
 
   useEffect(() => {
     if (currentAccount && currentAccount?.address) {
@@ -113,7 +123,7 @@ function TransferForm() {
             label: key,
             value: key,
             extra: coinTypes.get(key),
-          }
+          };
         });
         assetsComboboxRef.current?.setOptions(options);
       });
@@ -131,7 +141,7 @@ function TransferForm() {
 
     const coins = (await client.getCoins({ owner: from, coinType, limit: 100 })).data;
 
-    const transfer = new TransactionBlock();
+    const transfer = new Transaction();
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const amountBN = new BigNumber(amount).shiftedBy(decimals);
@@ -148,13 +158,12 @@ function TransferForm() {
     }
 
     const [primaryCoin, ...mergeCoins] = coins?.filter(
-      (coin) =>
-        normalizeSuiCoinType(coin.coinType) === normalizeSuiCoinType(coinType),
+      (coin) => normalizeSuiCoinType(coin.coinType) === normalizeSuiCoinType(coinType),
     );
 
     if (asset?.value === SUI_TYPE_ARG) {
-      const coin = transfer.splitCoins(transfer.gas, [transfer.pure(amountBNString)]);
-      transfer.transferObjects([coin], transfer.pure(to));
+      const coin = transfer.splitCoins(transfer.gas, [amountBNString]);
+      transfer.transferObjects([coin], to);
     } else {
       const primaryCoinInput = transfer.object(primaryCoin.coinObjectId);
       if (mergeCoins.length) {
@@ -163,28 +172,41 @@ function TransferForm() {
           mergeCoins.map((coin) => transfer.object(coin.coinObjectId)),
         );
       }
-      const coin = transfer.splitCoins(primaryCoinInput, [transfer.pure(amountBNString)]);
-      transfer.transferObjects([coin], transfer.pure(to));
+      const coin = transfer.splitCoins(primaryCoinInput, [amountBNString]);
+      transfer.transferObjects([coin], to);
       transfer.setSender(from);
     }
 
-    const res: unknown = await signAndExecuteTransactionBlock({
-      transactionBlock: transfer,
+    const res: unknown = await signAndExecuteTransaction({
+      transaction: transfer,
       account: currentAccount,
     });
     apiFromRef.current?.setValue('result', JSON.stringify(res));
-  }
+  };
 
-  return <ApiForm title="测试 Native & Token 转账" description='测试转账' ref={apiFromRef}>
-    <ApiForm.Combobox id='asset' label='选择资产' placeholder='请选择资产' required ref={assetsComboboxRef} />
-    <ApiForm.Text id='assetInfo' type='info' />
-    <ApiForm.Text id='assetDecimals' type='info' hidden />
-    <AssetInfoView viewRef={apiFromRef.current} client={client} />
-    <ApiForm.Field id='to' label='to' placeholder='请输入转账地址' />
-    <ApiForm.Field id='amount' label='转账金额' defaultValue='0.0001' />
-    <ApiForm.Button id='transfer' label='transfer' onClick={handleTransfer} availableDependencyFields={[{ fieldIds: ['asset', 'to', 'amount'] }]} />
-    <ApiForm.AutoHeightTextArea id='result' />
-  </ApiForm>
+  return (
+    <ApiForm title="测试 Native & Token 转账" description="测试转账" ref={apiFromRef}>
+      <ApiForm.Combobox
+        id="asset"
+        label="选择资产"
+        placeholder="请选择资产"
+        required
+        ref={assetsComboboxRef}
+      />
+      <ApiForm.Text id="assetInfo" type="info" />
+      <ApiForm.Text id="assetDecimals" type="info" hidden />
+      <AssetInfoView viewRef={apiFromRef.current} client={client} />
+      <ApiForm.Field id="to" label="to" placeholder="请输入转账地址" />
+      <ApiForm.Field id="amount" label="转账金额" defaultValue="0.0001" />
+      <ApiForm.Button
+        id="transfer"
+        label="transfer"
+        onClick={handleTransfer}
+        availableDependencyFields={[{ fieldIds: ['asset', 'to', 'amount'] }]}
+      />
+      <ApiForm.AutoHeightTextArea id="result" />
+    </ApiForm>
+  );
 }
 
 function Example() {
@@ -198,8 +220,8 @@ function Example() {
   const { currentWallet, connectionStatus, isConnected } = useCurrentWallet();
 
   const { mutateAsync: connect } = useConnectWallet();
-  const { mutateAsync: signTransactionBlock } = useSignTransactionBlock();
-  const { mutateAsync: signAndExecuteTransactionBlock } = useSignAndExecuteTransactionBlock();
+  const { mutateAsync: signTransaction } = useSignTransaction();
+  const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
   const { mutateAsync: signPersonalMessage } = useSignPersonalMessage();
   const { mutateAsync: signMessage } = useSignMessage();
   const { mutateAsync: disconnect } = useDisconnectWallet();
@@ -287,7 +309,10 @@ function Example() {
               signature: string;
             } = JSON.parse(result);
 
-            const publicKey = await verifyPersonalMessage(Buffer.from(bytes, 'base64'), signature);
+            const publicKey = await verifyPersonalMessageSignature(
+              Buffer.from(bytes, 'base64'),
+              signature,
+            );
 
             return (currentAccount.address === publicKey.toSuiAddress()).toString();
           }}
@@ -309,9 +334,9 @@ function Example() {
               amount: number;
             } = JSON.parse(request);
 
-            const transfer = new TransactionBlock();
-            const [coin] = transfer.splitCoins(transfer.gas, [transfer.pure(amount)]);
-            transfer.transferObjects([coin], transfer.pure(to));
+            const transfer = new Transaction();
+            const [coin] = transfer.splitCoins(transfer.gas, [amount]);
+            transfer.transferObjects([coin], to);
 
             const tx = await sponsorTransaction(
               client,
@@ -322,8 +347,8 @@ function Example() {
               }),
             );
 
-            const res: unknown = await signTransactionBlock({
-              transactionBlock: tx,
+            const res: unknown = await signTransaction({
+              transaction: tx,
               account: currentAccount,
             });
             return JSON.stringify(res);
@@ -336,7 +361,7 @@ function Example() {
               transactionBlockBytes: string;
               signature: string;
             } = JSON.parse(result);
-            const publicKey = await verifyTransactionBlock(
+            const publicKey = await verifyTransactionSignature(
               Buffer.from(transactionBlockBytes, 'base64'),
               signature,
             );
@@ -360,10 +385,10 @@ function Example() {
               amount: number;
             } = JSON.parse(request);
 
-            const transfer = new TransactionBlock();
+            const transfer = new Transaction();
             transfer.setSender(from);
-            const [coin] = transfer.splitCoins(transfer.gas, [transfer.pure(amount)]);
-            transfer.transferObjects([coin], transfer.pure(to));
+            const [coin] = transfer.splitCoins(transfer.gas, [amount]);
+            transfer.transferObjects([coin], to);
 
             const tx = await sponsorTransaction(
               client,
@@ -374,8 +399,8 @@ function Example() {
               }),
             );
 
-            const res: unknown = await signAndExecuteTransactionBlock({
-              transactionBlock: tx,
+            const res: unknown = await signAndExecuteTransaction({
+              transaction: tx,
               account: currentAccount,
             });
             return JSON.stringify(res);
@@ -397,9 +422,9 @@ function Example() {
               amount: number;
             } = JSON.parse(request);
 
-            const transfer = new TransactionBlock();
-            const [coin] = transfer.splitCoins(transfer.gas, [transfer.pure(amount)]);
-            transfer.transferObjects([coin], transfer.pure(to));
+            const transfer = new Transaction();
+            const [coin] = transfer.splitCoins(transfer.gas, [amount]);
+            transfer.transferObjects([coin], to);
 
             const tx = await sponsorTransaction(
               client,
@@ -419,8 +444,8 @@ function Example() {
             // @ts-expect-error
             tx.denyList = () => '0x403';
 
-            const res: unknown = await signTransactionBlock({
-              transactionBlock: tx,
+            const res: unknown = await signTransaction({
+              transaction: tx,
               account: currentAccount,
             });
             return JSON.stringify(res);
@@ -433,7 +458,7 @@ function Example() {
               transactionBlockBytes: string;
               signature: string;
             } = JSON.parse(result);
-            const publicKey = await verifyTransactionBlock(
+            const publicKey = await verifyTransactionSignature(
               Buffer.from(transactionBlockBytes, 'base64'),
               signature,
             );
@@ -441,14 +466,19 @@ function Example() {
             return (currentAccount.address === publicKey.toSuiAddress()).toString();
           }}
         />
-         <ApiPayload
+        <ApiPayload
           title="signTransactionBlock (USDC)"
           description="USDC代币转账签名"
           presupposeParams={signTokenTransactionParams}
           onExecute={async (request: string) => {
-            const { from, to, amount ,token} = JSON.parse(request) as { from: string, to: string, amount: number, token: string };
+            const { from, to, amount, token } = JSON.parse(request) as {
+              from: string;
+              to: string;
+              amount: number;
+              token: string;
+            };
 
-            const transfer = new TransactionBlock();
+            const transfer = new Transaction();
             transfer.setSender(from);
 
             const { data: coins } = await client.getCoins({
@@ -460,11 +490,8 @@ function Example() {
               throw new Error('No BUSD coins found');
             }
 
-            const [coin] = transfer.splitCoins(
-              transfer.object(coins[0].coinObjectId),
-              [transfer.pure(amount)]
-            );
-            transfer.transferObjects([coin], transfer.pure(to));
+            const [coin] = transfer.splitCoins(transfer.object(coins[0].coinObjectId), [amount]);
+            transfer.transferObjects([coin], to);
 
             const tx = await sponsorTransaction(
               client,
@@ -475,21 +502,25 @@ function Example() {
               }),
             );
 
-            const res = await signTransactionBlock({
-              transactionBlock: tx,
+            const res = await signTransaction({
+              transaction: tx,
               account: currentAccount,
             });
             return JSON.stringify(res);
           }}
           onValidate={async (request: string, result: string) => {
-            const { transactionBlockBytes, signature } = JSON.parse(result) as { transactionBlockBytes: string, signature: string };
-            const publicKey = await verifyTransactionBlock(
+            const { transactionBlockBytes, signature } = JSON.parse(result) as {
+              transactionBlockBytes: string;
+              signature: string;
+            };
+            const publicKey = await verifyTransactionSignature(
               Buffer.from(transactionBlockBytes, 'base64'),
               signature,
             );
 
             return (
-              bytesToHex(new Uint8Array(currentAccount.publicKey)) === bytesToHex(publicKey.toRawBytes())
+              bytesToHex(new Uint8Array(currentAccount.publicKey)) ===
+              bytesToHex(publicKey.toRawBytes())
             ).toString();
           }}
         />
@@ -499,9 +530,14 @@ function Example() {
           description="USDC代币转账签名并执行"
           presupposeParams={signTokenTransactionParams}
           onExecute={async (request: string) => {
-            const { from, to, amount, token } = JSON.parse(request) as { from: string, to: string, amount: number, token: string };
+            const { from, to, amount, token } = JSON.parse(request) as {
+              from: string;
+              to: string;
+              amount: number;
+              token: string;
+            };
 
-            const transfer = new TransactionBlock();
+            const transfer = new Transaction();
             transfer.setSender(from);
 
             const { data: coins } = await client.getCoins({
@@ -513,11 +549,8 @@ function Example() {
               throw new Error('No BUSD coins found');
             }
 
-            const [coin] = transfer.splitCoins(
-              transfer.object(coins[0].coinObjectId),
-              [transfer.pure(BigInt(amount))]
-            );
-            transfer.transferObjects([coin], transfer.pure(to));
+            const [coin] = transfer.splitCoins(transfer.object(coins[0].coinObjectId), [amount]);
+            transfer.transferObjects([coin], to);
 
             const tx = await sponsorTransaction(
               client,
@@ -528,8 +561,8 @@ function Example() {
               }),
             );
 
-            const res = await signAndExecuteTransactionBlock({
-              transactionBlock: tx,
+            const res = await signAndExecuteTransaction({
+              transaction: tx,
               account: currentAccount,
             });
 

@@ -1,10 +1,20 @@
-import { hexToBytes } from '@noble/hashes/utils';
-import mitt, { Emitter } from 'mitt';
 import {
+  ReadonlyWalletAccount,
+  SUI_DEVNET_CHAIN,
+  SUI_TESTNET_CHAIN,
+  registerWallet,
+} from '@mysten/wallet-standard';
+import mitt from 'mitt';
+
+import { hexToBytes } from '@onekeyfe/cross-inpage-provider-core';
+
+import { ALL_PERMISSION_TYPES } from './types';
+
+import type { ProviderSui } from './OnekeySuiProvider';
+import type { AccountInfo, PermissionType, WalletInfo } from './types';
+import type {
   IdentifierArray,
   IdentifierString,
-  ReadonlyWalletAccount,
-  registerWallet,
   StandardConnectFeature,
   StandardConnectMethod,
   StandardDisconnectFeature,
@@ -12,20 +22,21 @@ import {
   StandardEventsFeature,
   StandardEventsListeners,
   StandardEventsOnMethod,
-  SUI_DEVNET_CHAIN,
-  SUI_TESTNET_CHAIN,
   SuiSignAndExecuteTransactionBlockFeature,
   SuiSignAndExecuteTransactionBlockMethod,
+  SuiSignAndExecuteTransactionFeature,
+  SuiSignAndExecuteTransactionMethod,
   SuiSignMessageFeature,
   SuiSignMessageMethod,
   SuiSignPersonalMessageFeature,
   SuiSignPersonalMessageMethod,
   SuiSignTransactionBlockFeature,
   SuiSignTransactionBlockMethod,
+  SuiSignTransactionFeature,
+  SuiSignTransactionMethod,
   Wallet,
 } from '@mysten/wallet-standard';
-import { ProviderSui } from './OnekeySuiProvider';
-import { AccountInfo, ALL_PERMISSION_TYPES, PermissionType, WalletInfo } from './types';
+import type { Emitter } from 'mitt';
 
 type WalletEventsMap = {
   [E in keyof StandardEventsListeners]: Parameters<StandardEventsListeners[E]>[0];
@@ -37,7 +48,11 @@ type Features = StandardConnectFeature &
   SuiSignAndExecuteTransactionBlockFeature &
   SuiSignTransactionBlockFeature &
   SuiSignMessageFeature &
-  SuiSignPersonalMessageFeature;
+  // standard features 1.1
+  SuiSignPersonalMessageFeature &
+  // standard features 2.0
+  SuiSignAndExecuteTransactionFeature &
+  SuiSignTransactionFeature;
 
 enum Feature {
   STANDARD__CONNECT = 'standard:connect',
@@ -47,6 +62,8 @@ enum Feature {
   SUI__SIGN_TRANSACTION_BLOCK = 'sui:signTransactionBlock',
   SUI__SIGN_MESSAGE = 'sui:signMessage',
   SUI__SIGN_PERSONAL_MESSAGE = 'sui:signPersonalMessage',
+  SUI__SIGN_AND_EXECUTE_TRANSACTION = 'sui:signAndExecuteTransaction',
+  SUI__SIGN_TRANSACTION = 'sui:signTransaction',
 }
 
 class OnekeySuiStandardWallet implements Wallet {
@@ -102,8 +119,16 @@ class OnekeySuiStandardWallet implements Wallet {
         signMessage: this.$signMessage,
       },
       [Feature.SUI__SIGN_PERSONAL_MESSAGE]: {
-        version: '1.0.0',
+        version: '1.1.0',
         signPersonalMessage: this.$signPersonalMessage,
+      },
+      [Feature.SUI__SIGN_AND_EXECUTE_TRANSACTION]: {
+        version: '2.0.0',
+        signAndExecuteTransaction: this.$signAndExecuteTransaction,
+      },
+      [Feature.SUI__SIGN_TRANSACTION]: {
+        version: '2.0.0',
+        signTransaction: this.$signTransaction,
       },
     };
   }
@@ -180,6 +205,14 @@ class OnekeySuiStandardWallet implements Wallet {
     return this.provider.signPersonalMessage(input);
   };
 
+  $signAndExecuteTransaction: SuiSignAndExecuteTransactionMethod = async (input) => {
+    return this.provider.signAndExecuteTransaction(input);
+  };
+
+  $signTransaction: SuiSignTransactionMethod = async (input) => {
+    return this.provider.signTransaction(input);
+  };
+
   subscribeEventFromBackend() {
     this.provider.onNetworkChange((network) => {
       if (!network) {
@@ -210,6 +243,8 @@ class OnekeySuiStandardWallet implements Wallet {
         Feature.SUI__SIGN_TRANSACTION_BLOCK,
         Feature.SUI__SIGN_MESSAGE,
         Feature.SUI__SIGN_PERSONAL_MESSAGE,
+        Feature.SUI__SIGN_AND_EXECUTE_TRANSACTION,
+        Feature.SUI__SIGN_TRANSACTION,
       ],
     });
 

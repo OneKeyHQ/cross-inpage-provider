@@ -1,6 +1,7 @@
+import type { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
+import { ProviderBase } from '@onekeyfe/cross-inpage-provider-core';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 
-import { ProviderBase, IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 
 class ProviderSuiBase extends ProviderBase {
   constructor(props: IInpageProviderConfig) {

@@ -546,7 +546,8 @@ function Example() {
           allowCallWithoutProvider={!!providerCosmos}
           onExecute={async (request: string) => {
             const network = await providerCosmos?.createSigningStargateClient();
-            const accountInfo = await network.getAccount(account?.address);
+
+            const sequence = await network.getSequence(account?.address);
             const chainId = await network.getChainId();
 
             const obj = JSON.parse(request);
@@ -556,7 +557,7 @@ function Example() {
               bodyBytes: Buffer.from(obj.signDoc.bodyBytes, 'hex'),
               authInfoBytes: Buffer.from(obj.signDoc.authInfoBytes, 'hex'),
               chainId: chainId,
-              accountNumber: Long.fromNumber(accountInfo?.accountNumber),
+              accountNumber: Long.fromNumber(sequence?.accountNumber),
             });
             return res;
           }}
@@ -602,6 +603,22 @@ export default function Demo() {
   return (
     <TomoContextProvider
       chainTypes={['cosmos', 'bitcoin']}
+      cosmosChains={[
+        {
+          id: 1,
+          name: 'Babylon Main',
+          type: 'cosmos',
+          network: 'bbn-1',
+          backendUrls: { rpcUrl: 'https://babylon.nodes.guru' },
+        },
+        {
+          id: 2,
+          name: 'Babylon Test',
+          type: 'cosmos',
+          network: 'bbn-test-5',
+          backendUrls: { rpcUrl: 'https://babylon-testnet-rpc.nodes.guru' },
+        },
+      ]}
       style={{
         rounded: 'medium',
         theme: 'light',

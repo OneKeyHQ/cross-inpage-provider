@@ -22,7 +22,7 @@ import {
   InputScriptData,
   ScriptFunctionArgumentTypes,
 } from '@aptos-labs/ts-sdk';
-import { hexToBytes, bytesToHex } from '@noble/hashes/utils';
+import { hexToBytes, bytesToHex } from '@onekeyfe/cross-inpage-provider-core';
 import type { Types } from 'aptos';
 
 export enum TransactionPayloadType {
@@ -99,6 +99,10 @@ export type TransactionPayloadV2SDK = InputScriptData | InputEntryFunctionData;
 export function serializeTransactionPayload(
   args: TransactionPayloadV1SDK | TransactionPayloadV2SDK,
 ) {
+  if (!args) {
+    throw new Error('Transaction payload cannot be undefined');
+  }
+
   const serializer = new Serializer();
   if ('type' in args || ('arguments' in args && 'type_arguments' in args)) {
     // Some Dapps do not pass the type parameter.

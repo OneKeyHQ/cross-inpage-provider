@@ -9,6 +9,7 @@ export * from './JsBridgeIframe';
 export * from './CrossEventEmitter';
 export * from './walletProperty';
 export * from './notification';
+export * from './utils/hashUtils';
 import * as consts from './consts';
 export { consts };
 

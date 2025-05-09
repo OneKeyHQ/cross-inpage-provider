@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { JsBridgeBase } from '@onekeyfe/cross-inpage-provider-core';
-import { ProviderEthereum, shimWeb3, registerEIP6963Provider } from '@onekeyfe/onekey-eth-provider';
+import {
+  ProviderEthereum,
+  shimWeb3,
+  registerEIP6963Provider,
+  MetaMaskSDK,
+} from '@onekeyfe/onekey-eth-provider';
 import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
 import { ProviderSolana, registerSolanaWallet, WalletIcon } from '@onekeyfe/onekey-solana-provider';
 import {
@@ -53,7 +58,7 @@ export type IWindowOneKeyHub = {
   btcwallet?: ProviderBtcWallet;
   alephium?: ProviderAlph;
   scdo?: ProviderScdo;
-  NEOLineN3?: NEOLineN3; 
+  NEOLineN3?: NEOLineN3;
   NEOLine?: NEOLineN3;
   $private?: ProviderPrivate;
   $walletInfo?: {
@@ -150,7 +155,7 @@ function injectWeb3Provider({
   const algorand = new ProviderAlgo({ bridge });
 
   const scdo = new ProviderScdo({ bridge });
-  
+
   const neo = new ProviderNeo({ bridge });
   NEOLineN3.instance = neo;
 
@@ -194,12 +199,13 @@ function injectWeb3Provider({
   // Override MetaMask EIP6963 Provider
   if (checkWalletSwitchEnable()) {
     registerEIP6963Provider({
-      uuid: '7677b54f-3486-46e2-4e37-bf8747814f',
+      uuid: '7677b54f-3486-46e2-4e37-bf8747814f12',
       name: 'MetaMask',
       rdns: 'io.metamask',
       image: WALLET_CONNECT_INFO.metamask.icon,
       provider: ethereum,
     });
+    defineWindowProperty('mmsdk', new MetaMaskSDK(ethereum));
   }
 
   defineWindowProperty('solana', solana);
@@ -213,6 +219,7 @@ function injectWeb3Provider({
   });
   registerAlephiumProvider(alephium);
   defineWindowProperty('tronLink', tron);
+  defineWindowProperty('tronOfTronLink', tron);
   defineWindowProperty('suiWallet', sui);
   defineWindowProperty('bfcWallet', bfc);
   defineWindowProperty('onekeyTonWallet', {
@@ -227,6 +234,7 @@ function injectWeb3Provider({
   defineWindowProperty('algorand', algorand);
   defineWindowProperty('exodus', {
     algorand,
+    ethereum
   });
 
   // Cardano chain provider injection is handled independently.
@@ -286,9 +294,9 @@ function injectWeb3Provider({
   if (checkWalletSwitchEnable()) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     registerAptosWallet(martian, {
-      name: 'Martian',
-      logo: WALLET_CONNECT_INFO.martian.icon as WalletIcon,
-      url: 'https://chrome.google.com/webstore/detail/martian-wallet/efbglgofoippbgcjepnhiblaibcnclgk',
+      name: 'Petra',
+      logo: WALLET_CONNECT_INFO.petra.icon as WalletIcon,
+      url: 'https://chromewebstore.google.com/detail/petra-aptos-wallet/ejjladinnckdgjemekebdpeokbikhfci',
     });
   }
 

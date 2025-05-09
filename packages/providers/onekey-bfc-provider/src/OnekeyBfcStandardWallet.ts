@@ -1,4 +1,4 @@
-import { hexToBytes } from '@noble/hashes/utils';
+import { hexToBytes } from '@onekeyfe/cross-inpage-provider-core';
 import mitt, { Emitter } from 'mitt';
 import {
   IdentifierArray,

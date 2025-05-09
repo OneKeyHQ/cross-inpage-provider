@@ -2,7 +2,7 @@
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { ProviderAptosBase } from './ProviderAptosBase';
-import {
+import type {
   AptosAccountInfo,
   ProviderState,
   SignMessagePayload,
@@ -14,7 +14,7 @@ import type * as TypeUtils from './type-utils';
 import { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
 import type { Types } from 'aptos';
-import type { AccountAuthenticator } from '@aptos-labs/ts-sdk';
+import type { AccountAuthenticator, PendingTransactionResponse } from '@aptos-labs/ts-sdk';
 import {
   AccountAuthenticatorEd25519,
   Ed25519PublicKey,
@@ -25,7 +25,7 @@ import {
   AptosSignAndSubmitTransactionOutput,
 } from '@aptos-labs/wallet-standard';
 import { serializeTransactionPayload } from './serializer';
-import type { TransactionPayloadV1SDK } from './serializer';
+import type { TransactionPayloadV1SDK, TransactionPayloadV2SDK } from './serializer';
 
 export type AptosProviderType = 'petra' | 'martian';
 
@@ -76,7 +76,10 @@ export type AptosRequest = {
     publicKey: string;
   }>;
 
+  // Standard Wallet V1.1.0
   'signAndSubmitTransactionV2': (params: string) => Promise<AptosSignAndSubmitTransactionOutput>;
+  // Standard Wallet V1.0.0
+  'signAndSubmitTransactionStandardV1': (params: string) => Promise<string>;
 };
 
 type JsBridgeRequest = {
@@ -124,6 +127,8 @@ export interface IProviderAptos extends ProviderAptosBase {
   signAndSubmitTransactionV2(
     params: AptosSignAndSubmitTransactionInput,
   ): Promise<AptosSignAndSubmitTransactionOutput>;
+
+  signAndSubmitTransactionStandardV1(params: string): Promise<PendingTransactionResponse>;
 
   /**
    * Sign message
@@ -292,7 +297,9 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
   }
 
   async signAndSubmitTransaction(transactions: any): Promise<any> {
-    const serialize = serializeTransactionPayload(transactions as TransactionPayloadV1SDK);
+    const serialize = serializeTransactionPayload(
+      transactions as TransactionPayloadV1SDK | TransactionPayloadV2SDK,
+    );
     const res = await this._callBridge({
       method: 'signAndSubmitTransaction',
       params: serialize,
@@ -304,7 +311,7 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
   }
 
   async signTransaction(transactions: Types.TransactionPayload): Promise<any> {
-    const serialize = serializeTransactionPayload(transactions);
+    const serialize = serializeTransactionPayload(transactions as TransactionPayloadV1SDK);
 
     const res = await this._callBridge({
       method: 'signTransaction',
@@ -339,7 +346,9 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
   async signAndSubmitTransactionV2(
     params: AptosSignAndSubmitTransactionInput,
   ): Promise<AptosSignAndSubmitTransactionOutput> {
-    const serialize = serializeTransactionPayload(params.payload);
+    const serialize = serializeTransactionPayload(
+      params.payload as TransactionPayloadV1SDK | TransactionPayloadV2SDK,
+    );
     const param = {
       gasUnitPrice: params.gasUnitPrice,
       maxGasAmount: params.maxGasAmount,
@@ -349,6 +358,17 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
       method: 'signAndSubmitTransactionV2',
       params: JSON.stringify(param),
     });
+  }
+
+  async signAndSubmitTransactionStandardV1(params: string): Promise<PendingTransactionResponse> {
+    const res = await this._callBridge({
+      method: 'signAndSubmitTransactionStandardV1',
+      params,
+    });
+    if (!res) throw web3Errors.provider.unauthorized();
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return JSON.parse(res);
   }
 
   async signMessageCompatible(

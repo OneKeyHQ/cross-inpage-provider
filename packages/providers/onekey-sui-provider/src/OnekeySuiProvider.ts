@@ -1,25 +1,31 @@
-import { bytesToHex } from '@noble/hashes/utils';
+import { Transaction } from '@mysten/sui/transactions';
+
+import { bytesToHex } from '@onekeyfe/cross-inpage-provider-core';
 /* eslint-disable tsdoc/syntax */
 import type { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
-import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
-import { ProviderSuiBase } from './ProviderSuiBase';
-import type * as TypeUtils from './type-utils';
-import type { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 import { web3Errors } from '@onekeyfe/cross-inpage-provider-errors';
-import { TransactionBlock } from '@mysten/sui.js/transactions';
+import type { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
+import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 
-import { ALL_PERMISSION_TYPES, AccountInfo } from './types';
-import type { PermissionType } from './types';
-import {
+import { ProviderSuiBase } from './ProviderSuiBase';
+import { ALL_PERMISSION_TYPES } from './types';
+
+import type * as TypeUtils from './type-utils';
+import type { AccountInfo , PermissionType } from './types';
+import type {
   IdentifierString,
+  SignedTransaction,
   SuiSignAndExecuteTransactionBlockInput,
   SuiSignAndExecuteTransactionBlockOutput,
+  SuiSignAndExecuteTransactionInput,
+  SuiSignAndExecuteTransactionOutput,
   SuiSignMessageInput,
   SuiSignMessageOutput,
   SuiSignPersonalMessageInput,
   SuiSignPersonalMessageOutput,
   SuiSignTransactionBlockInput,
   SuiSignTransactionBlockOutput,
+  SuiSignTransactionInput,
 } from '@mysten/wallet-standard';
 
 const PROVIDER_EVENTS = {
@@ -55,6 +61,17 @@ type SignPersonalMessageInput = SuiSignPersonalMessageInput & {
   walletSerialize: string;
 };
 
+type OneKeySuiSignTransactionInput = Omit<SuiSignTransactionInput, 'transaction' | 'signal'> & {
+  transaction: string;
+};
+
+type OneKeySuiSignAndExecuteTransactionInput = Omit<
+  SuiSignAndExecuteTransactionInput,
+  'transaction' | 'signal'
+> & {
+  transaction: string;
+};
+
 export type SuiRequest = {
   'hasPermissions': (permissions: readonly PermissionType[]) => Promise<boolean>;
 
@@ -77,6 +94,12 @@ export type SuiRequest = {
   'signMessage': (input: SignMessageInput) => Promise<SuiSignMessageOutput>;
 
   'signPersonalMessage': (input: SignPersonalMessageInput) => Promise<SuiSignPersonalMessageOutput>;
+
+  'signTransaction': (input: OneKeySuiSignTransactionInput) => Promise<SignedTransaction>;
+
+  'signAndExecuteTransaction': (
+    input: OneKeySuiSignAndExecuteTransactionInput,
+  ) => Promise<SuiSignAndExecuteTransactionOutput>;
 };
 
 type JsBridgeRequest = {
@@ -254,7 +277,7 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
         ...input,
         // https://github.com/MystenLabs/sui/blob/ace69fa8404eb704b504082d324ebc355a3d2948/sdk/typescript/src/transactions/object.ts#L6-L17
         // With a few more objects, other wallets have steps for tojson.
-        transactionBlock: TransactionBlock.from(input.transactionBlock.serialize()),
+        transactionBlock: Transaction.from(input.transactionBlock.serialize()),
         walletSerialize: JSON.stringify(input.account),
         blockSerialize: input.transactionBlock.serialize(),
       },
@@ -268,7 +291,7 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
       method: 'signTransactionBlock',
       params: {
         ...input,
-        transactionBlock: TransactionBlock.from(input.transactionBlock.serialize()),
+        transactionBlock: Transaction.from(input.transactionBlock.serialize()),
         walletSerialize: JSON.stringify(input.account),
         blockSerialize: input.transactionBlock.serialize(),
       },
@@ -295,6 +318,30 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
         ...input,
         walletSerialize: JSON.stringify(input.account),
         messageSerialize: bytesToHex(input.message),
+      },
+    });
+  }
+
+  async signTransaction(input: SuiSignTransactionInput): Promise<SignedTransaction> {
+    return this._callBridge({
+      method: 'signTransaction',
+      params: {
+        transaction: await input.transaction.toJSON(),
+        account: input.account,
+        chain: input.chain,
+      },
+    });
+  }
+
+  async signAndExecuteTransaction(
+    input: SuiSignAndExecuteTransactionInput,
+  ): Promise<SuiSignAndExecuteTransactionOutput> {
+    return this._callBridge({
+      method: 'signAndExecuteTransaction',
+      params: {
+        transaction: await input.transaction.toJSON(),
+        account: input.account,
+        chain: input.chain,
       },
     });
   }

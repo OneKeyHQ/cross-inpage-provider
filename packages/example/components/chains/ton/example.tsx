@@ -336,7 +336,7 @@ export default function App() {
             {
               appName: 'onekey',
               name: 'OneKey',
-              imageUrl: 'https://common.onekey-asset.com/logo/onekey-x288.png',
+              imageUrl: 'https://uni.onekey-asset.com/static/logo/onekey-x288.png',
               aboutUrl: 'https://onekey.so',
               jsBridgeKey: 'onekeyTonWallet',
               platforms: ['chrome'],

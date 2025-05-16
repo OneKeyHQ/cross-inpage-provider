@@ -2,6 +2,49 @@
 # yarn lockfile v1
 
 
+"@noble/hashes@^1.7.1":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.8.0.tgz#cee43d801fcef9644b11b8194857695acd5f815a"
+  integrity sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==
+
+"@onekeyfe/cross-inpage-provider-core@2.2.24":
+  version "2.2.24"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-core/-/cross-inpage-provider-core-2.2.24.tgz#316ff33db5414d1329a135f0cf83dfa64ff98b34"
+  integrity sha512-Owg4eslXO4KvYt0cJT6pHroHh0UJ8bXe0pomr2WpTC2/CKIccm4zyKOg7eJ2C4tnYSgWrUQ5EFWb8DrP/xhUoQ==
+  dependencies:
+    "@noble/hashes" "^1.7.1"
+    "@onekeyfe/cross-inpage-provider-errors" "2.2.24"
+    "@onekeyfe/cross-inpage-provider-events" "2.2.24"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.24"
+    events "^3.3.0"
+    lodash-es "^4.17.21"
+    ms "^2.1.3"
+
+"@onekeyfe/cross-inpage-provider-errors@2.2.24":
+  version "2.2.24"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-2.2.24.tgz#7018568f7bf029af70d71a06d46ac454fae17d67"
+  integrity sha512-Xl8HlfLIkREq3AuUAK4LwrVYXXHQhuRwu/QWhRf0WDcg+n27B87bOkllh1mFpwZHIgZOxKK/LpQgqizvULlQrg==
+  dependencies:
+    fast-safe-stringify "^2.0.6"
+
+"@onekeyfe/cross-inpage-provider-events@2.2.24":
+  version "2.2.24"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-events/-/cross-inpage-provider-events-2.2.24.tgz#199684f52928116ee9cdae99f58e0d3d040db6cc"
+  integrity sha512-o7A0BAKJI+72NW0t6J9s6dv8rYPZb1iYYiXX2ub2nWnY1kQ8nG+0cZcSksBUZhGThliWzB7C0oR3MiNUHEhZpw==
+
+"@onekeyfe/cross-inpage-provider-types@2.2.24":
+  version "2.2.24"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-types/-/cross-inpage-provider-types-2.2.24.tgz#ddb7cbefdf8879339a983933ed876628502afdda"
+  integrity sha512-uOporLpVT/ybmoqWfu3go4v+uQH8aUpSscfZKvUU46dYEk8vXB9DDJiJODcGz9qhbcl1kgrEv4Q25S7sxVvxfg==
+
+"@onekeyfe/extension-bridge-injected@2.2.24":
+  version "2.2.24"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/extension-bridge-injected/-/extension-bridge-injected-2.2.24.tgz#a972ea84cef0aee7c1781e855aa6bb0b69729a2e"
+  integrity sha512-juQfyJpRoYi0nay+T//sxk2SA22xsZABw4yYldR44xdWv1sWuoCEizIGiNnp1yNX1bWtNeWXBWbAinHc2SU4Xg==
+  dependencies:
+    "@onekeyfe/cross-inpage-provider-core" "2.2.24"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.24"
+
 "@types/depd@^1.1.32":
   version "1.1.32"
   resolved "https://registry.yarnpkg.com/@types/depd/-/depd-1.1.32.tgz#7937f66870d0cd7a9881152e4eb02c8c43298f11"
@@ -35,6 +78,11 @@ borsh@^0.6.0:
     bs58 "^4.0.0"
     text-encoding-utf-8 "^1.0.2"
 
+borsh@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/borsh/-/borsh-1.0.0.tgz#b564c8cc8f7a91e3772b9aef9e07f62b84213c1f"
+  integrity sha512-fSVWzzemnyfF89EPwlUNsrS5swF5CrtiN4e+h0/lLf4dz2he4L3ndM20PS9wj7ICSkXJe/TQUHdaPTq15b1mNQ==
+
 bs58@^4.0.0:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/bs58/-/bs58-4.0.1.tgz#be161e76c354f6f788ae4071f63f34e8c4f0a42a"
@@ -66,6 +114,16 @@ error-polyfill@^0.1.3:
     o3 "^1.0.3"
     u3 "^0.1.1"
 
+events@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
+  integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
+
+fast-safe-stringify@^2.0.6:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.1.1.tgz#c406a83b6e70d9e35ce3b30a81141df30aeba884"
+  integrity sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==
+
 http-errors@^1.7.2:
   version "1.8.1"
   resolved "https://registry.yarnpkg.com/http-errors/-/http-errors-1.8.1.tgz#7c3f28577cbc8a207388455dbd62295ed07bd68c"
@@ -86,6 +144,16 @@ js-sha256@^0.9.0:
   version "0.9.0"
   resolved "https://registry.yarnpkg.com/js-sha256/-/js-sha256-0.9.0.tgz#0b89ac166583e91ef9123644bd3c5334ce9d0966"
   integrity sha512-sga3MHh9sgQN2+pJ9VYZ+1LPwXOxuBJBA5nrR5/ofPfuiJBE2hnjsaN8se8JznOmGLN2p49Pe5U/ttafcs/apA==
+
+lodash-es@^4.17.21:
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.21.tgz#43e626c46e6591b7750beb2b50117390c609e3ee"
+  integrity sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==
+
+ms@^2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
+  integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
 mustache@^4.0.0:
   version "4.2.0"

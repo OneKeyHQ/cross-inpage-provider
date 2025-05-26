@@ -267,12 +267,14 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
         id: string;
       };
       if(!checkWalletSwitchEnable()) return;
-
-      if (data && data.type === 'proxy-request' && data.method) {
+      const hasHandle = data && data.type && data.type.startsWith('proxy-request') && data.type !== 'proxy-request-response';
+      if (data && hasHandle && data.method) {
         const method = data.method as 'enable';
         if (this[method]) {
           const unwrapedArgs = JSONUint8Array.unwrap(data.args) as object[];
-          (this[method] as (...args: any[]) => Promise<any>)(...unwrapedArgs).then((res) => {
+          (this[method] as (...args: any[]) => Promise<any>)(...unwrapedArgs, {
+            typeLongToString: true,
+          }).then((res) => {
             window.postMessage({
               type: 'proxy-request-response',
               id: data.id,
@@ -470,6 +472,9 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
       accountNumber?: Long | null | undefined;
     },
     signOptions?: KeplrSignOptions | undefined,
+    customOptions?: {
+      typeLongToString?: boolean;
+    },
   ): Promise<DirectSignResponse> {
     const res = await this._callBridge({
       method: 'signDirect',
@@ -495,7 +500,7 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
         // @ts-expect-error
         authInfoBytes: hexToBytes(res.signed.authInfoBytes),
         // @ts-ignore
-        accountNumber: Long.fromString(res.signed.accountNumber),
+        accountNumber: customOptions?.typeLongToString ? res.signed.accountNumber?.toString() : Long.fromString(res.signed.accountNumber),
         chainId: res.signed.chainId,
       },
     };

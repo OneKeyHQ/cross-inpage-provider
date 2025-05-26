@@ -244,6 +244,7 @@ function injectWeb3Provider({
 
   // cosmos keplr
   defineWindowProperty('keplr', cosmos);
+  (window as any).keplrRequestMetaIdSupport = true; // support keplr request meta id
   defineWindowProperty('getOfflineSigner', cosmos.getOfflineSigner.bind(cosmos));
   defineWindowProperty('getOfflineSignerOnlyAmino', cosmos.getOfflineSignerOnlyAmino.bind(cosmos));
   defineWindowProperty('getOfflineSignerAuto', cosmos.getOfflineSignerAuto.bind(cosmos));

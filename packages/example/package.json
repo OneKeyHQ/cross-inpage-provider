@@ -62,7 +62,7 @@
     "@solana/wallet-adapter-wallets": "^0.19.36",
     "@solana/wallet-standard-util": "^1.1.1",
     "@solana/wallet-standard-wallet-adapter-react": "^1.1.2",
-    "@solana/web3.js": "^1.91.8",
+    "@solana/web3.js": "^1.98.1",
     "@starcoin/starcoin": "^2.1.6",
     "@starcoin/starmask-onboarding": "^1.0.0",
     "@tanstack/react-query": "^5.40.0",

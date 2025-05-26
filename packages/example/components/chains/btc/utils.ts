@@ -1,6 +1,7 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import * as ecc from 'tiny-secp256k1';
 import { BlockBook, IBtcUTXO } from './blockbook';
+import { getApiKey } from '../../../lib/api';
 
 bitcoin.initEccLib(ecc);
 
@@ -112,10 +113,10 @@ export async function createPSBT(
   let url: string;
   if (network === bitcoin.networks.bitcoin) {
     // url = 'https://btc1.trezor.io';
-    url = 'https://go.getblock.io/80f0e77bd1b04080a0d20ef4702be1ba';
+    url = `https://go.getblock.io/${getApiKey("WU1HRxULSUpQQ1saWw8GUwRJQlERFUhSXVtfERVFF18=")}`;
   } else if (network === bitcoin.networks.testnet) {
     // url = 'https://tbtc1.trezor.io';
-    url = 'https://go.getblock.io/e15e85170a3940419ebf13d3b82f78ab';
+    url = `https://go.getblock.io/${getApiKey("DUIXSEAPHktSEgweW1cBUwcdEQYWEEtTW1hRTUMVFQg=")}`;
   }
   if (!url) {
     throw new Error('unsupported network');

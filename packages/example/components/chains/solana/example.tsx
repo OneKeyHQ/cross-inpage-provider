@@ -14,6 +14,7 @@ import { createTransferTransaction, createVersionedTransaction, createTokenTrans
 import nacl from 'tweetnacl';
 import { toast } from '../../ui/use-toast';
 import { OffchainMessage } from '../solanaStandard/OffchainMessage';
+import { getApiKey } from '../../../lib/api';
 
 const NETWORK = clusterApiUrl('mainnet-beta');
 
@@ -37,7 +38,7 @@ export default function Example() {
   ]);
 
   const { provider, setAccount, account } = useWallet<IProviderApi>();
-  const connection = useMemo(() => new Connection('https://go.getblock.io/d60799984fed48669b56fb8e3c6af98b'), []);
+  const connection = useMemo(() => new Connection(`https://go.getblock.io/${getApiKey("DEwWFkUCHktXRF8YWw1QCQQcEgQWTE1QDlgKRRVDRw8=")}`), []);
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

@@ -17,6 +17,7 @@ import { verifySignIn } from '@solana/wallet-standard-util';
 import nacl from 'tweetnacl';
 import { Transaction, VersionedTransaction } from '@solana/web3.js';
 import { OffchainMessage } from './OffchainMessage';
+import { getApiKey } from '../../../lib/api';
 
 function Example() {
   const { setProvider } = useWallet();
@@ -399,7 +400,7 @@ export default function App() {
   const network = WalletAdapterNetwork.Mainnet;
 
   // You can also provide a custom RPC endpoint.
-  const endpoint = useMemo(() => 'https://go.getblock.io/d60799984fed48669b56fb8e3c6af98b', []);
+  const endpoint = useMemo(() => `https://go.getblock.io/${getApiKey("DEwWFkUCHktXRF8YWw1QCQQcEgQWTE1QDlgKRRVDRw8=")}`, []);
 
   const wallets = useMemo(
     () => [],

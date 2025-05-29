@@ -6,6 +6,7 @@ import {
   shimWeb3,
   registerEIP6963Provider,
   MetaMaskSDK,
+  METAMASK_UUID
 } from '@onekeyfe/onekey-eth-provider';
 import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
 import { ProviderSolana, registerSolanaWallet, WalletIcon } from '@onekeyfe/onekey-solana-provider';
@@ -199,7 +200,7 @@ function injectWeb3Provider({
   // Override MetaMask EIP6963 Provider
   if (checkWalletSwitchEnable()) {
     registerEIP6963Provider({
-      uuid: '7677b54f-3486-46e2-4e37-bf8747814f12',
+      uuid: METAMASK_UUID,
       name: 'MetaMask',
       rdns: 'io.metamask',
       image: WALLET_CONNECT_INFO.metamask.icon,

@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/onekey-cardano-provider",
-  "version": "2.2.25",
+  "version": "2.2.26",
   "keywords": [
     "cross-inpage-provider",
     "cardano"
@@ -29,9 +29,9 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "2.2.25",
-    "@onekeyfe/cross-inpage-provider-errors": "2.2.25",
-    "@onekeyfe/cross-inpage-provider-types": "2.2.25",
-    "@onekeyfe/extension-bridge-injected": "2.2.25"
+    "@onekeyfe/cross-inpage-provider-core": "2.2.26",
+    "@onekeyfe/cross-inpage-provider-errors": "2.2.26",
+    "@onekeyfe/cross-inpage-provider-types": "2.2.26",
+    "@onekeyfe/extension-bridge-injected": "2.2.26"
   }
 }

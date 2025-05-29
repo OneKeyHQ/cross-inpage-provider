@@ -5081,4 +5081,16 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
+  {
+    urls: ['dollar.noble.xyz'],
+    walletsForProvider: {
+      [IInjectedProviderNames.cosmos]: [
+        {
+          ...basicWalletInfo['keplr'],
+          name: /^Keplr$/,
+          container: () => getConnectWalletModalByTitle('div[role="dialog"]', 'Connect a wallet'),
+        },
+      ],
+    },
+  },
 ];

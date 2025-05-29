@@ -1,6 +1,6 @@
 const DEFAULT_API = 'https://api.onekeytest.com'
 
-function getApiKey(apiKey:string, fromBase64:boolean = true) {
+function getApiKey(apiKey:string, fromBase64 = true) {
     if (fromBase64) {
         const key = Buffer.from(apiKey, 'base64').toString();
         return getApiKey(key, false);

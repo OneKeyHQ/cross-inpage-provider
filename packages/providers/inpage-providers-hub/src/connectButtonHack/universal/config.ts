@@ -5099,8 +5099,9 @@ export const sitesConfig: SitesInfo[] = [
       [IInjectedProviderNames.cosmos]: [
         {
           ...basicWalletInfo['keplr'],
-          name: /keplr/i,
-          container: () => getConnectWalletModalByTitle('div[role="dialog"]', 'Connect origin wallet'),
+          findIconAndName({ name }) {
+            return findIconAndNameByName(document.body, name, 'auto-search-icon')?? null;
+          },
         },
       ],
     },

@@ -36,14 +36,26 @@ export default {
   ],
   signTokenTransaction: (address: string) => [
     {
-      id: 'signUSDTransaction',
-      name: 'BUSD_TYPE',
+      id: 'signUSDTransaction-BFC-gas',
+      name: 'BUSD_TYPE use BFC gas',
       value: JSON.stringify({
+        busdGas: false,
         from: address,
         to: address,
         amount: 1000, // 0.000001 USD
-        token: '0x00000000000000000000000000000000000000000000000000000000000000c8::busd::BUSD'      
+        token: '0x00000000000000000000000000000000000000000000000000000000000000c8::busd::BUSD'
       }),
     },
+    {
+      id: 'signUSDTransaction-BUSD-gas',
+      name: 'BUSD_TYPE use busdGas',
+      value: JSON.stringify({
+        busdGas: true,
+        from: address,
+        to: address,
+        amount: 1000, // 0.000001 USD
+        token: '0x00000000000000000000000000000000000000000000000000000000000000c8::busd::BUSD'
+      }),
+    }
   ],
 };

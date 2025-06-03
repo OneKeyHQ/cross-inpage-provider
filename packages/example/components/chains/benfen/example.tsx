@@ -8,8 +8,9 @@ import ConnectButton from '../../../components/connect/ConnectButton';
 import { hexToBytes, bytesToHex } from '@noble/hashes/utils';
 import { useWallet } from '../../../components/connect/WalletContext';
 import DappList from '../../../components/DAppList';
+import { BENFEN_CLOCK_OBJECT_ID, BFC_DECIMALS } from '@benfen/bfc.js/utils';
 import params from './params';
-import { getFullnodeUrl } from '@benfen/bfc.js/client';
+import { CoinStruct, getFullnodeUrl } from '@benfen/bfc.js/client';
 import {
   useCurrentAccount,
   useSignTransactionBlock,
@@ -34,9 +35,14 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useSignMessage } from './useSignMessage';
 import { ApiGroup, ApiPayload } from '../../ApiActuator';
-import { sponsorTransaction } from './utils';
+import { computeTxBudget, sponsorTransaction, TOKEN_INFO } from './utils';
 import { IKnownWallet } from '../../connect/types';
 import { WalletWithRequiredFeatures } from '@benfen/bfc.js/dist/cjs/wallet-standard';
+import BigNumber from 'bignumber.js';
+import { ApiForm } from '../../ApiForm';
+import { log } from 'console';
+
+
 
 function Example() {
   const client = useBenfenClient();
@@ -47,7 +53,9 @@ function Example() {
   const { isConnected } = useCurrentWallet();
 
   const { mutateAsync: signTransactionBlock } = useSignTransactionBlock();
-  const { mutateAsync: signAndExecuteTransactionBlock } = useSignAndExecuteTransactionBlock();
+  const { mutateAsync: signAndExecuteTransactionBlock } = useSignAndExecuteTransactionBlock({
+    executeFromWallet: true,
+  });
   const { mutateAsync: signPersonalMessage } = useSignPersonalMessage();
   const { mutateAsync: signMessage } = useSignMessage();
 
@@ -351,47 +359,256 @@ function Example() {
           description="BUSD代币转账签名并执行"
           presupposeParams={signTokenTransactionParams}
           onExecute={async (request: string) => {
-            const { from, to, amount, token } = JSON.parse(request) as {
+            const { from, to, amount, token,busdGas } = JSON.parse(request) as {
               from: string;
               to: string;
               amount: number;
               token: string;
+              busdGas: boolean;
             };
 
-            const transfer = new TransactionBlock();
-            transfer.setSender(from);
-
-            const { data: coins } = await client.getCoins({
+            const tx = new TransactionBlock();
+            const bigintAmount = BigInt(new BigNumber(amount).toFixed(0));
+            const { data: bfcCoins } = await client.getCoins({
               owner: from,
-              coinType: token,
+              coinType: TOKEN_INFO.BFC.address,
             });
 
-            if (!coins.length) {
-              throw new Error('No BUSD coins found');
+            let gasCoins = bfcCoins;
+            let coin: ReturnType<(typeof tx)['splitCoins']>;
+            if (busdGas) {
+              const { data: busdCoins } = await client.getCoins({
+                owner: from,
+                coinType: TOKEN_INFO.BUSD.address,
+              });
+              gasCoins = busdCoins;
+              const [primaryCoins, ...otherCoins] = bfcCoins;
+              if (otherCoins.length > 0) {
+                tx.mergeCoins(
+                  tx.object(primaryCoins.coinObjectId),
+                  otherCoins.map((i) => tx.object(i.coinObjectId)),
+                );
+              }
+              coin = tx.splitCoins(tx.object(primaryCoins.coinObjectId), [tx.pure(bigintAmount)]);
+            } else {
+              // 使用 BFC 作为 gas，判断转账的代币类型
+              if (token === TOKEN_INFO.BFC.address) {
+                // 转账 BFC 代币，可以使用 tx.gas
+                coin = tx.splitCoins(tx.gas, [tx.pure(bigintAmount)]);
+              } else {
+                // 转账其他代币，需要获取对应的代币
+                const { data: tokenCoins } = await client.getCoins({
+                  owner: from,
+                  coinType: token,
+                });
+                const [primaryCoin, ...otherCoins] = tokenCoins;
+                if (otherCoins.length > 0) {
+                  tx.mergeCoins(
+                    tx.object(primaryCoin.coinObjectId),
+                    otherCoins.map((i) => tx.object(i.coinObjectId)),
+                  );
+                }
+                coin = tx.splitCoins(tx.object(primaryCoin.coinObjectId), [tx.pure(bigintAmount)]);
+              }
             }
 
-            const [coin] = transfer.splitCoins(transfer.object(coins[0].coinObjectId), [
-              transfer.pure(BigInt(amount)),
-            ]);
-            transfer.transferObjects([coin], transfer.pure(to));
+            tx.setGasPayment(
+              gasCoins.map((i) => ({ objectId: i.coinObjectId, version: i.version, digest: i.digest })),
+            );
+            tx.transferObjects([coin], tx.pure(to));
+            tx.setSenderIfNotSet(from);
 
-            const tx = await sponsorTransaction(
+            await computeTxBudget(
+              tx,
+              gasCoins.reduce((pre, cur) => BigInt(cur.balance) + pre, BigInt(0)),
+              busdGas ? TOKEN_INFO.BUSD : TOKEN_INFO.BFC,
               client,
-              from,
-              await transfer.build({
-                client,
-                onlyTransactionKind: true,
-              }),
             );
 
             const res = await signAndExecuteTransactionBlock({
               transactionBlock: tx,
-              account: currentAccount,
             });
 
             return JSON.stringify(res);
           }}
         />
+
+        <ApiForm title="Benfen Swap" description="Benfen Swap 相关操作">
+          <ApiForm.Text id="swapButtonTitle" value="测试 BFC 转 BUSD" size="lg" />
+
+          <ApiForm.Field type="number" id="swapBfcAmount" label="BFC 数量" required defaultValue='0.01'/>
+          <ApiForm.Checkbox id="useBusdGasSwapBfc" label="使用 BUSD 作为 gas" />
+
+          <ApiForm.Button
+            id="swapButton"
+            label="BFC 转 BUSD"
+            onClick={async (formRef) => {
+              const amount = formRef?.getValue<string>('swapBfcAmount') ?? '0';
+              const busdGas = formRef?.getValue<boolean>('useBusdGasSwapBfc');
+
+              const tx = new TransactionBlock();
+              tx.setSenderIfNotSet(currentAccount?.address??'');
+
+              const bigintAmount = BigInt(new BigNumber(amount).shiftedBy(BFC_DECIMALS).toFixed(0));
+              const from = currentAccount?.address??'';
+
+              const { data: bfcCoins } = await client.getCoins({
+                owner: from,
+                coinType: TOKEN_INFO.BFC.address,
+              });
+
+              let gasCoins = bfcCoins;
+              let coin: ReturnType<(typeof tx)['splitCoins']>;
+              if (busdGas) {
+                const { data: busdCoins } = await client.getCoins({
+                  owner: from,
+                  coinType: TOKEN_INFO.BUSD.address,
+                });
+                gasCoins = busdCoins;
+                const [primaryCoins, ...otherCoins] = bfcCoins;
+                if (otherCoins.length > 0) {
+                  tx.mergeCoins(
+                    tx.object(primaryCoins.coinObjectId),
+                    otherCoins.map((i) => tx.object(i.coinObjectId)),
+                  );
+                }
+                coin = tx.splitCoins(tx.object(primaryCoins.coinObjectId), [tx.pure(bigintAmount)]);
+              } else {
+                coin = tx.splitCoins(tx.gas, [tx.pure(bigintAmount)]);
+              }
+
+              tx.setGasPayment(
+                gasCoins.map((i) => ({ objectId: i.coinObjectId, version: i.version, digest: i.digest })),
+              );
+              tx.moveCall({
+                target: '0xc8::bfc_system::swap_bfc_to_stablecoin',
+                typeArguments: [TOKEN_INFO.BUSD.address],
+                arguments: [
+                  tx.object('0xc9'),
+                  coin,
+                  tx.object(BENFEN_CLOCK_OBJECT_ID),
+                  tx.pure(bigintAmount),
+                  tx.pure('0'),
+                  // 30 minutes
+                  tx.pure(Date.now() + 30 * 60 * 1000),
+                ],
+              });
+              tx.setSenderIfNotSet(from);
+
+              await computeTxBudget(
+                tx,
+                gasCoins.reduce((pre, cur) => BigInt(cur.balance) + pre, BigInt(0)),
+                busdGas ? TOKEN_INFO.BUSD : TOKEN_INFO.BFC,
+                client,
+                bigintAmount
+              );
+
+              const res = await signAndExecuteTransactionBlock({
+                transactionBlock: tx,
+              });
+
+              formRef?.setValue('swapResponse', JSON.stringify(res, null, 2));
+            }}
+            validation={{
+              fields: ['swapBfcAmount'],
+              validator: (values) => {
+                if (!values.swapBfcAmount) {
+                  return '请输入 BFC 数量';
+                }
+              },
+            }}
+          />
+          <ApiForm.Field type="text" id="swapResponse" label="响应"  />
+
+          <ApiForm.Separator/>
+
+          <ApiForm.Field type="number" id="swapBusdAmount" label="BUSD 数量" required defaultValue='0.01' />
+          <ApiForm.Checkbox id="useBusdGasSwapBusd" label="使用 BUSD 作为 gas" />
+
+          <ApiForm.Button
+            id="swapBusdButton"
+            label="BUSD 转 BFC"
+            onClick={async (formRef) => {
+              const amount = formRef?.getValue<string>('swapBusdAmount') ?? '0';
+              const busdGas = formRef?.getValue<boolean>('useBusdGasSwapBusd');
+              const tx = new TransactionBlock();
+              const from = currentAccount?.address??'';
+
+              console.log('=====>>>>> busdGas', busdGas);
+
+              const bigintAmount = BigInt(new BigNumber(amount).shiftedBy(BFC_DECIMALS).toFixed(0));
+
+              const { data: busdCoins } = await client.getCoins({
+                owner: from,
+                coinType: TOKEN_INFO.BUSD.address,
+              });
+
+              let gasCoins = busdCoins;
+              let coin: ReturnType<(typeof tx)['splitCoins']>;
+              if(busdGas) {
+                // 先从合并后的 coin 分割出用于交换的部分
+                coin = tx.splitCoins(tx.gas ,[tx.pure(bigintAmount)]);
+              } else {
+                const [primaryCoin, ...otherCoins] = busdCoins;
+                if (otherCoins.length > 0) {
+                  tx.mergeCoins(
+                    tx.object(primaryCoin.coinObjectId),
+                    otherCoins.map((i) => tx.object(i.coinObjectId))
+                  );
+                }
+                // eslint-disable-next-line prefer-const
+                coin = tx.splitCoins(tx.object(primaryCoin.coinObjectId), [tx.pure(bigintAmount)]);
+                const { data: bfcCoins } = await client.getCoins({
+                  owner: from,
+                  coinType: TOKEN_INFO.BFC.address,
+                });
+                gasCoins = bfcCoins;
+              }
+
+              tx.setGasPayment(
+                gasCoins.map((i) => ({ objectId: i.coinObjectId, version: i.version, digest: i.digest })),
+              );
+              tx.setSenderIfNotSet(from);
+              tx.moveCall({
+                target: '0xc8::bfc_system::swap_stablecoin_to_bfc',
+                typeArguments: [TOKEN_INFO.BUSD.address],
+                arguments: [
+                  tx.object('0xc9'),
+                  coin,
+                  tx.object(BENFEN_CLOCK_OBJECT_ID),
+                  tx.pure(bigintAmount),
+                  tx.pure('0'),
+                  // 30 minutes
+                  tx.pure(Date.now() + 30 * 60 * 1000),
+                ],
+              });
+
+              await computeTxBudget(
+                tx,
+                gasCoins.reduce((pre, cur) => BigInt(cur.balance) + pre, BigInt(0)),
+                busdGas ? TOKEN_INFO.BUSD : TOKEN_INFO.BFC,
+                client,
+                bigintAmount
+              );
+
+              const res = await signAndExecuteTransactionBlock({
+                transactionBlock: tx,
+              });
+
+              formRef?.setValue('response', JSON.stringify(res, null, 2));
+            }}
+            validation={{
+              fields: ['swapBusdAmount'],
+              validator: (values) => {
+                if (!values.swapBusdAmount) {
+                  return '请输入 BFC 数量';
+                }
+              },
+            }}
+          />
+          <ApiForm.Field type="text" id="response" label="响应"  />
+        </ApiForm>
+
       </ApiGroup>
 
       <DappList dapps={dapps} />

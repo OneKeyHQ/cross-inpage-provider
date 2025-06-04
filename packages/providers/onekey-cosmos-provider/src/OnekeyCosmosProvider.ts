@@ -266,7 +266,7 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
         id: string;
       };
       if(!checkWalletSwitchEnable()) return;
-      const hasHandle = data && data.type && data.type.startsWith('proxy-request') && data.type !== 'proxy-request-response';
+      const hasHandle = data && typeof data.type === 'string' && data.type.startsWith('proxy-request') && data.type !== 'proxy-request-response';
       if (data && hasHandle && data.method) {
         const method = data.method as 'enable';
         if (this[method]) {

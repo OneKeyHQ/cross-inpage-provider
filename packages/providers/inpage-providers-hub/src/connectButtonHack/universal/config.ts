@@ -4027,13 +4027,14 @@ export const sitesConfig: SitesInfo[] = [
       [IInjectedProviderNames.sui]: [
         {
           ...basicWalletInfo['suiwallet'],
-          findIconAndName() {
+          findIconAndName(_wallet) {
             const modal = getConnectWalletModalByTitle(
               'section.chakra-modal__content',
               'Connect a Wallet',
             );
             const ele = modal?.querySelector('div');
-            return (ele && findIconAndNameByName(ele, /^Sui$/i, 'auto-search-icon')) ?? null;
+            const result = ele && findIconAndNameByName(ele, /^Sui$/i, 'auto-search-icon');
+            return result || null;
           },
         },
       ],
@@ -5106,4 +5107,93 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
+  {
+    urls: ['omni.apex.exchange','www.inceptionlrt.com',
+    'swapx.fi','app.dodoex.io','app.aegis.im','app.neopin.io',
+    'www.inceptionlrt.com','www.inverse.finance','app.drop.money','app.jellyverse'
+    ],
+    walletsForProvider: {
+    [IInjectedProviderNames.ethereum]: [
+      {
+        ...basicWalletInfo['metamask'],
+        findIconAndName({ name }) {
+          return findIconAndNameByName(document.body, name, 'auto-search-icon')?? null;
+        },
+      },
+    ],
+  },
+  },
+  {
+    urls: ['smoothy.finance'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName(wallet) {
+            return findIconAndNameByIcon(
+              () =>
+                Array.from(
+                  document.querySelectorAll<HTMLElement>(
+                    'img[src*="/img/metamask"]',  
+                  ),
+                ).filter((e) => isVisible(e))?.[0],
+              'auto-search-text',
+              wallet.name,
+            );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.jellyverse.org'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('div[role="dialog"]', 'Select a wallet');
+            return (modal && findIconAndNameByName(modal, name, 'auto-search-icon')) ?? null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['locker.flokifi.com'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('div.SliderModal__Root-sc-4017ce2c-0', 'Choose a Wallet');
+            return (modal && findIconAndNameByName(modal, /Browser Wallet/i, 'auto-search-icon')) ?? null;
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.alienbase.xyz'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName(wallet) {
+            return findIconAndNameByIcon(
+              () =>
+                Array.from(
+                  document.querySelectorAll<HTMLElement>(
+                    'img[alt*="Connect with Metamask"]',  
+                  ),
+                ).filter((e) => isVisible(e))?.[0],
+              'auto-search-text',
+              wallet.name,
+            );
+          },
+        }
+        ],    
+    },
+  },
 ];
+

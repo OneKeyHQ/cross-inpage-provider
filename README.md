@@ -48,7 +48,6 @@ yarn update-version 1.0.1
 yarn publish-packages
 ```
 
-
 # E2E Test
 
 ```

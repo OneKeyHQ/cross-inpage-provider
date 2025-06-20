@@ -18,6 +18,8 @@ import versionInfo from './versionInfo';
 
 function toPlainError(errorInfo: IErrorInfo) {
   return {
+    constructorName: errorInfo.constructorName,
+
     name: errorInfo.name,
     message: errorInfo.message,
     stack: errorInfo.stack,
@@ -30,6 +32,9 @@ function toPlainError(errorInfo: IErrorInfo) {
     className: errorInfo.className,
     autoToast: errorInfo.autoToast,
     requestId: errorInfo.requestId,
+
+    reconnect: errorInfo.reconnect,
+    payload: errorInfo.payload,
   };
 }
 
@@ -44,6 +49,8 @@ function isLegacyExtMessage(payload: unknown): boolean {
 const globalWindow = typeof window !== 'undefined' ? window : global;
 
 type IErrorInfo = Error & {
+  constructorName?: string;
+
   // Error
   name?: string;
   message?: string;
@@ -59,6 +66,17 @@ type IErrorInfo = Error & {
   className?: string;
   autoToast?: boolean;
   requestId?: string;
+
+  // OneKeyHardwareError
+  reconnect?: boolean;
+  payload?: {
+    code?: number | string;
+    error?: string;
+    message?: string;
+    params?: any;
+    connectId?: string;
+    deviceId?: string;
+  };
 };
 
 const BRIDGE_EVENTS = {

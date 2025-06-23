@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { isPlainObject, isString } from 'lodash-es';
+import { isPlainObject, isString, isNil } from 'lodash-es';
 import { CrossEventEmitter } from './CrossEventEmitter';
 import { appDebugLogger, consoleErrorInDev } from './loggers';
 
@@ -366,6 +366,10 @@ abstract class JsBridgeBase extends CrossEventEmitter {
       data: null,
     };
 
+    if (isNil(payloadReceived) || payloadReceived === '') {
+      throw new Error('JsBridge ERROR: receive() payload is empty');
+    }
+
     if (isPlainObject(payloadReceived)) {
       payload = payloadReceived as IJsBridgeMessagePayload;
     }
@@ -426,7 +430,7 @@ abstract class JsBridgeBase extends CrossEventEmitter {
       if (callbackInfo) {
         try {
           if (error) {
-            const errorObject = toNativeErrorObject(error); 
+            const errorObject = toNativeErrorObject(error);
             this.rejectCallback(id, errorObject);
           } else {
             this.resolveCallback(id, data);

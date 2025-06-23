@@ -10,7 +10,7 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"type": "module",
+	
 	"files": [
 		"dist/*"
 	],

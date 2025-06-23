@@ -31,6 +31,9 @@ function buildInjected(cb) {
   if (!appPath) {
     throw new Error('APP_MONOREPO_LOCAL_PATH not found, please set it at .env file');
   }
+  execCmd('echo "--------------------------------  "');
+  execCmd('echo APP_MONOREPO_LOCAL_PATH=' + appPath);
+  execCmd('echo "--------------------------------  "');
   const currentPath = __dirname;
 
   // execSync('yarn build-inject');

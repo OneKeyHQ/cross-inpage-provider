@@ -1,45 +1,75 @@
 #!/usr/bin/env bash
 
-
 syncFiles() {
-
     appPath=$APP_MONOREPO_LOCAL_PATH
     workingPath=$CURRENT_WORKING_PATH
 
     echo "**********************" $workingPath
     echo "**********************" $appPath
 
-    rsync -avz --exclude node_modules \
-              $workingPath/packages/events/   \
-              $appPath/node_modules/@onekeyfe/cross-inpage-provider-events/
+    # Arrays to store package information
+    declare -a package_dirs=()
+    declare -a package_names=()
+    declare -a relative_paths=()
 
-    rsync -avz --exclude node_modules \
-              $workingPath/packages/core/   \
-              $appPath/node_modules/@onekeyfe/cross-inpage-provider-core/
+    echo "Discovering packages..."
+    echo "======================="
 
-    rsync -avz --exclude node_modules \
-              $workingPath/packages/errors/   \
-              $appPath/node_modules/@onekeyfe/cross-inpage-provider-errors/
+    # Find all package.json files, excluding node_modules and .next directories
+    for package_json in $(find $workingPath/packages -name "package.json" | grep -v node_modules | grep -v "\.next"); do
+        # Get the directory containing the package.json
+        package_dir=$(dirname "$package_json")
+        
+        # Extract package name and private status from package.json
+        package_name=$(node -p "try { JSON.parse(require('fs').readFileSync('$package_json', 'utf8')).name || '' } catch(e) { '' }")
+        is_private=$(node -p "try { JSON.parse(require('fs').readFileSync('$package_json', 'utf8')).private || false } catch(e) { false }")
+        
+        # Skip if package name is empty or if it's a private package
+        if [ -z "$package_name" ] || [ "$is_private" = "true" ]; then
+            echo "Skipping: ${package_dir#$workingPath/packages/} (private or no name)"
+            continue
+        fi
+        
+        # Get relative path from packages directory
+        relative_path=${package_dir#$workingPath/packages/}
+        
+        # Store package information
+        package_dirs+=("$package_dir")
+        package_names+=("$package_name")
+        relative_paths+=("$relative_path")
+        
+    done
 
-    rsync -avz --exclude node_modules \
-              $workingPath/packages/types/   \
-              $appPath/node_modules/@onekeyfe/cross-inpage-provider-types/
+    echo ""
+    echo "Packages to sync (${#package_names[@]} total):"
+    echo "=============================================="
+    
+    # Print all packages that will be synced
+    for i in "${!package_names[@]}"; do
+        echo "[$((i+1))] ${relative_paths[i]} -> ${package_names[i]}"
+    done
 
-    rsync -avz --exclude node_modules \
-              $workingPath/packages/injected/   \
-              $appPath/node_modules/@onekeyfe/cross-inpage-provider-injected/
-
-    rsync -avz --exclude node_modules \
-              $workingPath/packages/providers/inpage-providers-hub/   \
-              $appPath/node_modules/@onekeyfe/inpage-providers-hub/
-
-    rsync -avz --exclude node_modules \
-              $workingPath/packages/extension/extension-bridge-hosted/   \
-              $appPath/node_modules/@onekeyfe/extension-bridge-hosted/
-
-    rsync -avz --exclude node_modules \
-              $workingPath/packages/webview/   \
-              $appPath/node_modules/@onekeyfe/onekey-cross-webview/
+    echo ""
+    echo "Starting rsync operations..."
+    echo "============================"
+    
+    # Perform rsync for all collected packages
+    for i in "${!package_dirs[@]}"; do
+        echo "Syncing [$((i+1))/${#package_dirs[@]}]: ${relative_paths[i]} -> ${package_names[i]}"
+        
+        rsync -avz --exclude node_modules \
+              "${package_dirs[i]}/" \
+              "$appPath/node_modules/${package_names[i]}/"
+        
+        if [ $? -eq 0 ]; then
+            echo "✓ Successfully synced ${package_names[i]}"
+        else
+            echo "✗ Failed to sync ${package_names[i]}"
+        fi
+        echo ""
+    done
+    
+    echo "Rsync operations completed!"
 }
 
 syncFiles

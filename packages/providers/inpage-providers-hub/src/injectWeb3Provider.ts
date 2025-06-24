@@ -280,10 +280,10 @@ function injectWeb3Provider({
     icon: WALLET_CONNECT_INFO.onekey.icon as WalletIcon,
   });
 
-  // registerSolanaWallet(solana, {
-  //   icon: WALLET_CONNECT_INFO.phantom.icon as WalletIcon,
-  //   name: 'Phantom',
-  // });
+  registerSolanaWallet(solana, {
+    icon: WALLET_CONNECT_INFO.solflare.icon as WalletIcon,
+    name: 'Solflare',
+  });
 
   // OneKey Sui Standard Wallet
   registerSuiWallet(sui, {

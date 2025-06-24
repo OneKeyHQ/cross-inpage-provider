@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/cross-inpage-provider-empty",
-  "version": "2.2.31",
+  "version": "2.2.32",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -10,7 +10,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "type": "module",
   "files": [
     "dist/*"
   ],

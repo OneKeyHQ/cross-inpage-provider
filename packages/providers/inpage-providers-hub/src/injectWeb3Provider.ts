@@ -280,6 +280,11 @@ function injectWeb3Provider({
     icon: WALLET_CONNECT_INFO.onekey.icon as WalletIcon,
   });
 
+  // registerSolanaWallet(solana, {
+  //   icon: WALLET_CONNECT_INFO.phantom.icon as WalletIcon,
+  //   name: 'Phantom',
+  // });
+
   // OneKey Sui Standard Wallet
   registerSuiWallet(sui, {
     logo: WALLET_CONNECT_INFO.onekey.icon,

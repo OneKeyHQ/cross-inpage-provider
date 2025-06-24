@@ -12,7 +12,6 @@ import {
   type SolanaSignTransactionMethod,
   type SolanaSignTransactionOutput,
 } from '@solana/wallet-standard-features';
-import { Transaction, VersionedTransaction } from '@solana/web3.js';
 import type { Wallet, WalletIcon } from '@wallet-standard/base';
 import {
   StandardConnect,
@@ -48,7 +47,7 @@ export type OneKeyFeature = {
 export class OneKeySolanaStandardWallet implements Wallet {
   readonly #listeners: { [E in StandardEventsNames]?: StandardEventsListeners[E][] } = {};
   readonly #version = '1.0.0' as const;
-  readonly #name = 'OneKey' as const;
+  readonly #name: string;
   readonly #icon: WalletIcon;
   #account: OneKeySolanaWalletAccount | null = null;
   readonly #provider: ProviderSolana;
@@ -120,6 +119,7 @@ export class OneKeySolanaStandardWallet implements Wallet {
 
       this.#provider = provider;
       this.#icon = options.icon
+      this.#name = options.name || 'OneKey'
 
       provider.on('connect', this.#connected,);
       provider.on('disconnect', this.#disconnected);

@@ -1,5 +1,3 @@
-import { Transaction } from '@mysten/sui/transactions';
-
 import { bytesToHex } from '@onekeyfe/cross-inpage-provider-core';
 /* eslint-disable tsdoc/syntax */
 import type { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
@@ -46,11 +44,11 @@ type SuiProviderEventsMap = {
   [PROVIDER_EVENTS.message_low_level]: (payload: IJsonRpcRequest) => void;
 };
 
-type SignAndExecuteTransactionBlockInput = SuiSignAndExecuteTransactionBlockInput & {
+type SignAndExecuteTransactionBlockInput = Omit<SuiSignAndExecuteTransactionBlockInput, 'transactionBlock'> & {
   blockSerialize: string;
   walletSerialize: string;
 };
-type SignTransactionBlockInput = SuiSignTransactionBlockInput & {
+type SignTransactionBlockInput = Omit<SuiSignTransactionBlockInput, 'transactionBlock'> & {
   blockSerialize: string;
   walletSerialize: string;
 };
@@ -274,10 +272,8 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
     return this._callBridge({
       method: 'signAndExecuteTransactionBlock',
       params: {
-        ...input,
-        // https://github.com/MystenLabs/sui/blob/ace69fa8404eb704b504082d324ebc355a3d2948/sdk/typescript/src/transactions/object.ts#L6-L17
-        // With a few more objects, other wallets have steps for tojson.
-        transactionBlock: Transaction.from(input.transactionBlock.serialize()),
+        account: input.account,
+        chain: input.chain,
         walletSerialize: JSON.stringify(input.account),
         blockSerialize: input.transactionBlock.serialize(),
       },
@@ -290,8 +286,8 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
     return this._callBridge({
       method: 'signTransactionBlock',
       params: {
-        ...input,
-        transactionBlock: Transaction.from(input.transactionBlock.serialize()),
+        account: input.account,
+        chain: input.chain,
         walletSerialize: JSON.stringify(input.account),
         blockSerialize: input.transactionBlock.serialize(),
       },

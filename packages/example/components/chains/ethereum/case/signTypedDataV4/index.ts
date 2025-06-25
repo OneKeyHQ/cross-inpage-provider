@@ -20,6 +20,7 @@ import orderBlur from './orderBlur';
 import order1Inch from './order1Inch';
 import {
   safeTxMultiSigCall,
+  safeTxMultiSigCallChainId,
   safeTxMultiSigDelegateCall,
   safeTxMultiSigEmpty,
 } from './safeTxMultiSig';
@@ -45,6 +46,7 @@ export default (params: IEIP712Params) => [
   orderBlur(params),
   order1Inch(params),
   safeTxMultiSigCall(params),
+  safeTxMultiSigCallChainId(params),
   safeTxMultiSigDelegateCall(params),
   safeTxMultiSigEmpty(params),
 ];

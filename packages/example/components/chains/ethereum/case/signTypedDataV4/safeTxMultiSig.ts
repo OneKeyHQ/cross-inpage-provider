@@ -57,6 +57,22 @@ export const safeTxMultiSigCall = (params: IEIP712Params) => ({
   ),
 });
 
+export const safeTxMultiSigCallChainId = (params: IEIP712Params) => ({
+  id: 'signTypedDataV4-safeTxMultiSig-call-number-chainId',
+  name: 'safeTxMultiSig: Call Number ChainId',
+  description: 'SafeTxMultiSig 多签交易 Call Number ChainId',
+  value: JSON.stringify(
+    merge({}, baseSafeTxMultiSig, {
+      domain: {
+        chainId: 311,
+      },
+      message: {
+        operation: SafeTxMultiSigOperation.CALL,
+      },
+    }),
+  ),
+});
+
 export const safeTxMultiSigDelegateCall = (params: IEIP712Params) => ({
   id: 'signTypedDataV4-safeTxMultiSig-delegateCall',
   name: 'safeTxMultiSig: DelegateCall',

@@ -36,5 +36,8 @@
     "@onekeyfe/cross-inpage-provider-types": "2.2.33",
     "@onekeyfe/extension-bridge-injected": "2.2.33",
     "patch-package": "^8.0.0"
+  },
+  "resolutions": {
+    "pbkdf2": "^3.1.3"
   }
 }

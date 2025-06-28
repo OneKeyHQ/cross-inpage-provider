@@ -5,6 +5,7 @@ packages/*/dist/
 .env.local
 /inpage-provider-legacy/
 .idea/
+.claude/
 yarn-error.log
 .DS_Store
 .watchman-*

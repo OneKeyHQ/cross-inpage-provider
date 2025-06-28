@@ -241,21 +241,23 @@ function IconButton({
     >
       <div style={{ display: 'flex', alignItems: 'center', padding: '8px', flexDirection: side === 'left' ? 'row-reverse' : 'row' }}>
         <Logo style={logoStyle} />
-        <div 
-          style={{
-            position: 'absolute',
-            height: '18px',
-            width: '18px',
-            display: 'flex',
-            alignItems: 'center',
-            background: '#fff',
-            borderRadius: '6px',
-            bottom: '2px',
-            left: '24px',
-          }} 
-        >
-          {riskLevel && riskLevel !== EHostSecurityLevel.Unknown ? SECURITY_INFO[riskLevel].icon : null}
-        </div>
+        {riskLevel && riskLevel !== EHostSecurityLevel.Unknown ? (
+          <div
+            style={{
+              position: 'absolute',
+              height: '18px',
+              width: '18px',
+              display: 'flex',
+              alignItems: 'center',
+              background: '#fff',
+              borderRadius: '6px',
+              bottom: '2px',
+              left: '24px',
+            }}
+          >
+            {SECURITY_INFO[riskLevel].icon}
+          </div>
+        ) : null}
         {!dataLoaded && <span style={textStyle}>{isExpanded ? i18n.fetchingDAppInfo : ''}</span>}
       </div>
       {

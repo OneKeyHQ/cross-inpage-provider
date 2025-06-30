@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
+import { IInpageProviderConfig, IProviderBaseConnectionStatus } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { ProviderTonBase } from './ProviderTonBase';
 import type * as TypeUtils from './type-utils';
@@ -44,6 +44,10 @@ export type TonRequest = {
   'signProof': (request: SignProofRequest) => Promise<SignProofResult>;
   'getDeviceInfo': () => Promise<Partial<DeviceInfo>>;
 };
+
+const TonResponseError = {
+  WrongAddressFormat: 1,
+} as const;
 
 type JsBridgeRequest = {
   [K in keyof TonRequest]: (
@@ -129,6 +133,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
   };
   protocolVersion = 2;
   isWalletBrowser = false;
+  connectionStatus: IProviderBaseConnectionStatus = 'disconnected';
 
   constructor(props: OneKeyTonProviderProps) {
     super({
@@ -364,14 +369,26 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     return this._connect();
   }
 
-  convertError<T extends RpcMethod>(id: string, error: unknown): WalletResponseError<T> {
+  convertError<T extends RpcMethod>(id: string, error: unknown, method: string): WalletResponseError<T> {
     const { code, message } = error as { code?: number; message?: string };
     if (code === 4001) {
+      let errorMessage: string = ConnectEventErrorMessage.USER_DECLINED;
+      if(method === 'sendTransaction' || method === 'signData'){
+        errorMessage = SendTransactionErrorMessage.USER_REJECTS_ERROR;
+      }
       return {
         id,
         error: {
           code: SEND_TRANSACTION_ERROR_CODES.USER_REJECTS_ERROR,
-          message: ConnectEventErrorMessage.USER_DECLINED,
+          message: errorMessage,
+        },
+      } as WalletResponseError<T>;
+    } else if(code === TonResponseError.WrongAddressFormat) {
+      return {
+        id,
+        error: {
+          code: SEND_TRANSACTION_ERROR_CODES.BAD_REQUEST_ERROR,
+          message: message,
         },
       } as WalletResponseError<T>;
     } else {
@@ -414,7 +431,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
         } as WalletResponseError<T>;
       }
     } catch (error) {
-      return this.convertError(id, error);
+      return this.convertError(id, error,message.method);
     }
 
     if (res === undefined) {
@@ -449,12 +466,16 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     return res;
   }
 
+  async disconnect(): Promise<void> {
+    await this._disconnect();
+  }
+
   private async _disconnect(): Promise<void> {
     await this._callBridge({
       method: 'disconnect',
       params: [],
     });
-    this._handleDisconnected();
+    this._handleDisconnected({ emit: true });
   }
 
   listen(callback: (event: WalletEvent) => void): void {

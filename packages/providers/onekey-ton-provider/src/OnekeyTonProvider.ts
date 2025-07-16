@@ -46,7 +46,7 @@ export type TonRequest = {
 };
 
 const TonResponseError = {
-  WrongAddressFormat: 1,
+  ParameterError: 1,
 } as const;
 
 type JsBridgeRequest = {
@@ -383,7 +383,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
           message: errorMessage,
         },
       } as WalletResponseError<T>;
-    } else if(code === TonResponseError.WrongAddressFormat) {
+    } else if(code === TonResponseError.ParameterError) {
       return {
         id,
         error: {

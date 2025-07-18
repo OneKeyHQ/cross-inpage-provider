@@ -526,6 +526,62 @@ function Example() {
         />
 
         <ApiPayload
+          title="signTransactionFromBase64"
+          description="从 base64 字符串反序列化交易并签名"
+          presupposeParams={[
+            {
+              id: 'signTransactionFromBase64',
+              name: 'Base64 Transaction',
+              value: JSON.stringify({
+                base64Transaction: "",
+              }),
+            },
+          ]}
+          onExecute={async (request: string) => {
+            const { base64Transaction } = JSON.parse(request) as {
+              base64Transaction: string;
+            };
+
+            try {
+              // 从 base64 字符串创建交易字节数组
+              const transactionBytes = Buffer.from(base64Transaction, 'base64');
+              
+              // 使用 sponsorTransaction 包装交易
+              const tx = await sponsorTransaction(
+                client,
+                currentAccount?.address || '',
+                transactionBytes,
+              );
+
+              const res = await signTransaction({
+                transaction: tx,
+                account: currentAccount,
+              });
+              
+              return JSON.stringify(res);
+            } catch (error) {
+              throw new Error(`Invalid base64 transaction: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            }
+          }}
+          onValidate={async (request: string, result: string) => {
+            const {
+              transactionBlockBytes,
+              signature,
+            }: {
+              transactionBlockBytes: string;
+              signature: string;
+            } = JSON.parse(result);
+            
+            const publicKey = await verifyTransactionSignature(
+              Buffer.from(transactionBlockBytes, 'base64'),
+              signature,
+            );
+
+            return (currentAccount.address === publicKey.toSuiAddress()).toString();
+          }}
+        />
+
+        <ApiPayload
           title="signAndExecuteTransactionBlock (USDC)"
           description="USDC代币转账签名并执行"
           presupposeParams={signTokenTransactionParams}

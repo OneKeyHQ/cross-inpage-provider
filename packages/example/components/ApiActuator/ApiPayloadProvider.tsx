@@ -26,7 +26,7 @@ export const tryFormatJson = (json: string) => {
   }
 };
 
-const tryFormatCompactJson = (json: string) => {
+export const tryFormatCompactJson = (json: string) => {
   try {
     const hasArray = /\[.*?\]/.test(json);
     const obj = JSON.parse(json);

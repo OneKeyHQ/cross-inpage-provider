@@ -29,7 +29,6 @@ import {
   Ed25519Account,
   AnyRawTransaction,
   AccountAuthenticator,
-  ScriptFunctionArgumentTypes,
   Account,
 } from '@aptos-labs/ts-sdk';
 import {
@@ -94,6 +93,9 @@ function MultiAgentTransactionFlow() {
         typeArguments: [],
         functionArguments: [account.address, new U64(1)],
       },
+      options:{
+        expireTimestamp: Math.floor(Date.now() / 1000) + 60 * 5,
+      }
     });
 
     console.log('=== DEBUG: Transaction generation ===');
@@ -142,9 +144,8 @@ function MultiAgentTransactionFlow() {
 
       console.log('Secondary signer authenticator:', authenticator);
 
-      const secondaryAuth = authenticator;
-      setSecondarySignerAuthenticator(secondaryAuth);
-      console.log('===== secondaryAuth ===== ', `isEd25519: ${secondaryAuth.isEd25519()? 'true' : 'false'}, isMultiEd25519: ${secondaryAuth.isMultiEd25519()? 'true' : 'false'}, isSingleKey: ${secondaryAuth.isSingleKey()? 'true' : 'false'}, isMultiKey: ${secondaryAuth.isMultiKey()? 'true' : 'false'}`);
+      setSecondarySignerAuthenticator(authenticator);
+      console.log('===== secondaryAuth ===== ', `isEd25519: ${authenticator.isEd25519()? 'true' : 'false'}, isMultiEd25519: ${authenticator.isMultiEd25519()? 'true' : 'false'}, isSingleKey: ${authenticator.isSingleKey()? 'true' : 'false'}, isMultiKey: ${authenticator.isMultiKey()? 'true' : 'false'}`);
       apiFromRef.current?.setJsonValue('secondarySignerSignResponse', authenticator);
       return Promise.resolve();
     } catch (error) {
@@ -251,6 +252,9 @@ function SponsorTransactionFlow() {
           AccountAddress.from("0x0").toUint8Array(),
         ],
       },
+      options:{
+        expireTimestamp: Math.floor(Date.now() / 1000) + 60 * 5,
+      }
     });
     console.log('===  02, transactionToSign ===', transactionToSign);
     transactionToSign.feePayerAddress = account.address;
@@ -270,14 +274,9 @@ function SponsorTransactionFlow() {
     console.log('=== DEBUG: Transaction generation ===');
     console.log('Sender address:', sender.accountAddress.toString());
 
-    try {
-      const transaction = await generateTransaction(sender);
-      setTransactionToSubmit(transaction);
-    } catch (error) {
-      console.error(error);
-    }
-
     const transaction = await generateTransaction(sender);
+    setTransactionToSubmit(transaction);
+
     console.log('=== DEBUG: Transaction generation ===');
     console.log('Transaction to sign:', transaction);
 
@@ -496,9 +495,12 @@ function Example() {
           presupposeParams={params.signTransaction(account?.address.toString() ?? '')}
           onExecute={async (request: string) => {
             const obj = JSON.parse(request);
-            const { transactionOrPayload, asFeePayer } = obj;
+            const { data, asFeePayer, options } = obj;
             const res = await signTransaction({
-              transactionOrPayload,
+              transactionOrPayload: {
+                data,
+                options: options ? options : undefined,
+              },
               asFeePayer,
             });
             return res;
@@ -526,7 +528,7 @@ function Example() {
               id: 'sender',
               name: 'sender',
               value: JSON.stringify({
-                recipient: account?.address ?? '',
+                recipient: account?.address.toString() ?? '',
                 amount: 100000,
               }),
             },
@@ -534,7 +536,7 @@ function Example() {
           onExecute={async (request: string) => {
             const { recipient, amount } = JSON.parse(request);
             const res = await aptosClient.coin.transferCoinTransaction({
-              sender: account?.address ?? '',
+              sender: account?.address.toString() ?? '',
               recipient,
               amount,
             });
@@ -548,8 +550,8 @@ function Example() {
           }}
           onValidate={async (request: string, result: string) => {
             const { txn, result: signedTxn } = JSON.parse(result);
-            const publicKey = jsonToUint8Array(get(signedTxn, 'public_key.key.data'));
-            const signature = jsonToUint8Array(get(signedTxn, 'signature.data.data'));
+            const publicKey = jsonToUint8Array(get(signedTxn, 'authenticator.public_key.key.data'));
+            const signature = jsonToUint8Array(get(signedTxn, 'authenticator.signature.data.data'));
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             const simpleTxn = SimpleTransaction.deserialize(new Deserializer(hexToBytes(txn)));
@@ -574,7 +576,7 @@ function Example() {
               id: 'sender',
               name: 'sender',
               value: JSON.stringify({
-                recipient: account?.address ?? '',
+                recipient: account?.address.toString() ?? '',
                 amount: 100000,
                 coinType:
                   '0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::USDC',
@@ -584,7 +586,7 @@ function Example() {
           onExecute={async (request: string) => {
             const { recipient, amount, coinType } = JSON.parse(request);
             const res = await aptosClient.coin.transferCoinTransaction({
-              sender: account?.address ?? '',
+              sender: account?.address.toString() ?? '',
               recipient,
               amount,
               coinType,
@@ -599,8 +601,8 @@ function Example() {
           }}
           onValidate={async (request: string, result: string) => {
             const { txn, result: signedTxn } = JSON.parse(result);
-            const publicKey = jsonToUint8Array(get(signedTxn, 'public_key.key.data'));
-            const signature = jsonToUint8Array(get(signedTxn, 'signature.data.data'));
+            const publicKey = jsonToUint8Array(get(signedTxn, 'authenticator.public_key.key.data'));
+            const signature = jsonToUint8Array(get(signedTxn, 'authenticator.signature.data.data'));
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             const simpleTxn = SimpleTransaction.deserialize(new Deserializer(hexToBytes(txn)));
@@ -653,7 +655,7 @@ function Example() {
               return {
                 txn: res.bcsToHex().toStringWithoutPrefix(),
                 result: await signTransaction({
-                  transactionOrPayload:res
+                  transactionOrPayload: res
                 }),
               };
             } catch (error) {
@@ -662,8 +664,8 @@ function Example() {
           }}
           onValidate={async (request: string, result: string) => {
             const { txn, result: signedTxn } = JSON.parse(result);
-            const publicKey = jsonToUint8Array(get(signedTxn, 'public_key.key.data'));
-            const signature = jsonToUint8Array(get(signedTxn, 'signature.data.data'));
+            const publicKey = jsonToUint8Array(get(signedTxn, 'authenticator.public_key.key.data'));
+            const signature = jsonToUint8Array(get(signedTxn, 'authenticator.signature.data.data'));
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             const simpleTxn = SimpleTransaction.deserialize(new Deserializer(hexToBytes(txn)));
@@ -690,7 +692,7 @@ function Example() {
               id: 'sender',
               name: 'sender',
               value: JSON.stringify({
-                recipient: account?.address ?? '',
+                recipient: account?.address.toString() ?? '',
                 amount: 100000,
                 coinType: '0x357b0b74bc833e95a115ad22604854d6b0fca151cecd94111770e5d6ffc9dc2b',
               }),
@@ -700,7 +702,7 @@ function Example() {
             const { recipient, amount, coinType } = JSON.parse(request);
             return {
               result: await signAndSubmitTransaction({
-                sender: account?.address ?? '',
+                sender: account?.address.toString() ?? '',
                 data: {
                   function: '0x1::primary_fungible_store::transfer',
                   typeArguments: ['0x1::fungible_asset::Metadata'],
@@ -719,7 +721,7 @@ function Example() {
               id: 'sender',
               name: 'sender',
               value: JSON.stringify({
-                recipient: account?.address ?? '',
+                recipient: account?.address.toString() ?? '',
                 amount: 100000,
                 coinType: '0x357b0b74bc833e95a115ad22604854d6b0fca151cecd94111770e5d6ffc9dc2b',
               }),
@@ -729,7 +731,7 @@ function Example() {
             const { recipient, amount, coinType } = JSON.parse(request);
             return {
               result: await signAndSubmitTransaction({
-                sender: account?.address ?? '',
+                sender: account?.address.toString() ?? '',
                 data: {
                   function: '0x1::primary_fungible_store::transfer',
                   typeArguments: ['0x1::fungible_asset::Metadata'],
@@ -757,13 +759,13 @@ function Example() {
           onExecute={async (request: string) => {
             return {
               result: await signAndSubmitTransaction({
-                sender: account?.address ?? '',
+                sender: account?.address.toString() ?? '',
                 data: {
                   bytecode:
                     'a11ceb0b060000000701000402040a030e0c041a04051e20073e30086e2000000001010204010001000308000104030401000105050601000002010203060c0305010b0001080101080102060c03010b0001090002050b00010900000a6170746f735f636f696e04636f696e04436f696e094170746f73436f696e087769746864726177076465706f7369740000000000000000000000000000000000000000000000000000000000000001000001080b000b0138000c030b020b03380102',
                   functionArguments: [
                     new U64(1),
-                    AccountAddress.from(account?.address ?? ('' as string)),
+                    AccountAddress.from(account?.address.toString() ?? ('' as string)),
                   ],
                 },
               }),
@@ -782,11 +784,11 @@ function Example() {
           ]}
           onExecute={async (request: string) => {
               const commitedTransaction = await signAndSubmitTransaction({
-                sender: account?.address ?? '',
+                sender: account?.address.toString() ?? '',
                 data: {
                   function: "0x1::coin::transfer",
                   typeArguments: [APTOS_COIN],
-                  functionArguments: [account.address, 1], // 1 is in Octas
+                  functionArguments: [account.address.toString(), 1], // 1 is in Octas
                 },
                 options: { maxGasAmount: MaxGasAMount },
               })

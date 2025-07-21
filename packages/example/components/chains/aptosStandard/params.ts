@@ -20,11 +20,11 @@ export default {
       id: 'signTransaction-native',
       name: 'transfer native coin',
       value: JSON.stringify({
-        transactionOrPayload: {
+        data: {
           type: 'entry_function_payload',
           function: '0x1::coin::transfer',
-          type_arguments: ['0x1::aptos_coin::AptosCoin'],
-          arguments: [address, '100000'],
+          typeArguments: ['0x1::aptos_coin::AptosCoin'],
+          functionArguments: [address, '100000'],
         },
       }),
     },
@@ -32,11 +32,11 @@ export default {
       id: 'signTransaction-native-options',
       name: 'transfer native coin - options',
       value: JSON.stringify({
-        transactionOrPayload: {
+        data: {
           type: 'entry_function_payload',
           function: '0x1::coin::transfer',
-          type_arguments: ['0x1::aptos_coin::AptosCoin'],
-          arguments: [address, '100000'],
+          typeArguments: ['0x1::aptos_coin::AptosCoin'],
+          functionArguments: [address, '100000'],
         },
         options: {
           maxGasAmount: 1000000,
@@ -48,13 +48,13 @@ export default {
       id: 'signTransaction-usdc-legacy',
       name: 'transfer usdc coin (legacy)',
       value: JSON.stringify({
-        transactionOrPayload: {
+        data: {
           type: 'entry_function_payload',
           function: '0x1::coin::transfer',
-          type_arguments: [
+          typeArguments: [
             '0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::USDC',
           ],
-          arguments: [address, 10000],
+          functionArguments: [address, 10000],
         },
       }),
     },
@@ -62,11 +62,11 @@ export default {
       id: 'signTransaction-usdc-fa',
       name: 'transfer usdc coin',
       value: JSON.stringify({
-        transactionOrPayload: {
+        data: {
           type: 'entry_function_payload',
           function: '0x1::primary_fungible_store::transfer',
-          type_arguments: ['0x1::fungible_asset::Metadata'],
-          arguments: [
+          typeArguments: ['0x1::fungible_asset::Metadata'],
+          functionArguments: [
             '0x357b0b74bc833e95a115ad22604854d6b0fca151cecd94111770e5d6ffc9dc2b',
             address,
             10000,

@@ -50,7 +50,7 @@
     "@onekeyfe/onekey-webln-provider": "2.2.34",
     "lodash-es": "^4.17.21",
     "preact": "^10.25.1",
-    "web3": "^1.7.3"
+    "web3": "^4.0.1"
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.12",

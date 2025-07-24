@@ -64,7 +64,7 @@ export const safeTxMultiSigCallChainId = (params: IEIP712Params) => ({
   value: JSON.stringify(
     merge({}, baseSafeTxMultiSig, {
       domain: {
-        chainId: 311,
+        chainId: params.chainId,
       },
       message: {
         operation: SafeTxMultiSigOperation.CALL,

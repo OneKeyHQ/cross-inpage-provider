@@ -11,6 +11,7 @@ import { ApiFormRef } from './ApiForm';
 export interface ApiButtonProps {
   id: string;
   label: string;
+  disabled?: boolean;
   onClick: (
     form: ApiFormRef | null | undefined,
     values: Record<string, IFormField<any>>,
@@ -30,7 +31,7 @@ export interface ApiButtonProps {
 }
 
 export const ApiButton = memo(
-  ({ id, label, onClick, validation, availableDependencyFields }: ApiButtonProps) => {
+  ({ id, label, onClick, validation, availableDependencyFields, disabled}: ApiButtonProps) => {
     const context = useFormContext();
     if (!context) throw new Error('ApiButton must be used within ApiForm');
 
@@ -190,7 +191,7 @@ export const ApiButton = memo(
 
     return (
       <div className="flex flex-col gap-1">
-        <Button key={id} onClick={handleClick} disabled={disabledTooltip != null} loading={loading}>
+        <Button key={id} onClick={handleClick} disabled={disabledTooltip != null || disabled} loading={loading}>
           {label}
         </Button>
         {disabledTooltip && <div className="text-red-500 text-sm">{disabledTooltip}</div>}

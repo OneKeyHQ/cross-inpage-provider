@@ -219,6 +219,7 @@ export class AptosStandardProvider implements AptosWallet {
   signAndSubmitTransaction: AptosSignAndSubmitTransactionMethod = async (
     input: AptosSignAndSubmitTransactionInput,
   ): Promise<UserResponse<AptosSignAndSubmitTransactionOutput>> => {
+    // Special case: Only support simple transaction
     if (!!input && 'rawTransaction' in input) {
       // Support standard sign and send transaction 1.0.0
       const serializer = new Serializer();

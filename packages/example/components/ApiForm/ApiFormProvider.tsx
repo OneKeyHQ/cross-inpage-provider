@@ -5,7 +5,7 @@ import { ApiFormProviderContext } from './hooks/useFormContext';
 import { ApiFormRef } from './ApiForm';
 import { stringifyWithSpecialType } from '../../lib/jsonUtils';
 import { get, isEmpty } from 'lodash';
-import { tryFormatJson } from '../ApiActuator/ApiPayloadProvider';
+import { tryFormatCompactJson, tryFormatJson } from '../ApiActuator/ApiPayloadProvider';
 
 export const ApiFormProvider = forwardRef<ApiFormRef | null, { children: React.ReactNode }>(
     function ApiFormProvider({ children }, ref) {
@@ -68,7 +68,7 @@ export const ApiFormProvider = forwardRef<ApiFormRef | null, { children: React.R
 
       if (isEmpty(errorMessage)) {
         store.scope.set(store.fieldAtom(id), {
-          value: tryFormatJson(resultString),
+          value: tryFormatCompactJson(resultString),
         });
       } else {
         store.scope.set(store.fieldAtom(id), {

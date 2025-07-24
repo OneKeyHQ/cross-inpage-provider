@@ -4,7 +4,7 @@ import ConnectButton from '../../../components/connect/ConnectButton';
 import { useEffect, useRef } from 'react';
 import { get } from 'lodash';
 import axios from 'axios';
-import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
+import { hexToBytes } from '@noble/hashes/utils';
 import { IProviderApi, IProviderInfo, SignMessageResponse } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import { useWallet } from '../../../components/connect/WalletContext';
@@ -15,7 +15,7 @@ import nacl from 'tweetnacl';
 import { stripHexPrefix } from 'ethereumjs-util';
 import { toast } from '../../ui/use-toast';
 import { TxnBuilderTypes } from 'aptos';
-import type { Types } from 'aptos';
+
 
 export default function Example() {
   const walletsRef = useRef<IProviderInfo[]>([

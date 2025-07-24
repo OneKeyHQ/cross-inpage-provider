@@ -1,5 +1,6 @@
-import { EntryFunctionArgumentTypes, SimpleEntryFunctionArgumentTypes } from '@aptos-labs/ts-sdk';
+import {  Aptos, AptosConfig, Network ,EntryFunctionArgumentTypes, SimpleEntryFunctionArgumentTypes } from '@aptos-labs/ts-sdk';
 import type { SignMessagePayload, SignMessageRequest } from './types';
+import { NetworkInfo } from "@aptos-labs/wallet-adapter-core";
 
 export const APTOS_SIGN_MESSAGE_PREFIX = 'APTOS';
 
@@ -90,3 +91,31 @@ export function formatFunctionArgument(
 
   return functionArg;
 }
+
+// Devnet client
+const DEVNET_CONFIG = new AptosConfig({ network: Network.DEVNET });
+const DEVNET_CLIENT = new Aptos(DEVNET_CONFIG);
+
+// Testnet client
+const TESTNET_CONFIG = new AptosConfig({ network: Network.TESTNET });
+const TESTNET_CLIENT = new Aptos(TESTNET_CONFIG);
+
+// Mainnet client
+const MAINNET_CONFIG = new AptosConfig({ network: Network.MAINNET });
+const MAINNET_CLIENT = new Aptos(MAINNET_CONFIG);
+
+export const aptosClient = (network?: NetworkInfo | null) => {
+  if (network?.name === Network.DEVNET) {
+    return DEVNET_CLIENT;
+  } else if (network?.name === Network.TESTNET) {
+    return TESTNET_CLIENT;
+  } else if (network?.name === Network.MAINNET) {
+    return MAINNET_CLIENT;
+  } else {
+    const CUSTOM_CONFIG = new AptosConfig({
+      network: Network.CUSTOM,
+      fullnode: network?.url,
+    });
+    return new Aptos(CUSTOM_CONFIG);
+  }
+};

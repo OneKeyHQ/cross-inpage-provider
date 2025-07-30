@@ -38,9 +38,7 @@ class JsBridgeDesktopHost extends JsBridgeBase {
         // *** use ipcRenderer.on instead
 
         try {
-          this.webviewRef.current?.send('JsBridgeDesktopHostToInjected', payloadStr)?.catch((error: unknown) => {
-            appDebugLogger.webview('send', error);
-          });
+          this.webviewRef.current?.send('JsBridgeDesktopHostToInjected', payloadStr)
         } catch (error) {
           appDebugLogger.webview('send', error);
         }

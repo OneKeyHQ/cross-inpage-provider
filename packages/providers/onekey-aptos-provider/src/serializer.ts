@@ -19,8 +19,10 @@ import {
   InputEntryFunctionData,
   TypeTag,
   standardizeTypeTags,
-  InputScriptData,
-  ScriptFunctionArgumentTypes,
+  type InputScriptData,
+  type ScriptFunctionArgumentTypes,
+  type InputMultiSigData,
+  AccountAddressInput,
 } from '@aptos-labs/ts-sdk';
 import { hexToBytes, bytesToHex } from '@onekeyfe/cross-inpage-provider-core';
 import type { Types } from 'aptos';
@@ -30,6 +32,7 @@ export enum TransactionPayloadType {
   ENTRY_FUNCTION = 1,
   SCRIPT_LEGACY = 2, // V1 SDK Script Params Petra
   ENTRY_FUNCTION_LEGACY = 3, // V1 SDK Entry Function Params
+  MULTISIG = 4, // V2 SDK MultiSig Params
 }
 
 // OneKey Primitive Types
@@ -104,16 +107,20 @@ export function serializeTransactionPayload(
   }
 
   const serializer = new Serializer();
-  if ('type' in args || ('arguments' in args && 'type_arguments' in args)) {
+ if ('function' in args && 'functionArguments' in args && !('multisigAddress' in args)) {
+    // V2 SDK Entry Function Params
+    serializeTransactionPayloadEntryFunction(args, serializer);
+  } else if('function' in args && 'functionArguments' in args && 'multisigAddress' in args) {
+    // V2 SDK MultiSig Params
+    // @ts-expect-error
+    serializeTransactionPayloadMultiSig(args, serializer);
+  } else if ('bytecode' in args && 'functionArguments' in args) {
+    // V2 SDK Script Params
+    serializeTransactionPayloadScript(args, serializer);
+  } else if ('type' in args || ('arguments' in args && 'type_arguments' in args)) {
     // Some Dapps do not pass the type parameter.
     // V1 SDK Legacy Params
     serializableTransactionPayloadV1Legacy(args as Types.TransactionPayload, serializer);
-  } else if (!('type' in args) && 'function' in args && !('multisigAddress' in args)) {
-    // V2 SDK Entry Function Params
-    serializeTransactionPayloadEntryFunction(args, serializer);
-  } else if (!('type' in args) && 'bytecode' in args) {
-    // V2 SDK Script Params
-    serializeTransactionPayloadScript(args, serializer);
   } else if (!('type' in args) && 'value' in args) {
     // fix wormhole v1 sdk
     // not support complex type
@@ -140,6 +147,8 @@ export function deserializeTransactionPayload(hex: string): TransactionPayloadV2
     return deserializableTransactionPayloadV1EntryFunctionLegacy(deserializer);
   } else if (type === TransactionPayloadType.SCRIPT_LEGACY) {
     return deserializableTransactionPayloadV1ScriptLegacy(deserializer);
+  } else if (type === TransactionPayloadType.MULTISIG) {
+    return deserializeTransactionPayloadMultiSig(deserializer);
   } else {
     throw new Error('Invalid transaction payload type');
   }
@@ -447,6 +456,50 @@ function deserializeTransactionPayloadEntryFunction(
     typeArguments,
     functionArguments,
   };
+}
+
+function serializeTransactionPayloadMultiSig(args: InputMultiSigData, serializer: Serializer) {
+  const { multisigAddress, function: functionName, typeArguments, functionArguments } = args;
+  serializer.serializeU32AsUleb128(TransactionPayloadType.MULTISIG);
+
+  if(typeof multisigAddress === 'string') {
+    serializer.serializeU8(0);
+    serializer.serializeOption(multisigAddress);
+  } else if(multisigAddress instanceof AccountAddress) {
+    serializer.serializeU8(1);
+    const multisigAddressSerializer = new Serializer();
+    multisigAddress.serialize(multisigAddressSerializer);
+    serializer.serializeOption(multisigAddressSerializer.toUint8Array());
+  } else if(multisigAddress instanceof Uint8Array) {
+    serializer.serializeU8(2);
+    serializer.serializeOption(multisigAddress);
+  } else {
+    throw new Error('Invalid multisig address type');
+  }
+
+  serializer.serializeOption(functionName);
+  serializer.serializeVector<TypeTag>(standardizeTypeTags(typeArguments));
+  serializer.serializeOption(serializeArguments(functionArguments) ?? '');
+}
+
+function deserializeTransactionPayloadMultiSig(deserializer: Deserializer): InputMultiSigData {
+  const multisigAddressType = deserializer.deserializeU8();
+  let multisigAddress: AccountAddressInput;
+  if(multisigAddressType === 0) {
+    multisigAddress = deserializer.deserializeOption('string') ?? '';
+  } else if(multisigAddressType === 1) {
+    const bytes = deserializer.deserializeBytes();
+    multisigAddress = AccountAddress.deserialize(new Deserializer(bytes));
+  } else if(multisigAddressType === 2) {
+    multisigAddress = deserializer.deserializeOption('bytes') ?? new Uint8Array();
+  } else {
+    throw new Error('Invalid multisig address type');
+  }
+
+  const functionName = deserializer.deserializeOption('string');
+  const typeArguments = deserializer.deserializeVector(TypeTag);
+  const functionArguments = deserializeArguments(deserializer.deserializeOption('string') ?? '');
+  return { multisigAddress, function: functionName as `${string}::${string}::${string}`, typeArguments, functionArguments };
 }
 
 // V1 SDK Script Wormhole Params

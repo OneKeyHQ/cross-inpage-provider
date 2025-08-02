@@ -13,6 +13,10 @@ import params from './params';
 import nacl from 'tweetnacl';
 import { stripHexPrefix } from 'ethereumjs-util';
 import {
+  createSignInMessage,
+  createSignInSigningMessage,
+} from '@aptos-labs/siwa';
+import {
   Network,
   Aptos,
   AptosConfig,
@@ -37,6 +41,7 @@ import {
   AptosSignMessageInput,
   AptosSignInInput,
   AdapterWallet,
+  AptosSignInOutput,
 } from '@aptos-labs/wallet-adapter-core';
 import { useWallet as useStandardWallet } from '@aptos-labs/wallet-adapter-react';
 
@@ -46,6 +51,7 @@ import { jsonToUint8Array } from '../../../lib/uint8array';
 import { get } from 'lodash';
 import { ApiForm, ApiFormRef } from '../../ApiForm';
 import { aptosClient } from './utils';
+import { stringifyWithSpecialType } from '../../../lib/jsonUtils';
 
 
 const APTOS_COIN = "0x1::aptos_coin::AptosCoin";
@@ -431,8 +437,10 @@ function Example() {
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
             const obj = JSON.parse(request) as AptosSignMessageInput;
-            const res = await signMessage(obj);
-            return JSON.stringify(res);
+            const result = await signMessage(obj);
+            return stringifyWithSpecialType(result).replace(/\\n/g, '\\\\n')
+              .replace(/\\r/g, '\\\\r')
+              .replace(/\\t/g, '\\\\t');
           }}
           onValidate={(request: string, result: string) => {
             const { fullMessage, signature } = JSON.parse(result) as SignMessageResponse;
@@ -454,8 +462,7 @@ function Example() {
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
             const obj = JSON.parse(request) as AptosSignMessageInput;
-            const res = await signMessageAndVerify(obj);
-            return JSON.stringify(res);
+            return signMessageAndVerify(obj);
           }}
         />
         <ApiPayload
@@ -485,8 +492,31 @@ function Example() {
               walletName: string;
               input: AptosSignInInput;
             };
-            const res = await signIn(obj);
-            return JSON.stringify(res);
+            return signIn(obj);
+          }}
+          onValidate={async (request: string, result: string) => {
+            const { account, input, signature } = JSON.parse(result) as AptosSignInOutput;
+
+            const publicKeyU8 = jsonToUint8Array(get(account, 'publicKey.key.data'));
+            const signatureU8 = jsonToUint8Array(get(signature, 'data.data'));
+
+            const message = createSignInSigningMessage(createSignInMessage(input));
+
+            const isValidSignature = nacl.sign.detached.verify(
+              Buffer.from(message),
+              signatureU8,
+              publicKeyU8,
+            );
+            return Promise.resolve(isValidSignature.toString());
+          }}
+        />
+         <ApiPayload
+          title="openIn"
+          description="signMessageAndVerify"
+          presupposeParams={params.signMessage}
+          onExecute={async (request: string) => {
+            const obj = JSON.parse(request) as AptosSignMessageInput;
+            return signMessageAndVerify(obj);
           }}
         />
         <ApiPayload

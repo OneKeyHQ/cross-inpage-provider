@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { ProviderAptosBase } from './ProviderAptosBase';
 import type {
   AptosAccountInfo,
+  OneKeyBridgeSignInOutput,
   ProviderState,
   SignMessagePayload,
   SignMessagePayloadCompatible,
@@ -23,6 +23,7 @@ import {
 import {
   AptosSignAndSubmitTransactionInput,
   AptosSignAndSubmitTransactionOutput,
+  AptosSignInInput,
 } from '@aptos-labs/wallet-standard';
 import { serializeTransactionPayload } from './serializer';
 import type { TransactionPayloadV1SDK, TransactionPayloadV2SDK } from './serializer';
@@ -80,6 +81,10 @@ export type AptosRequest = {
   'signAndSubmitTransactionV2': (params: string) => Promise<AptosSignAndSubmitTransactionOutput>;
   // Standard Wallet V1.0.0
   'signAndSubmitTransactionStandardV1': (params: string) => Promise<string>;
+
+  'signIn': (payload: AptosSignInInput) => Promise<OneKeyBridgeSignInOutput>;
+
+  'openInMobileApp': () => Promise<void>;
 };
 
 type JsBridgeRequest = {
@@ -135,6 +140,10 @@ export interface IProviderAptos extends ProviderAptosBase {
    * @returns Transaction
    */
   signMessage(payload: SignMessagePayload): Promise<SignMessageResponse>;
+
+  signIn(payload: AptosSignInInput): Promise<OneKeyBridgeSignInOutput>;
+
+  openInMobileApp(): Promise<void>;
 
   network(): Promise<string>;
 
@@ -377,6 +386,24 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     return this._callBridge({
       method: 'signMessage',
       params: payload,
+    });
+  }
+
+  async signIn(payload: AptosSignInInput): Promise<OneKeyBridgeSignInOutput> {
+    const result = await this._callBridge({
+      method: 'signIn',
+      params: payload,
+    });
+
+    if (!result) throw web3Errors.provider.unauthorized();
+
+    return result;
+  }
+
+  async openInMobileApp(): Promise<void> {
+    return this._callBridge({
+      method: 'openInMobileApp',
+      params: undefined,
     });
   }
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Ed25519Signature,
   Ed25519PublicKey,
@@ -43,6 +44,10 @@ import type {
   AptosSignAndSubmitTransactionMethod,
   AptosSignAndSubmitTransactionInput,
   AptosSignAndSubmitTransactionOutput,
+  AptosSignInMethod,
+  AptosSignInInput,
+  AptosSignInOutput,
+  AptosOpenInMobileAppMethod,
 } from '@aptos-labs/wallet-standard';
 
 import type { ProviderAptos } from './OnekeyAptosProvider';
@@ -134,6 +139,14 @@ export class AptosStandardProvider implements AptosWallet {
       'aptos:signAndSubmitTransaction': {
         version: '1.1.0',
         signAndSubmitTransaction: this.signAndSubmitTransaction,
+      },
+      'aptos:signIn': {
+        version: '1.0.0',
+        signIn: this.signIn,
+      },
+      'aptos:openInMobileApp': {
+        version: '1.0.0',
+        openInMobileApp: this.openInMobileApp,
       },
     };
   }
@@ -273,6 +286,38 @@ export class AptosStandardProvider implements AptosWallet {
         status: UserResponseStatus.REJECTED,
       };
     }
+  };
+
+  signIn: AptosSignInMethod = async (
+    input: AptosSignInInput,
+  ): Promise<UserResponse<AptosSignInOutput>> => {
+    try {
+      const result = await this.provider.signIn(input);
+      const account = new AccountInfo({
+        address: result.account.address,
+        publicKey: new Ed25519PublicKey(result.account.publicKey),
+      });
+
+      const output: AptosSignInOutput = {
+        account,
+        input: result.input,
+        signature: new Ed25519Signature(result.signature),
+        type: result.type,
+      };
+
+      return {
+        status: UserResponseStatus.APPROVED,
+        args: output,
+      };
+    } catch (e) {
+      return {
+        status: UserResponseStatus.REJECTED,
+      };
+    }
+  };
+
+  openInMobileApp: AptosOpenInMobileAppMethod = async (): Promise<void> => {
+    return this.provider.openInMobileApp();
   };
 
   onAccountChange: AptosOnAccountChangeMethod = async (

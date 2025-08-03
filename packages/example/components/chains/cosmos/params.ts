@@ -12,6 +12,12 @@ export const networks = [
     denom: 'uakt',
   },
   {
+    name: 'Terra',
+    id: 'columbus-5',
+    rest: 'https://terra-classic-lcd.publicnode.com',
+    denom: 'uluna',
+  },
+  {
     name: 'Juno',
     id: 'juno-1',
     rest: 'https://lcd-juno.keplr.app',

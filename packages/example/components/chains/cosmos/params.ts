@@ -44,7 +44,7 @@ export const networks = [
   {
     name: 'Terra',
     id: 'columbus-5',
-    rest: 'https://terra-classic-lcd.publicnode.com',
+    rest: 'https://lcd-columbus.keplr.app',
     denom: 'uluna',
   },
   {

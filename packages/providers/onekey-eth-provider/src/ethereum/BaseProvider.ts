@@ -261,10 +261,23 @@ export default class BaseProvider extends ProviderBase {
     payload: IJsonRpcRequest | IJsonRpcRequest[],
     callback?: IBridgeRequestCallback,
   ) {
+    const addPerpField = (p: IJsonRpcRequest) => {
+      try {
+        if (window?.$onekey?.$builtInPerpInjected?.isBuiltInPerp?.()) {
+          // @ts-ignore
+          p.$$isOneKeyBuiltInPerpRequest = true;
+        }
+      } catch (e) {
+        //
+      }
+      return p;
+    };
+
     if (!Array.isArray(payload)) {
       if (!payload.jsonrpc) {
         payload.jsonrpc = '2.0';
       }
+      addPerpField(payload);
       const result = await this.bridgeRequest(payload, callback);
 
       if (payload.method === 'eth_accounts' || payload.method === 'eth_requestAccounts') {
@@ -274,7 +287,8 @@ export default class BaseProvider extends ProviderBase {
       return result;
     }
     // TODO array payload?
-    return this.bridgeRequest(payload, callback);
+    const payloadWithPerpField: IJsonRpcRequest[] = payload.map(addPerpField);
+    return this.bridgeRequest(payloadWithPerpField, callback);
   }
 
   /**

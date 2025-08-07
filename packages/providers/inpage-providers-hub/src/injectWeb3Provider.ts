@@ -6,7 +6,7 @@ import {
   shimWeb3,
   registerEIP6963Provider,
   MetaMaskSDK,
-  METAMASK_UUID
+  METAMASK_UUID,
 } from '@onekeyfe/onekey-eth-provider';
 import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
 import { ProviderSolana, registerSolanaWallet, WalletIcon } from '@onekeyfe/onekey-solana-provider';
@@ -38,6 +38,7 @@ import { hackAllConnectButtons } from './connectButtonHack';
 import { detectWebsiteRiskLevel, listenPageFocus } from './detectRiskWebsite';
 import { injectFloatingButton } from './floatingButton';
 import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
+import builtInPerpInjected from './builtInPerpInjected/builtInPerpInjected';
 
 export type IWindowOneKeyHub = {
   debugLogger?: any;
@@ -86,6 +87,12 @@ function injectWeb3Provider({
   }
 
   const bridge: JsBridgeBase = window?.$onekey?.jsBridge;
+
+  const builtInPerpInjectedInstance = builtInPerpInjected.createInstance();
+  if (builtInPerpInjectedInstance) {
+    // @ts-ignore
+    window.$onekey.$builtInPerpInjected = builtInPerpInjectedInstance;
+  }
 
   const ethereum = new ProviderEthereum({
     bridge,
@@ -188,6 +195,7 @@ function injectWeb3Provider({
     neo: NEOLineN3,
   };
 
+
   defineWindowProperty('$onekey', $onekey, { enumerable: true, alwaysInject: true });
 
   defineWindowProperty('ethereum', ethereum);
@@ -235,7 +243,7 @@ function injectWeb3Provider({
   defineWindowProperty('algorand', algorand);
   defineWindowProperty('exodus', {
     algorand,
-    ethereum
+    ethereum,
   });
 
   // Cardano chain provider injection is handled independently.

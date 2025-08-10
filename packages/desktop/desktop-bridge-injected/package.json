@@ -30,7 +30,7 @@
     "electron": "*"
   },
   "devDependencies": {
-    "electron": "^17.2.0"
+    "electron": "^18.3.7"
   },
   "dependencies": {
     "@onekeyfe/cross-inpage-provider-core": "2.2.36",

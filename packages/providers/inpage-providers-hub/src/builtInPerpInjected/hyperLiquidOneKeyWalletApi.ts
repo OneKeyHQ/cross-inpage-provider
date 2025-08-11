@@ -3,8 +3,8 @@
 import type { ProviderEthereum } from '@onekeyfe/onekey-eth-provider';
 import { isNumber } from 'lodash-es';
 import providersHubUtils from '../utils/providersHubUtils';
-import hyperLiquidDappDetecter from './hyperLiquidDappDetecter';
 import { HyperliquidBuilderStore } from './HyperliquidBuilderStore';
+import hyperLiquidDappDetecter from './hyperLiquidDappDetecter';
 
 type IHyperliquidBuilderFeeConfig = {
   expectBuilderAddress: string;
@@ -21,15 +21,13 @@ function getEthereum() {
   return undefined;
 }
 
-function saveBuilderFeeConfigToStorage(
-  {
-    result,
-    fromSource,
-  }: {
-    result: IHyperliquidBuilderFeeConfig | undefined;
-    fromSource: string;
-  },
-) {
+function saveBuilderFeeConfigToStorage({
+  result,
+  fromSource,
+}: {
+  result: IHyperliquidBuilderFeeConfig | undefined;
+  fromSource: string;
+}) {
   if (!hyperLiquidDappDetecter.isBuiltInHyperLiquidSite()) {
     return;
   }
@@ -137,7 +135,21 @@ async function checkHyperliquidUserApproveStatus({
   }
 }
 
+async function logHyperLiquidServerApiAction({ payload }: { payload: any }) {
+  if (!hyperLiquidDappDetecter.isBuiltInHyperLiquidSite()) {
+    return;
+  }
+  const ethereum = getEthereum();
+  if (ethereum && ethereum?.request && ethereum?.isOneKey) {
+    void ethereum?.request({
+      method: 'hl_logApiEvent',
+      params: [{ apiPayload: payload }],
+    });
+  }
+}
+
 export default {
   initHyperliquidBuilderFeeConfig,
   checkHyperliquidUserApproveStatus,
+  logHyperLiquidServerApiAction,
 };

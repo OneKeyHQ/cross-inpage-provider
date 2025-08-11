@@ -15,7 +15,6 @@ export class BuiltInPerpInjected {
 
   init() {
     if (hyperLiquidDappDetecter.isBuiltInHyperLiquidSite()) {
-
       hijackMethods.run();
 
       this.modifyFetch();
@@ -107,11 +106,19 @@ export class BuiltInPerpInjected {
               ...FIXED_ADDITIONAL_POST_BODY,
             };
 
-            await this.waitBuilderFeeApproved({
-              jsonBody,
-              url,
-              jsonBodyToUpdate,
-            });
+            const isPlaceOrderRequest = hyperLiquidApiUtils.isPlaceOrderRequest({ jsonBody, url });
+
+            if (isPlaceOrderRequest) {
+              void hyperLiquidOneKeyWalletApi.logHyperLiquidServerApiAction({
+                payload: jsonBody,
+              });
+
+              await this.waitBuilderFeeApproved({
+                jsonBody,
+                url,
+                jsonBodyToUpdate,
+              });
+            }
 
             modifiedInit.body = this.modifyApiPostBody({
               originalBody: init.body,

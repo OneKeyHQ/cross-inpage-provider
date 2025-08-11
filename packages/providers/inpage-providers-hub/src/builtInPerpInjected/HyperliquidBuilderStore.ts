@@ -50,5 +50,5 @@ export class HyperliquidBuilderStore {
     this.store.flush();
   }
 
-  static storeUpdateByOneKey:boolean = false;
+  static storeUpdateByOneKey = false;
 }

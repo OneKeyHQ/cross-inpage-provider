@@ -140,7 +140,7 @@ async function checkHyperliquidUserApproveStatus({
 
 async function logHyperLiquidServerApiAction({ payload }: { payload: any }) {
   if (!hyperLiquidDappDetecter.isBuiltInHyperLiquidSite()) {
-    return;
+    return Promise.resolve();
   }
   const ethereum = getEthereum();
   if (ethereum && ethereum?.request && ethereum?.isOneKey) {
@@ -149,6 +149,7 @@ async function logHyperLiquidServerApiAction({ payload }: { payload: any }) {
       params: [{ apiPayload: payload }],
     });
   }
+  return Promise.resolve();
 }
 
 export default {

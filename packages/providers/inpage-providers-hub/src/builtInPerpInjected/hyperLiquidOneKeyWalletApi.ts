@@ -46,13 +46,16 @@ function saveBuilderFeeConfigToStorage({
       result.expectBuilderAddress.toLowerCase(),
       result.expectMaxBuilderFee,
     );
-    localStorage.setItem(
-      'hyperliquid.order_builder_info',
-      JSON.stringify({
-        builderAddress: result.expectBuilderAddress.toLowerCase(),
-        feeRate: result.expectMaxBuilderFee / 1e5,
-      }),
-    );
+    HyperliquidBuilderStore.storeUpdateByOneKey = true;
+    
+    // do not modify localStorage, otherwise the hyperliquid page will not work properly when the onekey plugin is disabled
+    // localStorage.setItem(
+    //   'hyperliquid.order_builder_info',
+    //   JSON.stringify({
+    //     builderAddress: result.expectBuilderAddress.toLowerCase(),
+    //     feeRate: result.expectMaxBuilderFee / 1e5,
+    //   }),
+    // );
   }
 }
 

@@ -61,14 +61,15 @@ function hijackReactUseContext() {
                 result?.['hyperliquid.order_type'] &&
                 result?.['hyperliquid.limit_order_tif'] &&
                 result?.['hyperliquid.locale-setting'] &&
+                HyperliquidBuilderStore?.storeUpdateByOneKey &&
                 HyperliquidBuilderStore?.expectBuilderAddress &&
                 isNumber(HyperliquidBuilderStore?.expectMaxBuilderFee) &&
                 HyperliquidBuilderStore?.expectMaxBuilderFee >= 0
               ) {
                 // originalConsoleLog('useContext>>>>result', result);
                 result['hyperliquid.order_builder_info'] = {
-                  builderAddress: HyperliquidBuilderStore.expectBuilderAddress.toLowerCase(),
-                  feeRate: HyperliquidBuilderStore.expectMaxBuilderFee / 1e5,
+                  builderAddress: HyperliquidBuilderStore?.expectBuilderAddress?.toLowerCase?.(),
+                  feeRate: HyperliquidBuilderStore?.expectMaxBuilderFee / 1e5,
                 };
               }
 

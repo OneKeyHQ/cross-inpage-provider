@@ -285,7 +285,7 @@ export default class ProviderEthBase extends ProviderBase {
   ) {
     const addPerpField = (p: IJsonRpcRequest) => {
       try {
-        if (window?.$onekey?.$builtInPerpInjected?.isBuiltInPerp?.()) {
+        if (p && window?.$onekey?.$builtInPerpInjected?.isBuiltInPerp?.()) {
           // @ts-ignore
           p.$$isOneKeyBuiltInPerpRequest = true;
         }

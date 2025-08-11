@@ -1,43 +1,45 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { JsBridgeBase } from '@onekeyfe/cross-inpage-provider-core';
 import {
-  ProviderEthereum,
-  shimWeb3,
-  registerEIP6963Provider,
-  MetaMaskSDK,
-  METAMASK_UUID
-} from '@onekeyfe/onekey-eth-provider';
-import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
-import { ProviderSolana, registerSolanaWallet, WalletIcon } from '@onekeyfe/onekey-solana-provider';
+  checkWalletSwitchEnable,
+  defineWindowProperty,
+  JsBridgeBase,
+} from '@onekeyfe/cross-inpage-provider-core';
+import { ProviderAlgo } from '@onekeyfe/onekey-algo-provider';
+import { ProviderAlph, registerAlephiumProvider } from '@onekeyfe/onekey-alph-provider';
 import {
   ProviderAptos,
   ProviderAptosMartian,
   registerAptosWallet,
 } from '@onekeyfe/onekey-aptos-provider';
-import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
-import { ProviderAlph, registerAlephiumProvider } from '@onekeyfe/onekey-alph-provider';
-import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
-import { ProviderCardano, defineWindowCardanoProperty } from '@onekeyfe/onekey-cardano-provider';
-import { ProviderCosmos, BBNProviderCosmos } from '@onekeyfe/onekey-cosmos-provider';
-import { ProviderPolkadot, registerPolkadot } from '@onekeyfe/onekey-polkadot-provider';
-import {
-  defineWindowProperty,
-  checkWalletSwitchEnable,
-} from '@onekeyfe/cross-inpage-provider-core';
-import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import { ProviderBfc, registerBfcWallet } from '@onekeyfe/onekey-bfc-provider';
-import { ProviderWebln } from '@onekeyfe/onekey-webln-provider';
-import { ProviderScdo } from '@onekeyfe/onekey-scdo-provider';
-import { createTonProviderOpenMask, ProviderTon } from '@onekeyfe/onekey-ton-provider';
-import { ProviderNostr } from '@onekeyfe/onekey-nostr-provider';
 import { ProviderBtc, ProviderBtcWallet } from '@onekeyfe/onekey-btc-provider';
-import { ProviderAlgo } from '@onekeyfe/onekey-algo-provider';
-import { ProviderNeo, NEOLineN3, emitNeoReadyEvent } from '@onekeyfe/onekey-neo-provider';
+import { defineWindowCardanoProperty, ProviderCardano } from '@onekeyfe/onekey-cardano-provider';
+import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
+import { BBNProviderCosmos, ProviderCosmos } from '@onekeyfe/onekey-cosmos-provider';
+import {
+  METAMASK_UUID,
+  MetaMaskSDK,
+  ProviderEthereum,
+  registerEIP6963Provider,
+  shimWeb3,
+} from '@onekeyfe/onekey-eth-provider';
+import { emitNeoReadyEvent, NEOLineN3, ProviderNeo } from '@onekeyfe/onekey-neo-provider';
+import { ProviderNostr } from '@onekeyfe/onekey-nostr-provider';
+import { ProviderPolkadot, registerPolkadot } from '@onekeyfe/onekey-polkadot-provider';
+import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
+import { ProviderScdo } from '@onekeyfe/onekey-scdo-provider';
+import { ProviderSolana, registerSolanaWallet, WalletIcon } from '@onekeyfe/onekey-solana-provider';
+import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
+import { createTonProviderOpenMask, ProviderTon } from '@onekeyfe/onekey-ton-provider';
+import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
+import { ProviderWebln } from '@onekeyfe/onekey-webln-provider';
+import builtInPerpInjected from './builtInPerpInjected';
 import { hackAllConnectButtons } from './connectButtonHack';
+import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
 import { detectWebsiteRiskLevel, listenPageFocus } from './detectRiskWebsite';
 import { injectFloatingButton } from './floatingButton';
-import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
+import hyperLiquidOneKeyWalletApi from './builtInPerpInjected/hyperLiquidOneKeyWalletApi';
 
 export type IWindowOneKeyHub = {
   debugLogger?: any;
@@ -87,9 +89,18 @@ function injectWeb3Provider({
 
   const bridge: JsBridgeBase = window?.$onekey?.jsBridge;
 
+  const builtInPerpInjectedInstance = builtInPerpInjected.createInstance();
+  if (builtInPerpInjectedInstance) {
+    // @ts-ignore
+    window.$onekey.$builtInPerpInjected = builtInPerpInjectedInstance;
+  }
+
   const ethereum = new ProviderEthereum({
     bridge,
   });
+
+  void hyperLiquidOneKeyWalletApi.initHyperliquidBuilderFeeConfig(ethereum);
+
   const $private = new ProviderPrivate({
     bridge,
   });
@@ -235,7 +246,7 @@ function injectWeb3Provider({
   defineWindowProperty('algorand', algorand);
   defineWindowProperty('exodus', {
     algorand,
-    ethereum
+    ethereum,
   });
 
   // Cardano chain provider injection is handled independently.

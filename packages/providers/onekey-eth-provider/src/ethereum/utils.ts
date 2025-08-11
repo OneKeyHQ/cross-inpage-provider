@@ -35,4 +35,13 @@ export const NOOP = () => undefined;
 
 export const EMITTED_NOTIFICATIONS = [
   'eth_subscription', // per eth-json-rpc-filters/subscriptionManager
+  'onekeyWalletEvents_builtInPerpConfigChanged'
 ];
+
+export const LOW_LEVEL_METHODS = {
+  metamask_accountsChanged: 'metamask_accountsChanged',
+  metamask_unlockStateChanged: 'metamask_unlockStateChanged',
+  metamask_chainChanged: 'metamask_chainChanged',
+  metamask_getProviderState: 'metamask_getProviderState',
+  METAMASK_STREAM_FAILURE: 'METAMASK_STREAM_FAILURE',
+};

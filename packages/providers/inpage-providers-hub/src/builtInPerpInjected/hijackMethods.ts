@@ -5,7 +5,7 @@
 
 import providersHubUtils from '../utils/providersHubUtils';
 import { HyperliquidBuilderStore } from './HyperliquidBuilderStore';
-import hyperLiquidDappDetect from './hyperliquidDappDetect';
+import hyperLiquidDappDetecter from './hyperLiquidDappDetecter';
 import { isNumber } from 'lodash-es';
 
 /* eslint-disable @typescript-eslint/no-unsafe-return */
@@ -96,7 +96,7 @@ function hijackReactUseContext() {
 
 export default {
   run() {
-    if (hyperLiquidDappDetect.isBuiltInHyperLiquidSite()) {
+    if (hyperLiquidDappDetecter.isBuiltInHyperLiquidSite()) {
       hijackReactUseContext();
     }
   },

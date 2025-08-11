@@ -3,7 +3,7 @@ import { FIXED_ADDITIONAL_POST_BODY } from './consts';
 import hijackMethods from './hijackMethods';
 import hyperLiquidOneKeyWalletApi from './hyperLiquidOneKeyWalletApi';
 import hyperLiquidApiUtils from './hyperLiquidServerApi';
-import hyperLiquidDappDetect from './hyperliquidDappDetect';
+import hyperLiquidDappDetecter from './hyperLiquidDappDetecter';
 
 const originalConsoleLog = providersHubUtils.consoleLog;
 
@@ -14,7 +14,7 @@ export class BuiltInPerpInjected {
   }
 
   init() {
-    if (hyperLiquidDappDetect.isBuiltInHyperLiquidSite()) {
+    if (hyperLiquidDappDetecter.isBuiltInHyperLiquidSite()) {
 
       hijackMethods.run();
 
@@ -24,7 +24,7 @@ export class BuiltInPerpInjected {
 
   // do not remove this method, it is used by onekey-eth-provider
   isBuiltInPerp() {
-    return hyperLiquidDappDetect.isBuiltInHyperLiquidSite();
+    return hyperLiquidDappDetecter.isBuiltInHyperLiquidSite();
   }
 
   modifyApiPostBody({
@@ -130,7 +130,7 @@ export class BuiltInPerpInjected {
 
 export default {
   createInstance: () => {
-    if (hyperLiquidDappDetect.isBuiltInHyperLiquidSite()) {
+    if (hyperLiquidDappDetecter.isBuiltInHyperLiquidSite()) {
       return new BuiltInPerpInjected();
     }
     return undefined;

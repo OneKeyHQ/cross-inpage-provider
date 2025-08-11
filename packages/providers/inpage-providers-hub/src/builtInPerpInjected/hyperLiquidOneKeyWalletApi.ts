@@ -3,7 +3,7 @@
 import type { ProviderEthereum } from '@onekeyfe/onekey-eth-provider';
 import { isNumber } from 'lodash-es';
 import providersHubUtils from '../utils/providersHubUtils';
-import hyperliquidDappDetect from './hyperliquidDappDetect';
+import hyperLiquidDappDetecter from './hyperLiquidDappDetecter';
 import { HyperliquidBuilderStore } from './HyperliquidBuilderStore';
 
 type IHyperliquidBuilderFeeConfig = {
@@ -30,7 +30,7 @@ function saveBuilderFeeConfigToStorage(
     fromSource: string;
   },
 ) {
-  if (!hyperliquidDappDetect.isBuiltInHyperLiquidSite()) {
+  if (!hyperLiquidDappDetecter.isBuiltInHyperLiquidSite()) {
     return;
   }
   providersHubUtils.consoleLog(
@@ -59,7 +59,7 @@ function saveBuilderFeeConfigToStorage(
 }
 
 function registerBuilderFeeUpdateEvents(ethereum: ProviderEthereum | undefined) {
-  if (!hyperliquidDappDetect.isBuiltInHyperLiquidSite()) {
+  if (!hyperLiquidDappDetecter.isBuiltInHyperLiquidSite()) {
     return;
   }
 
@@ -82,7 +82,7 @@ function registerBuilderFeeUpdateEvents(ethereum: ProviderEthereum | undefined) 
 }
 
 async function initHyperliquidBuilderFeeConfig(ethereum: ProviderEthereum | undefined) {
-  if (!hyperliquidDappDetect.isBuiltInHyperLiquidSite()) {
+  if (!hyperLiquidDappDetecter.isBuiltInHyperLiquidSite()) {
     return;
   }
 
@@ -107,7 +107,7 @@ async function checkHyperliquidUserApproveStatus({
 }: {
   shouldApproveBuilderFee: boolean;
 }) {
-  if (!hyperliquidDappDetect.isBuiltInHyperLiquidSite()) {
+  if (!hyperLiquidDappDetecter.isBuiltInHyperLiquidSite()) {
     return;
   }
   const ethereum = getEthereum();

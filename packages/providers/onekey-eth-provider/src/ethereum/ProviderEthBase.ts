@@ -4,19 +4,20 @@ import dequal from 'fast-deep-equal';
 
 import {
   appDebugLogger as debugLogger,
-  ProviderBase,
   IBridgeRequestCallback,
   IInpageProviderConfig,
+  ProviderBase,
 } from '@onekeyfe/cross-inpage-provider-core';
 
-import {
-  IInjectedProviderNames,
-  IJsonRpcRequest,
-  IJsonRpcResponse,
-} from '@onekeyfe/cross-inpage-provider-types';
+import { IInjectedProviderNames, IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 
 import messages from './messages';
-import { ConsoleLike, EMITTED_NOTIFICATIONS, logStreamDisconnectWarning } from './utils';
+import {
+  ConsoleLike,
+  EMITTED_NOTIFICATIONS,
+  logStreamDisconnectWarning,
+  LOW_LEVEL_METHODS,
+} from './utils';
 
 export type UnlockStateChangedPayload = { accounts?: string[]; isUnlocked?: boolean };
 export type ChainChangedPayload = { chainId?: string; networkVersion?: string };
@@ -55,7 +56,7 @@ export interface BaseProviderState {
   isPermanentlyDisconnected: boolean;
 }
 
-export default class BaseProvider extends ProviderBase {
+export default class ProviderEthBase extends ProviderBase {
   protected providerName = IInjectedProviderNames.ethereum;
 
   public isMetaMask = true;
@@ -95,7 +96,7 @@ export default class BaseProvider extends ProviderBase {
 
     // private state
     this._state = {
-      ...BaseProvider._defaultState,
+      ...ProviderEthBase._defaultState,
     };
 
     // public state
@@ -133,7 +134,7 @@ export default class BaseProvider extends ProviderBase {
 
     void this._initializeState();
 
-    // handle JSON-RPC notifications
+    /*
     this.on('message_low_level', (payload) => {
       const { method, params } = payload as IJsonRpcRequest;
       if (method === 'metamask_accountsChanged') {
@@ -148,6 +149,27 @@ export default class BaseProvider extends ProviderBase {
           data: params,
         });
       } else if (method === 'METAMASK_STREAM_FAILURE') {
+        // TODO destroy bridge connection
+        const error = new Error(messages.errors.permanentlyDisconnected());
+      }
+    });
+    */
+
+    // handle JSON-RPC notifications
+    this.on('message_low_level', (payload) => {
+      const { method, params } = payload as IJsonRpcRequest;
+      if (method === LOW_LEVEL_METHODS.metamask_accountsChanged) {
+        this._handleAccountsChanged(params as unknown[]);
+      } else if (method === LOW_LEVEL_METHODS.metamask_unlockStateChanged) {
+        this._handleUnlockStateChanged(params as UnlockStateChangedPayload);
+      } else if (method === LOW_LEVEL_METHODS.metamask_chainChanged) {
+        this._handleChainChanged(params as ChainChangedPayload);
+      } else if (EMITTED_NOTIFICATIONS.includes(method)) {
+        this.emit('message', {
+          type: method,
+          data: params,
+        });
+      } else if (method === LOW_LEVEL_METHODS.METAMASK_STREAM_FAILURE) {
         // TODO destroy bridge connection
         const error = new Error(messages.errors.permanentlyDisconnected());
       }

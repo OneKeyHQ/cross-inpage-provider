@@ -7,7 +7,7 @@ import {
   IInpageProviderConfig,
 } from '@onekeyfe/cross-inpage-provider-core';
 
-import BaseProvider, { BaseProviderOptions } from './BaseProvider';
+import ProviderEthBase, { BaseProviderOptions } from './ProviderEthBase';
 import messages from './messages';
 import sendSiteMetadata from './siteMetadata';
 import { EMITTED_NOTIFICATIONS, NOOP } from './utils';
@@ -39,7 +39,7 @@ interface SentWarningsState {
   };
 }
 
-export default class MetaMaskInpageProvider extends BaseProvider {
+export default class MetaMaskInpageProvider extends ProviderEthBase {
   protected _sentWarnings: SentWarningsState = {
     // methods
     enable: false,

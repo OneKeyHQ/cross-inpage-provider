@@ -1,4 +1,4 @@
-import BaseProvider from './BaseProvider';
+import ProviderEthBase from './ProviderEthBase';
 import {
   initializeProvider,
   setGlobalProvider,
@@ -9,7 +9,7 @@ import shimWeb3 from './shimWeb3';
 export {
   initializeProvider,
   MetaMaskInpageProvider,
-  BaseProvider,
+  ProviderEthBase as BaseProvider,
   setGlobalProvider,
   shimWeb3,
 };

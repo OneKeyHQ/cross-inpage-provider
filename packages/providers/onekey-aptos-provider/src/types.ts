@@ -1,3 +1,4 @@
+import { AptosSignInBoundFields, AptosSignInInput } from '@aptos-labs/wallet-standard';
 import { WalletIcon } from '@wallet-standard/core';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -68,4 +69,29 @@ export type WalletInfo = {
   name: string;
   logo: WalletIcon;
   url?: string | undefined;
+};
+
+
+export type OneKeyBridgeSignInOutput = {
+  /**
+   * Account information of the user.
+   */
+  account: {
+    address: string;
+    publicKey: string;
+  };
+  /**
+   * Input fields to the `signIn` signing request to the wallet. The wallet will ensure that any bound fields not included in the `AptosSignInInput` are included in the output.
+   */
+  input: AptosSignInInput & AptosSignInBoundFields;
+  /**
+   * Signature of the SIWA Signing Message constructed from the `input` fields.
+   */
+  signature: string;
+  /**
+   * The type of signing scheme used to sign the message.
+   *
+   * @example 'ed25519' | 'multi_ed25519' | 'single_key' | 'multi_key'
+   */
+  type: string;
 };

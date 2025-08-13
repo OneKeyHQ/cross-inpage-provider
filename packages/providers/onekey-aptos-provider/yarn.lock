@@ -34,10 +34,10 @@
     jwt-decode "^4.0.0"
     poseidon-lite "^0.2.0"
 
-"@aptos-labs/wallet-standard@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@aptos-labs/wallet-standard/-/wallet-standard-0.2.0.tgz#d0f9d422d63ac93a02c2eb3157090434ded77379"
-  integrity sha512-4aoO4MlqzrW+CtO83MwbHMMtu91DL5B7YKRvhJbRnVB4R+QCOwBI/aQTkNZbKBDfOplLlqWTTl6Li0l6e02YLQ==
+"@aptos-labs/wallet-standard@^0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@aptos-labs/wallet-standard/-/wallet-standard-0.5.1.tgz#b4d742d751870b8585a02e89e5791cebd5cfdbb9"
+  integrity sha512-jrdWH4qibIZRVn3h7eJhTpkvlLhwJgViC0XLoEz/+deMGZUUbga47LDX3SyZi/Sms7MvlN8oDI40pbCZX6PhaA==
 
 "@noble/curves@^1.4.0", "@noble/curves@~1.7.0":
   version "1.7.0"

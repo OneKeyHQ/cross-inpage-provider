@@ -60,7 +60,7 @@ const TRANSFER_SCRIPT =
   "0xa11ceb0b0700000a0601000203020605080d071525083a40107a1f010200030201000104060c060c05030003060c0503083c53454c463e5f30046d61696e0d6170746f735f6163636f756e74087472616e73666572ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000000114636f6d70696c6174696f6e5f6d65746164617461090003322e3003322e31000001070b000b01010b020b03110002";
 
 function MultiAgentTransactionFlow() {
-  const { account, network, signTransaction, submitTransaction } = useStandardWallet();
+  const { account, network, signTransaction, submitTransaction, openInMobileApp } = useStandardWallet();
 
   const [secondarySignerAccount, setSecondarySignerAccount] = useState<Ed25519Account>();
   const [transactionToSubmit, setTransactionToSubmit] = useState<AnyRawTransaction | null>(null);
@@ -510,15 +510,14 @@ function Example() {
             return Promise.resolve(isValidSignature.toString());
           }}
         />
-         <ApiPayload
-          title="openIn"
+         {/* <ApiPayload
+          title="openInMobileApp"
           description="signMessageAndVerify"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
-            const obj = JSON.parse(request) as AptosSignMessageInput;
-            return signMessageAndVerify(obj);
+            return openInMobileApp();
           }}
-        />
+        /> */}
         <ApiPayload
           title="signTransaction"
           description="signTransaction"

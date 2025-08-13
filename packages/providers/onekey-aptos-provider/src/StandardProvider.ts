@@ -47,7 +47,6 @@ import type {
   AptosSignInMethod,
   AptosSignInInput,
   AptosSignInOutput,
-  AptosOpenInMobileAppMethod,
 } from '@aptos-labs/wallet-standard';
 
 import type { ProviderAptos } from './OnekeyAptosProvider';
@@ -143,10 +142,6 @@ export class AptosStandardProvider implements AptosWallet {
       'aptos:signIn': {
         version: '1.0.0',
         signIn: this.signIn,
-      },
-      'aptos:openInMobileApp': {
-        version: '1.0.0',
-        openInMobileApp: this.openInMobileApp,
       },
     };
   }
@@ -314,10 +309,6 @@ export class AptosStandardProvider implements AptosWallet {
         status: UserResponseStatus.REJECTED,
       };
     }
-  };
-
-  openInMobileApp: AptosOpenInMobileAppMethod = async (): Promise<void> => {
-    return this.provider.openInMobileApp();
   };
 
   onAccountChange: AptosOnAccountChangeMethod = async (

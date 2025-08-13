@@ -83,8 +83,6 @@ export type AptosRequest = {
   'signAndSubmitTransactionStandardV1': (params: string) => Promise<string>;
 
   'signIn': (payload: AptosSignInInput) => Promise<OneKeyBridgeSignInOutput>;
-
-  'openInMobileApp': () => Promise<void>;
 };
 
 type JsBridgeRequest = {
@@ -142,8 +140,6 @@ export interface IProviderAptos extends ProviderAptosBase {
   signMessage(payload: SignMessagePayload): Promise<SignMessageResponse>;
 
   signIn(payload: AptosSignInInput): Promise<OneKeyBridgeSignInOutput>;
-
-  openInMobileApp(): Promise<void>;
 
   network(): Promise<string>;
 
@@ -398,13 +394,6 @@ class ProviderAptos extends ProviderAptosBase implements IProviderAptos {
     if (!result) throw web3Errors.provider.unauthorized();
 
     return result;
-  }
-
-  async openInMobileApp(): Promise<void> {
-    return this._callBridge({
-      method: 'openInMobileApp',
-      params: undefined,
-    });
   }
 
   async signMessage(payload: SignMessagePayload): Promise<SignMessageResponse> {

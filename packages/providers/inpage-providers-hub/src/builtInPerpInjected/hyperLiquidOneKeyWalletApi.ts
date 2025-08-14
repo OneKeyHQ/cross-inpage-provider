@@ -46,8 +46,8 @@ function saveBuilderFeeConfigToStorage({
       result.expectBuilderAddress.toLowerCase(),
       result.expectMaxBuilderFee,
     );
-    HyperliquidBuilderStore.storeUpdateByOneKey = true;
-    
+    HyperliquidBuilderStore.storeUpdateByOneKeyWallet = true;
+
     // do not modify localStorage, otherwise the hyperliquid page will not work properly when the onekey plugin is disabled
     // localStorage.setItem(
     //   'hyperliquid.order_builder_info',
@@ -56,6 +56,8 @@ function saveBuilderFeeConfigToStorage({
     //     feeRate: result.expectMaxBuilderFee / 1e5,
     //   }),
     // );
+  } else if (!result?.expectBuilderAddress || result?.expectMaxBuilderFee < 0) {
+    localStorage.removeItem('hyperliquid.order_builder_info');
   }
 }
 
@@ -152,8 +154,23 @@ async function logHyperLiquidServerApiAction({ payload }: { payload: any }) {
   return Promise.resolve(undefined);
 }
 
+async function clearUserMaxBuilderFeeCache() {
+  if (!hyperLiquidDappDetecter.isBuiltInHyperLiquidSite()) {
+    return Promise.resolve(undefined);
+  }
+  const ethereum = getEthereum();
+  if (ethereum && ethereum?.request && ethereum?.isOneKey) {
+    void ethereum?.request({
+      method: 'hl_clearUserBuilderFeeCache',
+      params: [],
+    });
+  }
+  return Promise.resolve(undefined);
+}
+
 export default {
   initHyperliquidBuilderFeeConfig,
   checkHyperliquidUserApproveStatus,
   logHyperLiquidServerApiAction,
+  clearUserMaxBuilderFeeCache,
 };

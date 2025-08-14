@@ -1,9 +1,10 @@
+import { merge } from 'lodash';
 import providersHubUtils from '../utils/providersHubUtils';
 import { FIXED_ADDITIONAL_POST_BODY } from './consts';
 import hijackMethods from './hijackMethods';
+import hyperLiquidDappDetecter from './hyperLiquidDappDetecter';
 import hyperLiquidOneKeyWalletApi from './hyperLiquidOneKeyWalletApi';
 import hyperLiquidApiUtils from './hyperLiquidServerApi';
-import hyperLiquidDappDetecter from './hyperLiquidDappDetecter';
 
 const originalConsoleLog = providersHubUtils.consoleLog;
 
@@ -36,7 +37,7 @@ export class BuiltInPerpInjected {
     jsonBodyToUpdate: Record<string, unknown>;
   }) {
     if (Object.keys(jsonBodyToUpdate).length) {
-      Object.assign(jsonBody as Record<string, unknown>, jsonBodyToUpdate);
+      merge(jsonBody as Record<string, unknown>, jsonBodyToUpdate);
       return JSON.stringify(jsonBody);
     }
     return originalBody;
@@ -62,6 +63,14 @@ export class BuiltInPerpInjected {
       await hyperLiquidOneKeyWalletApi.checkHyperliquidUserApproveStatus({
         shouldApproveBuilderFee: true,
       });
+      // TODO remove
+      // merge(jsonBodyToUpdate, {
+      //   action: {
+      //     builder: {
+      //       f: 9999,
+      //     },
+      //   },
+      // });
     }
 
     originalConsoleLog(
@@ -125,7 +134,52 @@ export class BuiltInPerpInjected {
               jsonBody,
               jsonBodyToUpdate,
             });
-            return originalFetch(input, modifiedInit);
+            try {
+              const result = await originalFetch(input, modifiedInit);
+              try {
+                if (isPlaceOrderRequest) {
+                  const resData = (await result.clone().json()) as
+                    | {
+                        response: string;
+                        status: 'err' | 'ok'; // success or err
+                      }
+                    | undefined;
+                  if (resData?.status === 'err') {
+                    originalConsoleLog('BuiltInPerpInjected__PlaceOrderRequest__Error1', resData);
+                    void hyperLiquidOneKeyWalletApi.clearUserMaxBuilderFeeCache();
+                  }
+                  /*
+                    {
+                        "status": "ok",
+                        "response": {
+                            "type": "order",
+                            "data": {
+                                "statuses": [
+                                    {
+                                        "resting": {
+                                            "oid": 133956942251
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                  */
+                  if (resData?.status === 'ok') {
+                    originalConsoleLog('BuiltInPerpInjected__PlaceOrderRequest__Success', resData);
+                  }
+                }
+              } catch (eeee) {
+                // ignore
+                originalConsoleLog('BuiltInPerpInjected__PlaceOrderRequest__Error2', eeee);
+              }
+              return result;
+            } catch (error) {
+              if (isPlaceOrderRequest) {
+                originalConsoleLog('BuiltInPerpInjected__PlaceOrderRequest__Error3', error);
+              }
+              throw error;
+            }
           }
         }
       }

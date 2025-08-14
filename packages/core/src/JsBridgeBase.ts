@@ -16,6 +16,8 @@ import {
 } from '@onekeyfe/cross-inpage-provider-types';
 import versionInfo from './versionInfo';
 
+const orignalConsoleLog = console.log;
+
 function toPlainError(errorInfo: IErrorInfo) {
   return {
     constructorName: errorInfo.constructorName,
@@ -362,6 +364,8 @@ abstract class JsBridgeBase extends CrossEventEmitter {
       internal?: boolean;
     },
   ) {
+    // orignalConsoleLog('JsBridgeBase.receive', payloadReceived, sender);
+
     let payload: IJsBridgeMessagePayload = {
       data: null,
     };

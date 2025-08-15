@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/cross-inpage-provider-core",
-  "version": "2.2.37-alpha.1",
+  "version": "2.2.37",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -29,9 +29,9 @@
   },
   "dependencies": {
     "@noble/hashes": "^1.7.1",
-    "@onekeyfe/cross-inpage-provider-errors": "2.2.37-alpha.1",
-    "@onekeyfe/cross-inpage-provider-events": "2.2.37-alpha.1",
-    "@onekeyfe/cross-inpage-provider-types": "2.2.37-alpha.1",
+    "@onekeyfe/cross-inpage-provider-errors": "2.2.37",
+    "@onekeyfe/cross-inpage-provider-events": "2.2.37",
+    "@onekeyfe/cross-inpage-provider-types": "2.2.37",
     "events": "^3.3.0",
     "lodash-es": "^4.17.21",
     "ms": "^2.1.3"

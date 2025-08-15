@@ -90,7 +90,7 @@ function injectWeb3Provider({
   const bridge: JsBridgeBase = window?.$onekey?.jsBridge;
 
   const builtInPerpInjectedInstance = builtInPerpInjected.createInstance();
-  if (builtInPerpInjectedInstance) {
+  if (builtInPerpInjectedInstance && window?.$onekey) {
     // @ts-ignore
     window.$onekey.$builtInPerpInjected = builtInPerpInjectedInstance;
   }

@@ -191,9 +191,14 @@ export class BuiltInPerpInjected {
 
 export default {
   createInstance: () => {
-    if (hyperLiquidDappDetecter.isBuiltInHyperLiquidSite()) {
-      return new BuiltInPerpInjected();
+    try {
+      if (hyperLiquidDappDetecter.isBuiltInHyperLiquidSite()) {
+        return new BuiltInPerpInjected();
+      }
+      return undefined;
+    } catch (error) {
+      originalConsoleLog('BuiltInPerpInjected__createInstance__Error', error);
+      return undefined;
     }
-    return undefined;
   },
 };

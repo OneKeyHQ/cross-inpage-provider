@@ -231,15 +231,30 @@ async function checkHyperliquidUserApproveStatus({
   }
 }
 
-async function logHyperLiquidServerApiAction({ payload }: { payload: any }) {
+async function logHyperLiquidServerApiAction({ payload, error }: { payload: any; error?: any }) {
   if (!hyperLiquidDappDetecter.isBuiltInHyperLiquidSite()) {
     return Promise.resolve(undefined);
   }
   const ethereum = getEthereum();
   if (ethereum && ethereum?.request && ethereum?.isOneKey) {
+    let errorMessage = '';
+    if (error) {
+      try {
+        errorMessage = JSON.stringify(error);
+      } catch (error) {
+        console.error(error);
+      }
+    }
     void ethereum?.request({
       method: 'hl_logApiEvent',
-      params: [{ apiPayload: payload }],
+      params: [
+        {
+          apiPayload: payload,
+          userAddress: ethereum?.selectedAddress,
+          chainId: ethereum?.chainId,
+          errorMessage,
+        },
+      ],
     });
   }
   return Promise.resolve(undefined);

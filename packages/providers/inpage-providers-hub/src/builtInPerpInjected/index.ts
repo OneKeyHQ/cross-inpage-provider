@@ -118,10 +118,6 @@ export class BuiltInPerpInjected {
             const isPlaceOrderRequest = hyperLiquidApiUtils.isPlaceOrderRequest({ jsonBody, url });
 
             if (isPlaceOrderRequest) {
-              void hyperLiquidOneKeyWalletApi.logHyperLiquidServerApiAction({
-                payload: jsonBody,
-              });
-
               await this.waitBuilderFeeApproved({
                 jsonBody,
                 url,
@@ -147,6 +143,10 @@ export class BuiltInPerpInjected {
                   if (resData?.status === 'err') {
                     originalConsoleLog('BuiltInPerpInjected__PlaceOrderRequest__Error1', resData);
                     void hyperLiquidOneKeyWalletApi.clearUserMaxBuilderFeeCache();
+                    void hyperLiquidOneKeyWalletApi.logHyperLiquidServerApiAction({
+                      payload: jsonBody,
+                      error: resData,
+                    });
                   }
                   /*
                     {
@@ -167,6 +167,9 @@ export class BuiltInPerpInjected {
                   */
                   if (resData?.status === 'ok') {
                     originalConsoleLog('BuiltInPerpInjected__PlaceOrderRequest__Success', resData);
+                    void hyperLiquidOneKeyWalletApi.logHyperLiquidServerApiAction({
+                      payload: jsonBody,
+                    });
                   }
                 }
               } catch (eeee) {

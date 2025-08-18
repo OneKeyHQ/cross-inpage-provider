@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/onekey-near-provider",
-  "version": "2.2.37-alpha.1",
+  "version": "2.2.37",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -34,10 +34,10 @@
     "near-api-js": "^0.44.2"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "2.2.37-alpha.1",
-    "@onekeyfe/cross-inpage-provider-errors": "2.2.37-alpha.1",
-    "@onekeyfe/cross-inpage-provider-types": "2.2.37-alpha.1",
-    "@onekeyfe/extension-bridge-injected": "2.2.37-alpha.1",
+    "@onekeyfe/cross-inpage-provider-core": "2.2.37",
+    "@onekeyfe/cross-inpage-provider-errors": "2.2.37",
+    "@onekeyfe/cross-inpage-provider-types": "2.2.37",
+    "@onekeyfe/extension-bridge-injected": "2.2.37",
     "borsh": "^0.6.0",
     "depd": "^2.0.0",
     "tweetnacl": "^1.0.3"

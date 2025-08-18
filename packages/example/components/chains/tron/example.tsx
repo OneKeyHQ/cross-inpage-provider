@@ -334,7 +334,7 @@ export default function Example() {
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
             const tronWeb = provider.tronWeb;
-            const signedString = await tronWeb.trx.sign(request);
+            const signedString = await tronWeb.trx.signMessage(request);
             return signedString;
           }}
           onValidate={async (request: string, result: string) => {

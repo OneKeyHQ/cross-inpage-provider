@@ -61,7 +61,7 @@ function hijackReactUseContext() {
                 result?.['hyperliquid.order_type'] &&
                 result?.['hyperliquid.limit_order_tif'] &&
                 result?.['hyperliquid.locale-setting'] &&
-                HyperliquidBuilderStore?.storeUpdateByOneKey &&
+                HyperliquidBuilderStore?.storeUpdateByOneKeyWallet &&
                 HyperliquidBuilderStore?.expectBuilderAddress &&
                 isNumber(HyperliquidBuilderStore?.expectMaxBuilderFee) &&
                 HyperliquidBuilderStore?.expectMaxBuilderFee >= 0

@@ -1,10 +1,10 @@
 import {
+  checkWalletSwitchEnable,
   ISpecialPropertyProviderNamesReflection,
   Logger,
-  checkWalletSwitchEnable,
 } from '@onekeyfe/cross-inpage-provider-core';
-import { throttle, ThrottleSettings } from 'lodash-es';
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
+import { throttle, ThrottleSettings } from 'lodash-es';
 import type { IWindowOneKeyHub } from '../injectWeb3Provider';
 
 const hackButtonLogger = new Logger('hackButton');
@@ -271,6 +271,7 @@ export function createNewImageToContainer({
 
 function hackConnectButton({
   urls,
+  isSiteCustomMatchedFn,
   replaceMethod,
   providers,
   mutationObserverOptions = {
@@ -287,6 +288,7 @@ function hackConnectButton({
   callbackDelay = 10,
 }: {
   urls: string[];
+  isSiteCustomMatchedFn?: () => boolean;
   replaceMethod: (options?: { providers: IInjectedProviderNames[] }) => void;
   providers: IInjectedProviderNames[];
   /*
@@ -302,7 +304,13 @@ function hackConnectButton({
   throttleSettings?: ThrottleSettings;
   callbackDelay?: number;
 }) {
-  const isUrlMatched = () => Boolean(urls.includes(window.location.hostname) || urls.includes('*'));
+  const isUrlMatched = () => {
+    const r = Boolean(urls.includes(window.location.hostname) || urls.includes('*'));
+    if (isSiteCustomMatchedFn) {
+      return isSiteCustomMatchedFn?.() === true && r;
+    }
+    return r;
+  };
   const getEnabledInjectedProviders = () => {
     if (!isUrlMatched()) {
       return;

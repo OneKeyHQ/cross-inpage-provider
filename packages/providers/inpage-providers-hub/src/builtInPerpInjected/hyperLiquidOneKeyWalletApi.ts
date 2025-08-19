@@ -41,6 +41,7 @@ function saveBuilderFeeConfigToStorage({
     fromSource,
   );
   if (result?.customLocalStorage) {
+
     try {
       Object.entries(result.customLocalStorage).forEach(([key, value]) => {
         try {
@@ -61,6 +62,7 @@ function saveBuilderFeeConfigToStorage({
     } catch (error) {
       console.error(error);
     }
+
   }
   if (
     result?.expectBuilderAddress &&

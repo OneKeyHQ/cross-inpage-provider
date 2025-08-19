@@ -41,18 +41,28 @@ function saveBuilderFeeConfigToStorage({
     fromSource,
   );
   if (result?.customLocalStorage) {
-    Object.entries(result.customLocalStorage).forEach(([key, value]) => {
-      if (isString(value) && value && key) {
-        if (key === 'hyperliquid.locale-setting') {
-          localStorage.setItem(key, value);
-        } else {
-          const currentValue = localStorage.getItem(key);
-          if (currentValue === null || currentValue === undefined) {
-            localStorage.setItem(key, value);
+
+    try {
+      Object.entries(result.customLocalStorage).forEach(([key, value]) => {
+        try {
+          if (isString(value) && value && key) {
+            if (key === 'hyperliquid.locale-setting') {
+              localStorage.setItem(key, value);
+            } else {
+              const currentValue = localStorage.getItem(key);
+              if (currentValue === null || currentValue === undefined) {
+                localStorage.setItem(key, value);
+              }
+            }
           }
+        } catch (error) {
+          console.error(error);
         }
-      }
-    });
+      });
+    } catch (error) {
+      console.error(error);
+    }
+
   }
   if (
     result?.expectBuilderAddress &&
@@ -67,6 +77,7 @@ function saveBuilderFeeConfigToStorage({
     HyperliquidBuilderStore.storeUpdateByOneKeyWallet = true;
 
     // do not modify localStorage, otherwise the hyperliquid page will not work properly when the onekey plugin is disabled
+    localStorage.removeItem('hyperliquid.order_builder_info');
     // localStorage.setItem(
     //   'hyperliquid.order_builder_info',
     //   JSON.stringify({
@@ -86,19 +97,23 @@ function registerBuilderFeeUpdateEvents(ethereum: ProviderEthereum | undefined) 
   }
 
   ethereum?.on('message', (payload, p1, p2) => {
-    const { type: method, data: params } = (payload as { type: string; data: unknown }) || {};
-    if (method === 'onekeyWalletEvents_builtInPerpConfigChanged') {
-      const paramsInfo = params as {
-        hyperliquidBuilderAddress: string;
-        hyperliquidMaxBuilderFee: number;
-      };
-      saveBuilderFeeConfigToStorage({
-        result: {
-          expectBuilderAddress: paramsInfo.hyperliquidBuilderAddress,
-          expectMaxBuilderFee: paramsInfo.hyperliquidMaxBuilderFee,
-        },
-        fromSource: 'onekeyWalletEvents_builtInPerpConfigChanged',
-      });
+    try {
+      const { type: method, data: params } = (payload as { type: string; data: unknown }) || {};
+      if (method === 'onekeyWalletEvents_builtInPerpConfigChanged') {
+        const paramsInfo = params as {
+          hyperliquidBuilderAddress: string;
+          hyperliquidMaxBuilderFee: number;
+        };
+        saveBuilderFeeConfigToStorage({
+          result: {
+            expectBuilderAddress: paramsInfo.hyperliquidBuilderAddress,
+            expectMaxBuilderFee: paramsInfo.hyperliquidMaxBuilderFee,
+          },
+          fromSource: 'onekeyWalletEvents_builtInPerpConfigChanged',
+        });
+      }
+    } catch (error) {
+      console.error(error);
     }
   });
 }

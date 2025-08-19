@@ -6,7 +6,10 @@ import { isNumber, isString } from 'lodash-es';
 import { hackConnectButton } from '../connectButtonHack/hackConnectButton';
 import providersHubUtils from '../utils/providersHubUtils';
 import { HYPERLIQUID_HOSTNAME } from './consts';
-import { HyperliquidBuilderStore } from './HyperliquidBuilderStore';
+import {
+  HyperliquidBuilderStore,
+  IHyperliquidBuilderCustomSettings,
+} from './HyperliquidBuilderStore';
 import hyperLiquidDappDetecter from './hyperLiquidDappDetecter';
 
 type IHyperliquidBuilderFeeConfig = {
@@ -14,6 +17,7 @@ type IHyperliquidBuilderFeeConfig = {
   expectMaxBuilderFee: number;
   shouldModifyPlaceOrderPayload?: boolean;
   customLocalStorage?: Record<string, unknown>;
+  customSettings?: IHyperliquidBuilderCustomSettings;
 };
 
 function getEthereum() {
@@ -63,6 +67,17 @@ function saveBuilderFeeConfigToStorage({
       console.error(error);
     }
 
+  }
+  if (result?.customSettings) {
+    providersHubUtils.consoleLog(
+      'BuiltInPerpInjected___saveBuilderFeeConfigToStorage>>>>result.customSettings22211',
+      result.customSettings,
+    );
+    try {
+      HyperliquidBuilderStore.customSettings = result.customSettings;
+    } catch (error) {
+      console.error(error);
+    }
   }
   if (
     result?.expectBuilderAddress &&
@@ -123,35 +138,43 @@ function hackConnectionButton() {
     urls: [HYPERLIQUID_HOSTNAME],
     providers: [IInjectedProviderNames.ethereum],
     replaceMethod() {
+      const customSettings = HyperliquidBuilderStore?.customSettings;
+
       const hideNavigationBar = () => {
-        const siteIcon =
-          window?.document?.querySelectorAll?.('a[href="/trade"]>svg')?.[0]?.parentElement;
-        const navBarItems = siteIcon?.nextElementSibling?.childNodes;
-        const navBarRightContainer = siteIcon?.nextElementSibling?.nextElementSibling;
+        let navBarRightContainer: Element | null | undefined;
 
-        navBarItems?.forEach((item, index) => {
-          try {
-            const ele = item as HTMLElement;
-            if (index >= 1) {
-              const href = ele?.querySelector('a')?.getAttribute('href');
-              if (ele && !href?.includes('/trade')) {
-                ele.style.display = 'none';
+        if (customSettings?.hideNavBar ?? true) {
+          const siteIcon =
+            window?.document?.querySelectorAll?.('a[href="/trade"]>svg')?.[0]?.parentElement;
+          const navBarItems = siteIcon?.nextElementSibling?.childNodes;
+          navBarRightContainer = siteIcon?.nextElementSibling?.nextElementSibling;
+
+          navBarItems?.forEach((item, index) => {
+            try {
+              const ele = item as HTMLElement;
+              if (index >= 1) {
+                const href = ele?.querySelector('a')?.getAttribute('href');
+                if (ele && !href?.includes('/trade')) {
+                  ele.style.display = 'none';
+                }
               }
+            } catch (error) {
+              console.error(error);
             }
-          } catch (error) {
-            console.error(error);
-          }
-        });
+          });
+        }
 
-        if (navBarRightContainer) {
-          const button = navBarRightContainer.querySelector('button');
-          if (button && button?.textContent?.toLowerCase()?.trim() === 'connect') {
-            button.style.display = 'none';
+        if (customSettings?.hideNavBarConnectButton ?? false) {
+          if (navBarRightContainer) {
+            const button = navBarRightContainer.querySelector('button');
+            if (button && button?.textContent?.toLowerCase()?.trim() === 'connect') {
+              button.style.display = 'none';
+            }
           }
         }
       };
 
-      const hideConnectButton = () => {
+      const hideNotOneKeyWalletConnectButton = () => {
         const buttons = Array.from(document?.querySelectorAll?.('div.modal button'));
         const oneKeyButton = buttons.find((button) =>
           button?.textContent?.toLowerCase()?.includes?.('onekey'),
@@ -180,7 +203,9 @@ function hackConnectionButton() {
         console.error(error);
       }
       try {
-        hideConnectButton();
+        if (customSettings?.hideNotOneKeyWalletConnectButton ?? true) {
+          hideNotOneKeyWalletConnectButton();
+        }
       } catch (error) {
         console.error(error);
       }

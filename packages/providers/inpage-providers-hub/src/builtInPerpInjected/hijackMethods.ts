@@ -6,7 +6,6 @@
 import providersHubUtils from '../utils/providersHubUtils';
 import { HyperliquidBuilderStore } from './HyperliquidBuilderStore';
 import hyperLiquidDappDetecter from './hyperLiquidDappDetecter';
-import { isNumber } from 'lodash-es';
 
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 const originalConsoleLog = providersHubUtils.consoleLog;
@@ -60,19 +59,18 @@ function hijackReactUseContext() {
                 result &&
                 result?.['hyperliquid.order_type'] &&
                 result?.['hyperliquid.limit_order_tif'] &&
-                result?.['hyperliquid.locale-setting'] &&
-                HyperliquidBuilderStore?.storeUpdateByOneKeyWallet &&
-                HyperliquidBuilderStore?.expectBuilderAddress &&
-                isNumber(HyperliquidBuilderStore?.expectMaxBuilderFee) &&
-                HyperliquidBuilderStore?.expectMaxBuilderFee >= 0
+                result?.['hyperliquid.locale-setting']
               ) {
-                // originalConsoleLog('useContext>>>>result', result);
-                result['hyperliquid.order_builder_info'] = {
-                  builderAddress: HyperliquidBuilderStore?.expectBuilderAddress?.toLowerCase?.(),
-                  feeRate: HyperliquidBuilderStore?.expectMaxBuilderFee / 1e5,
-                };
-              }
+                const builderInfo = HyperliquidBuilderStore?.getAvailableBuilderInfo();
 
+                if (builderInfo) {
+                  // originalConsoleLog('useContext>>>>result', result);
+                  result['hyperliquid.order_builder_info'] = {
+                    builderAddress: builderInfo.address,
+                    feeRate: builderInfo.fee / 1e5,
+                  };
+                }
+              }
               return result;
             };
 
@@ -95,10 +93,78 @@ function hijackReactUseContext() {
   });
 }
 
+type HyperLiquidOrderObject = {
+  grouping: string;
+  orders: {
+    a: string;
+    b: string;
+    p: string;
+    r: string;
+  }[];
+  type: string;
+  builder?: {
+    b: string;
+    f: number;
+  };
+};
+
+function isHyperLiquidObjectLike(obj: HyperLiquidOrderObject | undefined): boolean {
+  if (!obj || typeof obj !== 'object') {
+    return false;
+  }
+
+  const requiredFields = ['grouping', 'orders', 'type'];
+  const hasAllRequiredFields = requiredFields.every((field) =>
+    Object.prototype.hasOwnProperty.call(obj, field),
+  );
+
+  if (!hasAllRequiredFields) {
+    return false;
+  }
+
+  return Boolean(
+    typeof obj.grouping === 'string' &&
+      obj.grouping === 'na' &&
+      Array.isArray(obj.orders) &&
+      obj.orders.length > 0 &&
+      Object.prototype.hasOwnProperty.call(obj.orders[0], 'a') &&
+      Object.prototype.hasOwnProperty.call(obj.orders[0], 'b') &&
+      Object.prototype.hasOwnProperty.call(obj.orders[0], 'p') &&
+      Object.prototype.hasOwnProperty.call(obj.orders[0], 'r') &&
+      Object.prototype.hasOwnProperty.call(obj.orders[0], 's') &&
+      Object.prototype.hasOwnProperty.call(obj.orders[0], 't') &&
+      typeof obj.type === 'string' &&
+      obj.type === 'order',
+  );
+}
+
+function hijackObjectKeys() {
+  const originalObjectKeys = Object.keys;
+
+  Object.keys = function (obj: object) {
+    try {
+      if (obj && isHyperLiquidObjectLike(obj as HyperLiquidOrderObject) === true) {
+        const builderInfo = HyperliquidBuilderStore?.getAvailableBuilderInfo();
+        if (builderInfo) {
+          // "builder":{"b":"0x11111","f":35}
+          (obj as HyperLiquidOrderObject).builder = {
+            b: builderInfo.address,
+            f: builderInfo.fee,
+          };
+        }
+      }
+    } catch (e) {
+      originalConsoleLog('hijackObjectKeys____error', e);
+    }
+    return originalObjectKeys(obj);
+  };
+}
+
 export default {
   run() {
     if (hyperLiquidDappDetecter.isBuiltInHyperLiquidSite()) {
       hijackReactUseContext();
+      hijackObjectKeys();
     }
   },
 };

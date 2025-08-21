@@ -1,3 +1,4 @@
+import { isNumber } from 'lodash-es';
 import { LocalStorageStore } from '../utils/LocalStorageStore';
 
 const prefix = 'hyperliquid.k_config_v3.'; //builder
@@ -51,11 +52,13 @@ export class HyperliquidBuilderStore {
     }
   }
 
-  static get customSettings(): {
-    hideNavBar?: boolean;
-    hideNavBarConnectButton?: boolean;
-    hideNotOneKeyWalletConnectButton?: boolean;
-  } | undefined {
+  static get customSettings():
+    | {
+        hideNavBar?: boolean;
+        hideNavBarConnectButton?: boolean;
+        hideNotOneKeyWalletConnectButton?: boolean;
+      }
+    | undefined {
     if (this._customSettings === undefined) {
       this._customSettings = this.store.get<IHyperliquidBuilderCustomSettings>(
         storageKeys.customSettings,
@@ -76,6 +79,26 @@ export class HyperliquidBuilderStore {
   static updateBuilderInfo(address: string, fee: number): void {
     this.expectBuilderAddress = address;
     this.expectMaxBuilderFee = fee;
+  }
+
+  static getAvailableBuilderInfo():
+    | {
+        address: string;
+        fee: number;
+      }
+    | undefined {
+    if (
+      HyperliquidBuilderStore?.storeUpdateByOneKeyWallet &&
+      HyperliquidBuilderStore?.expectBuilderAddress &&
+      isNumber(HyperliquidBuilderStore?.expectMaxBuilderFee) &&
+      HyperliquidBuilderStore?.expectMaxBuilderFee >= 0
+    ) {
+      return {
+        address: HyperliquidBuilderStore?.expectBuilderAddress?.toLowerCase?.(),
+        fee: HyperliquidBuilderStore?.expectMaxBuilderFee,
+      };
+    }
+    return undefined;
   }
 
   static flush(): void {

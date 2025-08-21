@@ -4,6 +4,7 @@ import {
   checkWalletSwitchEnable,
   defineWindowProperty,
   JsBridgeBase,
+  isOneKeyWebsite
 } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderAlgo } from '@onekeyfe/onekey-algo-provider';
 import { ProviderAlph, registerAlephiumProvider } from '@onekeyfe/onekey-alph-provider';
@@ -201,7 +202,9 @@ function injectWeb3Provider({
 
   defineWindowProperty('$onekey', $onekey, { enumerable: true, alwaysInject: true });
 
-  defineWindowProperty('ethereum', ethereum);
+  if (!isOneKeyWebsite()) {
+    defineWindowProperty('ethereum', ethereum);
+  }
   // OneKey Ethereum EIP6963 Provider
   registerEIP6963Provider({
     image: WALLET_CONNECT_INFO.onekey.icon,
@@ -209,7 +212,7 @@ function injectWeb3Provider({
   });
 
   // Override MetaMask EIP6963 Provider
-  if (checkWalletSwitchEnable()) {
+  if (checkWalletSwitchEnable() && !isOneKeyWebsite()) {
     registerEIP6963Provider({
       uuid: METAMASK_UUID,
       name: 'MetaMask',

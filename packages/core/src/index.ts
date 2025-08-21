@@ -10,6 +10,7 @@ export * from './CrossEventEmitter';
 export * from './walletProperty';
 export * from './notification';
 export * from './utils/hashUtils';
+export * from './utils/isOneKeyWebsite';
 import * as consts from './consts';
 export { consts };
 

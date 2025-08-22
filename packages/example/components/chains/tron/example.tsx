@@ -330,7 +330,7 @@ export default function Example() {
       <ApiGroup title="SignMessage">
         <ApiPayload
           title="SignMessage"
-          description="（暂不支持）签名消息存在安全风险，硬件不支持"
+          description="（官方废弃，暂不支持）签名消息"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
             const tronWeb = provider.tronWeb;
@@ -360,7 +360,7 @@ export default function Example() {
         />
         <ApiPayload
           title="SignMessage V2"
-          description="（暂不支持）签名消息"
+          description="签名消息"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
             const tronWeb = provider.tronWeb;
@@ -372,6 +372,24 @@ export default function Example() {
 
             // verify the signature
             const res = await tronWeb.trx.verifyMessageV2(request, result);
+            const isValid = res === tronWeb.defaultAddress.base58;
+            return Promise.resolve(isValid.toString());
+          }}
+        />
+        <ApiPayload
+          title="SignMessage V2 Array"
+          description="签名消息 Array(only support hex)"
+          presupposeParams={params.signMessageArray}
+          onExecute={async (request: string) => {
+            const tronWeb = provider.tronWeb;
+            const signedString = tronWeb.trx.signMessageV2(Buffer.from(request, 'hex'));
+            return Promise.resolve(signedString);
+          }}
+          onValidate={async (request: string, result: string) => {
+            const tronWeb = provider.tronWeb;
+
+            // verify the signature
+            const res = await tronWeb.trx.verifyMessageV2(Buffer.from(request, 'hex'), result);
             const isValid = res === tronWeb.defaultAddress.base58;
             return Promise.resolve(isValid.toString());
           }}

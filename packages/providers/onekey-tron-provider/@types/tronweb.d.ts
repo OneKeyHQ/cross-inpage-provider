@@ -59,6 +59,13 @@ type HttpProvider = {
 
 declare module 'tronweb' {
   export class TronWeb {
+    utils: {
+      isHex: (string: string) => boolean;
+      isString: (string: unknown) => boolean;
+      ethersUtils: {
+        toUtf8Bytes: (string: string) => Uint8Array;
+      };
+    };
     ready: boolean;
     constructor(options: any);
 
@@ -102,6 +109,13 @@ declare module 'tronweb' {
         useTronHeader: boolean,
         callback?: Callback,
       ) => Promise<any>;
+      signMessage: (
+        transaction: IUnsignedTransaction,
+        privateKey: any,
+        useTronHeader: boolean,
+        callback?: Callback,
+      ) => Promise<string>;
+      signMessageV2: (message: string | Uint8Array | Array<number>, privateKey?: string | false) => Promise<string>;
       getAccount: (string) => Promise<{ address: string }>;
       getAccountResources: (string) => Promise<IAccountResources>;
       getBalance: (string) => Promise<number>;

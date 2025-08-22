@@ -26,6 +26,7 @@ import {
 } from './types';
 import { isWalletEventMethodMatch } from './utils';
 import BigNumber from 'bignumber.js';
+import { toUtf8Bytes } from 'tronweb/lib/esm/utils';
 type OneKeyTronProviderProps = IInpageProviderConfig & {
   timeout?: number;
 };
@@ -58,6 +59,8 @@ class OneKeyTronWeb extends TronWeb {
       base58: false,
     };
     this.trx.sign = (transaction: UnsignedTransaction) => provider.sign(transaction);
+    this.trx.signMessage = (transaction: UnsignedTransaction) => provider.signMessage(transaction);
+    this.trx.signMessageV2 = (message: string | Uint8Array | Array<number>, privateKey?: string | false) => provider.signMessageV2(message, privateKey);
     this.trx.getNodeInfo = (callback?: Callback) => provider.getNodeInfo(callback);
   }
   provider!: IProviderTron;
@@ -443,9 +446,52 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
   }
 
   async sign(transaction: UnsignedTransaction): Promise<SignedTransaction> {
+    if (this.tronWeb?.utils.isString(transaction)) {
+      // @ts-ignore
+      if (!this.tronWeb?.utils.isHex(transaction)) {
+          throw new Error('Expected hex message input');
+      }
+      return this.request({
+        method: 'signMessageV1',
+        params: transaction,
+      });
+    }
+
     return this.request({
       method: 'tron_signTransaction',
       params: transaction,
+    });
+  }
+
+  async signMessage(transaction: UnsignedTransaction): Promise<string> {
+    let messageStr;
+    if(typeof transaction === 'string') {
+      messageStr = transaction;
+    } else {
+      throw new Error('Expected hex message input');
+    }
+
+    return this.request({
+      method: 'signMessageV1',
+      params: [messageStr],
+    });
+  }
+
+  async signMessageV2(message: string | Uint8Array | Array<number>): Promise<string> {
+    let messageStr;
+    if(typeof message === 'string') {
+      const bytes = this.tronWeb?.utils?.ethersUtils?.toUtf8Bytes(message);
+      if(!bytes) {
+        throw new Error('Expected message input');
+      }
+      messageStr = Buffer.from(bytes).toString('hex');
+    } else {
+      messageStr = Buffer.from(message).toString('hex');
+    }
+
+    return this.request({
+      method: 'signMessageV2',
+      params: [messageStr],
     });
   }
 

@@ -20,6 +20,23 @@ export default {
       name: 'signMessage',
       value: '0x01020304',
     },
+    {
+      id: 'signMessage-utf8',
+      name: 'signMessage-utf8',
+      value: 'hello',
+    },
+  ],
+  signMessageArray: [
+    {
+      id: 'signMessage-hex',
+      name: 'signMessage-hex',
+      value: '01020304',
+    },
+    {
+      id: 'signMessage-utf8-hex',
+      name: 'signMessage-utf8-hex',
+      value: '68656c6c6f',
+    },
   ],
   nativeTransfer: (address: string) => [
     {

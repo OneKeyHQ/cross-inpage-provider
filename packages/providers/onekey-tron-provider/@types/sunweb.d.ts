@@ -18,6 +18,7 @@ declare module 'sunweb' {
         useTronHeader: boolean,
         callback?: Callback,
       ) => Promise<any>;
+      signMessageV2: (message: string | Uint8Array | Array<number>, privateKey?: string | false) => string;
       getNodeInfo: (callback?: Callback) => Promise<any>;
     };
   }

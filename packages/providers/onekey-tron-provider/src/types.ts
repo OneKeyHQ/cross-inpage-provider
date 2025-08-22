@@ -55,6 +55,8 @@ export interface IProviderTron extends ProviderTronBase {
   ready: boolean;
   request<T>(args: RequestArguments): Promise<T>;
   sign(transaction: UnsignedTransaction): Promise<SignedTransaction>;
+  signMessage(transaction: UnsignedTransaction): Promise<string>;
+  signMessageV2(message: string | Uint8Array | Array<number>, privateKey?: string | false): Promise<string>;
   getNodeInfo(callback?: Callback): Promise<any>;
 }
 

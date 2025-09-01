@@ -49,7 +49,8 @@
     "@onekeyfe/onekey-tron-provider": "2.2.42",
     "@onekeyfe/onekey-webln-provider": "2.2.42",
     "lodash-es": "^4.17.21",
-    "preact": "^10.25.1"
+    "preact": "^10.25.1",
+    "cipher-base": "^1.0.6"
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.12",

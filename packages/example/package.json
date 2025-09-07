@@ -109,7 +109,7 @@
     "lucide-react": "^0.378.0",
     "msw": "^2.4.1",
     "near-api-js": "^0.44.2",
-    "next": "^13.5.9",
+    "next": "^14.2.32",
     "next-themes": "^0.3.0",
     "perfect-json": "^0.3.1",
     "react": "^18.3.1",

@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-import { IInpageProviderConfig, IProviderBaseConnectionStatus } from '@onekeyfe/cross-inpage-provider-core';
+import {
+  IInpageProviderConfig,
+  IProviderBaseConnectionStatus,
+} from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { ProviderTonBase } from './ProviderTonBase';
 import type * as TypeUtils from './type-utils';
@@ -126,7 +129,11 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     appName: 'onekey',
     appVersion: this.version,
     maxProtocolVersion: 2,
-    features: ["SendTransaction", { name: 'SendTransaction', maxMessages: 4 }],
+    features: [
+      'SendTransaction',
+      { name: 'SendTransaction', maxMessages: 4 },
+      { name: 'SignData', types: ['text', 'binary', 'cell'] },
+    ],
   };
   walletInfo?: WalletInfo = {
     name: 'OneKey',
@@ -281,13 +288,16 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
                 message: ConnectEventErrorMessage.USER_DECLINED,
               },
             };
-          } else if (code === TonResponseError.InvalidManifestUrl || code === TonResponseError.ContentManifest) {
+          } else if (
+            code === TonResponseError.InvalidManifestUrl ||
+            code === TonResponseError.ContentManifest
+          ) {
             return {
               event: 'connect_error',
               id,
               payload: {
                 code,
-                message: message ?? "",
+                message: message ?? '',
               },
             };
           }
@@ -378,11 +388,15 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     return this._connect();
   }
 
-  convertError<T extends RpcMethod>(id: string, error: unknown, method: string): WalletResponseError<T> {
+  convertError<T extends RpcMethod>(
+    id: string,
+    error: unknown,
+    method: string,
+  ): WalletResponseError<T> {
     const { code, message } = error as { code?: number; message?: string };
     if (code === 4001) {
       let errorMessage: string = ConnectEventErrorMessage.USER_DECLINED;
-      if(method === 'sendTransaction' || method === 'signData'){
+      if (method === 'sendTransaction' || method === 'signData') {
         errorMessage = SendTransactionErrorMessage.USER_REJECTS_ERROR;
       }
       return {
@@ -392,7 +406,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
           message: errorMessage,
         },
       } as WalletResponseError<T>;
-    } else if(code === TonResponseError.ParameterError) {
+    } else if (code === TonResponseError.ParameterError) {
       return {
         id,
         error: {
@@ -422,6 +436,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
         }
         return p;
       });
+      console.log('=====>>>>> send params', message);
       if (message.method === 'sendTransaction') {
         res = await this._sendTransaction(params[0] as TransactionRequest);
       } else if (message.method === 'signData') {
@@ -440,7 +455,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
         } as WalletResponseError<T>;
       }
     } catch (error) {
-      return this.convertError(id, error,message.method);
+      return this.convertError(id, error, message.method);
     }
 
     if (res === undefined) {

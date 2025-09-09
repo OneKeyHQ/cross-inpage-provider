@@ -242,6 +242,44 @@ export default {
       },
     ];
   },
+  signData: (to: string) => {
+    return [
+      {
+        id: 'signData-text',
+        name: 'Text',
+        value: JSON.stringify({
+          "type": "text",
+          "text": "Hello, TON!"
+        }),
+      },
+      {
+        id: 'signData-binary',
+        name: 'Binary',
+        value: JSON.stringify({
+          "type": "binary",
+          "bytes": "SGVsbG8sIFRPTiE="
+        }),
+      },
+      {
+        id: 'signData-cell',
+        name: 'Cell',
+        value: JSON.stringify({
+          "type": "cell",
+          "schema": "message#_ text:string = Message;",
+          "cell": "te6cckEBAQEAEQAAHgAAAABIZWxsbywgVE9OIb7WCx4="
+        }),
+      },
+      {
+        id: 'signData-cell-cn',
+        name: 'Cell',
+        value: JSON.stringify({
+          "type": "cell",
+          "schema": "message#_ text:string = 我是中文，中文日本語한국어العربيةРусскийDeutschFrançaisEspañolΕλληνικάहिन्दीไทยTiếngViệtעברית🌍;",
+          "cell": "te6cckEBAQEAEQAAHgAAAABIZWxsbywgVE9OIb7WCx4="
+        }),
+      },
+    ];
+  },
   sendTransactionWithError: (to: string) => {
     let bounceableAddress = '';
     let nonBounceableAddress = '';

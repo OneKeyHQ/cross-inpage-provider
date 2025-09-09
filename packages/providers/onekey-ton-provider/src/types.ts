@@ -45,15 +45,39 @@ export interface TransactionRequest {
   messages: Message[];
 }
 
-export interface SignDataRequest {
+export type SignDataPayloadText = {
+  type: "text";
+  text: string;
+};
+
+export type SignDataPayloadBinary = {
+  type: "binary";
+  bytes: string; // base64 (not url safe) encoded bytes array
+};
+
+export type SignDataPayloadCell = {
+  type: "cell";
+  schema: string; // TL-B scheme of the cell payload
+  cell: string; // base64 (not url safe) encoded cell
+}
+
+export interface SignDataPayloadLegacy {
   schema_crc: number;
   cell: string;
   publicKey?: string;
 }
 
-export interface SignDataResult {
-  signature: string; // base64 encoded signature 
+export type SignDataRequest = SignDataPayloadLegacy | SignDataPayloadText | SignDataPayloadBinary | SignDataPayloadCell;
+
+export type SignDataResult = {
+  signature: string; // base64 encoded signature
   timestamp: number; // UNIX timestamp in seconds (UTC) at the moment on creating the signature.
+} & {
+  signature: string; // base64 encoded signature
+  address: string;
+  timestamp: number;
+  domain: string;
+  payload: SignDataRequest;
 }
 
 export interface SignProofRequest {
@@ -61,7 +85,7 @@ export interface SignProofRequest {
 }
 
 export interface SignProofResult {
-  signature: string; // base64 encoded signature 
+  signature: string; // base64 encoded signature
   timestamp: number; // 64-bit unix epoch time of the signing operation (seconds)
   domain: {
     lengthBytes: number; // AppDomain Length

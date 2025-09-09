@@ -124,7 +124,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     appName: 'onekey',
     appVersion: this.version,
     maxProtocolVersion: 2,
-    features: [{ name: 'SendTransaction', maxMessages: 4 }],
+    features: [{ name: 'SendTransaction', maxMessages: 4 },{ name: 'SignData', types: ['text' , 'binary' , 'cell'] }],
   };
   walletInfo?: WalletInfo = {
     name: 'OneKey',
@@ -413,6 +413,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
         }
         return p;
       });
+      console.log('=====>>>>> send params', message);
       if (message.method === 'sendTransaction') {
         res = await this._sendTransaction(params[0] as TransactionRequest);
       } else if (message.method === 'signData') {

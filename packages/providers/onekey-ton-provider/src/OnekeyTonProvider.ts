@@ -47,6 +47,8 @@ export type TonRequest = {
 
 const TonResponseError = {
   ParameterError: 1,
+  InvalidManifestUrl: 2,
+  ContentManifest: 3,
 } as const;
 
 type JsBridgeRequest = {
@@ -124,7 +126,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     appName: 'onekey',
     appVersion: this.version,
     maxProtocolVersion: 2,
-    features: [{ name: 'SendTransaction', maxMessages: 4 }],
+    features: ["SendTransaction", { name: 'SendTransaction', maxMessages: 4 }],
   };
   walletInfo?: WalletInfo = {
     name: 'OneKey',
@@ -269,7 +271,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
             params: protocolVersion && message ? [protocolVersion, message] : [],
           });
         } catch (error) {
-          const { code } = error as { code?: number; message?: string };
+          const { code, message } = error as { code?: number; message?: string };
           if (code === 4001) {
             return {
               event: 'connect_error',
@@ -277,6 +279,15 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
               payload: {
                 code: CONNECT_EVENT_ERROR_CODES.USER_REJECTS_ERROR,
                 message: ConnectEventErrorMessage.USER_DECLINED,
+              },
+            };
+          } else if (code === TonResponseError.InvalidManifestUrl || code === TonResponseError.ContentManifest) {
+            return {
+              event: 'connect_error',
+              id,
+              payload: {
+                code,
+                message: message ?? "",
               },
             };
           }
@@ -315,6 +326,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
         });
       } catch (error) {
         const { code } = error as { code?: number; message?: string };
+        console.log('=====>>>>> signProof error', error);
         if (code === 4001) {
           return {
             event: 'connect_error',
@@ -358,7 +370,10 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
 
   connect(protocolVersion?: number, message?: ConnectRequest): Promise<ConnectEvent> {
     try {
-      return this._connect(protocolVersion, message);
+      return this._connect(protocolVersion, message).then((res) => {
+        console.log('=====>>>>> connect res', res);
+        return res;
+      });
     } catch (error) {
       console.error('=====>>>>> connect error', error);
       throw error;

@@ -293,8 +293,6 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
           }
         }
 
-        console.log('=====>>>>> connect result', result);
-
         if (!result) {
           return {
             event: 'connect_error',
@@ -326,7 +324,6 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
         });
       } catch (error) {
         const { code } = error as { code?: number; message?: string };
-        console.log('=====>>>>> signProof error', error);
         if (code === 4001) {
           return {
             event: 'connect_error',
@@ -370,10 +367,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
 
   connect(protocolVersion?: number, message?: ConnectRequest): Promise<ConnectEvent> {
     try {
-      return this._connect(protocolVersion, message).then((res) => {
-        console.log('=====>>>>> connect res', res);
-        return res;
-      });
+      return this._connect(protocolVersion, message);
     } catch (error) {
       console.error('=====>>>>> connect error', error);
       throw error;

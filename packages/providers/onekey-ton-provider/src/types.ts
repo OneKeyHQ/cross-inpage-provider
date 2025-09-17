@@ -20,7 +20,7 @@ export enum SendTransactionErrorMessage {
   UNKNOWN_ERROR = "Unknown error",
   BAD_REQUEST_ERROR = "Bad request",
   UNKNOWN_APP_ERROR = "Unknown app",
-  USER_REJECTS_ERROR = "User rejects",
+  USER_REJECTS_ERROR = "User declined the transaction",
   METHOD_NOT_SUPPORTED = "Method is not supported",
 }
 
@@ -52,7 +52,7 @@ export interface SignDataRequest {
 }
 
 export interface SignDataResult {
-  signature: string; // base64 encoded signature 
+  signature: string; // base64 encoded signature
   timestamp: number; // UNIX timestamp in seconds (UTC) at the moment on creating the signature.
 }
 
@@ -61,7 +61,7 @@ export interface SignProofRequest {
 }
 
 export interface SignProofResult {
-  signature: string; // base64 encoded signature 
+  signature: string; // base64 encoded signature
   timestamp: number; // 64-bit unix epoch time of the signing operation (seconds)
   domain: {
     lengthBytes: number; // AppDomain Length

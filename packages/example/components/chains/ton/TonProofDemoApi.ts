@@ -2,8 +2,9 @@
 import {
   Account,
   ConnectAdditionalRequest,
+  SendTransactionRequest,
   TonProofItemReplySuccess,
-} from '@tonconnect/ui-react';
+} from "@tonconnect/ui-react";
 import '../../../lib/localStorageForGithubPages';
 
 class TonProofDemoApiService {
@@ -79,6 +80,21 @@ class TonProofDemoApiService {
 
     // eslint-disable-next-line @typescript-eslint/ban-types
     return response as {};
+  }
+
+  async merkleProof(): Promise<SendTransactionRequest> {
+    const response = await (
+      await fetch(`${this.host}/api/merkle_proof`, {
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+          "Content-type": "application/json",
+        },
+        method: "POST",
+        body: "",
+      })
+    ).json();
+
+    return response as SendTransactionRequest;
   }
 
   reset() {

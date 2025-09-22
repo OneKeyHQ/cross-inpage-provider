@@ -112,6 +112,12 @@ export const registeredChains: IChainInfo[] = [
   },
   {
     id: uuid.v4(),
+    name: 'Cosmos Kit',
+    href: '/cosmosKit',
+    icon: 'https://uni.onekey-asset.com/static/chain/cosmos.png',
+  },
+  {
+    id: uuid.v4(),
     name: 'Cosmos Babylon',
     href: '/cosmosBabylon',
     icon: 'https://uni.onekey-asset.com/static/logo/babylon.png',

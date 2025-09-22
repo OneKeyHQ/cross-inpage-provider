@@ -79,3 +79,31 @@
 .select {
   @apply bg-white border border-gray-300 rounded-lg p-2 text-gray-700 focus:outline-none focus:border-blue-500;
 }
+
+.simple-table {
+  @apply w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm;
+}
+
+.simple-table th {
+  @apply bg-gray-50 px-2 py-1 text-left text-sm font-medium text-gray-900 border-b border-gray-200;
+}
+
+.simple-table td {
+  @apply px-2 py-1 text-sm text-gray-700 border-b border-gray-200;
+}
+
+.simple-table tr:last-child td {
+  @apply border-b-0;
+}
+
+.dark .simple-table {
+  @apply bg-gray-900 shadow-none;
+}
+
+.dark .simple-table th {
+  @apply bg-gray-800 text-gray-100 border-gray-700;
+}
+
+.dark .simple-table td {
+  @apply text-gray-300 border-gray-700;
+}

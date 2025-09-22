@@ -536,6 +536,7 @@ function Example() {
               msgs: obj.msgs,
             };
             const signer = await providerCosmos?.getOfflineSigner();
+            // @ts-ignore
             return await signer.signAmino(account.address, requestObj);
           }}
         />

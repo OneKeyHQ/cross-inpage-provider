@@ -35,9 +35,11 @@
     "lodash-es": "^4.17.21",
     "querystring": "^0.2.1",
     "sunweb": "^1.0.7",
-    "tronweb": "^6.0.1"
+    "tronweb": "^6.0.1",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@types/lodash-es": "^4.17.12"
+    "@types/lodash-es": "^4.17.12",
+    "@types/uuid": "^8.3.2"
   }
 }

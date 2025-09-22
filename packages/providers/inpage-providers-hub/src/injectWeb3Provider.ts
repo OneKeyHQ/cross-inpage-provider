@@ -33,7 +33,7 @@ import { ProviderScdo } from '@onekeyfe/onekey-scdo-provider';
 import { ProviderSolana, registerSolanaWallet, WalletIcon } from '@onekeyfe/onekey-solana-provider';
 import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import { createTonProviderOpenMask, ProviderTon } from '@onekeyfe/onekey-ton-provider';
-import { ProviderTron } from '@onekeyfe/onekey-tron-provider';
+import { ProviderTron, registerTIP6963Provider } from '@onekeyfe/onekey-tron-provider';
 import { ProviderWebln } from '@onekeyfe/onekey-webln-provider';
 import builtInPerpInjected from './builtInPerpInjected';
 import { hackAllConnectButtons } from './connectButtonHack';
@@ -235,6 +235,11 @@ function injectWeb3Provider({
   registerAlephiumProvider(alephium);
   defineWindowProperty('tronLink', tron);
   defineWindowProperty('tronOfTronLink', tron);
+  // OneKey Ethereum EIP6963 Provider
+  registerTIP6963Provider({
+    image: WALLET_CONNECT_INFO.onekey.icon,
+    provider: tron,
+  });
   defineWindowProperty('suiWallet', sui);
   defineWindowProperty('bfcWallet', bfc);
   defineWindowProperty('onekeyTonWallet', {

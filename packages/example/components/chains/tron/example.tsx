@@ -6,7 +6,7 @@ import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
 import { memo, useEffect, useRef, useState } from 'react';
 import { get } from 'lodash';
-import { IProviderApi, IProviderInfo } from './types';
+import { IProviderApi, IProviderInfo, ITIP6963AnnounceProviderEvent, ITIP6963ProviderDetail } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import { useWallet } from '../../../components/connect/WalletContext';
 import type { IKnownWallet } from '../../../components/connect/types';
@@ -99,16 +99,20 @@ const WalletWatchAsset = memo(() => {
 });
 
 export default function Example() {
-  const walletsRef = useRef<IProviderInfo[]>([
+  const walletsRef = useRef<ITIP6963ProviderDetail[]>([
     {
-      uuid: 'injected',
-      name: 'Injected Wallet',
-      inject: 'tronLink',
+      info: {
+        uuid: 'injected',
+        name: 'Injected Wallet',
+        inject: 'tronLink',
+      }
     },
     {
-      uuid: 'injected-onekey',
-      name: 'Injected OneKey',
-      inject: '$onekey.tron',
+      info: {
+        uuid: 'injected-onekey',
+        name: 'Injected OneKey',
+        inject: '$onekey.tron',
+      }
     },
   ]);
 
@@ -117,12 +121,12 @@ export default function Example() {
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const providerDetail = walletsRef.current?.find((w) => w.uuid === selectedWallet.id);
+    const providerDetail = walletsRef.current?.find((w) => w.info.uuid === selectedWallet.id);
     if (!providerDetail) {
       return Promise.reject('Wallet not found');
     }
 
-    const provider = get(window, providerDetail.inject) as IProviderApi | undefined;
+    const provider = providerDetail.provider ?? get(window, providerDetail.info.inject) as IProviderApi | undefined;
 
     if (!provider) {
       toast({
@@ -144,10 +148,16 @@ export default function Example() {
       }
     }
 
+    let address = tronWeb?.defaultAddress?.base58 as string
+    if(!address) {
+      const [addr] = await provider.request<string[]>({ method: 'tron_accounts' });
+      address = addr;
+    }
+
     // const [address] = await provider.request<string[]>({ method: 'tron_accounts' });
     return {
       provider,
-      address: tronWeb?.defaultAddress?.base58 as string | undefined,
+      address,
       // address: address,
     };
   };
@@ -164,6 +174,33 @@ export default function Example() {
       });
     }
   }, [provider]);
+
+  useEffect(() => {
+    const listener = (event: ITIP6963AnnounceProviderEvent) => {
+      console.log('tron tip6963 [listener]', event);
+      const { info, provider } = event.detail;
+      const wallet = walletsRef.current.find((wallet) => wallet.info.uuid === info.uuid);
+      if (!wallet) {
+        walletsRef.current = [
+          ...walletsRef.current,
+          {
+            info,
+            provider,
+          },
+        ];
+      }
+    };
+
+    // @ts-expect-error
+    window.addEventListener('TIP6963:announceProvider', listener);
+
+    window.dispatchEvent(new Event('TIP6963:requestProvider'));
+
+    return () => {
+      // @ts-expect-error
+      window.removeEventListener('TIP6963:announceProvider', listener);
+    };
+  }, []);
 
   const checkReceiveAddress = () => {
     if (account.address === receiveAddress) {
@@ -222,6 +259,27 @@ export default function Example() {
     };
   }, [account, provider, setAccount]);
 
+  useEffect(() => {
+    if (!provider) return;
+    provider.on('accountsChanged', (accounts: string[]) => {
+      console.log('TIP6963 tron [accountsChanged]', accounts);
+    });
+
+    provider.on('chainChanged', (chainId: string) => {
+      console.log('TIP6963 tron [chainChanged]', chainId);
+    });
+
+    return () => {
+      provider.removeListener('accountsChanged', (accounts: string[]) => {
+        console.log('TIP6963 tron [accountsChanged]', accounts);
+      });
+
+      provider.removeListener('chainChanged', (chainId: string) => {
+        console.log('TIP6963 tron [chainChanged]', chainId);
+      });
+    };
+  }, [provider]);
+
   return (
     <>
       <ConnectButton<IProviderApi>
@@ -229,8 +287,9 @@ export default function Example() {
           return Promise.resolve(
             walletsRef.current.map((wallet) => {
               return {
-                id: wallet.uuid,
-                name: wallet.name,
+                id: wallet.info.uuid,
+                name: `${wallet.info.name}${wallet.provider ? ' (TIP6963)' : ''}`,
+                logo: wallet.info.icon,
               };
             }),
           );
@@ -492,6 +551,123 @@ export default function Example() {
             const signedTx = await tronWeb.trx.sign(tx);
             const broastTx = await tronWeb.trx.sendRawTransaction(signedTx);
             return JSON.stringify(broastTx);
+          }}
+        />
+      </ApiGroup>
+
+      <ApiGroup title="TIP6963 Only" >
+        <ApiPayload
+          title="eth_requestAccounts"
+          description="请求连接 Wallet 获取账户"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            const res = await provider?.request<string[]>({
+              method: 'eth_requestAccounts',
+            });
+            return JSON.stringify(res);
+          }}
+        />
+
+        <ApiPayload
+          title="wallet_accounts"
+          description="获取已连接账户"
+          disableRequestContent
+          onExecute={async (request: string) => {
+            const res = await provider?.request<string[]>({
+              method: 'wallet_accounts',
+            });
+            return JSON.stringify(res);
+          }}
+        />
+
+        <ApiPayload
+          title="eth_chainId"
+          description="获取当前网络"
+          onExecute={async (request: string) => {
+            const res = await provider?.request<string>({
+              method: 'eth_chainId',
+            });
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="wallet_switchEthereumChain"
+          description="切换网络"
+          presupposeParams={[
+            {
+              id: 'chainId-mainnet',
+              name: '网络 ID Mainnet',
+              value: JSON.stringify({
+                "chainId": "0x2b6653dc",
+              }),
+            },
+            {
+              id: 'chainId-mainnet',
+              name: '网络 ID Mainnet',
+              value: JSON.stringify({
+                "chainId": "0x7a69d1ed",
+              }),
+            },
+          ]}
+          onExecute={async (request: string) => {
+            const res = await provider?.request<string[]>({
+              method: 'wallet_switchEthereumChain',
+              params: [JSON.parse(request)],
+            });
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="personal_sign"
+          description="签名"
+          presupposeParams={params.signMessage}
+          onExecute={async (request: string) => {
+            const tronWeb = provider?.request({
+              method: 'personal_sign',
+              params: [request],
+            });
+            return Promise.resolve(tronWeb);
+          }}
+          onValidate={async (request: string, result: string) => {
+            const tronWeb = provider.tronWeb;
+
+            // verify the signature
+            const res = await tronWeb.trx.verifyMessageV2(request, result);
+            const isValid = res === tronWeb.defaultAddress.base58;
+            return Promise.resolve(isValid.toString());
+          }}
+        />
+        <ApiPayload
+          title="eth_signTransaction"
+          description="签名交易"
+          presupposeParams={params.nativeTransfer(receiveAddress ?? '')}
+          onExecute={async (request: string) => {
+            checkReceiveAddress();
+
+            const { to, amount } = JSON.parse(request);
+
+            const tronWeb = provider.tronWeb;
+            const tx = await tronWeb.transactionBuilder.sendTrx(to, amount, account.address);
+            console.log('tx', tx);
+
+            const signedTx = await provider?.request<any>({
+              method: 'eth_signTransaction',
+              params: [tx],
+            });
+            const broastTx = await tronWeb.trx.sendRawTransaction(signedTx);
+            console.log('broastTx', broastTx);
+
+            return JSON.stringify(broastTx);
+          }}
+        />
+        <ApiPayload
+          title="wallet_disconnect"
+          description="断开连接"
+          onExecute={async (request: string) => {
+            const tronWeb = provider?.request({
+              method: 'wallet_disconnect'
+            });
+            return Promise.resolve(tronWeb);
           }}
         />
       </ApiGroup>

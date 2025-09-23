@@ -26,7 +26,6 @@ import {
 } from './types';
 import { isWalletEventMethodMatch } from './utils';
 import BigNumber from 'bignumber.js';
-import { toUtf8Bytes } from 'tronweb/lib/esm/utils';
 type OneKeyTronProviderProps = IInpageProviderConfig & {
   timeout?: number;
 };
@@ -322,6 +321,7 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
         this._postMessage(ProviderEvents.ACCOUNTS_CHANGED, {
           address,
         });
+        this.emit(ProviderEvents.ACCOUNTS_CHANGED, [address]);
       }
     }
   }
@@ -379,6 +379,8 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
           chain: '_',
         },
       });
+
+      this.emit(ProviderEvents.CHAIN_CHANGED, chainId);
     }
   }
 

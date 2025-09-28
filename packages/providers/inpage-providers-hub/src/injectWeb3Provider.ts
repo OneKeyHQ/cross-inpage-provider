@@ -347,7 +347,7 @@ function injectWeb3Provider({
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     registerSuiWallet(sui, {
       name: 'Slush',
-      logo: WALLET_CONNECT_INFO.phantom.icon as WalletIcon,
+      logo: WALLET_CONNECT_INFO.slush.icon as WalletIcon,
     });
   }
 

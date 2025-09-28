@@ -343,6 +343,14 @@ function injectWeb3Provider({
     });
   }
 
+  if (checkWalletSwitchEnable()) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    registerSuiWallet(sui, {
+      name: 'Slush',
+      logo: WALLET_CONNECT_INFO.phantom.icon as WalletIcon,
+    });
+  }
+
   // OneKey BFC Standard Wallet
   registerBfcWallet(bfc, {
     logo: WALLET_CONNECT_INFO.onekey.icon,

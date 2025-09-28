@@ -92,6 +92,11 @@ export const basicWalletInfo = {
     updatedName: WALLET_CONNECT_INFO.nami.text,
     name: /^(Nami Wallet|Nami)$/i,
   },
+  [WALLET_NAMES.slush]: {
+    updatedIcon: WALLET_CONNECT_INFO.slush.icon,
+    updatedName: WALLET_CONNECT_INFO.slush.text,
+    name: /^(Slush Wallet|Slush)$/i,
+  },
 } as const;
 
 /**
@@ -5193,6 +5198,29 @@ export const sitesConfig: SitesInfo[] = [
           },
         }
         ],    
+    },
+  },
+  {
+    urls: ['buidlpad.com'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: 'div[id*="-content-EVM"]',
+        }
+      ],
+      [IInjectedProviderNames.sui]: [
+        {
+          ...basicWalletInfo['slush'],
+          container: 'div[id*="-content-Sui"]',
+        }
+      ],
+      [IInjectedProviderNames.solana]: [
+        {
+          ...basicWalletInfo['phantom'],
+          container: 'div[id*="-content-Solana"]',
+        }
+      ],  
     },
   },
 ];

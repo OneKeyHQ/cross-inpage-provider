@@ -81,7 +81,7 @@
     "@walletconnect/types": "^2.13.0",
     "@web3modal/standalone": "^2.4.3",
     "algosdk": "^2.8.0",
-    "aptos": "^1.21.0",
+    "aptos": "^1.22.1",
     "bcrypto": "^5.5.2",
     "bignumber.js": "^9.0.1",
     "bip322-js": "^2.0.0",

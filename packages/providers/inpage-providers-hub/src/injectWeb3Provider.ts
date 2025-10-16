@@ -252,10 +252,13 @@ function injectWeb3Provider({
   defineWindowProperty('unisat', btc);
   defineWindowProperty('scdo', scdo);
   defineWindowProperty('algorand', algorand);
-  defineWindowProperty('exodus', {
-    algorand,
-    ethereum,
-  });
+
+  if (!['core.allbridge.io'].includes(window.location.hostname)) {
+    defineWindowProperty('exodus', {
+      algorand,
+      ethereum,
+    });
+  }
 
   // Cardano chain provider injection is handled independently.
   if (checkWalletSwitchEnable()) {
@@ -302,6 +305,11 @@ function injectWeb3Provider({
   registerSolanaWallet(solana, {
     icon: WALLET_CONNECT_INFO.solflare.icon as WalletIcon,
     name: 'Solflare',
+  });
+
+  registerSolanaWallet(solana, {
+    icon: WALLET_CONNECT_INFO.backpack.icon as WalletIcon,
+    name: 'Backpack',
   });
 
   // OneKey Sui Standard Wallet

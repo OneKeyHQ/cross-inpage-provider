@@ -9,6 +9,8 @@ import { OneKeySolanaStandardWallet } from './wallet';
 import { ProviderSolana } from '../ProviderSolana';
 import { WalletInfo } from './types';
 
+const BACKPACK_OVERRIDE_HOSTNAMES = ['claim.monad.xyz'];
+
 export function registerWallet(wallet: Wallet): void {
   const callback: WindowRegisterWalletEventCallback = ({ register }) => register(wallet);
   try {
@@ -75,6 +77,13 @@ export function DEPRECATED_registerWallet(wallet: Wallet): void {
 }
 
 export function registerSolanaWallet(provider: ProviderSolana, options: WalletInfo) {
+  if (
+    options.name === 'Backpack' &&
+    !BACKPACK_OVERRIDE_HOSTNAMES.includes(window.location.hostname)
+  ) {
+    return;
+  }
+
   try {
     registerWallet(new OneKeySolanaStandardWallet(provider, options));
   } catch (error) {

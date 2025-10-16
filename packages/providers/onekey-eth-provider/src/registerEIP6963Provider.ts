@@ -1,7 +1,19 @@
 import { v4 as uuidV4 } from 'uuid';
 import type { ProviderEthereum } from './ProviderEthereum';
 
-const METAMASK_OVERRIDE_EXCLUDE_HOSTNAMES = ['app.uniswap.org', 'app.ethena.fi'];
+const METAMASK_OVERRIDE_HOSTNAMES = [
+  'app.layerbank.finance',
+  'app.aevo.xyz',
+  'shibaswap.com',
+  'merlinswap.org',
+  'stake.lido.fi',
+  'www.lolik.com',
+  'www.babylon.magpiexyz.io',
+  'www.pendle.magpiexyz.io',
+  'omni.apex.exchange',
+  'app.dodoex.io',
+  'app.jellyverse.org',
+];
 export const METAMASK_UUID = '7677b54f-3486-46e2-4e37-bf8747814f12';
 
 export function registerEIP6963Provider({
@@ -17,7 +29,7 @@ export function registerEIP6963Provider({
   image: string;
   provider: ProviderEthereum;
 }) {
-  if (uuid === METAMASK_UUID && METAMASK_OVERRIDE_EXCLUDE_HOSTNAMES.includes(window.location.hostname)) {
+  if (uuid === METAMASK_UUID && !METAMASK_OVERRIDE_HOSTNAMES.includes(window.location.hostname)) {
     return;
   }
 

@@ -347,7 +347,7 @@ function injectWeb3Provider({
   if (checkWalletSwitchEnable()) {
     registerSuiWallet(sui, {
       name: 'Sui Wallet',
-      logo: WALLET_CONNECT_INFO.onekey.icon,
+      logo: WALLET_CONNECT_INFO.suiwallet.icon,
     });
   }
 

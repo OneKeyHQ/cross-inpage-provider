@@ -358,6 +358,60 @@ export default {
       'description': 'personalSign',
       'value': '0x01',
     },
+    {
+      'id': 'eth_sign_1k',
+      'name': 'eth_sign 1kb data',
+      'description': 'personalSign 1kb',
+      'value': `0x${'01'.repeat(1024)}`,
+    },
+    {
+      'id': 'eth_sign_4k',
+      'name': 'eth_sign 4kb data',
+      'description': 'personalSign 4kb',
+      'value': `0x${'01'.repeat(4096)}`,
+    },
+    {
+      'id': 'eth_sign_5k',
+      'name': 'eth_sign 5kb data',
+      'description': 'personalSign 5kb',
+      'value': `0x${'01'.repeat(5120)}`,
+    },
+    {
+      'id': 'eth_sign_5_5k',
+      'name': 'eth_sign 5.5kb data',
+      'description': 'personalSign 5.5kb classic1s limit',
+      'value': `0x${'01'.repeat(5632)}`,
+    },
+    {
+      'id': 'eth_sign_6k',
+      'name': 'eth_sign 6kb data',
+      'description': 'personalSign 6kb',
+      'value': `0x${'01'.repeat(6144)}`,
+    },
+    {
+      'id': 'eth_sign_8k',
+      'name': 'eth_sign 8kb data',
+      'description': 'personalSign 8kb pro limit',
+      'value': `0x${'01'.repeat(8192)}`,
+    },
+    {
+      'id': 'eth_sign_8_5k',
+      'name': 'eth_sign 8.5kb data',
+      'description': 'personalSign 8.5kb',
+      'value': `0x${'01'.repeat(8704)}`,
+    },
+    {
+      'id': 'eth_sign_10k',
+      'name': 'eth_sign 10kb data',
+      'description': 'personalSign 10kb',
+      'value': `0x${'01'.repeat(10240)}`,
+    },
+    {
+      'id': 'eth_sign_12k',
+      'name': 'eth_sign 12kb data',
+      'description': 'personalSign 12kb',
+      'value': `0x${'01'.repeat(12288)}`,
+    },
   ],
   personalEcRecover: [
     {
@@ -575,8 +629,7 @@ export default {
           'maxPriorityFeePerGas': '0x749b15c42',
           'from': from,
           'to': '0x3c499c542cef5e3811e1192ce70d8cc03d5c3359',
-          'data':
-            '0xd4d9bdcd7f60722d75e432c43705f4bfa2bf3d8bd792706a6a4120a722d18b32f3b036b3',
+          'data': '0xd4d9bdcd7f60722d75e432c43705f4bfa2bf3d8bd792706a6a4120a722d18b32f3b036b3',
         }),
       },
     ];

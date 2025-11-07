@@ -5247,5 +5247,16 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
+  {
+    urls: ['app.uniswap.org'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['walletconnect'],
+          container: 'div[data-testid="option-grid"]',
+        },
+      ],
+    },
+  },
 ];
 

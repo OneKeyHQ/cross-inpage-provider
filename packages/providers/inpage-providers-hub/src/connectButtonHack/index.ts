@@ -4,7 +4,6 @@ import openSea from './sites/opensea';
 import magiceden from './sites/magiceden';
 import gem from './sites/gem';
 import rarible from './sites/rarible';
-import uniswap from './sites/uniswap';
 import sushi from './sites/sushi';
 import _1inch from './sites/1inch';
 import dydx from './sites/dydx';
@@ -43,8 +42,7 @@ function hackAllConnectButtons() {
   openSea()
   magiceden()
   gem()
-  rarible()
-  uniswap()
+  rarible();
   sushi()
   _1inch()
   dydx()

@@ -1,6 +1,12 @@
 name: publish-npm-packages
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release'
+        required: true
+        type: string
 
 jobs:
   publish-packages:
@@ -63,3 +69,66 @@ jobs:
           publish_dir: ./packages/example/out
           cname: ${{ env.TEST_ENDPOINT }}
           force_orphan: true
+
+      - name: Check if stable release
+        id: check_stable
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          if [[ "$VERSION" =~ -alpha|-beta|-rc|-canary|-dev|-next ]]; then
+            echo "is_stable=false" >> $GITHUB_OUTPUT
+            echo "Skipping release: $VERSION is a pre-release version"
+          else
+            echo "is_stable=true" >> $GITHUB_OUTPUT
+            echo "Creating release for stable version: $VERSION"
+          fi
+
+      - name: Get previous tag
+        if: steps.check_stable.outputs.is_stable == 'true'
+        id: previoustag
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          echo "tag=$PREV_TAG" >> $GITHUB_OUTPUT
+
+      - name: Generate Release Notes
+        if: steps.check_stable.outputs.is_stable == 'true'
+        id: release_notes
+        run: |
+          VERSION="v${{ github.event.inputs.version }}"
+          PREV_TAG="${{ steps.previoustag.outputs.tag }}"
+
+          echo "## What's Changed" > release_notes.md
+          echo "" >> release_notes.md
+
+          if [ -n "$PREV_TAG" ]; then
+            echo "### Commits since $PREV_TAG" >> release_notes.md
+            git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)" >> release_notes.md
+          else
+            echo "### Recent Commits" >> release_notes.md
+            git log -20 --pretty=format:"- %s (%h)" >> release_notes.md
+          fi
+
+          echo "" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${VERSION}" >> release_notes.md
+
+      - name: Create Git Tag
+        if: steps.check_stable.outputs.is_stable == 'true'
+        run: |
+          VERSION="v${{ github.event.inputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a $VERSION -m "Release $VERSION"
+          git push origin $VERSION
+
+      - name: Create GitHub Release
+        if: steps.check_stable.outputs.is_stable == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          name: Release v${{ github.event.inputs.version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

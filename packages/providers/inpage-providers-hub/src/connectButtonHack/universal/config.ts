@@ -5258,5 +5258,16 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
+  {
+    urls: ['monadvision.com'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          container: () => getConnectWalletModalByTitle('div section', 'Connect Wallet'),
+        },
+      ],
+    },
+  },
 ];
 

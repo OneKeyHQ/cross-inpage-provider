@@ -14,6 +14,8 @@ const METAMASK_OVERRIDE_HOSTNAMES = [
   'app.dodoex.io',
   'app.jellyverse.org',
   'buidlpad.com',
+  'app.opinion.trade',
+  'monadvision.com',
 ];
 export const METAMASK_UUID = '7677b54f-3486-46e2-4e37-bf8747814f12';
 

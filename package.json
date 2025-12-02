@@ -22,7 +22,7 @@
     "publish-packages": "lerna publish from-package",
     "example": "cd ./packages/example && yarn dev",
     "example-build": "cd ./packages/example && yarn --registry 'https://registry.npmjs.org' && yarn build",
-    "update-version": "lerna version --no-git-tag-version --exact --yes",
+    "update-version": "lerna version --force-publish --no-git-tag-version --exact --yes",
     "swap-lock-registry": "npx swap-lock-registry --yarn --parallel --url https://registry.yarnpkg.com yarn.lock",
     "test:e2e:headed": "cd ./packages/e2e && yarn test:headed",
     "test:e2e": "cd ./packages/e2e && yarn test"

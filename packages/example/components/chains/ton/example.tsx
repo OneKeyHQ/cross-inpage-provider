@@ -15,6 +15,7 @@ import { TonProofDemoApi } from './TonProofDemoApi';
 import { Switch } from '../../ui/switch';
 import { useToast } from '../../ui/use-toast';
 import { useState, useEffect } from 'react';
+import { verifySignData } from './utils';
 const TON_SCAM_DAPP_ENABLE_KEY = 'ton_scam_dapp_enable';
 
 type IPresupposeParam = {
@@ -159,6 +160,38 @@ export function Example() {
           onExecute={async (request: string) => {
             const response = await TonProofDemoApi.getAccountInfo(wallet.account);
             return response;
+          }}
+        />
+      </ApiGroup>
+
+      <ApiGroup title="Sign Data">
+        <ApiPayload
+          title="signData"
+          description="signData"
+          allowCallWithoutProvider={!!userFriendlyAddress}
+          presupposeParams={params.signData(userFriendlyAddress || '')}
+          onExecute={async (request: string) => {
+            const res = await tonConnectUI?.signData(JSON.parse(request));
+            return JSON.stringify(res);
+          }}
+          onValidate={async (request: string, response: string) => {
+            const { signature, address, timestamp, domain, payload } = JSON.parse(response);
+
+            console.log('=====>>>>> publicKey', wallet?.account.publicKey);
+            console.log('address', address);
+            console.log('timestamp', timestamp);
+            console.log('domain', domain);
+            console.log('payload', payload);
+
+            const res = verifySignData(
+              signature,
+              wallet?.account.publicKey ?? '',
+              address,
+              timestamp,
+              domain,
+              payload
+            );
+            return Promise.resolve(res);
           }}
         />
       </ApiGroup>

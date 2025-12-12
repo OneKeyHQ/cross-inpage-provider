@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/onekey-polkadot-provider",
-  "version": "2.2.53",
+  "version": "2.2.54",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -27,10 +27,10 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@onekeyfe/cross-inpage-provider-core": "2.2.53",
-    "@onekeyfe/cross-inpage-provider-errors": "2.2.53",
-    "@onekeyfe/cross-inpage-provider-types": "2.2.53",
-    "@onekeyfe/extension-bridge-injected": "2.2.53",
+    "@onekeyfe/cross-inpage-provider-core": "2.2.54",
+    "@onekeyfe/cross-inpage-provider-errors": "2.2.54",
+    "@onekeyfe/cross-inpage-provider-types": "2.2.54",
+    "@onekeyfe/extension-bridge-injected": "2.2.54",
     "@polkadot/extension-inject": "^0.46.3",
     "eth-rpc-errors": "^4.0.3",
     "mitt": "^3.0.0"

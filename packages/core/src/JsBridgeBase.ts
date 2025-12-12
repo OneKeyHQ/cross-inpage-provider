@@ -34,6 +34,7 @@ function toPlainError(errorInfo: IErrorInfo) {
     className: errorInfo.className,
     autoToast: errorInfo.autoToast,
     requestId: errorInfo.requestId,
+    httpStatusCode: errorInfo.httpStatusCode,
 
     reconnect: errorInfo.reconnect,
     payload: errorInfo.payload,
@@ -68,6 +69,7 @@ type IErrorInfo = Error & {
   className?: string;
   autoToast?: boolean;
   requestId?: string;
+  httpStatusCode?: number;
 
   // OneKeyHardwareError
   reconnect?: boolean;

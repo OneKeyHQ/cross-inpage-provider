@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/onekey-sui-provider",
-  "version": "2.2.54",
+  "version": "2.2.55",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -28,10 +28,10 @@
   },
   "dependencies": {
     "@mysten/wallet-standard": "^0.14.0",
-    "@onekeyfe/cross-inpage-provider-core": "2.2.54",
-    "@onekeyfe/cross-inpage-provider-errors": "2.2.54",
-    "@onekeyfe/cross-inpage-provider-types": "2.2.54",
-    "@onekeyfe/extension-bridge-injected": "2.2.54",
+    "@onekeyfe/cross-inpage-provider-core": "2.2.55",
+    "@onekeyfe/cross-inpage-provider-errors": "2.2.55",
+    "@onekeyfe/cross-inpage-provider-types": "2.2.55",
+    "@onekeyfe/extension-bridge-injected": "2.2.55",
     "eth-rpc-errors": "^4.0.3",
     "mitt": "^3.0.0"
   }

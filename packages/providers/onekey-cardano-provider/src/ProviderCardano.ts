@@ -58,20 +58,21 @@ type OneKeyCardanoProviderProps = IInpageProviderConfig & {
 type CardanoAccount = { accounts: {address: string} }
 
 class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
-  private _account: string | null = null
+  private _account: string | null = null;
 
   get account() {
-    return this._account
+    return this._account;
   }
 
   get isConnected() {
-    return this._account !== null
+    return this._account !== null;
   }
 
-  onekey: Cip30Wallet
+  onekey: Cip30Wallet;
 
-  nami: Cip30Wallet
+  nami: Cip30Wallet;
 
+  yoroi: Cip30Wallet;
 
   constructor(props: OneKeyCardanoProviderProps) {
     super({
@@ -84,10 +85,14 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
     this.nami = {
       ...this.walletInfo(),
       name: 'Nami',
-    }
+    };
     this.onekey = {
-      ...this.walletInfo()
-    }
+      ...this.walletInfo(),
+    };
+    this.yoroi = {
+      ...this.walletInfo(),
+      name: 'yoroi',
+    };
   }
 
   private _registerEvents() {
@@ -115,12 +120,12 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
     return this._callBridge(param);
   }
 
-  private _handleConnected(account: string, options: {emit: boolean})  {
-    this._account = account
+  private _handleConnected(account: string, options: { emit: boolean }) {
+    this._account = account;
     if (options.emit && this.isConnectionStatusChanged('connected')) {
-      this.connectionStatus = 'connected'
-      this.emit('connect', account)
-      this.emit('accountChanged', account)
+      this.connectionStatus = 'connected';
+      this.emit('connect', account);
+      this.emit('accountChanged', account);
     }
   }
 
@@ -133,11 +138,11 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
   }
 
   override isAccountsChanged(address: string): boolean {
-    return address !==  this._account
+    return address !== this._account;
   }
 
   private _handleAccountChange(payload: CardanoAccount) {
-    const account = payload.accounts?.address
+    const account = payload.accounts?.address;
     if (this.isAccountsChanged(account)) {
       this.emit('accountChanged', account || null);
     }
@@ -171,44 +176,45 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
       name: 'OneKey',
       icon: 'https://theme.zdassets.com/theme_assets/10237731/cd8f795ce97bdd7657dd4fb4b19fde3f32b50349.png',
       isEnabled: () => Promise.resolve(true),
-      enable: () => this.enable() 
-     }
+      enable: () => this.enable(),
+    };
   }
 
   async enable() {
     const API = {
       getNetworkId: () => this.getNetworkId(),
-      getUtxos:  (amount?: Cbor, paginate?: Paginate) => this.getUtxos(amount, paginate),
+      getUtxos: (amount?: Cbor, paginate?: Paginate) => this.getUtxos(amount, paginate),
       getBalance: () => this.getBalance(),
       getUsedAddresses: () => this.getUsedAddresses(),
-      getUnusedAddresses: () => this.getUnUsedAddress(), 
+      getUnusedAddresses: () => this.getUnUsedAddress(),
 
       getChangeAddress: () => this.getChangeAddress(),
-    
+
       getRewardAddresses: () => this.getRewardAddresses(),
-    
+
       signTx: (tx: Cbor, partialSign?: boolean) => this.signTx(tx, partialSign),
-    
+
       signData: (addr: Cbor, payload: Bytes) => this.signData(addr, payload),
-    
+
       submitTx: (tx: Cbor) => this.submitTx(tx),
 
       experimental: {
-        on: (eventName: string, callback: (detail: any) => void) => this.namiOn(eventName, callback),
+        on: (eventName: string, callback: (detail: any) => void) =>
+          this.namiOn(eventName, callback),
         off: () => this.namiOff(),
         getCollateral: () => this.getCollateral(),
       },
-    }
+    };
 
     if (!this.account) {
       const result = await this._callBridge({
         method: 'connect',
-        params: undefined 
-      })
-      this._handleConnected(result.account, {emit: true})
-      return API 
+        params: undefined,
+      });
+      this._handleConnected(result.account, { emit: true });
+      return API;
     }
-    return Promise.resolve(API)
+    return Promise.resolve(API);
   }
 
   // CIP30 Dapp API 👇
@@ -216,57 +222,57 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
   async getNetworkId(): Promise<NetworkId> {
     return this._callBridge({
       method: 'getNetworkId',
-      params: undefined
-    })
-	}
+      params: undefined,
+    });
+  }
 
   async getUtxos(amount?: Cbor, paginate?: Paginate) {
     return this._callBridge({
       method: 'getUtxos',
       params: {
         amount,
-        paginate
-      }
-    })
+        paginate,
+      },
+    });
   }
 
   async getCollateral() {
-    return Promise.resolve([])
+    return Promise.resolve([]);
   }
 
   async getBalance() {
     return this._callBridge({
       method: 'getBalance',
-      params: undefined
-    })
+      params: undefined,
+    });
   }
 
   async getUsedAddresses(): Promise<Cbor[]> {
     return this._callBridge({
       method: 'getUsedAddresses',
-      params: undefined
-    })
+      params: undefined,
+    });
   }
 
   async getUnUsedAddress() {
     return this._callBridge({
       method: 'getUnusedAddresses',
-      params: undefined
-    })
+      params: undefined,
+    });
   }
 
   async getChangeAddress() {
     return this._callBridge({
       method: 'getChangeAddress',
-      params: undefined
-    })
+      params: undefined,
+    });
   }
 
   async getRewardAddresses() {
     return this._callBridge({
       method: 'getRewardAddresses',
-      params: undefined
-    })
+      params: undefined,
+    });
   }
 
   async signTx(tx: Cbor, partialSign?: boolean) {
@@ -274,9 +280,9 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
       method: 'signTx',
       params: {
         tx,
-        partialSign
-      }
-    })
+        partialSign,
+      },
+    });
   }
 
   async signData(addr: Cbor, payload: Bytes) {
@@ -284,16 +290,16 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
       method: 'signData',
       params: {
         addr,
-        payload
-      }
-    })
+        payload,
+      },
+    });
   }
 
   async submitTx(tx: Cbor) {
     return this._callBridge({
       method: 'submitTx',
-      params: tx
-    })
+      params: tx,
+    });
   }
 
   /**

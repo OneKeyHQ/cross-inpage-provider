@@ -18,6 +18,7 @@ import { ProviderBtc, ProviderBtcWallet } from '@onekeyfe/onekey-btc-provider';
 import { defineWindowCardanoProperty, ProviderCardano } from '@onekeyfe/onekey-cardano-provider';
 import { ProviderConflux } from '@onekeyfe/onekey-conflux-provider';
 import { BBNProviderCosmos, ProviderCosmos } from '@onekeyfe/onekey-cosmos-provider';
+import { ProviderStellar, ProviderStellarHana } from '@onekeyfe/onekey-stellar-provider';
 import {
   METAMASK_UUID,
   MetaMaskSDK,
@@ -172,6 +173,8 @@ function injectWeb3Provider({
   const neo = new ProviderNeo({ bridge });
   NEOLineN3.instance = neo;
 
+  const stellar = new ProviderStellar({ bridge });
+
   // providerHub
   const $onekey = {
     ...window.$onekey,
@@ -198,6 +201,7 @@ function injectWeb3Provider({
     btcwallet: btcWallet,
     algorand,
     neo: NEOLineN3,
+    stellar,
   };
 
   defineWindowProperty('$onekey', $onekey, { enumerable: true, alwaysInject: true });
@@ -252,6 +256,8 @@ function injectWeb3Provider({
   defineWindowProperty('unisat', btc);
   defineWindowProperty('scdo', scdo);
   defineWindowProperty('algorand', algorand);
+
+  defineWindowProperty('hanaWallet', { stellar: new ProviderStellarHana(stellar) });
 
   if (!['core.allbridge.io'].includes(window.location.hostname)) {
     defineWindowProperty('exodus', {

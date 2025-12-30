@@ -63,9 +63,10 @@ export enum IInjectedProviderNames {
   nostr = 'nostr',
   bfc = 'bfc',
   neo = 'neo',
+  stellar = 'stellar',
   $private = '$private',
   $hardware_sdk = '$hardware_sdk',
-  $walletConnect = '$walletConnect' 
+  $walletConnect = '$walletConnect',
 }
 
 export type IInjectedProviderNamesStrings = keyof typeof IInjectedProviderNames;

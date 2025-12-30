@@ -17,6 +17,13 @@ type IHyperliquidBuilderFeeConfig = {
   expectMaxBuilderFee: number;
   shouldModifyPlaceOrderPayload?: boolean;
   customLocalStorage?: Record<string, unknown>;
+  customLocalStorageV2?: Record<
+    string,
+    {
+      value: unknown;
+      skipIfExists?: boolean;
+    }
+  >;
   customSettings?: IHyperliquidBuilderCustomSettings;
 };
 
@@ -45,7 +52,6 @@ function saveBuilderFeeConfigToStorage({
     fromSource,
   );
   if (result?.customLocalStorage) {
-
     try {
       Object.entries(result.customLocalStorage).forEach(([key, value]) => {
         try {
@@ -66,7 +72,29 @@ function saveBuilderFeeConfigToStorage({
     } catch (error) {
       console.error(error);
     }
-
+  }
+  if (result?.customLocalStorageV2) {
+    try {
+      Object.entries(result.customLocalStorageV2).forEach(([key, valueInfo]) => {
+        const { value, skipIfExists } = valueInfo || {};
+        try {
+          if (isString(value) && value && key) {
+            if (skipIfExists) {
+              const currentValue = localStorage.getItem(key);
+              if (currentValue === null || currentValue === undefined) {
+                localStorage.setItem(key, value);
+              }
+            } else {
+              localStorage.setItem(key, value);
+            }
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      });
+    } catch (error) {
+      console.error(error);
+    }
   }
   if (result?.customSettings) {
     providersHubUtils.consoleLog(

@@ -2,11 +2,6 @@ name: publish-npm-packages
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to release'
-        required: true
-        type: string
 
 jobs:
   publish-packages:
@@ -21,6 +16,18 @@ jobs:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
           cache: 'yarn'
+
+      - name: auto getting release version 
+        id: release_version
+        run: |
+          VERSION=$(node -p "require('./packages/core/package.json').version")
+          if [ -z "$VERSION" ]; then
+            echo "can't read version" >&2
+            exit 1
+          fi
+          echo "version：$VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Install Packages
         # global env make ci `yarn && yarn bootstrap` not correctly
@@ -73,8 +80,9 @@ jobs:
       - name: Check if stable release
         id: check_stable
         run: |
-          VERSION="${{ github.event.inputs.version }}"
-          if [[ "$VERSION" =~ -alpha|-beta|-rc|-canary|-dev|-next ]]; then
+          VERSION="${VERSION}"
+          LOWER_VERSION=$(echo "$VERSION" | tr '[:upper:]' '[:lower:]')
+          if [[ "$LOWER_VERSION" =~ alpha|beta|rc|canary|dev|next|apache ]]; then
             echo "is_stable=false" >> $GITHUB_OUTPUT
             echo "Skipping release: $VERSION is a pre-release version"
           else
@@ -86,14 +94,14 @@ jobs:
         if: steps.check_stable.outputs.is_stable == 'true'
         id: previoustag
         run: |
-          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          PREV_TAG=$(git describe --tags --abbrev=0 --match "v*" 2>/dev/null || echo "")
           echo "tag=$PREV_TAG" >> $GITHUB_OUTPUT
 
       - name: Generate Release Notes
         if: steps.check_stable.outputs.is_stable == 'true'
         id: release_notes
         run: |
-          VERSION="v${{ github.event.inputs.version }}"
+          VERSION="v${{ env.VERSION }}"
           PREV_TAG="${{ steps.previoustag.outputs.tag }}"
 
           echo "## What's Changed" > release_notes.md
@@ -114,7 +122,7 @@ jobs:
       - name: Create Git Tag
         if: steps.check_stable.outputs.is_stable == 'true'
         run: |
-          VERSION="v${{ github.event.inputs.version }}"
+          VERSION="v${{ env.VERSION }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -a $VERSION -m "Release $VERSION"
@@ -124,11 +132,10 @@ jobs:
         if: steps.check_stable.outputs.is_stable == 'true'
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ github.event.inputs.version }}
-          name: Release v${{ github.event.inputs.version }}
+          tag_name: v${{ env.VERSION }}
+          name: Release v${{ env.VERSION }}
           body_path: release_notes.md
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

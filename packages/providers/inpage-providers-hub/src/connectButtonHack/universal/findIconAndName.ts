@@ -147,7 +147,7 @@ export function findIconAndNameAcrossContainers(
     text: [isClickable],
     icon: [isWalletIconLessEqualThan, isClickable],
   },
-  pickText?: (nodes: Text[]) => Text | null, // 多文本时如何挑选
+  pickText?: (nodes: Text[]) => Text | null,
 ): FindResultType | null {
   const containers = Array.from(document.querySelectorAll<HTMLElement>(containerSelector)).filter(
     (c) => {

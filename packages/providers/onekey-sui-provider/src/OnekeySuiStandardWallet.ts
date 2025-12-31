@@ -2,6 +2,7 @@ import {
   ReadonlyWalletAccount,
   SUI_DEVNET_CHAIN,
   SUI_TESTNET_CHAIN,
+  SUI_MAINNET_CHAIN,
   registerWallet,
 } from '@mysten/wallet-standard';
 import mitt from 'mitt';
@@ -85,7 +86,7 @@ class OnekeySuiStandardWallet implements Wallet {
   }
 
   get chains() {
-    return [SUI_DEVNET_CHAIN, SUI_TESTNET_CHAIN] as IdentifierArray;
+    return [SUI_DEVNET_CHAIN, SUI_TESTNET_CHAIN, SUI_MAINNET_CHAIN] as IdentifierArray;
   }
 
   get accounts() {

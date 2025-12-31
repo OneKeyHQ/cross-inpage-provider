@@ -1,6 +1,10 @@
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { WALLET_CONNECT_INFO, WALLET_NAMES } from '../consts';
-import { findIconAndNameByName, findIconAndNameByIcon } from './findIconAndName';
+import {
+  findIconAndNameAcrossContainers,
+  findIconAndNameByName,
+  findIconAndNameByIcon,
+} from './findIconAndName';
 import { isWalletIconLessEqualThan, replaceIcon } from './imgUtils';
 import { findIconAndNameInShadowRoot } from './shadowRoot';
 import { ConstraintFn, FindResultType, Selector } from './type';
@@ -5265,6 +5269,71 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['metamask'],
           container: () => getConnectWalletModalByTitle('div section', 'Connect Wallet'),
+        },
+      ],
+    },
+  },
+  {
+    urls: ['app.galxe.com'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          // container: 'div.e2e-MetaMask',
+          findIconAndName(wallet) {
+            return findIconAndNameByIcon('div.e2e-MetaMask img', 'auto-search-text', wallet.name);
+          },
+        },
+      ],
+      [IInjectedProviderNames.solana]: [
+        {
+          ...basicWalletInfo['phantom'],
+          findIconAndName(wallet) {
+            const dialog = Array.from(
+              document.querySelectorAll<HTMLElement>('div[role="dialog"]'),
+            ).filter((e) => isVisible(e))?.[0];
+            if (!dialog) return null;
+
+            return findIconAndNameAcrossContainers(
+              'div[role="dialog"] div.grid',
+              wallet.name,
+              'auto-search-icon',
+            );
+          },
+        },
+      ],
+      [IInjectedProviderNames.aptos]: [
+        {
+          ...basicWalletInfo['petra'],
+          findIconAndName(wallet) {
+            const dialog = Array.from(
+              document.querySelectorAll<HTMLElement>('div[role="dialog"]'),
+            ).filter((e) => isVisible(e))?.[0];
+            if (!dialog) return null;
+
+            return findIconAndNameAcrossContainers(
+              'div[role="dialog"] div.grid',
+              wallet.name,
+              'auto-search-icon',
+            );
+          },
+        },
+      ],
+      [IInjectedProviderNames.btc]: [
+        {
+          ...basicWalletInfo['unisat'],
+          findIconAndName(wallet) {
+            const dialog = Array.from(
+              document.querySelectorAll<HTMLElement>('div[role="dialog"]'),
+            ).filter((e) => isVisible(e))?.[0];
+            if (!dialog) return null;
+
+            return findIconAndNameAcrossContainers(
+              'div[role="dialog"] div.grid',
+              wallet.name,
+              'auto-search-icon',
+            );
+          },
         },
       ],
     },

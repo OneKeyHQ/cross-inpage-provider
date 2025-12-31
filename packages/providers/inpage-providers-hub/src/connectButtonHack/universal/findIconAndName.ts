@@ -3,6 +3,7 @@ import { findWalletIconByParent, isWalletIconLessEqualThan } from './imgUtils';
 import { findWalletTextByParent } from './textUtils';
 import { ConstraintFn, FindResultType, Selector } from './type';
 import { arrayify, isClickable, isInExternalLink, universalLog } from './utils';
+import domUtils from '../utils/utilsDomNodes';
 /**
  *
  * @description:
@@ -132,5 +133,43 @@ export function findTextByImg(
     parent = parent.parentElement;
   }
   universalLog.warn('can not find the text node by img ', level);
+  return null;
+}
+
+export function findIconAndNameAcrossContainers(
+  containerSelector: string,
+  walletName: RegExp,
+  icon:
+    | 'auto-search-icon'
+    | 'auto-search-icon-first'
+    | ((t: Text) => HTMLElement | null | undefined) = 'auto-search-icon',
+  constraints: { text: ConstraintFn[]; icon: ConstraintFn[] } = {
+    text: [isClickable],
+    icon: [isWalletIconLessEqualThan, isClickable],
+  },
+  pickText?: (nodes: Text[]) => Text | null, // 多文本时如何挑选
+): FindResultType | null {
+  const containers = Array.from(document.querySelectorAll<HTMLElement>(containerSelector)).filter(
+    (c) => {
+      const s = getComputedStyle(c);
+      return s.visibility !== 'hidden' && s.display !== 'none';
+    },
+  );
+  for (const container of containers) {
+    const texts = (domUtils.findTextNode(container, walletName, 'all') as Text[] | null) || [];
+    const textNode =
+      pickText?.(texts) ||
+      texts.find((n) => {
+        const p = n.parentElement;
+        if (!p) return false;
+        const s = getComputedStyle(p);
+        return s.visibility !== 'hidden' && s.display !== 'none';
+      }) ||
+      texts[0];
+    if (!textNode) continue;
+
+    const res = findIconAndNameByName(container, walletName, icon, constraints);
+    if (res) return res;
+  }
   return null;
 }

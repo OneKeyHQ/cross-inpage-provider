@@ -15,7 +15,7 @@ function getNativeContractId(networkPassphrase: string): string {
   const nativeAsset = StellarSdk.Asset.native();
   // Get the contract ID for this asset on the specified network
   // This uses the standard SAC (Stellar Asset Contract) address derivation
-  return nativeAsset.contractId(networkPassphrase) as string;
+  return nativeAsset.contractId(networkPassphrase);
 }
 
 /**

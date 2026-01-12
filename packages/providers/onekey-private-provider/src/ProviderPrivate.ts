@@ -124,6 +124,18 @@ class ProviderPrivate extends ProviderBase {
     if (!params.networkChangedText) return
     switchNetworkNotification(params.networkChangedText)
   }
+
+  getRookieGuideInfo() {
+    return this.request({
+      method: 'wallet_getRookieGuideInfo',
+    });
+  }
+
+  resetRookieGuideProgress() {
+    return this.request({
+      method: 'wallet_resetRookieGuideProgress',
+    });
+  }
 }
 
 export { ProviderPrivate };

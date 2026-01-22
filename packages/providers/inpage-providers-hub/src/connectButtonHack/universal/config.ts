@@ -76,6 +76,11 @@ export const basicWalletInfo = {
     updatedName: WALLET_CONNECT_INFO.petra.text,
     name: /^(Petra|Petra Wallet)$/i,
   },
+  [WALLET_NAMES.solflare]: {
+    updatedIcon: WALLET_CONNECT_INFO.solflare.icon,
+    updatedName: WALLET_CONNECT_INFO.solflare.text,
+    name: /^(Solflare|Solflare Wallet)$/i,
+  },
   [WALLET_NAMES.keplr]: {
     updatedIcon: WALLET_CONNECT_INFO.keplr.icon,
     updatedName: WALLET_CONNECT_INFO.keplr.text,
@@ -2101,6 +2106,29 @@ export const sitesConfig: SitesInfo[] = [
                 modal,
                 { text: [], icon: [] },
                 5,
+              )
+            );
+          },
+        },
+      ],
+      [IInjectedProviderNames.solana]: [
+        {
+          ...basicWalletInfo['solflare'],
+          findIconAndName({ name }) {
+            const modal = getConnectWalletModalByTitle('#portal-root', 'Connect Wallet');
+            return (
+              modal &&
+              findIconAndNameByName(
+                modal,
+                name,
+                'auto-search-icon',
+                {
+                  icon: [
+                    isWalletIconLessEqualThan,
+                    (walletIcon) => walletIcon.getAttribute('alt') !== 'Solana network',
+                  ],
+                  text: [],
+                }
               )
             );
           },

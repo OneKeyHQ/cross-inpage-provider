@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import { ApiGroup } from '../../ApiActuator';
+import DetectionStandardWallet from './detectionStandardWallet';
 import { LoopEvmSignMessage } from './loopEvmSignMessage';
 import { LoopEvmSignTx } from './loopEvmSignTx';
 import { MultipleCallConnectWallet } from './multipleCallConnectWallet';
@@ -20,6 +21,10 @@ export default function BTCExample() {
         <MultipleCallConnectWallet />
         <MultipleCallSignMessage />
         <MultipleCallSignTx />
+      </ApiGroup>
+
+      <ApiGroup title="工具">
+        <DetectionStandardWallet />
       </ApiGroup>
     </>
   );

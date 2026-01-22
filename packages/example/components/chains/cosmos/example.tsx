@@ -274,7 +274,10 @@ export default function Example() {
               msgs: obj.msgs,
             };
 
-            return await provider?.signAmino(network.id, account.address, requestObj);
+            return await provider?.signAmino(network.id, account.address, requestObj,{
+              preferNoSetFee: true,
+              preferNoSetMemo: true,
+            });
           }}
           onValidate={async (request: string, response: string) => {
             return await nodeClient.encodeAmino(response);

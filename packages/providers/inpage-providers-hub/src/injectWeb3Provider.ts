@@ -314,7 +314,7 @@ function injectWeb3Provider({
   });
 
   registerSolanaWallet(solana, {
-    icon: WALLET_CONNECT_INFO.onekey.icon as WalletIcon,
+    icon: WALLET_CONNECT_INFO.jupiter.icon as WalletIcon,
     name: 'Jupiter',
   });
 

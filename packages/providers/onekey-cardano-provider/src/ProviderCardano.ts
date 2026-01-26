@@ -46,8 +46,6 @@ type CardanoProviderEventsMap = {
 interface IProviderCardano extends ProviderBase {
   isConnected: boolean;
 
-  onekey: Cip30Wallet;
-
   getNetworkId(): Promise<NetworkId>;
 }
 
@@ -68,12 +66,6 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
     return this._account !== null;
   }
 
-  onekey: Cip30Wallet;
-
-  nami: Cip30Wallet;
-
-  yoroi: Cip30Wallet;
-
   constructor(props: OneKeyCardanoProviderProps) {
     super({
       ...props,
@@ -81,18 +73,6 @@ class ProviderCardano extends ProviderCardanoBase implements IProviderCardano {
     });
 
     this._registerEvents();
-
-    this.nami = {
-      ...this.walletInfo(),
-      name: 'Nami',
-    };
-    this.onekey = {
-      ...this.walletInfo(),
-    };
-    this.yoroi = {
-      ...this.walletInfo(),
-      name: 'yoroi',
-    };
   }
 
   private _registerEvents() {

@@ -266,10 +266,10 @@ function injectWeb3Provider({
     });
   }
 
-  // Cardano chain provider injection is handled independently.
-  if (checkWalletSwitchEnable()) {
-    defineWindowCardanoProperty('cardano', cardano);
-  }
+  // Cardano: always inject OneKey wallet, proxy wallets only in default wallet mode
+  defineWindowCardanoProperty('cardano', cardano, {
+    registerProxyWallets: checkWalletSwitchEnable(),
+  });
 
   // cosmos keplr
   defineWindowProperty('keplr', cosmos);

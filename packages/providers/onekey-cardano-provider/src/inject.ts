@@ -2,15 +2,52 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-export function defineWindowCardanoProperty(property: string, provider: unknown) {
+import type { ProviderCardano } from './ProviderCardano';
+
+const PROXY_WALLETS = ['nami', 'yoroi'] as const;
+
+type ProxyWalletName = typeof PROXY_WALLETS[number];
+
+const proxyWalletConfigs: Record<ProxyWalletName, { name: string }> = {
+  nami: { name: 'Nami' },
+  yoroi: { name: 'yoroi' },
+};
+
+/**
+ * Define window.cardano property
+ * - Always injects OneKey wallet
+ * - Injects proxy wallets (Nami, etc.) only when registerProxyWallets is true
+ */
+export function defineWindowCardanoProperty(
+  property: string,
+  provider: ProviderCardano,
+  options?: { registerProxyWallets?: boolean },
+) {
+  const walletInfo = provider.walletInfo();
+  const protectedKeys: string[] = ['onekey'];
+
+  // Always register OneKey wallet
+  (provider as any).onekey = walletInfo;
+
+  // Register proxy wallets on the provider instance if needed
+  if (options?.registerProxyWallets) {
+    PROXY_WALLETS.forEach((walletKey) => {
+      const config = proxyWalletConfigs[walletKey];
+      (provider as any)[walletKey] = {
+        ...walletInfo,
+        name: config.name,
+      };
+      protectedKeys.push(walletKey);
+    });
+  }
+
   const proxyProvider = new Proxy(provider as object, {
-    defineProperty(target, property, attributes) {
-      if (property !== 'nami') {
-        return Reflect.defineProperty(target, property, attributes);
+    defineProperty(target, prop, attributes) {
+      if (protectedKeys.includes(prop as string)) {
+        // skip define to prevent overwriting
+        return true;
       }
-      // skip define Prevent overwriting
-      console.log('skip define Prevent overwriting')
-      return true;
+      return Reflect.defineProperty(target, prop, attributes);
     },
   });
 
@@ -23,7 +60,7 @@ export function defineWindowCardanoProperty(property: string, provider: unknown)
     get() {
       return proxyProvider;
     },
-    set(val) {
+    set() {
       // skip set
     },
   });

@@ -314,6 +314,11 @@ function injectWeb3Provider({
   });
 
   registerSolanaWallet(solana, {
+    icon: WALLET_CONNECT_INFO.solflare.icon as WalletIcon,
+    name: 'Jupiter',
+  });
+
+  registerSolanaWallet(solana, {
     icon: WALLET_CONNECT_INFO.metamask.icon as WalletIcon,
     name: 'MetaMask',
   });

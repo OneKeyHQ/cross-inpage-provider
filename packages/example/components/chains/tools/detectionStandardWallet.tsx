@@ -20,12 +20,14 @@ type DetectedWallet = {
   rawKeys: string[];
 };
 
-const serializeValue = (value: unknown): unknown => {
+const serializeValue = (value: unknown, seen = new WeakSet<object>()): unknown => {
   if (typeof value === 'function') return '[function]';
   if (typeof value === 'bigint') return value.toString();
-  if (Array.isArray(value)) return value.map(serializeValue);
   if (value && typeof value === 'object') {
-    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, serializeValue(v)]));
+    if (seen.has(value)) return '[circular]';
+    seen.add(value);
+    if (Array.isArray(value)) return value.map((v) => serializeValue(v, seen));
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, serializeValue(v, seen)]));
   }
   return value ?? null;
 };

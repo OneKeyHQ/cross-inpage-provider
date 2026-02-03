@@ -106,6 +106,11 @@ export const basicWalletInfo = {
     updatedName: WALLET_CONNECT_INFO.slush.text,
     name: /^(Slush Wallet|Slush)$/i,
   },
+  [WALLET_NAMES.jupiter]: {
+    updatedIcon: WALLET_CONNECT_INFO.jupiter.icon,
+    updatedName: WALLET_CONNECT_INFO.jupiter.text,
+    name: /^(Jupiter Extension|Jupiter)$/i,
+  },
 } as const;
 
 /**
@@ -2118,18 +2123,13 @@ export const sitesConfig: SitesInfo[] = [
             const modal = getConnectWalletModalByTitle('#portal-root', 'Connect Wallet');
             return (
               modal &&
-              findIconAndNameByName(
-                modal,
-                name,
-                'auto-search-icon',
-                {
-                  icon: [
-                    isWalletIconLessEqualThan,
-                    (walletIcon) => walletIcon.getAttribute('alt') !== 'Solana network',
-                  ],
-                  text: [],
-                }
-              )
+              findIconAndNameByName(modal, name, 'auto-search-icon', {
+                icon: [
+                  isWalletIconLessEqualThan,
+                  (walletIcon) => walletIcon.getAttribute('alt') !== 'Solana network',
+                ],
+                text: [],
+              })
             );
           },
         },
@@ -5361,6 +5361,24 @@ export const sitesConfig: SitesInfo[] = [
               wallet.name,
               'auto-search-icon',
             );
+          },
+        },
+      ],
+    },
+  },
+  {
+    urls: ['jup.ag'],
+    walletsForProvider: {
+      [IInjectedProviderNames.solana]: [
+        {
+          ...basicWalletInfo['jupiter'],
+          findIconAndName({ name }) {
+            const dialog = Array.from(
+              document.querySelectorAll<HTMLElement>('div[role="dialog"]'),
+            ).filter((e) => isVisible(e))?.[0];
+            if (!dialog) return null;
+
+            return findIconAndNameByName(dialog, name, 'auto-search-icon');
           },
         },
       ],

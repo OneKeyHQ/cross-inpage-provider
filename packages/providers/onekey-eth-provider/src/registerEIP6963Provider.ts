@@ -18,6 +18,24 @@ const METAMASK_OVERRIDE_HOSTNAMES = [
   'monadvision.com',
   'app.galxe.com',
 ];
+
+function detectPrivySDK() {
+  try {
+    if (document.querySelector('iframe[src*="auth.privy.io"]')) {
+      return true;
+    }
+
+    for (let i = 0; i < localStorage.length; i++) {
+      if (localStorage.key(i)?.startsWith('privy:')) {
+        return true;
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+  return false;
+}
+
 export const METAMASK_UUID = '7677b54f-3486-46e2-4e37-bf8747814f12';
 
 export function registerEIP6963Provider({
@@ -33,7 +51,11 @@ export function registerEIP6963Provider({
   image: string;
   provider: ProviderEthereum;
 }) {
-  if (uuid === METAMASK_UUID && !METAMASK_OVERRIDE_HOSTNAMES.includes(window.location.hostname)) {
+  if (
+    uuid === METAMASK_UUID &&
+    !METAMASK_OVERRIDE_HOSTNAMES.includes(window.location.hostname) &&
+    !detectPrivySDK()
+  ) {
     return;
   }
 

@@ -51,12 +51,10 @@ export function registerEIP6963Provider({
   image: string;
   provider: ProviderEthereum;
 }) {
-  if (
-    uuid === METAMASK_UUID &&
-    !METAMASK_OVERRIDE_HOSTNAMES.includes(window.location.hostname) &&
-    !detectPrivySDK()
-  ) {
-    return;
+  if (uuid === METAMASK_UUID) {
+    const allowed: boolean =
+      METAMASK_OVERRIDE_HOSTNAMES.includes(window.location.hostname) || detectPrivySDK();
+    if (!allowed) return;
   }
 
   // EIP-6963: https://eips.ethereum.org/EIPS/eip-6963

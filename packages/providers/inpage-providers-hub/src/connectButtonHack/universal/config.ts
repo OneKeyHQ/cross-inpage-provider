@@ -5384,5 +5384,24 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
   },
+  {
+    urls: ['app.based.one'],
+    walletsForProvider: {
+      [IInjectedProviderNames.ethereum]: [
+        {
+          ...basicWalletInfo['metamask'],
+          findIconAndName({ name }) {
+            const dialog = Array.from(
+              document.querySelectorAll<HTMLElement>('[role="dialog"]'),
+            ).filter((e) => isVisible(e))?.[0];
+            if (dialog) {
+              return findIconAndNameByName(dialog, name, 'auto-search-icon-first');
+            }
+            return null;
+          },
+        },
+      ],
+    },
+  },
 ];
 

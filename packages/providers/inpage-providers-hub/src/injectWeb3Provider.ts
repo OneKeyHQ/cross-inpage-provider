@@ -82,12 +82,22 @@ export type IWindowOneKeyHub = {
   };
 };
 
+function isMobileWeb(): boolean {
+  return (
+    typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android|Mobi/i.test(navigator.userAgent)
+  );
+}
+
 function injectWeb3Provider({
   showFloatingButton = false,
 }: { showFloatingButton?: boolean } = {}): unknown {
   if (!window?.$onekey?.jsBridge) {
     throw new Error('OneKey jsBridge not found.');
   }
+
+  // https://github.com/Uniswap/interface/blob/55c403afe7f2f9e356d42c58180f455aa70f1a3c/apps/web/src/features/wallet/connection/hooks/useOrderedWalletConnectors.ts#L136
+  const strictInjectHostnames = isMobileWeb() ? ['app.uniswap.org'] : [];
+  const strictInjectMode = strictInjectHostnames.includes(window.location.hostname);
 
   const bridge: JsBridgeBase = window?.$onekey?.jsBridge;
 
@@ -207,7 +217,9 @@ function injectWeb3Provider({
   defineWindowProperty('$onekey', $onekey, { enumerable: true, alwaysInject: true });
 
   if (!isOneKeyWebsite()) {
-    defineWindowProperty('ethereum', ethereum);
+    if (!strictInjectMode) {
+      defineWindowProperty('ethereum', ethereum);
+    }
   }
   // OneKey Ethereum EIP6963 Provider
   registerEIP6963Provider({
@@ -308,25 +320,24 @@ function injectWeb3Provider({
     icon: WALLET_CONNECT_INFO.onekey.icon as WalletIcon,
   });
 
-  registerSolanaWallet(solana, {
-    icon: WALLET_CONNECT_INFO.solflare.icon as WalletIcon,
-    name: 'Solflare',
-  });
-
-  registerSolanaWallet(solana, {
-    icon: WALLET_CONNECT_INFO.jupiter.icon as WalletIcon,
-    name: 'Jupiter',
-  });
-
-  registerSolanaWallet(solana, {
-    icon: WALLET_CONNECT_INFO.metamask.icon as WalletIcon,
-    name: 'MetaMask',
-  });
-
-  registerSolanaWallet(solana, {
-    icon: WALLET_CONNECT_INFO.backpack.icon as WalletIcon,
-    name: 'Backpack',
-  });
+  if (!strictInjectMode) {
+    registerSolanaWallet(solana, {
+      icon: WALLET_CONNECT_INFO.solflare.icon as WalletIcon,
+      name: 'Solflare',
+    });
+    registerSolanaWallet(solana, {
+      icon: WALLET_CONNECT_INFO.jupiter.icon as WalletIcon,
+      name: 'Jupiter',
+    });
+    registerSolanaWallet(solana, {
+      icon: WALLET_CONNECT_INFO.metamask.icon as WalletIcon,
+      name: 'MetaMask',
+    });
+    registerSolanaWallet(solana, {
+      icon: WALLET_CONNECT_INFO.backpack.icon as WalletIcon,
+      name: 'Backpack',
+    });
+  }
 
   // OneKey Sui Standard Wallet
   registerSuiWallet(sui, {

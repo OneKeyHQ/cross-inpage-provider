@@ -13,13 +13,13 @@ declare module 'sunweb' {
     request<T>(args: any): Promise<T>;
     trx: {
       sign: (
-        transaction: IUnsignedTransaction,
+        transaction: any,
         privateKey: any,
         useTronHeader: boolean,
-        callback?: Callback,
+        callback?: any,
       ) => Promise<any>;
       signMessageV2: (message: string | Uint8Array | Array<number>, privateKey?: string | false) => string;
-      getNodeInfo: (callback?: Callback) => Promise<any>;
+      getNodeInfo: (callback?: any) => Promise<any>;
     };
   }
 

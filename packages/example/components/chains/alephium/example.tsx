@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
 
 import { dapps } from './dapps.config';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
@@ -240,6 +240,178 @@ export function Example() {
             }
 
             return Promise.resolve(signed.toString());
+          }}
+        />
+      </ApiGroup>
+
+      <ApiGroup title="Provider Proxy Tests (nodeProvider / explorerProvider)">
+        <ApiPayload
+          title="Duck-Typing Check (isWalletObj)"
+          description="验证 nodeProvider/explorerProvider 属性存在性，isWalletObj() 依赖这些属性"
+          allowCallWithoutProvider
+          onExecute={async () => {
+            const provider = (window as any).alephium;
+            const requiredKeys = [
+              'id', 'name', 'icon',
+              'unsafeEnable', 'isPreauthorized',
+              'nodeProvider', 'explorerProvider',
+              'signAndSubmitTransferTx', 'signAndSubmitDeployContractTx',
+              'signAndSubmitExecuteScriptTx', 'signAndSubmitUnsignedTx',
+              'signUnsignedTx', 'signMessage',
+            ];
+            const checks: Record<string, boolean> = {};
+            for (const key of requiredKeys) {
+              checks[key] = provider ? key in provider : false;
+            }
+            checks['nodeProvider !== undefined'] = provider?.nodeProvider !== undefined;
+            checks['explorerProvider !== undefined'] = provider?.explorerProvider !== undefined;
+            const allPassed = Object.values(checks).every(Boolean);
+            return Promise.resolve(JSON.stringify({ allPassed, checks }, null, 2));
+          }}
+        />
+        <ApiPayload
+          title="nodeProvider.infos.getInfosVersion"
+          description="nodeProvider namespace API — 获取节点版本（无参数，最简单的 proxy 测试）"
+          allowCallWithoutProvider
+          onExecute={async () => {
+            const provider = (window as any).alephium;
+            if (!provider?.nodeProvider) throw new Error('nodeProvider not available');
+            const result = await provider.nodeProvider.infos.getInfosVersion();
+            return JSON.stringify(result);
+          }}
+        />
+        <ApiPayload
+          title="nodeProvider.addresses.getAddressesAddressBalance"
+          description="nodeProvider namespace API — 查询地址余额"
+          allowCallWithoutProvider={!!wallet}
+          presupposeParams={[{
+            id: 'proxy-balance-current',
+            name: 'Current Address',
+            value: JSON.stringify({ address: wallet?.account?.address ?? '' }),
+          }]}
+          onExecute={async (request: string) => {
+            const provider = (window as any).alephium;
+            if (!provider?.nodeProvider) throw new Error('nodeProvider not available');
+            const { address } = JSON.parse(request);
+            const result = await provider.nodeProvider.addresses.getAddressesAddressBalance(address);
+            return JSON.stringify(result);
+          }}
+        />
+        <ApiPayload
+          title="nodeProvider.blockflow.getBlockflowChainInfo"
+          description="nodeProvider namespace API — 获取链信息 (fromGroup=0, toGroup=0)"
+          allowCallWithoutProvider
+          onExecute={async () => {
+            const provider = (window as any).alephium;
+            if (!provider?.nodeProvider) throw new Error('nodeProvider not available');
+            const result = await provider.nodeProvider.blockflow.getBlockflowChainInfo({ fromGroup: 0, toGroup: 0 });
+            return JSON.stringify(result);
+          }}
+        />
+        <ApiPayload
+          title="nodeProvider.request() (low-level API)"
+          description="nodeProvider.request({ path, method, params }) — 标准低级 API"
+          allowCallWithoutProvider
+          onExecute={async () => {
+            const provider = (window as any).alephium;
+            if (!provider?.nodeProvider) throw new Error('nodeProvider not available');
+            const result = await provider.nodeProvider.request({
+              path: 'infos',
+              method: 'getInfosVersion',
+              params: [],
+            });
+            return JSON.stringify(result);
+          }}
+        />
+        <ApiPayload
+          title="explorerProvider.infos.getInfosHeights"
+          description="explorerProvider namespace API — 获取链高度"
+          allowCallWithoutProvider
+          onExecute={async () => {
+            const provider = (window as any).alephium;
+            if (!provider?.explorerProvider) throw new Error('explorerProvider not available');
+            const result = await provider.explorerProvider.infos.getInfosHeights();
+            return JSON.stringify(result);
+          }}
+        />
+        <ApiPayload
+          title="explorerProvider.tokens.getTokensTokenIdAddresses"
+          description="explorerProvider namespace API — 查询 ALPH token 持有地址"
+          allowCallWithoutProvider
+          presupposeParams={[{
+            id: 'proxy-explorer-token-alph',
+            name: 'ALPH (Native)',
+            value: JSON.stringify({
+              tokenId: '0000000000000000000000000000000000000000000000000000000000000000',
+            }),
+          }, {
+            id: 'proxy-explorer-token-usdc',
+            name: 'USDC',
+            value: JSON.stringify({
+              tokenId: '722954d9067c5a5ad532746a024f2a9d7a18ed9b90e27d0a3a504962160b5600',
+            }),
+          }, {
+            id: 'proxy-explorer-token-usdt',
+            name: 'USDT',
+            value: JSON.stringify({
+              tokenId: '556d9582463fe44fbd108aedc9f409f69086dc78d994b88ea6c9e65f8bf98e00',
+            }),
+          }]}
+          onExecute={async (request: string) => {
+            const provider = (window as any).alephium;
+            if (!provider?.explorerProvider) throw new Error('explorerProvider not available');
+            const { tokenId } = JSON.parse(request);
+            const result = await provider.explorerProvider.tokens.getTokensTokenIdAddresses(tokenId, { page: 1, limit: 5 });
+            return JSON.stringify(result);
+          }}
+        />
+      </ApiGroup>
+
+      <ApiGroup title="Stub Compatibility Tests (@alephium/web3 → lightweight stub)">
+        <ApiPayload
+          title="Proxy 类型检查"
+          description="验证 nodeProvider/explorerProvider 是 Proxy 对象且支持任意属性访问"
+          allowCallWithoutProvider
+          onExecute={async () => {
+            const provider = (window as any).alephium;
+            const checks: Record<string, boolean> = {};
+            // Proxy should allow accessing any property without throwing
+            checks['nodeProvider.anyNamespace is callable'] =
+              typeof provider?.nodeProvider?.someRandomNamespace === 'function';
+            checks['explorerProvider.anyNamespace is callable'] =
+              typeof provider?.explorerProvider?.someRandomNamespace === 'function';
+            // 'then' should return undefined (prevent Promise coercion)
+            checks['nodeProvider.then === undefined'] =
+              provider?.nodeProvider?.then === undefined;
+            checks['explorerProvider.then === undefined'] =
+              provider?.explorerProvider?.then === undefined;
+            const allPassed = Object.values(checks).every(Boolean);
+            return Promise.resolve(JSON.stringify({ allPassed, checks }, null, 2));
+          }}
+        />
+        <ApiPayload
+          title="Signer 方法存在性"
+          description="验证签名相关方法仍然可用（stub 保留了 InteractiveSignerProvider 基类）"
+          allowCallWithoutProvider
+          onExecute={async () => {
+            const provider = (window as any).alephium;
+            const checks: Record<string, boolean> = {};
+            const methods = [
+              'signAndSubmitTransferTx',
+              'signAndSubmitDeployContractTx',
+              'signAndSubmitExecuteScriptTx',
+              'signAndSubmitUnsignedTx',
+              'signUnsignedTx',
+              'signMessage',
+              'unsafeEnable',
+              'isPreauthorized',
+              'disconnect',
+            ];
+            for (const m of methods) {
+              checks[`${m} is function`] = typeof provider?.[m] === 'function';
+            }
+            const allPassed = Object.values(checks).every(Boolean);
+            return Promise.resolve(JSON.stringify({ allPassed, checks }, null, 2));
           }}
         />
       </ApiGroup>

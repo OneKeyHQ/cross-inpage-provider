@@ -1,5 +1,6 @@
 module.exports = {
-  // simplify lodash import which caused jira crash
+  // babel-plugin-lodash transforms `import { x } from 'lodash'` → `import x from 'lodash/x'`
+  // to cherry-pick individual functions instead of bundling the entire 531 KB monolith.
   plugins: ['babel-plugin-lodash'],
   presets: [
     [

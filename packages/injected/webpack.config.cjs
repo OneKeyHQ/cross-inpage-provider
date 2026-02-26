@@ -27,16 +27,36 @@ const commonConfig = {
     minimize: true,
   },
   resolve: {
-    // DO NOT need alias if injected working in all platforms
-    //    alias module should be ES module export
     alias: {
-      // secp256k1 required in @solana/web3.js index.iife.js
-      // './precomputed/secp256k1': path.resolve(__dirname, 'development/resolveAlias/secp256k1-mock'),
-      // '@solana/web3.js': path.resolve(__dirname, 'development/resolveAlias/@solana-web3'),
-      tronweb: path.resolve(
+      // === Stubs: replace heavy libs with lightweight implementations ===
+
+      // Stub poseidon-lite (~608 KB): transitive dep of @aptos-labs/ts-sdk,
+      // only used for Keyless Account ZK hashing — never called in provider layer
+      'poseidon-lite': path.resolve(__dirname, 'src/stubs/poseidon-lite-stub.js'),
+      // Stub validator (~221 KB): tronweb only uses validator.isURL()
+      validator: path.resolve(__dirname, 'src/stubs/validator-stub.js'),
+      // Stub @alephium/web3 (~584 KB): provider only extends InteractiveSignerProvider.
+      // NodeProvider/ExplorerProvider API calls are proxied via bridge in OnekeyAlphProvider.
+      '@alephium/web3': path.resolve(
         __dirname,
-        'node_modules/@onekeyfe/inpage-providers-hub/node_modules/@onekeyfe/onekey-tron-provider/node_modules/tronweb/dist/TronWeb.js',
+        '../../packages/providers/onekey-alph-provider/src/stubs/alephium-web3.js',
       ),
+      // === Peer deps ===
+      '@aptos-labs/ts-sdk': path.resolve(
+        __dirname,
+        '../../packages/providers/onekey-aptos-provider/node_modules/@aptos-labs/ts-sdk',
+      ),
+
+      // === Dedup: multiple copies across providers → single copy ===
+      // (yarn-deduplicate handles lockfile-level dedup, but monorepo workspace
+      //  packages still get their own node_modules copies. These aliases force
+      //  webpack to bundle only one copy.)
+      // Dedup to v1.7.2 (installed in injected/package.json).
+      // @scure/bip32 imports '@noble/hashes/legacy' which only exists in v1.7.2+
+      '@noble/hashes': path.resolve(__dirname, 'node_modules/@noble/hashes'),
+      '@noble/curves': path.resolve(__dirname, 'node_modules/@noble/curves'),
+      'lodash-es': path.resolve(__dirname, '../../node_modules/lodash-es'),
+      'bignumber.js': path.resolve(__dirname, 'node_modules/bignumber.js'),
     },
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.d.ts'],
     fallback: {

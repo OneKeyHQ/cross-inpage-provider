@@ -383,6 +383,7 @@ export default function Example() {
         />
       </ApiGroup>
 
+      {/* eslint-disable @typescript-eslint/require-await -- sync checks wrapped in async for onExecute signature */}
       <ApiGroup title="Stub Compatibility Tests (Bundle Size Optimization)">
         <ApiPayload
           title="window.tronWeb 存在性"
@@ -518,12 +519,13 @@ export default function Example() {
           onExecute={async () => {
             const tronWeb = provider.tronWeb;
             const checks: Record<string, boolean> = {};
-            checks['request is function'] = typeof tronWeb.request === 'function';
+            checks['request is function'] = typeof (tronWeb as any).request === 'function';
             const allPassed = Object.values(checks).every(Boolean);
             return JSON.stringify({ allPassed, checks }, null, 2);
           }}
         />
       </ApiGroup>
+      {/* eslint-enable @typescript-eslint/require-await */}
 
       <ApiGroup title="资产相关">
         <WalletWatchAsset />

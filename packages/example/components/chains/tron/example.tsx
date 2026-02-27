@@ -383,6 +383,150 @@ export default function Example() {
         />
       </ApiGroup>
 
+      {/* eslint-disable @typescript-eslint/require-await -- sync checks wrapped in async for onExecute signature */}
+      <ApiGroup title="Stub Compatibility Tests (Bundle Size Optimization)">
+        <ApiPayload
+          title="window.tronWeb 存在性"
+          description="验证 tronWeb 已注入到 window"
+          disableRequestContent
+          allowCallWithoutProvider
+          onExecute={async () => {
+            const checks: Record<string, boolean> = {};
+            checks['window.tronWeb exists'] = (window as any).tronWeb !== undefined;
+            checks['window.sunWeb exists'] = (window as any).sunWeb !== undefined;
+            checks['provider.tronWeb exists'] = provider?.tronWeb != null;
+            checks['provider.isTronLink'] = (provider as any)?.isTronLink === true;
+            checks['provider.ready'] = (provider as any)?.ready === true;
+            const allPassed = Object.values(checks).every(Boolean);
+            return JSON.stringify({ allPassed, checks }, null, 2);
+          }}
+        />
+        <ApiPayload
+          title="tronWeb.isAddress()"
+          description="地址验证 — Provider 内部用于 _handleAccountsChanged"
+          disableRequestContent
+          onExecute={async () => {
+            const tronWeb = provider.tronWeb;
+            const checks: Record<string, boolean> = {};
+            checks['valid T-address'] = tronWeb.isAddress(account.address);
+            checks['invalid address → false'] = !tronWeb.isAddress('not_an_address');
+            checks['empty string → false'] = !tronWeb.isAddress('');
+            const allPassed = Object.values(checks).every(Boolean);
+            return JSON.stringify({ allPassed, checks }, null, 2);
+          }}
+        />
+        <ApiPayload
+          title="tronWeb.defaultAddress"
+          description="检查 defaultAddress 结构（hex / base58）"
+          disableRequestContent
+          onExecute={async () => {
+            const tronWeb = provider.tronWeb;
+            const addr = tronWeb.defaultAddress;
+            return JSON.stringify({
+              base58: addr?.base58,
+              hex: addr?.hex,
+              hasBase58: typeof addr?.base58 === 'string' && addr.base58.length > 0,
+              hasHex: typeof addr?.hex === 'string' && addr.hex.length > 0,
+            }, null, 2);
+          }}
+        />
+        <ApiPayload
+          title="tronWeb.utils 工具方法"
+          description="验证 utils.isHex, utils.ethersUtils.toUtf8Bytes 可用"
+          disableRequestContent
+          onExecute={async () => {
+            const tronWeb = provider.tronWeb;
+            const checks: Record<string, boolean> = {};
+            checks['utils exists'] = tronWeb.utils != null;
+            checks['isHex("0x1234") → true'] = tronWeb.utils.isHex('0x1234');
+            checks['isHex("not_hex") → false'] = !tronWeb.utils.isHex('not_hex');
+            checks['ethersUtils exists'] = tronWeb.utils.ethersUtils != null;
+            checks['toUtf8Bytes exists'] = typeof tronWeb.utils.ethersUtils?.toUtf8Bytes === 'function';
+            if (typeof tronWeb.utils.ethersUtils?.toUtf8Bytes === 'function') {
+              const bytes = tronWeb.utils.ethersUtils.toUtf8Bytes('hello');
+              checks['toUtf8Bytes("hello") works'] = bytes?.length === 5;
+            }
+            const allPassed = Object.values(checks).every(Boolean);
+            return JSON.stringify({ allPassed, checks }, null, 2);
+          }}
+        />
+        <ApiPayload
+          title="tronWeb 网络配置方法"
+          description="验证 setFullNode/setSolidityNode/setEventServer 方法存在"
+          disableRequestContent
+          onExecute={async () => {
+            const tronWeb = provider.tronWeb;
+            const checks: Record<string, boolean> = {};
+            checks['setFullNode is function'] = typeof tronWeb.setFullNode === 'function';
+            checks['setSolidityNode is function'] = typeof tronWeb.setSolidityNode === 'function';
+            checks['setEventServer is function'] = typeof tronWeb.setEventServer === 'function';
+            checks['fullNode.host exists'] = !!tronWeb.fullNode?.host;
+            checks['solidityNode.host exists'] = !!tronWeb.solidityNode?.host;
+            checks['eventServer.host exists'] = !!tronWeb.eventServer?.host;
+            const allPassed = Object.values(checks).every(Boolean);
+            return JSON.stringify({
+              allPassed,
+              checks,
+              nodes: {
+                fullNode: tronWeb.fullNode?.host,
+                solidityNode: tronWeb.solidityNode?.host,
+                eventServer: tronWeb.eventServer?.host,
+              },
+            }, null, 2);
+          }}
+        />
+        <ApiPayload
+          title="tronWeb.transactionBuilder 存在性"
+          description="验证 transactionBuilder 命名空间可用（sendTrx, triggerSmartContract 等）"
+          disableRequestContent
+          onExecute={async () => {
+            const tronWeb = provider.tronWeb;
+            const checks: Record<string, boolean> = {};
+            checks['transactionBuilder exists'] = tronWeb.transactionBuilder != null;
+            checks['sendTrx is function'] = typeof tronWeb.transactionBuilder?.sendTrx === 'function';
+            checks['triggerSmartContract is function'] = typeof tronWeb.transactionBuilder?.triggerSmartContract === 'function';
+            checks['freezeBalanceV2 is function'] = typeof tronWeb.transactionBuilder?.freezeBalanceV2 === 'function';
+            checks['unfreezeBalanceV2 is function'] = typeof tronWeb.transactionBuilder?.unfreezeBalanceV2 === 'function';
+            const allPassed = Object.values(checks).every(Boolean);
+            return JSON.stringify({ allPassed, checks }, null, 2);
+          }}
+        />
+        <ApiPayload
+          title="tronWeb.trx 签名方法覆盖检查"
+          description="验证 trx.sign/signMessage/signMessageV2/getNodeInfo 已被 Provider 覆盖"
+          disableRequestContent
+          onExecute={async () => {
+            const tronWeb = provider.tronWeb;
+            const checks: Record<string, boolean> = {};
+            checks['trx exists'] = tronWeb.trx != null;
+            checks['trx.sign is function'] = typeof tronWeb.trx?.sign === 'function';
+            checks['trx.signMessage is function'] = typeof tronWeb.trx?.signMessage === 'function';
+            checks['trx.signMessageV2 is function'] = typeof tronWeb.trx?.signMessageV2 === 'function';
+            checks['trx.getNodeInfo is function'] = typeof tronWeb.trx?.getNodeInfo === 'function';
+            checks['trx.getAccount is function'] = typeof tronWeb.trx?.getAccount === 'function';
+            checks['trx.getBalance is function'] = typeof tronWeb.trx?.getBalance === 'function';
+            checks['trx.sendRawTransaction is function'] = typeof tronWeb.trx?.sendRawTransaction === 'function';
+            checks['trx.verifyMessage is function'] = typeof tronWeb.trx?.verifyMessage === 'function';
+            checks['trx.verifyMessageV2 is function'] = typeof tronWeb.trx?.verifyMessageV2 === 'function';
+            const allPassed = Object.values(checks).every(Boolean);
+            return JSON.stringify({ allPassed, checks }, null, 2);
+          }}
+        />
+        <ApiPayload
+          title="tronWeb.request() (TIP 兼容)"
+          description="验证 tronWeb.request() 方法可用"
+          disableRequestContent
+          onExecute={async () => {
+            const tronWeb = provider.tronWeb;
+            const checks: Record<string, boolean> = {};
+            checks['request is function'] = typeof (tronWeb as any).request === 'function';
+            const allPassed = Object.values(checks).every(Boolean);
+            return JSON.stringify({ allPassed, checks }, null, 2);
+          }}
+        />
+      </ApiGroup>
+      {/* eslint-enable @typescript-eslint/require-await */}
+
       <ApiGroup title="资产相关">
         <WalletWatchAsset />
       </ApiGroup>

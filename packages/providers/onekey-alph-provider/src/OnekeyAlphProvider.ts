@@ -5,10 +5,12 @@ import {
   EnableOptions,
   RequestMessage,
 } from '@alephium/get-extension-wallet';
-import { NodeProvider, ExplorerProvider, InteractiveSignerProvider } from '@alephium/web3';
+import { InteractiveSignerProvider } from '@alephium/web3';
 import type {
   EnableOptionsBase,
   Account,
+  NodeProvider,
+  ExplorerProvider,
   SignDeployContractTxParams,
   SignDeployContractTxResult,
   SignExecuteScriptTxParams,
@@ -48,8 +50,8 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
   _accountInfo: Account | undefined;
 
   onDisconnected: (() => void | Promise<void>) | undefined = undefined;
-  #nodeProvider: NodeProvider | undefined = undefined;
-  #explorerProvider: ExplorerProvider | undefined = undefined;
+  private _nodeProvider: NodeProvider | undefined = undefined;
+  private _explorerProvider: ExplorerProvider | undefined = undefined;
 
   constructor(props: OneKeyTonProviderProps) {
     super();
@@ -60,6 +62,19 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
     });
 
     this.version = this._base.version;
+
+    // Create proxy providers eagerly in the constructor.
+    // defineWindowProperty() wraps the instance in a Proxy whose defineProperty
+    // trap silently blocks property assignments not in its whitelist.
+    // Lazy assignment in the getter (this._nodeProvider = ...) is swallowed
+    // by that trap, so we must set these before the Proxy wrapping happens.
+    this._nodeProvider = this._createProviderProxy(
+      'alph_nodeProvider_request',
+    ) as NodeProvider;
+    this._explorerProvider = this._createProviderProxy(
+      'alph_explorerProvider_request',
+    ) as ExplorerProvider;
+
     this._registerEvents();
   }
 
@@ -192,17 +207,64 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
   }
 
   get nodeProvider(): NodeProvider | undefined {
-    if (!this.#nodeProvider) {
-      this.#nodeProvider = new NodeProvider('https://node.mainnet.alephium.org');
-    }
-    return this.#nodeProvider;
+    return this._nodeProvider;
   }
 
   get explorerProvider(): ExplorerProvider | undefined {
-    if (!this.#explorerProvider) {
-      this.#explorerProvider = new ExplorerProvider('https://backend.mainnet.alephium.org');
+    return this._explorerProvider;
+  }
+
+  /**
+   * Create a two-level Proxy that forwards all property access to the App side
+   * via bridge, where the real NodeProvider/ExplorerProvider executes the call.
+   *
+   * Handles three usage patterns:
+   * 1. provider.namespace.method(...args)  -- e.g. nodeProvider.addresses.getAddressesAddressBalance('T...')
+   * 2. provider.directMethod(...args)      -- e.g. nodeProvider.fetchFungibleTokenMetaData(tokenId)
+   * 3. provider.request(args)              -- low-level API
+   */
+  // eslint-disable-next-line class-methods-use-this
+  private _sanitizeBridgeParams(value: unknown): unknown {
+    if (typeof value === 'bigint') return value.toString();
+    if (Array.isArray(value)) return value.map((v) => this._sanitizeBridgeParams(v));
+    if (value !== null && typeof value === 'object') {
+      const out: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(value)) {
+        out[k] = this._sanitizeBridgeParams(v);
+      }
+      return out;
     }
-    return this.#explorerProvider;
+    return value;
+  }
+
+  private _createProviderProxy(bridgeMethod: string): unknown {
+    const bridge = this.bridgeRequest.bind(this);
+    const sanitize = this._sanitizeBridgeParams.bind(this);
+    const forward = (args: unknown) =>
+      bridge({ method: bridgeMethod, params: sanitize(args) });
+
+    return new Proxy(Object.create(null), {
+      get(_, prop) {
+        if (typeof prop !== 'string' || prop === 'then' || prop === 'toJSON') return undefined;
+
+        // request() — standard low-level API: provider.request({ path, method, params })
+        if (prop === 'request') return forward;
+
+        // Return a callable Proxy:
+        // - Called directly → direct method:  provider.fetchFungibleTokenMetaData(tokenId)
+        // - Property access → namespace.method: provider.addresses.getBalance(addr)
+        const directCall = (...args: unknown[]) =>
+          forward({ path: prop, params: args });
+
+        return new Proxy(directCall, {
+          get(_, method) {
+            if (typeof method !== 'string' || method === 'then') return undefined;
+            return (...args: unknown[]) =>
+              forward({ path: prop, method, params: args });
+          },
+        });
+      },
+    });
   }
 
   unsafeGetSelectedAccount(): Promise<Account> {

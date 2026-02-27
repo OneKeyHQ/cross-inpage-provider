@@ -1,5 +1,5 @@
 
-const version = '2.2.60';
+const version = '2.2.61';
 const versionBuild = '2020-0101-1';
 
 export default {

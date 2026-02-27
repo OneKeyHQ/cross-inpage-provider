@@ -453,13 +453,13 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
       if (!this.tronWeb?.utils.isHex(transaction)) {
           throw new Error('Expected hex message input');
       }
-      return this.request({
+      return await this.request({
         method: 'signMessageV1',
         params: transaction,
       });
     }
 
-    return this.request({
+    return await this.request({
       method: 'tron_signTransaction',
       params: transaction,
     });
@@ -473,7 +473,7 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
       throw new Error('Expected hex message input');
     }
 
-    return this.request({
+    return await this.request({
       method: 'signMessageV1',
       params: [messageStr],
     });
@@ -491,7 +491,7 @@ class ProviderTron extends ProviderTronBase implements IProviderTron {
       messageStr = Buffer.from(message).toString('hex');
     }
 
-    return this.request({
+    return await this.request({
       method: 'signMessageV2',
       params: [messageStr],
     });

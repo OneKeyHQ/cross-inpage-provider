@@ -8,5 +8,6 @@ module.exports = {
     '/inpage-providers-hub/.*/universal/',
     '/node_modules/',
     '/__tests__/fixtures/',
+    '/dist/',
   ],
 };

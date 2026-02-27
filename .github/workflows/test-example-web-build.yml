@@ -15,16 +15,18 @@ jobs:
       - name: Setup Environment
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           registry-url: 'https://registry.npmjs.org'
           cache: 'yarn'
 
-      - name: Install Dependency
+      - name: Install and Build Workspace
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo 'skipped yarn install at workspace root'
+          yarn
+          yarn bootstrap
+          yarn build
 
-      - name: Build Target
+      - name: Build Example
         run: |
-          yarn example-build
+          cd packages/example && yarn build

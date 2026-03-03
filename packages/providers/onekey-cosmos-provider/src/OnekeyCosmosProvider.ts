@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable tsdoc/syntax */
-import { bytesToHex, hexToBytes, checkEnableDefineProperty, checkWalletSwitchEnable, type IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
+import { bytesToHex, hexToBytes, checkWalletSwitchEnable, type IInpageProviderConfig } from '@onekeyfe/cross-inpage-provider-core';
 import { getOrCreateExtInjectedJsBridge } from '@onekeyfe/extension-bridge-injected';
 import { ProviderCosmosBase } from './ProviderCosmosBase';
 import type * as TypeUtils from './type-utils';
@@ -123,24 +123,21 @@ export type CosmosRequest = {
   // ): Promise<string>;
   // 'getEnigmaUtils'(chainId: string): SecretUtils;
 
-  // // Related to Enigma.
-  // // But, recommended to use `getEnigmaUtils` rather than using below.
-  // 'getEnigmaPubKey'(chainId: string): Promise<Uint8Array>;
-  // 'getEnigmaTxEncryptionKey'(
-  //   chainId: string,
-  //   nonce: Uint8Array
-  // ): Promise<Uint8Array>;
-  // 'enigmaEncrypt'(
-  //   chainId: string,
-  //   contractCodeHash: string,
-  //   // eslint-disable-next-line @typescript-eslint/ban-types
-  //   msg: object
-  // ): Promise<Uint8Array>;
-  // 'enigmaDecrypt'(
-  //   chainId: string,
-  //   ciphertext: Uint8Array,
-  //   nonce: Uint8Array
-  // ): Promise<Uint8Array>;
+  'getEnigmaPubKey': (chainId: string) => Promise<string>;
+  'enigmaEncrypt': (
+    chainId: string,
+    contractCodeHash: string,
+    msg: object,
+  ) => Promise<string>;
+  'enigmaDecrypt': (
+    chainId: string,
+    ciphertext: string,
+    nonce: string,
+  ) => Promise<string>;
+  'enigmaGetTxEncryptionKey': (
+    chainId: string,
+    nonce: string,
+  ) => Promise<string>;
 };
 
 type JsBridgeRequest = {
@@ -216,6 +213,17 @@ export interface IProviderCosmos {
   getOfflineSignerAuto(chainId: string): Promise<OfflineAminoSigner | OfflineDirectSigner>;
 
   getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]>;
+
+  getEnigmaUtils(chainId: string): {
+    getPubkey: () => Promise<Uint8Array>;
+    encrypt: (contractCodeHash: string, msg: object) => Promise<Uint8Array>;
+    decrypt: (ciphertext: Uint8Array, nonce: Uint8Array) => Promise<Uint8Array>;
+    getTxEncryptionKey: (nonce: Uint8Array) => Promise<Uint8Array>;
+  };
+  getEnigmaPubKey(chainId: string): Promise<Uint8Array>;
+  enigmaEncrypt(chainId: string, contractCodeHash: string, msg: object): Promise<Uint8Array>;
+  enigmaDecrypt(chainId: string, ciphertext: Uint8Array, nonce: Uint8Array): Promise<Uint8Array>;
+  getEnigmaTxEncryptionKey(chainId: string, nonce: Uint8Array): Promise<Uint8Array>;
 }
 
 export type OneKeySuiProviderProps = IInpageProviderConfig & {
@@ -597,6 +605,80 @@ class ProviderCosmos extends ProviderCosmosBase implements IProviderCosmos {
       method: 'getChainInfoWithoutEndpoints',
       params: chainId,
     });
+  }
+
+   async getEnigmaPubKey(chainId: string): Promise<Uint8Array> {
+    const hex = await this._callBridge({
+      method: 'getEnigmaPubKey',
+      // @ts-expect-error
+      params: { chainId },
+    });
+    return hexToBytes(hex);
+  }
+
+   async enigmaEncrypt(
+    chainId: string,
+    contractCodeHash: string,
+    msg: object,
+  ): Promise<Uint8Array> {
+    const hex = await this._callBridge({
+      method: 'enigmaEncrypt',
+      // @ts-expect-error
+      params: { chainId, contractCodeHash, msg },
+    });
+    return hexToBytes(hex);
+  }
+
+   async enigmaDecrypt(
+    chainId: string,
+    ciphertext: Uint8Array,
+    nonce: Uint8Array,
+  ): Promise<Uint8Array> {
+    const hex = await this._callBridge({
+      method: 'enigmaDecrypt',
+      // @ts-expect-error
+      params: {
+        chainId,
+        ciphertext: bytesToHex(ciphertext),
+        nonce: bytesToHex(nonce),
+      },
+    });
+    return hexToBytes(hex);
+  }
+
+  async getEnigmaTxEncryptionKey(
+    chainId: string,
+    nonce: Uint8Array,
+  ): Promise<Uint8Array> {
+    const hex = await this._callBridge({
+      method: 'enigmaGetTxEncryptionKey',
+      // @ts-expect-error
+      params: { chainId, nonce: bytesToHex(nonce) },
+    });
+    return hexToBytes(hex);
+  }
+
+  getEnigmaUtils(chainId: string) {
+    return {
+      getPubkey: async (): Promise<Uint8Array> => {
+        return this.getEnigmaPubKey(chainId);
+      },
+      encrypt: async (
+        contractCodeHash: string,
+        msg: object,
+      ): Promise<Uint8Array> => {
+        return this.enigmaEncrypt(chainId, contractCodeHash, msg);
+      },
+      decrypt: async (
+        ciphertext: Uint8Array,
+        nonce: Uint8Array,
+      ): Promise<Uint8Array> => {
+        return this.enigmaDecrypt(chainId, ciphertext, nonce);
+      },
+      getTxEncryptionKey: async (nonce: Uint8Array): Promise<Uint8Array> => {
+        return this.getEnigmaTxEncryptionKey(chainId, nonce);
+      },
+    };
   }
 }
 

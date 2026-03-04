@@ -50,8 +50,10 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
   _accountInfo: Account | undefined;
 
   onDisconnected: (() => void | Promise<void>) | undefined = undefined;
-  private _nodeProvider: NodeProvider | undefined = undefined;
-  private _explorerProvider: ExplorerProvider | undefined = undefined;
+  // NOTE: Do NOT use `private` keyword here — TypeScript compiles it to WeakMap-based
+  // access, which breaks when the instance is wrapped in a Proxy by defineWindowProperty().
+  _nodeProvider: NodeProvider | undefined = undefined;
+  _explorerProvider: ExplorerProvider | undefined = undefined;
 
   constructor(props: OneKeyTonProviderProps) {
     super();

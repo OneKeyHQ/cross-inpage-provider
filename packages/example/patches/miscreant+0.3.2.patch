@@ -1,0 +1,13 @@
+diff --git a/node_modules/miscreant/src/providers/webcrypto.ts b/node_modules/miscreant/src/providers/webcrypto.ts
+index 1234567..abcdefg 100644
+--- a/node_modules/miscreant/src/providers/webcrypto.ts
++++ b/node_modules/miscreant/src/providers/webcrypto.ts
+@@ -17,7 +17,7 @@ export class WebCryptoProvider implements ICryptoProvider {
+   public async importCTRKey(keyData: Uint8Array): Promise<ICTRLike> {
+     try {
+       return await WebCryptoAesCtr.importKey(this.crypto, keyData);
+-    } catch (e) {
++    } catch (e: any) {
+       if (e.message.includes("unsupported")) {
+         throw new NotImplementedError("WebCryptoProvider: AES-CTR unsupported. Use PolyfillCryptoProvider.");
+       } else {

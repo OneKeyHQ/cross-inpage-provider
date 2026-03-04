@@ -43,6 +43,21 @@ export default {
       value: 'FRACTAL_BITCOIN_TESTNET',
     },
   ],
+  getBitcoinUtxos: [
+    {
+      id: 'getBitcoinUtxos-no-params',
+      name: 'getBitcoinUtxos (no params)',
+      value: JSON.stringify({}),
+    },
+    {
+      id: 'getBitcoinUtxos',
+      name: 'getBitcoinUtxos (first 20)',
+      value: JSON.stringify({
+        cursor: 0,
+        size: 20,
+      }),
+    },
+  ],
   signMessage: [
     {
       id: 'signMessage ecdsa default',
@@ -75,6 +90,17 @@ export default {
       value: JSON.stringify({
         toAddress: address,
         satoshis: 1000,
+      }),
+    },
+    {
+      id: 'sendBitcoin-with-memo',
+      name: 'SendBitcoin with memo',
+      value: JSON.stringify({
+        toAddress: address,
+        satoshis: 1000,
+        options: {
+          memo: 'Hello OneKey',
+        },
       }),
     },
   ],

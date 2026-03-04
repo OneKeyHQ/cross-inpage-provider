@@ -526,7 +526,7 @@ export default function Example() {
             const plaintext = new TextDecoder().decode(decrypted);
 
             const obj = JSON.parse(request);
-            const expected = obj.contractCodeHash + JSON.stringify(obj.msg);
+            const expected = String(obj.contractCodeHash) + JSON.stringify(obj.msg);
             return JSON.stringify({
               valid: plaintext === expected,
               decrypted: plaintext,
@@ -573,7 +573,7 @@ export default function Example() {
             const obj = JSON.parse(request);
 
             // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-            const expected = obj.contractCodeHash + JSON.stringify(obj.msg);
+            const expected = String(obj.contractCodeHash) + JSON.stringify(obj.msg);
             return JSON.stringify({
               valid: plaintext === expected,
               decrypted: plaintext,

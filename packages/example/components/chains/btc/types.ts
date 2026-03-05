@@ -3,6 +3,7 @@ export interface IProviderApi {
   on(event: string, listener: (...args: any[]) => void): this;
   removeListener(event: string, listener: (...args: any[]) => void): this;
   requestAccounts(): Promise<string[]>;
+  disconnect(): Promise<void>;
   getAccounts(): Promise<string[]>;
   getNetwork(): Promise<string>;
   switchNetwork(network: string): Promise<string>;
@@ -14,12 +15,20 @@ export interface IProviderApi {
     unconfirmed: number;
     total: number;
   }>;
+  getBalanceV2(): Promise<{
+    available: number;
+    unavailable: number;
+    total: number;
+  }>;
+  getBitcoinUtxos(cursor?: number, size?: number): Promise<{ txid: string; vout: number }[]>;
   signMessage(msg: string, type: string): Promise<string>;
   sendBitcoin(
     toAddress: string,
     satoshis: number,
     options?: {
-      feeRate: number;
+      feeRate?: number;
+      memo?: string;
+      memos?: string[];
     },
   ): Promise<string>;
   pushTx(options: { rawtx: string }): Promise<string>;

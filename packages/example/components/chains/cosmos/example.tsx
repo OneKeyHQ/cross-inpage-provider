@@ -14,6 +14,8 @@ import { PubKey } from 'cosmjs-types/cosmos/crypto/ed25519/keys';
 import { Any } from 'cosmjs-types/google/protobuf/any';
 import { AuthInfo, Fee, SignerInfo, Tx, TxBody, TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
+import { SIV, PolyfillCryptoProvider } from 'miscreant';
+import { SecretNetworkClient } from 'secretjs';
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import { useWallet } from '../../../components/connect/WalletContext';
@@ -451,6 +453,160 @@ export default function Example() {
             // @ts-expect-error
             const res = await provider?.sendTx(network.id, tx, 'Sync');
             return JSON.stringify(res);
+          }}
+        />
+      </ApiGroup>
+
+      <ApiGroup title="Enigma (Secret Network)">
+        <ApiPayload
+          title="getPubkey"
+          description="getPubkey() → 验证: 和 encrypt() 输出中嵌入的 pubkey 交叉校验"
+          presupposeParams={[
+            {
+              id: 'getPubkey',
+              name: 'getPubkey',
+              value: JSON.stringify({
+                contractCodeHash:
+                  'af74387e276be8874f07bec3a87023ee49b0e7ebe08178c49d0a49c3c98ed60e',
+                msg: { balance: {} },
+              }),
+            },
+          ]}
+          onExecute={async () => {
+            const utils = provider?.getEnigmaUtils('secret-4');
+            const pubkey = await utils?.getPubkey();
+            return pubkey ? bytesToHex(pubkey) : 'null';
+          }}
+          onValidate={async (request: string) => {
+            const obj = JSON.parse(request);
+            const utils = provider?.getEnigmaUtils('secret-4');
+
+            const pubkey = await utils?.getPubkey();
+            const encrypted = await utils?.encrypt(obj.contractCodeHash, obj.msg);
+            if (!pubkey || !encrypted) return 'null';
+
+            const embeddedPubkey = encrypted.slice(32, 64);
+            const pubkeyHex = bytesToHex(pubkey);
+            const embeddedHex = bytesToHex(embeddedPubkey);
+
+            return JSON.stringify({
+              valid: pubkeyHex === embeddedHex,
+              getPubkey: pubkeyHex,
+              encryptEmbeddedPubkey: embeddedHex,
+            });
+          }}
+        />
+        <ApiPayload
+          title="encrypt"
+          description="getEnigmaUtils('secret-4').encrypt() → 验证: decrypt round-trip"
+          presupposeParams={[
+            {
+              id: 'encrypt',
+              name: 'encrypt',
+              value: JSON.stringify({
+                contractCodeHash:
+                  'af74387e276be8874f07bec3a87023ee49b0e7ebe08178c49d0a49c3c98ed60e',
+                msg: { balance: {} },
+              }),
+            },
+          ]}
+          onExecute={async (request: string) => {
+            const obj = JSON.parse(request);
+            const utils = provider?.getEnigmaUtils('secret-4');
+            const encrypted = await utils?.encrypt(obj.contractCodeHash, obj.msg);
+            return encrypted ? bytesToHex(encrypted) : 'null';
+          }}
+          onValidate={async (request: string, response: string) => {
+            const encryptedBytes = hexToBytes(response);
+            const nonce = encryptedBytes.slice(0, 32);
+            const ciphertext = encryptedBytes.slice(64);
+
+            const utils = provider?.getEnigmaUtils('secret-4');
+            const decrypted = await utils?.decrypt(ciphertext, nonce);
+            const plaintext = new TextDecoder().decode(decrypted);
+
+            const obj = JSON.parse(request);
+            const expected = String(obj.contractCodeHash) + JSON.stringify(obj.msg);
+            return JSON.stringify({
+              valid: plaintext === expected,
+              decrypted: plaintext,
+              expected,
+            });
+          }}
+        />
+        <ApiPayload
+          title="getTxEncryptionKey"
+          description="getEnigmaUtils('secret-4').getTxEncryptionKey() → 验证: 用 key 手动 AES-SIV 解密"
+          presupposeParams={[
+            {
+              id: 'getTxEncryptionKey',
+              name: 'getTxEncryptionKey',
+              value: JSON.stringify({
+                contractCodeHash:
+                  'af74387e276be8874f07bec3a87023ee49b0e7ebe08178c49d0a49c3c98ed60e',
+                msg: { balance: {} },
+              }),
+            },
+          ]}
+          onExecute={async (request: string) => {
+            const obj = JSON.parse(request);
+            const utils = provider?.getEnigmaUtils('secret-4');
+            const encrypted = await utils?.encrypt(obj.contractCodeHash, obj.msg);
+            if (!encrypted) return 'null';
+            const nonce = encrypted.slice(0, 32);
+            const key = await utils?.getTxEncryptionKey(nonce);
+            return JSON.stringify({
+              encryptedHex: bytesToHex(encrypted),
+              keyHex: key ? bytesToHex(key) : 'null',
+            });
+          }}
+          onValidate={async (request: string, response: string) => {
+            const res = JSON.parse(response);
+            const encryptedBytes = hexToBytes(res.encryptedHex);
+            const ciphertext = encryptedBytes.slice(64);
+            const keyBytes = hexToBytes(res.keyHex);
+
+            const siv = await SIV.importKey(keyBytes, 'AES-SIV', new PolyfillCryptoProvider());
+            const decrypted: Uint8Array = await siv.open(ciphertext, [new Uint8Array()]);
+            const plaintext = new TextDecoder().decode(decrypted);
+
+            const obj = JSON.parse(request);
+
+            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+            const expected = String(obj.contractCodeHash) + JSON.stringify(obj.msg);
+            return JSON.stringify({
+              valid: plaintext === expected,
+              decrypted: plaintext,
+              expected,
+            });
+          }}
+        />
+        <ApiPayload
+          title="secretjs queryContract"
+          description="端到端验证: 用 secretjs + getEnigmaUtils 查询 sSCRT 合约 token_info"
+          disableRequestContent
+          onExecute={async () => {
+            const chainId = 'secret-4';
+            await provider?.enable(chainId);
+            const offlineSigner = provider?.getOfflineSigner(chainId);
+            const accounts = await offlineSigner?.getAccounts();
+            const enigmaUtils = provider?.getEnigmaUtils(chainId);
+
+            const secretjs = new SecretNetworkClient({
+              url: 'https://secret-4.api.trivium.network:1317',
+              chainId,
+              wallet: offlineSigner,
+              walletAddress: accounts?.[0]?.address ?? '',
+              encryptionUtils: enigmaUtils,
+            });
+
+            const result = await secretjs.query.compute.queryContract({
+              contract_address: 'secret1k0jntykt7e4g3y88ltc60czgjuqdy4c9e8fzek',
+              code_hash: 'af74387e276be8874f07bec3a87023ee49b0e7ebe08178c49d0a49c3c98ed60e',
+              query: { token_info: {} },
+            });
+
+            return JSON.stringify(result);
           }}
         />
       </ApiGroup>

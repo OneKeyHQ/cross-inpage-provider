@@ -13,6 +13,8 @@ import {
   ProviderEventsMap,
   MessageType,
   BalanceInfo,
+  BalanceInfoV2,
+  BitcoinUtxo,
   InscriptionInfo,
   Chain,
 } from './types';
@@ -171,6 +173,12 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
     });
   }
 
+  async disconnect() {
+    return this._request<void>({
+      method: ProviderMethods.DISCONNECT,
+    });
+  }
+
   async getAccounts() {
     return this._request<string[]>({
       method: ProviderMethods.GET_ACCOUNTS,
@@ -221,6 +229,22 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
     });
   }
 
+  async getBalanceV2() {
+    return this._request<BalanceInfoV2>({
+      method: ProviderMethods.GET_BALANCE_V2,
+    });
+  }
+
+  async getBitcoinUtxos(cursor: number | undefined, size: number | undefined) {
+    return this._request<BitcoinUtxo[]>({
+      method: ProviderMethods.GET_BITCOIN_UTXOS,
+      params: {
+        cursor,
+        size,
+      },
+    });
+  }
+
   async getInscriptions(cursor = 0, size = 20) {
     return this._request<{
       total: number;
@@ -234,13 +258,19 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
     });
   }
 
-  async sendBitcoin(toAddress: string, satoshis: number, options?: { feeRate: number }) {
+  async sendBitcoin(
+    toAddress: string,
+    satoshis: number,
+    options?: { feeRate?: number; memo?: string; memos?: string[] },
+  ) {
     return this._request<string>({
       method: ProviderMethods.SEND_BITCOIN,
       params: {
         toAddress,
         satoshis,
         feeRate: options?.feeRate,
+        memo: options?.memo,
+        memos: options?.memos,
       },
     });
   }
@@ -344,5 +374,7 @@ export {
   ProviderEventsMap,
   MessageType,
   BalanceInfo,
+  BalanceInfoV2,
+  BitcoinUtxo,
   InscriptionInfo,
 };

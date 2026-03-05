@@ -6,6 +6,8 @@ import { ProviderBtcBase } from './ProviderBtcBase';
 export type MessageType = 'ecdsa' | 'bip322-simple';
 export type NetworkType = 'livenet' | 'testnet';
 export type BalanceInfo = { 'confirmed': number; 'unconfirmed': number; 'total': number };
+export type BalanceInfoV2 = { 'available': number; 'unavailable': number; 'total': number };
+export type BitcoinUtxo = { 'txid': string; 'vout': number };
 export type InscriptionInfo = {
   inscriptionId: string;
   inscriptionNumber: number;
@@ -37,7 +39,7 @@ export enum ProviderEvents {
   CLOSE = 'close',
   ACCOUNTS_CHANGED = 'accountsChanged',
   ACCOUNT_CHANGED = 'accountChanged',
-  NETWORK_CHANGED = 'networkChanged',
+  NETWORK_CHANGED = 'chainChanged',
   MESSAGE_LOW_LEVEL = 'message_low_level',
 }
 
@@ -59,6 +61,9 @@ export enum ProviderMethods {
   SIGN_PSBTS = 'signPsbts',
   PUSH_PSBT = 'pushPsbt',
   GET_PROVIDER_STATE = 'getProviderState',
+  DISCONNECT = 'disconnect',
+  GET_BALANCE_V2 = 'getBalanceV2',
+  GET_BITCOIN_UTXOS = 'getBitcoinUtxos',
   INSCRIBE_TRANSFER = 'inscribeTransfer',
 
   /**
@@ -123,6 +128,7 @@ export interface IProviderBtc extends ProviderBtcBase {
   readonly isOneKey: boolean;
 
   requestAccounts(): Promise<string[]>;
+  disconnect(): Promise<void>;
   getAccounts(): Promise<string[]>;
   getNetwork(): Promise<string>;
   switchNetwork(network: NetworkType): Promise<void>;
@@ -130,6 +136,8 @@ export interface IProviderBtc extends ProviderBtcBase {
   switchChain(chain: string): Promise<Chain>;
   getPublicKey(): Promise<string>;
   getBalance(): Promise<BalanceInfo | number>;
+  getBalanceV2(): Promise<BalanceInfoV2>;
+  getBitcoinUtxos(cursor?: number, size?: number): Promise<BitcoinUtxo[]>;
   getInscriptions(
     cursor?: number,
     size?: number,
@@ -137,7 +145,7 @@ export interface IProviderBtc extends ProviderBtcBase {
     total: number;
     list: InscriptionInfo[];
   }>;
-  sendBitcoin(toAddress: string, satoshis: number, options?: { feeRate: number }): Promise<string>;
+  sendBitcoin(toAddress: string, satoshis: number, options?: { feeRate?: number; memo?: string; memos?: string[] }): Promise<string>;
   sendInscription(
     toAddress: string,
     inscriptionId: string,

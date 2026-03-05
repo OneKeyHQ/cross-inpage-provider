@@ -122,6 +122,16 @@ export default function BTCExample() {
         />
 
         <ApiPayload
+          title="disconnect"
+          description="断开连接"
+          disableRequestContent
+          onExecute={async () => {
+            await provider?.disconnect();
+            return 'disconnected';
+          }}
+        />
+
+        <ApiPayload
           title="getAccounts"
           description="获取当前账户地址"
           disableRequestContent
@@ -148,6 +158,26 @@ export default function BTCExample() {
             return JSON.stringify(res);
           }}
         />
+        <ApiPayload
+          title="getBalanceV2"
+          description="获取当前账户余额 (available/unavailable/total)"
+          disableRequestContent
+          onExecute={async () => {
+            const res = await provider?.getBalanceV2();
+            return JSON.stringify(res);
+          }}
+        />
+        <ApiPayload
+          title="getBitcoinUtxos"
+          description="获取当前账户 Bitcoin UTXOs"
+          presupposeParams={params.getBitcoinUtxos}
+          onExecute={async (request: string) => {
+            const obj = JSON.parse(request) as { cursor?: number; size?: number };
+            const res = await provider?.getBitcoinUtxos(obj.cursor, obj.size);
+            return JSON.stringify(res);
+          }}
+        />
+
         <ApiPayload
           title="getNetwork"
           description="获取当前网络"
@@ -219,8 +249,8 @@ export default function BTCExample() {
           description="发送交易"
           presupposeParams={params.sendBitcoin(account?.address ?? '')}
           onExecute={async (request: string) => {
-            const obj = JSON.parse(request) as { toAddress: string; satoshis: number };
-            const res = await provider?.sendBitcoin(obj.toAddress, obj.satoshis);
+            const obj = JSON.parse(request) as { toAddress: string; satoshis: number; options?: { feeRate?: number; memo?: string; memos?: string[] } };
+            const res = await provider?.sendBitcoin(obj.toAddress, obj.satoshis, obj.options);
             return JSON.stringify(res);
           }}
         />

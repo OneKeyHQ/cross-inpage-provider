@@ -54,6 +54,7 @@ export const ApiSelector = forwardRef<ApiSelectorRef, ApiSelectorProps>(function
     id,
     name: label,
     required,
+    defaultValue,
   });
   const options = field.extra?.options;
 

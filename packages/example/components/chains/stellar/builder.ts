@@ -90,6 +90,109 @@ export function buildTrustTransaction(params: {
   return transaction.toXDR();
 }
 
+export interface BuildPathPaymentStrictSendParams {
+  sourceAddress: string;
+  destinationAddress: string;
+  sendAssetCode: string;
+  sendAssetIssuer: string;
+  sendAmount: string;
+  destAssetCode: string;
+  destAssetIssuer: string;
+  destMin: string;
+  networkPassphrase: string;
+}
+
+export interface BuildPathPaymentStrictReceiveParams {
+  sourceAddress: string;
+  destinationAddress: string;
+  sendAssetCode: string;
+  sendAssetIssuer: string;
+  sendMax: string;
+  destAssetCode: string;
+  destAssetIssuer: string;
+  destAmount: string;
+  networkPassphrase: string;
+}
+
+function resolveAsset(code: string, issuer: string): StellarSdk.Asset {
+  if (code === 'XLM' && !issuer) {
+    return StellarSdk.Asset.native();
+  }
+  return new StellarSdk.Asset(code, issuer);
+}
+
+/**
+ * Build a Path Payment Strict Send transaction (swap - fixed send amount)
+ */
+export function buildPathPaymentStrictSendTransaction(params: BuildPathPaymentStrictSendParams): string {
+  const {
+    sourceAddress, destinationAddress, sendAssetCode, sendAssetIssuer,
+    sendAmount, destAssetCode, destAssetIssuer, destMin, networkPassphrase,
+  } = params;
+
+  const sourceKeypair = StellarSdk.Keypair.fromPublicKey(sourceAddress);
+  const account = new StellarSdk.Account(sourceKeypair.publicKey(), '0');
+
+  const sendAsset = resolveAsset(sendAssetCode, sendAssetIssuer);
+  const destAsset = resolveAsset(destAssetCode, destAssetIssuer);
+
+  const transactionBuilder = new StellarSdk.TransactionBuilder(account, {
+    fee: StellarSdk.BASE_FEE,
+    networkPassphrase,
+  });
+
+  transactionBuilder.addOperation(
+    StellarSdk.Operation.pathPaymentStrictSend({
+      sendAsset,
+      sendAmount,
+      destination: destinationAddress,
+      destAsset,
+      destMin,
+      path: [],
+    }),
+  );
+
+  transactionBuilder.setTimeout(180);
+  const transaction = transactionBuilder.build();
+  return transaction.toXDR();
+}
+
+/**
+ * Build a Path Payment Strict Receive transaction (swap - fixed receive amount)
+ */
+export function buildPathPaymentStrictReceiveTransaction(params: BuildPathPaymentStrictReceiveParams): string {
+  const {
+    sourceAddress, destinationAddress, sendAssetCode, sendAssetIssuer,
+    sendMax, destAssetCode, destAssetIssuer, destAmount, networkPassphrase,
+  } = params;
+
+  const sourceKeypair = StellarSdk.Keypair.fromPublicKey(sourceAddress);
+  const account = new StellarSdk.Account(sourceKeypair.publicKey(), '0');
+
+  const sendAsset = resolveAsset(sendAssetCode, sendAssetIssuer);
+  const destAsset = resolveAsset(destAssetCode, destAssetIssuer);
+
+  const transactionBuilder = new StellarSdk.TransactionBuilder(account, {
+    fee: StellarSdk.BASE_FEE,
+    networkPassphrase,
+  });
+
+  transactionBuilder.addOperation(
+    StellarSdk.Operation.pathPaymentStrictReceive({
+      sendAsset,
+      sendMax,
+      destination: destinationAddress,
+      destAsset,
+      destAmount,
+      path: [],
+    }),
+  );
+
+  transactionBuilder.setTimeout(180);
+  const transaction = transactionBuilder.build();
+  return transaction.toXDR();
+}
+
 /**
  * Build a create account transaction
  */

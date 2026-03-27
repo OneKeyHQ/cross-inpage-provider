@@ -244,7 +244,10 @@ export class ProviderStellar extends ProviderStellarBase implements IProviderSte
     return super.emit(event, ...args);
   }
 
-  removeListener<E extends keyof StellarProviderEventsMap>(eventName: E, listener: StellarProviderEventsMap[E]): this {
+  removeListener<E extends keyof StellarProviderEventsMap>(
+    eventName: E,
+    listener: StellarProviderEventsMap[E],
+  ): this {
     return super.removeListener(eventName, listener);
   }
 
@@ -263,6 +266,14 @@ export class ProviderStellar extends ProviderStellarBase implements IProviderSte
     }
 
     return result;
+  }
+
+  /**
+   * Get the public key of the current account
+   * @returns Promise<string> - The public key/address
+   */
+  async getPublicKey(): Promise<string> {
+    return this.getAddress().then((t) => t.address);
   }
 
   /**

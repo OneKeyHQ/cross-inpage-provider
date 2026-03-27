@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument */
 import { dapps } from './dapps.config';
 import ConnectButton from '../../connect/ConnectButton';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { get } from 'lodash-es';
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
@@ -16,21 +16,33 @@ import {
   buildTrustTransaction,
   buildCreateAccountTransaction,
 } from './builder';
+import { SwapStrictSend, SwapStrictReceive } from './SwapToken';
+import { buildRealAuthEntry, buildTokenTransferAuthEntry, checkAccountExists } from './soroban';
 import {
-  buildRealAuthEntry,
-  buildTokenTransferAuthEntry,
-  checkAccountExists,
-  MAINNET_NETWORK_PASSPHRASE,
-} from './soroban';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../ui/select';
 
 // Force TypeScript to re-check params type
 type ParamsType = typeof params;
 
-// Default to mainnet if getNetwork is not available
-const DEFAULT_NETWORK = {
-  network: 'mainnet',
-  networkPassphrase: 'Public Global Stellar Network ; September 2015',
+type NetworkInfo = { network: string; networkPassphrase: string };
+
+const STELLAR_NETWORKS: Record<string, NetworkInfo> = {
+  mainnet: {
+    network: 'mainnet',
+    networkPassphrase: 'Public Global Stellar Network ; September 2015',
+  },
+  testnet: {
+    network: 'testnet',
+    networkPassphrase: 'Test SDF Network ; September 2015',
+  },
 };
+
+const DEFAULT_NETWORK = STELLAR_NETWORKS.mainnet;
 
 // Helper function to detect if wallet is Hana style
 const isHanaWallet = (provider: IProviderApi): boolean => {
@@ -111,7 +123,13 @@ export default function StellarExample() {
   ]);
 
   const { provider, setAccount, account } = useWallet<IProviderApi>();
-  const networkInfoRef = useRef<{ network: string; networkPassphrase: string }>(DEFAULT_NETWORK);
+  const [selectedNetwork, setSelectedNetwork] = useState<string>('mainnet');
+  const networkInfoRef = useRef({ ...DEFAULT_NETWORK });
+
+  const handleNetworkChange = (network: string) => {
+    setSelectedNetwork(network);
+    networkInfoRef.current = STELLAR_NETWORKS[network];
+  };
 
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
     const providerDetail = walletsRef.current?.find((w) => w.uuid === selectedWallet.id);
@@ -152,8 +170,14 @@ export default function StellarExample() {
       console.warn('Failed to get network, using default mainnet:', error);
     }
 
-    // Store network info for later use
+    // Sync network info
     networkInfoRef.current = network;
+    const matchedKey = Object.keys(STELLAR_NETWORKS).find(
+      (k) => STELLAR_NETWORKS[k].networkPassphrase === network.networkPassphrase,
+    );
+    if (matchedKey) {
+      setSelectedNetwork(matchedKey);
+    }
 
     return {
       provider,
@@ -210,6 +234,22 @@ export default function StellarExample() {
         onDisconnect={onDisconnectWallet}
       />
 
+      <div className="flex items-center gap-3 mb-4 p-3 rounded-lg border bg-muted/30">
+        <span className="text-sm font-medium whitespace-nowrap">Network:</span>
+        <Select value={selectedNetwork} onValueChange={(v) => handleNetworkChange(v)}>
+          <SelectTrigger className="w-[280px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="mainnet">Mainnet (Public Global Stellar Network)</SelectItem>
+            <SelectItem value="testnet">Testnet (Test SDF Network)</SelectItem>
+          </SelectContent>
+        </Select>
+        <span className="text-xs text-muted-foreground truncate">
+          {networkInfoRef.current.networkPassphrase}
+        </span>
+      </div>
+
       <ApiGroup title="Basics">
         <ApiPayload
           title="getAddress / getPublicKey"
@@ -243,8 +283,14 @@ export default function StellarExample() {
             } catch (error) {
               console.warn('Failed to get network, using default mainnet:', error);
             }
-            // Update network info for signing methods
+            // Sync network info and UI
             networkInfoRef.current = res;
+            const matchedKey = Object.keys(STELLAR_NETWORKS).find(
+              (k) => STELLAR_NETWORKS[k].networkPassphrase === res.networkPassphrase,
+            );
+            if (matchedKey) {
+              setSelectedNetwork(matchedKey);
+            }
             return JSON.stringify(
               {
                 ...res,
@@ -262,7 +308,7 @@ export default function StellarExample() {
           disableRequestContent
           onExecute={async () => {
             await provider?.disconnect();
-            networkInfoRef.current = DEFAULT_NETWORK;
+            handleNetworkChange('mainnet');
             return 'Disconnected successfully';
           }}
         />
@@ -359,6 +405,11 @@ export default function StellarExample() {
         />
       </ApiGroup>
 
+      <ApiGroup title="Swap Token (Path Payment)">
+        <SwapStrictSend networkPassphrase={networkInfoRef.current.networkPassphrase} />
+        <SwapStrictReceive networkPassphrase={networkInfoRef.current.networkPassphrase} />
+      </ApiGroup>
+
       <ApiGroup title="Sign Message">
         <ApiPayload
           title="signMessage"
@@ -382,17 +433,17 @@ export default function StellarExample() {
             const address = sourceAddress || account?.address || '';
 
             // Check if account exists on mainnet
-            const accountExists = await checkAccountExists(address);
+            const accountExists = await checkAccountExists(address, networkInfoRef.current.networkPassphrase);
             if (!accountExists) {
               throw new Error(
-                `账户 ${address} 在主网上不存在或未激活。`,
+                `账户 ${address} 在 ${networkInfoRef.current.network} 上不存在或未激活。`,
               );
             }
 
             // Build real auth entry via RPC simulation
             const { authEntries, simulationResult } = await buildRealAuthEntry({
               sourceAddress: address,
-              networkPassphrase: MAINNET_NETWORK_PASSPHRASE,
+              networkPassphrase: networkInfoRef.current.networkPassphrase,
             });
 
             if (authEntries.length === 0) {
@@ -409,7 +460,7 @@ export default function StellarExample() {
             // Sign the first auth entry
             const authEntry = authEntries[0];
             const res = await signAuthEntryCompat(provider, authEntry, {
-              networkPassphrase: MAINNET_NETWORK_PASSPHRASE,
+              networkPassphrase: networkInfoRef.current.networkPassphrase,
             });
 
             return JSON.stringify(
@@ -434,10 +485,10 @@ export default function StellarExample() {
             const address = sourceAddress || account?.address || '';
 
             // Check if account exists on mainnet
-            const accountExists = await checkAccountExists(address);
+            const accountExists = await checkAccountExists(address, networkInfoRef.current.networkPassphrase);
             if (!accountExists) {
               throw new Error(
-                `账户 ${address} 在主网上不存在或未激活。`,
+                `账户 ${address} 在 ${networkInfoRef.current.network} 上不存在或未激活。`,
               );
             }
 
@@ -446,7 +497,7 @@ export default function StellarExample() {
               sourceAddress: address,
               destinationAddress,
               amount,
-              networkPassphrase: MAINNET_NETWORK_PASSPHRASE,
+              networkPassphrase: networkInfoRef.current.networkPassphrase,
             });
 
             if (authEntries.length === 0) {
@@ -458,7 +509,7 @@ export default function StellarExample() {
             for (const authEntry of authEntries) {
               console.log('authEntry', authEntry);
               const res = await signAuthEntryCompat(provider, authEntry, {
-                networkPassphrase: MAINNET_NETWORK_PASSPHRASE,
+                networkPassphrase: networkInfoRef.current.networkPassphrase,
               });
               signedEntries.push(res);
             }

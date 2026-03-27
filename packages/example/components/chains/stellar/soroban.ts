@@ -2,6 +2,14 @@ import * as StellarSdk from '@stellar/stellar-sdk';
 
 // Stellar RPC endpoints
 const MAINNET_RPC = 'https://mainnet.sorobanrpc.com';
+const TESTNET_RPC = 'https://soroban-testnet.stellar.org';
+
+function getRpcUrl(networkPassphrase: string): string {
+  if (networkPassphrase === StellarSdk.Networks.TESTNET) {
+    return TESTNET_RPC;
+  }
+  return MAINNET_RPC;
+}
 
 /**
  * Get the contract ID for Native XLM SAC token
@@ -37,7 +45,7 @@ export async function buildRealAuthEntry(params: {
   const { sourceAddress, networkPassphrase } = params;
 
   // Create RPC server instance
-  const server = new StellarSdk.SorobanRpc.Server(MAINNET_RPC);
+  const server = new StellarSdk.SorobanRpc.Server(getRpcUrl(networkPassphrase));
 
   // Create source account (sequence number will be fetched)
   const sourceKeypair = StellarSdk.Keypair.fromPublicKey(sourceAddress);
@@ -109,7 +117,7 @@ export async function buildTokenTransferAuthEntry(params: {
 }> {
   const { sourceAddress, destinationAddress, amount, networkPassphrase } = params;
 
-  const server = new StellarSdk.SorobanRpc.Server(MAINNET_RPC);
+  const server = new StellarSdk.SorobanRpc.Server(getRpcUrl(networkPassphrase));
   const sourceKeypair = StellarSdk.Keypair.fromPublicKey(sourceAddress);
   const account = await server.getAccount(sourceAddress);
 
@@ -163,10 +171,11 @@ export async function buildTokenTransferAuthEntry(params: {
 export const MAINNET_NETWORK_PASSPHRASE = StellarSdk.Networks.PUBLIC;
 
 /**
- * Check if address exists on mainnet
+ * Check if address exists on the specified network
  */
-export async function checkAccountExists(address: string): Promise<boolean> {
-  const server = new StellarSdk.SorobanRpc.Server(MAINNET_RPC);
+export async function checkAccountExists(address: string, networkPassphrase?: string): Promise<boolean> {
+  const rpcUrl = networkPassphrase ? getRpcUrl(networkPassphrase) : MAINNET_RPC;
+  const server = new StellarSdk.SorobanRpc.Server(rpcUrl);
   try {
     await server.getAccount(address);
     return true;

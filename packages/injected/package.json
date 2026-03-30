@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/cross-inpage-provider-injected",
-  "version": "2.2.64",
+  "version": "2.2.65",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -24,8 +24,8 @@
   "scripts": {
     "prebuild": "rm -rf dist",
     "lint:dist": "NODE_OPTIONS=\"--max-old-space-size=8192\" npx eslint --config syntax-compatibility.eslint.config.cjs ./dist/injected/injectedNative.js",
-    "build": "tsc && tsc --project tsconfig.cjs.json && yarn webpack",
-    "build-prod": "tsc && tsc --project tsconfig.cjs.json && NODE_ENV=production yarn webpack && yarn lint:dist",
+    "build": "tsc && tsc --project tsconfig.cjs.json && yarn webpack && node scripts/generate-desktop-outputs.js",
+    "build-prod": "tsc && tsc --project tsconfig.cjs.json && NODE_ENV=production yarn webpack && node scripts/generate-desktop-outputs.js && yarn lint:dist",
     "start": "tsc --watch",
     "webpack": "webpack",
     "webpack-dev": "NODE_ENV=development webpack"
@@ -48,12 +48,12 @@
   "dependencies": {
     "@noble/curves": "1.8.0",
     "@noble/hashes": "1.7.2",
-    "@onekeyfe/cross-inpage-provider-core": "2.2.64",
-    "@onekeyfe/cross-inpage-provider-types": "2.2.64",
-    "@onekeyfe/desktop-bridge-injected": "2.2.64",
-    "@onekeyfe/extension-bridge-injected": "2.2.64",
-    "@onekeyfe/inpage-providers-hub": "2.2.64",
-    "@onekeyfe/native-bridge-injected": "2.2.64",
+    "@onekeyfe/cross-inpage-provider-core": "2.2.65",
+    "@onekeyfe/cross-inpage-provider-types": "2.2.65",
+    "@onekeyfe/desktop-bridge-injected": "2.2.65",
+    "@onekeyfe/extension-bridge-injected": "2.2.65",
+    "@onekeyfe/inpage-providers-hub": "2.2.65",
+    "@onekeyfe/native-bridge-injected": "2.2.65",
     "bignumber.js": "^9.1.2",
     "buffer": "^6.0.3",
     "cipher-base": "^1.0.6",

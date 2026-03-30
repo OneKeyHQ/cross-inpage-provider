@@ -64,6 +64,22 @@ function buildAssetParams(prefix: string, asset: { code: string; issuer: string 
   return `${prefix}_asset_type=credit_alphanum${asset.code.length <= 4 ? '4' : '12'}&${prefix}_asset_code=${asset.code}&${prefix}_asset_issuer=${asset.issuer}`;
 }
 
+interface HorizonPathRecord {
+  destination_amount: string;
+  source_amount: string;
+  path: { asset_code?: string }[];
+}
+
+interface BroadcastResult {
+  id: string;
+  hash: string;
+  ledger: number;
+  created_at: string;
+  extras?: { result_codes?: unknown };
+  detail?: string;
+  title?: string;
+}
+
 function assertDifferentAssets(
   sendAsset: { code: string; issuer: string },
   destAsset: { code: string; issuer: string },
@@ -87,7 +103,7 @@ async function fetchStrictSendQuote(
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Horizon API error: ${res.status}`);
   const data = await res.json();
-  const records = data?._embedded?.records;
+  const records = data?._embedded?.records as HorizonPathRecord[] | undefined;
   if (!records?.length) throw new Error('No path found - 当前交易对无流动性');
   return records[0];
 }
@@ -106,7 +122,7 @@ async function fetchStrictReceiveQuote(
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Horizon API error: ${res.status}`);
   const data = await res.json();
-  const records = data?._embedded?.records;
+  const records = data?._embedded?.records as HorizonPathRecord[] | undefined;
   if (!records?.length) throw new Error('No path found - 当前交易对无流动性');
   return records[0];
 }
@@ -140,7 +156,7 @@ async function broadcastTransaction(horizonUrl: string, signedTxXdr: string) {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: `tx=${encodeURIComponent(signedTxXdr)}`,
   });
-  const data = await res.json();
+  const data = (await res.json()) as BroadcastResult;
   if (!res.ok) {
     const extras = data?.extras?.result_codes;
     throw new Error(

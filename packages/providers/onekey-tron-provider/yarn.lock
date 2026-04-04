@@ -55,43 +55,43 @@
   resolved "https://registry.yarnpkg.com/@noble/secp256k1/-/secp256k1-1.7.1.tgz#b251c70f824ce3ca7f8dc3df08d58f005cc0507c"
   integrity sha512-hOUk6AyBFmqVrv7k5WAw/LpszxVbj9gGN4JRkIX52fdFAj1UA61KXmZDvqVEm+pOyec3+fIeZB02LYa/pWOArw==
 
-"@onekeyfe/cross-inpage-provider-core@2.2.60":
-  version "2.2.60"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-core/-/cross-inpage-provider-core-2.2.60.tgz#72700eb55a408e0594a25c05d250dfff6b7541b1"
-  integrity sha512-ZsgXvAq9U8rUfsBcIDCOUqNBcWiGa2vV6KK4Jt8YJz53XNqi2QNXIzvbYc16yErDst+GvPhfgeY21Q01BTJtrw==
+"@onekeyfe/cross-inpage-provider-core@2.2.65":
+  version "2.2.65"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-core/-/cross-inpage-provider-core-2.2.65.tgz#323ba940e85f0755fd790e267b93797a90d6f0d8"
+  integrity sha512-5fLXB5JVTj/fmJFpvdEucbLxPIENFCRrO5uxJsI0+qOhURf8PfjjgMIBE/lX39FBTVozsf+kzBgmPirGoZsgcg==
   dependencies:
     "@noble/hashes" "^1.7.1"
-    "@onekeyfe/cross-inpage-provider-errors" "2.2.60"
-    "@onekeyfe/cross-inpage-provider-events" "2.2.60"
-    "@onekeyfe/cross-inpage-provider-types" "2.2.60"
+    "@onekeyfe/cross-inpage-provider-errors" "2.2.65"
+    "@onekeyfe/cross-inpage-provider-events" "2.2.65"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.65"
     events "^3.3.0"
     lodash-es "^4.17.21"
     ms "^2.1.3"
 
-"@onekeyfe/cross-inpage-provider-errors@2.2.60":
-  version "2.2.60"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-2.2.60.tgz#640215868b338441c3caa424e8a46d96cf5764bf"
-  integrity sha512-kN8ac1xwDh75S6tLARnGpas4Epb2lD3SmMsZov7xhlLzOs+T7UOkdJrg2zvpIt5ve4bggWuVkpNIpw9uwgmJMA==
+"@onekeyfe/cross-inpage-provider-errors@2.2.65":
+  version "2.2.65"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-2.2.65.tgz#ce702378d13ff2a5f81f861099479c0c340ccb0e"
+  integrity sha512-TqTrdnhZ3f//BjJja2c3ZLqlitC4m9w8Hn9AvoW+YdEKh5BHZwFU8UDK86F6HH+riG62ODOGLnWcoXFCtLu4Mw==
   dependencies:
     fast-safe-stringify "^2.0.6"
 
-"@onekeyfe/cross-inpage-provider-events@2.2.60":
-  version "2.2.60"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-events/-/cross-inpage-provider-events-2.2.60.tgz#4d24020ef038d9c53771339c2aebc9657bb0ccd2"
-  integrity sha512-8iZzxCelhAD/3cNmbGX6QwfT8S31P6qTWCK/w91yH1kuIlQQNS6dmUbLDRkG+N/tsZnHlKI5zDXR2WhqEIkw+Q==
+"@onekeyfe/cross-inpage-provider-events@2.2.65":
+  version "2.2.65"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-events/-/cross-inpage-provider-events-2.2.65.tgz#1ecfb0caffd803aca9153424aae9c878d0593951"
+  integrity sha512-V1LPhioSoeEqO9bo7A0w7dgz35ii7mwmwYhuR0B1l5H0uB4LtITiD/QYpDuoR1Qk+EDpEP5TaNpWaKkO+w/tEw==
 
-"@onekeyfe/cross-inpage-provider-types@2.2.60":
-  version "2.2.60"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-types/-/cross-inpage-provider-types-2.2.60.tgz#a83f3eae97688c1db614a43f072bfbf73c2c8882"
-  integrity sha512-wKIaEPjSX2IlZvWQ7UR1zEADH46SI70EqFhiimR2QurVg8WaohgZHVVrkDmvPk1r88ItWlCXs7qIctef6IsbTg==
+"@onekeyfe/cross-inpage-provider-types@2.2.65":
+  version "2.2.65"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-types/-/cross-inpage-provider-types-2.2.65.tgz#1dedf1ab77953f1885e76466e67d4f1532a346da"
+  integrity sha512-s3sFqvjE3Litw72Vqx26xDYSBbLEKnDr/BRSaepEEQqq2pGrDhIL6bUW7AnnHbLV3QSwnW0H+IrUFgbDOigmRQ==
 
-"@onekeyfe/extension-bridge-injected@2.2.60":
-  version "2.2.60"
-  resolved "https://registry.yarnpkg.com/@onekeyfe/extension-bridge-injected/-/extension-bridge-injected-2.2.60.tgz#c185d2c6891f99e5519845e676304f4d84fd91ae"
-  integrity sha512-2JEkrBtPRBtf1/5HuDkrvsj8KHj6Cw+qIw1OYgGo/n82dkyF+Y+ViDaQgiff6jxrWKXMvLy9Vpw5otikOkcPGA==
+"@onekeyfe/extension-bridge-injected@2.2.65":
+  version "2.2.65"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/extension-bridge-injected/-/extension-bridge-injected-2.2.65.tgz#248ed6bd355e40ac03d74223622b3177d74aadd9"
+  integrity sha512-NCeR+TGkCmzKeuiXKHgsJtlOjIGprJOsK3XEb5aqkNZuCuWw/LUkUP/De0vwh6UNSs765qJttKa6kTK+AR/3/w==
   dependencies:
-    "@onekeyfe/cross-inpage-provider-core" "2.2.60"
-    "@onekeyfe/cross-inpage-provider-types" "2.2.60"
+    "@onekeyfe/cross-inpage-provider-core" "2.2.65"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.65"
 
 "@scure/base@~1.1.6":
   version "1.1.7"
@@ -254,6 +254,11 @@ lodash-es@^4.17.21:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.21.tgz#43e626c46e6591b7750beb2b50117390c609e3ee"
   integrity sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==
+
+lodash-es@^4.18.1:
+  version "4.18.1"
+  resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.18.1.tgz#b962eeb80d9d983a900bf342961fb7418ca10b1d"
+  integrity sha512-J8xewKD/Gk22OZbhpOVSwcs60zhd95ESDwezOFuA3/099925PdHJ7OFHNTGtajL3AlZkykD32HykiMo+BIBI8A==
 
 mime-db@1.52.0:
   version "1.52.0"

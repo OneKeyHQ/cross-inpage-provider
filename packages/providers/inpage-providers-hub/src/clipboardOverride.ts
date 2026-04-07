@@ -101,8 +101,8 @@ export function injectClipboardOverride($private: ProviderPrivate): void {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const value = Reflect.get(target, prop, receiver);
       if (typeof value === 'function') {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-        return (value as Function).bind(target);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/ban-types
+        return (value as () => unknown).bind(target);
       }
       return value;
     },

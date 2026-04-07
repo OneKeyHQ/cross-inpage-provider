@@ -12,35 +12,34 @@ function createNotAllowedError(): DOMException {
   );
 }
 
-async function requestClipboardPermission(
-  $private: ProviderPrivate,
-  type: 'read' | 'write',
-): Promise<boolean> {
-  try {
-    const result = await $private.request({
-      method: 'wallet_requestClipboardPermission',
-      params: { type },
-    });
-    return !!(result as { allowed?: boolean })?.allowed;
-  } catch {
-    return false;
-  }
-}
-
 export function injectClipboardOverride($private: ProviderPrivate): void {
   if (typeof navigator === 'undefined') return;
   console.log('[OneKey] Clipboard override: initializing');
 
+  const rememberedOrigins = new Set<string>();
+
   const clipboardProxy = {
     async readText(): Promise<string> {
-      console.log('[OneKey] Clipboard: readText() intercepted, requesting permission');
+      console.log('[OneKey] Clipboard: readText() intercepted');
+      if (rememberedOrigins.has(window.location.origin)) {
+        console.log('[OneKey] Clipboard: readText() - origin remembered, using original API');
+        if (!originalClipboard) {
+          throw new DOMException('Clipboard API not available', 'NotSupportedError');
+        }
+        return originalClipboard.readText();
+      }
+      console.log('[OneKey] Clipboard: readText() requesting permission');
       try {
         const result = await $private.request({
           method: 'wallet_requestClipboardPermission',
           params: { type: 'read' },
-        }) as { allowed?: boolean; content?: string } | undefined;
+        }) as { allowed?: boolean; content?: string; remember?: boolean } | undefined;
         console.log('[OneKey] Clipboard: readText() permission result:', result?.allowed);
         if (!result?.allowed) throw createNotAllowedError();
+        if (result.remember) {
+          rememberedOrigins.add(window.location.origin);
+          console.log('[OneKey] Clipboard: origin remembered for this session');
+        }
         return result.content ?? '';
       } catch (e) {
         if (e instanceof DOMException) throw e;
@@ -55,14 +54,26 @@ export function injectClipboardOverride($private: ProviderPrivate): void {
       return [new ClipboardItem({ 'text/plain': blob })];
     },
     async writeText(text: string): Promise<void> {
-      console.log('[OneKey] Clipboard: writeText() intercepted, requesting permission');
+      console.log('[OneKey] Clipboard: writeText() intercepted');
+      if (rememberedOrigins.has(window.location.origin)) {
+        console.log('[OneKey] Clipboard: writeText() - origin remembered, using original API');
+        if (!originalClipboard) {
+          throw new DOMException('Clipboard API not available', 'NotSupportedError');
+        }
+        return originalClipboard.writeText(text);
+      }
+      console.log('[OneKey] Clipboard: writeText() requesting permission');
       try {
         const result = await $private.request({
           method: 'wallet_requestClipboardPermission',
           params: { type: 'write', text },
-        }) as { allowed?: boolean } | undefined;
+        }) as { allowed?: boolean; remember?: boolean } | undefined;
         console.log('[OneKey] Clipboard: writeText() permission result:', result?.allowed);
         if (!result?.allowed) throw createNotAllowedError();
+        if (result.remember) {
+          rememberedOrigins.add(window.location.origin);
+          console.log('[OneKey] Clipboard: origin remembered for this session');
+        }
       } catch (e) {
         if (e instanceof DOMException) throw e;
         throw createNotAllowedError();

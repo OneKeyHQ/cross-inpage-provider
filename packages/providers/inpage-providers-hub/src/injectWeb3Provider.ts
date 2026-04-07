@@ -91,7 +91,8 @@ function isMobileWeb(): boolean {
 
 function injectWeb3Provider({
   showFloatingButton = false,
-}: { showFloatingButton?: boolean } = {}): unknown {
+  enableClipboardOverride = true,
+}: { showFloatingButton?: boolean; enableClipboardOverride?: boolean } = {}): unknown {
   if (!window?.$onekey?.jsBridge) {
     throw new Error('OneKey jsBridge not found.');
   }
@@ -117,7 +118,9 @@ function injectWeb3Provider({
   const $private = new ProviderPrivate({
     bridge,
   });
-  injectClipboardOverride($private);
+  if (enableClipboardOverride) {
+    injectClipboardOverride($private);
+  }
   const solana = new ProviderSolana({
     bridge,
   });

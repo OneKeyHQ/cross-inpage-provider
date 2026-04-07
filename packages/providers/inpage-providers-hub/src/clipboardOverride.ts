@@ -29,39 +29,55 @@ async function requestClipboardPermission(
 
 export function injectClipboardOverride($private: ProviderPrivate): void {
   if (typeof navigator === 'undefined') return;
+  console.log('[OneKey] Clipboard override: initializing');
 
   const clipboardProxy = {
     async readText(): Promise<string> {
-      const allowed = await requestClipboardPermission($private, 'read');
-      if (!allowed) throw createNotAllowedError();
-      if (!originalClipboard) {
-        throw new DOMException('Clipboard API not available', 'NotSupportedError');
+      console.log('[OneKey] Clipboard: readText() intercepted, requesting permission');
+      try {
+        const result = await $private.request({
+          method: 'wallet_requestClipboardPermission',
+          params: { type: 'read' },
+        }) as { allowed?: boolean; content?: string } | undefined;
+        console.log('[OneKey] Clipboard: readText() permission result:', result?.allowed);
+        if (!result?.allowed) throw createNotAllowedError();
+        return result.content ?? '';
+      } catch (e) {
+        if (e instanceof DOMException) throw e;
+        throw createNotAllowedError();
       }
-      return originalClipboard.readText();
     },
     async read(): Promise<ClipboardItems> {
-      const allowed = await requestClipboardPermission($private, 'read');
-      if (!allowed) throw createNotAllowedError();
-      if (!originalClipboard) {
-        throw new DOMException('Clipboard API not available', 'NotSupportedError');
-      }
-      return originalClipboard.read();
+      // ClipboardItems are complex (binary data), not supported through bridge
+      // Fall back to readText and wrap as plain text ClipboardItem
+      const text = await clipboardProxy.readText();
+      const blob = new Blob([text], { type: 'text/plain' });
+      return [new ClipboardItem({ 'text/plain': blob })];
     },
     async writeText(text: string): Promise<void> {
-      const allowed = await requestClipboardPermission($private, 'write');
-      if (!allowed) throw createNotAllowedError();
-      if (!originalClipboard) {
-        throw new DOMException('Clipboard API not available', 'NotSupportedError');
+      console.log('[OneKey] Clipboard: writeText() intercepted, requesting permission');
+      try {
+        const result = await $private.request({
+          method: 'wallet_requestClipboardPermission',
+          params: { type: 'write', text },
+        }) as { allowed?: boolean } | undefined;
+        console.log('[OneKey] Clipboard: writeText() permission result:', result?.allowed);
+        if (!result?.allowed) throw createNotAllowedError();
+      } catch (e) {
+        if (e instanceof DOMException) throw e;
+        throw createNotAllowedError();
       }
-      return originalClipboard.writeText(text);
     },
     async write(data: ClipboardItems): Promise<void> {
-      const allowed = await requestClipboardPermission($private, 'write');
-      if (!allowed) throw createNotAllowedError();
-      if (!originalClipboard) {
-        throw new DOMException('Clipboard API not available', 'NotSupportedError');
+      // Extract text from ClipboardItems and delegate to writeText
+      for (const item of data) {
+        if (item.types.includes('text/plain')) {
+          const blob = await item.getType('text/plain');
+          const text = await blob.text();
+          return clipboardProxy.writeText(text);
+        }
       }
-      return originalClipboard.write(data);
+      throw new DOMException('No text/plain data in ClipboardItems', 'NotSupportedError');
     },
     addEventListener: originalClipboard?.addEventListener?.bind(originalClipboard),
     removeEventListener: originalClipboard?.removeEventListener?.bind(originalClipboard),
@@ -83,6 +99,7 @@ export function injectClipboardOverride($private: ProviderPrivate): void {
       configurable: false,
       enumerable: true,
     });
+    console.log('[OneKey] Clipboard override: success (navigator proxy)');
   } catch {
     try {
       Object.defineProperty(navigator, 'clipboard', {
@@ -90,8 +107,9 @@ export function injectClipboardOverride($private: ProviderPrivate): void {
         configurable: false,
         enumerable: true,
       });
+      console.log('[OneKey] Clipboard override: success (clipboard direct)');
     } catch (e) {
-      console.warn('[OneKey] Failed to override navigator.clipboard:', e);
+      console.warn('[OneKey] Clipboard override: FAILED - clipboard access is NOT protected', e);
     }
   }
 
@@ -106,6 +124,7 @@ export function injectClipboardOverride($private: ProviderPrivate): void {
         ): boolean {
           const cmd = command.toLowerCase();
           if (cmd === 'copy' || cmd === 'paste') {
+            console.log(`[OneKey] Clipboard: execCommand('${cmd}') blocked`);
             return false;
           }
           return originalExecCommand(command, showUI, value);
@@ -113,6 +132,7 @@ export function injectClipboardOverride($private: ProviderPrivate): void {
         configurable: false,
         writable: false,
       });
+      console.log('[OneKey] Clipboard override: execCommand locked');
     } catch {
       // Fallback to simple assignment if defineProperty fails
       document.execCommand = function (

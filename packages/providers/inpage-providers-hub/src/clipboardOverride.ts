@@ -96,10 +96,14 @@ export function injectClipboardOverride($private: ProviderPrivate): void {
   };
 
   const navigatorProxy = new Proxy(navigator, {
-    get(target, prop, receiver) {
+    get(target, prop, receiver): unknown {
       if (prop === 'clipboard') return clipboardProxy;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const value = Reflect.get(target, prop, receiver);
-      if (typeof value === 'function') return value.bind(target);
+      if (typeof value === 'function') {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        return (value as Function).bind(target);
+      }
       return value;
     },
   });

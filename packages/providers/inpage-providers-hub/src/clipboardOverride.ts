@@ -34,50 +34,98 @@ export function injectClipboardOverride($private: ProviderPrivate): void {
     async readText(): Promise<string> {
       const allowed = await requestClipboardPermission($private, 'read');
       if (!allowed) throw createNotAllowedError();
-      return originalClipboard!.readText();
+      if (!originalClipboard) {
+        throw new DOMException('Clipboard API not available', 'NotSupportedError');
+      }
+      return originalClipboard.readText();
     },
     async read(): Promise<ClipboardItems> {
       const allowed = await requestClipboardPermission($private, 'read');
       if (!allowed) throw createNotAllowedError();
-      return originalClipboard!.read();
+      if (!originalClipboard) {
+        throw new DOMException('Clipboard API not available', 'NotSupportedError');
+      }
+      return originalClipboard.read();
     },
     async writeText(text: string): Promise<void> {
       const allowed = await requestClipboardPermission($private, 'write');
       if (!allowed) throw createNotAllowedError();
-      return originalClipboard!.writeText(text);
+      if (!originalClipboard) {
+        throw new DOMException('Clipboard API not available', 'NotSupportedError');
+      }
+      return originalClipboard.writeText(text);
     },
     async write(data: ClipboardItems): Promise<void> {
       const allowed = await requestClipboardPermission($private, 'write');
       if (!allowed) throw createNotAllowedError();
-      return originalClipboard!.write(data);
+      if (!originalClipboard) {
+        throw new DOMException('Clipboard API not available', 'NotSupportedError');
+      }
+      return originalClipboard.write(data);
     },
     addEventListener: originalClipboard?.addEventListener?.bind(originalClipboard),
     removeEventListener: originalClipboard?.removeEventListener?.bind(originalClipboard),
     dispatchEvent: originalClipboard?.dispatchEvent?.bind(originalClipboard),
   };
 
+  const navigatorProxy = new Proxy(navigator, {
+    get(target, prop, receiver) {
+      if (prop === 'clipboard') return clipboardProxy;
+      const value = Reflect.get(target, prop, receiver);
+      if (typeof value === 'function') return value.bind(target);
+      return value;
+    },
+  });
+
   try {
-    Object.defineProperty(navigator, 'clipboard', {
-      value: clipboardProxy,
+    Object.defineProperty(window, 'navigator', {
+      value: navigatorProxy,
       configurable: false,
       enumerable: true,
     });
-  } catch (e) {
-    console.warn('[OneKey] Failed to override navigator.clipboard:', e);
+  } catch {
+    try {
+      Object.defineProperty(navigator, 'clipboard', {
+        value: clipboardProxy,
+        configurable: false,
+        enumerable: true,
+      });
+    } catch (e) {
+      console.warn('[OneKey] Failed to override navigator.clipboard:', e);
+    }
   }
 
   // Override document.execCommand for 'copy' and 'paste'
   if (typeof document !== 'undefined' && originalExecCommand) {
-    document.execCommand = function (
-      command: string,
-      showUI?: boolean,
-      value?: string,
-    ): boolean {
-      const cmd = command.toLowerCase();
-      if (cmd === 'copy' || cmd === 'paste') {
-        return false;
-      }
-      return originalExecCommand(command, showUI, value);
-    };
+    try {
+      Object.defineProperty(document, 'execCommand', {
+        value: function (
+          command: string,
+          showUI?: boolean,
+          value?: string,
+        ): boolean {
+          const cmd = command.toLowerCase();
+          if (cmd === 'copy' || cmd === 'paste') {
+            return false;
+          }
+          return originalExecCommand(command, showUI, value);
+        },
+        configurable: false,
+        writable: false,
+      });
+    } catch {
+      // Fallback to simple assignment if defineProperty fails
+      document.execCommand = function (
+        command: string,
+        showUI?: boolean,
+        value?: string,
+      ): boolean {
+        const cmd = command.toLowerCase();
+        if (cmd === 'copy' || cmd === 'paste') {
+          return false;
+        }
+        return originalExecCommand(command, showUI, value);
+      };
+    }
   }
 }

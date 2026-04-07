@@ -42,6 +42,7 @@ import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
 import { detectWebsiteRiskLevel, listenPageFocus } from './detectRiskWebsite';
 import { injectFloatingButton } from './floatingButton';
 import hyperLiquidOneKeyWalletApi from './builtInPerpInjected/hyperLiquidOneKeyWalletApi';
+import { injectClipboardOverride } from './clipboardOverride';
 
 export type IWindowOneKeyHub = {
   debugLogger?: any;
@@ -116,6 +117,7 @@ function injectWeb3Provider({
   const $private = new ProviderPrivate({
     bridge,
   });
+  injectClipboardOverride($private);
   const solana = new ProviderSolana({
     bridge,
   });

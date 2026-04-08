@@ -61,11 +61,7 @@ abstract class ProviderBase extends CrossEventEmitter {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       this.bridge.attachProviderInstance(this as any);
     }, 0);
-    (
-      timeout as unknown as {
-        unref?: () => void;
-      }
-    ).unref?.();
+    (timeout as { unref?: () => void } | null)?.unref?.();
     // call sendSiteMetadataDomReady/getConnectWalletInfo in ProviderPrivate, dont need here
     // void this.sendSiteMetadataDomReady();
     // void this.getConnectWalletInfo();
@@ -100,11 +96,7 @@ abstract class ProviderBase extends CrossEventEmitter {
         console.error(`getConnectWalletInfo timeout: ${timeout}`);
         resolve(null);
       }, timeout);
-      (
-        timer as unknown as {
-          unref?: () => void;
-        }
-      ).unref?.();
+      (timer as { unref?: () => void } | null)?.unref?.();
       try {
         const result = (await this.bridgeRequest({
           method: METHODS.wallet_getConnectWalletInfo,

@@ -21,11 +21,7 @@ function safeApply<T, A extends any[]>(
     const timeout = setTimeout(() => {
       throw err;
     });
-    (
-      timeout as unknown as {
-        unref?: () => void;
-      }
-    ).unref?.();
+    (timeout as { unref?: () => void } | null)?.unref?.();
   }
 }
 

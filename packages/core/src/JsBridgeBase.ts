@@ -353,11 +353,7 @@ abstract class JsBridgeBase extends CrossEventEmitter {
     const timeout = setTimeout(() => {
       this.rejectExpiredCallbacks();
     }, this.callbacksExpireTimeout);
-    (
-      timeout as unknown as {
-        unref?: () => void;
-      }
-    ).unref?.();
+    (timeout as { unref?: () => void } | null)?.unref?.();
   }
 
   clearCallbackCache(id: number | string) {

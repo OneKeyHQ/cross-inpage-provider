@@ -18,9 +18,14 @@ function safeApply<T, A extends any[]>(
     Reflect.apply(handler, context, args);
   } catch (err) {
     // Throw error after timeout so as not to interrupt the stack
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       throw err;
     });
+    (
+      timeout as unknown as {
+        unref?: () => void;
+      }
+    ).unref?.();
   }
 }
 

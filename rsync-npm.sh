@@ -54,13 +54,37 @@ syncFiles() {
     echo "============================"
     
     # Perform rsync for all collected packages
+    # Only sync files that npm would publish (respecting the "files" field in package.json)
+    # to match npm install behavior and avoid polluting node_modules with src/config files.
     for i in "${!package_dirs[@]}"; do
         echo "Syncing [$((i+1))/${#package_dirs[@]}]: ${relative_paths[i]} -> ${package_names[i]}"
-        
-        rsync -avz --exclude node_modules \
+
+        # Build rsync include rules from package.json "files" field
+        pkg_json="${package_dirs[i]}/package.json"
+        filter_file=$(mktemp)
+        node -e "
+          var pkg = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8'));
+          var files = pkg.files || ['dist/*'];
+          files.forEach(function(f) {
+            if (f.endsWith('/*')) {
+              var dir = f.slice(0, -2);
+              console.log(dir);
+              console.log(dir + '/**');
+            } else {
+              console.log(f);
+            }
+          });
+          console.log('package.json');
+        " "$pkg_json" > "$filter_file"
+
+        rsync -avz --delete \
+              --include-from="$filter_file" \
+              --exclude='*' \
               "${package_dirs[i]}/" \
               "$appPath/node_modules/${package_names[i]}/"
-        
+
+        rm -f "$filter_file"
+
         if [ $? -eq 0 ]; then
             echo "✓ Successfully synced ${package_names[i]}"
         else

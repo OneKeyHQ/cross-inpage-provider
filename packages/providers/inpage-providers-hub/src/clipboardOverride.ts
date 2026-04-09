@@ -96,10 +96,13 @@ export function injectClipboardOverride($private: ProviderPrivate): void {
   };
 
   const navigatorProxy = new Proxy(navigator, {
-    get(target, prop, receiver): unknown {
+    get(target, prop): unknown {
       if (prop === 'clipboard') return clipboardProxy;
+      // Use target (not receiver) so native getters run with the real
+      // Navigator as `this`, avoiding "Illegal invocation" in Electron
+      // webFrame.executeJavaScript() and other sandboxed contexts.
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const value = Reflect.get(target, prop, receiver);
+      const value = Reflect.get(target, prop, target);
       if (typeof value === 'function') {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/ban-types
         return (value as () => unknown).bind(target);

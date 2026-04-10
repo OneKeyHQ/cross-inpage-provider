@@ -13,7 +13,7 @@ const bridge = (): JsBridgeExtInjected =>
   });
 injectJsBridge(bridge);
 
-injectWeb3Provider({ showFloatingButton: true });
+injectWeb3Provider({ showFloatingButton: true, enableClipboardOverride: false });
 
 console.log('OneKey Provider Ready ', performance.now());
 

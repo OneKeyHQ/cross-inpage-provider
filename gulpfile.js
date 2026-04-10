@@ -37,7 +37,7 @@ function buildInjected(cb) {
   const currentPath = __dirname;
 
   // execSync('yarn build-inject');
-  execCmd('cd packages/injected && yarn build && cd -');
+  execCmd('cd packages/injected && NODE_ENV=production yarn build && cd -');
 
   execCmd(`APP_MONOREPO_LOCAL_PATH=${appPath} CURRENT_WORKING_PATH=${currentPath} sh rsync-npm.sh`);
   execCmd(`cd ${appPath} && yarn copy:inject && cd -`);

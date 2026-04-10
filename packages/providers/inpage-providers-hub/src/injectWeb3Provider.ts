@@ -42,6 +42,7 @@ import { WALLET_CONNECT_INFO } from './connectButtonHack/consts';
 import { detectWebsiteRiskLevel, listenPageFocus } from './detectRiskWebsite';
 import { injectFloatingButton } from './floatingButton';
 import hyperLiquidOneKeyWalletApi from './builtInPerpInjected/hyperLiquidOneKeyWalletApi';
+import { injectClipboardOverride } from './clipboardOverride';
 
 export type IWindowOneKeyHub = {
   debugLogger?: any;
@@ -90,7 +91,8 @@ function isMobileWeb(): boolean {
 
 function injectWeb3Provider({
   showFloatingButton = false,
-}: { showFloatingButton?: boolean } = {}): unknown {
+  enableClipboardOverride = true,
+}: { showFloatingButton?: boolean; enableClipboardOverride?: boolean } = {}): unknown {
   if (!window?.$onekey?.jsBridge) {
     throw new Error('OneKey jsBridge not found.');
   }
@@ -116,6 +118,9 @@ function injectWeb3Provider({
   const $private = new ProviderPrivate({
     bridge,
   });
+  if (enableClipboardOverride) {
+    injectClipboardOverride($private);
+  }
   const solana = new ProviderSolana({
     bridge,
   });

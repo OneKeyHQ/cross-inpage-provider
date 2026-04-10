@@ -1,3 +1,5 @@
+jest.mock('lodash-es', () => require('lodash'));
+
 import { JsBridgeBase } from './JsBridgeBase';
 
 class TestBridge extends JsBridgeBase {
@@ -38,7 +40,8 @@ describe('JsBridgeBase callback timeout lifecycle', () => {
 
     expect(requestPromise).toBeDefined();
 
-    jest.advanceTimersByTime(60);
+    jest.advanceTimersByTime(120);
+    await Promise.resolve();
 
     await expect(requestPromise).rejects.toMatchObject({
       code: expect.any(Number),
@@ -55,13 +58,17 @@ describe('JsBridgeBase callback timeout lifecycle', () => {
     });
 
     const requestPayload = JSON.parse(String(bridge.lastPayload));
-    bridge.receive({
-      id: requestPayload.id,
-      type: 'RESPONSE',
-      data: { ok: true },
-      origin: 'https://example.com',
-      scope: requestPayload.scope,
-    });
+    bridge.receive(
+      {
+        id: requestPayload.id,
+        type: 'RESPONSE',
+        data: { ok: true },
+      },
+      {
+        origin: 'https://example.com',
+        internal: true,
+      },
+    );
 
     await expect(requestPromise).resolves.toEqual({ ok: true });
     expect(clearTimeoutSpy).toHaveBeenCalledTimes(1);

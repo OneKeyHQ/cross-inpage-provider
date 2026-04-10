@@ -89,6 +89,36 @@ const BRIDGE_EVENTS = {
 };
 
 abstract class JsBridgeBase extends CrossEventEmitter {
+  private callbacks: IJsBridgeCallback[] = [];
+
+  private callbacksCount = 0;
+
+  private callbacksExpireTimer?: ReturnType<typeof setTimeout>;
+
+  private callbackId = 1;
+
+  private _requestPayloadCache: Record<string | number, IJsBridgeMessagePayload> = {};
+
+  protected isExtUi = false;
+
+  protected isInjected = false;
+
+  protected sendAsString = true;
+
+  public globalOnMessageEnabled = true;
+
+  public providersHub: Record<string, any[]> = {
+    // name: []
+  };
+
+  private config: IJsBridgeConfig;
+
+  // TODO increase timeout as hardware sign transaction may take a long time
+  //    can set timeout for each callback
+  protected callbacksExpireTimeout: number = 10 * 60 * 1000;
+
+  public debugLogger: IDebugLogger = appDebugLogger;
+
   constructor(config: IJsBridgeConfig = {}) {
     super();
     this.config = config;
@@ -104,22 +134,7 @@ abstract class JsBridgeBase extends CrossEventEmitter {
         code: (error as Web3ProviderError<any>)?.code,
       });
     });
-    this.rejectExpiredCallbacks();
   }
-
-  private _requestPayloadCache: Record<string | number, IJsBridgeMessagePayload> = {};
-
-  protected isExtUi = false;
-
-  protected isInjected = false;
-
-  protected sendAsString = true;
-
-  public globalOnMessageEnabled = true;
-
-  public providersHub: Record<string, any[]> = {
-    // name: []
-  };
 
   public attachProviderInstance(provider: { providerName: string }) {
     const name = provider.providerName;
@@ -170,18 +185,6 @@ abstract class JsBridgeBase extends CrossEventEmitter {
     remoteId: '',
   };
 
-  private config: IJsBridgeConfig;
-
-  // TODO increase timeout as hardware sign transaction may take a long time
-  //    can set timeout for each callback
-  protected callbacksExpireTimeout: number = 10 * 60 * 1000;
-
-  public debugLogger: IDebugLogger = appDebugLogger;
-
-  private callbacks: IJsBridgeCallback[] = [];
-
-  private callbackId = 1;
-
   private createCallbackId(): number {
     this.callbackId += 1;
     return this.callbackId;
@@ -204,6 +207,8 @@ abstract class JsBridgeBase extends CrossEventEmitter {
         throw new Error(`JsBridge ERROR: callback exists, id=${id}`);
       }
       this.callbacks[id] = { id, resolve, reject, created: Date.now() };
+      this.callbacksCount += 1;
+      this.startCallbackExpireTimerLoop();
     }
 
     // convert to plain error object which can be stringify
@@ -335,8 +340,8 @@ abstract class JsBridgeBase extends CrossEventEmitter {
     }
   }
 
-  rejectExpiredCallbacks() {
-    if (!this.callbacksExpireTimeout) {
+  private rejectExpiredCallbacks() {
+    if (!this.callbacksExpireTimeout || this.callbacksCount === 0) {
       return;
     }
     const now = Date.now();
@@ -350,14 +355,37 @@ abstract class JsBridgeBase extends CrossEventEmitter {
         }
       }
     }
-    const timeout = setTimeout(() => {
+  }
+
+  private stopCallbackExpireTimerLoop() {
+    if (this.callbacksExpireTimer) {
+      clearTimeout(this.callbacksExpireTimer);
+      this.callbacksExpireTimer = undefined;
+    }
+  }
+
+  private startCallbackExpireTimerLoop() {
+    if (!this.callbacksExpireTimeout || this.callbacksCount === 0 || this.callbacksExpireTimer) {
+      return;
+    }
+    this.callbacksExpireTimer = setTimeout(() => {
+      this.callbacksExpireTimer = undefined;
       this.rejectExpiredCallbacks();
+      this.startCallbackExpireTimerLoop();
     }, this.callbacksExpireTimeout);
-    (timeout as { unref?: () => void } | null)?.unref?.();
+    (this.callbacksExpireTimer as { unref?: () => void } | null)?.unref?.();
   }
 
   clearCallbackCache(id: number | string) {
+    const callbackInfo = this.callbacks[id as number];
+    if (callbackInfo) {
+      this.callbacksCount -= 1;
+    }
     delete this.callbacks[id as number];
+    if (this.callbacksCount <= 0) {
+      this.callbacksCount = 0;
+      this.stopCallbackExpireTimerLoop();
+    }
   }
 
   public receive(

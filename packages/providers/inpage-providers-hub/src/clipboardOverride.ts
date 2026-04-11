@@ -16,35 +16,65 @@ export function injectClipboardOverride($private: ProviderPrivate): void {
   if (typeof navigator === 'undefined') return;
   console.log('[OneKey] Clipboard override: initializing');
 
-  const rememberedOrigins = new Set<string>();
+  // First decision per (origin, type) sticks for the rest of the page session.
+  // Matches Chrome native UX: deny once → deny until reload. Read and write are
+  // keyed separately so "allow read" does not implicitly grant write.
+  const sessionDecisions = new Map<string, 'allow' | 'deny'>();
+  // Coalesces concurrent requests so a burst of readText() calls only opens one
+  // modal. Without this, DApps that fire N synchronous readText() calls stack N
+  // modals before the first decision can land in sessionDecisions.
+  const pendingRequests = new Map<string, Promise<unknown>>();
 
   const clipboardProxy = {
     async readText(): Promise<string> {
       console.log('[OneKey] Clipboard: readText() intercepted');
-      if (rememberedOrigins.has(window.location.origin)) {
-        console.log('[OneKey] Clipboard: readText() - origin remembered, using original API');
+      const key = `${window.location.origin}:read`;
+
+      const decision = sessionDecisions.get(key);
+      if (decision === 'deny') {
+        console.log('[OneKey] Clipboard: readText() - session-denied, short-circuit');
+        throw createNotAllowedError();
+      }
+      if (decision === 'allow') {
+        console.log('[OneKey] Clipboard: readText() - session-allowed, native API');
         if (!originalClipboard) {
           throw new DOMException('Clipboard API not available', 'NotSupportedError');
         }
         return originalClipboard.readText();
       }
-      console.log('[OneKey] Clipboard: readText() requesting permission');
-      try {
-        const result = await $private.request({
-          method: 'wallet_requestClipboardPermission',
-          params: { type: 'read' },
-        }) as { allowed?: boolean; content?: string; remember?: boolean } | undefined;
-        console.log('[OneKey] Clipboard: readText() permission result:', result?.allowed);
-        if (!result?.allowed) throw createNotAllowedError();
-        if (result.remember) {
-          rememberedOrigins.add(window.location.origin);
-          console.log('[OneKey] Clipboard: origin remembered for this session');
-        }
-        return result.content ?? '';
-      } catch (e) {
-        if (e instanceof DOMException) throw e;
-        throw createNotAllowedError();
+
+      const existing = pendingRequests.get(key) as Promise<string> | undefined;
+      if (existing) {
+        console.log('[OneKey] Clipboard: readText() - coalescing with in-flight');
+        return existing;
       }
+
+      console.log('[OneKey] Clipboard: readText() requesting permission');
+      const promise = (async (): Promise<string> => {
+        try {
+          const result = await $private.request({
+            method: 'wallet_requestClipboardPermission',
+            params: { type: 'read' },
+          }) as { allowed?: boolean; content?: string } | undefined;
+          console.log('[OneKey] Clipboard: readText() permission result:', result?.allowed);
+          const allowed = Boolean(result?.allowed);
+          sessionDecisions.set(key, allowed ? 'allow' : 'deny');
+          if (!allowed) throw createNotAllowedError();
+          return result?.content ?? '';
+        } catch (e) {
+          if (!sessionDecisions.has(key)) {
+            sessionDecisions.set(key, 'deny');
+          }
+          if (e instanceof DOMException) throw e;
+          throw createNotAllowedError();
+        }
+      })();
+
+      pendingRequests.set(key, promise);
+      void promise.finally(() => {
+        pendingRequests.delete(key);
+      });
+      return promise;
     },
     async read(): Promise<ClipboardItems> {
       // ClipboardItems are complex (binary data), not supported through bridge
@@ -55,29 +85,52 @@ export function injectClipboardOverride($private: ProviderPrivate): void {
     },
     async writeText(text: string): Promise<void> {
       console.log('[OneKey] Clipboard: writeText() intercepted');
-      if (rememberedOrigins.has(window.location.origin)) {
-        console.log('[OneKey] Clipboard: writeText() - origin remembered, using original API');
+      const key = `${window.location.origin}:write`;
+
+      const decision = sessionDecisions.get(key);
+      if (decision === 'deny') {
+        console.log('[OneKey] Clipboard: writeText() - session-denied, short-circuit');
+        throw createNotAllowedError();
+      }
+      if (decision === 'allow') {
+        console.log('[OneKey] Clipboard: writeText() - session-allowed, native API');
         if (!originalClipboard) {
           throw new DOMException('Clipboard API not available', 'NotSupportedError');
         }
         return originalClipboard.writeText(text);
       }
-      console.log('[OneKey] Clipboard: writeText() requesting permission');
-      try {
-        const result = await $private.request({
-          method: 'wallet_requestClipboardPermission',
-          params: { type: 'write', text },
-        }) as { allowed?: boolean; remember?: boolean } | undefined;
-        console.log('[OneKey] Clipboard: writeText() permission result:', result?.allowed);
-        if (!result?.allowed) throw createNotAllowedError();
-        if (result.remember) {
-          rememberedOrigins.add(window.location.origin);
-          console.log('[OneKey] Clipboard: origin remembered for this session');
-        }
-      } catch (e) {
-        if (e instanceof DOMException) throw e;
-        throw createNotAllowedError();
+
+      const existing = pendingRequests.get(key) as Promise<void> | undefined;
+      if (existing) {
+        console.log('[OneKey] Clipboard: writeText() - coalescing with in-flight');
+        return existing;
       }
+
+      console.log('[OneKey] Clipboard: writeText() requesting permission');
+      const promise = (async (): Promise<void> => {
+        try {
+          const result = await $private.request({
+            method: 'wallet_requestClipboardPermission',
+            params: { type: 'write', text },
+          }) as { allowed?: boolean } | undefined;
+          console.log('[OneKey] Clipboard: writeText() permission result:', result?.allowed);
+          const allowed = Boolean(result?.allowed);
+          sessionDecisions.set(key, allowed ? 'allow' : 'deny');
+          if (!allowed) throw createNotAllowedError();
+        } catch (e) {
+          if (!sessionDecisions.has(key)) {
+            sessionDecisions.set(key, 'deny');
+          }
+          if (e instanceof DOMException) throw e;
+          throw createNotAllowedError();
+        }
+      })();
+
+      pendingRequests.set(key, promise);
+      void promise.finally(() => {
+        pendingRequests.delete(key);
+      });
+      return promise;
     },
     async write(data: ClipboardItems): Promise<void> {
       // Extract text from ClipboardItems and delegate to writeText

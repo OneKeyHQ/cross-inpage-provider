@@ -6,6 +6,8 @@ import { useWallet } from '../../connect/WalletContext';
 import {
   buildPathPaymentStrictSendTransaction,
   buildPathPaymentStrictReceiveTransaction,
+  fetchAccountSequence,
+  getHorizonUrl,
 } from './builder';
 
 interface StellarAsset {
@@ -48,13 +50,6 @@ function parseAssetValue(value: string): { code: string; issuer: string } {
   const idx = value.indexOf(':');
   if (idx === -1) return { code: value, issuer: '' };
   return { code: value.substring(0, idx), issuer: value.substring(idx + 1) };
-}
-
-const MAINNET_HORIZON = 'https://horizon.stellar.org';
-const TESTNET_HORIZON = 'https://horizon-testnet.stellar.org';
-
-function getHorizonUrl(networkPassphrase: string) {
-  return networkPassphrase === MAINNET_PASSPHRASE ? MAINNET_HORIZON : TESTNET_HORIZON;
 }
 
 function buildAssetParams(prefix: string, asset: { code: string; issuer: string }) {
@@ -251,8 +246,11 @@ export const SwapStrictSend = ({ networkPassphrase }: SwapProps) => {
           const destAddress =
             formRef?.getValue<string>('destAddress') || account?.address || '';
 
+          const sourceAddress = account?.address || '';
+          const sequence = await fetchAccountSequence(getHorizonUrl(networkPassphrase), sourceAddress);
+
           const xdr = buildPathPaymentStrictSendTransaction({
-            sourceAddress: account?.address || '',
+            sourceAddress,
             destinationAddress: destAddress,
             sendAssetCode: sendAsset.code,
             sendAssetIssuer: sendAsset.issuer,
@@ -261,6 +259,7 @@ export const SwapStrictSend = ({ networkPassphrase }: SwapProps) => {
             destAssetIssuer: destAsset.issuer,
             destMin,
             networkPassphrase,
+            sequence,
           });
 
           const res = await signTransactionCompat(provider, xdr, networkPassphrase);
@@ -383,8 +382,11 @@ export const SwapStrictReceive = ({ networkPassphrase }: SwapProps) => {
           const destAddress =
             formRef?.getValue<string>('destAddress') || account?.address || '';
 
+          const sourceAddress = account?.address || '';
+          const sequence = await fetchAccountSequence(getHorizonUrl(networkPassphrase), sourceAddress);
+
           const xdr = buildPathPaymentStrictReceiveTransaction({
-            sourceAddress: account?.address || '',
+            sourceAddress,
             destinationAddress: destAddress,
             sendAssetCode: sendAsset.code,
             sendAssetIssuer: sendAsset.issuer,
@@ -393,6 +395,7 @@ export const SwapStrictReceive = ({ networkPassphrase }: SwapProps) => {
             destAssetIssuer: destAsset.issuer,
             destAmount,
             networkPassphrase,
+            sequence,
           });
 
           const res = await signTransactionCompat(provider, xdr, networkPassphrase);

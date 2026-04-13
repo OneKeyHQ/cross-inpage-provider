@@ -15,6 +15,8 @@ import {
   buildPaymentTransaction,
   buildTrustTransaction,
   buildCreateAccountTransaction,
+  fetchAccountSequence,
+  getHorizonUrl,
 } from './builder';
 import { SwapStrictSend, SwapStrictReceive } from './SwapToken';
 import { buildRealAuthEntry, buildTokenTransferAuthEntry, checkAccountExists } from './soroban';
@@ -322,13 +324,18 @@ export default function StellarExample() {
           onExecute={async (request: string) => {
             const { sourceAddress, destinationAddress, amount, memo } = JSON.parse(request);
 
+            const networkPassphrase = networkInfoRef.current.networkPassphrase;
+            const effectiveSource = sourceAddress || account?.address || '';
+            const sequence = await fetchAccountSequence(getHorizonUrl(networkPassphrase), effectiveSource);
+
             // Build transaction XDR
             const xdr = buildPaymentTransaction({
-              sourceAddress: sourceAddress || account?.address || '',
+              sourceAddress: effectiveSource,
               destinationAddress,
               amount,
               memo,
-              networkPassphrase: networkInfoRef.current.networkPassphrase,
+              networkPassphrase,
+              sequence,
             });
 
             // Sign transaction with wallet compatibility
@@ -352,13 +359,18 @@ export default function StellarExample() {
           onExecute={async (request: string) => {
             const { sourceAddress, assetCode, assetIssuer, limit } = JSON.parse(request);
 
+            const networkPassphrase = networkInfoRef.current.networkPassphrase;
+            const effectiveSource = sourceAddress || account?.address || '';
+            const sequence = await fetchAccountSequence(getHorizonUrl(networkPassphrase), effectiveSource);
+
             // Build transaction XDR
             const xdr = buildTrustTransaction({
-              sourceAddress: sourceAddress || account?.address || '',
+              sourceAddress: effectiveSource,
               assetCode,
               assetIssuer,
               limit,
-              networkPassphrase: networkInfoRef.current.networkPassphrase,
+              networkPassphrase,
+              sequence,
             });
 
             // Sign transaction with wallet compatibility
@@ -382,12 +394,17 @@ export default function StellarExample() {
           onExecute={async (request: string) => {
             const { sourceAddress, destinationAddress, startingBalance } = JSON.parse(request);
 
+            const networkPassphrase = networkInfoRef.current.networkPassphrase;
+            const effectiveSource = sourceAddress || account?.address || '';
+            const sequence = await fetchAccountSequence(getHorizonUrl(networkPassphrase), effectiveSource);
+
             // Build transaction XDR
             const xdr = buildCreateAccountTransaction({
-              sourceAddress: sourceAddress || account?.address || '',
+              sourceAddress: effectiveSource,
               destinationAddress,
               startingBalance,
-              networkPassphrase: networkInfoRef.current.networkPassphrase,
+              networkPassphrase,
+              sequence,
             });
 
             // Sign transaction with wallet compatibility

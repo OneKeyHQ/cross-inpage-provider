@@ -4,11 +4,41 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import * as StellarSdk from '@stellar/stellar-base';
 
+const MAINNET_PASSPHRASE = 'Public Global Stellar Network ; September 2015';
+const MAINNET_HORIZON = 'https://horizon.stellar.org';
+const TESTNET_HORIZON = 'https://horizon-testnet.stellar.org';
+
+const TX_TIMEOUT_SECONDS = 300;
+
+export function getHorizonUrl(networkPassphrase: string): string {
+  return networkPassphrase === MAINNET_PASSPHRASE ? MAINNET_HORIZON : TESTNET_HORIZON;
+}
+
+/**
+ * Fetch current account sequence from Horizon.
+ * Must be called right before building a transaction so the seqNum is fresh.
+ */
+export async function fetchAccountSequence(
+  horizonUrl: string,
+  address: string,
+): Promise<string> {
+  const res = await fetch(`${horizonUrl}/accounts/${address}`);
+  if (!res.ok) {
+    throw new Error(`获取账户序列号失败 (${res.status}): 请确认账户已在链上激活`);
+  }
+  const data = (await res.json()) as { sequence?: string };
+  if (!data?.sequence) {
+    throw new Error('Horizon 返回数据缺少 sequence 字段');
+  }
+  return data.sequence;
+}
+
 export interface BuildTransactionParams {
   sourceAddress: string;
   destinationAddress: string;
   amount: string;
   networkPassphrase: string;
+  sequence: string;
 }
 
 export interface BuildPaymentTransactionParams extends BuildTransactionParams {
@@ -19,19 +49,16 @@ export interface BuildPaymentTransactionParams extends BuildTransactionParams {
  * Build a simple payment transaction
  */
 export function buildPaymentTransaction(params: BuildPaymentTransactionParams): string {
-  const { sourceAddress, destinationAddress, amount, networkPassphrase, memo } = params;
+  const { sourceAddress, destinationAddress, amount, networkPassphrase, memo, sequence } = params;
 
-  // Create source account
   const sourceKeypair = StellarSdk.Keypair.fromPublicKey(sourceAddress);
-  const account = new StellarSdk.Account(sourceKeypair.publicKey(), '0');
+  const account = new StellarSdk.Account(sourceKeypair.publicKey(), sequence);
 
-  // Build transaction
   const transactionBuilder = new StellarSdk.TransactionBuilder(account, {
     fee: StellarSdk.BASE_FEE,
     networkPassphrase,
   });
 
-  // Add payment operation
   transactionBuilder.addOperation(
     StellarSdk.Operation.payment({
       destination: destinationAddress,
@@ -40,13 +67,11 @@ export function buildPaymentTransaction(params: BuildPaymentTransactionParams): 
     }),
   );
 
-  // Add memo if provided
   if (memo) {
     transactionBuilder.addMemo(StellarSdk.Memo.text(memo));
   }
 
-  // Set timeout
-  transactionBuilder.setTimeout(180);
+  transactionBuilder.setTimeout(TX_TIMEOUT_SECONDS);
 
   // Build transaction
   const transaction = transactionBuilder.build();
@@ -63,12 +88,13 @@ export function buildTrustTransaction(params: {
   assetCode: string;
   assetIssuer: string;
   networkPassphrase: string;
+  sequence: string;
   limit?: string;
 }): string {
-  const { sourceAddress, assetCode, assetIssuer, networkPassphrase, limit } = params;
+  const { sourceAddress, assetCode, assetIssuer, networkPassphrase, limit, sequence } = params;
 
   const sourceKeypair = StellarSdk.Keypair.fromPublicKey(sourceAddress);
-  const account = new StellarSdk.Account(sourceKeypair.publicKey(), '0');
+  const account = new StellarSdk.Account(sourceKeypair.publicKey(), sequence);
 
   const asset = new StellarSdk.Asset(assetCode, assetIssuer);
 
@@ -84,7 +110,7 @@ export function buildTrustTransaction(params: {
     }),
   );
 
-  transactionBuilder.setTimeout(180);
+  transactionBuilder.setTimeout(TX_TIMEOUT_SECONDS);
 
   const transaction = transactionBuilder.build();
   return transaction.toXDR();
@@ -100,6 +126,7 @@ export interface BuildPathPaymentStrictSendParams {
   destAssetIssuer: string;
   destMin: string;
   networkPassphrase: string;
+  sequence: string;
 }
 
 export interface BuildPathPaymentStrictReceiveParams {
@@ -112,6 +139,7 @@ export interface BuildPathPaymentStrictReceiveParams {
   destAssetIssuer: string;
   destAmount: string;
   networkPassphrase: string;
+  sequence: string;
 }
 
 function resolveAsset(code: string, issuer: string): StellarSdk.Asset {
@@ -127,11 +155,11 @@ function resolveAsset(code: string, issuer: string): StellarSdk.Asset {
 export function buildPathPaymentStrictSendTransaction(params: BuildPathPaymentStrictSendParams): string {
   const {
     sourceAddress, destinationAddress, sendAssetCode, sendAssetIssuer,
-    sendAmount, destAssetCode, destAssetIssuer, destMin, networkPassphrase,
+    sendAmount, destAssetCode, destAssetIssuer, destMin, networkPassphrase, sequence,
   } = params;
 
   const sourceKeypair = StellarSdk.Keypair.fromPublicKey(sourceAddress);
-  const account = new StellarSdk.Account(sourceKeypair.publicKey(), '0');
+  const account = new StellarSdk.Account(sourceKeypair.publicKey(), sequence);
 
   const sendAsset = resolveAsset(sendAssetCode, sendAssetIssuer);
   const destAsset = resolveAsset(destAssetCode, destAssetIssuer);
@@ -152,7 +180,7 @@ export function buildPathPaymentStrictSendTransaction(params: BuildPathPaymentSt
     }),
   );
 
-  transactionBuilder.setTimeout(180);
+  transactionBuilder.setTimeout(TX_TIMEOUT_SECONDS);
   const transaction = transactionBuilder.build();
   return transaction.toXDR();
 }
@@ -163,11 +191,11 @@ export function buildPathPaymentStrictSendTransaction(params: BuildPathPaymentSt
 export function buildPathPaymentStrictReceiveTransaction(params: BuildPathPaymentStrictReceiveParams): string {
   const {
     sourceAddress, destinationAddress, sendAssetCode, sendAssetIssuer,
-    sendMax, destAssetCode, destAssetIssuer, destAmount, networkPassphrase,
+    sendMax, destAssetCode, destAssetIssuer, destAmount, networkPassphrase, sequence,
   } = params;
 
   const sourceKeypair = StellarSdk.Keypair.fromPublicKey(sourceAddress);
-  const account = new StellarSdk.Account(sourceKeypair.publicKey(), '0');
+  const account = new StellarSdk.Account(sourceKeypair.publicKey(), sequence);
 
   const sendAsset = resolveAsset(sendAssetCode, sendAssetIssuer);
   const destAsset = resolveAsset(destAssetCode, destAssetIssuer);
@@ -188,7 +216,7 @@ export function buildPathPaymentStrictReceiveTransaction(params: BuildPathPaymen
     }),
   );
 
-  transactionBuilder.setTimeout(180);
+  transactionBuilder.setTimeout(TX_TIMEOUT_SECONDS);
   const transaction = transactionBuilder.build();
   return transaction.toXDR();
 }
@@ -201,11 +229,12 @@ export function buildCreateAccountTransaction(params: {
   destinationAddress: string;
   startingBalance: string;
   networkPassphrase: string;
+  sequence: string;
 }): string {
-  const { sourceAddress, destinationAddress, startingBalance, networkPassphrase } = params;
+  const { sourceAddress, destinationAddress, startingBalance, networkPassphrase, sequence } = params;
 
   const sourceKeypair = StellarSdk.Keypair.fromPublicKey(sourceAddress);
-  const account = new StellarSdk.Account(sourceKeypair.publicKey(), '0');
+  const account = new StellarSdk.Account(sourceKeypair.publicKey(), sequence);
 
   const transactionBuilder = new StellarSdk.TransactionBuilder(account, {
     fee: StellarSdk.BASE_FEE,
@@ -219,7 +248,7 @@ export function buildCreateAccountTransaction(params: {
     }),
   );
 
-  transactionBuilder.setTimeout(180);
+  transactionBuilder.setTimeout(TX_TIMEOUT_SECONDS);
 
   const transaction = transactionBuilder.build();
   return transaction.toXDR();

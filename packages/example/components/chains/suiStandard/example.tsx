@@ -11,9 +11,10 @@ import { hexToBytes, bytesToHex } from '@noble/hashes/utils';
 import { useWallet } from '../../../components/connect/WalletContext';
 import DappList from '../../../components/DAppList';
 import params from './params';
-import { getFullnodeUrl } from '@mysten/sui/client';
+import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
 import { SUI_TYPE_ARG, normalizeSuiAddress } from '@mysten/sui/utils';
-import type { CoinStruct, SuiClient } from '@mysten/sui/client';
+import type { CoinStruct } from '@mysten/sui/client';
+import { bcs } from '@mysten/sui/bcs';
 
 import {
   ConnectButton,
@@ -466,6 +467,65 @@ function Example() {
             return (currentAccount.address === publicKey.toSuiAddress()).toString();
           }}
         />
+        <ApiPayload
+          title="signTransaction (多签复刻)"
+          description="用原始 DragonBall 合约调用 tx，刷新 mainnet 上的 object 版本后重新序列化并签名。sender ≠ 当前账户。"
+          presupposeParams={[
+            {
+              id: 'reproduceRealTx',
+              name: '多签复刻（mainnet）',
+              value:
+                'AAADAQDsuo2nhSxc7cB45ZFJBzzCBEnlNaJIo/ZftmBUm8p5EczBITEAAAAAIPNzl4FMi4POCfRC2IZTPbmtPBOLjSCTK6Rs1nqVmq1XAQHxn+Bjcch7yq6i0qjCLWgjneB9fee+SMysjHY2DDVbWrfUhDAAAAAAAQAgilcTJiZDsNW/7CjGknxUyeKreRBgmZ/tHCuOlqNGxwABACWEjIkS/MUDG4lmyHcG4zXqBv9ksxF1CLVO1b3pUoolCmdvdmVybmFuY2UUZ3JhbnRfcGFyYW1fbW9kaWZpZXIAAwEAAAEBAAECAOXpW8OoseK4/d0AMRJLd4+N3kC7cxgI+knWOIx5pKB9AbhxevR2YeOf9RKAmhVYFyi1JZUR7hZaMqNzKN+hvZ12KunmKgAAAAAgig+Wha8y0ruDOorfk28LOAavQpddXKWDBA+qkr7XYmHl6VvDqLHiuP3dADESS3ePjd5Au3MYCPpJ1jiMeaSgfSsCAAAAAAAAxKEkAAAAAAAA',
+            },
+          ]}
+          onExecute={async (request: string) => {
+            const mainnet = new SuiClient({ url: getFullnodeUrl('mainnet') });
+            const origBytes = Buffer.from(request, 'base64');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const parsed: any = bcs.TransactionData.parse(origBytes);
+            const v1 = parsed.V1;
+
+            const refreshRef = async (id: string) => {
+              const r = await mainnet.getObject({ id, options: {} });
+              if (!r.data) throw new Error(`object ${id} 已不存在`);
+              return {
+                objectId: r.data.objectId,
+                version: r.data.version,
+                digest: r.data.digest,
+              };
+            };
+
+            for (const input of v1.kind.ProgrammableTransaction.inputs) {
+              const owned = input?.Object?.ImmOrOwnedObject;
+              if (owned) input.Object.ImmOrOwnedObject = await refreshRef(owned.objectId);
+            }
+            v1.gasData.payment = await Promise.all(
+              v1.gasData.payment.map((gp: { objectId: string }) => refreshRef(gp.objectId)),
+            );
+            v1.gasData.price = String(await mainnet.getReferenceGasPrice());
+            v1.gasData.budget = '10000000';
+
+            const newBytes = bcs.TransactionData.serialize(parsed).toBytes();
+            const res: unknown = await signTransaction({
+              transaction: Transaction.from(newBytes),
+              account: currentAccount,
+              chain: 'sui:mainnet',
+            });
+            return JSON.stringify(res);
+          }}
+          onValidate={async (_request: string, result: string) => {
+            const { bytes, signature } = JSON.parse(result) as {
+              bytes: string;
+              signature: string;
+            };
+            const publicKey = await verifyTransactionSignature(
+              Buffer.from(bytes, 'base64'),
+              signature,
+            );
+            return (currentAccount.address === publicKey.toSuiAddress()).toString();
+          }}
+        />
+
         <ApiPayload
           title="signTransactionBlock (USDC)"
           description="USDC代币转账签名"

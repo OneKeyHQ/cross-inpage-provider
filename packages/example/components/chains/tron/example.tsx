@@ -16,6 +16,7 @@ import { InputWithSave } from '../../InputWithSave';
 import { toast } from '../../ui/use-toast';
 import { ApiComboboxRef, ApiForm, ApiFormRef, ComboboxOption } from '../../ApiForm';
 import { okLinkRequest } from '../utils/OkLink';
+import { Buffer } from 'buffer';
 
 type ITokenOption = {
   type: string;

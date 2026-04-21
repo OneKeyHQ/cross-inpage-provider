@@ -13,7 +13,7 @@
     "swap-lock-registry": "npx swap-lock-registry --yarn --parallel --url https://registry.yarnpkg.com yarn.lock"
   },
   "dependencies": {
-    "@alephium/web3-react": "^1.4.0",
+    "@alephium/web3-react": "^3.0.0",
     "@aptos-labs/siwa": "^0.4.0",
     "@aptos-labs/ts-sdk": "^1.39.0",
     "@aptos-labs/wallet-adapter-react": "^7.0.0",
@@ -25,7 +25,7 @@
     "@codemirror/lang-json": "^6.0.1",
     "@codemirror/lint": "^6.8.0",
     "@cosmjs/amino": "^0.32.3",
-    "@cosmjs/stargate": "^0.32.4",
+    "@cosmjs/stargate": "^0.33.0",
     "@ethersproject/bytes": "^5.0.6",
     "@keystonehq/keystone-sdk": "^0.9.1",
     "@metamask/eth-sig-util": "^7.0.2",
@@ -84,7 +84,7 @@
     "@walletconnect/types": "^2.13.0",
     "@web3modal/standalone": "^2.4.3",
     "algosdk": "^2.8.0",
-    "aptos": "^1.21.0",
+    "aptos": "^1.22.1",
     "bcrypto": "^5.5.2",
     "bignumber.js": "^9.0.1",
     "bip322-js": "^2.0.0",

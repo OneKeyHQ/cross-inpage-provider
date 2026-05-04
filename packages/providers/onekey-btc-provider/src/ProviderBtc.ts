@@ -347,6 +347,22 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
     });
   }
 
+  /**
+   * @experimental May change in future versions.
+   * Derive a deterministic 32-byte value from the wallet's key material via
+   * HKDF-SHA-256. The wallet backend handles validation, user approval, and
+   * the actual derivation.
+   */
+  async deriveContextHash(appName: string, context: string) {
+    return this._request<string>({
+      method: ProviderMethods.DERIVE_CONTEXT_HASH,
+      params: {
+        appName,
+        context,
+      },
+    });
+  }
+
   async getVersion() {
     return Promise.resolve('1.4.10');
   }

@@ -72,6 +72,13 @@ export enum ProviderMethods {
   GET_NETWORK_FEES = 'getNetworkFees',
   GET_UTXOS = 'getUtxos',
   GET_BTC_TIP_HEIGHT = 'getBTCTipHeight',
+
+  /**
+   * @experimental Derive a deterministic 32-byte value from the wallet's key
+   * material via HKDF-SHA-256. The wallet backend handles validation, user
+   * approval, and the actual derivation.
+   */
+  DERIVE_CONTEXT_HASH = 'deriveContextHash',
 }
 
 export type OneKeyBtcProviderProps = IInpageProviderConfig & {
@@ -157,6 +164,24 @@ export interface IProviderBtc extends ProviderBtcBase {
   signPsbts(psbtHexs: string[], options?: { autoFinalized: boolean }): Promise<string[]>;
   pushPsbt(psbt: string): Promise<string>;
   inscribeTransfer(ticker: string, amount: string): Promise<string>;
+  /**
+   * @experimental Deterministic 32-byte value derived from the connected
+   * address's key material via HKDF-SHA-256. Output is per-public-key:
+   * the same connected address always produces the same value; different
+   * connected addresses (different public keys) produce different values.
+   * Cross-wallet portable — any conforming wallet produces the same value
+   * for the same connected public key + appName + context.
+   *
+   * Supported on HD (mnemonic / xpriv) software accounts. Hardware, QR,
+   * watching-only, and external accounts are not yet supported (need
+   * firmware-side derivation). Requires user approval — the wallet shows
+   * the application name, context bytes, and bound address before deriving.
+   *
+   * @param appName - 1-64 bytes, `[a-z0-9-]` only.
+   * @param context - lowercase hex, even-length, no `0x` prefix, ≤ 2048 chars.
+   * @returns 64-char lowercase hex string.
+   */
+  deriveContextHash(appName: string, context: string): Promise<string>;
 }
 
 

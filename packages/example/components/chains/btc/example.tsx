@@ -241,6 +241,16 @@ export default function BTCExample() {
             return 'Dapp Example: 不支持的类型签字的验证';
           }}
         />
+        <ApiPayload
+          title="deriveContextHash"
+          description="Derive a deterministic context hash for the current BTC account"
+          presupposeParams={params.deriveContextHash}
+          onExecute={async (request: string) => {
+            const obj = JSON.parse(request) as { appName: string; context: string };
+            const res = await provider?.deriveContextHash(obj.appName, obj.context);
+            return res;
+          }}
+        />
       </ApiGroup>
 
       <ApiGroup title="Transaction">

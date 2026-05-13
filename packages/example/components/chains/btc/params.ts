@@ -83,6 +83,16 @@ export default {
       }),
     },
   ],
+  deriveContextHash: [
+    {
+      id: 'deriveContextHash',
+      name: 'deriveContextHash',
+      value: JSON.stringify({
+        appName: 'test-app',
+        context: 'deadbeef',
+      }),
+    },
+  ],
   sendBitcoin: (address: string) => [
     {
       id: 'sendBitcoin',

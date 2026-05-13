@@ -6,6 +6,7 @@ import { IPresupposeParam } from './PresupposeParamsSelector';
 const RequestContext = createContext<string>('');
 const ResultContext = createContext<string>('');
 const ValidateResultContext = createContext<string>('');
+const BroadcastResultContext = createContext<string>('');
 const CurrentParamIdContext = createContext<string>('');
 const PresupposeParamsContext = createContext<IPresupposeParam[] | undefined>(undefined);
 const DispatchContext = createContext<React.Dispatch<ApiPayloadAction> | null>(null);
@@ -14,6 +15,7 @@ type ApiPayloadAction =
   | { type: 'SET_REQUEST'; payload: string }
   | { type: 'SET_RESULT'; payload: string }
   | { type: 'SET_VALIDATE_RESULT'; payload: string }
+  | { type: 'SET_BROADCAST_RESULT'; payload: string }
   | { type: 'SET_CURRENT_PARAM_ID'; payload: string }
   | { type: 'SET_PRESUPPOSE_PARAMS'; payload: IPresupposeParam[] };
 
@@ -52,6 +54,8 @@ function apiPayloadReducer(state: ApiPayloadState, action: ApiPayloadAction): Ap
       return { ...state, result: tryFormatCompactJson(action.payload) };
     case 'SET_VALIDATE_RESULT':
       return { ...state, validateResult: tryFormatJson(action.payload) };
+    case 'SET_BROADCAST_RESULT':
+      return { ...state, broadcastResult: tryFormatJson(action.payload) };
     case 'SET_CURRENT_PARAM_ID':
       return { ...state, currentPurposeParamId: action.payload };
     case 'SET_PRESUPPOSE_PARAMS':
@@ -65,6 +69,7 @@ interface ApiPayloadState {
   request: string;
   result: string;
   validateResult: string;
+  broadcastResult: string;
   currentPurposeParamId: string;
   presupposeParams?: IPresupposeParam[];
 }
@@ -78,6 +83,7 @@ export function ApiPayloadProvider({ children }: IApiPayloadProviderProps) {
     request: '',
     result: '',
     validateResult: '',
+    broadcastResult: '',
     currentPurposeParamId: '',
   });
 
@@ -86,6 +92,7 @@ export function ApiPayloadProvider({ children }: IApiPayloadProviderProps) {
   const requestValue = useMemo(() => state.request, [state.request]);
   const resultValue = useMemo(() => state.result, [state.result]);
   const validateResultValue = useMemo(() => state.validateResult, [state.validateResult]);
+  const broadcastResultValue = useMemo(() => state.broadcastResult, [state.broadcastResult]);
   const currentParamIdValue = useMemo(
     () => state.currentPurposeParamId,
     [state.currentPurposeParamId],
@@ -97,11 +104,13 @@ export function ApiPayloadProvider({ children }: IApiPayloadProviderProps) {
       <RequestContext.Provider value={requestValue}>
         <ResultContext.Provider value={resultValue}>
           <ValidateResultContext.Provider value={validateResultValue}>
-            <CurrentParamIdContext.Provider value={currentParamIdValue}>
-              <PresupposeParamsContext.Provider value={presupposeParamsValue}>
-                {children}
-              </PresupposeParamsContext.Provider>
-            </CurrentParamIdContext.Provider>
+            <BroadcastResultContext.Provider value={broadcastResultValue}>
+              <CurrentParamIdContext.Provider value={currentParamIdValue}>
+                <PresupposeParamsContext.Provider value={presupposeParamsValue}>
+                  {children}
+                </PresupposeParamsContext.Provider>
+              </CurrentParamIdContext.Provider>
+            </BroadcastResultContext.Provider>
           </ValidateResultContext.Provider>
         </ResultContext.Provider>
       </RequestContext.Provider>
@@ -119,6 +128,7 @@ export function useApiPayload() {
     request: useContext(RequestContext),
     result: useContext(ResultContext),
     validateResult: useContext(ValidateResultContext),
+    broadcastResult: useContext(BroadcastResultContext),
     currentPurposeParamId: useContext(CurrentParamIdContext),
     presupposeParams: useContext(PresupposeParamsContext),
     dispatch,
@@ -128,6 +138,7 @@ export function useApiPayload() {
 export const useRequest = () => useContext(RequestContext);
 export const useResult = () => useContext(ResultContext);
 export const useValidateResult = () => useContext(ValidateResultContext);
+export const useBroadcastResult = () => useContext(BroadcastResultContext);
 export const useCurrentParamId = () => useContext(CurrentParamIdContext);
 export const usePresupposeParams = () => useContext(PresupposeParamsContext);
 export const useApiDispatch = () => {

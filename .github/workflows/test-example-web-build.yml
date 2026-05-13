@@ -25,7 +25,8 @@ jobs:
         run: |
           yarn
           yarn bootstrap
-          yarn build
+          yarn bootstrap
+          NODE_ENV=production yarn build
 
       - name: Build Example
         run: |

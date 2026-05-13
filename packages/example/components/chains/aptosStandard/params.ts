@@ -75,6 +75,16 @@ export default {
       }),
     },
   ],
+  signMultiRecipientTransaction: (address: string) => [
+    {
+      id: 'signTransaction-multi-recipient-native',
+      name: 'batch transfer native coin',
+      value: JSON.stringify({
+        recipients: [address, address],
+        amount: 1,
+      }),
+    },
+  ],
   signAndSubmitTransaction: (address: string) => [
     {
       id: 'transaction-native-pure',

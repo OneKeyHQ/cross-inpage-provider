@@ -34,6 +34,17 @@ export default {
       }),
     },
   ],
+  signMultiRecipientTransaction: (address: string) => [
+    {
+      id: 'signTransaction-multi-recipient',
+      name: 'signTransaction Multi Recipient',
+      value: JSON.stringify({
+        from: address,
+        recipients: [address, address],
+        amount: 1,
+      }),
+    },
+  ],
   signTokenTransaction: (address: string) => [
     {
       id: 'signUSDCransaction',

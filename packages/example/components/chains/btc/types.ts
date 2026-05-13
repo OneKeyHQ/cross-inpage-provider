@@ -22,6 +22,7 @@ export interface IProviderApi {
   }>;
   getBitcoinUtxos(cursor?: number, size?: number): Promise<{ txid: string; vout: number }[]>;
   signMessage(msg: string, type: string): Promise<string>;
+  deriveContextHash(appName: string, context: string): Promise<string>;
   sendBitcoin(
     toAddress: string,
     satoshis: number,

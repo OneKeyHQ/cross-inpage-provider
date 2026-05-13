@@ -59,6 +59,21 @@ const MaxGasAMount = 10000;
 const TRANSFER_SCRIPT =
   "0xa11ceb0b0700000a0601000203020605080d071525083a40107a1f010200030201000104060c060c05030003060c0503083c53454c463e5f30046d61696e0d6170746f735f6163636f756e74087472616e73666572ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000000114636f6d70696c6174696f6e5f6d65746164617461090003322e3003322e31000001070b000b01010b020b03110002";
 
+function normalizeSafeAptosDemoRecipients(recipients: string[]) {
+  return recipients.map((recipient, index) => {
+    const trimmedRecipient = recipient.trim();
+    if (!AccountAddress.isValid({ input: trimmedRecipient }).valid) {
+      throw new Error(`Invalid Aptos recipient at index ${index}`);
+    }
+    const normalizedRecipient = AccountAddress.from(trimmedRecipient).toString();
+    const withoutPrefix = normalizedRecipient.replace(/^0x/, '');
+    if (/^0+$/.test(withoutPrefix)) {
+      throw new Error(`Unsafe zero Aptos recipient at index ${index}`);
+    }
+    return normalizedRecipient;
+  });
+}
+
 function MultiAgentTransactionFlow() {
   const { account, network, signTransaction, submitTransaction } = useStandardWallet();
 
@@ -531,6 +546,39 @@ function Example() {
                 options: options ? options : undefined,
               },
               asFeePayer,
+            });
+            return res;
+          }}
+        />
+        <ApiPayload
+          title="signTransaction (Multi Recipient)"
+          description="Builds one Aptos batch_transfer_coins transaction. Defaults to self-transfer recipients for safety; edit recipients to your own addresses when testing different To values."
+          presupposeParams={params.signMultiRecipientTransaction(account?.address.toString() ?? '')}
+          onExecute={async (request: string) => {
+            const { recipients, amount } = JSON.parse(request) as {
+              recipients: string[];
+              amount: number | string;
+            };
+            if (!Array.isArray(recipients) || recipients.length === 0) {
+              throw new Error('At least one recipient is required');
+            }
+            const safeRecipients = normalizeSafeAptosDemoRecipients(recipients);
+            const transferAmount = Number(amount);
+            if (!Number.isSafeInteger(transferAmount) || transferAmount <= 0) {
+              throw new Error('amount must be a positive safe integer in octas');
+            }
+            const res = await signTransaction({
+              transactionOrPayload: {
+                data: {
+                  type: 'entry_function_payload',
+                  function: '0x1::aptos_account::batch_transfer_coins',
+                  typeArguments: [APTOS_COIN],
+                  functionArguments: [
+                    safeRecipients,
+                    safeRecipients.map(() => transferAmount),
+                  ],
+                },
+              },
             });
             return res;
           }}

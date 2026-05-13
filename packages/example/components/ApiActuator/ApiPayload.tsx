@@ -13,6 +13,7 @@ import { Button } from '../ui/button';
 import {
   ApiPayloadProvider,
   useApiDispatch,
+  useBroadcastResult,
   useRequest,
   useResult,
   useValidateResult,
@@ -45,6 +46,7 @@ function ApiPayloadContent({
   presupposeParams,
   onExecute,
   onValidate,
+  onBroadcast,
   onPresupposeParamChange,
   generateRequestFrom,
   onGenerateRequest,
@@ -77,6 +79,13 @@ function ApiPayloadContent({
               <ValidateResultDisplay />
             </>
           )}
+
+          {onBroadcast && (
+            <>
+              <ApiExecuteBroadcast onBroadcast={onBroadcast} />
+              <BroadcastResultDisplay />
+            </>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -94,6 +103,7 @@ export function ApiPayload(props: IApiPayloadProps) {
 export type IApiExecuteProps = {
   allowCallWithoutProvider?: boolean;
   timeout?: number;
+  onBroadcast?: (request: string, result: string) => Promise<string> | string;
 } & IApiExecutor;
 
 interface IExecuteResult {
@@ -128,11 +138,18 @@ function ApiExecute({
     },
     [dispatch],
   );
+  const handleSetBroadcastResult = useCallback(
+    (newResult: string) => {
+      dispatch({ type: 'SET_BROADCAST_RESULT', payload: newResult });
+    },
+    [dispatch],
+  );
 
   const handleExecute = useCallback(async () => {
     setLoading(true);
     handleSetResult('Calling...');
     handleSetValidateResult('');
+    handleSetBroadcastResult('');
 
     try {
       const { result, error } = await Promise.race([
@@ -152,7 +169,14 @@ function ApiExecute({
       handleSetResult(`Error: ${typeof error === 'string' ? error : JSON.stringify(error)}`);
     }
     setLoading(false);
-  }, [execute, request, handleSetResult]);
+  }, [
+    execute,
+    request,
+    timeout,
+    handleSetResult,
+    handleSetValidateResult,
+    handleSetBroadcastResult,
+  ]);
 
   return (
     <Button
@@ -196,6 +220,52 @@ function ApiExecuteValidate({ onExecute, onValidate }: IApiExecuteProps) {
   );
 }
 
+function ApiExecuteBroadcast({
+  onBroadcast,
+  timeout = 5 * 60 * 1000,
+}: Pick<IApiExecuteProps, 'onBroadcast' | 'timeout'>) {
+  const request = useRequest();
+  const result = useResult();
+  const dispatch = useApiDispatch();
+
+  const [loading, setLoading] = useState(false);
+
+  const handleSetBroadcastResult = useCallback(
+    (newResult: string) => {
+      dispatch({ type: 'SET_BROADCAST_RESULT', payload: newResult });
+    },
+    [dispatch],
+  );
+
+  const handleBroadcast = useCallback(async () => {
+    if (!onBroadcast) {
+      return;
+    }
+    setLoading(true);
+    handleSetBroadcastResult('Broadcasting...');
+    try {
+      const broadcastResult = await Promise.race([
+        onBroadcast(request, result),
+        new Promise<string>((_, rej) =>
+          setTimeout(() => rej(`broadcast timeout ${timeout}ms`), timeout),
+        ),
+      ]);
+      handleSetBroadcastResult(broadcastResult);
+    } catch (error) {
+      handleSetBroadcastResult(
+        `Error: ${typeof error === 'string' ? error : JSON.stringify(error)}`,
+      );
+    }
+    setLoading(false);
+  }, [onBroadcast, request, result, timeout, handleSetBroadcastResult]);
+
+  return (
+    <Button loading={loading} disabled={!result || !onBroadcast} onClick={handleBroadcast}>
+      Broadcast
+    </Button>
+  );
+}
+
 function ExecuteResultDisplay() {
   const result = useResult();
 
@@ -206,4 +276,10 @@ function ValidateResultDisplay() {
   const validateResult = useValidateResult();
 
   return <ResultTextArea label="验证结果" content={validateResult} />;
+}
+
+function BroadcastResultDisplay() {
+  const broadcastResult = useBroadcastResult();
+
+  return <ResultTextArea label="广播结果" content={broadcastResult} />;
 }

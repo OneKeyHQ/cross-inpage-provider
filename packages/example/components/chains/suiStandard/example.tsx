@@ -12,7 +12,7 @@ import { useWallet } from '../../../components/connect/WalletContext';
 import DappList from '../../../components/DAppList';
 import params from './params';
 import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
-import { SUI_TYPE_ARG, normalizeSuiAddress } from '@mysten/sui/utils';
+import { SUI_TYPE_ARG, isValidSuiAddress, normalizeSuiAddress } from '@mysten/sui/utils';
 import type { CoinStruct } from '@mysten/sui/client';
 import { bcs } from '@mysten/sui/bcs';
 
@@ -57,6 +57,46 @@ export function normalizeSuiCoinType(coinType: string): string {
     }
   }
   return coinType;
+}
+
+const UNSAFE_MULTI_RECIPIENT_DEMO_ADDRESSES = new Set([
+  '0x0000000000000000000000000000000000000000000000000000000000000000',
+  '0x1111111111111111111111111111111111111111111111111111111111111111',
+  '0x2222222222222222222222222222222222222222222222222222222222222222',
+]);
+
+function normalizeSafeDemoRecipients(recipients: string[]) {
+  return recipients.map((recipient, index) => {
+    const trimmedRecipient = recipient.trim();
+    if (!isValidSuiAddress(trimmedRecipient)) {
+      throw new Error(`Recipient ${index + 1} must be a full SUI address`);
+    }
+    const normalizedRecipient = normalizeSuiAddress(trimmedRecipient);
+    if (UNSAFE_MULTI_RECIPIENT_DEMO_ADDRESSES.has(normalizedRecipient)) {
+      throw new Error(`Recipient ${index + 1} is not safe for this demo`);
+    }
+    return normalizedRecipient;
+  });
+}
+
+function parseSignedSuiTransactionResult(result: string) {
+  const {
+    bytes,
+    transactionBlockBytes,
+    signature,
+  }: {
+    bytes?: string;
+    transactionBlockBytes?: string;
+    signature?: string;
+  } = JSON.parse(result);
+  const transactionBlock = transactionBlockBytes ?? bytes;
+  if (!transactionBlock) {
+    throw new Error('Missing signed transaction bytes');
+  }
+  if (!signature) {
+    throw new Error('Missing signature');
+  }
+  return { transactionBlock, signature };
 }
 
 function AssetInfoView({
@@ -237,6 +277,10 @@ function Example() {
 
   const signTransactionPresupposeParams = useMemo(() => {
     return params.signTransaction(currentAccount?.address ?? '');
+  }, [currentAccount?.address]);
+
+  const signMultiRecipientTransactionPresupposeParams = useMemo(() => {
+    return params.signMultiRecipientTransaction(currentAccount?.address ?? '');
   }, [currentAccount?.address]);
 
   const signTokenTransactionParams = useMemo(() => {
@@ -523,6 +567,83 @@ function Example() {
               signature,
             );
             return (currentAccount.address === publicKey.toSuiAddress()).toString();
+          }}
+        />
+
+        <ApiPayload
+          title="signTransactionBlock (Multi Recipient)"
+          description="Builds one SUI PTB with multiple TransferObjects commands. Defaults to self-transfer recipients for safety; edit recipients to your own addresses when testing different To values."
+          presupposeParams={signMultiRecipientTransactionPresupposeParams}
+          onExecute={async (request: string) => {
+            const {
+              from,
+              recipients,
+              amount,
+            }: {
+              from: string;
+              recipients: string[];
+              amount: number;
+            } = JSON.parse(request);
+
+            if (!from || !isValidSuiAddress(from)) {
+              throw new Error('Connect a SUI account before signing');
+            }
+            if (!Number.isSafeInteger(amount) || amount <= 0) {
+              throw new Error('Amount must be a positive integer in MIST');
+            }
+            if (!Array.isArray(recipients) || recipients.length === 0) {
+              throw new Error('At least one recipient is required');
+            }
+            const safeRecipients = normalizeSafeDemoRecipients(recipients);
+
+            const transfer = new Transaction();
+            const coins = transfer.splitCoins(
+              transfer.gas,
+              safeRecipients.map(() => amount),
+            );
+            safeRecipients.forEach((recipient, index) => {
+              const coin = coins[index];
+              if (!coin) {
+                throw new Error(`Missing split coin for recipient ${index}`);
+              }
+              transfer.transferObjects([coin], recipient);
+            });
+
+            const tx = await sponsorTransaction(
+              client,
+              from,
+              await transfer.build({
+                client,
+                onlyTransactionKind: true,
+              }),
+            );
+
+            const res: unknown = await signTransaction({
+              transaction: tx,
+              account: currentAccount,
+            });
+            return JSON.stringify(res);
+          }}
+          onValidate={async (_request: string, result: string) => {
+            const { transactionBlock, signature } = parseSignedSuiTransactionResult(result);
+            const publicKey = await verifyTransactionSignature(
+              Buffer.from(transactionBlock, 'base64'),
+              signature,
+            );
+
+            return (currentAccount.address === publicKey.toSuiAddress()).toString();
+          }}
+          onBroadcast={async (_request: string, result: string) => {
+            const { transactionBlock, signature } = parseSignedSuiTransactionResult(result);
+            const res = await client.executeTransactionBlock({
+              transactionBlock,
+              signature,
+              options: {
+                showEffects: true,
+                showEvents: true,
+              },
+            });
+            return JSON.stringify(res);
           }}
         />
 

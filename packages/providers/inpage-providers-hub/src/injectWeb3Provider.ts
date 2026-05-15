@@ -4,7 +4,7 @@ import {
   checkWalletSwitchEnable,
   defineWindowProperty,
   JsBridgeBase,
-  isOneKeyWebsite
+  isOneKeyWebsite,
 } from '@onekeyfe/cross-inpage-provider-core';
 import { ProviderAlgo } from '@onekeyfe/onekey-algo-provider';
 import { ProviderAlph, registerAlephiumProvider } from '@onekeyfe/onekey-alph-provider';
@@ -246,6 +246,13 @@ function injectWeb3Provider({
 
   defineWindowProperty('solana', solana);
   defineWindowProperty('phantom', { solana, ethereum });
+  if (checkWalletSwitchEnable()) {
+    try {
+      (window as unknown as { isPhantomInstalled?: boolean }).isPhantomInstalled = true;
+    } catch {
+      // ignore
+    }
+  }
   defineWindowProperty('aptos', martian);
   defineWindowProperty('petra', martian, { enumerable: true });
   defineWindowProperty('conflux', conflux);

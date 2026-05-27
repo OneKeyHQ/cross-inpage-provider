@@ -54,6 +54,7 @@
     "@onekeyfe/extension-bridge-injected": "2.2.70",
     "@onekeyfe/inpage-providers-hub": "2.2.70",
     "@onekeyfe/native-bridge-injected": "2.2.70",
+    "@onekeyfe/onekey-private-provider": "2.2.70",
     "bignumber.js": "^9.1.2",
     "buffer": "^6.0.3",
     "cipher-base": "^1.0.6",

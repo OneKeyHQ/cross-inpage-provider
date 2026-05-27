@@ -134,6 +134,7 @@ const extensionConfig = merge(commonConfig, {
   entry: {
     injectedExtension: './src/injectedExtension.ts',
     injectedNative: './src/injectedNative.ts',
+    injectedWebEmbed: './src/injectedWebEmbed.ts',
   },
 });
 

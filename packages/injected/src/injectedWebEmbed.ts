@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   defineWindowProperty,
   injectedProviderReceiveHandler,
@@ -19,7 +21,7 @@ const $private = new ProviderPrivate({
 defineWindowProperty(
   '$onekey',
   {
-    ...(window as any).$onekey,
+    ...window.$onekey,
     jsBridge,
     $private,
   },

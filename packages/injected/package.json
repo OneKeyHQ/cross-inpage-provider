@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/cross-inpage-provider-injected",
-  "version": "2.2.70",
+  "version": "2.2.71",
   "keywords": [
     "cross-inpage-provider"
   ],
@@ -48,13 +48,13 @@
   "dependencies": {
     "@noble/curves": "1.8.0",
     "@noble/hashes": "1.7.2",
-    "@onekeyfe/cross-inpage-provider-core": "2.2.70",
-    "@onekeyfe/cross-inpage-provider-types": "2.2.70",
-    "@onekeyfe/desktop-bridge-injected": "2.2.70",
-    "@onekeyfe/extension-bridge-injected": "2.2.70",
-    "@onekeyfe/inpage-providers-hub": "2.2.70",
-    "@onekeyfe/native-bridge-injected": "2.2.70",
-    "@onekeyfe/onekey-private-provider": "2.2.70",
+    "@onekeyfe/cross-inpage-provider-core": "2.2.71",
+    "@onekeyfe/cross-inpage-provider-types": "2.2.71",
+    "@onekeyfe/desktop-bridge-injected": "2.2.71",
+    "@onekeyfe/extension-bridge-injected": "2.2.71",
+    "@onekeyfe/inpage-providers-hub": "2.2.71",
+    "@onekeyfe/native-bridge-injected": "2.2.71",
+    "@onekeyfe/onekey-private-provider": "2.2.71",
     "bignumber.js": "^9.1.2",
     "buffer": "^6.0.3",
     "cipher-base": "^1.0.6",

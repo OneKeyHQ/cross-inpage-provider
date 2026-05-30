@@ -13,7 +13,7 @@
     "swap-lock-registry": "npx swap-lock-registry --yarn --parallel --url https://registry.yarnpkg.com yarn.lock"
   },
   "dependencies": {
-    "@alephium/web3-react": "^1.4.0",
+    "@alephium/web3-react": "^3.0.0",
     "@aptos-labs/siwa": "^0.4.0",
     "@aptos-labs/ts-sdk": "^1.39.0",
     "@aptos-labs/wallet-adapter-react": "^7.0.0",
@@ -78,7 +78,7 @@
     "@uiw/react-codemirror": "^4.22.1",
     "@unisat/wallet-utils": "^1.0.0",
     "@uniswap/default-token-list": "^12.23.0",
-    "@walletconnect/core": "^2.13.0",
+    "@walletconnect/core": "^2.18.0",
     "@walletconnect/sign-client": "^2.13.0",
     "@walletconnect/types": "^2.13.0",
     "@web3modal/standalone": "^2.4.3",

@@ -2,6 +2,49 @@
 # yarn lockfile v1
 
 
+"@noble/hashes@^1.7.1":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.8.0.tgz#cee43d801fcef9644b11b8194857695acd5f815a"
+  integrity sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==
+
+"@onekeyfe/cross-inpage-provider-core@2.2.65":
+  version "2.2.65"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-core/-/cross-inpage-provider-core-2.2.65.tgz#323ba940e85f0755fd790e267b93797a90d6f0d8"
+  integrity sha512-5fLXB5JVTj/fmJFpvdEucbLxPIENFCRrO5uxJsI0+qOhURf8PfjjgMIBE/lX39FBTVozsf+kzBgmPirGoZsgcg==
+  dependencies:
+    "@noble/hashes" "^1.7.1"
+    "@onekeyfe/cross-inpage-provider-errors" "2.2.65"
+    "@onekeyfe/cross-inpage-provider-events" "2.2.65"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.65"
+    events "^3.3.0"
+    lodash-es "^4.17.21"
+    ms "^2.1.3"
+
+"@onekeyfe/cross-inpage-provider-errors@2.2.65":
+  version "2.2.65"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-errors/-/cross-inpage-provider-errors-2.2.65.tgz#ce702378d13ff2a5f81f861099479c0c340ccb0e"
+  integrity sha512-TqTrdnhZ3f//BjJja2c3ZLqlitC4m9w8Hn9AvoW+YdEKh5BHZwFU8UDK86F6HH+riG62ODOGLnWcoXFCtLu4Mw==
+  dependencies:
+    fast-safe-stringify "^2.0.6"
+
+"@onekeyfe/cross-inpage-provider-events@2.2.65":
+  version "2.2.65"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-events/-/cross-inpage-provider-events-2.2.65.tgz#1ecfb0caffd803aca9153424aae9c878d0593951"
+  integrity sha512-V1LPhioSoeEqO9bo7A0w7dgz35ii7mwmwYhuR0B1l5H0uB4LtITiD/QYpDuoR1Qk+EDpEP5TaNpWaKkO+w/tEw==
+
+"@onekeyfe/cross-inpage-provider-types@2.2.65":
+  version "2.2.65"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/cross-inpage-provider-types/-/cross-inpage-provider-types-2.2.65.tgz#1dedf1ab77953f1885e76466e67d4f1532a346da"
+  integrity sha512-s3sFqvjE3Litw72Vqx26xDYSBbLEKnDr/BRSaepEEQqq2pGrDhIL6bUW7AnnHbLV3QSwnW0H+IrUFgbDOigmRQ==
+
+"@onekeyfe/extension-bridge-injected@2.2.65":
+  version "2.2.65"
+  resolved "https://registry.yarnpkg.com/@onekeyfe/extension-bridge-injected/-/extension-bridge-injected-2.2.65.tgz#248ed6bd355e40ac03d74223622b3177d74aadd9"
+  integrity sha512-NCeR+TGkCmzKeuiXKHgsJtlOjIGprJOsK3XEb5aqkNZuCuWw/LUkUP/De0vwh6UNSs765qJttKa6kTK+AR/3/w==
+  dependencies:
+    "@onekeyfe/cross-inpage-provider-core" "2.2.65"
+    "@onekeyfe/cross-inpage-provider-types" "2.2.65"
+
 "@types/lodash-es@^4.17.12":
   version "4.17.12"
   resolved "https://registry.yarnpkg.com/@types/lodash-es/-/lodash-es-4.17.12.tgz#65f6d1e5f80539aa7cfbfc962de5def0cf4f341b"
@@ -26,6 +69,11 @@ eth-rpc-errors@^4.0.3:
   dependencies:
     fast-safe-stringify "^2.0.6"
 
+events@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
+  integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
+
 fast-safe-stringify@^2.0.6:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.1.1.tgz#c406a83b6e70d9e35ce3b30a81141df30aeba884"
@@ -36,6 +84,11 @@ lodash-es@^4.17.21:
   resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.21.tgz#43e626c46e6591b7750beb2b50117390c609e3ee"
   integrity sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==
 
+lodash-es@^4.18.1:
+  version "4.18.1"
+  resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.18.1.tgz#b962eeb80d9d983a900bf342961fb7418ca10b1d"
+  integrity sha512-J8xewKD/Gk22OZbhpOVSwcs60zhd95ESDwezOFuA3/099925PdHJ7OFHNTGtajL3AlZkykD32HykiMo+BIBI8A==
+
 long@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/long/-/long-4.0.0.tgz#9a7b71cfb7d361a194ea555241c92f7468d5bf28"
@@ -45,3 +98,8 @@ mitt@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/mitt/-/mitt-3.0.0.tgz#69ef9bd5c80ff6f57473e8d89326d01c414be0bd"
   integrity sha512-7dX2/10ITVyqh4aOSVI9gdape+t9l2/8QxHrFmUXu4EEUpdlxl6RudZUPZoc+zuY2hk1j7XxVroIVIan/pD/SQ==
+
+ms@^2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
+  integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==

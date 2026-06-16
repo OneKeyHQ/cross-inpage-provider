@@ -11,9 +11,14 @@ import { hexToBytes, bytesToHex } from '@noble/hashes/utils';
 import { useWallet } from '../../../components/connect/WalletContext';
 import DappList from '../../../components/DAppList';
 import params from './params';
-import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
+// @mysten/sui 2.x: the JSON-RPC client + helpers moved to /jsonRpc
+// (SuiClient -> SuiJsonRpcClient, getFullnodeUrl -> getJsonRpcFullnodeUrl)
+import {
+  getJsonRpcFullnodeUrl as getFullnodeUrl,
+  SuiJsonRpcClient as SuiClient,
+} from '@mysten/sui/jsonRpc';
 import { SUI_TYPE_ARG, isValidSuiAddress, normalizeSuiAddress } from '@mysten/sui/utils';
-import type { CoinStruct } from '@mysten/sui/client';
+import type { CoinStruct } from '@mysten/sui/jsonRpc';
 import { bcs } from '@mysten/sui/bcs';
 
 import {
@@ -287,6 +292,14 @@ function Example() {
     return params.signTokenTransaction(currentAccount?.address ?? '');
   }, [currentAccount?.address]);
 
+  const sendToAddressBalanceParams = useMemo(() => {
+    return params.sendToAddressBalance(currentAccount?.address ?? '');
+  }, [currentAccount?.address]);
+
+  const withdrawFromAddressBalanceParams = useMemo(() => {
+    return params.withdrawFromAddressBalance(currentAccount?.address ?? '');
+  }, [currentAccount?.address]);
+
   return (
     <>
       <InfoLayout title="Base Info">
@@ -523,7 +536,10 @@ function Example() {
             },
           ]}
           onExecute={async (request: string) => {
-            const mainnet = new SuiClient({ url: getFullnodeUrl('mainnet') });
+            const mainnet = new SuiClient({
+              url: getFullnodeUrl('mainnet'),
+              network: 'mainnet',
+            });
             const origBytes = Buffer.from(request, 'base64');
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const parsed: any = bcs.TransactionData.parse(origBytes);
@@ -752,6 +768,80 @@ function Example() {
         />
       </ApiGroup>
 
+      <ApiGroup title="Address Balance (accumulator)">
+        <ApiPayload
+          title="send_funds"
+          description="存入余额地址：0x2::coin::send_funds 把币转入收款方的 address balance（任何人都可存入，自动合并）"
+          presupposeParams={sendToAddressBalanceParams}
+          onExecute={async (request: string) => {
+            const {
+              from,
+              to,
+              amount,
+            }: {
+              from: string;
+              to: string;
+              amount: number;
+            } = JSON.parse(request);
+
+            const tx = new Transaction();
+            tx.setSender(from);
+            tx.moveCall({
+              target: '0x2::coin::send_funds',
+              typeArguments: [SUI_TYPE_ARG],
+              arguments: [
+                // coinWithBalance: sources from owned coins / address balance
+                tx.coin({ type: SUI_TYPE_ARG, balance: BigInt(amount) }),
+                tx.pure.address(to),
+              ],
+            });
+
+            const res: unknown = await signAndExecuteTransaction({
+              transaction: tx,
+              account: currentAccount,
+            });
+            return JSON.stringify(res);
+          }}
+        />
+
+        <ApiPayload
+          title="redeem_funds"
+          description="花余额地址的钱：tx.withdrawal + 0x2::coin::redeem_funds 从自己的 address balance 取出并转给收款方（只有 owner 可取出）"
+          presupposeParams={withdrawFromAddressBalanceParams}
+          onExecute={async (request: string) => {
+            const {
+              from,
+              to,
+              amount,
+            }: {
+              from: string;
+              to: string;
+              amount: number;
+            } = JSON.parse(request);
+
+            const tx = new Transaction();
+            tx.setSender(from);
+            const [withdrawn] = tx.moveCall({
+              target: '0x2::coin::redeem_funds',
+              typeArguments: [SUI_TYPE_ARG],
+              arguments: [
+                tx.withdrawal({
+                  amount: BigInt(amount).toString(),
+                  type: SUI_TYPE_ARG,
+                }),
+              ],
+            });
+            tx.transferObjects([withdrawn], to);
+
+            const res: unknown = await signAndExecuteTransaction({
+              transaction: tx,
+              account: currentAccount,
+            });
+            return JSON.stringify(res);
+          }}
+        />
+      </ApiGroup>
+
       <ApiGroup title="业务测试">
         <TransferForm />
       </ApiGroup>
@@ -764,18 +854,19 @@ function Example() {
 const queryClient = new QueryClient();
 
 const { networkConfig } = createNetworkConfig({
-  testnet: { url: getFullnodeUrl('testnet') },
-  mainnet: { url: getFullnodeUrl('mainnet') },
+  testnet: { url: getFullnodeUrl('testnet'), network: 'testnet' },
+  mainnet: { url: getFullnodeUrl('mainnet'), network: 'mainnet' },
 });
 
 export default function App() {
-  const [activeNetwork, setActiveNetwork] = useState('mainnet');
+  const [activeNetwork, setActiveNetwork] = useState<'mainnet' | 'testnet'>(
+    'mainnet',
+  );
 
   return (
     <QueryClientProvider client={queryClient}>
       <SuiClientProvider
         networks={networkConfig}
-        // @ts-expect-error
         network={activeNetwork}
         onNetworkChange={(network) => {
           setActiveNetwork(network);

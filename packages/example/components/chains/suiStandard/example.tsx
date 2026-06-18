@@ -255,6 +255,183 @@ function TransferForm() {
   );
 }
 
+// 复用 TransferForm 的资产加载逻辑：按 coinType 聚合当前账户的币并填充下拉框
+function useAssetCombobox(
+  apiFromRef: React.RefObject<ApiFormRef>,
+  assetsComboboxRef: React.RefObject<ApiComboboxRef<CoinStruct[]>>,
+) {
+  const client = useSuiClient();
+  const currentAccount = useCurrentAccount();
+
+  const getCoins = async () => {
+    const coins = await client.getAllCoins({ owner: currentAccount?.address });
+
+    return coins.data.reduce((acc, coin) => {
+      const coinType = coin.coinType;
+      if (!acc.has(coinType)) {
+        acc.set(coinType, []);
+      }
+      acc.get(coinType)?.push(coin);
+      return acc;
+    }, new Map<string, CoinStruct[]>());
+  };
+
+  useEffect(() => {
+    if (currentAccount && currentAccount?.address) {
+      apiFromRef.current?.setValue('to', currentAccount.address);
+      void getCoins().then((coinTypes) => {
+        const options = Array.from(coinTypes.keys()).map((key) => {
+          return {
+            label: key,
+            value: key,
+            extra: coinTypes.get(key),
+          };
+        });
+        assetsComboboxRef.current?.setOptions(options);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentAccount]);
+}
+
+function SendFundsForm() {
+  const client = useSuiClient();
+  const currentAccount = useCurrentAccount();
+  const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+
+  const apiFromRef = useRef<ApiFormRef>(null);
+  const assetsComboboxRef = useRef<ApiComboboxRef<CoinStruct[]>>(null);
+
+  useAssetCombobox(apiFromRef, assetsComboboxRef);
+
+  const handleSend = async () => {
+    const from = currentAccount?.address;
+    const asset = assetsComboboxRef.current?.getCurrentOption();
+    const to = apiFromRef.current?.getValue('to');
+    const amount = apiFromRef.current?.getValue('amount');
+    const decimals = apiFromRef.current?.getValue('assetDecimals');
+
+    const coinType = asset?.value;
+    const amountBNString = new BigNumber(amount).shiftedBy(decimals).toString();
+
+    const tx = new Transaction();
+    tx.setSender(from);
+    tx.moveCall({
+      target: '0x2::coin::send_funds',
+      typeArguments: [coinType],
+      arguments: [
+        // coinWithBalance: sources from owned coins / address balance
+        tx.coin({ type: coinType, balance: BigInt(amountBNString) }),
+        tx.pure.address(to),
+      ],
+    });
+
+    const res: unknown = await signAndExecuteTransaction({
+      transaction: tx,
+      account: currentAccount,
+    });
+    apiFromRef.current?.setValue('result', JSON.stringify(res));
+  };
+
+  return (
+    <ApiForm
+      title="send_funds"
+      description="存入余额地址：0x2::coin::send_funds 把币转入收款方的 address balance（任何人都可存入，自动合并）"
+      ref={apiFromRef}
+    >
+      <ApiForm.Combobox
+        id="asset"
+        label="选择资产"
+        placeholder="请选择资产"
+        required
+        ref={assetsComboboxRef}
+      />
+      <ApiForm.Text id="assetInfo" type="info" />
+      <ApiForm.Text id="assetDecimals" type="info" hidden />
+      <AssetInfoView viewRef={apiFromRef.current} client={client} />
+      <ApiForm.Field id="to" label="to" placeholder="请输入收款地址" />
+      <ApiForm.Field id="amount" label="存入金额" defaultValue="0.0001" />
+      <ApiForm.Button
+        id="send"
+        label="send_funds"
+        onClick={handleSend}
+        availableDependencyFields={[{ fieldIds: ['asset', 'to', 'amount'] }]}
+      />
+      <ApiForm.AutoHeightTextArea id="result" />
+    </ApiForm>
+  );
+}
+
+function RedeemFundsForm() {
+  const client = useSuiClient();
+  const currentAccount = useCurrentAccount();
+  const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+
+  const apiFromRef = useRef<ApiFormRef>(null);
+  const assetsComboboxRef = useRef<ApiComboboxRef<CoinStruct[]>>(null);
+
+  useAssetCombobox(apiFromRef, assetsComboboxRef);
+
+  const handleRedeem = async () => {
+    const from = currentAccount?.address;
+    const asset = assetsComboboxRef.current?.getCurrentOption();
+    const to = apiFromRef.current?.getValue('to');
+    const amount = apiFromRef.current?.getValue('amount');
+    const decimals = apiFromRef.current?.getValue('assetDecimals');
+
+    const coinType = asset?.value;
+    const amountBNString = new BigNumber(amount).shiftedBy(decimals).toString();
+
+    const tx = new Transaction();
+    tx.setSender(from);
+    const [withdrawn] = tx.moveCall({
+      target: '0x2::coin::redeem_funds',
+      typeArguments: [coinType],
+      arguments: [
+        tx.withdrawal({
+          amount: BigInt(amountBNString).toString(),
+          type: coinType,
+        }),
+      ],
+    });
+    tx.transferObjects([withdrawn], to);
+
+    const res: unknown = await signAndExecuteTransaction({
+      transaction: tx,
+      account: currentAccount,
+    });
+    apiFromRef.current?.setValue('result', JSON.stringify(res));
+  };
+
+  return (
+    <ApiForm
+      title="redeem_funds"
+      description="花余额地址的钱：tx.withdrawal + 0x2::coin::redeem_funds 从自己的 address balance 取出并转给收款方（只有 owner 可取出）"
+      ref={apiFromRef}
+    >
+      <ApiForm.Combobox
+        id="asset"
+        label="选择资产"
+        placeholder="请选择资产"
+        required
+        ref={assetsComboboxRef}
+      />
+      <ApiForm.Text id="assetInfo" type="info" />
+      <ApiForm.Text id="assetDecimals" type="info" hidden />
+      <AssetInfoView viewRef={apiFromRef.current} client={client} />
+      <ApiForm.Field id="to" label="to" placeholder="请输入收款地址" />
+      <ApiForm.Field id="amount" label="取出金额" defaultValue="0.0001" />
+      <ApiForm.Button
+        id="redeem"
+        label="redeem_funds"
+        onClick={handleRedeem}
+        availableDependencyFields={[{ fieldIds: ['asset', 'to', 'amount'] }]}
+      />
+      <ApiForm.AutoHeightTextArea id="result" />
+    </ApiForm>
+  );
+}
+
 function Example() {
   const client = useSuiClient();
   const { setProvider } = useWallet();
@@ -290,14 +467,6 @@ function Example() {
 
   const signTokenTransactionParams = useMemo(() => {
     return params.signTokenTransaction(currentAccount?.address ?? '');
-  }, [currentAccount?.address]);
-
-  const sendToAddressBalanceParams = useMemo(() => {
-    return params.sendToAddressBalance(currentAccount?.address ?? '');
-  }, [currentAccount?.address]);
-
-  const withdrawFromAddressBalanceParams = useMemo(() => {
-    return params.withdrawFromAddressBalance(currentAccount?.address ?? '');
   }, [currentAccount?.address]);
 
   return (
@@ -769,81 +938,8 @@ function Example() {
       </ApiGroup>
 
       <ApiGroup title="Address Balance (accumulator)">
-        <ApiPayload
-          title="send_funds"
-          description="存入余额地址：0x2::coin::send_funds 把币转入收款方的 address balance（任何人都可存入，自动合并）"
-          presupposeParams={sendToAddressBalanceParams}
-          onExecute={async (request: string) => {
-            const {
-              from,
-              to,
-              amount,
-              coinType = SUI_TYPE_ARG,
-            }: {
-              from: string;
-              to: string;
-              amount: number;
-              coinType?: string;
-            } = JSON.parse(request);
-
-            const tx = new Transaction();
-            tx.setSender(from);
-            tx.moveCall({
-              target: '0x2::coin::send_funds',
-              typeArguments: [coinType],
-              arguments: [
-                // coinWithBalance: sources from owned coins / address balance
-                tx.coin({ type: coinType, balance: BigInt(amount) }),
-                tx.pure.address(to),
-              ],
-            });
-
-            const res: unknown = await signAndExecuteTransaction({
-              transaction: tx,
-              account: currentAccount,
-            });
-            return JSON.stringify(res);
-          }}
-        />
-
-        <ApiPayload
-          title="redeem_funds"
-          description="花余额地址的钱：tx.withdrawal + 0x2::coin::redeem_funds 从自己的 address balance 取出并转给收款方（只有 owner 可取出）"
-          presupposeParams={withdrawFromAddressBalanceParams}
-          onExecute={async (request: string) => {
-            const {
-              from,
-              to,
-              amount,
-              coinType = SUI_TYPE_ARG,
-            }: {
-              from: string;
-              to: string;
-              amount: number;
-              coinType?: string;
-            } = JSON.parse(request);
-
-            const tx = new Transaction();
-            tx.setSender(from);
-            const [withdrawn] = tx.moveCall({
-              target: '0x2::coin::redeem_funds',
-              typeArguments: [coinType],
-              arguments: [
-                tx.withdrawal({
-                  amount: BigInt(amount).toString(),
-                  type: coinType,
-                }),
-              ],
-            });
-            tx.transferObjects([withdrawn], to);
-
-            const res: unknown = await signAndExecuteTransaction({
-              transaction: tx,
-              account: currentAccount,
-            });
-            return JSON.stringify(res);
-          }}
-        />
+        <SendFundsForm />
+        <RedeemFundsForm />
       </ApiGroup>
 
       <ApiGroup title="业务测试">

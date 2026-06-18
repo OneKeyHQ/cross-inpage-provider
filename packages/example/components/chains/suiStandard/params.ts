@@ -34,30 +34,6 @@ export default {
       }),
     },
   ],
-  sendToAddressBalance: (address: string) => [
-    {
-      id: 'sendToAddressBalance',
-      name: 'coin::send_funds (deposit to address balance)',
-      value: JSON.stringify({
-        from: address,
-        to: address,
-        amount: 100000, // MIST = 0.0001 SUI
-        coinType: '0x2::sui::SUI', // 资产类型，可改为任意 coin type
-      }),
-    },
-  ],
-  withdrawFromAddressBalance: (address: string) => [
-    {
-      id: 'withdrawFromAddressBalance',
-      name: 'coin::redeem_funds (spend address balance)',
-      value: JSON.stringify({
-        from: address,
-        to: address,
-        amount: 100000, // MIST = 0.0001 SUI
-        coinType: '0x2::sui::SUI', // 资产类型，可改为任意 coin type
-      }),
-    },
-  ],
   signMultiRecipientTransaction: (address: string) => [
     {
       id: 'signTransaction-multi-recipient',

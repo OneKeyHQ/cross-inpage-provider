@@ -80,7 +80,7 @@ const SUI_SUPPORTED_TRANSACTION_INTENTS = ['CoinWithBalance'];
 async function serializeSuiTransaction(transaction: SuiSerializableTransaction) {
   if (transaction.toJSON) {
     return transaction.toJSON({
-      supportedIntents: SUI_SUPPORTED_TRANSACTION_INTENTS,
+      supportedIntents: [...SUI_SUPPORTED_TRANSACTION_INTENTS],
     });
   }
   if (transaction.serialize) {

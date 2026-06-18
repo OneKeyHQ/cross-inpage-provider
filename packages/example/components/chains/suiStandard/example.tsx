@@ -104,6 +104,31 @@ function parseSignedSuiTransactionResult(result: string) {
   return { transactionBlock, signature };
 }
 
+function createDemoTransferTransaction({
+  from,
+  to,
+  amount,
+}: {
+  from: string;
+  to: string;
+  amount: number;
+}) {
+  const transfer = new Transaction();
+  transfer.setSender(from);
+  const [coin] = transfer.splitCoins(transfer.gas, [amount]);
+  transfer.transferObjects([coin], to);
+  return transfer;
+}
+
+function forceSerializeFailure(transaction: Transaction) {
+  Object.defineProperty(transaction, 'serialize', {
+    value: () => {
+      throw new Error('Invalid input');
+    },
+  });
+  return transaction;
+}
+
 function AssetInfoView({
   viewRef,
   client,
@@ -630,6 +655,120 @@ function Example() {
               transaction: tx,
               account: currentAccount,
             });
+            return JSON.stringify(res);
+          }}
+        />
+
+        <ApiPayload
+          title="signTransactionBlock (direct legacy)"
+          description="直接调用 deprecated sui:signTransactionBlock，覆盖旧 transactionBlock.serialize() 路径"
+          presupposeParams={signTransactionPresupposeParams}
+          onExecute={async (request: string) => {
+            const {
+              from,
+              to,
+              amount,
+            }: {
+              from: string;
+              to: string;
+              amount: number;
+            } = JSON.parse(request);
+
+            const signTransactionBlockFeature =
+              currentWallet?.features['sui:signTransactionBlock'];
+            if (!currentAccount || !signTransactionBlockFeature) {
+              throw new Error('signTransactionBlock is not available');
+            }
+
+            const res = await signTransactionBlockFeature.signTransactionBlock({
+              transactionBlock: createDemoTransferTransaction({ from, to, amount }),
+              account: currentAccount,
+              chain: currentAccount.chains[0] ?? 'sui:mainnet',
+            });
+            return JSON.stringify(res);
+          }}
+          onValidate={async (_request: string, result: string) => {
+            const { transactionBlock, signature } = parseSignedSuiTransactionResult(result);
+            const publicKey = await verifyTransactionSignature(
+              Buffer.from(transactionBlock, 'base64'),
+              signature,
+            );
+
+            return (currentAccount.address === publicKey.toSuiAddress()).toString();
+          }}
+        />
+
+        <ApiPayload
+          title="signTransactionBlock (direct fallback)"
+          description="直接调用 deprecated sui:signTransactionBlock，并让 serialize 抛错，覆盖 fallback toJSON 路径"
+          presupposeParams={signTransactionPresupposeParams}
+          onExecute={async (request: string) => {
+            const {
+              from,
+              to,
+              amount,
+            }: {
+              from: string;
+              to: string;
+              amount: number;
+            } = JSON.parse(request);
+
+            const signTransactionBlockFeature =
+              currentWallet?.features['sui:signTransactionBlock'];
+            if (!currentAccount || !signTransactionBlockFeature) {
+              throw new Error('signTransactionBlock is not available');
+            }
+
+            const res = await signTransactionBlockFeature.signTransactionBlock({
+              transactionBlock: forceSerializeFailure(
+                createDemoTransferTransaction({ from, to, amount }),
+              ),
+              account: currentAccount,
+              chain: currentAccount.chains[0] ?? 'sui:mainnet',
+            });
+            return JSON.stringify(res);
+          }}
+          onValidate={async (_request: string, result: string) => {
+            const { transactionBlock, signature } = parseSignedSuiTransactionResult(result);
+            const publicKey = await verifyTransactionSignature(
+              Buffer.from(transactionBlock, 'base64'),
+              signature,
+            );
+
+            return (currentAccount.address === publicKey.toSuiAddress()).toString();
+          }}
+        />
+
+        <ApiPayload
+          title="signAndExecuteTransactionBlock (direct legacy)"
+          description="直接调用 deprecated sui:signAndExecuteTransactionBlock，覆盖旧 transactionBlock.serialize() 执行路径"
+          presupposeParams={signTransactionPresupposeParams}
+          onExecute={async (request: string) => {
+            const {
+              from,
+              to,
+              amount,
+            }: {
+              from: string;
+              to: string;
+              amount: number;
+            } = JSON.parse(request);
+
+            const signAndExecuteTransactionBlockFeature =
+              currentWallet?.features['sui:signAndExecuteTransactionBlock'];
+            if (!currentAccount || !signAndExecuteTransactionBlockFeature) {
+              throw new Error('signAndExecuteTransactionBlock is not available');
+            }
+
+            const res =
+              await signAndExecuteTransactionBlockFeature.signAndExecuteTransactionBlock({
+                transactionBlock: createDemoTransferTransaction({ from, to, amount }),
+                account: currentAccount,
+                chain: currentAccount.chains[0] ?? 'sui:mainnet',
+                options: {
+                  showEffects: true,
+                },
+              });
             return JSON.stringify(res);
           }}
         />

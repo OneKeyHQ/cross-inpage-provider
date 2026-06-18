@@ -89,6 +89,19 @@ async function serializeSuiTransaction(transaction: SuiSerializableTransaction) 
   throw new Error('Invalid Sui transaction');
 }
 
+async function serializeSuiTransactionBlock(transaction: SuiSerializableTransaction) {
+  if (transaction.serialize) {
+    try {
+      return transaction.serialize();
+    } catch (error) {
+      if (!transaction.toJSON) {
+        throw error;
+      }
+    }
+  }
+  return serializeSuiTransaction(transaction);
+}
+
 export type SuiRequest = {
   'hasPermissions': (permissions: readonly PermissionType[]) => Promise<boolean>;
 
@@ -294,7 +307,7 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
         account: input.account,
         chain: input.chain,
         walletSerialize: JSON.stringify(input.account),
-        blockSerialize: await serializeSuiTransaction(input.transactionBlock),
+        blockSerialize: await serializeSuiTransactionBlock(input.transactionBlock),
       },
     }) as Promise<SuiSignAndExecuteTransactionBlockOutput>;
   }
@@ -308,7 +321,7 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
         account: input.account,
         chain: input.chain,
         walletSerialize: JSON.stringify(input.account),
-        blockSerialize: await serializeSuiTransaction(input.transactionBlock),
+        blockSerialize: await serializeSuiTransactionBlock(input.transactionBlock),
       },
     });
   }

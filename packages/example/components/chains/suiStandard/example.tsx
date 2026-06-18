@@ -778,20 +778,22 @@ function Example() {
               from,
               to,
               amount,
+              coinType = SUI_TYPE_ARG,
             }: {
               from: string;
               to: string;
               amount: number;
+              coinType?: string;
             } = JSON.parse(request);
 
             const tx = new Transaction();
             tx.setSender(from);
             tx.moveCall({
               target: '0x2::coin::send_funds',
-              typeArguments: [SUI_TYPE_ARG],
+              typeArguments: [coinType],
               arguments: [
                 // coinWithBalance: sources from owned coins / address balance
-                tx.coin({ type: SUI_TYPE_ARG, balance: BigInt(amount) }),
+                tx.coin({ type: coinType, balance: BigInt(amount) }),
                 tx.pure.address(to),
               ],
             });
@@ -813,21 +815,23 @@ function Example() {
               from,
               to,
               amount,
+              coinType = SUI_TYPE_ARG,
             }: {
               from: string;
               to: string;
               amount: number;
+              coinType?: string;
             } = JSON.parse(request);
 
             const tx = new Transaction();
             tx.setSender(from);
             const [withdrawn] = tx.moveCall({
               target: '0x2::coin::redeem_funds',
-              typeArguments: [SUI_TYPE_ARG],
+              typeArguments: [coinType],
               arguments: [
                 tx.withdrawal({
                   amount: BigInt(amount).toString(),
-                  type: SUI_TYPE_ARG,
+                  type: coinType,
                 }),
               ],
             });

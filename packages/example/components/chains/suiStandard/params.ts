@@ -42,6 +42,7 @@ export default {
         from: address,
         to: address,
         amount: 100000, // MIST = 0.0001 SUI
+        coinType: '0x2::sui::SUI', // 资产类型，可改为任意 coin type
       }),
     },
   ],
@@ -53,6 +54,7 @@ export default {
         from: address,
         to: address,
         amount: 100000, // MIST = 0.0001 SUI
+        coinType: '0x2::sui::SUI', // 资产类型，可改为任意 coin type
       }),
     },
   ],

@@ -1,10 +1,13 @@
 // Copyright (c) Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-import { SuiObjectRef, SuiClient } from '@mysten/sui/client';
+// @mysten/sui 2.x: types moved to /jsonRpc, SuiClient -> SuiJsonRpcClient
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { Transaction } from '@mysten/sui/transactions';
-import type { CoinStruct } from '@mysten/sui/client';
+import type {
+  SuiObjectRef,
+  SuiJsonRpcClient as SuiClient,
+} from '@mysten/sui/jsonRpc';
 export async function sponsorTransaction(
   client: SuiClient,
   sender: string,

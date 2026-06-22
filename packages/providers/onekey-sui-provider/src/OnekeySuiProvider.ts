@@ -70,6 +70,38 @@ type OneKeySuiSignAndExecuteTransactionInput = Omit<
   transaction: string;
 };
 
+type SuiSerializableTransaction = {
+  serialize?: () => string;
+  toJSON?: (options?: { supportedIntents?: string[] }) => string | Promise<string>;
+};
+
+const SUI_SUPPORTED_TRANSACTION_INTENTS = ['CoinWithBalance'];
+
+async function serializeSuiTransaction(transaction: SuiSerializableTransaction) {
+  if (transaction.toJSON) {
+    return transaction.toJSON({
+      supportedIntents: [...SUI_SUPPORTED_TRANSACTION_INTENTS],
+    });
+  }
+  if (transaction.serialize) {
+    return transaction.serialize();
+  }
+  throw new Error('Invalid Sui transaction');
+}
+
+async function serializeSuiTransactionBlock(transaction: SuiSerializableTransaction) {
+  if (transaction.serialize) {
+    try {
+      return transaction.serialize();
+    } catch (error) {
+      if (!transaction.toJSON) {
+        throw error;
+      }
+    }
+  }
+  return serializeSuiTransaction(transaction);
+}
+
 export type SuiRequest = {
   'hasPermissions': (permissions: readonly PermissionType[]) => Promise<boolean>;
 
@@ -275,7 +307,7 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
         account: input.account,
         chain: input.chain,
         walletSerialize: JSON.stringify(input.account),
-        blockSerialize: input.transactionBlock.serialize(),
+        blockSerialize: await serializeSuiTransactionBlock(input.transactionBlock),
       },
     }) as Promise<SuiSignAndExecuteTransactionBlockOutput>;
   }
@@ -289,7 +321,7 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
         account: input.account,
         chain: input.chain,
         walletSerialize: JSON.stringify(input.account),
-        blockSerialize: input.transactionBlock.serialize(),
+        blockSerialize: await serializeSuiTransactionBlock(input.transactionBlock),
       },
     });
   }
@@ -322,7 +354,7 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
     return this._callBridge({
       method: 'signTransaction',
       params: {
-        transaction: await input.transaction.toJSON(),
+        transaction: await serializeSuiTransaction(input.transaction),
         account: input.account,
         chain: input.chain,
       },
@@ -335,7 +367,7 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
     return this._callBridge({
       method: 'signAndExecuteTransaction',
       params: {
-        transaction: await input.transaction.toJSON(),
+        transaction: await serializeSuiTransaction(input.transaction),
         account: input.account,
         chain: input.chain,
       },

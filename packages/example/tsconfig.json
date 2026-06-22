@@ -13,7 +13,7 @@
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
@@ -21,7 +21,12 @@
     "strictNullChecks": false,
     "paths": {
       "components": ["./components"],
-      "lib": ["./lib"]
+      "lib": ["./lib"],
+      // bundler moduleResolution (needed for @mysten/sui 2.x exports) can't
+      // resolve this deep path that lacks an exports entry; map it explicitly.
+      "@benfen/bfc.js/dist/cjs/wallet-standard": [
+        "./node_modules/@benfen/bfc.js/dist/esm/wallet-standard/index.d.ts"
+      ]
     }
   },
   "include": [

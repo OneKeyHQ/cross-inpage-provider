@@ -11,9 +11,14 @@ import { hexToBytes, bytesToHex } from '@noble/hashes/utils';
 import { useWallet } from '../../../components/connect/WalletContext';
 import DappList from '../../../components/DAppList';
 import params from './params';
-import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
+// @mysten/sui 2.x: the JSON-RPC client + helpers moved to /jsonRpc
+// (SuiClient -> SuiJsonRpcClient, getFullnodeUrl -> getJsonRpcFullnodeUrl)
+import {
+  getJsonRpcFullnodeUrl as getFullnodeUrl,
+  SuiJsonRpcClient as SuiClient,
+} from '@mysten/sui/jsonRpc';
 import { SUI_TYPE_ARG, isValidSuiAddress, normalizeSuiAddress } from '@mysten/sui/utils';
-import type { CoinStruct } from '@mysten/sui/client';
+import type { CoinStruct } from '@mysten/sui/jsonRpc';
 import { bcs } from '@mysten/sui/bcs';
 
 import {
@@ -97,6 +102,31 @@ function parseSignedSuiTransactionResult(result: string) {
     throw new Error('Missing signature');
   }
   return { transactionBlock, signature };
+}
+
+function createDemoTransferTransaction({
+  from,
+  to,
+  amount,
+}: {
+  from: string;
+  to: string;
+  amount: number;
+}) {
+  const transfer = new Transaction();
+  transfer.setSender(from);
+  const [coin] = transfer.splitCoins(transfer.gas, [amount]);
+  transfer.transferObjects([coin], to);
+  return transfer;
+}
+
+function forceSerializeFailure(transaction: Transaction) {
+  Object.defineProperty(transaction, 'serialize', {
+    value: () => {
+      throw new Error('Invalid input');
+    },
+  });
+  return transaction;
 }
 
 function AssetInfoView({
@@ -243,6 +273,183 @@ function TransferForm() {
         id="transfer"
         label="transfer"
         onClick={handleTransfer}
+        availableDependencyFields={[{ fieldIds: ['asset', 'to', 'amount'] }]}
+      />
+      <ApiForm.AutoHeightTextArea id="result" />
+    </ApiForm>
+  );
+}
+
+// 复用 TransferForm 的资产加载逻辑：按 coinType 聚合当前账户的币并填充下拉框
+function useAssetCombobox(
+  apiFromRef: React.RefObject<ApiFormRef>,
+  assetsComboboxRef: React.RefObject<ApiComboboxRef<CoinStruct[]>>,
+) {
+  const client = useSuiClient();
+  const currentAccount = useCurrentAccount();
+
+  const getCoins = async () => {
+    const coins = await client.getAllCoins({ owner: currentAccount?.address });
+
+    return coins.data.reduce((acc, coin) => {
+      const coinType = coin.coinType;
+      if (!acc.has(coinType)) {
+        acc.set(coinType, []);
+      }
+      acc.get(coinType)?.push(coin);
+      return acc;
+    }, new Map<string, CoinStruct[]>());
+  };
+
+  useEffect(() => {
+    if (currentAccount && currentAccount?.address) {
+      apiFromRef.current?.setValue('to', currentAccount.address);
+      void getCoins().then((coinTypes) => {
+        const options = Array.from(coinTypes.keys()).map((key) => {
+          return {
+            label: key,
+            value: key,
+            extra: coinTypes.get(key),
+          };
+        });
+        assetsComboboxRef.current?.setOptions(options);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentAccount]);
+}
+
+function SendFundsForm() {
+  const client = useSuiClient();
+  const currentAccount = useCurrentAccount();
+  const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+
+  const apiFromRef = useRef<ApiFormRef>(null);
+  const assetsComboboxRef = useRef<ApiComboboxRef<CoinStruct[]>>(null);
+
+  useAssetCombobox(apiFromRef, assetsComboboxRef);
+
+  const handleSend = async () => {
+    const from = currentAccount?.address;
+    const asset = assetsComboboxRef.current?.getCurrentOption();
+    const to = apiFromRef.current?.getValue('to');
+    const amount = apiFromRef.current?.getValue('amount');
+    const decimals = apiFromRef.current?.getValue('assetDecimals');
+
+    const coinType = asset?.value;
+    const amountBNString = new BigNumber(amount).shiftedBy(decimals).toString();
+
+    const tx = new Transaction();
+    tx.setSender(from);
+    tx.moveCall({
+      target: '0x2::coin::send_funds',
+      typeArguments: [coinType],
+      arguments: [
+        // coinWithBalance: sources from owned coins / address balance
+        tx.coin({ type: coinType, balance: BigInt(amountBNString) }),
+        tx.pure.address(to),
+      ],
+    });
+
+    const res: unknown = await signAndExecuteTransaction({
+      transaction: tx,
+      account: currentAccount,
+    });
+    apiFromRef.current?.setValue('result', JSON.stringify(res));
+  };
+
+  return (
+    <ApiForm
+      title="send_funds"
+      description="存入余额地址：0x2::coin::send_funds 把币转入收款方的 address balance（任何人都可存入，自动合并）"
+      ref={apiFromRef}
+    >
+      <ApiForm.Combobox
+        id="asset"
+        label="选择资产"
+        placeholder="请选择资产"
+        required
+        ref={assetsComboboxRef}
+      />
+      <ApiForm.Text id="assetInfo" type="info" />
+      <ApiForm.Text id="assetDecimals" type="info" hidden />
+      <AssetInfoView viewRef={apiFromRef.current} client={client} />
+      <ApiForm.Field id="to" label="to" placeholder="请输入收款地址" />
+      <ApiForm.Field id="amount" label="存入金额" defaultValue="0.0001" />
+      <ApiForm.Button
+        id="send"
+        label="send_funds"
+        onClick={handleSend}
+        availableDependencyFields={[{ fieldIds: ['asset', 'to', 'amount'] }]}
+      />
+      <ApiForm.AutoHeightTextArea id="result" />
+    </ApiForm>
+  );
+}
+
+function RedeemFundsForm() {
+  const client = useSuiClient();
+  const currentAccount = useCurrentAccount();
+  const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+
+  const apiFromRef = useRef<ApiFormRef>(null);
+  const assetsComboboxRef = useRef<ApiComboboxRef<CoinStruct[]>>(null);
+
+  useAssetCombobox(apiFromRef, assetsComboboxRef);
+
+  const handleRedeem = async () => {
+    const from = currentAccount?.address;
+    const asset = assetsComboboxRef.current?.getCurrentOption();
+    const to = apiFromRef.current?.getValue('to');
+    const amount = apiFromRef.current?.getValue('amount');
+    const decimals = apiFromRef.current?.getValue('assetDecimals');
+
+    const coinType = asset?.value;
+    const amountBNString = new BigNumber(amount).shiftedBy(decimals).toString();
+
+    const tx = new Transaction();
+    tx.setSender(from);
+    const [withdrawn] = tx.moveCall({
+      target: '0x2::coin::redeem_funds',
+      typeArguments: [coinType],
+      arguments: [
+        tx.withdrawal({
+          amount: BigInt(amountBNString).toString(),
+          type: coinType,
+        }),
+      ],
+    });
+    tx.transferObjects([withdrawn], to);
+
+    const res: unknown = await signAndExecuteTransaction({
+      transaction: tx,
+      account: currentAccount,
+    });
+    apiFromRef.current?.setValue('result', JSON.stringify(res));
+  };
+
+  return (
+    <ApiForm
+      title="redeem_funds"
+      description="花余额地址的钱：tx.withdrawal + 0x2::coin::redeem_funds 从自己的 address balance 取出并转给收款方（只有 owner 可取出）"
+      ref={apiFromRef}
+    >
+      <ApiForm.Combobox
+        id="asset"
+        label="选择资产"
+        placeholder="请选择资产"
+        required
+        ref={assetsComboboxRef}
+      />
+      <ApiForm.Text id="assetInfo" type="info" />
+      <ApiForm.Text id="assetDecimals" type="info" hidden />
+      <AssetInfoView viewRef={apiFromRef.current} client={client} />
+      <ApiForm.Field id="to" label="to" placeholder="请输入收款地址" />
+      <ApiForm.Field id="amount" label="取出金额" defaultValue="0.0001" />
+      <ApiForm.Button
+        id="redeem"
+        label="redeem_funds"
+        onClick={handleRedeem}
         availableDependencyFields={[{ fieldIds: ['asset', 'to', 'amount'] }]}
       />
       <ApiForm.AutoHeightTextArea id="result" />
@@ -453,6 +660,120 @@ function Example() {
         />
 
         <ApiPayload
+          title="signTransactionBlock (direct legacy)"
+          description="直接调用 deprecated sui:signTransactionBlock，覆盖旧 transactionBlock.serialize() 路径"
+          presupposeParams={signTransactionPresupposeParams}
+          onExecute={async (request: string) => {
+            const {
+              from,
+              to,
+              amount,
+            }: {
+              from: string;
+              to: string;
+              amount: number;
+            } = JSON.parse(request);
+
+            const signTransactionBlockFeature =
+              currentWallet?.features['sui:signTransactionBlock'];
+            if (!currentAccount || !signTransactionBlockFeature) {
+              throw new Error('signTransactionBlock is not available');
+            }
+
+            const res = await signTransactionBlockFeature.signTransactionBlock({
+              transactionBlock: createDemoTransferTransaction({ from, to, amount }),
+              account: currentAccount,
+              chain: currentAccount.chains[0] ?? 'sui:mainnet',
+            });
+            return JSON.stringify(res);
+          }}
+          onValidate={async (_request: string, result: string) => {
+            const { transactionBlock, signature } = parseSignedSuiTransactionResult(result);
+            const publicKey = await verifyTransactionSignature(
+              Buffer.from(transactionBlock, 'base64'),
+              signature,
+            );
+
+            return (currentAccount.address === publicKey.toSuiAddress()).toString();
+          }}
+        />
+
+        <ApiPayload
+          title="signTransactionBlock (direct fallback)"
+          description="直接调用 deprecated sui:signTransactionBlock，并让 serialize 抛错，覆盖 fallback toJSON 路径"
+          presupposeParams={signTransactionPresupposeParams}
+          onExecute={async (request: string) => {
+            const {
+              from,
+              to,
+              amount,
+            }: {
+              from: string;
+              to: string;
+              amount: number;
+            } = JSON.parse(request);
+
+            const signTransactionBlockFeature =
+              currentWallet?.features['sui:signTransactionBlock'];
+            if (!currentAccount || !signTransactionBlockFeature) {
+              throw new Error('signTransactionBlock is not available');
+            }
+
+            const res = await signTransactionBlockFeature.signTransactionBlock({
+              transactionBlock: forceSerializeFailure(
+                createDemoTransferTransaction({ from, to, amount }),
+              ),
+              account: currentAccount,
+              chain: currentAccount.chains[0] ?? 'sui:mainnet',
+            });
+            return JSON.stringify(res);
+          }}
+          onValidate={async (_request: string, result: string) => {
+            const { transactionBlock, signature } = parseSignedSuiTransactionResult(result);
+            const publicKey = await verifyTransactionSignature(
+              Buffer.from(transactionBlock, 'base64'),
+              signature,
+            );
+
+            return (currentAccount.address === publicKey.toSuiAddress()).toString();
+          }}
+        />
+
+        <ApiPayload
+          title="signAndExecuteTransactionBlock (direct legacy)"
+          description="直接调用 deprecated sui:signAndExecuteTransactionBlock，覆盖旧 transactionBlock.serialize() 执行路径"
+          presupposeParams={signTransactionPresupposeParams}
+          onExecute={async (request: string) => {
+            const {
+              from,
+              to,
+              amount,
+            }: {
+              from: string;
+              to: string;
+              amount: number;
+            } = JSON.parse(request);
+
+            const signAndExecuteTransactionBlockFeature =
+              currentWallet?.features['sui:signAndExecuteTransactionBlock'];
+            if (!currentAccount || !signAndExecuteTransactionBlockFeature) {
+              throw new Error('signAndExecuteTransactionBlock is not available');
+            }
+
+            const res =
+              await signAndExecuteTransactionBlockFeature.signAndExecuteTransactionBlock({
+                transactionBlock: createDemoTransferTransaction({ from, to, amount }),
+                account: currentAccount,
+                chain: currentAccount.chains[0] ?? 'sui:mainnet',
+                options: {
+                  showEffects: true,
+                },
+              });
+            return JSON.stringify(res);
+          }}
+        />
+
+        <ApiPayload
           title="signTransactionBlock"
           description="签名交易 (特殊情况，带 clock、system 参数)"
           presupposeParams={signTransactionPresupposeParams}
@@ -523,7 +844,10 @@ function Example() {
             },
           ]}
           onExecute={async (request: string) => {
-            const mainnet = new SuiClient({ url: getFullnodeUrl('mainnet') });
+            const mainnet = new SuiClient({
+              url: getFullnodeUrl('mainnet'),
+              network: 'mainnet',
+            });
             const origBytes = Buffer.from(request, 'base64');
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const parsed: any = bcs.TransactionData.parse(origBytes);
@@ -752,6 +1076,11 @@ function Example() {
         />
       </ApiGroup>
 
+      <ApiGroup title="Address Balance (accumulator)">
+        <SendFundsForm />
+        <RedeemFundsForm />
+      </ApiGroup>
+
       <ApiGroup title="业务测试">
         <TransferForm />
       </ApiGroup>
@@ -764,18 +1093,19 @@ function Example() {
 const queryClient = new QueryClient();
 
 const { networkConfig } = createNetworkConfig({
-  testnet: { url: getFullnodeUrl('testnet') },
-  mainnet: { url: getFullnodeUrl('mainnet') },
+  testnet: { url: getFullnodeUrl('testnet'), network: 'testnet' },
+  mainnet: { url: getFullnodeUrl('mainnet'), network: 'mainnet' },
 });
 
 export default function App() {
-  const [activeNetwork, setActiveNetwork] = useState('mainnet');
+  const [activeNetwork, setActiveNetwork] = useState<'mainnet' | 'testnet'>(
+    'mainnet',
+  );
 
   return (
     <QueryClientProvider client={queryClient}>
       <SuiClientProvider
         networks={networkConfig}
-        // @ts-expect-error
         network={activeNetwork}
         onNetworkChange={(network) => {
           setActiveNetwork(network);

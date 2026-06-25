@@ -310,7 +310,10 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
   signAndSubmitChainedTx(params: SignChainedTxParams[]): Promise<SignChainedTxResult[]> {
     return this.bridgeRequest({
       method: 'signAndSubmitChainedTx',
-      params: JSON.stringify(params),
+      // Number256 fields (e.g. attoAlphAmount / token amounts) may be passed as
+      // bigint by the SDK; convert to string first so JSON.stringify doesn't throw
+      // "Do not know how to serialize a BigInt".
+      params: JSON.stringify(this._sanitizeBridgeParams(params)),
     }) as Promise<SignChainedTxResult[]>;
   }
 

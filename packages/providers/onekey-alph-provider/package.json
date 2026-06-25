@@ -28,7 +28,6 @@
   },
   "dependencies": {
     "@alephium/get-extension-wallet": "^3.0.4",
-    "@alephium/walletconnect-provider": "^3.0.4",
     "@alephium/web3": "^3.0.4",
     "@onekeyfe/cross-inpage-provider-core": "2.2.72",
     "@onekeyfe/cross-inpage-provider-errors": "2.2.72",

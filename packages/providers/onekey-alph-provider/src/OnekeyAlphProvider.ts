@@ -241,6 +241,18 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
     return value;
   }
 
+  /**
+   * Serialize params for a bridge request. The Alephium SDK allows Number256
+   * fields (attoAlphAmount, token amounts, gasPrice, ...) to be passed as
+   * bigint, but a bare JSON.stringify throws "Do not know how to serialize a
+   * BigInt". Sanitize bigint values to string first so every signing method
+   * forwards valid JSON. When the input has no bigint this is an inert deep-copy,
+   * so the serialized output is identical to the previous behavior.
+   */
+  private _stringifyBridgeParams(params: unknown): string {
+    return JSON.stringify(this._sanitizeBridgeParams(params));
+  }
+
   private _createProviderProxy(bridgeMethod: string): unknown {
     const bridge = this.bridgeRequest.bind(this);
     const sanitize = this._sanitizeBridgeParams.bind(this);
@@ -280,7 +292,7 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
   ): Promise<SignDeployContractTxResult> {
     return this.bridgeRequest({
       method: 'signAndSubmitDeployContractTx',
-      params: JSON.stringify(params),
+      params: this._stringifyBridgeParams(params),
     }) as Promise<SignDeployContractTxResult>;
   }
 
@@ -289,45 +301,42 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
   ): Promise<SignExecuteScriptTxResult> {
     return this.bridgeRequest({
       method: 'signAndSubmitExecuteScriptTx',
-      params: JSON.stringify(params),
+      params: this._stringifyBridgeParams(params),
     }) as Promise<SignExecuteScriptTxResult>;
   }
 
   signAndSubmitTransferTx(params: SignTransferTxParams): Promise<SignTransferTxResult> {
     return this.bridgeRequest({
       method: 'signAndSubmitTransferTx',
-      params: JSON.stringify(params),
+      params: this._stringifyBridgeParams(params),
     }) as Promise<SignTransferTxResult>;
   }
 
   signAndSubmitUnsignedTx(params: SignUnsignedTxParams): Promise<SignUnsignedTxResult> {
     return this.bridgeRequest({
       method: 'signAndSubmitUnsignedTx',
-      params: JSON.stringify(params),
+      params: this._stringifyBridgeParams(params),
     }) as Promise<SignUnsignedTxResult>;
   }
 
   signAndSubmitChainedTx(params: SignChainedTxParams[]): Promise<SignChainedTxResult[]> {
     return this.bridgeRequest({
       method: 'signAndSubmitChainedTx',
-      // Number256 fields (e.g. attoAlphAmount / token amounts) may be passed as
-      // bigint by the SDK; convert to string first so JSON.stringify doesn't throw
-      // "Do not know how to serialize a BigInt".
-      params: JSON.stringify(this._sanitizeBridgeParams(params)),
+      params: this._stringifyBridgeParams(params),
     }) as Promise<SignChainedTxResult[]>;
   }
 
   signUnsignedTx(params: SignUnsignedTxParams): Promise<SignUnsignedTxResult> {
     return this.bridgeRequest({
       method: 'signUnsignedTx',
-      params: JSON.stringify(params),
+      params: this._stringifyBridgeParams(params),
     }) as Promise<SignUnsignedTxResult>;
   }
 
   signMessage(params: SignMessageParams): Promise<SignMessageResult> {
     return this.bridgeRequest({
       method: 'signMessage',
-      params: JSON.stringify(params),
+      params: this._stringifyBridgeParams(params),
     }) as Promise<SignMessageResult>;
   }
 

@@ -115,6 +115,50 @@ export default {
       },
     ];
   },
+  signAndSubmitChainedTx: (from: string, to: string) => {
+    return [
+      {
+        id: 'signAndSubmitChainedTx-transfer-and-execute',
+        name: 'Transfer + ExecuteScript',
+        description: 'Chained tx：先一笔 Native 转账，再一笔合约调用，按顺序原子签名提交',
+        value: JSON.stringify([
+          {
+            type: 'Transfer',
+            signerAddress: from,
+            destinations: [
+              {
+                address: to,
+                attoAlphAmount: ONE_ALPH.toString(),
+              },
+            ],
+          },
+          {
+            type: 'ExecuteScript',
+            signerAddress: from,
+            bytecode:
+              '0101030001000d13020d0d144020c3fb9f552e7ab1138023ef0e313cf43483fc7fa35f2bbadc3f997ab17e52a10001001700160013020e2c2f0c7b',
+          },
+        ]),
+      },
+      {
+        id: 'signAndSubmitChainedTx-double-transfer',
+        name: 'Transfer + Transfer',
+        description: '两笔 Native 转账链式提交',
+        value: JSON.stringify([
+          {
+            type: 'Transfer',
+            signerAddress: from,
+            destinations: [{ address: to, attoAlphAmount: ONE_ALPH.toString() }],
+          },
+          {
+            type: 'Transfer',
+            signerAddress: from,
+            destinations: [{ address: to, attoAlphAmount: ONE_ALPH.toString() }],
+          },
+        ]),
+      },
+    ];
+  },
   signUnsignedTx: (from: string) => {
     return [
       {

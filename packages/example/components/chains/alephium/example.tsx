@@ -187,6 +187,18 @@ export function Example() {
           }}
         />
         <ApiPayload
+          title="signAndSubmitChainedTx"
+          description="链式交易：一次签名按顺序提交多笔相互依赖的交易"
+          allowCallWithoutProvider={!!wallet}
+          presupposeParams={params.signAndSubmitChainedTx(
+            wallet?.account?.address ?? '',
+            wallet?.account?.address ?? '',
+          )}
+          onExecute={async (request: string) => {
+            return wallet.signer.signAndSubmitChainedTx(JSON.parse(request));
+          }}
+        />
+        <ApiPayload
           title="signUnsignedTx"
           description=""
           allowCallWithoutProvider={!!wallet}
@@ -257,6 +269,7 @@ export function Example() {
               'nodeProvider', 'explorerProvider',
               'signAndSubmitTransferTx', 'signAndSubmitDeployContractTx',
               'signAndSubmitExecuteScriptTx', 'signAndSubmitUnsignedTx',
+              'signAndSubmitChainedTx',
               'signUnsignedTx', 'signMessage',
             ];
             const checks: Record<string, boolean> = {};
@@ -401,6 +414,7 @@ export function Example() {
               'signAndSubmitDeployContractTx',
               'signAndSubmitExecuteScriptTx',
               'signAndSubmitUnsignedTx',
+              'signAndSubmitChainedTx',
               'signUnsignedTx',
               'signMessage',
               'unsafeEnable',

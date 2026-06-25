@@ -21,6 +21,8 @@ import type {
   SignUnsignedTxResult,
   SignMessageParams,
   SignMessageResult,
+  SignChainedTxParams,
+  SignChainedTxResult,
 } from '@alephium/web3';
 import { ProviderAlphBase } from './ProviderAlphBase';
 
@@ -303,6 +305,13 @@ export class ProviderAlph extends InteractiveSignerProvider implements AlephiumW
       method: 'signAndSubmitUnsignedTx',
       params: JSON.stringify(params),
     }) as Promise<SignUnsignedTxResult>;
+  }
+
+  signAndSubmitChainedTx(params: SignChainedTxParams[]): Promise<SignChainedTxResult[]> {
+    return this.bridgeRequest({
+      method: 'signAndSubmitChainedTx',
+      params: JSON.stringify(params),
+    }) as Promise<SignChainedTxResult[]>;
   }
 
   signUnsignedTx(params: SignUnsignedTxParams): Promise<SignUnsignedTxResult> {

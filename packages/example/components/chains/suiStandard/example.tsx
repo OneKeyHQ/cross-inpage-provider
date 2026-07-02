@@ -457,6 +457,123 @@ function RedeemFundsForm() {
   );
 }
 
+// Sweep ALL of a selected asset into the sender's OWN address balance.
+// SUI (native) needs two clicks because gas must come from a coin until the
+// address balance can cover it; a token needs only step 1 (gas comes from a
+// separate SUI coin), so its coinBalance reaches 0 in one shot.
+function SweepAllToBalanceForm() {
+  const client = useSuiClient();
+  const currentAccount = useCurrentAccount();
+  const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+
+  const apiFromRef = useRef<ApiFormRef>(null);
+  const assetsComboboxRef = useRef<ApiComboboxRef<CoinStruct[]>>(null);
+
+  useAssetCombobox(apiFromRef, assetsComboboxRef);
+
+  // One button — auto-decides from the selected asset + current on-chain state:
+  //  - Token: merge every coin + send_funds (gas from a separate SUI coin) => 0.
+  //  - SUI with address balance for gas: gasless sweep of all coins => 0.
+  //  - SUI on a fresh account (no address balance): seed it (leave a gas reserve);
+  //    click once more to sweep the remainder gaslessly. (2 clicks = SUI limit.)
+  const handleSweep = async () => {
+    const from = currentAccount?.address;
+    const coinType = assetsComboboxRef.current?.getCurrentOption()?.value;
+    const isNative = coinType === '0x2::sui::SUI';
+
+    const { data: coinObjs } = await client.getCoins({ owner: from, coinType });
+    if (!coinObjs.length) {
+      apiFromRef.current?.setValue(
+        'result',
+        '没有 coin 了 —— 已全在余额地址 (coinBalance = 0)',
+      );
+      return;
+    }
+
+    // Can gas be paid gaslessly from the SUI address balance?
+    const suiBalance = await client.core.getBalance({
+      owner: from,
+      coinType: '0x2::sui::SUI',
+    });
+    const canGasless =
+      BigInt(suiBalance.balance.addressBalance) >= BigInt(5000000); // 0.005 SUI
+
+    const tx = new Transaction();
+    tx.setSender(from);
+    let note = '';
+
+    if (isNative && !canGasless) {
+      // Fresh SUI: gas must come from a coin, so seed the address balance and
+      // leave a reserve; the next click sweeps the remainder gaslessly.
+      const total = coinObjs.reduce(
+        (acc, c) => acc + BigInt(c.balance),
+        BigInt(0),
+      );
+      const reserve = BigInt(20000000); // 0.02 SUI
+      const amount = total > reserve ? total - reserve : BigInt(0);
+      tx.moveCall({
+        target: '0x2::coin::send_funds',
+        typeArguments: [coinType],
+        arguments: [
+          tx.coin({ type: coinType, balance: amount }),
+          tx.pure.address(from),
+        ],
+      });
+      note = '已铺垫余额地址 (留 ~0.02 SUI 付 gas)，请再点一次清零。';
+    } else {
+      // Token, or SUI with address balance: sweep every coin in one shot.
+      const primary = tx.object(coinObjs[0].coinObjectId);
+      if (coinObjs.length > 1) {
+        tx.mergeCoins(
+          primary,
+          coinObjs.slice(1).map((c) => tx.object(c.coinObjectId)),
+        );
+      }
+      tx.moveCall({
+        target: '0x2::coin::send_funds',
+        typeArguments: [coinType],
+        arguments: [primary, tx.pure.address(from)],
+      });
+      if (isNative) {
+        tx.setGasPayment([]); // gasless: gas from address balance
+      }
+      note = '已清空所有 coin → coinBalance = 0';
+    }
+
+    const res: unknown = await signAndExecuteTransaction({
+      transaction: tx,
+      account: currentAccount,
+    });
+    apiFromRef.current?.setValue('result', `${note}\n${JSON.stringify(res)}`);
+  };
+
+  return (
+    <ApiForm
+      title="全部转入余额地址 (清空 coins)"
+      description="选资产后点一个按钮自动判断：Token 一次清零；SUI 若余额地址还没钱会先铺垫、再点一次即清零 (coinBalance=0)。"
+      ref={apiFromRef}
+    >
+      <ApiForm.Combobox
+        id="asset"
+        label="选择资产"
+        placeholder="请选择资产"
+        required
+        ref={assetsComboboxRef}
+      />
+      <ApiForm.Text id="assetInfo" type="info" />
+      <ApiForm.Text id="assetDecimals" type="info" hidden />
+      <AssetInfoView viewRef={apiFromRef.current} client={client} />
+      <ApiForm.Button
+        id="sweep"
+        label="全部转入余额地址 (自动)"
+        onClick={handleSweep}
+        availableDependencyFields={[{ fieldIds: ['asset'] }]}
+      />
+      <ApiForm.AutoHeightTextArea id="result" />
+    </ApiForm>
+  );
+}
+
 function Example() {
   const client = useSuiClient();
   const { setProvider } = useWallet();
@@ -1079,6 +1196,7 @@ function Example() {
       <ApiGroup title="Address Balance (accumulator)">
         <SendFundsForm />
         <RedeemFundsForm />
+        <SweepAllToBalanceForm />
       </ApiGroup>
 
       <ApiGroup title="业务测试">

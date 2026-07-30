@@ -18,6 +18,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 
 const distDir = path.resolve(__dirname, '..', 'dist', 'injected');
 const injectedDesktopPath = path.join(distDir, 'injectedDesktop.js');
@@ -29,7 +30,14 @@ if (!fs.existsSync(injectedDesktopPath)) {
   process.exit(1);
 }
 
-const injectedCode = fs.readFileSync(injectedDesktopPath, 'utf-8');
+// Development webpack builds end with an inline source-map directive. The
+// generated wrapper must not append its closing expression to that same line:
+// `//# sourceMappingURL=...})();` comments out the wrapper close and produces
+// `SyntaxError: Unexpected end of input` at runtime. The generated artifacts do
+// not need the source map, so remove it before wrapping.
+const injectedCode = fs
+  .readFileSync(injectedDesktopPath, 'utf-8')
+  .replace(/\r?\n\/\/# sourceMappingURL=data:[^\r\n]*\s*$/u, '');
 
 // require("electron") shim: maps to window.__onekeyDesktopBridge exposed by contextBridge
 const requireShim = [
@@ -42,7 +50,14 @@ const requireShim = [
   '};',
 ].join('');
 
-const wrappedProviderCode = `(function(){${requireShim}\n${injectedCode}})();`;
+const wrappedProviderCode = `(function(){${requireShim}\n${injectedCode}\n})();`;
+
+// Fail the build before Electron sees an invalid provider string. Checking only
+// the preload file is insufficient because the provider is embedded as a
+// string passed to webFrame.executeJavaScript().
+new vm.Script(wrappedProviderCode, {
+  filename: 'injectedDesktopCode.js',
+});
 
 // 1. injectedDesktopCode.js — provider + require shim, for executeJavaScript
 fs.writeFileSync(
@@ -89,6 +104,10 @@ webFrame.executeJavaScript(${JSON.stringify(wrappedProviderCode)}).catch(functio
 });
 })();
 `;
+
+new vm.Script(preloadContent, {
+  filename: 'injectedDesktopPreload.js',
+});
 
 fs.writeFileSync(
   path.join(distDir, 'injectedDesktopPreload.js'),

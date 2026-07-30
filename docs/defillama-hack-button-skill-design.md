@@ -19,6 +19,12 @@
 
 本 skill 默认不提交 commit、不 push，也不打开 PR。除非用户明确要求，否则只修改当前 worktree。
 
+真实 OneKey Desktop 人工验证复用现有 DApp Browser：DeepLink 确认 workspace 后把协议作为
+普通 Browser tab 打开，并在同一个 DApp Browser 底部显示开发工具栏。禁止新增独立
+WebView modal、第二套 provider bridge 或只为该工作流存在的浏览器页面。自定义 preload
+只替换该 Browser tab 的 provider bundle，其他导航、session、EIP-6963 和 host bridge
+均继续复用 DApp Browser 的现有实现。
+
 ### 1.1 当前实施状态（2026-07-29）
 
 本方案已经在当前 worktree 落地。实现以 `packages/connect-button-lab` 为独立 workspace，
@@ -1066,7 +1072,7 @@ Case runner 必须输出逐项 assertion result 和稳定的 failure code；regi
 建议命令：
 
 ```bash
-yarn --cwd packages/injected build
+yarn --cwd packages/injected build-prod
 yarn --cwd packages/connect-button-lab test --protocol aave
 ```
 

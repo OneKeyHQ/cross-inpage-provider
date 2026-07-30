@@ -2,6 +2,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
 import { runCommand } from '../src/lib/process.mjs';
@@ -12,6 +13,10 @@ const injectedDir = path.join(repoRoot, 'packages/injected');
 const outputFile = path.join(
   injectedDir,
   'dist/injected/injectedDesktopPreload.js',
+);
+const providerCodeFile = path.join(
+  injectedDir,
+  'dist/injected/injectedDesktopCode.js',
 );
 const generatedVersionInfoFile = path.join(
   repoRoot,
@@ -181,17 +186,29 @@ try {
         YARN_CACHE_FOLDER: path.join(repoRoot, '.data/yarn-cache'),
         YARN_IGNORE_PATH: '1',
         YARN_PURE_LOCKFILE: 'true',
+        NODE_ENV: 'production',
       },
       timeoutMs: 30 * 60 * 1000,
     },
   );
 
-  const content = await fs.readFile(outputFile);
+  const [content, providerCode] = await Promise.all([
+    fs.readFile(outputFile),
+    fs.readFile(providerCodeFile),
+  ]);
+  new vm.Script(providerCode.toString('utf8'), {
+    filename: path.basename(providerCodeFile),
+  });
+  new vm.Script(content.toString('utf8'), {
+    filename: path.basename(outputFile),
+  });
   process.stdout.write(
     `${JSON.stringify({
       ok: true,
       output: path.relative(repoRoot, outputFile),
       bytes: content.byteLength,
+      providerCode: path.relative(repoRoot, providerCodeFile),
+      providerCodeBytes: providerCode.byteLength,
       sha256: crypto.createHash('sha256').update(content).digest('hex'),
     })}\n`,
   );

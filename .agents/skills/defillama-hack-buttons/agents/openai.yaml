@@ -1,0 +1,4 @@
+interface:
+  display_name: "DeFiLlama Hack Buttons"
+  short_description: "Automate top-TVL dapp button coverage and regression"
+  default_prompt: "Use $defillama-hack-buttons to process the next three DeFiLlama protocols with scripted Electron E2E."

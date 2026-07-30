@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connect Button Lab Demo</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: #08110c;
+        color: #f4fff7;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background:
+          radial-gradient(circle at 20% 10%, rgba(68, 214, 44, 0.18), transparent 30%),
+          radial-gradient(circle at 80% 90%, rgba(48, 160, 255, 0.14), transparent 32%),
+          #08110c;
+      }
+      main {
+        width: min(720px, calc(100vw - 48px));
+        padding: 48px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 28px;
+        background: rgba(12, 25, 17, 0.86);
+        box-shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
+      }
+      .eyebrow {
+        color: #83f474;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 12px 0 8px;
+        font-size: clamp(36px, 6vw, 64px);
+        line-height: 1;
+      }
+      p {
+        margin: 0 0 28px;
+        color: #a9baae;
+        font-size: 17px;
+        line-height: 1.6;
+      }
+      button {
+        border: 0;
+        font: inherit;
+        cursor: pointer;
+      }
+      #connect {
+        padding: 15px 22px;
+        border-radius: 14px;
+        color: #041107;
+        background: #44d62c;
+        font-weight: 800;
+      }
+      dialog {
+        width: min(460px, calc(100vw - 32px));
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 22px;
+        color: #f4fff7;
+        background: #101c14;
+        box-shadow: 0 30px 100px rgba(0, 0, 0, 0.6);
+      }
+      dialog::backdrop {
+        background: rgba(0, 0, 0, 0.68);
+        backdrop-filter: blur(6px);
+      }
+      .dialog-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+      }
+      .dialog-title h2 {
+        margin: 0;
+      }
+      #close {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        color: #c9d7cc;
+        background: #1b2b20;
+      }
+      .wallet-list {
+        display: grid;
+        gap: 10px;
+      }
+      .wallet {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        color: #f4fff7;
+        background: #17271c;
+        text-align: left;
+      }
+      .wallet:hover {
+        border-color: rgba(68, 214, 44, 0.72);
+      }
+      .wallet img {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: #26382a;
+      }
+      .wallet span {
+        font-weight: 750;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="eyebrow">Local deterministic fixture</div>
+      <h1>Connect Button Lab</h1>
+      <p>
+        Open the wallet modal to watch the current worktree's hack runtime replace the original
+        connector presentation.
+      </p>
+      <button id="connect" type="button">Connect Wallet</button>
+    </main>
+
+    <dialog id="wallet-modal" aria-label="Connect a wallet">
+      <div class="dialog-title">
+        <h2>Connect a wallet</h2>
+        <button id="close" type="button" aria-label="Close">×</button>
+      </div>
+      <div class="wallet-list">
+        <button class="wallet" type="button" data-lab-wallet="metamask">
+          <img alt="" />
+          <span data-lab-wallet-name>MetaMask</span>
+        </button>
+        <button class="wallet" type="button" data-lab-wallet="walletconnect">
+          <img alt="" />
+          <span data-lab-wallet-name>WalletConnect</span>
+        </button>
+      </div>
+    </dialog>
+
+    <script>
+      const modal = document.querySelector('#wallet-modal');
+      document.querySelector('#connect').addEventListener('click', () => modal.showModal());
+      document.querySelector('#close').addEventListener('click', () => modal.close());
+      document.querySelector('[data-lab-wallet="metamask"]').addEventListener('click', () => {
+        window.ethereum?.request?.({ method: 'eth_requestAccounts' });
+      });
+    </script>
+  </body>
+</html>

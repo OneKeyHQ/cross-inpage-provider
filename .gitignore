@@ -14,3 +14,8 @@ lerna-debug.log
 .env
 .vscode
 .history
+/app-monorepo/
+/.data/
+/.yarn/
+/.yarnrc.yml
+packages/providers/inpage-providers-hub/src/connectButtonHack/defillama-protocols.json.*.tmp

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "rainbowkit",
+    "confidence": 0.98,
+    "selectors": [
+      "button[data-testid^=\"rk-wallet-option-\"]"
+    ]
+  },
+  {
+    "id": "reown-appkit",
+    "confidence": 0.95,
+    "selectors": [
+      "w3m-modal",
+      "wui-list-wallet",
+      "[data-testid=\"w3m-modal\"]"
+    ]
+  },
+  {
+    "id": "web3modal",
+    "confidence": 0.94,
+    "selectors": [
+      "w3m-modal",
+      "[class*=\"w3m-modal\"]"
+    ]
+  },
+  {
+    "id": "dynamic",
+    "confidence": 0.94,
+    "selectors": [
+      "[data-testid^=\"wallet-list-item-\"]",
+      "[data-testid=\"dyn-wallet-list\"]"
+    ]
+  },
+  {
+    "id": "connectkit",
+    "confidence": 0.93,
+    "selectors": [
+      "[data-testid=\"connectkit-modal\"]",
+      "[class*=\"ConnectKit\"]"
+    ]
+  }
+]

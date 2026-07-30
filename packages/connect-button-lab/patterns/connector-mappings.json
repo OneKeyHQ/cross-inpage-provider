@@ -1,0 +1,72 @@
+{
+  "metamask": {
+    "provider": "ethereum",
+    "updatedText": "OneKey & MetaMask",
+    "expectedMethods": ["eth_requestAccounts", "eth_accounts"]
+  },
+  "walletconnect": {
+    "provider": "ethereum",
+    "updatedText": "OneKey & WalletConnect",
+    "expectedMethods": ["eth_requestAccounts", "eth_accounts"]
+  },
+  "phantom": {
+    "provider": "solana",
+    "updatedText": "OneKey & Phantom",
+    "expectedMethods": ["connect"]
+  },
+  "solflare": {
+    "provider": "solana",
+    "updatedText": "OneKey & Solflare",
+    "expectedMethods": ["connect"]
+  },
+  "jupiter": {
+    "provider": "solana",
+    "updatedText": "OneKey & Jupiter",
+    "expectedMethods": ["connect"]
+  },
+  "unisat": {
+    "provider": "btc",
+    "updatedText": "OneKey & UniSat",
+    "expectedMethods": ["requestAccounts"]
+  },
+  "keplr": {
+    "provider": "cosmos",
+    "updatedText": "OneKey & Keplr",
+    "expectedMethods": ["enable"]
+  },
+  "petra": {
+    "provider": "aptos",
+    "updatedText": "OneKey & Petra",
+    "expectedMethods": ["connect"]
+  },
+  "martian": {
+    "provider": "aptos",
+    "updatedText": "OneKey & Martian",
+    "expectedMethods": ["connect"]
+  },
+  "suiwallet": {
+    "provider": "sui",
+    "updatedText": "OneKey & Sui",
+    "expectedMethods": ["connect"]
+  },
+  "slush": {
+    "provider": "sui",
+    "updatedText": "OneKey & Slush",
+    "expectedMethods": ["connect"]
+  },
+  "tronlink": {
+    "provider": "tron",
+    "updatedText": "OneKey & TronLink",
+    "expectedMethods": ["request"]
+  },
+  "polkadot": {
+    "provider": "polkadot",
+    "updatedText": "OneKey & Polkadot",
+    "expectedMethods": ["enable"]
+  },
+  "nami": {
+    "provider": "cardano",
+    "updatedText": "OneKey & Nami",
+    "expectedMethods": ["enable"]
+  }
+}

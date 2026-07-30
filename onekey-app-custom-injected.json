@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-app-custom-injected",
+  "protocolRegistry": "packages/providers/inpage-providers-hub/src/connectButtonHack/defillama-protocols.json",
+  "registryUpdater": "packages/connect-button-lab/src/cli/custom-injected-registry.mjs",
+  "desktopPreload": "packages/injected/dist/injected/injectedDesktopPreload.js"
+}

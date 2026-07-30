@@ -1,4 +1,5 @@
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
+import defillamaSitesGenerated from '../generated/defillama-sites.generated';
 import { hackConnectButton } from '../hackConnectButton';
 import { SitesInfo, sitesConfig } from './config';
 import { findIconAndNameByName as defaultFindIconAndName } from './findIconAndName';
@@ -99,7 +100,7 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
 
 export default () => {
   try {
-    hackWalletConnectButton(sitesConfig);
+    hackWalletConnectButton([...sitesConfig, ...defillamaSitesGenerated]);
   } catch (e) {
     universalLog.warn(e);
   }

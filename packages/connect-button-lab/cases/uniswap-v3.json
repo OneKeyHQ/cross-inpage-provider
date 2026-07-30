@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "protocolId": "2198",
+  "slug": "uniswap-v3",
+  "name": "Uniswap V3",
+  "url": "https://app.uniswap.org/",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "setup": [
+    {
+      "action": "waitFor",
+      "selector": "button[data-testid=\"navbar-connect-wallet\"]",
+      "timeoutMs": 60000,
+      "delayMs": 1000
+    }
+  ],
+  "openWallet": [
+    {
+      "action": "click",
+      "selector": "button[data-testid=\"navbar-connect-wallet\"]",
+      "timeoutMs": 15000,
+      "delayMs": 800
+    },
+    {
+      "action": "click",
+      "text": "Other wallets",
+      "timeoutMs": 15000,
+      "delayMs": 800
+    },
+    {
+      "action": "waitFor",
+      "text": "WalletConnect",
+      "timeoutMs": 30000,
+      "delayMs": 1000
+    }
+  ],
+  "assertions": [
+    {
+      "walletId": "ethereum-onekey-walletconnect",
+      "text": "OneKey & WalletConnect",
+      "iconFingerprint": "sha256:8151366ab5cebf9310157cff6ebcca6b2a017e270da9f79d1299261c37942321",
+      "count": 1
+    }
+  ],
+  "clickProbe": {
+    "walletId": "ethereum-onekey-walletconnect",
+    "expectedScope": "ethereum",
+    "expectedMethods": [
+      "eth_requestAccounts",
+      "eth_accounts"
+    ]
+  },
+  "assertMutation": true,
+  "assertReload": true,
+  "timeouts": {
+    "navigationMs": 30000,
+    "walletModalMs": 15000
+  }
+}

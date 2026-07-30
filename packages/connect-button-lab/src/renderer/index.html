@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OneKey Connect Button Lab</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="control-panel">
+        <header class="brand">
+          <div class="brand-mark" aria-hidden="true">1K</div>
+          <div>
+            <h1>Connect Button Lab</h1>
+            <p id="brand-subtitle">Current worktree injection runtime</p>
+          </div>
+        </header>
+
+        <section class="summary" aria-label="Test summary">
+          <div class="metric">
+            <strong id="passed-count">0</strong>
+            <span>Passed</span>
+          </div>
+          <div class="metric">
+            <strong id="review-count">0</strong>
+            <span>Review</span>
+          </div>
+          <div class="metric">
+            <strong id="failed-count">0</strong>
+            <span>Failed</span>
+          </div>
+          <div class="metric">
+            <strong id="untested-count">0</strong>
+            <span>Untested</span>
+          </div>
+        </section>
+
+        <section class="actions" aria-label="Test controls">
+          <button id="run-selected" class="button primary" type="button">
+            <span>Run selected</span>
+            <kbd>⌘↵</kbd>
+          </button>
+          <button id="run-all" class="button secondary" type="button">Run all ready</button>
+          <button id="stop-run" class="button danger hidden" type="button">Stop</button>
+        </section>
+
+        <section class="queue-header">
+          <div>
+            <h2>DeFiLlama · Top 20 per chain</h2>
+            <span id="queue-progress">Ready</span>
+          </div>
+          <div class="queue-tools">
+            <button
+              id="refresh-sites"
+              class="refresh-button"
+              type="button"
+              title="Refresh from DeFiLlama"
+            >
+              Refresh
+            </button>
+            <input id="site-search" type="search" placeholder="Search protocol…" />
+          </div>
+        </section>
+
+        <div
+          id="site-list"
+          class="site-list"
+          role="listbox"
+          aria-label="Sites grouped by chain"
+        ></div>
+
+        <section class="event-log">
+          <div class="section-title">
+            <h2>Live events</h2>
+            <button id="clear-events" class="text-button" type="button">Clear</button>
+          </div>
+          <div id="events" class="events" aria-live="polite"></div>
+        </section>
+      </aside>
+
+      <section class="stage">
+        <header class="stage-toolbar">
+          <div class="site-identity">
+            <span id="current-status" class="status-dot idle" aria-hidden="true"></span>
+            <div>
+              <strong id="current-name">Choose a site</strong>
+              <span id="current-url">No page loaded</span>
+            </div>
+          </div>
+          <div class="stage-actions">
+            <button id="reload-page" class="icon-button" type="button" title="Reload page">↻</button>
+            <button id="capture-page" class="toolbar-button" type="button">Screenshot</button>
+            <button id="open-devtools" class="toolbar-button" type="button">DevTools</button>
+          </div>
+        </header>
+
+        <div id="notice" class="notice">
+          Select a site, then run its test. The page remains interactive after the run.
+        </div>
+
+        <div class="browser-frame">
+          <div class="browser-chrome">
+            <div class="traffic-lights" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div id="address-bar" class="address-bar">about:blank</div>
+            <span id="injection-pill" class="pill pending">Injection idle</span>
+          </div>
+          <webview id="site-view"></webview>
+          <div id="empty-state" class="empty-state">
+            <div class="empty-orbit"><span>1K</span></div>
+            <h2>Live dapp viewport</h2>
+            <p>Protocols become test-ready after their batch creates a scripted E2E case.</p>
+          </div>
+        </div>
+
+        <footer class="result-strip">
+          <div>
+            <span>Last assertion</span>
+            <strong id="assertion-summary">Waiting for a run</strong>
+          </div>
+          <button id="show-artifact" class="text-button hidden" type="button">
+            Show screenshot
+          </button>
+        </footer>
+      </section>
+    </main>
+
+    <script src="./renderer.js"></script>
+  </body>
+</html>

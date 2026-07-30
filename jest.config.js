@@ -7,10 +7,13 @@ module.exports = {
     '^@onekeyfe/cross-inpage-provider-types$': '<rootDir>/packages/types/src/index.ts',
     '^@onekeyfe/(.*)$': '<rootDir>/packages/$1/src',
   },
+  modulePathIgnorePatterns: ['<rootDir>/app-monorepo/'],
   testPathIgnorePatterns: [
+    '/app-monorepo/',
     '/inpage-providers-hub/.*/universal/',
     '/node_modules/',
     '/__tests__/fixtures/',
     '/dist/',
   ],
+  watchPathIgnorePatterns: ['<rootDir>/app-monorepo/'],
 };

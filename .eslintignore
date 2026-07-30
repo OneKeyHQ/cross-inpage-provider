@@ -5,3 +5,4 @@ dist
 inpage-provider-legacy/
 **/__tests__/*
 playwright.config.ts
+app-monorepo/

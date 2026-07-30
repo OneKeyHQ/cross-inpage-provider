@@ -1,0 +1,7 @@
+[
+  { "text": "Reject all", "optional": true },
+  { "text": "Only necessary", "optional": true },
+  { "text": "Accept necessary", "optional": true },
+  { "text": "Decline", "optional": true },
+  { "text": "Close", "optional": true }
+]

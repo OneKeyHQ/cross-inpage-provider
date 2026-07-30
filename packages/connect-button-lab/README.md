@@ -76,12 +76,14 @@ onekey-wallet://custom-injected?workspace=%2Fabsolute%2Fpath%2Fto%2Fcross-inpage
 ```
 
 The Desktop App requires enabled developer settings and an explicit confirmation before reading
-or executing workspace content. After confirmation it opens the selected protocol as a normal tab
-inside the existing DApp Browser and renders the developer toolbar at the bottom of that browser.
-It must not open a separate WebView modal or maintain a second provider bridge. The DApp Browser
-toolbar can navigate protocols, override an incorrect DeFiLlama dapp URL, reload a changed preload
-bundle, and mark the independent human review state as pending or processed. URL and review edits
-are atomically persisted to the versioned registry; they never replace scripted E2E evidence.
+or executing workspace content. The DeepLink only activates that workspace. The selected protocol
+then opens as a normal URL inside the existing DApp Browser, with the developer toolbar at the
+bottom. While the workspace is active, every current and newly created DApp Browser webview uses
+the workspace-built `injectedDesktopPreload.js`; injection state is not attached to an individual
+tab. It must not open a separate WebView modal or maintain a second provider bridge. The toolbar
+can navigate protocols, override an incorrect DeFiLlama dapp URL, reload a changed preload bundle,
+and mark the independent human review state as pending or processed. URL and review edits are
+atomically persisted to the versioned registry; they never replace scripted E2E evidence.
 
 A successful repo skill batch automatically rebuilds this ignored preload in production mode from
 the current workspace source and syntax-checks both the provider string and Electron preload. To

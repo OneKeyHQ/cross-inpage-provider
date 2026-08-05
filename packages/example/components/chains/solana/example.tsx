@@ -13,7 +13,10 @@ import params from './params';
 import { createTransferTransaction, createVersionedTransaction, createTokenTransferTransaction, hasVersionedTx, createVersionedLegacyTransaction } from './builder';
 import nacl from 'tweetnacl';
 import { toast } from '../../ui/use-toast';
-import { serializeOffchainMessageV1 } from '../solanaStandard/OffchainMessageV1';
+import {
+  encodeOffchainMessageV1WithReference,
+  readSignersFromSignedMessage,
+} from '../solanaStandard/verifyOffchainMessageV1';
 import { getApiKey } from '../../../lib/api';
 
 const NETWORK = clusterApiUrl('mainnet-beta');
@@ -182,15 +185,23 @@ export default function Example() {
             return Promise.resolve(isValidSignature.toString());
           }}
         />
-          <ApiPayload
+        <ApiPayload
           title="solSignOffchainMessage"
-          description="签名 Offchain Message v1 (OneKey 私有方法)"
-          presupposeParams={params.signMessage}
+          description="签名 Offchain Message v1 (OneKey 私有方法)。预设覆盖正文形态与签名者列表两个维度"
+          presupposeParams={params.signOffchainMessageV1(account?.publicKey ?? '')}
           onExecute={async (request: string) => {
-            // v1 只签 UTF-8 原文，preamble 由钱包构造
-            return await provider?.solSignOffchainMessage(request, [account?.publicKey]);
+            const { message, requiredSigners } = JSON.parse(request) as {
+              message: string;
+              requiredSigners: string[];
+            };
+            // v1 只传 UTF-8 原文与签名者，preamble 由钱包构造
+            return await provider?.solSignOffchainMessage(message, requiredSigners);
           }}
           onValidate={(request: string, result: string) => {
+            const { message, requiredSigners } = JSON.parse(request) as {
+              message: string;
+              requiredSigners: string[];
+            };
             const {
               signature,
               publicKey,
@@ -203,25 +214,30 @@ export default function Example() {
 
             const toBytes = (value: any) =>
               new Uint8Array(Array.isArray(value) ? value : value.data);
-
             const signatureObj = toBytes(signature);
             const signedBytes = toBytes(signedOffchainMessage);
 
-            // 用 dApp 请求时指定的账户重建，而不是钱包回传的那个 ——
-            // 否则钱包换个账户签，下面两项检查会一起变绿，等于没检查
-            const requestedKey = new PublicKey(account?.publicKey);
-            const signedWithRequestedAccount =
-              new PublicKey(publicKey).toBase58() === requestedKey.toBase58();
-
-            const expected = serializeOffchainMessageV1({
-              message: request,
-              requiredSigners: [requestedKey.toBytes()],
+            // 用官方 codec 按请求内容重建 —— 独立于钱包侧的编码实现
+            const expected = encodeOffchainMessageV1WithReference({
+              message,
+              requiredSigners,
             });
             const matchesSpec =
               signedBytes.length === expected.length &&
               signedBytes.every((byte, i) => byte === expected[i]);
 
-            const isValidSignature = nacl.sign.detached.verify(
+            // 直接从两边的字节里读回签名者顺序做比较，不经过任何编码器
+            const walletSigners = readSignersFromSignedMessage(signedBytes);
+            const referenceSigners = readSignersFromSignedMessage(expected);
+            const walletSortedSigners =
+              walletSigners.length === referenceSigners.length &&
+              walletSigners.every((s, i) => s === referenceSigners[i]);
+
+            const requestedKey = new PublicKey(account?.publicKey);
+            const signedWithRequestedAccount =
+              new PublicKey(publicKey).toBase58() === requestedKey.toBase58();
+
+            const signatureValid = nacl.sign.detached.verify(
               signedBytes,
               signatureObj,
               requestedKey.toBytes(),
@@ -229,15 +245,16 @@ export default function Example() {
 
             return Promise.resolve(
               JSON.stringify({
-                signatureValid: isValidSignature,
+                signatureValid,
                 matchesOffchainMessageV1Spec: matchesSpec,
                 signedWithRequestedAccount,
+                walletSortedSigners,
+                signerCount: signedBytes[17],
+                walletSigners,
               }),
             );
           }}
         />
-      </ApiGroup>
-      <ApiGroup title="Transfer">
         <ApiPayload
           title="signAndSendTransaction"
           description="签署并发送交易"

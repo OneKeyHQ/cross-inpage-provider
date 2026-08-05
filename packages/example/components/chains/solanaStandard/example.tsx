@@ -17,6 +17,7 @@ import { verifySignIn } from '@solana/wallet-standard-util';
 import nacl from 'tweetnacl';
 import { Transaction, VersionedTransaction } from '@solana/web3.js';
 import { OffchainMessage } from './OffchainMessage';
+import { serializeOffchainMessageV1 } from './OffchainMessageV1';
 import { getApiKey } from '../../../lib/api';
 
 function Example() {
@@ -141,6 +142,62 @@ function Example() {
             }
 
             return Promise.resolve('false');
+          }}
+        />
+        <ApiPayload
+          title="signOffchainMessage"
+          description="solana:signOffchainMessage (Offchain Message v1)"
+          presupposeParams={params.signMessage}
+          onExecute={async (request: string) => {
+            // wallet-adapter 尚未透出该 feature，直接从 wallet-standard 的 features 上取
+            const feature =
+              // @ts-expect-error wallet-standard features are untyped here
+              wallet?.adapter?.wallet?.features?.['solana:signOffchainMessage'];
+            if (!feature) {
+              throw new Error('wallet does not support solana:signOffchainMessage');
+            }
+            if (!feature.supportedMessageVersions?.includes(1)) {
+              throw new Error('wallet does not support offchain message version 1');
+            }
+
+            // @ts-expect-error wallet-standard accounts are untyped here
+            const account = wallet?.adapter?.wallet?.accounts?.[0];
+            const [output] = await feature.signOffchainMessage({
+              account,
+              messageVersion: 1,
+              message: request,
+              requiredSigners: [account.publicKey],
+            });
+
+            return JSON.stringify({
+              signature: Array.from(output.signature),
+              signedOffchainMessage: Array.from(output.signedOffchainMessage),
+              signatureType: output.signatureType ?? 'ed25519',
+            });
+          }}
+          onValidate={(request: string, result: string) => {
+            const output = JSON.parse(result);
+            const signature = new Uint8Array(output.signature);
+            const signedBytes = new Uint8Array(output.signedOffchainMessage);
+
+            // 钱包回传的字节必须与 dApp 按 v1 规范重建的字节完全一致
+            const expected = serializeOffchainMessageV1({
+              message: request,
+              requiredSigners: [publicKey.toBytes()],
+            });
+            const matchesSpec =
+              signedBytes.length === expected.length &&
+              signedBytes.every((byte, i) => byte === expected[i]);
+
+            const signatureValid = nacl.sign.detached.verify(
+              signedBytes,
+              signature,
+              publicKey.toBytes(),
+            );
+
+            return Promise.resolve(
+              JSON.stringify({ signatureValid, matchesOffchainMessageV1Spec: matchesSpec }),
+            );
           }}
         />
         <ApiPayload

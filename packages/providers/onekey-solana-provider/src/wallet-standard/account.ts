@@ -1,13 +1,19 @@
 import {
   SolanaSignAndSendTransaction,
   SolanaSignMessage,
+  SolanaSignOffchainMessage,
   SolanaSignTransaction,
 } from '@solana/wallet-standard-features';
 import type { WalletAccount } from '@wallet-standard/base';
 import { SOLANA_CHAINS } from './solana';
 
 const chains = SOLANA_CHAINS;
-const features = [SolanaSignAndSendTransaction, SolanaSignTransaction, SolanaSignMessage] as const;
+const features = [
+  SolanaSignAndSendTransaction,
+  SolanaSignTransaction,
+  SolanaSignMessage,
+  SolanaSignOffchainMessage,
+] as const;
 
 export class OneKeySolanaWalletAccount implements WalletAccount {
   readonly #address: WalletAccount['address'];

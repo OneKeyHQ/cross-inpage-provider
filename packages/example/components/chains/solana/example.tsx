@@ -13,7 +13,7 @@ import params from './params';
 import { createTransferTransaction, createVersionedTransaction, createTokenTransferTransaction, hasVersionedTx, createVersionedLegacyTransaction } from './builder';
 import nacl from 'tweetnacl';
 import { toast } from '../../ui/use-toast';
-import { OffchainMessage } from '../solanaStandard/OffchainMessage';
+import { serializeOffchainMessageV1 } from '../solanaStandard/OffchainMessageV1';
 import { getApiKey } from '../../../lib/api';
 
 const NETWORK = clusterApiUrl('mainnet-beta');
@@ -184,39 +184,51 @@ export default function Example() {
         />
           <ApiPayload
           title="solSignOffchainMessage"
-          description="签名消息(OneKey 私有方法)"
+          description="签名 Offchain Message v1 (OneKey 私有方法)"
           presupposeParams={params.signMessage}
           onExecute={async (request: string) => {
-            return await provider?.solSignOffchainMessage(Buffer.from(request, 'utf8'));
+            // v1 只签 UTF-8 原文，preamble 由钱包构造
+            return await provider?.solSignOffchainMessage(request, [account?.publicKey]);
           }}
           onValidate={(request: string, result: string) => {
-            // const message = bs58.decode(request).toString();
             const {
               signature,
               publicKey,
+              signedOffchainMessage,
             }: {
               signature: any;
               publicKey: string;
+              signedOffchainMessage: any;
             } = JSON.parse(result);
 
-            let signatureObj;
-            if(Array.isArray(signature)) {
-              signatureObj = new Uint8Array(signature)
-            } else {
-              signatureObj = new Uint8Array(signature.data)
-            }
+            const toBytes = (value: any) =>
+              new Uint8Array(Array.isArray(value) ? value : value.data);
+
+            const signatureObj = toBytes(signature);
+            const signedBytes = toBytes(signedOffchainMessage);
             const publicKeyObj = new PublicKey(publicKey);
 
-            const offchainMessage = new OffchainMessage({
-              message: Buffer.from(request, 'utf8'),
+            // 钱包回传的字节必须与 dApp 按 v1 规范重建的字节完全一致
+            const expected = serializeOffchainMessageV1({
+              message: request,
+              requiredSigners: [publicKeyObj.toBytes()],
             });
+            const matchesSpec =
+              signedBytes.length === expected.length &&
+              signedBytes.every((byte, i) => byte === expected[i]);
+
             const isValidSignature = nacl.sign.detached.verify(
-              offchainMessage.serialize(),
+              signedBytes,
               signatureObj,
               publicKeyObj.toBytes(),
             );
 
-            return Promise.resolve(isValidSignature.toString());
+            return Promise.resolve(
+              JSON.stringify({
+                signatureValid: isValidSignature,
+                matchesOffchainMessageV1Spec: matchesSpec,
+              }),
+            );
           }}
         />
       </ApiGroup>

@@ -190,18 +190,59 @@ export default function Example() {
           description="签名 Offchain Message v1 (OneKey 私有方法)。预设覆盖正文形态与签名者列表两个维度"
           presupposeParams={params.signOffchainMessageV1(account?.publicKey ?? '')}
           onExecute={async (request: string) => {
-            const { message, requiredSigners } = JSON.parse(request) as {
+            const { message, requiredSigners, expectRejection } = JSON.parse(
+              request,
+            ) as {
               message: string;
               requiredSigners: string[];
+              expectRejection?: boolean;
             };
+
+            // 负向用例：这条请求本就该被拒绝，所以「抛错」才是期望结果。
+            // 捕获下来交给 onValidate 判定，否则正确的拒绝会显示成工具崩溃。
+            if (expectRejection) {
+              try {
+                await provider?.solSignOffchainMessage(message, requiredSigners);
+                return JSON.stringify({ rejected: false });
+              } catch (e: any) {
+                return JSON.stringify({
+                  rejected: true,
+                  reason: e?.message ?? String(e),
+                });
+              }
+            }
+
             // v1 只传 UTF-8 原文与签名者，preamble 由钱包构造
             return await provider?.solSignOffchainMessage(message, requiredSigners);
           }}
           onValidate={(request: string, result: string) => {
-            const { message, requiredSigners } = JSON.parse(request) as {
+            const { message, requiredSigners, expectRejection } = JSON.parse(
+              request,
+            ) as {
               message: string;
               requiredSigners: string[];
+              expectRejection?: boolean;
             };
+
+            // 负向用例的判定是反的：被拒绝才算通过
+            if (expectRejection) {
+              const outcome = JSON.parse(result) as {
+                rejected: boolean;
+                reason?: string;
+              };
+              return Promise.resolve(
+                JSON.stringify(
+                  outcome.rejected
+                    ? { passed: true, rejectedBecause: outcome.reason }
+                    : {
+                        passed: false,
+                        problem:
+                          '钱包签署了一条本应被拒绝的请求',
+                      },
+                ),
+              );
+            }
+
             const {
               signature,
               publicKey,
@@ -255,6 +296,8 @@ export default function Example() {
             );
           }}
         />
+      </ApiGroup>
+      <ApiGroup title="Transfer">
         <ApiPayload
           title="signAndSendTransaction"
           description="签署并发送交易"

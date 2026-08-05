@@ -39,13 +39,17 @@ export function useApiExecutor({ onExecute, onValidate }: IApiExecutor): {
       } catch (error) {
         console.log('execute error', error);
 
-        let errorMessage = '';
-        try {
-          errorMessage = JSON.stringify(error);
-        } catch (error) {
-          errorMessage = get(error, 'message', 'Execution error');
+        // `JSON.stringify` renders an Error as `{}` and does not throw, so the message has to
+        // be read first or every thrown Error shows up as an empty object.
+        let errorMessage = get(error, 'message', '') as string;
+        if (!errorMessage) {
+          try {
+            errorMessage = JSON.stringify(error);
+          } catch {
+            errorMessage = 'Execution error';
+          }
         }
-        return { result: undefined, error: errorMessage };
+        return { result: undefined, error: errorMessage || 'Execution error' };
       }
     },
     [onExecute],

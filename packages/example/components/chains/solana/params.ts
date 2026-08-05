@@ -73,6 +73,7 @@ export default {
         value: JSON.stringify({
           message: 'Hello OneKey',
           requiredSigners: [publicKey, publicKey],
+          expectRejection: true,
         }),
       },
       {
@@ -82,6 +83,7 @@ export default {
         value: JSON.stringify({
           message: 'Hello OneKey',
           requiredSigners: [CO_SIGNER_FIRST],
+          expectRejection: true,
         }),
       },
     ];

@@ -154,9 +154,12 @@ function Example() {
           description="solana:signOffchainMessage (Offchain Message v1)。预设覆盖正文形态与签名者列表两个维度"
           presupposeParams={params.signOffchainMessageV1(publicKey?.toBase58() ?? '')}
           onExecute={async (request: string) => {
-            const { message, requiredSigners } = JSON.parse(request) as {
+            const { message, requiredSigners, expectRejection } = JSON.parse(
+              request,
+            ) as {
               message: string;
               requiredSigners: string[];
+              expectRejection?: boolean;
             };
 
             // wallet-adapter 尚未透出该 feature，直接从 wallet-standard 的 features 上取
@@ -172,12 +175,27 @@ function Example() {
 
             // @ts-expect-error wallet-standard accounts are untyped here
             const account = wallet?.adapter?.wallet?.accounts?.[0];
-            const [output] = await feature.signOffchainMessage({
+            const input = {
               account,
               messageVersion: 1,
               message,
               requiredSigners: requiredSigners.map((s) => bs58.decode(s)),
-            });
+            };
+
+            // 负向用例：抛错才是期望结果，捕获下来交给 onValidate 判定
+            if (expectRejection) {
+              try {
+                await feature.signOffchainMessage(input);
+                return JSON.stringify({ rejected: false });
+              } catch (e: any) {
+                return JSON.stringify({
+                  rejected: true,
+                  reason: e?.message ?? String(e),
+                });
+              }
+            }
+
+            const [output] = await feature.signOffchainMessage(input);
 
             return JSON.stringify({
               signature: Array.from(output.signature),
@@ -186,10 +204,29 @@ function Example() {
             });
           }}
           onValidate={(request: string, result: string) => {
-            const { message, requiredSigners } = JSON.parse(request) as {
+            const { message, requiredSigners, expectRejection } = JSON.parse(
+              request,
+            ) as {
               message: string;
               requiredSigners: string[];
+              expectRejection?: boolean;
             };
+
+            // 负向用例的判定是反的：被拒绝才算通过
+            if (expectRejection) {
+              const outcome = JSON.parse(result) as {
+                rejected: boolean;
+                reason?: string;
+              };
+              return Promise.resolve(
+                JSON.stringify(
+                  outcome.rejected
+                    ? { passed: true, rejectedBecause: outcome.reason }
+                    : { passed: false, problem: '钱包签署了一条本应被拒绝的请求' },
+                ),
+              );
+            }
+
             const output = JSON.parse(result);
             const signature = new Uint8Array(output.signature);
             const signedBytes = new Uint8Array(output.signedOffchainMessage);

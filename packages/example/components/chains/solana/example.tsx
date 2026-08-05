@@ -206,12 +206,16 @@ export default function Example() {
 
             const signatureObj = toBytes(signature);
             const signedBytes = toBytes(signedOffchainMessage);
-            const publicKeyObj = new PublicKey(publicKey);
 
-            // 钱包回传的字节必须与 dApp 按 v1 规范重建的字节完全一致
+            // 用 dApp 请求时指定的账户重建，而不是钱包回传的那个 ——
+            // 否则钱包换个账户签，下面两项检查会一起变绿，等于没检查
+            const requestedKey = new PublicKey(account?.publicKey);
+            const signedWithRequestedAccount =
+              new PublicKey(publicKey).toBase58() === requestedKey.toBase58();
+
             const expected = serializeOffchainMessageV1({
               message: request,
-              requiredSigners: [publicKeyObj.toBytes()],
+              requiredSigners: [requestedKey.toBytes()],
             });
             const matchesSpec =
               signedBytes.length === expected.length &&
@@ -220,13 +224,14 @@ export default function Example() {
             const isValidSignature = nacl.sign.detached.verify(
               signedBytes,
               signatureObj,
-              publicKeyObj.toBytes(),
+              requestedKey.toBytes(),
             );
 
             return Promise.resolve(
               JSON.stringify({
                 signatureValid: isValidSignature,
                 matchesOffchainMessageV1Spec: matchesSpec,
+                signedWithRequestedAccount,
               }),
             );
           }}

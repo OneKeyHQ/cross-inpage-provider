@@ -306,10 +306,17 @@ export class OneKeySolanaStandardWallet implements Wallet {
               throw new Error('requiredSigners must contain the public key of account');
           }
 
-          const { signature, signedOffchainMessage } = await this.#provider.solSignOffchainMessage(
-              message,
-              requiredSigners.map((signer) => bs58.encode(signer as Uint8Array)),
-          );
+          const { signature, signedOffchainMessage, publicKey } =
+              await this.#provider.solSignOffchainMessage(
+                  message,
+                  requiredSigners.map((signer) => Uint8Array.from(signer)),
+              );
+
+          // The dapp verifies against the account it named, so a wallet that signed with a
+          // different key must fail here rather than return an unverifiable signature.
+          if (!bytesEqual(publicKey.toBytes(), account.publicKey)) {
+              throw new Error('wallet signed with a different account');
+          }
 
           outputs.push({ signedOffchainMessage, signature, signatureType: 'ed25519' });
       } else if (inputs.length > 1) {

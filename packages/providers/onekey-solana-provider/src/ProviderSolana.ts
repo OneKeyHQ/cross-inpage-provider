@@ -12,6 +12,7 @@ import {
   isWalletEventMethodMatch,
   normalizeRequiredSigners,
 } from './utils';
+import type { IRequiredSigner } from './utils';
 import type * as TypeUtils from './type-utils';
 
 export type DisplayEncoding = 'utf8' | 'hex';
@@ -184,7 +185,7 @@ interface IProviderSolana extends ProviderSolanaBase {
    */
   solSignOffchainMessage(
     message: string,
-    requiredSigners: readonly (string | Uint8Array)[],
+    requiredSigners: readonly IRequiredSigner[],
   ): Promise<{
     signature: Uint8Array;
     publicKey: PublicKey;
@@ -413,7 +414,7 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
 
   async solSignOffchainMessage(
     message: string,
-    requiredSigners: readonly (string | Uint8Array)[],
+    requiredSigners: readonly IRequiredSigner[],
   ): Promise<{
     signature: Uint8Array;
     publicKey: PublicKey;
@@ -436,6 +437,14 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
         requiredSigners: encodedSigners,
       },
     });
+
+    // A wallet that predates offchain message v1 answers the v0 shape, without the bytes it
+    // signed. Say so plainly instead of letting bs58 throw "Expected String" on undefined.
+    if (typeof result?.signedOffchainMessage !== 'string') {
+      throw new Error(
+        'solSignOffchainMessage: the wallet did not return signedOffchainMessage, it does not support offchain message v1',
+      );
+    }
 
     return {
       signature: base58.decode(result.signature),
@@ -505,9 +514,19 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
         // straight to the bridge would let a caller omit it, and the wallet would then treat a
         // UTF-8 body as a base58 version 0 message.
         const offchainParams = params as {
+          version?: number;
           message: string;
-          requiredSigners: readonly (string | Uint8Array)[];
+          requiredSigners: readonly IRequiredSigner[];
         };
+        // Reject an unknown version rather than silently signing it as v1.
+        if (
+          offchainParams?.version !== undefined &&
+          offchainParams.version !== OFFCHAIN_MESSAGE_VERSION_V1
+        ) {
+          throw new Error(
+            `solSignOffchainMessage: unsupported offchain message version ${offchainParams.version}, only version ${OFFCHAIN_MESSAGE_VERSION_V1} is supported`,
+          );
+        }
         return this.solSignOffchainMessage(
           offchainParams?.message,
           offchainParams?.requiredSigners,

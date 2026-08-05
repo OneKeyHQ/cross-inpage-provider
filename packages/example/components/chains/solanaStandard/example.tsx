@@ -16,7 +16,13 @@ import { createTransferTransaction, createVersionedLegacyTransaction, createVers
 import { verifySignIn } from '@solana/wallet-standard-util';
 import nacl from 'tweetnacl';
 import { Transaction, VersionedTransaction } from '@solana/web3.js';
+import bs58 from 'bs58';
+
 import { OffchainMessage } from './OffchainMessage';
+import {
+  encodeOffchainMessageV1WithReference,
+  readSignersFromSignedMessage,
+} from './verifyOffchainMessageV1';
 import { getApiKey } from '../../../lib/api';
 
 function Example() {
@@ -141,6 +147,121 @@ function Example() {
             }
 
             return Promise.resolve('false');
+          }}
+        />
+        <ApiPayload
+          title="signOffchainMessage"
+          description="solana:signOffchainMessage (Offchain Message v1)。预设覆盖正文形态与签名者列表两个维度"
+          presupposeParams={params.signOffchainMessageV1(publicKey?.toBase58() ?? '')}
+          onExecute={async (request: string) => {
+            const { message, requiredSigners, expectRejection } = JSON.parse(
+              request,
+            ) as {
+              message: string;
+              requiredSigners: string[];
+              expectRejection?: boolean;
+            };
+
+            // wallet-adapter 尚未透出该 feature，直接从 wallet-standard 的 features 上取
+            const feature =
+              // @ts-expect-error wallet-standard features are untyped here
+              wallet?.adapter?.wallet?.features?.['solana:signOffchainMessage'];
+            if (!feature) {
+              throw new Error('wallet does not support solana:signOffchainMessage');
+            }
+            if (!feature.supportedMessageVersions?.includes(1)) {
+              throw new Error('wallet does not support offchain message version 1');
+            }
+
+            // @ts-expect-error wallet-standard accounts are untyped here
+            const account = wallet?.adapter?.wallet?.accounts?.[0];
+            const input = {
+              account,
+              messageVersion: 1,
+              message,
+              requiredSigners: requiredSigners.map((s) => bs58.decode(s)),
+            };
+
+            // 负向用例：抛错才是期望结果，捕获下来交给 onValidate 判定
+            if (expectRejection) {
+              try {
+                await feature.signOffchainMessage(input);
+                return JSON.stringify({ rejected: false });
+              } catch (e: any) {
+                return JSON.stringify({
+                  rejected: true,
+                  reason: e?.message ?? String(e),
+                });
+              }
+            }
+
+            const [output] = await feature.signOffchainMessage(input);
+
+            return JSON.stringify({
+              signature: Array.from(output.signature),
+              signedOffchainMessage: Array.from(output.signedOffchainMessage),
+              signatureType: output.signatureType ?? 'ed25519',
+            });
+          }}
+          onValidate={(request: string, result: string) => {
+            const { message, requiredSigners, expectRejection } = JSON.parse(
+              request,
+            ) as {
+              message: string;
+              requiredSigners: string[];
+              expectRejection?: boolean;
+            };
+
+            // 负向用例的判定是反的：被拒绝才算通过
+            if (expectRejection) {
+              const outcome = JSON.parse(result) as {
+                rejected: boolean;
+                reason?: string;
+              };
+              return Promise.resolve(
+                JSON.stringify(
+                  outcome.rejected
+                    ? { passed: true, rejectedBecause: outcome.reason }
+                    : { passed: false, problem: '钱包签署了一条本应被拒绝的请求' },
+                ),
+              );
+            }
+
+            const output = JSON.parse(result);
+            const signature = new Uint8Array(output.signature);
+            const signedBytes = new Uint8Array(output.signedOffchainMessage);
+
+            // 用官方 codec 重建 —— 独立于钱包侧的编码实现
+            const expected = encodeOffchainMessageV1WithReference({
+              message,
+              requiredSigners,
+            });
+            const matchesSpec =
+              signedBytes.length === expected.length &&
+              signedBytes.every((byte, i) => byte === expected[i]);
+
+            // 直接从两边字节里读回签名者顺序比较，不经过任何编码器
+            const walletSigners = readSignersFromSignedMessage(signedBytes);
+            const referenceSigners = readSignersFromSignedMessage(expected);
+            const walletSortedSigners =
+              walletSigners.length === referenceSigners.length &&
+              walletSigners.every((s, i) => s === referenceSigners[i]);
+
+            const signatureValid = nacl.sign.detached.verify(
+              signedBytes,
+              signature,
+              publicKey.toBytes(),
+            );
+
+            return Promise.resolve(
+              JSON.stringify({
+                signatureValid,
+                matchesOffchainMessageV1Spec: matchesSpec,
+                walletSortedSigners,
+                signerCount: signedBytes[17],
+                walletSigners,
+              }),
+            );
           }}
         />
         <ApiPayload

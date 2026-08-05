@@ -1,5 +1,19 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 
+/**
+ * LEGACY — version 0 offchain message envelope, kept only as an interop probe.
+ *
+ * It is used by the `signMessage` demo to detect wallets that wrap a plain `signMessage`
+ * payload in a v0 envelope (Ledger-style). It is NOT how OneKey signs offchain messages:
+ * `solana:signOffchainMessage` and `solSignOffchainMessage` are version 1 only, see
+ * ./OffchainMessageV1.ts.
+ *
+ * Note this encoder implements the Agave/solana-sdk flavour of "v0" (signing domain, version,
+ * message format, u16 length) which differs from the v0 described by SRFC-3 and implemented in
+ * `@solana/offchain-messages` (which also carries an application domain and a signer list).
+ * That divergence is one of the reasons version 1 exists.
+ */
+
 // Max off-chain message length supported by Ledger
 const OFFCM_MAX_LEDGER_LEN = 1212;
 // Max length of version 0 off-chain message

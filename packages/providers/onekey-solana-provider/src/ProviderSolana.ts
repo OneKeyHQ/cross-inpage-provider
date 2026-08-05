@@ -6,10 +6,28 @@ import { IJsonRpcRequest } from '@onekeyfe/cross-inpage-provider-types';
 import base58 from 'bs58';
 
 import { ProviderSolanaBase } from './ProviderSolanaBase';
-import { decodeSignedTransaction, encodeTransaction, isWalletEventMethodMatch } from './utils';
+import {
+  decodeSignedTransaction,
+  encodeTransaction,
+  isWalletEventMethodMatch,
+  normalizeRequiredSigners,
+} from './utils';
+import type { IRequiredSigner } from './utils';
 import type * as TypeUtils from './type-utils';
 
 export type DisplayEncoding = 'utf8' | 'hex';
+
+/**
+ * Offchain message specification version carried over the bridge.
+ *
+ * Version 0 is intentionally absent: it carries a message format enum that cannot be determined
+ * at the protocol level, a redundant u16 length prefix, an unordered/non-unique signer list and a
+ * spoofable application domain — all removed by version 1.
+ * See https://github.com/solana-foundation/SRFCs/discussions/3
+ */
+export type OffchainMessageVersion = 1;
+
+export const OFFCHAIN_MESSAGE_VERSION_V1: OffchainMessageVersion = 1;
 
 export type ConnectOptions = {
   // Only connect when user have connected before, otherwise would throw an error
@@ -26,9 +44,32 @@ export type SolanaRequest = {
     publicKey: string;
   }>;
 
-  'solSignOffchainMessage': (params: { message: string; version?: number }) => Promise<{
+  /**
+   * Sign an offchain message conforming to version 1 of the Solana offchain message
+   * specification (https://github.com/solana-foundation/SRFCs/discussions/3).
+   *
+   * Version 0 is intentionally not supported: it carries a message format enum that cannot be
+   * determined at the protocol level, a redundant u16 length prefix, an unordered/non-unique
+   * signer list and a spoofable application domain — all removed by version 1.
+   *
+   * The wallet is responsible for building the preamble (signing domain, version byte and the
+   * lexicographically sorted, de-duplicated signer list) and returns the exact bytes it signed.
+   */
+  'solSignOffchainMessage': (params: {
+    /**
+     * Offchain message specification version, the discriminant the wallet dispatches on.
+     * Only 1 is accepted today; the wallet must reject any other value rather than guess.
+     */
+    version: OffchainMessageVersion;
+    /** UTF-8 message body, verbatim. The wallet encodes it, not the dapp. */
+    message: string;
+    /** Base58 encoded 32-byte signer public keys. The wallet sorts and de-duplicates them. */
+    requiredSigners: string[];
+  }) => Promise<{
     signature: string;
     publicKey: string;
+    /** Base58 encoded preamble + body bytes the wallet actually signed. */
+    signedOffchainMessage: string;
   }>;
 
   'signTransaction': (params: { message: string }) => Promise<Transaction>;
@@ -137,6 +178,19 @@ interface IProviderSolana extends ProviderSolanaBase {
     signature: Uint8Array;
     publicKey: PublicKey;
   }>;
+
+  /** Sign a version 1 Solana offchain message
+   * @param message - UTF-8 message body. The wallet wraps it with the specified preamble.
+   * @param requiredSigners - 32-byte signer public keys, base58 encoded or raw bytes.
+   */
+  solSignOffchainMessage(
+    message: string,
+    requiredSigners: readonly IRequiredSigner[],
+  ): Promise<{
+    signature: Uint8Array;
+    publicKey: PublicKey;
+    signedOffchainMessage: Uint8Array;
+  }>;
 }
 
 type OneKeySolanaProviderProps = IInpageProviderConfig & {
@@ -179,6 +233,7 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
     this.signTransaction = this.signTransaction.bind(this);
     this.signAllTransactions = this.signAllTransactions.bind(this);
     this.signMessage = this.signMessage.bind(this);
+    this.solSignOffchainMessage = this.solSignOffchainMessage.bind(this);
     this.isAccountsChanged = this.isAccountsChanged.bind(this);
     this.bridgeRequest = this.bridgeRequest.bind(this);
 
@@ -358,23 +413,43 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
   }
 
   async solSignOffchainMessage(
-    message: Uint8Array,
-    version?: number,
+    message: string,
+    requiredSigners: readonly IRequiredSigner[],
   ): Promise<{
     signature: Uint8Array;
     publicKey: PublicKey;
+    signedOffchainMessage: Uint8Array;
   }> {
+    if (typeof message !== 'string') {
+      throw new Error('solSignOffchainMessage: message must be a UTF-8 string');
+    }
+    if (message.length === 0) {
+      throw new Error('solSignOffchainMessage: message must not be empty');
+    }
+
+    const encodedSigners = normalizeRequiredSigners(requiredSigners);
+
     const result = await this._callBridge({
       method: 'solSignOffchainMessage',
       params: {
-        message: typeof message === 'string' ? message : base58.encode(message),
-        version,
+        version: OFFCHAIN_MESSAGE_VERSION_V1,
+        message,
+        requiredSigners: encodedSigners,
       },
     });
+
+    // A wallet that predates offchain message v1 answers the v0 shape, without the bytes it
+    // signed. Say so plainly instead of letting bs58 throw "Expected String" on undefined.
+    if (typeof result?.signedOffchainMessage !== 'string') {
+      throw new Error(
+        'solSignOffchainMessage: the wallet did not return signedOffchainMessage, it does not support offchain message v1',
+      );
+    }
 
     return {
       signature: base58.decode(result.signature),
       publicKey: new PublicKey(result.publicKey),
+      signedOffchainMessage: base58.decode(result.signedOffchainMessage),
     };
   }
 
@@ -434,6 +509,29 @@ class ProviderSolana extends ProviderSolanaBase implements IProviderSolana {
         return this._handleSignAllTransactions(params as { message: string[] });
       case 'signMessage':
         return this._handleSignMessage(params as { message: string; display?: DisplayEncoding });
+      case 'solSignOffchainMessage': {
+        // Routed through the typed method so `version` is always set. Passing these params
+        // straight to the bridge would let a caller omit it, and the wallet would then treat a
+        // UTF-8 body as a base58 version 0 message.
+        const offchainParams = params as {
+          version?: number;
+          message: string;
+          requiredSigners: readonly IRequiredSigner[];
+        };
+        // Reject an unknown version rather than silently signing it as v1.
+        if (
+          offchainParams?.version !== undefined &&
+          offchainParams.version !== OFFCHAIN_MESSAGE_VERSION_V1
+        ) {
+          throw new Error(
+            `solSignOffchainMessage: unsupported offchain message version ${offchainParams.version}, only version ${OFFCHAIN_MESSAGE_VERSION_V1} is supported`,
+          );
+        }
+        return this.solSignOffchainMessage(
+          offchainParams?.message,
+          offchainParams?.requiredSigners,
+        );
+      }
       case 'signAndSendTransaction':
         return this._handleSignAndSendTransaction(
           params as { message: string; options?: SendOptions },

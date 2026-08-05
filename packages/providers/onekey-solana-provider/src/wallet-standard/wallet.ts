@@ -7,6 +7,10 @@ import {
   type SolanaSignMessageFeature,
   type SolanaSignMessageMethod,
   type SolanaSignMessageOutput,
+  SolanaSignOffchainMessage,
+  type SolanaSignOffchainMessageFeature,
+  type SolanaSignOffchainMessageMethod,
+  type SolanaSignOffchainMessageOutput,
   SolanaSignTransaction,
   type SolanaSignTransactionFeature,
   type SolanaSignTransactionMethod,
@@ -74,6 +78,7 @@ export class OneKeySolanaStandardWallet implements Wallet {
       SolanaSignAndSendTransactionFeature &
       SolanaSignTransactionFeature &
       SolanaSignMessageFeature &
+      SolanaSignOffchainMessageFeature &
       OneKeyFeature {
       return {
           [StandardConnect]: {
@@ -101,6 +106,12 @@ export class OneKeySolanaStandardWallet implements Wallet {
           [SolanaSignMessage]: {
               version: '1.0.0',
               signMessage: this.#signMessage,
+          },
+          [SolanaSignOffchainMessage]: {
+              version: '1.0.0',
+              // Version 0 of the offchain message spec is deliberately unsupported.
+              supportedMessageVersions: [1],
+              signOffchainMessage: this.#signOffchainMessage,
           },
           [OneKeyNamespace]: {
               onekey: this.#provider,
@@ -273,6 +284,44 @@ export class OneKeySolanaStandardWallet implements Wallet {
       } else if (inputs.length > 1) {
           for (const input of inputs) {
               outputs.push(...(await this.#signMessage(input)));
+          }
+      }
+
+      return outputs;
+  };
+
+  #signOffchainMessage: SolanaSignOffchainMessageMethod = async (...inputs) => {
+      if (!this.#account) throw new Error('not connected');
+
+      const outputs: SolanaSignOffchainMessageOutput[] = [];
+
+      if (inputs.length === 1) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          const { account, message, messageVersion, requiredSigners } = inputs[0]!;
+          if (account !== this.#account) throw new Error('invalid account');
+          // Only version 1 of the offchain message spec is supported.
+          if (messageVersion !== 1) throw new Error('invalid message version');
+          if (!requiredSigners?.length) throw new Error('requiredSigners must not be empty');
+          if (!requiredSigners.some((signer) => bytesEqual(signer, account.publicKey))) {
+              throw new Error('requiredSigners must contain the public key of account');
+          }
+
+          const { signature, signedOffchainMessage, publicKey } =
+              await this.#provider.solSignOffchainMessage(
+                  message,
+                  requiredSigners.map((signer) => Uint8Array.from(signer)),
+              );
+
+          // The dapp verifies against the account it named, so a wallet that signed with a
+          // different key must fail here rather than return an unverifiable signature.
+          if (!bytesEqual(publicKey.toBytes(), account.publicKey)) {
+              throw new Error('wallet signed with a different account');
+          }
+
+          outputs.push({ signedOffchainMessage, signature, signatureType: 'ed25519' });
+      } else if (inputs.length > 1) {
+          for (const input of inputs) {
+              outputs.push(...(await this.#signOffchainMessage(input)));
           }
       }
 

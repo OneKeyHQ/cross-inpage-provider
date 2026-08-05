@@ -15,11 +15,12 @@ export interface IProviderApi {
     publicKey: PublicKey;
   }>;
   solSignOffchainMessage(
-    data: Uint8Array,
-    version?: number,
+    message: string,
+    requiredSigners: readonly (string | Uint8Array)[],
   ): Promise<{
     signature: Uint8Array;
     publicKey: PublicKey;
+    signedOffchainMessage: Uint8Array;
   }>;
   signAndSendTransaction(transafe: Transaction): Promise<{
     signature: Uint8Array;

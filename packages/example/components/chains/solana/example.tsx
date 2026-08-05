@@ -13,7 +13,10 @@ import params from './params';
 import { createTransferTransaction, createVersionedTransaction, createTokenTransferTransaction, hasVersionedTx, createVersionedLegacyTransaction } from './builder';
 import nacl from 'tweetnacl';
 import { toast } from '../../ui/use-toast';
-import { OffchainMessage } from '../solanaStandard/OffchainMessage';
+import {
+  encodeOffchainMessageV1WithReference,
+  readSignersFromSignedMessage,
+} from '../solanaStandard/verifyOffchainMessageV1';
 import { getApiKey } from '../../../lib/api';
 
 const NETWORK = clusterApiUrl('mainnet-beta');
@@ -182,41 +185,115 @@ export default function Example() {
             return Promise.resolve(isValidSignature.toString());
           }}
         />
-          <ApiPayload
+        <ApiPayload
           title="solSignOffchainMessage"
-          description="签名消息(OneKey 私有方法)"
-          presupposeParams={params.signMessage}
+          description="签名 Offchain Message v1 (OneKey 私有方法)。预设覆盖正文形态与签名者列表两个维度"
+          presupposeParams={params.signOffchainMessageV1(account?.publicKey ?? '')}
           onExecute={async (request: string) => {
-            return await provider?.solSignOffchainMessage(Buffer.from(request, 'utf8'));
+            const { message, requiredSigners, expectRejection } = JSON.parse(
+              request,
+            ) as {
+              message: string;
+              requiredSigners: string[];
+              expectRejection?: boolean;
+            };
+
+            // 负向用例：这条请求本就该被拒绝，所以「抛错」才是期望结果。
+            // 捕获下来交给 onValidate 判定，否则正确的拒绝会显示成工具崩溃。
+            if (expectRejection) {
+              try {
+                await provider?.solSignOffchainMessage(message, requiredSigners);
+                return JSON.stringify({ rejected: false });
+              } catch (e: any) {
+                return JSON.stringify({
+                  rejected: true,
+                  reason: e?.message ?? String(e),
+                });
+              }
+            }
+
+            // v1 只传 UTF-8 原文与签名者，preamble 由钱包构造
+            return await provider?.solSignOffchainMessage(message, requiredSigners);
           }}
           onValidate={(request: string, result: string) => {
-            // const message = bs58.decode(request).toString();
+            const { message, requiredSigners, expectRejection } = JSON.parse(
+              request,
+            ) as {
+              message: string;
+              requiredSigners: string[];
+              expectRejection?: boolean;
+            };
+
+            // 负向用例的判定是反的：被拒绝才算通过
+            if (expectRejection) {
+              const outcome = JSON.parse(result) as {
+                rejected: boolean;
+                reason?: string;
+              };
+              return Promise.resolve(
+                JSON.stringify(
+                  outcome.rejected
+                    ? { passed: true, rejectedBecause: outcome.reason }
+                    : {
+                        passed: false,
+                        problem:
+                          '钱包签署了一条本应被拒绝的请求',
+                      },
+                ),
+              );
+            }
+
             const {
               signature,
               publicKey,
+              signedOffchainMessage,
             }: {
               signature: any;
               publicKey: string;
+              signedOffchainMessage: any;
             } = JSON.parse(result);
 
-            let signatureObj;
-            if(Array.isArray(signature)) {
-              signatureObj = new Uint8Array(signature)
-            } else {
-              signatureObj = new Uint8Array(signature.data)
-            }
-            const publicKeyObj = new PublicKey(publicKey);
+            const toBytes = (value: any) =>
+              new Uint8Array(Array.isArray(value) ? value : value.data);
+            const signatureObj = toBytes(signature);
+            const signedBytes = toBytes(signedOffchainMessage);
 
-            const offchainMessage = new OffchainMessage({
-              message: Buffer.from(request, 'utf8'),
+            // 用官方 codec 按请求内容重建 —— 独立于钱包侧的编码实现
+            const expected = encodeOffchainMessageV1WithReference({
+              message,
+              requiredSigners,
             });
-            const isValidSignature = nacl.sign.detached.verify(
-              offchainMessage.serialize(),
+            const matchesSpec =
+              signedBytes.length === expected.length &&
+              signedBytes.every((byte, i) => byte === expected[i]);
+
+            // 直接从两边的字节里读回签名者顺序做比较，不经过任何编码器
+            const walletSigners = readSignersFromSignedMessage(signedBytes);
+            const referenceSigners = readSignersFromSignedMessage(expected);
+            const walletSortedSigners =
+              walletSigners.length === referenceSigners.length &&
+              walletSigners.every((s, i) => s === referenceSigners[i]);
+
+            const requestedKey = new PublicKey(account?.publicKey);
+            const signedWithRequestedAccount =
+              new PublicKey(publicKey).toBase58() === requestedKey.toBase58();
+
+            const signatureValid = nacl.sign.detached.verify(
+              signedBytes,
               signatureObj,
-              publicKeyObj.toBytes(),
+              requestedKey.toBytes(),
             );
 
-            return Promise.resolve(isValidSignature.toString());
+            return Promise.resolve(
+              JSON.stringify({
+                signatureValid,
+                matchesOffchainMessageV1Spec: matchesSpec,
+                signedWithRequestedAccount,
+                walletSortedSigners,
+                signerCount: signedBytes[17],
+                walletSigners,
+              }),
+            );
           }}
         />
       </ApiGroup>

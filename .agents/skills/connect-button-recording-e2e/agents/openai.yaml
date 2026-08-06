@@ -1,0 +1,4 @@
+interface:
+  display_name: "Connect Button Recording E2E"
+  short_description: "Turn manual recordings into verified Desktop E2E scripts"
+  default_prompt: "Use $connect-button-recording-e2e to generate and verify a Desktop E2E script from the latest manual recording."

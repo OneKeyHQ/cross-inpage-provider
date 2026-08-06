@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "providers": {
+    "algo": {
+      "packageName": "@onekeyfe/onekey-algo-provider",
+      "chainMatcher": "names",
+      "chainNames": ["algorand"]
+    },
+    "alephium": {
+      "packageName": "@onekeyfe/onekey-alph-provider",
+      "chainMatcher": "names",
+      "chainNames": ["alephium"]
+    },
+    "aptos": {
+      "packageName": "@onekeyfe/onekey-aptos-provider",
+      "chainMatcher": "names",
+      "chainNames": ["aptos"]
+    },
+    "bfc": {
+      "packageName": "@onekeyfe/onekey-bfc-provider",
+      "chainMatcher": "names",
+      "chainNames": ["bfc"]
+    },
+    "btc": {
+      "packageName": "@onekeyfe/onekey-btc-provider",
+      "chainMatcher": "names",
+      "chainNames": ["bitcoin"]
+    },
+    "cardano": {
+      "packageName": "@onekeyfe/onekey-cardano-provider",
+      "chainMatcher": "names",
+      "chainNames": ["cardano"]
+    },
+    "conflux": {
+      "packageName": "@onekeyfe/onekey-conflux-provider",
+      "chainMatcher": "names",
+      "chainNames": ["conflux"]
+    },
+    "cosmos": {
+      "packageName": "@onekeyfe/onekey-cosmos-provider",
+      "chainMatcher": "names",
+      "chainNames": ["cosmos", "cosmos hub", "cosmoshub"]
+    },
+    "ethereum": {
+      "packageName": "@onekeyfe/onekey-eth-provider",
+      "chainMatcher": "evm",
+      "chainNames": []
+    },
+    "neo": {
+      "packageName": "@onekeyfe/onekey-neo-provider",
+      "chainMatcher": "names",
+      "chainNames": ["neo"]
+    },
+    "polkadot": {
+      "packageName": "@onekeyfe/onekey-polkadot-provider",
+      "chainMatcher": "names",
+      "chainNames": ["polkadot"]
+    },
+    "scdo": {
+      "packageName": "@onekeyfe/onekey-scdo-provider",
+      "chainMatcher": "names",
+      "chainNames": ["scdo"]
+    },
+    "solana": {
+      "packageName": "@onekeyfe/onekey-solana-provider",
+      "chainMatcher": "names",
+      "chainNames": ["solana"]
+    },
+    "stellar": {
+      "packageName": "@onekeyfe/onekey-stellar-provider",
+      "chainMatcher": "names",
+      "chainNames": ["stellar"]
+    },
+    "sui": {
+      "packageName": "@onekeyfe/onekey-sui-provider",
+      "chainMatcher": "names",
+      "chainNames": ["sui"]
+    },
+    "ton": {
+      "packageName": "@onekeyfe/onekey-ton-provider",
+      "chainMatcher": "names",
+      "chainNames": ["ton"]
+    },
+    "tron": {
+      "packageName": "@onekeyfe/onekey-tron-provider",
+      "chainMatcher": "names",
+      "chainNames": ["tron"]
+    }
+  }
+}

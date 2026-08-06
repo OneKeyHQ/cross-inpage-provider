@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 1,
+  "protocols": [
+    {
+      "protocolId": "7844",
+      "protocolSlug": "vena-finance",
+      "status": "resolved",
+      "url": "https://app.vena.finance",
+      "evidenceUrl": "https://www.vena.finance/",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "7776",
+      "protocolSlug": "nerona",
+      "status": "resolved",
+      "url": "https://app.nerona.xyz",
+      "evidenceUrl": "https://app.nerona.xyz/",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "8208",
+      "protocolSlug": "sato",
+      "status": "resolved",
+      "url": "https://sat0.org",
+      "evidenceUrl": "https://sat0.org/whitepaper",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "7817",
+      "protocolSlug": "rise.rich",
+      "status": "resolved",
+      "url": "https://rise.rich",
+      "evidenceUrl": "https://docs.rise.rich/introduction",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "7843",
+      "protocolSlug": "fluxflow-v3",
+      "status": "resolved",
+      "url": "https://app.fluxflow.fi",
+      "evidenceUrl": "https://fluxflow.fi/",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "8041",
+      "protocolSlug": "dreamdex",
+      "status": "resolved",
+      "url": "https://app.dreamdex.io",
+      "evidenceUrl": "https://app.dreamdex.io/",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "7821",
+      "protocolSlug": "eticahub",
+      "status": "resolved",
+      "url": "https://eticahub.com",
+      "evidenceUrl": "https://eticahub.com/",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "8026",
+      "protocolSlug": "kayen-finance-v3",
+      "status": "resolved",
+      "url": "https://app.kayen.finance",
+      "evidenceUrl": "https://www.kayen.finance/",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "8079",
+      "protocolSlug": "boar-finance",
+      "status": "resolved",
+      "url": "https://boar.finance/mezo",
+      "evidenceUrl": "https://mezo.org/blog/set-it-and-earn-automated-vebtc-yield-with-boar-finance/",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "7878",
+      "protocolSlug": "bitverse-dex",
+      "status": "resolved",
+      "url": "https://app.bitverse.zone",
+      "evidenceUrl": "https://www.bitverse.zone/",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "7885",
+      "protocolSlug": "openfi",
+      "status": "resolved",
+      "url": "https://app.open-fi.xyz",
+      "evidenceUrl": "https://x.com/open_fi_",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "7736",
+      "protocolSlug": "chisino",
+      "status": "resolved",
+      "url": "https://app.chisino.io",
+      "evidenceUrl": "https://chisino.io/",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "7708",
+      "protocolSlug": "tulpea",
+      "status": "resolved",
+      "url": "https://app.tulpea.org",
+      "evidenceUrl": "https://tulpea.org/",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "8275",
+      "protocolSlug": "fry.farm",
+      "status": "resolved",
+      "url": "https://fry.farm",
+      "evidenceUrl": "https://frynetworks.com/",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "8283",
+      "protocolSlug": "valos",
+      "status": "no_runnable_dapp",
+      "reason": "institutional_service_requires_formal_onboarding",
+      "evidenceUrl": "https://valos.io/",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "8274",
+      "protocolSlug": "diamond-finance",
+      "status": "unresolved",
+      "reason": "no_trusted_official_dapp_url_found",
+      "evidenceUrl": "https://defillama.com/protocol/diamond-finance",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "4380",
+      "protocolSlug": "powh3d",
+      "status": "unresolved",
+      "reason": "no_maintained_official_dapp_url_found",
+      "evidenceUrl": "https://defillama.com/protocol/powh3d",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "4389",
+      "protocolSlug": "fomo3d",
+      "status": "unresolved",
+      "reason": "no_maintained_official_dapp_url_found",
+      "evidenceUrl": "https://defillama.com/protocol/fomo3d",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "7909",
+      "protocolSlug": "bond",
+      "status": "unresolved",
+      "reason": "no_trusted_official_dapp_url_found",
+      "evidenceUrl": "https://defillama.com/protocol/bond",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "8329",
+      "protocolSlug": "marinus",
+      "status": "unresolved",
+      "reason": "no_trusted_official_dapp_url_found",
+      "evidenceUrl": "https://talk.harmony.one/t/buy-and-burn-mp/27011",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "8289",
+      "protocolSlug": "prismapad",
+      "status": "unresolved",
+      "reason": "no_trusted_official_dapp_url_found",
+      "evidenceUrl": "https://defillama.com/protocol/prismapad",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    },
+    {
+      "protocolId": "7781",
+      "protocolSlug": "tsunami-v3",
+      "status": "unresolved",
+      "reason": "candidate_url_could_not_be_verified_as_official",
+      "evidenceUrl": "https://defillama.com/protocol/tsunami-v3",
+      "verifiedAt": "2026-07-31T04:15:00.000Z"
+    }
+  ]
+}

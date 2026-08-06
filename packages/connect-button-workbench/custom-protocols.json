@@ -1,0 +1,748 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-custom-protocol-registry",
+  "source": "custom",
+  "protocols": [
+    {
+      "id": "1inch",
+      "name": "1inch",
+      "slug": "1inch",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://app.1inch.io",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "unsupported",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "aave-v3",
+      "name": "Aave V3",
+      "slug": "aave-v3",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://app.aave.com",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-05T08:44:04.051Z",
+        "reviewedUrl": "https://app.aave.com/",
+        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+      }
+    },
+    {
+      "id": "balancer-fi",
+      "name": "Balancer",
+      "slug": "balancer-fi",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://app.balancer.fi",
+      "target": {
+        "urlOverride": "https://balancer.fi/pools",
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-05T03:16:50.395Z",
+        "reviewedUrl": "https://balancer.fi/pools",
+        "injectedBundleSha256": "d839244e90304eff08e52875eef9cbecde5d83c7e13990c0b33a7f37052faf39"
+      }
+    },
+    {
+      "id": "benqi",
+      "name": "BENQI",
+      "slug": "benqi",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://staking.benqi.fi",
+      "target": {
+        "urlOverride": "https://app.benqi.fi/savax",
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-05T03:31:47.025Z",
+        "reviewedUrl": "https://app.benqi.fi/savax",
+        "injectedBundleSha256": "d839244e90304eff08e52875eef9cbecde5d83c7e13990c0b33a7f37052faf39"
+      }
+    },
+    {
+      "id": "boringdao",
+      "name": "BoringDAO",
+      "slug": "boringdao",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://app.boringdao.com",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "unsupported",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "compound",
+      "name": "Compound",
+      "slug": "compound",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://app.compound.finance",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-05T03:34:31.448Z",
+        "reviewedUrl": "https://app.compound.finance/?market=usdc-mainnet",
+        "injectedBundleSha256": "d839244e90304eff08e52875eef9cbecde5d83c7e13990c0b33a7f37052faf39"
+      }
+    },
+    {
+      "id": "dydx",
+      "name": "dYdX",
+      "slug": "dydx",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://trade.dydx.exchange",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "pending",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "dydx-v4",
+      "name": "dYdX v4",
+      "slug": "dydx-v4",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://dydx.trade",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "pending",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "eigenlayer",
+      "name": "EigenLayer",
+      "slug": "eigenlayer",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://app.eigenlayer.xyz",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-05T03:35:40.282Z",
+        "reviewedUrl": "https://app.eigenlayer.xyz/",
+        "injectedBundleSha256": "d839244e90304eff08e52875eef9cbecde5d83c7e13990c0b33a7f37052faf39"
+      }
+    },
+    {
+      "id": "elk",
+      "name": "Elk",
+      "slug": "elk",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://app.elk.finance",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-06T09:07:41.356Z",
+        "reviewedUrl": "https://app.elk.finance/swap/43114/AVAX/ELK",
+        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+      }
+    },
+    {
+      "id": "gamma",
+      "name": "Gamma",
+      "slug": "gamma",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://gamma.io",
+      "target": {
+        "urlOverride": "https://gamma.io/ordinals/collections/soft-eulogies-domain-1-light/items",
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-05T07:53:12.876Z",
+        "reviewedUrl": "https://gamma.io/ordinals/collections/soft-eulogies-domain-1-light/items",
+        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+      }
+    },
+    {
+      "id": "gem",
+      "name": "Gem",
+      "slug": "gem",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://gem.xyz",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "pending",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "hope",
+      "name": "Hope",
+      "slug": "hope",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://app.hope.money",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-04T13:54:20.736Z",
+        "reviewedUrl": "https://app.hope.money/",
+        "injectedBundleSha256": "c0519700338fa600d6bad059ed9e1d3b242d92abe6b3818afa2cf85104107af6"
+      }
+    },
+    {
+      "id": "hyperliquid",
+      "name": "Hyperliquid",
+      "slug": "hyperliquid",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://app.hyperliquid.xyz",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "pending",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "idclub",
+      "name": "ID Club",
+      "slug": "idclub",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://idclub.io",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-04T13:54:07.093Z",
+        "reviewedUrl": "https://idclub.io/marketplace",
+        "injectedBundleSha256": "c0519700338fa600d6bad059ed9e1d3b242d92abe6b3818afa2cf85104107af6"
+      }
+    },
+    {
+      "id": "imtbl-top",
+      "name": "IMTBL",
+      "slug": "imtbl-top",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://imtbl.top",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "pending",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "indexcoop",
+      "name": "Index Coop",
+      "slug": "indexcoop",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://app.indexcoop.com",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "pending",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "iziswap",
+      "name": "iZiSwap",
+      "slug": "iziswap",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://izumi.finance",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "pending",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "lite-instadapp",
+      "name": "Instadapp Lite",
+      "slug": "lite-instadapp",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://lite.instadapp.io",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "pending",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "magiceden",
+      "name": "Magic Eden",
+      "slug": "magiceden",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://magiceden.io",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "pending",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "meth-mantle",
+      "name": "mETH",
+      "slug": "meth-mantle",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://meth.mantle.xyz",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "pending",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "mux",
+      "name": "MUX",
+      "slug": "mux",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://app.mux.network",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-06T10:39:35.714Z",
+        "reviewedUrl": "https://app.mux.network/#/trade?chainId=42161&unit=USD&market=ETH&collateral=USDC",
+        "injectedBundleSha256": "ecab3f51b08b72b664f34f7f61f8940fe39dbd15e7043acc3717c589c2150a48"
+      }
+    },
+    {
+      "id": "oasis",
+      "name": "Oasis",
+      "slug": "oasis",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://oasis.app",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "pending",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "opensea",
+      "name": "OpenSea",
+      "slug": "opensea",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://opensea.io",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-06T10:36:19.415Z",
+        "reviewedUrl": "https://opensea.io/",
+        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+      }
+    },
+    {
+      "id": "ord",
+      "name": "Ord",
+      "slug": "ord",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://ord.io",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "pending",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "ordinalsmarket",
+      "name": "Ordinals Market",
+      "slug": "ordinalsmarket",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://ordinals.market",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "pending",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "ordinalswallet",
+      "name": "Ordinals Wallet",
+      "slug": "ordinalswallet",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://ordinalswallet.com",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-06T11:02:49.413Z",
+        "reviewedUrl": "https://ordinalswallet.com/",
+        "injectedBundleSha256": "4d11b4ddf165a50fdb9564fbe092f5534c846d1c6112338a319b20e1d1fb47ae"
+      }
+    },
+    {
+      "id": "rarible",
+      "name": "Rarible",
+      "slug": "rarible",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://rarible.com",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "pending",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "renzoprotocol",
+      "name": "Renzo",
+      "slug": "renzoprotocol",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://app.renzoprotocol.com",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-06T11:00:09.769Z",
+        "reviewedUrl": "https://app.renzoprotocol.com/explore",
+        "injectedBundleSha256": "4d11b4ddf165a50fdb9564fbe092f5534c846d1c6112338a319b20e1d1fb47ae"
+      }
+    },
+    {
+      "id": "sating",
+      "name": "Sating",
+      "slug": "sating",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://sating.io",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "pending",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "silo",
+      "name": "Silo",
+      "slug": "silo",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://app.silo.finance",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-06T10:19:08.759Z",
+        "reviewedUrl": "https://app.silo.finance/explore",
+        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+      }
+    },
+    {
+      "id": "stargate-finance",
+      "name": "Stargate",
+      "slug": "stargate-finance",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://stargate.finance",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-06T10:19:05.564Z",
+        "reviewedUrl": "https://stargate.finance/",
+        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+      }
+    },
+    {
+      "id": "sushi",
+      "name": "Sushi",
+      "slug": "sushi",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://sushi.com",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-06T10:18:59.098Z",
+        "reviewedUrl": "https://www.sushi.com/ethereum/swap",
+        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+      }
+    },
+    {
+      "id": "synthetix",
+      "name": "Synthetix",
+      "slug": "synthetix",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://app.synthetix.io",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "pending",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "unisat",
+      "name": "UniSat",
+      "slug": "unisat",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://unisat.io",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-06T10:18:45.998Z",
+        "reviewedUrl": "https://unisat.io/",
+        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+      }
+    },
+    {
+      "id": "velocity",
+      "name": "Velocity",
+      "slug": "velocity",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://velocity.exchange",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-06T10:18:04.332Z",
+        "reviewedUrl": "https://velocity.exchange/",
+        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+      }
+    },
+    {
+      "id": "yearn",
+      "name": "Yearn",
+      "slug": "yearn",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://app.yearn.finance",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "pending",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "zapper",
+      "name": "Zapper",
+      "slug": "zapper",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://zapper.xyz",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "unsupported",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    },
+    {
+      "id": "zerion",
+      "name": "Zerion",
+      "slug": "zerion",
+      "active": true,
+      "category": "Custom",
+      "totalTvl": 0,
+      "sourceUrl": "https://app.zerion.io",
+      "target": {
+        "urlOverride": null,
+        "resolvedDappUrl": null
+      },
+      "manualReview": {
+        "state": "pending",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
+      }
+    }
+  ]
+}

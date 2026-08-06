@@ -26,12 +26,8 @@
     "swap-lock-registry": "npx swap-lock-registry --yarn --parallel --url https://registry.yarnpkg.com yarn.lock",
     "test:e2e:headed": "cd ./packages/e2e && yarn test:headed",
     "test:e2e": "cd ./packages/e2e && yarn test",
-    "connect-button-lab": "npm --prefix packages/connect-button-lab run dashboard",
-    "connect-button-lab:test": "npm --prefix packages/connect-button-lab test",
-    "connect-button-lab:test-all": "npm --prefix packages/connect-button-lab run test:all",
-    "hack-buttons:sync": "npm --prefix packages/connect-button-lab run registry:sync --",
-    "hack-buttons:batch": "npm --prefix packages/connect-button-lab run batch -- --limit 3 --mode auto",
-    "hack-buttons:validate": "npm --prefix packages/connect-button-lab run registry:validate"
+    "hack-buttons:sync": "npm --prefix packages/connect-button-workbench run registry:sync --",
+    "hack-buttons:validate": "npm --prefix packages/providers/inpage-providers-hub run validate:provider-capabilities && npm --prefix packages/connect-button-workbench run registry:validate"
   },
   "devDependencies": {
     "@testing-library/react-hooks": "^7.0.2",

@@ -9,8 +9,12 @@ const TerserPlugin = require('terser-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 const IS_PRD = process.env.NODE_ENV === 'production';
+const IS_CUSTOM_INJECTION_DEV = process.env.ONEKEY_CUSTOM_INJECTION_DEV === '1';
+const CUSTOM_INJECTION_BUILD_LABEL =
+  process.env.ONEKEY_CUSTOM_INJECTION_BUILD_LABEL || 'local-workspace';
 
 console.log('============ , IS_PRD', IS_PRD, process.env.NODE_ENV);
+console.log('============ , IS_CUSTOM_INJECTION_DEV', IS_CUSTOM_INJECTION_DEV);
 
 const createAnalyzer = (name) => {
   return new BundleAnalyzerPlugin({
@@ -142,11 +146,23 @@ const desktopConfig = merge(commonConfig, {
   target: 'web',
   entry: {
     injectedDesktop: './src/injectedDesktop.ts',
+    ...(IS_CUSTOM_INJECTION_DEV
+      ? {
+          customInjectionAutoReviewPreload: './src/customInjectionAutoReviewPreload.ts',
+          customInjectionRecorderPreload: './src/customInjectionRecorderPreload.ts',
+        }
+      : {}),
   },
   externals: {
     electron: 'commonjs electron', // 将 Electron 标记为外部模块
   },
-  plugins: [createAnalyzer('desktop')],
+  plugins: [
+    new webpack.DefinePlugin({
+      __ONEKEY_CUSTOM_INJECTION_DEV__: JSON.stringify(IS_CUSTOM_INJECTION_DEV),
+      __ONEKEY_CUSTOM_INJECTION_BUILD_LABEL__: JSON.stringify(CUSTOM_INJECTION_BUILD_LABEL),
+    }),
+    createAnalyzer('desktop'),
+  ],
 });
 
 module.exports = [extensionConfig, desktopConfig];

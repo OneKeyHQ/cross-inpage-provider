@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "../..",
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "noEmit": true,
+    "paths": {
+      "@onekeyfe/cross-inpage-provider-core": ["packages/core/src/index.ts"],
+      "@onekeyfe/cross-inpage-provider-types": ["packages/types/src/index.ts"]
+    },
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "types": ["jest", "node"]
+  },
+  "include": ["dapps/**/*.ts"],
+  "exclude": ["dist", "node_modules"]
+}

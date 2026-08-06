@@ -24,11 +24,13 @@ export const WALLET_CONNECT_INFO: Record<
     iconUrl: string;
     icon: string;
     text: string;
+    autoReviewIconUrls?: readonly string[];
   }
 > = {
   onekey: {
     text: 'OneKey',
     iconUrl: 'https://uni.onekey-asset.com/static/logo/onekey.png',
+    autoReviewIconUrls: ['https://iconic.dynamic-static-assets.com/icons/sprite.svg#onekey'],
     icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNi42NjY2NyIgZmlsbD0iIzQ0RDYyQyIvPgo8cGF0aCBkPSJNMTcuNDQ1NyA2Ljc4MzJMMTIuOTk0NSA2Ljc4MzJMMTIuMjEzNiA5LjE0NDQ2SDE0LjY4NTlMMTQuNjg1OSAxNC4xMTgySDE3LjQ0NTdWNi43ODMyWiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0yMS4wNzY0IDIwLjEzNzhDMjEuMDc2NCAyMi45NDEzIDE4LjgwMzcgMjUuMjE0MSAxNi4wMDAxIDI1LjIxNDFDMTMuMTk2NiAyNS4yMTQxIDEwLjkyMzggMjIuOTQxMyAxMC45MjM4IDIwLjEzNzhDMTAuOTIzOCAxNy4zMzQyIDEzLjE5NjYgMTUuMDYxNSAxNi4wMDAxIDE1LjA2MTVDMTguODAzNyAxNS4wNjE1IDIxLjA3NjQgMTcuMzM0MiAyMS4wNzY0IDIwLjEzNzhaTTE4Ljc3MTggMjAuMTM3OEMxOC43NzE4IDIxLjY2ODUgMTcuNTMwOSAyMi45MDk1IDE2LjAwMDEgMjIuOTA5NUMxNC40NjkzIDIyLjkwOTUgMTMuMjI4NCAyMS42Njg1IDEzLjIyODQgMjAuMTM3OEMxMy4yMjg0IDE4LjYwNyAxNC40NjkzIDE3LjM2NiAxNi4wMDAxIDE3LjM2NkMxNy41MzA5IDE3LjM2NiAxOC43NzE4IDE4LjYwNyAxOC43NzE4IDIwLjEzNzhaIiBmaWxsPSJibGFjayIvPgo8L3N2Zz4K',
   },
   metamask: {

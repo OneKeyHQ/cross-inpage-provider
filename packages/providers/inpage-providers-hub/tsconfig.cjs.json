@@ -5,6 +5,7 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "jsxImportSource": "preact",
+    "resolveJsonModule": true,
     "outDir": "./dist/cjs"
   }
 }

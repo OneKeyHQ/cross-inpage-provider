@@ -1,4 +1,4 @@
 interface:
-  display_name: "DeFiLlama Hack Buttons"
-  short_description: "Automate top-TVL dapp button coverage and regression"
-  default_prompt: "Use $defillama-hack-buttons to process the next three DeFiLlama protocols with scripted Electron E2E."
+  display_name: 'DeFiLlama Hack Buttons'
+  short_description: 'Resolve, build, and verify dapp button hacks in Desktop'
+  default_prompt: 'Use $defillama-hack-buttons to resolve the requested or recently selected site, inspect it in OneKey Desktop, and implement its connect-button Hack code.'

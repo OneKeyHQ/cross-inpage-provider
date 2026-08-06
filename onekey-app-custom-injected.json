@@ -1,7 +1,20 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 3,
   "kind": "onekey-app-custom-injected",
-  "protocolRegistry": "packages/providers/inpage-providers-hub/src/connectButtonHack/defillama-protocols.json",
-  "registryUpdater": "packages/connect-button-lab/src/cli/custom-injected-registry.mjs",
-  "desktopPreload": "packages/injected/dist/injected/injectedDesktopPreload.js"
+  "protocolSources": [
+    {
+      "source": "defillama",
+      "protocolRegistry": "packages/providers/inpage-providers-hub/src/connectButtonHack/defillama-protocols.json",
+      "registryUpdater": "packages/connect-button-workbench/src/cli/custom-injected-registry.mjs",
+      "registryRefresher": "packages/connect-button-workbench/src/cli/sync-registry.mjs"
+    },
+    {
+      "source": "custom",
+      "protocolRegistry": "packages/connect-button-workbench/custom-protocols.json",
+      "registryUpdater": "packages/connect-button-workbench/src/cli/custom-injected-registry.mjs"
+    }
+  ],
+  "desktopPreload": "packages/injected/dist/injected/injectedDesktopPreload.js",
+  "dappsDirectory": "packages/connect-button-workbench/dapps",
+  "recordingE2EGenerator": "packages/connect-button-workbench/src/cli/generate-recording-e2e.mjs"
 }

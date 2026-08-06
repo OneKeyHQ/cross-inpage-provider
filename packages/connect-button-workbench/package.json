@@ -1,0 +1,17 @@
+{
+  "name": "@onekeyfe/connect-button-workbench",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OneKey Desktop tooling for recording, adapting, and validating DApp connect buttons",
+  "scripts": {
+    "build:desktop-preload": "npm run generate:adapter-entry && npm run typecheck:adapters && node scripts/build-desktop-preload.mjs",
+    "test": "node --test tests/*.test.mjs && npm run test:adapters",
+    "test:adapters": "../../node_modules/.bin/jest --config jest.config.cjs --runInBand",
+    "typecheck:adapters": "../../node_modules/.bin/tsc --project tsconfig.adapters.json",
+    "registry:sync": "node src/cli/sync-registry.mjs",
+    "registry:validate": "node src/cli/validate-registry.mjs",
+    "registry:custom-injected": "node src/cli/custom-injected-registry.mjs",
+    "generate:adapter-entry": "node scripts/generate-adapter-entry.mjs",
+    "generate:recording-e2e": "node src/cli/generate-recording-e2e.mjs"
+  }
+}

@@ -43,6 +43,15 @@ import { detectWebsiteRiskLevel, listenPageFocus } from './detectRiskWebsite';
 import { injectFloatingButton } from './floatingButton';
 import hyperLiquidOneKeyWalletApi from './builtInPerpInjected/hyperLiquidOneKeyWalletApi';
 import { injectClipboardOverride } from './clipboardOverride';
+import providerCapabilities from './injected-provider-capabilities.json';
+
+type ConfiguredProviderId = keyof typeof providerCapabilities.providers;
+
+function defineInjectedChainProviders<
+  T extends Record<ConfiguredProviderId, unknown>,
+>(providers: T & Record<Exclude<keyof T, ConfiguredProviderId>, never>) {
+  return providers;
+}
 
 export type IWindowOneKeyHub = {
   debugLogger?: any;
@@ -109,9 +118,44 @@ function injectWeb3Provider({
     window.$onekey.$builtInPerpInjected = builtInPerpInjectedInstance;
   }
 
-  const ethereum = new ProviderEthereum({
-    bridge,
+  const injectedChainProviders = defineInjectedChainProviders({
+    algo: new ProviderAlgo({ bridge }),
+    alephium: new ProviderAlph({ bridge }),
+    aptos: new ProviderAptosMartian({ bridge }),
+    bfc: new ProviderBfc({ bridge }),
+    btc: new ProviderBtc({ bridge }),
+    cardano: new ProviderCardano({ bridge }),
+    conflux: new ProviderConflux({ bridge }),
+    cosmos: new ProviderCosmos({ bridge }),
+    ethereum: new ProviderEthereum({ bridge }),
+    neo: new ProviderNeo({ bridge }),
+    polkadot: new ProviderPolkadot({ bridge }),
+    scdo: new ProviderScdo({ bridge }),
+    solana: new ProviderSolana({ bridge }),
+    stellar: new ProviderStellar({ bridge }),
+    sui: new ProviderSui({ bridge }),
+    ton: new ProviderTon({ bridge }),
+    tron: new ProviderTron({ bridge }),
   });
+  const {
+    algo: algorand,
+    alephium,
+    aptos: martian,
+    bfc,
+    btc,
+    cardano,
+    conflux,
+    cosmos,
+    ethereum,
+    neo,
+    polkadot,
+    scdo,
+    solana,
+    stellar,
+    sui,
+    ton: tonconnect,
+    tron,
+  } = injectedChainProviders;
 
   void hyperLiquidOneKeyWalletApi.initHyperliquidBuilderFeeConfig(ethereum);
 
@@ -121,53 +165,9 @@ function injectWeb3Provider({
   if (enableClipboardOverride) {
     injectClipboardOverride($private);
   }
-  const solana = new ProviderSolana({
-    bridge,
-  });
-
-  const martian = new ProviderAptosMartian({
-    bridge,
-  });
-
-  const conflux = new ProviderConflux({
-    bridge,
-  });
-
-  const tron = new ProviderTron({
-    bridge,
-  });
-
-  const sui = new ProviderSui({
-    bridge,
-  });
-
-  const bfc = new ProviderBfc({
-    bridge,
-  });
-
-  const cardano = new ProviderCardano({
-    bridge,
-  });
-
-  const alephium = new ProviderAlph({
-    bridge,
-  });
-
-  const tonconnect = new ProviderTon({
-    bridge,
-  });
-
-  const cosmos = new ProviderCosmos({
-    bridge,
-  });
-
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   const bbnCosmos = new BBNProviderCosmos(cosmos, {
     logo: WALLET_CONNECT_INFO.onekey.icon,
-  });
-
-  const polkadot = new ProviderPolkadot({
-    bridge,
   });
 
   const webln = new ProviderWebln({
@@ -178,17 +178,9 @@ function injectWeb3Provider({
     bridge,
   });
 
-  const btc = new ProviderBtc({ bridge });
   const btcWallet = new ProviderBtcWallet({ bridge });
 
-  const algorand = new ProviderAlgo({ bridge });
-
-  const scdo = new ProviderScdo({ bridge });
-
-  const neo = new ProviderNeo({ bridge });
   NEOLineN3.instance = neo;
-
-  const stellar = new ProviderStellar({ bridge });
 
   // providerHub
   const $onekey = {

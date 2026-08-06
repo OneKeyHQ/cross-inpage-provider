@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+
+const SKILL_RELATIVE_PATH = '.agents/skills/defillama-hack-buttons';
+const MANIFEST_RELATIVE_PATH = 'onekey-app-custom-injected.json';
 
 async function isRepository(directory) {
   try {
-    const packageJson = JSON.parse(
-      await fs.readFile(path.join(directory, 'package.json'), 'utf8'),
-    );
-    await fs.access(path.join(directory, 'packages/connect-button-lab/package.json'));
+    const packageJson = JSON.parse(await fs.readFile(path.join(directory, 'package.json'), 'utf8'));
+    await fs.access(path.join(directory, MANIFEST_RELATIVE_PATH));
     return packageJson.name === 'cross-inpage-provider';
   } catch {
     return false;
@@ -19,7 +19,7 @@ async function isRepository(directory) {
 async function findRepository() {
   const starts = [
     process.cwd(),
-    path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..'),
+    path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../..'),
   ];
   for (const start of starts) {
     let current = path.resolve(start);
@@ -31,87 +31,220 @@ async function findRepository() {
   throw new Error('Could not locate the cross-inpage-provider repository');
 }
 
-function validateArguments(argv) {
-  const limitIndex = argv.findIndex((argument) => argument === '--limit');
-  const inlineLimit = argv.find((argument) => argument.startsWith('--limit='));
-  const value =
-    limitIndex >= 0
-      ? Number(argv[limitIndex + 1])
-      : inlineLimit
-        ? Number(inlineLimit.slice('--limit='.length))
-        : 3;
-  if (!Number.isInteger(value) || value < 1 || value > 3) {
+function argumentValue(argv, name) {
+  const index = argv.indexOf(name);
+  if (index >= 0) {
+    const value = argv[index + 1];
+    if (!value || value.startsWith('--')) {
+      throw new Error(`${name} requires a value`);
+    }
+    return value;
+  }
+  const inline = argv.find((argument) => argument.startsWith(`${name}=`));
+  return inline?.slice(name.length + 1) || null;
+}
+
+function parseArguments(argv) {
+  const known = new Set(['--limit', '--site']);
+  for (let index = 0; index < argv.length; index += 1) {
+    const argument = argv[index];
+    const name = argument.split('=')[0];
+    if (!known.has(name)) {
+      throw new Error(`Unknown argument: ${argument}`);
+    }
+    if (!argument.includes('=')) index += 1;
+  }
+
+  const rawLimit = argumentValue(argv, '--limit');
+  const limit = rawLimit === null ? 3 : Number(rawLimit);
+  if (!Number.isInteger(limit) || limit < 1 || limit > 3) {
     throw new Error('The skill runner only permits --limit between 1 and 3');
   }
   return {
-    hasLimit: limitIndex >= 0 || Boolean(inlineLimit),
-    hasMode:
-      argv.includes('--mode') || argv.some((argument) => argument.startsWith('--mode=')),
+    limit,
+    site: argumentValue(argv, '--site'),
   };
 }
 
-function run(command, args, cwd) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(command, args, {
-      cwd,
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-    let stdout = '';
-    let stderr = '';
-    child.stdout.on('data', (chunk) => {
-      stdout = `${stdout}${chunk}`.slice(-20000);
-    });
-    child.stderr.on('data', (chunk) => {
-      stderr = `${stderr}${chunk}`.slice(-20000);
-    });
-    child.on('error', reject);
-    child.on('close', (exitCode) => {
-      resolve({ code: exitCode ?? 4, stdout, stderr });
-    });
-  });
+function normalizeHostname(value) {
+  if (!value) return null;
+  try {
+    const hostname = new URL(
+      value.includes('://') ? value : `https://${value}`,
+    ).hostname.toLowerCase();
+    return hostname.replace(/^www\./, '');
+  } catch {
+    return String(value)
+      .trim()
+      .toLowerCase()
+      .replace(/^www\./, '');
+  }
+}
+
+function protocolHostnames(protocol) {
+  const values = [
+    protocol.sourceHostname,
+    protocol.target?.hostname,
+    protocol.sourceUrl,
+    protocol.target?.urlOverride,
+    protocol.target?.resolvedDappUrl,
+  ];
+  return [...new Set(values.map(normalizeHostname).filter(Boolean))];
+}
+
+function preferredUrl(protocol) {
+  return (
+    protocol.target?.urlOverride || protocol.target?.resolvedDappUrl || protocol.sourceUrl || null
+  );
+}
+
+function summarizeProtocol(protocol) {
+  return {
+    key: `${protocol.registrySource}:${protocol.id}`,
+    source: protocol.registrySource,
+    id: protocol.id,
+    slug: protocol.slug,
+    name: protocol.name,
+    category: protocol.category,
+    url: preferredUrl(protocol),
+    hostname:
+      normalizeHostname(preferredUrl(protocol)) ||
+      normalizeHostname(protocol.target?.hostname) ||
+      normalizeHostname(protocol.sourceHostname),
+    sourceUrl: protocol.sourceUrl || null,
+    urlOverride: protocol.target?.urlOverride || null,
+    rankedChains: (protocol.rankings || [])
+      .slice()
+      .sort((left, right) => left.rank - right.rank)
+      .slice(0, 8)
+      .map(({ chain, rank, chainTvl }) => ({ chain, rank, chainTvl })),
+    priority: protocol.priority || null,
+    manualReview: protocol.manualReview || {
+      state: 'pending',
+      reviewedAt: null,
+      reviewedUrl: null,
+      injectedBundleSha256: null,
+    },
+  };
+}
+
+function priorityCompare(left, right) {
+  return (
+    (left.priority?.bestRank ?? Number.MAX_SAFE_INTEGER) -
+      (right.priority?.bestRank ?? Number.MAX_SAFE_INTEGER) ||
+    (right.priority?.rankedChainCount ?? 0) - (left.priority?.rankedChainCount ?? 0) ||
+    (right.priority?.maxChainTvl ?? 0) - (left.priority?.maxChainTvl ?? 0) ||
+    String(left.id).localeCompare(String(right.id), undefined, { numeric: true })
+  );
+}
+
+function resolveExplicitSite(protocols, query) {
+  const normalizedQuery = String(query).trim().toLowerCase();
+  const queryHostname = normalizeHostname(query);
+  const exact = protocols.filter(
+    (protocol) =>
+      `${protocol.registrySource}:${protocol.id}`.toLowerCase() === normalizedQuery ||
+      String(protocol.id).toLowerCase() === normalizedQuery ||
+      String(protocol.slug).toLowerCase() === normalizedQuery ||
+      String(protocol.name).toLowerCase() === normalizedQuery ||
+      protocolHostnames(protocol).includes(queryHostname),
+  );
+  if (exact.length === 0) {
+    throw new Error(`No protocol matches --site ${query}`);
+  }
+  if (exact.length > 1) {
+    throw new Error(
+      `Ambiguous --site ${query}; matches ${exact
+        .slice(0, 8)
+        .map((protocol) => protocol.slug)
+        .join(', ')}`,
+    );
+  }
+  return exact[0];
+}
+
+async function loadProtocolSources(repo) {
+  const manifest = JSON.parse(await fs.readFile(path.join(repo, MANIFEST_RELATIVE_PATH), 'utf8'));
+  if (!Array.isArray(manifest.protocolSources)) {
+    throw new Error('Custom Injection manifest has no protocolSources');
+  }
+  const protocols = [];
+  for (const sourceConfig of manifest.protocolSources) {
+    if (
+      typeof sourceConfig?.source !== 'string' ||
+      typeof sourceConfig?.protocolRegistry !== 'string'
+    ) {
+      throw new Error('Custom Injection protocol source is invalid');
+    }
+    const registry = JSON.parse(
+      await fs.readFile(path.join(repo, sourceConfig.protocolRegistry), 'utf8'),
+    );
+    if (!Array.isArray(registry.protocols)) {
+      throw new Error(`Protocol registry is invalid: ${sourceConfig.source}`);
+    }
+    protocols.push(
+      ...registry.protocols.map((protocol) => ({
+        ...protocol,
+        registrySource: sourceConfig.source,
+      })),
+    );
+  }
+  return protocols;
+}
+
+function commands(protocols) {
+  const site = protocols[0]?.hostname || protocols[0]?.slug || '<hostname>';
+  const cdpScript = `${SKILL_RELATIVE_PATH}/scripts/desktop-cdp.mjs`;
+  return {
+    cdpList: `node ${cdpScript} list`,
+    cdpPreload: `node ${cdpScript} preload --site ${site}`,
+    cdpOpenWallet: `node ${cdpScript} open-wallet --site ${site}`,
+    cdpInspect: `node ${cdpScript} inspect --site ${site}`,
+    buildDesktopPreload: 'npm --prefix packages/connect-button-workbench run build:desktop-preload',
+    cdpReload: `node ${cdpScript} reload --site ${site}`,
+    cdpVerify: `node ${cdpScript} verify --site ${site}`,
+    validateRegistry: 'npm run hack-buttons:validate',
+  };
 }
 
 try {
-  const forwarded = process.argv.slice(2);
-  const argumentState = validateArguments(forwarded);
+  const args = parseArguments(process.argv.slice(2));
   const repo = await findRepository();
-  const args = [
-    '--prefix',
-    'packages/connect-button-lab',
-    'run',
-    'batch',
-    '--',
-    ...(argumentState.hasLimit ? [] : ['--limit', '3']),
-    ...(argumentState.hasMode ? [] : ['--mode', 'auto']),
-    ...forwarded,
-  ];
-  const batch = await run('npm', args, repo);
-  if (batch.code !== 0) {
-    process.stdout.write(batch.stdout);
-    process.stderr.write(batch.stderr);
-    process.exitCode = batch.code;
-  } else {
-    const desktopBundle = await run(
-      'npm',
-      [
-        '--prefix',
-        'packages/connect-button-lab',
-        'run',
-        'build:desktop-preload',
-      ],
-      repo,
-    );
-    if (desktopBundle.code !== 0) {
-      throw new Error(
-        `Desktop preload build failed:\n${
-          desktopBundle.stderr || desktopBundle.stdout
-        }`.slice(-12000),
-      );
-    }
-    process.stderr.write(batch.stderr);
-    process.stdout.write(batch.stdout);
-    process.exitCode = 0;
-  }
+  const allProtocols = await loadProtocolSources(repo);
+  const active = allProtocols.filter((protocol) => protocol.active !== false);
+  const targets = args.site
+    ? [resolveExplicitSite(active, args.site)]
+    : active
+        .filter(
+          (protocol) =>
+            protocol.registrySource === 'defillama' &&
+            protocol.coverage?.state === 'pending' &&
+            (protocol.manualReview?.state || 'pending') === 'pending' &&
+            preferredUrl(protocol),
+        )
+        .sort(priorityCompare)
+        .slice(0, args.limit);
+  const protocols = targets.map(summarizeProtocol);
+  const counts = active.reduce(
+    (result, protocol) => {
+      const state = protocol.manualReview?.state || 'pending';
+      result[state] = (result[state] || 0) + 1;
+      if (protocol.coverage?.state === 'pending') result.hackPending += 1;
+      return result;
+    },
+    { pending: 0, processed: 0, hackPending: 0 },
+  );
+
+  process.stdout.write(
+    `${JSON.stringify({
+      ok: true,
+      mode: args.site ? 'targeted' : 'next',
+      readOnly: true,
+      protocols,
+      manualReviewCounts: counts,
+      commands: commands(protocols),
+    })}\n`,
+  );
 } catch (error) {
   process.stderr.write(`${JSON.stringify({ ok: false, error: error.message })}\n`);
   process.exitCode = 4;

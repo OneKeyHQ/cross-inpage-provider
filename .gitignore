@@ -15,6 +15,7 @@ lerna-debug.log
 .vscode
 .history
 /app-monorepo/
+/logs/
 /.data/
 /.yarn/
 /.yarnrc.yml

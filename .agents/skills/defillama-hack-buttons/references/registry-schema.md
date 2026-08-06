@@ -1,55 +1,71 @@
-# Registry and state transitions
+# Registry and manual-review state
 
-The project registry is:
+The repository registry is:
 
 `packages/providers/inpage-providers-hub/src/connectButtonHack/defillama-protocols.json`
 
-Do not edit it manually. Use the project CLI.
+The skill selector reads this file but never edits, claims, or completes a protocol. This prevents
+an interrupted investigation or an explicitly named site from mutating unrelated queue entries.
 
-## Task order
+## Selection rules
 
-DeFiLlama protocols whose normalized `category` is `CEX` are filtered before per-chain top-20
-selection and never enter the registry.
+- DeFiLlama CEX protocols and chains without a repository-supported provider are filtered during
+  registry refresh.
+- Runtime support and non-EVM chain aliases come from
+  `packages/providers/inpage-providers-hub/src/injected-provider-capabilities.json`.
+- EVM candidates require DeFiLlama chain metadata; EIP-155 metadata may identify and deduplicate
+  them but cannot create a chain from an ambiguous protocol key by itself.
+- A positive, non-CEX `protocol.chainTvls` key can add a chain missing from `/v2/chains` only when
+  it exactly matches a configured named-chain alias. Alias TVLs are ranked under one canonical
+  chain with `max`, never summed.
+- Protocols are hostname-deduplicated during refresh.
+- DeFiLlama entries marked `deadUrl`, `deadFrom`, `rugged`, or `deprecated` are excluded before
+  global and per-chain ranking.
+- Active selection is the union of global protocol-TVL top 1000 and each supported chain's
+  chain-TVL top 20. Protocol-level `tvl` is never replaced with chain TVL.
+- Reviewed missing URLs come from `packages/connect-button-workbench/dapp-url-resolutions.json`.
+  `resolved` entries populate `target.resolvedDappUrl`; `no_runnable_dapp` and `unresolved`
+  entries remain non-runnable instead of guessing a hostname.
+- Preferred page URL is `target.urlOverride`, then `target.resolvedDappUrl`, then `sourceUrl`.
+- A missing `manualReview` object is interpreted as `pending` for backward compatibility.
+- `manualReview.state` is `pending`, `processed`, or `unsupported`. `unsupported` is a terminal
+  manual state for entries without a usable DApp, such as an informational website only.
+- Untargeted runs select at most three active protocols whose coverage and manual review are both
+  pending, using `bestRank ASC`,
+  `rankedChainCount DESC`, `maxChainTvl DESC`, and numeric `id ASC`.
+- `--site` matches protocol ID, slug, exact name, source hostname, or target hostname and returns
+  exactly one protocol.
 
-1. Resume any persisted claim and reassign it to the current run. This lets a new machine continue
-   immediately after an interrupted run without incrementing the attempt counter.
-2. Claim active `coverage.state: pending`.
-3. Claim current-cycle `regression.state: pending`.
-4. After all active work is terminal, refresh the snapshot and start the next regression cycle.
+## Allowed persistent user state
 
-Priority is `bestRank ASC`, `rankedChainCount DESC`, `maxChainTvl DESC`, `id ASC`. A batch claims
-at most three primary protocols and prefers distinct hostnames.
+The Desktop Custom Injection runtime and toolbar, through the project updater, own:
 
-## Verified outcomes
+- `target.urlOverride`
+- `manualReview.state`
+- `manualReview.reviewedAt`
+- `manualReview.reviewedUrl`
+- `manualReview.injectedBundleSha256`
 
-`implemented_verified` and `existing_verified` require all of:
+Changing `urlOverride` resets manual review to `pending`. Marking `processed` must go through the
+existing atomic project updater. It can happen either through the explicit toolbar action or,
+while Developer Settings and Custom Injection are both enabled, through the capability-
+authenticated isolated-preload event produced when a `MutationObserver` detects an exact OneKey or
+`OneKey & …` icon source exported by this repository. The Desktop side must validate the active
+session, actual WebView, current protocol URL, and injected bundle before invoking the updater.
+This automatic decision is pure local code: it must not call or depend on an LLM, AI/model
+inference, remote classifier, or natural-language heuristic.
 
-- `evidence.lastE2eStatus: passed`
-- `evidence.scriptedAssertionsPassed: true`
-- a valid case file
-- for generated code, an existing adapter source and source manifest
+Marking `unsupported` must also go through the atomic project updater and clears the processed
+review metadata. Automatic review must never overwrite `unsupported`; only `pending` may be
+automatically promoted to `processed`.
 
-Regression `passed` and `repaired` use the same scripted-evidence gate.
+Hack implementation through this skill must not write coverage, automation, evidence, regression,
+claims, attempts, or terminal outcomes. In particular, CDP inspection is not E2E evidence and must
+never synthesize `scriptedAssertionsPassed`, `implemented_verified`, `existing_verified`, `passed`,
+or `repaired`.
 
-Use:
+Validate the registry after source work:
 
 ```bash
-npm --prefix packages/connect-button-lab run registry:validate
+npm run hack-buttons:validate
 ```
-
-All persisted file references must be repository-relative POSIX paths. Installed dependencies,
-build output, screenshots, research results, batch summaries, and work packets are ignored runtime
-artifacts and are not required on the next machine.
-
-## OneKey Desktop custom injection
-
-The repository root `onekey-app-custom-injected.json` exposes the registry, the atomic registry
-updater, and the generated Desktop preload as repository-relative paths. The Desktop App may only
-write `target.urlOverride` and `manualReview` through that updater.
-
-`target.urlOverride` is the first-choice dapp URL and survives DeFiLlama refreshes. Changing it
-resets `manualReview` to `pending`.
-
-`manualReview.state` is `pending` or `processed`. A processed review records the reviewed URL,
-timestamp, and injected bundle SHA-256. This human state is independent of the scripted evidence
-gate above and must never be used to synthesize a verified coverage or regression outcome.

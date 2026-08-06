@@ -11,3 +11,5 @@ node_modules/
 
 */**/reports/
 reports/
+src/connectButtonHack/generated/workbench-adapters/
+src/connectButtonHack/generated/.workbench-adapters-*/

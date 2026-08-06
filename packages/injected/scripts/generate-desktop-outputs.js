@@ -22,11 +22,12 @@ const vm = require('vm');
 
 const distDir = path.resolve(__dirname, '..', 'dist', 'injected');
 const injectedDesktopPath = path.join(distDir, 'injectedDesktop.js');
+const customInjectionAutoReviewPath = path.join(distDir, 'customInjectionAutoReviewPreload.js');
+const customInjectionRecorderPath = path.join(distDir, 'customInjectionRecorderPreload.js');
+const isCustomInjectionDev = process.env.ONEKEY_CUSTOM_INJECTION_DEV === '1';
 
 if (!fs.existsSync(injectedDesktopPath)) {
-  console.error(
-    'ERROR: dist/injected/injectedDesktop.js not found. Run webpack first.',
-  );
+  console.error('ERROR: dist/injected/injectedDesktop.js not found. Run webpack first.');
   process.exit(1);
 }
 
@@ -38,6 +39,24 @@ if (!fs.existsSync(injectedDesktopPath)) {
 const injectedCode = fs
   .readFileSync(injectedDesktopPath, 'utf-8')
   .replace(/\r?\n\/\/# sourceMappingURL=data:[^\r\n]*\s*$/u, '');
+let customInjectionAutoReviewCode = '';
+let customInjectionRecorderCode = '';
+if (isCustomInjectionDev) {
+  if (!fs.existsSync(customInjectionAutoReviewPath)) {
+    console.error('ERROR: dist/injected/customInjectionAutoReviewPreload.js not found.');
+    process.exit(1);
+  }
+  customInjectionAutoReviewCode = fs
+    .readFileSync(customInjectionAutoReviewPath, 'utf-8')
+    .replace(/\r?\n\/\/# sourceMappingURL=data:[^\r\n]*\s*$/u, '');
+  if (!fs.existsSync(customInjectionRecorderPath)) {
+    console.error('ERROR: dist/injected/customInjectionRecorderPreload.js not found.');
+    process.exit(1);
+  }
+  customInjectionRecorderCode = fs
+    .readFileSync(customInjectionRecorderPath, 'utf-8')
+    .replace(/\r?\n\/\/# sourceMappingURL=data:[^\r\n]*\s*$/u, '');
+}
 
 // require("electron") shim: maps to window.__onekeyDesktopBridge exposed by contextBridge
 const requireShim = [
@@ -60,10 +79,7 @@ new vm.Script(wrappedProviderCode, {
 });
 
 // 1. injectedDesktopCode.js — provider + require shim, for executeJavaScript
-fs.writeFileSync(
-  path.join(distDir, 'injectedDesktopCode.js'),
-  wrappedProviderCode,
-);
+fs.writeFileSync(path.join(distDir, 'injectedDesktopCode.js'), wrappedProviderCode);
 console.log('Generated dist/injected/injectedDesktopCode.js');
 
 // 2. injectedDesktopPreload.js — complete webview preload script
@@ -83,6 +99,12 @@ var ipcRenderer = electron.ipcRenderer;
 var webFrame = electron.webFrame;
 
 var HOST_CHANNEL = 'JsBridgeDesktopHostToInjected';
+
+// --- Custom Injection auto-review detector (isolated preload world only) ---
+${customInjectionAutoReviewCode}
+
+// --- Custom Injection manual recorder (isolated preload world only) ---
+${customInjectionRecorderCode}
 
 // --- IPC bridge (accessible from page world as window.__onekeyDesktopBridge) ---
 contextBridge.exposeInMainWorld('__onekeyDesktopBridge', {
@@ -109,8 +131,5 @@ new vm.Script(preloadContent, {
   filename: 'injectedDesktopPreload.js',
 });
 
-fs.writeFileSync(
-  path.join(distDir, 'injectedDesktopPreload.js'),
-  preloadContent,
-);
+fs.writeFileSync(path.join(distDir, 'injectedDesktopPreload.js'), preloadContent);
 console.log('Generated dist/injected/injectedDesktopPreload.js');

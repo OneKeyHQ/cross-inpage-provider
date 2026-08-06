@@ -5,6 +5,7 @@ import {
   applyProtocolPatch,
   buildRankedProtocols,
   compactRegistry,
+  documentAdvertisesUrl,
   hasRunnableDapp,
   isCexProtocol,
   mergeSnapshot,
@@ -60,6 +61,22 @@ const source = {
   protocolsSha256: 'c'.repeat(64),
   eip155ChainsSha256: 'd'.repeat(64),
 };
+
+test('llms URL discovery requires an exact parsed API URL', () => {
+  const expected = 'https://api.llama.fi/protocols';
+  assert.equal(
+    documentAdvertisesUrl(`Protocol endpoint: ${expected}.`, expected),
+    true,
+  );
+  for (const bypass of [
+    'https://evil.example/https://api.llama.fi/protocols',
+    'https://evil.example/?next=https://api.llama.fi/protocols',
+    'https://api.llama.fi.evil.example/protocols',
+    'https://api.llama.fi@evil.example/protocols',
+  ]) {
+    assert.equal(documentAdvertisesUrl(bypass, expected), false, bypass);
+  }
+});
 
 test('per-chain ranking is deterministic and ignores derived chain keys', () => {
   const result = buildRankedProtocols({ chains, protocols, topPerChain: 2 });

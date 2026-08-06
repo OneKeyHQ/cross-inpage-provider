@@ -36,6 +36,30 @@ export const DAPP_RESOLUTION_STATUSES = new Set([
   'unresolved',
 ]);
 
+export function documentAdvertisesUrl(document, expectedUrl) {
+  const expected = new URL(expectedUrl);
+  const candidates = String(document).match(
+    /https?:\/\/[^\s<>"'`()\[\]{}]+/gu,
+  );
+  return (candidates || []).some((value) => {
+    try {
+      const candidate = new URL(value.replace(/[.,;:]+$/u, ''));
+      return (
+        candidate.protocol === expected.protocol &&
+        candidate.hostname === expected.hostname &&
+        candidate.port === expected.port &&
+        candidate.pathname === expected.pathname &&
+        candidate.search === expected.search &&
+        candidate.hash === expected.hash &&
+        candidate.username === '' &&
+        candidate.password === ''
+      );
+    } catch {
+      return false;
+    }
+  });
+}
+
 function compareIds(left, right) {
   return String(left).localeCompare(String(right), 'en', {
     numeric: true,
@@ -835,7 +859,7 @@ export async function syncRegistry({
     fetchText(SOURCE_URLS.protocolsUrl, { fetchImpl }),
     fetchText(SOURCE_URLS.eip155ChainsUrl, { fetchImpl }),
   ]);
-  if (!llmsText.includes('https://api.llama.fi') || !llmsText.includes('/protocols')) {
+  if (!documentAdvertisesUrl(llmsText, SOURCE_URLS.protocolsUrl)) {
     throw new Error('llms.txt no longer advertises the expected free TVL API');
   }
   let chains;

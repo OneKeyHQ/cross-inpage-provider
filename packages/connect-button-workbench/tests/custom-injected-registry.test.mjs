@@ -118,9 +118,6 @@ test('custom injected editor persists URL and manual review with optimistic lock
   const unsupportedResult = JSON.parse(unsupportedUpdate.stdout);
   assert.deepEqual(unsupportedResult.manualReview, {
     state: 'unsupported',
-    reviewedAt: null,
-    reviewedUrl: null,
-    injectedBundleSha256: null,
   });
 
   const staleUpdate = runEditor([

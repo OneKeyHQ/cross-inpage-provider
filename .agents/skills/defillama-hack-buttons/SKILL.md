@@ -34,16 +34,15 @@ stale failed auto-review, Slack thread history, or the last JSONL line alone. If
 no site, do not select an unrelated batch; check the current CDP webviews or ask the user to open the
 target.
 
-Otherwise select at most three unprocessed protocols whose Hack coverage is still pending:
+Otherwise select at most three protocols whose manual review is still pending:
 
 ```bash
 node <skill-dir>/scripts/run.mjs --limit 3
 ```
 
-The selector is read-only. It ignores already-terminal coverage, treats missing `manualReview` as
-`pending`, uses
+The selector is read-only. It uses
 `urlOverride > resolvedDappUrl > sourceUrl`, and orders by DeFiLlama priority. Do not use the old
-batch/E2E runner and do not mutate coverage or regression state.
+batch/E2E runner or recreate its state fields.
 
 ## Research in OneKey Desktop
 
@@ -154,9 +153,7 @@ node <skill-dir>/scripts/desktop-cdp.mjs verify --site <hostname>
 
 The CDP verdict is a development DOM check only. It confirms the custom-workspace runtime marker, a
 visible `OneKey & …` replacement, OneKey joint icon, unique wallet IDs, and current real Desktop
-injection. It must not write
-`scriptedAssertionsPassed`, `implemented_verified`, `existing_verified`, regression outcomes, or
-E2E evidence.
+injection. It must not create legacy coverage, regression, automation, evidence, or E2E state.
 
 Do not create case manifests, Electron harness files, screenshots, traces, or E2E scripts. Do not
 write `manualReview` directly from this skill or from CDP. When Developer Settings and Custom

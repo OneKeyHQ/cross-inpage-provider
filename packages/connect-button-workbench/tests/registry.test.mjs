@@ -1,12 +1,10 @@
 import assert from 'node:assert/strict';
-import fs from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
 import test from 'node:test';
 import {
   applyDappResolutions,
   applyProtocolPatch,
   buildRankedProtocols,
+  compactRegistry,
   hasRunnableDapp,
   isCexProtocol,
   mergeSnapshot,
@@ -528,7 +526,7 @@ test('unavailable DeFiLlama DApps are excluded before global and chain ranking',
   );
 });
 
-test('curated DApp resolutions are reproducible and unresolved protocols are not runnable', () => {
+test('curated DApp resolutions are compact and unresolved protocols stay non-runnable', async () => {
   const ranked = buildRankedProtocols({
     chains,
     protocols: [
@@ -566,7 +564,6 @@ test('curated DApp resolutions are reproducible and unresolved protocols are not
     source,
     topPerChain: 3,
     globalTop: 3,
-    now: source.fetchedAt,
   });
   const config = {
     schemaVersion: 1,
@@ -592,19 +589,20 @@ test('curated DApp resolutions are reproducible and unresolved protocols are not
 
   assert.deepEqual(validateDappResolutionConfig(config), []);
   const stats = applyDappResolutions(registry, config);
-  const resolved = registry.protocols.find(
+  const compacted = compactRegistry(registry);
+  const resolved = compacted.protocols.find(
     (protocol) => protocol.id === 'resolved',
   );
-  const service = registry.protocols.find(
+  const service = compacted.protocols.find(
     (protocol) => protocol.id === 'service',
   );
-  const missing = registry.protocols.find(
+  const missing = compacted.protocols.find(
     (protocol) => protocol.id === 'missing',
   );
+
   assert.equal(resolved.target.resolvedDappUrl, 'https://app.resolved.example');
-  assert.equal(resolved.target.urlResolution.source, 'curated');
-  assert.equal(service.target.urlResolution.status, 'no_runnable_dapp');
-  assert.equal(missing.target.urlResolution.status, 'unresolved');
+  assert.equal(service.target, undefined);
+  assert.equal(missing.target, undefined);
   assert.equal(hasRunnableDapp(resolved), true);
   assert.equal(hasRunnableDapp(service), false);
   assert.equal(hasRunnableDapp(missing), false);
@@ -614,77 +612,63 @@ test('curated DApp resolutions are reproducible and unresolved protocols are not
     resolved: 1,
     noRunnableDapp: 1,
     reviewedUnresolved: 0,
-    activeWithoutRunnableDapp: 2,
+    selectedWithoutRunnableDapp: 2,
   });
-  assert.deepEqual(registryProgress(registry), {
-    active: 3,
+  assert.deepEqual(registryProgress(compacted), {
+    selected: 3,
     runnable: 1,
     withoutRunnableDapp: 2,
-    noRunnableDapp: 1,
-    unresolvedDapp: 1,
-    pendingCoverage: 1,
-    claimedCoverage: 0,
-    doneCoverage: 0,
-    pendingRegression: 0,
-    doneRegression: 0,
-    needsLlm: 0,
+    pendingReview: 3,
+    processedReview: 0,
+    unsupportedReview: 0,
   });
+  assert.deepEqual(await validateRegistry(compacted), []);
 });
 
-test('registry merge preserves work and creates regression tasks on rollover', async () => {
+test('registry refresh preserves only persistent Desktop state and drops old selections', async () => {
   const ranked = buildRankedProtocols({ chains, protocols, topPerChain: 2 });
   const first = mergeSnapshot({
     existing: null,
     selected: ranked.selected,
     source,
     topPerChain: 2,
-    now: source.fetchedAt,
   });
-  const two = first.protocols.find((protocol) => protocol.id === '2');
-  two.coverage = {
-    ...two.coverage,
-    state: 'done',
-    outcome: 'native_supported',
-    completedAt: source.fetchedAt,
-  };
-  two.target.hostname = 'app.two.example';
-  two.target.urlOverride = 'https://app.two.example/swap';
-  two.manualReview = {
+  const preserved = first.protocols.find((protocol) => protocol.id === '2');
+  preserved.target = { urlOverride: 'https://app.two.example/swap' };
+  preserved.manualReview = {
     state: 'processed',
     reviewedAt: source.fetchedAt,
     reviewedUrl: 'https://app.two.example/swap',
     injectedBundleSha256: 'e'.repeat(64),
   };
+  preserved.coverage = { state: 'done' };
+  preserved.history = [{ at: source.fetchedAt }];
 
-  const second = mergeSnapshot({
+  const selected = ranked.selected.filter((protocol) => protocol.id === '2');
+  const refreshed = mergeSnapshot({
     existing: first,
-    selected: ranked.selected,
+    selected,
     source: { ...source, fetchedAt: '2026-07-30T00:00:00.000Z' },
     topPerChain: 2,
-    startCycle: true,
-    now: '2026-07-30T00:00:00.000Z',
   });
-  const preserved = second.protocols.find((protocol) => protocol.id === '2');
-  assert.equal(second.cycle.number, 2);
-  assert.equal(second.cycle.kind, 'regression');
-  assert.equal(preserved.target.hostname, 'app.two.example');
-  assert.equal(preserved.target.urlOverride, 'https://app.two.example/swap');
-  assert.equal(preserved.manualReview.state, 'processed');
-  assert.equal(preserved.manualReview.injectedBundleSha256, 'e'.repeat(64));
-  assert.equal(preserved.coverage.outcome, 'native_supported');
-  assert.equal(preserved.regression.state, 'pending');
-  assert.equal(preserved.regression.cycle, 2);
-  assert.deepEqual(await validateRegistry(second, { checkFiles: false }), []);
+  const protocol = refreshed.protocols[0];
+
+  assert.deepEqual(refreshed.protocols.map(({ id }) => id), ['2']);
+  assert.equal(protocol.target.urlOverride, 'https://app.two.example/swap');
+  assert.equal(protocol.manualReview.state, 'processed');
+  assert.equal(protocol.coverage, undefined);
+  assert.equal(protocol.history, undefined);
+  assert.equal(protocol.active, undefined);
+  assert.deepEqual(await validateRegistry(refreshed), []);
 });
 
-test('URL overrides are normalized and reset only the manual review state', async () => {
+test('URL overrides are normalized and reset only manual review state', async () => {
   const ranked = buildRankedProtocols({ chains, protocols, topPerChain: 2 });
   const registry = mergeSnapshot({
     existing: null,
     selected: ranked.selected,
     source,
     topPerChain: 2,
-    now: source.fetchedAt,
   });
   const protocol = registry.protocols[0];
   protocol.manualReview = {
@@ -694,73 +678,59 @@ test('URL overrides are normalized and reset only the manual review state', asyn
     injectedBundleSha256: 'e'.repeat(64),
   };
 
-  await applyProtocolPatch(
-    registry,
-    protocol.id,
-    {
-      target: {
-        urlOverride: 'https://app.override.example/swap/',
-      },
+  await applyProtocolPatch(registry, protocol.id, {
+    target: {
+      urlOverride: 'https://app.override.example/swap/',
     },
-    { checkFiles: false },
-  );
+  });
 
   assert.equal(
     protocol.target.urlOverride,
     'https://app.override.example/swap',
   );
-  assert.deepEqual(protocol.manualReview, {
-    state: 'pending',
-    reviewedAt: null,
-    reviewedUrl: null,
-    injectedBundleSha256: null,
-  });
-  assert.deepEqual(await validateRegistry(registry, { checkFiles: false }), []);
+  assert.equal(protocol.manualReview, undefined);
+  assert.deepEqual(await validateRegistry(registry), []);
 
   await assert.rejects(
-    applyProtocolPatch(
-      registry,
-      protocol.id,
-      { target: { urlOverride: 'file:///tmp/dapp.html' } },
-      { checkFiles: false },
-    ),
+    applyProtocolPatch(registry, protocol.id, {
+      target: { urlOverride: 'file:///tmp/dapp.html' },
+    }),
     /must be an HTTP\(S\) URL/,
   );
 });
 
-test('unsupported manual review is terminal and survives registry refresh', async () => {
+test('unsupported manual review survives registry refresh', async () => {
   const ranked = buildRankedProtocols({ chains, protocols, topPerChain: 2 });
   const first = mergeSnapshot({
     existing: null,
     selected: ranked.selected,
     source,
     topPerChain: 2,
-    now: source.fetchedAt,
   });
   const protocol = first.protocols[0];
-  protocol.manualReview = {
-    state: 'unsupported',
-    reviewedAt: null,
-    reviewedUrl: null,
-    injectedBundleSha256: null,
-  };
+  protocol.manualReview = { state: 'unsupported' };
 
   const refreshed = mergeSnapshot({
     existing: first,
     selected: ranked.selected,
     source: { ...source, fetchedAt: '2026-07-30T00:00:00.000Z' },
     topPerChain: 2,
-    now: '2026-07-30T00:00:00.000Z',
   });
   const preserved = refreshed.protocols.find(
     (candidate) => candidate.id === protocol.id,
   );
 
-  assert.equal(preserved.manualReview.state, 'unsupported');
-  assert.deepEqual(await validateRegistry(refreshed, { checkFiles: false }), []);
+  assert.deepEqual(preserved.manualReview, { state: 'unsupported' });
+  assert.deepEqual(await validateRegistry(refreshed), []);
 });
 
-test('hostname representative changes preserve completed alias progress', () => {
+test('hostname representative changes preserve persistent alias state only', async () => {
+  const priority = {
+    globalRank: 1,
+    bestRank: 1,
+    rankedChainCount: 1,
+    maxChainTvl: 100,
+  };
   const existing = mergeSnapshot({
     existing: null,
     selected: [
@@ -768,22 +738,23 @@ test('hostname representative changes preserve completed alias progress', () => 
         id: 'legacy',
         name: 'Legacy',
         slug: 'legacy',
-        sourceHostname: 'same.example',
         sourceUrl: 'https://same.example/legacy',
         sourceProtocolIds: ['legacy'],
-        active: true,
-        rankings: [{ chain: 'Ethereum', rank: 1, chainTvl: 100 }],
-        priority: { bestRank: 1, rankedChainCount: 1, maxChainTvl: 100 },
+        totalTvl: 100,
+        priority,
       },
     ],
-    chains: [],
     source,
-    now: source.fetchedAt,
   });
-  const legacy = existing.protocols[0];
-  legacy.coverage.state = 'done';
-  legacy.coverage.outcome = 'native_supported';
-  legacy.coverage.completedAt = source.fetchedAt;
+  existing.protocols[0].target = {
+    urlOverride: 'https://same.example/app',
+  };
+  existing.protocols[0].manualReview = {
+    state: 'processed',
+    reviewedAt: source.fetchedAt,
+    reviewedUrl: 'https://same.example/app',
+    injectedBundleSha256: 'e'.repeat(64),
+  };
 
   const merged = mergeSnapshot({
     existing,
@@ -792,148 +763,90 @@ test('hostname representative changes preserve completed alias progress', () => 
         id: 'current',
         name: 'Current',
         slug: 'current',
-        sourceHostname: 'same.example',
         sourceUrl: 'https://same.example/current',
         sourceProtocolIds: ['current', 'legacy'],
-        active: true,
-        rankings: [{ chain: 'Ethereum', rank: 1, chainTvl: 200 }],
-        priority: { bestRank: 1, rankedChainCount: 1, maxChainTvl: 200 },
+        totalTvl: 200,
+        priority: { ...priority, maxChainTvl: 200 },
       },
     ],
-    chains: [],
-    source,
-    now: '2026-07-30T00:00:00.000Z',
+    source: { ...source, fetchedAt: '2026-07-30T00:00:00.000Z' },
   });
-  const current = merged.protocols.find((protocol) => protocol.id === 'current');
-  assert.equal(current.coverage.state, 'done');
-  assert.equal(current.coverage.outcome, 'native_supported');
+  const current = merged.protocols[0];
+
+  assert.equal(current.id, 'current');
+  assert.equal(current.target.urlOverride, 'https://same.example/app');
+  assert.equal(current.manualReview.state, 'processed');
   assert.deepEqual(current.sourceProtocolIds, ['current', 'legacy']);
-  assert.equal(
-    merged.protocols.find((protocol) => protocol.id === 'legacy').active,
-    false,
-  );
+  assert.equal(merged.protocols.some(({ id }) => id === 'legacy'), false);
+  assert.deepEqual(await validateRegistry(merged), []);
 });
 
-test('registry merge removes historical CEX records instead of retaining them inactive', () => {
-  const ranked = buildRankedProtocols({ chains, protocols, topPerChain: 2 });
-  const existing = mergeSnapshot({
-    existing: null,
-    selected: ranked.selected,
-    source,
-    topPerChain: 2,
-    now: source.fetchedAt,
-  });
-  existing.protocols.push({
-    ...structuredClone(existing.protocols[0]),
-    id: 'legacy-cex',
-    category: 'CEX',
-    active: false,
-    rankings: [],
-  });
-  const merged = mergeSnapshot({
-    existing,
-    selected: ranked.selected,
-    source,
-    topPerChain: 2,
-    now: '2026-07-30T00:00:00.000Z',
-  });
-  assert.ok(!merged.protocols.some((protocol) => protocol.id === 'legacy-cex'));
-});
-
-test('protocol patches enforce legacy E2E evidence', async () => {
+test('registry compaction removes legacy workflow fields', async () => {
   const ranked = buildRankedProtocols({ chains, protocols, topPerChain: 2 });
   const registry = mergeSnapshot({
     existing: null,
     selected: ranked.selected,
     source,
     topPerChain: 2,
-    now: source.fetchedAt,
   });
-  const [firstProtocol, secondProtocol] = registry.protocols;
+  registry.protocols[0] = {
+    ...registry.protocols[0],
+    active: true,
+    coverage: { state: 'pending' },
+    implementation: {},
+    automation: {},
+    evidence: {},
+    regression: {},
+    history: [],
+    rankings: [{ chain: 'Ethereum', rank: 1, chainTvl: 100 }],
+  };
+  registry.chains = [{ name: 'Ethereum' }];
+  registry.cycle = { number: 1 };
+
+  const compacted = compactRegistry(registry);
+  assert.deepEqual(Object.keys(compacted), [
+    'schemaVersion',
+    'source',
+    'settings',
+    'protocols',
+  ]);
+  assert.deepEqual(
+    Object.keys(compacted.protocols[0]).sort(),
+    [
+      'id',
+      'name',
+      'priority',
+      'slug',
+      'sourceUrl',
+      'totalTvl',
+    ],
+  );
+  assert.deepEqual(await validateRegistry(compacted), []);
+});
+
+test('registry patches and validation reject removed workflow fields', async () => {
+  const ranked = buildRankedProtocols({ chains, protocols, topPerChain: 2 });
+  const registry = mergeSnapshot({
+    existing: null,
+    selected: ranked.selected,
+    source,
+    topPerChain: 2,
+  });
 
   await assert.rejects(
-    applyProtocolPatch(
-      registry,
-      firstProtocol.id,
-      {
-        coverage: { state: 'done', outcome: 'existing_verified' },
-      },
-      { checkFiles: false },
-    ),
-    /requires passed scripted E2E evidence/,
+    applyProtocolPatch(registry, registry.protocols[0].id, {
+      coverage: { state: 'done' },
+    }),
+    /Unsupported patch keys: coverage/,
   );
-  const invalidVerified = structuredClone(registry);
-  const invalid = invalidVerified.protocols.find(
-    (candidate) => candidate.id === firstProtocol.id,
-  );
-  invalid.coverage.state = 'done';
-  invalid.coverage.outcome = 'existing_verified';
-  invalid.evidence.lastE2eStatus = 'passed';
-  invalid.evidence.scriptedAssertionsPassed = false;
+
+  const legacy = structuredClone(registry);
+  legacy.protocols[0].active = true;
+  legacy.protocols[0].coverage = { state: 'pending' };
+  const errors = await validateRegistry(legacy);
   assert.ok(
-    (await validateRegistry(invalidVerified, { checkFiles: false })).some(
-      (error) => error.includes('verified coverage requires passed scripted E2E'),
+    errors.some((error) =>
+      error.includes('unsupported fields: active, coverage'),
     ),
   );
-
-  const protocol = await applyProtocolPatch(
-    registry,
-    secondProtocol.id,
-    {
-      coverage: { state: 'done', outcome: 'native_supported' },
-      automation: {
-        classification: 'native_supported',
-        confidence: 1,
-        needsLlm: false,
-      },
-    },
-    { checkFiles: false },
-  );
-  assert.equal(protocol.history.length, 1);
-});
-
-test('registry rejects machine-local artifact paths', async () => {
-  const ranked = buildRankedProtocols({ chains, protocols, topPerChain: 2 });
-  const registry = mergeSnapshot({
-    existing: null,
-    selected: ranked.selected,
-    source,
-    topPerChain: 2,
-    now: source.fetchedAt,
-  });
-  registry.protocols[0].evidence.screenshots = [
-    '/Users/example/project/packages/connect-button-workbench/artifacts/failure.png',
-  ];
-  registry.protocols[1].automation.workPacket =
-    'C:\\project\\packages\\connect-button-workbench\\.data\\packet.json';
-  const errors = await validateRegistry(registry, { checkFiles: false });
-  assert.ok(
-    errors.some((error) => error.includes('evidence.screenshots must contain portable')),
-  );
-  assert.ok(
-    errors.some((error) => error.includes('automation.workPacket must be a portable')),
-  );
-});
-
-test('implemented coverage requires its source manifest for future codegen', async () => {
-  const ranked = buildRankedProtocols({ chains, protocols, topPerChain: 1 });
-  const registry = mergeSnapshot({
-    existing: null,
-    selected: ranked.selected,
-    source,
-    topPerChain: 1,
-    now: source.fetchedAt,
-  });
-  const protocol = registry.protocols[0];
-  protocol.coverage.state = 'done';
-  protocol.coverage.outcome = 'implemented_verified';
-  protocol.evidence.lastE2eStatus = 'passed';
-  protocol.evidence.scriptedAssertionsPassed = true;
-  protocol.implementation.kind = 'generated';
-  protocol.implementation.adapterFile = 'package.json';
-  protocol.implementation.caseFile = 'package.json';
-  protocol.implementation.manifestFile =
-    'packages/connect-button-workbench/manifests/missing.json';
-  const errors = await validateRegistry(registry);
-  assert.ok(errors.some((error) => error.includes('manifestFile does not exist')));
 });

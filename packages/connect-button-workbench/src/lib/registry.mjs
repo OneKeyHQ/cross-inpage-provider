@@ -1,10 +1,8 @@
-import path from 'node:path';
-import { fileExists, readJson, writeJsonAtomic } from './json-file.mjs';
+import { readJson, writeJsonAtomic } from './json-file.mjs';
 import { fetchText, sha256 } from './http.mjs';
 import {
   dappResolutionsFile as defaultDappResolutionsFile,
   registryFile as defaultRegistryFile,
-  repoDir,
   repoRelativePath,
 } from './paths.mjs';
 import {
@@ -22,35 +20,10 @@ export const SOURCE_URLS = Object.freeze({
   eip155ChainsUrl: 'https://chainid.network/chains.json',
 });
 
-export const COVERAGE_STATES = new Set(['pending', 'claimed', 'done']);
-export const COVERAGE_OUTCOMES = new Set([
-  'implemented_verified',
-  'existing_verified',
-  'native_supported',
-  'not_applicable',
-  'blocked',
-]);
-export const REGRESSION_STATES = new Set(['not_due', 'pending', 'claimed', 'done']);
-export const REGRESSION_OUTCOMES = new Set([
-  'passed',
-  'repaired',
-  'failed',
-  'still_blocked',
-  'still_not_applicable',
-]);
 export const MANUAL_REVIEW_STATES = new Set([
   'pending',
   'processed',
   'unsupported',
-]);
-export const AUTOMATION_CLASSIFICATIONS = new Set([
-  'standard_library',
-  'generic_modal',
-  'bespoke',
-  'native_supported',
-  'not_applicable',
-  'externally_blocked',
-  'needs_review',
 ]);
 export const SOURCE_DAPP_STATUSES = new Set([
   'available',
@@ -132,58 +105,6 @@ export function sourceDappAvailability(protocol) {
   };
 }
 
-function defaultCoverage() {
-  return {
-    state: 'pending',
-    outcome: null,
-    attempts: 0,
-    runId: null,
-    claimedAt: null,
-    completedAt: null,
-    reason: null,
-  };
-}
-
-function defaultImplementation() {
-  return {
-    kind: null,
-    adapterFile: null,
-    manifestFile: null,
-    walletIds: [],
-    caseFile: null,
-  };
-}
-
-function defaultAutomation() {
-  return {
-    classification: null,
-    confidence: null,
-    patternId: null,
-    workPacket: null,
-    needsLlm: false,
-  };
-}
-
-function defaultEvidence() {
-  return {
-    researchAt: null,
-    screenshots: [],
-    lastE2eAt: null,
-    lastE2eStatus: null,
-    lastE2eCommand: null,
-    scriptedAssertionsPassed: false,
-  };
-}
-
-function defaultRegression() {
-  return {
-    cycle: 0,
-    state: 'not_due',
-    outcome: null,
-    checkedAt: null,
-  };
-}
-
 function defaultManualReview() {
   return {
     state: 'pending',
@@ -191,47 +112,6 @@ function defaultManualReview() {
     reviewedUrl: null,
     injectedBundleSha256: null,
   };
-}
-
-function defaultUrlResolution() {
-  return {
-    status: 'unresolved',
-    source: 'none',
-    reason: 'no_trusted_official_url',
-    evidenceUrl: null,
-    verifiedAt: null,
-  };
-}
-
-function inferredUrlResolution(protocol) {
-  if (normalizeUrl(protocol?.target?.urlOverride).url) {
-    return {
-      status: 'resolved',
-      source: 'manual_override',
-      reason: 'manual_url_override',
-      evidenceUrl: null,
-      verifiedAt: null,
-    };
-  }
-  if (normalizeUrl(protocol?.target?.resolvedDappUrl).url) {
-    return {
-      status: 'resolved',
-      source: 'discovery',
-      reason: 'discovered_dapp_url',
-      evidenceUrl: null,
-      verifiedAt: null,
-    };
-  }
-  if (normalizeUrl(protocol?.sourceUrl).url) {
-    return {
-      status: 'resolved',
-      source: 'defillama',
-      reason: 'defillama_url',
-      evidenceUrl: null,
-      verifiedAt: null,
-    };
-  }
-  return defaultUrlResolution();
 }
 
 export function protocolDappUrl(protocol) {
@@ -308,27 +188,20 @@ export function applyDappResolutions(registry, config) {
     resolved: 0,
     noRunnableDapp: 0,
     reviewedUnresolved: 0,
-    activeWithoutRunnableDapp: 0,
+    selectedWithoutRunnableDapp: 0,
   };
 
   for (const protocol of registry.protocols) {
     protocol.target = {
       resolvedDappUrl: null,
       urlOverride: null,
-      hostname: null,
-      provider: null,
-      coveredByProtocolId: null,
-      urlResolution: defaultUrlResolution(),
       ...protocol.target,
     };
+    protocol.target.resolvedDappUrl = null;
     const entry = entries.get(String(protocol.id));
     if (!entry) {
-      if (protocol.target.urlResolution?.source === 'curated') {
-        protocol.target.resolvedDappUrl = null;
-      }
-      protocol.target.urlResolution = inferredUrlResolution(protocol);
-      if (protocol.active && !hasRunnableDapp(protocol)) {
-        stats.activeWithoutRunnableDapp += 1;
+      if (!hasRunnableDapp(protocol)) {
+        stats.selectedWithoutRunnableDapp += 1;
       }
       continue;
     }
@@ -338,35 +211,20 @@ export function applyDappResolutions(registry, config) {
         `DApp URL resolution ${entry.protocolId} expected slug ${entry.protocolSlug}, received ${protocol.slug}`,
       );
     }
-    const evidenceUrl = normalizeUrl(entry.evidenceUrl).url;
     if (entry.status === 'resolved') {
       const resolved = normalizeUrl(entry.url);
       protocol.target.resolvedDappUrl = resolved.url;
-      protocol.target.urlResolution = {
-        status: 'resolved',
-        source: 'curated',
-        reason: 'trusted_official_url',
-        evidenceUrl,
-        verifiedAt: entry.verifiedAt,
-      };
       stats.resolved += 1;
     } else {
       protocol.target.resolvedDappUrl = null;
-      protocol.target.urlResolution = {
-        status: entry.status,
-        source: 'curated',
-        reason: entry.reason,
-        evidenceUrl,
-        verifiedAt: entry.verifiedAt,
-      };
       if (entry.status === 'no_runnable_dapp') {
         stats.noRunnableDapp += 1;
       } else {
         stats.reviewedUnresolved += 1;
       }
     }
-    if (protocol.active && !hasRunnableDapp(protocol)) {
-      stats.activeWithoutRunnableDapp += 1;
+    if (!hasRunnableDapp(protocol)) {
+      stats.selectedWithoutRunnableDapp += 1;
     }
   }
   return stats;
@@ -760,7 +618,6 @@ export function buildRankedProtocols({
         slug: String(raw.slug || raw.name || id),
         name: String(raw.name || raw.slug || id),
         category: raw.category == null ? null : String(raw.category),
-        active: true,
         totalTvl:
           Number.isFinite(Number(raw.tvl)) && Number(raw.tvl) > 0
             ? Number(raw.tvl)
@@ -819,48 +676,11 @@ export function compareProtocolPriority(left, right) {
   );
 }
 
-function makeProtocol(snapshot) {
-  return {
-    ...snapshot,
-    totalTvl:
-      Number.isFinite(Number(snapshot.totalTvl)) &&
-      Number(snapshot.totalTvl) > 0
-        ? Number(snapshot.totalTvl)
-        : 0,
-    target: {
-      resolvedDappUrl: null,
-      urlOverride: null,
-      hostname: null,
-      provider: null,
-      coveredByProtocolId: null,
-      urlResolution: inferredUrlResolution(snapshot),
-    },
-    coverage: defaultCoverage(),
-    implementation: defaultImplementation(),
-    automation: defaultAutomation(),
-    evidence: defaultEvidence(),
-    regression: defaultRegression(),
-    manualReview: defaultManualReview(),
-    history: [],
-  };
-}
-
-function existingState(existing, fallback, key) {
-  return existing?.[key] && typeof existing[key] === 'object'
-    ? { ...fallback(), ...existing[key] }
-    : fallback();
-}
-
 function priorStateScore(protocol) {
   if (!protocol) return -1;
-  let score = 0;
-  if (protocol.coverage?.state === 'done') score += 100;
-  if (protocol.coverage?.state === 'claimed') score += 20;
-  if (protocol.regression?.state === 'done') score += 10;
-  if (protocol.regression?.state === 'claimed') score += 5;
-  if (protocol.evidence?.scriptedAssertionsPassed === true) score += 2;
-  if (protocol.implementation?.caseFile) score += 1;
-  return score;
+  if (protocol.manualReview?.state === 'processed') return 2;
+  if (protocol.manualReview?.state === 'unsupported') return 1;
+  return 0;
 }
 
 function findPriorProtocol(previous, snapshot) {
@@ -879,99 +699,123 @@ function findPriorProtocol(previous, snapshot) {
     )[0];
 }
 
+function compactManualReview(value) {
+  const review = {
+    ...defaultManualReview(),
+    ...(value && typeof value === 'object' ? value : {}),
+  };
+  if (review.state === 'processed') {
+    return {
+      state: 'processed',
+      reviewedAt: review.reviewedAt,
+      reviewedUrl: normalizeUrl(review.reviewedUrl).url,
+      injectedBundleSha256: review.injectedBundleSha256,
+    };
+  }
+  return review.state === 'unsupported' ? { state: 'unsupported' } : null;
+}
+
+function compactTarget(value) {
+  const target = {};
+  const resolvedDappUrl = normalizeUrl(value?.resolvedDappUrl).url;
+  const urlOverride = normalizeUrl(value?.urlOverride).url;
+  if (resolvedDappUrl) target.resolvedDappUrl = resolvedDappUrl;
+  if (urlOverride) target.urlOverride = urlOverride;
+  return target;
+}
+
+function compactProtocol(protocol) {
+  const sourceProtocolIds = [
+    ...new Set(
+      (protocol?.sourceProtocolIds || [])
+        .map((id) => String(id || '').trim())
+        .filter(Boolean),
+    ),
+  ].sort(compareIds);
+  const target = compactTarget(protocol?.target);
+  const manualReview = compactManualReview(protocol?.manualReview);
+  const result = {
+    id: String(protocol.id),
+    slug: String(protocol.slug || protocol.name || protocol.id),
+    name: String(protocol.name || protocol.slug || protocol.id),
+    totalTvl:
+      Number.isFinite(Number(protocol.totalTvl)) &&
+      Number(protocol.totalTvl) > 0
+        ? Number(protocol.totalTvl)
+        : 0,
+    priority: {
+      globalRank:
+        Number.isInteger(protocol?.priority?.globalRank)
+          ? protocol.priority.globalRank
+          : Number.isInteger(protocol?.globalRank)
+            ? protocol.globalRank
+            : null,
+      bestRank: Number.isInteger(protocol?.priority?.bestRank)
+        ? protocol.priority.bestRank
+        : null,
+      rankedChainCount: Number.isInteger(
+        protocol?.priority?.rankedChainCount,
+      )
+        ? protocol.priority.rankedChainCount
+        : 0,
+      maxChainTvl:
+        Number.isFinite(Number(protocol?.priority?.maxChainTvl)) &&
+        Number(protocol.priority.maxChainTvl) > 0
+          ? Number(protocol.priority.maxChainTvl)
+          : 0,
+    },
+  };
+  const sourceUrl = normalizeUrl(protocol.sourceUrl).url;
+  if (sourceUrl) result.sourceUrl = sourceUrl;
+  if (sourceProtocolIds.length > 1) {
+    result.sourceProtocolIds = sourceProtocolIds;
+  }
+  if (Object.keys(target).length > 0) result.target = target;
+  if (manualReview) result.manualReview = manualReview;
+  return result;
+}
+
+export function compactRegistry(registry) {
+  return {
+    schemaVersion: 1,
+    source: registry.source,
+    settings: {
+      topPerChain: registry.settings?.topPerChain ?? 20,
+      globalTop: registry.settings?.globalTop ?? 1000,
+    },
+    protocols: (registry.protocols || [])
+      .filter((protocol) => !isCexProtocol(protocol))
+      .map(compactProtocol),
+  };
+}
+
 export function mergeSnapshot({
   existing,
   selected,
-  chains,
   source,
   topPerChain = 20,
   globalTop = 1000,
-  startCycle = false,
-  now = new Date().toISOString(),
 }) {
   const previous = new Map((existing?.protocols || []).map((protocol) => [protocol.id, protocol]));
-  const activeIds = new Set(selected.map((protocol) => protocol.id));
-  const nextCycleNumber = existing
-    ? existing.cycle.number + (startCycle ? 1 : 0)
-    : 1;
-  const nextCycleKind = existing && startCycle ? 'regression' : existing?.cycle?.kind || 'coverage';
-
   const protocols = selected.map((snapshot) => {
     const prior = findPriorProtocol(previous, snapshot);
-    if (!prior) return makeProtocol(snapshot);
-    const merged = {
-      ...prior,
+    return compactProtocol({
       ...snapshot,
       target: {
-        resolvedDappUrl: null,
-        urlOverride: null,
-        hostname: null,
-        provider: null,
-        coveredByProtocolId: null,
-        urlResolution: inferredUrlResolution(prior),
-        ...prior.target,
+        resolvedDappUrl: prior?.target?.resolvedDappUrl || null,
+        urlOverride: prior?.target?.urlOverride || null,
+        ...snapshot.target,
       },
-      coverage: existingState(prior, defaultCoverage, 'coverage'),
-      implementation: existingState(prior, defaultImplementation, 'implementation'),
-      automation: existingState(prior, defaultAutomation, 'automation'),
-      evidence: existingState(prior, defaultEvidence, 'evidence'),
-      regression: existingState(prior, defaultRegression, 'regression'),
-      manualReview: existingState(
-        prior,
-        defaultManualReview,
-        'manualReview',
-      ),
-      history: Array.isArray(prior.history) ? prior.history.slice(-10) : [],
-    };
-    if (existing && startCycle && merged.coverage.state === 'done') {
-      merged.regression = {
-        cycle: nextCycleNumber,
-        state: 'pending',
-        outcome: null,
-        checkedAt: null,
-      };
-    }
-    return merged;
-  });
-
-  for (const prior of previous.values()) {
-    if (activeIds.has(prior.id) || isCexProtocol(prior)) continue;
-    protocols.push({
-      ...prior,
-      active: false,
-      totalTvl:
-        Number.isFinite(Number(prior.totalTvl)) &&
-        Number(prior.totalTvl) > 0
-          ? Number(prior.totalTvl)
-          : 0,
-      globalRank: null,
-      rankings: [],
+      manualReview: prior?.manualReview || defaultManualReview(),
     });
-  }
-
-  protocols.sort((left, right) => {
-    if (left.active !== right.active) return left.active ? -1 : 1;
-    if (!left.active) return compareIds(left.id, right.id);
-    return compareProtocolPriority(left, right);
   });
 
   return {
     schemaVersion: 1,
     source,
-    chains: Array.isArray(chains)
-      ? chains
-      : Array.isArray(existing?.chains)
-        ? existing.chains
-        : [],
     settings: {
       topPerChain,
       globalTop,
-    },
-    cycle: {
-      number: nextCycleNumber,
-      kind: nextCycleKind,
-      snapshotAt: now,
-      startedAt: existing && !startCycle ? existing.cycle.startedAt : now,
     },
     protocols,
   };
@@ -982,7 +826,6 @@ export async function syncRegistry({
   resolutionsFile = defaultDappResolutionsFile,
   topPerChain = 20,
   globalTop = 1000,
-  startCycle = false,
   fetchImpl = globalThis.fetch,
   now = new Date().toISOString(),
 } = {}) {
@@ -1020,7 +863,6 @@ export async function syncRegistry({
   const registry = mergeSnapshot({
     existing,
     selected: ranked.selected,
-    chains: ranked.chains,
     source: {
       ...SOURCE_URLS,
       fetchedAt: now,
@@ -1032,111 +874,57 @@ export async function syncRegistry({
     },
     topPerChain,
     globalTop,
-    startCycle,
-    now,
   });
-  const sourceProtocolsById = new Map(
-    protocols.map((protocol) => [String(protocol.id), protocol]),
-  );
-  for (const protocol of registry.protocols) {
-    const sourceProtocol = sourceProtocolsById.get(String(protocol.id));
-    if (sourceProtocol) {
-      protocol.sourceDapp = sourceDappAvailability(sourceProtocol);
-    }
-  }
   const dappResolutionStats = applyDappResolutions(
     registry,
     dappResolutions,
   );
-  const errors = await validateRegistry(registry, { checkFiles: false });
+  const compactedRegistry = compactRegistry(registry);
+  const errors = await validateRegistry(compactedRegistry, {
+    checkFiles: false,
+  });
   if (errors.length > 0) {
     throw new Error(`Generated registry is invalid:\n${errors.join('\n')}`);
   }
-  await writeJsonAtomic(file, registry);
+  await writeJsonAtomic(file, compactedRegistry);
   return {
-    registry,
+    registry: compactedRegistry,
     stats: {
       ...ranked.stats,
       totalProtocols: protocols.length,
-      activeProtocols: registry.protocols.filter((protocol) => protocol.active).length,
-      inactiveProtocols: registry.protocols.filter((protocol) => !protocol.active).length,
+      selectedProtocols: compactedRegistry.protocols.length,
       dappResolutions: dappResolutionStats,
     },
   };
-}
-
-function isStale(date, nowMs, ttlMs) {
-  const time = Date.parse(date || '');
-  return !Number.isFinite(time) || nowMs - time > ttlMs;
-}
-
-function isPortableRepoReference(value) {
-  if (
-    typeof value !== 'string' ||
-    !value ||
-    value.includes('\\') ||
-    value.includes('://')
-  ) {
-    return false;
-  }
-  if (path.posix.isAbsolute(value) || path.win32.isAbsolute(value)) return false;
-  const normalized = path.posix.normalize(value);
-  return (
-    normalized !== '.' &&
-    normalized !== '..' &&
-    !normalized.startsWith('../')
-  );
-}
-
-function mergePatch(target, patch) {
-  const result = { ...target };
-  for (const [key, value] of Object.entries(patch || {})) {
-    if (
-      value &&
-      typeof value === 'object' &&
-      !Array.isArray(value) &&
-      target?.[key] &&
-      typeof target[key] === 'object' &&
-      !Array.isArray(target[key])
-    ) {
-      result[key] = mergePatch(target[key], value);
-    } else {
-      result[key] = value;
-    }
-  }
-  return result;
 }
 
 export async function applyProtocolPatch(
   registry,
   protocolId,
   patch,
-  { now = new Date().toISOString(), checkFiles = true } = {},
 ) {
   const protocol = registry.protocols.find((candidate) => candidate.id === String(protocolId));
   if (!protocol) throw new Error(`Unknown protocol ID: ${protocolId}`);
-  const allowed = new Set([
-    'target',
-    'coverage',
-    'implementation',
-    'automation',
-    'evidence',
-    'regression',
-    'manualReview',
-  ]);
+  const allowed = new Set(['target', 'manualReview']);
   const unknown = Object.keys(patch).filter((key) => !allowed.has(key));
   if (unknown.length > 0) throw new Error(`Unsupported patch keys: ${unknown.join(', ')}`);
 
-  const before = structuredClone(protocol);
-  for (const key of Object.keys(patch)) {
-    protocol[key] = mergePatch(protocol[key], patch[key]);
+  const unknownTargetKeys = Object.keys(patch.target || {}).filter(
+    (key) => key !== 'urlOverride',
+  );
+  if (unknownTargetKeys.length > 0) {
+    throw new Error(
+      `Unsupported target patch keys: ${unknownTargetKeys.join(', ')}`,
+    );
   }
   if (
     Object.prototype.hasOwnProperty.call(patch.target || {}, 'urlOverride')
   ) {
+    const previousOverride = protocol.target?.urlOverride || null;
+    protocol.target ||= {};
     const override = patch.target.urlOverride;
     if (override == null) {
-      protocol.target.urlOverride = null;
+      delete protocol.target.urlOverride;
     } else {
       const normalizedOverride = normalizeUrl(override);
       if (!normalizedOverride.url) {
@@ -1144,78 +932,35 @@ export async function applyProtocolPatch(
       }
       protocol.target.urlOverride = normalizedOverride.url;
     }
-    if (protocol.target.urlOverride !== before.target?.urlOverride) {
-      protocol.manualReview = defaultManualReview();
+    if ((protocol.target.urlOverride || null) !== previousOverride) {
+      delete protocol.manualReview;
+    }
+    if (Object.keys(protocol.target).length === 0) {
+      delete protocol.target;
     }
   }
-  if (protocol.coverage.state === 'done') {
-    if (!COVERAGE_OUTCOMES.has(protocol.coverage.outcome)) {
-      throw new Error('Terminal coverage requires a valid outcome');
-    }
-    if (!protocol.coverage.completedAt) protocol.coverage.completedAt = now;
-    protocol.coverage.runId = null;
-    protocol.coverage.claimedAt = null;
-    if (
-      ['implemented_verified', 'existing_verified'].includes(protocol.coverage.outcome) &&
-      (protocol.evidence.lastE2eStatus !== 'passed' ||
-        protocol.evidence.scriptedAssertionsPassed !== true)
-    ) {
-      throw new Error(
-        `${protocol.coverage.outcome} requires passed scripted E2E evidence`,
-      );
-    }
+  if (patch.manualReview) {
+    const manualReview = compactManualReview({
+      ...defaultManualReview(),
+      ...protocol.manualReview,
+      ...patch.manualReview,
+    });
+    if (manualReview) protocol.manualReview = manualReview;
+    else delete protocol.manualReview;
   }
-  if (
-    protocol.regression.state === 'done' &&
-    ['passed', 'repaired'].includes(protocol.regression.outcome) &&
-    (protocol.evidence.lastE2eStatus !== 'passed' ||
-      protocol.evidence.scriptedAssertionsPassed !== true)
-  ) {
-    throw new Error(
-      `${protocol.regression.outcome} regression requires passed scripted E2E evidence`,
-    );
-  }
-  if (
-    checkFiles &&
-    ['implemented_verified', 'existing_verified'].includes(
-      protocol.coverage.outcome,
-    )
-  ) {
-    const requiredFiles = [
-      ['caseFile', protocol.implementation.caseFile],
-      ...(protocol.coverage.outcome === 'implemented_verified'
-        ? [
-            ['adapterFile', protocol.implementation.adapterFile],
-            ['manifestFile', protocol.implementation.manifestFile],
-          ]
-        : []),
-    ];
-    for (const [label, file] of requiredFiles) {
-      if (!file || !(await fileExists(path.resolve(repoDir, file)))) {
-        throw new Error(`${label} does not exist: ${file || '<empty>'}`);
-      }
-    }
-  }
-  protocol.history = [
-    ...(Array.isArray(before.history) ? before.history : []),
-    {
-      at: now,
-      runId: before.coverage.runId || before.regression.runId || null,
-      coverageState: protocol.coverage.state,
-      coverageOutcome: protocol.coverage.outcome,
-      regressionState: protocol.regression.state,
-      regressionOutcome: protocol.regression.outcome,
-    },
-  ].slice(-10);
   return protocol;
 }
 
-export async function validateRegistry(
-  registry,
-  { checkFiles = true, now = Date.now() } = {},
-) {
+export async function validateRegistry(registry) {
   const errors = [];
   if (registry?.schemaVersion !== 1) errors.push('schemaVersion must be 1');
+
+  const unknownRegistryKeys = Object.keys(registry || {}).filter(
+    (key) => !['schemaVersion', 'source', 'settings', 'protocols'].includes(key),
+  );
+  if (unknownRegistryKeys.length > 0) {
+    errors.push(`unsupported registry fields: ${unknownRegistryKeys.join(', ')}`);
+  }
   if (!Number.isFinite(Date.parse(registry?.source?.fetchedAt || ''))) {
     errors.push('source.fetchedAt must be an ISO timestamp');
   }
@@ -1229,9 +974,6 @@ export async function validateRegistry(
       errors.push(`source.${field} must be a SHA-256 digest`);
     }
   }
-  if (registry?.chains != null && !Array.isArray(registry.chains)) {
-    errors.push('chains must be an array');
-  }
   if (
     !Number.isInteger(registry?.settings?.topPerChain) ||
     registry.settings.topPerChain < 1
@@ -1244,305 +986,196 @@ export async function validateRegistry(
   ) {
     errors.push('settings.globalTop must be a positive integer');
   }
-  const chainNames = new Set();
-  for (const chain of registry?.chains || []) {
-    if (!chain?.name || chainNames.has(chain.name)) {
-      errors.push(`chain ${chain?.name || '<missing>'}: duplicate or missing name`);
-    }
-    chainNames.add(chain?.name);
-    if (!Number.isFinite(chain?.tvl) || chain.tvl < 0) {
-      errors.push(`chain ${chain?.name || '<missing>'}: invalid TVL`);
-    }
-    if (
-      chain?.chainId != null &&
-      (!Number.isSafeInteger(chain.chainId) || chain.chainId <= 0)
-    ) {
-      errors.push(`chain ${chain?.name || '<missing>'}: invalid chainId`);
-    }
-    if (typeof chain?.isEvm !== 'boolean') {
-      errors.push(`chain ${chain?.name || '<missing>'}: isEvm must be boolean`);
-    }
+  if (!Array.isArray(registry?.protocols)) {
+    return [...errors, 'protocols must be an array'];
   }
-  if (!Array.isArray(registry?.protocols)) return [...errors, 'protocols must be an array'];
+
   const ids = new Set();
   for (const protocol of registry.protocols) {
     const label = `protocol ${protocol?.id || '<missing>'}`;
-    if (!protocol?.id || ids.has(protocol.id)) errors.push(`${label}: duplicate or missing id`);
+    if (!protocol?.id || ids.has(protocol.id)) {
+      errors.push(`${label}: duplicate or missing id`);
+    }
     ids.add(protocol?.id);
-    if (isCexProtocol(protocol)) {
-      errors.push(`${label}: CEX protocols must be excluded from the registry`);
-    }
-    if (!COVERAGE_STATES.has(protocol?.coverage?.state)) {
-      errors.push(`${label}: invalid coverage.state`);
-    }
-    if (!REGRESSION_STATES.has(protocol?.regression?.state)) {
-      errors.push(`${label}: invalid regression.state`);
-    }
-    const manualReviewState = protocol?.manualReview?.state || 'pending';
-    if (!MANUAL_REVIEW_STATES.has(manualReviewState)) {
-      errors.push(`${label}: invalid manualReview.state`);
-    }
-    if (
-      protocol?.target?.urlOverride != null &&
-      !normalizeUrl(protocol.target.urlOverride).url
-    ) {
-      errors.push(`${label}: target.urlOverride must be an HTTP(S) URL or null`);
-    }
-    if (
-      protocol?.target?.resolvedDappUrl != null &&
-      !normalizeUrl(protocol.target.resolvedDappUrl).url
-    ) {
+
+    const unknownProtocolKeys = Object.keys(protocol || {}).filter(
+      (key) =>
+        ![
+          'id',
+          'slug',
+          'name',
+          'totalTvl',
+          'sourceUrl',
+          'sourceProtocolIds',
+          'priority',
+          'target',
+          'manualReview',
+        ].includes(key),
+    );
+    if (unknownProtocolKeys.length > 0) {
       errors.push(
-        `${label}: target.resolvedDappUrl must be an HTTP(S) URL or null`,
+        `${label}: unsupported fields: ${unknownProtocolKeys.join(', ')}`,
       );
     }
-    const urlResolution = protocol?.target?.urlResolution;
-    if (urlResolution != null) {
-      if (!DAPP_RESOLUTION_STATUSES.has(urlResolution.status)) {
-        errors.push(`${label}: invalid target.urlResolution.status`);
-      }
-      if (
-        typeof urlResolution.source !== 'string' ||
-        !urlResolution.source
-      ) {
-        errors.push(`${label}: invalid target.urlResolution.source`);
-      }
-      if (
-        typeof urlResolution.reason !== 'string' ||
-        !urlResolution.reason
-      ) {
-        errors.push(`${label}: invalid target.urlResolution.reason`);
-      }
-      if (
-        urlResolution.evidenceUrl != null &&
-        !normalizeUrl(urlResolution.evidenceUrl).url
-      ) {
-        errors.push(
-          `${label}: target.urlResolution.evidenceUrl must be an HTTP(S) URL or null`,
-        );
-      }
-      if (
-        urlResolution.verifiedAt != null &&
-        !Number.isFinite(Date.parse(urlResolution.verifiedAt))
-      ) {
-        errors.push(
-          `${label}: target.urlResolution.verifiedAt must be an ISO timestamp or null`,
-        );
-      }
-      if (
-        urlResolution.status === 'resolved' &&
-        !hasRunnableDapp(protocol)
-      ) {
-        errors.push(
-          `${label}: resolved target.urlResolution requires a runnable URL`,
-        );
-      }
-      if (
-        ['no_runnable_dapp', 'unresolved'].includes(
-          urlResolution.status,
-        ) &&
-        urlResolution.source === 'curated' &&
-        protocol.target?.resolvedDappUrl != null
-      ) {
-        errors.push(
-          `${label}: curated non-resolved target cannot retain resolvedDappUrl`,
-        );
-      }
+    if (typeof protocol?.slug !== 'string' || !protocol.slug.trim()) {
+      errors.push(`${label}: slug is required`);
     }
-    if (manualReviewState === 'processed') {
+    if (typeof protocol?.name !== 'string' || !protocol.name.trim()) {
+      errors.push(`${label}: name is required`);
+    }
+    if (protocol?.sourceUrl != null && !normalizeUrl(protocol.sourceUrl).url) {
+      errors.push(`${label}: sourceUrl must be an HTTP(S) URL`);
+    }
+    if (protocol?.sourceProtocolIds != null) {
       if (
-        !Number.isFinite(
-          Date.parse(protocol.manualReview.reviewedAt || ''),
+        !Array.isArray(protocol.sourceProtocolIds) ||
+        protocol.sourceProtocolIds.length < 2 ||
+        new Set(protocol.sourceProtocolIds).size !==
+          protocol.sourceProtocolIds.length ||
+        protocol.sourceProtocolIds.some(
+          (id) => typeof id !== 'string' || !id.trim(),
         )
       ) {
-        errors.push(`${label}: processed manual review requires reviewedAt`);
+        errors.push(`${label}: sourceProtocolIds must contain unique IDs`);
       }
-      if (!normalizeUrl(protocol.manualReview.reviewedUrl).url) {
-        errors.push(`${label}: processed manual review requires reviewedUrl`);
-      }
-      if (
-        !/^[a-f0-9]{64}$/iu.test(
-          protocol.manualReview.injectedBundleSha256 || '',
-        )
-      ) {
-        errors.push(
-          `${label}: processed manual review requires injectedBundleSha256`,
-        );
-      }
-    }
-    if (
-      protocol?.automation?.classification != null &&
-      !AUTOMATION_CLASSIFICATIONS.has(protocol.automation.classification)
-    ) {
-      errors.push(`${label}: invalid automation.classification`);
-    }
-    if (
-      protocol?.sourceDapp != null &&
-      !SOURCE_DAPP_STATUSES.has(protocol.sourceDapp.status)
-    ) {
-      errors.push(`${label}: invalid sourceDapp.status`);
-    }
-    if (
-      protocol?.sourceDapp?.reason != null &&
-      typeof protocol.sourceDapp.reason !== 'string'
-    ) {
-      errors.push(`${label}: invalid sourceDapp.reason`);
-    }
-    if (
-      protocol?.sourceDapp?.deadFrom != null &&
-      typeof protocol.sourceDapp.deadFrom !== 'string'
-    ) {
-      errors.push(`${label}: invalid sourceDapp.deadFrom`);
-    }
-    if (
-      protocol.active &&
-      protocol?.sourceDapp?.status === 'unavailable'
-    ) {
-      errors.push(`${label}: unavailable source DApp cannot be active`);
     }
     if (!Number.isFinite(protocol.totalTvl) || protocol.totalTvl < 0) {
       errors.push(`${label}: invalid protocol TVL`);
     }
+
+    const priority = protocol?.priority;
+    const unknownPriorityKeys = Object.keys(priority || {}).filter(
+      (key) =>
+        ![
+          'globalRank',
+          'bestRank',
+          'rankedChainCount',
+          'maxChainTvl',
+        ].includes(key),
+    );
+    if (unknownPriorityKeys.length > 0) {
+      errors.push(
+        `${label}: unsupported priority fields: ${unknownPriorityKeys.join(
+          ', ',
+        )}`,
+      );
+    }
     const hasGlobalRank =
-      Number.isInteger(protocol.globalRank) &&
-      protocol.globalRank >= 1 &&
-      protocol.globalRank <= registry.settings.globalTop;
-    if (
-      protocol.globalRank != null &&
-      !hasGlobalRank
-    ) {
+      Number.isInteger(priority?.globalRank) &&
+      priority.globalRank >= 1 &&
+      priority.globalRank <= registry.settings.globalTop;
+    if (priority?.globalRank != null && !hasGlobalRank) {
       errors.push(`${label}: invalid global rank`);
     }
-    if (
-      protocol.active &&
-      (!Array.isArray(protocol.rankings) || protocol.rankings.length === 0) &&
-      !hasGlobalRank
-    ) {
-      errors.push(`${label}: active protocol has no global or chain ranking`);
+    const hasChainRank =
+      Number.isInteger(priority?.bestRank) &&
+      priority.bestRank >= 1 &&
+      priority.bestRank <= registry.settings.topPerChain;
+    if (priority?.bestRank != null && !hasChainRank) {
+      errors.push(`${label}: invalid best chain rank`);
     }
-    for (const ranking of protocol.rankings || []) {
+    if (!hasGlobalRank && !hasChainRank) {
+      errors.push(`${label}: protocol has no global or chain ranking`);
+    }
+    if (
+      !Number.isInteger(priority?.rankedChainCount) ||
+      priority.rankedChainCount < 0
+    ) {
+      errors.push(`${label}: invalid rankedChainCount`);
+    }
+    if (
+      !Number.isFinite(priority?.maxChainTvl) ||
+      priority.maxChainTvl < 0
+    ) {
+      errors.push(`${label}: invalid maxChainTvl`);
+    }
+
+    if (protocol?.target != null) {
       if (
-        !Number.isInteger(ranking.rank) ||
-        ranking.rank < 1 ||
-        ranking.rank > registry.settings.topPerChain
+        typeof protocol.target !== 'object' ||
+        Array.isArray(protocol.target)
       ) {
-        errors.push(`${label}: invalid rank for ${ranking.chain}`);
-      }
-      if (!Number.isFinite(ranking.chainTvl) || ranking.chainTvl <= 0) {
-        errors.push(`${label}: invalid chain TVL for ${ranking.chain}`);
-      }
-    }
-    if (
-      protocol.coverage.state === 'done' &&
-      !COVERAGE_OUTCOMES.has(protocol.coverage.outcome)
-    ) {
-      errors.push(`${label}: done coverage requires valid outcome`);
-    }
-    if (
-      protocol.regression.state === 'done' &&
-      !REGRESSION_OUTCOMES.has(protocol.regression.outcome)
-    ) {
-      errors.push(`${label}: done regression requires valid outcome`);
-    }
-    if (
-      protocol.coverage.state === 'done' &&
-      ['implemented_verified', 'existing_verified'].includes(
-        protocol.coverage.outcome,
-      ) &&
-      (protocol.evidence?.lastE2eStatus !== 'passed' ||
-        protocol.evidence?.scriptedAssertionsPassed !== true)
-    ) {
-      errors.push(`${label}: verified coverage requires passed scripted E2E evidence`);
-    }
-    if (
-      protocol.regression.state === 'done' &&
-      ['passed', 'repaired'].includes(protocol.regression.outcome) &&
-      (protocol.evidence?.lastE2eStatus !== 'passed' ||
-        protocol.evidence?.scriptedAssertionsPassed !== true)
-    ) {
-      errors.push(`${label}: verified regression requires passed scripted E2E evidence`);
-    }
-    if (
-      protocol.coverage.state === 'claimed' &&
-      isStale(protocol.coverage.claimedAt, now, 24 * 60 * 60 * 1000)
-    ) {
-      errors.push(`${label}: coverage claim is older than 24 hours`);
-    }
-    for (const [field, value] of [
-      ['implementation.adapterFile', protocol.implementation?.adapterFile],
-      ['implementation.manifestFile', protocol.implementation?.manifestFile],
-      ['implementation.caseFile', protocol.implementation?.caseFile],
-      ['automation.workPacket', protocol.automation?.workPacket],
-    ]) {
-      if (value != null && !isPortableRepoReference(value)) {
-        errors.push(`${label}: ${field} must be a portable repository-relative path`);
-      }
-    }
-    if (!Array.isArray(protocol.evidence?.screenshots)) {
-      errors.push(`${label}: evidence.screenshots must be an array`);
-    } else {
-      for (const screenshot of protocol.evidence.screenshots) {
-        if (!isPortableRepoReference(screenshot)) {
+        errors.push(`${label}: target must be an object`);
+      } else {
+        const unknownTargetKeys = Object.keys(protocol.target).filter(
+          (key) => !['resolvedDappUrl', 'urlOverride'].includes(key),
+        );
+        if (unknownTargetKeys.length > 0) {
           errors.push(
-            `${label}: evidence.screenshots must contain portable repository-relative paths`,
+            `${label}: unsupported target fields: ${unknownTargetKeys.join(
+              ', ',
+            )}`,
           );
-          break;
+        }
+        if (Object.keys(protocol.target).length === 0) {
+          errors.push(`${label}: empty target must be omitted`);
+        }
+        if (
+          protocol.target.urlOverride != null &&
+          !normalizeUrl(protocol.target.urlOverride).url
+        ) {
+          errors.push(
+            `${label}: target.urlOverride must be an HTTP(S) URL`,
+          );
+        }
+        if (
+          protocol.target.resolvedDappUrl != null &&
+          !normalizeUrl(protocol.target.resolvedDappUrl).url
+        ) {
+          errors.push(
+            `${label}: target.resolvedDappUrl must be an HTTP(S) URL`,
+          );
         }
       }
     }
-    if (
-      checkFiles &&
-      ['implemented_verified', 'existing_verified'].includes(
-        protocol.coverage.outcome,
-      )
-    ) {
-      if (
-        !protocol.implementation.caseFile ||
-        !(await fileExists(path.resolve(repoDir, protocol.implementation.caseFile)))
-      ) {
-        errors.push(`${label}: caseFile does not exist`);
-      }
-      if (
-        protocol.coverage.outcome === 'implemented_verified' &&
-        (!protocol.implementation.adapterFile ||
-          !(await fileExists(
-            path.resolve(repoDir, protocol.implementation.adapterFile),
-          )))
-      ) {
-        errors.push(`${label}: adapterFile does not exist`);
-      }
-      if (
-        protocol.coverage.outcome === 'implemented_verified' &&
-        (!protocol.implementation.manifestFile ||
-          !(await fileExists(
-            path.resolve(repoDir, protocol.implementation.manifestFile),
-          )))
-      ) {
-        errors.push(`${label}: manifestFile does not exist`);
-      }
-    }
-  }
 
-  for (const protocol of registry.protocols) {
-    const seen = new Set([protocol.id]);
-    let current = protocol;
-    while (current?.target?.coveredByProtocolId) {
-      const nextId = current.target.coveredByProtocolId;
-      if (seen.has(nextId)) {
-        errors.push(`protocol ${protocol.id}: coveredByProtocolId cycle`);
-        break;
+    const review = protocol?.manualReview;
+    if (review == null) {
+      continue;
+    }
+    if (typeof review !== 'object' || Array.isArray(review)) {
+      errors.push(`${label}: manualReview must be an object`);
+      continue;
+    }
+    const unknownReviewKeys = Object.keys(review).filter(
+      (key) =>
+        ![
+          'state',
+          'reviewedAt',
+          'reviewedUrl',
+          'injectedBundleSha256',
+        ].includes(key),
+    );
+    if (unknownReviewKeys.length > 0) {
+      errors.push(
+        `${label}: unsupported manualReview fields: ${unknownReviewKeys.join(
+          ', ',
+        )}`,
+      );
+    }
+    if (!MANUAL_REVIEW_STATES.has(review.state)) {
+      errors.push(`${label}: invalid manualReview.state`);
+    }
+    if (review.state === 'processed') {
+      if (!Number.isFinite(Date.parse(review.reviewedAt || ''))) {
+        errors.push(`${label}: processed manual review requires reviewedAt`);
       }
-      seen.add(nextId);
-      current = registry.protocols.find((candidate) => candidate.id === nextId);
-      if (!current) {
-        errors.push(`protocol ${protocol.id}: unknown coveredByProtocolId ${nextId}`);
-        break;
+      if (!normalizeUrl(review.reviewedUrl).url) {
+        errors.push(`${label}: processed manual review requires reviewedUrl`);
       }
+      if (!/^[a-f0-9]{64}$/iu.test(review.injectedBundleSha256 || '')) {
+        errors.push(
+          `${label}: processed manual review requires injectedBundleSha256`,
+        );
+      }
+    } else if (Object.keys(review).some((key) => key !== 'state')) {
+      errors.push(
+        `${label}: pending or unsupported review must contain only state`,
+      );
     }
   }
   return errors;
 }
-
 export async function loadRegistry(file = defaultRegistryFile) {
   const registry = await readJson(file, null);
   if (!registry) throw new Error(`Registry not found: ${file}`);
@@ -1550,38 +1183,30 @@ export async function loadRegistry(file = defaultRegistryFile) {
 }
 
 export async function saveRegistry(registry, file = defaultRegistryFile) {
-  await writeJsonAtomic(file, registry);
+  const output =
+    registry?.kind === 'onekey-custom-protocol-registry'
+      ? registry
+      : compactRegistry(registry);
+  await writeJsonAtomic(file, output);
+  return output;
 }
 
 export function registryProgress(registry) {
-  const active = registry.protocols.filter((protocol) => protocol.active);
-  const runnable = active.filter(hasRunnableDapp);
+  const selected = registry.protocols;
+  const runnable = selected.filter(hasRunnableDapp);
   const counts = {
-    active: active.length,
+    selected: selected.length,
     runnable: runnable.length,
-    withoutRunnableDapp: active.length - runnable.length,
-    noRunnableDapp: active.filter(
-      (protocol) =>
-        protocol.target?.urlResolution?.status === 'no_runnable_dapp',
-    ).length,
-    unresolvedDapp: active.filter(
-      (protocol) =>
-        protocol.target?.urlResolution?.status === 'unresolved',
-    ).length,
-    pendingCoverage: 0,
-    claimedCoverage: 0,
-    doneCoverage: 0,
-    pendingRegression: 0,
-    doneRegression: 0,
-    needsLlm: 0,
+    withoutRunnableDapp: selected.length - runnable.length,
+    pendingReview: 0,
+    processedReview: 0,
+    unsupportedReview: 0,
   };
-  for (const protocol of runnable) {
-    if (protocol.coverage.state === 'pending') counts.pendingCoverage += 1;
-    if (protocol.coverage.state === 'claimed') counts.claimedCoverage += 1;
-    if (protocol.coverage.state === 'done') counts.doneCoverage += 1;
-    if (protocol.regression.state === 'pending') counts.pendingRegression += 1;
-    if (protocol.regression.state === 'done') counts.doneRegression += 1;
-    if (protocol.automation.needsLlm) counts.needsLlm += 1;
+  for (const protocol of selected) {
+    const state = protocol.manualReview?.state || 'pending';
+    if (state === 'processed') counts.processedReview += 1;
+    else if (state === 'unsupported') counts.unsupportedReview += 1;
+    else counts.pendingReview += 1;
   }
   return counts;
 }

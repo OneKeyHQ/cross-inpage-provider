@@ -21,17 +21,21 @@ an interrupted investigation or an explicitly named site from mutating unrelated
 - Protocols are hostname-deduplicated during refresh.
 - DeFiLlama entries marked `deadUrl`, `deadFrom`, `rugged`, or `deprecated` are excluded before
   global and per-chain ranking.
-- Active selection is the union of global protocol-TVL top 1000 and each supported chain's
+- Current selection is the union of global protocol-TVL top 1000 and each supported chain's
   chain-TVL top 20. Protocol-level `tvl` is never replaced with chain TVL.
+- The registry stores only that current selection. It does not retain inactive protocols, full API
+  responses, per-chain ranking rows, or historical workflow state; the next refresh fetches those
+  inputs again.
 - Reviewed missing URLs come from `packages/connect-button-workbench/dapp-url-resolutions.json`.
   `resolved` entries populate `target.resolvedDappUrl`; `no_runnable_dapp` and `unresolved`
   entries remain non-runnable instead of guessing a hostname.
 - Preferred page URL is `target.urlOverride`, then `target.resolvedDappUrl`, then `sourceUrl`.
-- A missing `manualReview` object is interpreted as `pending` for backward compatibility.
 - `manualReview.state` is `pending`, `processed`, or `unsupported`. `unsupported` is a terminal
   manual state for entries without a usable DApp, such as an informational website only.
-- Untargeted runs select at most three active protocols whose coverage and manual review are both
-  pending, using `bestRank ASC`,
+- Pending review is the default and is omitted from the compact file; only `processed` and
+  `unsupported` state is persisted.
+- Untargeted runs select at most three protocols whose manual review is pending, using
+  `globalRank ASC`, `bestRank ASC`,
   `rankedChainCount DESC`, `maxChainTvl DESC`, and numeric `id ASC`.
 - `--site` matches protocol ID, slug, exact name, source hostname, or target hostname and returns
   exactly one protocol.
@@ -59,10 +63,9 @@ Marking `unsupported` must also go through the atomic project updater and clears
 review metadata. Automatic review must never overwrite `unsupported`; only `pending` may be
 automatically promoted to `processed`.
 
-Hack implementation through this skill must not write coverage, automation, evidence, regression,
-claims, attempts, or terminal outcomes. In particular, CDP inspection is not E2E evidence and must
-never synthesize `scriptedAssertionsPassed`, `implemented_verified`, `existing_verified`, `passed`,
-or `repaired`.
+Hack implementation through this skill must not recreate the removed coverage, automation,
+evidence, regression, claim, attempt, or terminal-outcome fields. CDP inspection remains a
+development DOM check, not persistent E2E state.
 
 Validate the registry after source work:
 

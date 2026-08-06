@@ -98,14 +98,14 @@ try {
     );
   }
 
-  await saveRegistry(registry, file);
-  const savedText = `${JSON.stringify(registry, null, 2)}\n`;
+  const savedRegistry = await saveRegistry(registry, file);
+  const savedText = `${JSON.stringify(savedRegistry, null, 2)}\n`;
   process.stdout.write(
     `${JSON.stringify({
       ok: true,
       protocolId: protocol.id,
-      urlOverride: protocol.target.urlOverride,
-      manualReview: protocol.manualReview,
+      urlOverride: protocol.target?.urlOverride || null,
+      manualReview: protocol.manualReview || { state: 'pending' },
       registrySha256: sha256(savedText),
     })}\n`,
   );

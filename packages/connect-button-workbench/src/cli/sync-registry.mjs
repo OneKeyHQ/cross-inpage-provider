@@ -14,13 +14,11 @@ try {
     file: args.file || registryFile,
     topPerChain,
     globalTop,
-    startCycle: Boolean(args['start-cycle']),
   });
   process.stdout.write(
     `${JSON.stringify({
       ok: true,
       file: args.file || registryFile,
-      cycle: result.registry.cycle,
       stats: result.stats,
       progress: registryProgress(result.registry),
     })}\n`,

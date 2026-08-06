@@ -7,14 +7,11 @@ try {
   const args = parseArgs();
   const file = args.file || registryFile;
   const registry = await loadRegistry(file);
-  const errors = await validateRegistry(registry, {
-    checkFiles: !args['skip-file-checks'],
-  });
+  const errors = await validateRegistry(registry);
   process.stdout.write(
     `${JSON.stringify({
       ok: errors.length === 0,
       file,
-      cycle: registry.cycle,
       progress: registryProgress(registry),
       errors,
     })}\n`,

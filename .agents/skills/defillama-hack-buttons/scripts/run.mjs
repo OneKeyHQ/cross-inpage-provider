@@ -105,7 +105,6 @@ function summarizeProtocol(protocol) {
     id: protocol.id,
     slug: protocol.slug,
     name: protocol.name,
-    category: protocol.category,
     url: preferredUrl(protocol),
     hostname:
       normalizeHostname(preferredUrl(protocol)) ||
@@ -113,11 +112,6 @@ function summarizeProtocol(protocol) {
       normalizeHostname(protocol.sourceHostname),
     sourceUrl: protocol.sourceUrl || null,
     urlOverride: protocol.target?.urlOverride || null,
-    rankedChains: (protocol.rankings || [])
-      .slice()
-      .sort((left, right) => left.rank - right.rank)
-      .slice(0, 8)
-      .map(({ chain, rank, chainTvl }) => ({ chain, rank, chainTvl })),
     priority: protocol.priority || null,
     manualReview: protocol.manualReview || {
       state: 'pending',
@@ -130,6 +124,8 @@ function summarizeProtocol(protocol) {
 
 function priorityCompare(left, right) {
   return (
+    (left.priority?.globalRank ?? Number.MAX_SAFE_INTEGER) -
+      (right.priority?.globalRank ?? Number.MAX_SAFE_INTEGER) ||
     (left.priority?.bestRank ?? Number.MAX_SAFE_INTEGER) -
       (right.priority?.bestRank ?? Number.MAX_SAFE_INTEGER) ||
     (right.priority?.rankedChainCount ?? 0) - (left.priority?.rankedChainCount ?? 0) ||
@@ -211,28 +207,25 @@ try {
   const args = parseArguments(process.argv.slice(2));
   const repo = await findRepository();
   const allProtocols = await loadProtocolSources(repo);
-  const active = allProtocols.filter((protocol) => protocol.active !== false);
   const targets = args.site
-    ? [resolveExplicitSite(active, args.site)]
-    : active
+    ? [resolveExplicitSite(allProtocols, args.site)]
+    : allProtocols
         .filter(
           (protocol) =>
             protocol.registrySource === 'defillama' &&
-            protocol.coverage?.state === 'pending' &&
             (protocol.manualReview?.state || 'pending') === 'pending' &&
             preferredUrl(protocol),
         )
         .sort(priorityCompare)
         .slice(0, args.limit);
   const protocols = targets.map(summarizeProtocol);
-  const counts = active.reduce(
+  const counts = allProtocols.reduce(
     (result, protocol) => {
       const state = protocol.manualReview?.state || 'pending';
       result[state] = (result[state] || 0) + 1;
-      if (protocol.coverage?.state === 'pending') result.hackPending += 1;
       return result;
     },
-    { pending: 0, processed: 0, hackPending: 0 },
+    { pending: 0, processed: 0, unsupported: 0 },
   );
 
   process.stdout.write(

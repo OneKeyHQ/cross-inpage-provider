@@ -166,10 +166,11 @@ try {
     !contentText.includes('onekey@CUSTOM_INJECTION_AUTO_REVIEW') ||
     !contentText.includes('onekey@CUSTOM_INJECTION_RECORDING_COMMAND') ||
     !contentText.includes('onekey@CUSTOM_INJECTION_RECORDING_EVENT') ||
+    !contentText.includes('Blocked unsupported OneKey Desktop bridge channel') ||
     !contentText.includes('MutationObserver')
   ) {
     throw new Error(
-      'Custom injection Desktop preload is missing its development marker, auto-review observer, or recorder',
+      'Custom injection Desktop preload is missing its development marker, auto-review observer, recorder, or page bridge guard',
     );
   }
   new vm.Script(providerCode.toString('utf8'), {

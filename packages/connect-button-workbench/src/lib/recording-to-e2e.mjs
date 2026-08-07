@@ -1,8 +1,8 @@
 import crypto from 'node:crypto';
 
 import {
+  createDesktopRecordingE2ECase,
   isDesktopE2EProhibitedActionText,
-  validateDesktopRecordingE2ECase,
 } from './desktop-recording-e2e.mjs';
 
 const MAXIMUM_RECORDING_BYTES = 1024 * 1024;
@@ -28,6 +28,13 @@ const ALLOWED_LOCATOR_KINDS = new Set([
   'text',
   'css',
 ]);
+const ALLOWED_LOCATOR_STRENGTHS = new Set([
+  'stable',
+  'anchored',
+  'class',
+  'semantic',
+  'structural',
+]);
 const LOCATOR_PRIORITY = new Map(
   ['testId', 'dataTest', 'dataCy', 'id', 'ariaLabel', 'role', 'text', 'css'].map((kind, index) => [
     kind,
@@ -37,6 +44,10 @@ const LOCATOR_PRIORITY = new Map(
 const SAFE_SEGMENT = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 const CONNECT_TARGET_TEXT = /\bconnect(?:\s+(?:a\s+)?wallet)?\b/iu;
 const ESCAPE_DISMISSIBLE_ROLES = new Set(['menuitem', 'option']);
+const MAXIMUM_RECORDED_MATCH_COUNT = 10_000;
+const MAXIMUM_TARGET_SCOPES = 4;
+const MAXIMUM_SHADOW_HOSTS = 4;
+const MAXIMUM_SHADOW_HOST_SELECTORS = 4;
 
 function boundedString(value, label, maximumLength) {
   if (typeof value !== 'string') throw new Error(`${label} must be a string`);
@@ -50,6 +61,22 @@ function boundedString(value, label, maximumLength) {
 function optionalString(value, label, maximumLength) {
   if (value == null || value === '') return null;
   return boundedString(value, label, maximumLength);
+}
+
+function optionalBoundedInteger(value, label, maximum) {
+  if (value == null) return null;
+  if (!Number.isInteger(value) || value < 0 || value > maximum) {
+    throw new Error(`${label} must be an integer between 0 and ${String(maximum)}`);
+  }
+  return value;
+}
+
+function inferLocatorStrength(kind, value) {
+  if (['testId', 'dataTest', 'dataCy', 'id'].includes(kind)) return 'stable';
+  if (kind !== 'css') return 'semantic';
+  if (/\[(?:data-testid|data-test|data-cy)=|#[a-zA-Z_-]/u.test(value)) return 'anchored';
+  if (/\[class~=/u.test(value)) return 'class';
+  return 'structural';
 }
 
 export function normalizeRecordingProtocolSlug(value) {
@@ -95,6 +122,23 @@ function normalizeSelector(value, stepIndex, selectorIndex) {
     value: boundedString(value.value, `step ${stepIndex} selector ${selectorIndex} value`, 512),
     unique: value.unique === true,
   };
+  const strength = value.strength ?? inferLocatorStrength(kind, selector.value);
+  if (!ALLOWED_LOCATOR_STRENGTHS.has(strength)) {
+    throw new Error(`step ${stepIndex} selector ${selectorIndex} strength is unsupported`);
+  }
+  selector.strength = strength;
+  const matchCount = optionalBoundedInteger(
+    value.matchCount,
+    `step ${stepIndex} selector ${selectorIndex} matchCount`,
+    MAXIMUM_RECORDED_MATCH_COUNT,
+  );
+  const visibleMatchCount = optionalBoundedInteger(
+    value.visibleMatchCount,
+    `step ${stepIndex} selector ${selectorIndex} visibleMatchCount`,
+    MAXIMUM_RECORDED_MATCH_COUNT,
+  );
+  if (matchCount !== null) selector.matchCount = matchCount;
+  if (visibleMatchCount !== null) selector.visibleMatchCount = visibleMatchCount;
   if (kind === 'role') {
     selector.role = boundedString(
       value.role,
@@ -108,6 +152,67 @@ function normalizeSelector(value, stepIndex, selectorIndex) {
     );
   }
   return selector;
+}
+
+function normalizeScope(value, stepIndex, scopeIndex) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`step ${stepIndex} scope ${scopeIndex} must be an object`);
+  }
+  if (value.relation !== 'ancestor') {
+    throw new Error(`step ${stepIndex} scope ${scopeIndex} relation is unsupported`);
+  }
+  return {
+    relation: 'ancestor',
+    tag: boundedString(value.tag, `step ${stepIndex} scope ${scopeIndex} tag`, 40).toLowerCase(),
+    locator: normalizeSelector(value.locator, stepIndex, `scope-${String(scopeIndex)}`),
+  };
+}
+
+function normalizeShadowHost(value, stepIndex, hostIndex) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`step ${stepIndex} shadow host ${hostIndex} must be an object`);
+  }
+  if (
+    !Array.isArray(value.selectors) ||
+    value.selectors.length === 0 ||
+    value.selectors.length > MAXIMUM_SHADOW_HOST_SELECTORS
+  ) {
+    throw new Error(
+      `step ${stepIndex} shadow host ${hostIndex} must contain 1-${String(
+        MAXIMUM_SHADOW_HOST_SELECTORS,
+      )} selectors`,
+    );
+  }
+  return {
+    tag: boundedString(
+      value.tag,
+      `step ${stepIndex} shadow host ${hostIndex} tag`,
+      40,
+    ).toLowerCase(),
+    selectors: value.selectors.map((selector, selectorIndex) =>
+      normalizeSelector(
+        selector,
+        stepIndex,
+        `shadow-${String(hostIndex)}-${String(selectorIndex)}`,
+      ),
+    ),
+  };
+}
+
+function normalizeGeometry(value, stepIndex) {
+  if (value == null) return null;
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`step ${stepIndex} target geometry must be an object`);
+  }
+  const geometry = {};
+  for (const key of ['centerXRatio', 'centerYRatio', 'widthRatio', 'heightRatio']) {
+    const number = value[key];
+    if (typeof number !== 'number' || !Number.isFinite(number) || number < 0 || number > 1) {
+      throw new Error(`step ${stepIndex} target geometry ${key} must be between 0 and 1`);
+    }
+    geometry[key] = number;
+  }
+  return geometry;
 }
 
 function normalizeStep(value, index, expectedHostname) {
@@ -131,11 +236,34 @@ function normalizeStep(value, index, expectedHostname) {
   ) {
     throw new Error(`step ${index} must contain 1-8 selectors`);
   }
+  const stableClassTokens = value.target.stableClassTokens ?? [];
+  if (!Array.isArray(stableClassTokens) || stableClassTokens.length > 6) {
+    throw new Error(`step ${index} target stableClassTokens must contain 0-6 values`);
+  }
+  const scopes = value.target.scopes ?? [];
+  if (!Array.isArray(scopes) || scopes.length > MAXIMUM_TARGET_SCOPES) {
+    throw new Error(
+      `step ${index} target scopes must contain 0-${String(MAXIMUM_TARGET_SCOPES)} values`,
+    );
+  }
+  const shadowHosts = value.target.shadowHosts ?? [];
+  if (!Array.isArray(shadowHosts) || shadowHosts.length > MAXIMUM_SHADOW_HOSTS) {
+    throw new Error(
+      `step ${index} target shadowHosts must contain 0-${String(MAXIMUM_SHADOW_HOSTS)} values`,
+    );
+  }
   const target = {
     tag: boundedString(value.target.tag, `step ${index} target tag`, 40).toLowerCase(),
     text: optionalString(value.target.text, `step ${index} target text`, 240),
     role: optionalString(value.target.role, `step ${index} target role`, 80),
     ariaLabel: optionalString(value.target.ariaLabel, `step ${index} target ariaLabel`, 240),
+    inputType: optionalString(value.target.inputType, `step ${index} target inputType`, 40),
+    stableClassTokens: stableClassTokens.map((token, tokenIndex) =>
+      boundedString(token, `step ${index} target stableClassTokens ${tokenIndex}`, 40),
+    ),
+    scopes: scopes.map((scope, scopeIndex) => normalizeScope(scope, index, scopeIndex)),
+    shadowHosts: shadowHosts.map((host, hostIndex) => normalizeShadowHost(host, index, hostIndex)),
+    geometry: normalizeGeometry(value.target.geometry, index),
     selectors: value.target.selectors.map((selector, selectorIndex) =>
       normalizeSelector(selector, index, selectorIndex),
     ),
@@ -154,7 +282,7 @@ function normalizeRecording(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     throw new Error('Recording must be an object');
   }
-  if (value.schemaVersion !== 1 || value.kind !== 'onekey-connect-button-recording') {
+  if (![1, 2].includes(value.schemaVersion) || value.kind !== 'onekey-connect-button-recording') {
     throw new Error('Unsupported connect-button recording');
   }
   if (value.runtime?.privateSession !== true) {
@@ -197,6 +325,7 @@ function normalizeRecording(value) {
     };
   }
   return {
+    schemaVersion: value.schemaVersion,
     source,
     protocolId,
     protocolName,
@@ -249,11 +378,32 @@ function assertSafeTarget(target, stepIndex) {
   }
 }
 
+function compiledLocator(selector) {
+  return {
+    kind: selector.kind,
+    value: selector.value,
+    strength: selector.strength,
+    uniqueAtRecording: selector.unique,
+    ...(selector.matchCount !== undefined ? { matchCount: selector.matchCount } : {}),
+    ...(selector.visibleMatchCount !== undefined
+      ? { visibleMatchCount: selector.visibleMatchCount }
+      : {}),
+    ...(selector.kind === 'role' ? { role: selector.role, name: selector.name } : {}),
+  };
+}
+
 function compiledLocators(target, stepIndex) {
   const selectors = target.selectors.map((selector, index) => ({ selector, index }));
-  if (!selectors.some(({ selector }) => selector.unique)) {
+  const hasRecordedUniqueLocator = selectors.some(({ selector }) => selector.unique);
+  const hasCompositeContext = Boolean(
+    selectors.length >= 2 ||
+      target.scopes.length > 0 ||
+      target.shadowHosts.length > 0 ||
+      target.stableClassTokens.length > 0,
+  );
+  if (!hasRecordedUniqueLocator && !hasCompositeContext) {
     throw new Error(
-      `step ${stepIndex} has no unique recorded locator; re-record with the current recorder`,
+      `step ${stepIndex} has neither a unique locator nor enough composite target context; re-record with the current recorder`,
     );
   }
   selectors.sort((left, right) => {
@@ -269,14 +419,37 @@ function compiledLocators(target, stepIndex) {
     const key = `${selector.kind}:${selector.value}`;
     if (seen.has(key)) return [];
     seen.add(key);
-    return [
-      {
-        kind: selector.kind,
-        value: selector.value,
-        ...(selector.kind === 'role' ? { role: selector.role, name: selector.name } : {}),
-      },
-    ];
+    return [compiledLocator(selector)];
   });
+}
+
+function compiledTarget(target) {
+  return {
+    tag: target.tag,
+    ...(target.role ? { role: target.role.toLowerCase() } : {}),
+    ...(target.text ? { name: target.text } : {}),
+    ...(target.ariaLabel ? { ariaLabel: target.ariaLabel } : {}),
+    ...(target.inputType ? { inputType: target.inputType.toLowerCase() } : {}),
+    ...(target.stableClassTokens.length > 0 ? { stableClassTokens: target.stableClassTokens } : {}),
+    ...(target.scopes.length > 0
+      ? {
+          scopes: target.scopes.map((scope) => ({
+            relation: scope.relation,
+            tag: scope.tag,
+            locator: compiledLocator(scope.locator),
+          })),
+        }
+      : {}),
+    ...(target.shadowHosts.length > 0
+      ? {
+          shadowHosts: target.shadowHosts.map((host) => ({
+            tag: host.tag,
+            locators: host.selectors.map(compiledLocator),
+          })),
+        }
+      : {}),
+    ...(target.geometry ? { geometry: target.geometry } : {}),
+  };
 }
 
 function actionDescription(recording, step, index, walletOpeningIndex) {
@@ -323,22 +496,13 @@ export function compileRecordingToDesktopE2E(value, recordingSha256) {
       action: step.action,
       description: actionDescription(recording, step, index, walletOpeningIndex),
       locators: compiledLocators(step.target, index),
+      target: compiledTarget(step.target),
       ...(step.action === 'press' ? { key: step.key } : {}),
-      timeoutMs: 10_000,
-      waitAfterMs: index === walletOpeningIndex ? 1_000 : 750,
     };
   });
   const readinessIndex = readinessActionIndex(requiredSteps, walletOpeningIndex);
-  const readinessTargetAction = compiledActions[readinessIndex];
-  compiledActions.splice(readinessIndex, 0, {
-    action: 'press',
-    description: `Wait for the ${recording.protocolName} connect path to finish initializing`,
-    locators: readinessTargetAction.locators,
-    key: 'Escape',
-    timeoutMs: readinessTargetAction.timeoutMs,
-    waitAfterMs: 3_000,
-  });
-  const testCase = validateDesktopRecordingE2ECase({
+  compiledActions[readinessIndex].readiness = true;
+  const definition = {
     schemaVersion: 1,
     kind: 'onekey-connect-button-desktop-e2e',
     source: recording.source,
@@ -347,30 +511,23 @@ export function compileRecordingToDesktopE2E(value, recordingSha256) {
     startUrl: recording.initialUrl,
     recordingSha256,
     actions: compiledActions,
-  });
+  };
+  const testCase = createDesktopRecordingE2ECase(definition);
   return {
     recording,
+    definition,
     testCase,
   };
 }
 
-export function renderDesktopRecordingE2E(testCase) {
-  const serialized = JSON.stringify(testCase, null, 2).replace(
+export function renderDesktopRecordingE2E(definition) {
+  const serialized = JSON.stringify(definition, null, 2).replace(
     /^(\s*)"([a-zA-Z][a-zA-Z0-9]*)":/gmu,
     '$1$2:',
   );
-  return `import { pathToFileURL } from 'node:url';
+  return `import { runDesktopRecordingE2EModule } from '../../../src/lib/desktop-recording-e2e.mjs';
 
-import {
-  runDesktopRecordingE2EAndExit,
-  validateDesktopRecordingE2ECase,
-} from '../../../src/lib/desktop-recording-e2e.mjs';
-
-export const testCase = validateDesktopRecordingE2ECase(${serialized});
-
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  await runDesktopRecordingE2EAndExit(testCase);
-}
+export const testCase = await runDesktopRecordingE2EModule(import.meta.url, ${serialized});
 `;
 }
 
@@ -390,6 +547,6 @@ export function generateDesktopRecordingE2EFromContent(content) {
   return {
     ...compiled,
     recordingSha256,
-    source: renderDesktopRecordingE2E(compiled.testCase),
+    source: renderDesktopRecordingE2E(compiled.definition),
   };
 }

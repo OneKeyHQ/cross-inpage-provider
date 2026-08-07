@@ -33,6 +33,18 @@ Use:
 Mutation observers can call the replacement repeatedly. Check the wallet marker before changing the
 DOM and ensure repeated calls do not add wrappers, icons, text, or duplicate wallet IDs.
 
+## Preserve the mutation throttle floor
+
+`hackConnectButton` has a default and hard minimum `throttleDelay` of 600ms. Never lower it to make
+an adapter appear more responsive. Mutation-heavy DApps can turn a shorter delay into repeated
+full-DOM selector work, causing visible jank and sustained CPU usage. The runtime clamps smaller or
+invalid values back to 600ms; adapters may only choose a larger delay.
+
+When an adapter misses a wallet modal or works only after reload, diagnose the actual lifecycle
+failure instead: verify the observer target is still connected, preserve pending mutation records,
+handle asynchronous layout safely, and make selectors deterministic. Developers and LLM agents
+must fix that root cause rather than use a shorter throttle as a timing workaround.
+
 ## Choosing the implementation shape
 
 Use an existing universal adapter when a stable, unique selector already fits the dapp. Add a

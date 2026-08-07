@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "silo",
+  "site": "app.silo.finance",
+  "recordingSha256": "5802ddd63b77813de67b6432f9f45e9e44b3aace6e777a082d6dba450b9495ce",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "789e84c9275ecf047b8b562b08eaedaeee7db5848e1e8a12ff2340579ed1515f"
+}

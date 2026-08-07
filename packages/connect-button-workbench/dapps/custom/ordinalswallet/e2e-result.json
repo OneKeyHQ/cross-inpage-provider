@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "ordinalswallet",
+  "site": "ordinalswallet.com",
+  "recordingSha256": "eec89f37cb125876b8bab9e3fbaa4be899fef0cd79e9651ad30bf0b65ce95a31",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "unisat",
+      "iconLabel": "OneKey & UniSat"
+    }
+  ],
+  "e2eSha256": "67f95fead01fa6b522409974937a7e405ea197a72b01ca7ffb9dba955617f5b1"
+}

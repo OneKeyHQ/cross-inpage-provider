@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "lite-instadapp",
+  "site": "fluid.io",
+  "recordingSha256": "63cb9fdefc2ecf6ddd09e653e2f84d958d9661910e0197023f7aed632895522c",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "af70502780def20e9f0758b994569175114615d488099d7a2512e4ae439e6bf2"
+}

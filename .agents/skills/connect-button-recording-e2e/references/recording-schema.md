@@ -4,9 +4,15 @@ Desktop persists a normalized envelope under the manifest's `dappsDirectory` as 
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "kind": "onekey-connect-button-recording",
-  "protocol": { "source": "defillama", "id": "protocol-id", "name": "Protocol", "slug": "protocol", "url": "https://app.example" },
+  "protocol": {
+    "source": "defillama",
+    "id": "protocol-id",
+    "name": "Protocol",
+    "slug": "protocol",
+    "url": "https://app.example"
+  },
   "runtime": { "bundleSha256": "<64 lowercase hex>", "privateSession": true },
   "startedAt": "<ISO timestamp>",
   "finishedAt": "<ISO timestamp>",
@@ -25,8 +31,40 @@ Desktop persists a normalized envelope under the manifest's `dappsDirectory` as 
         "text": "Connect Wallet",
         "role": "button",
         "ariaLabel": null,
+        "inputType": null,
+        "stableClassTokens": ["wallet-trigger"],
+        "scopes": [
+          {
+            "relation": "ancestor",
+            "tag": "section",
+            "locator": {
+              "kind": "testId",
+              "value": "account-panel",
+              "unique": true,
+              "matchCount": 1,
+              "visibleMatchCount": 1,
+              "strength": "stable"
+            }
+          }
+        ],
+        "shadowHosts": [],
+        "geometry": {
+          "centerXRatio": 0.75,
+          "centerYRatio": 0.125,
+          "widthRatio": 0.125,
+          "heightRatio": 0.055556
+        },
         "selectors": [
-          { "kind": "role", "value": "button:Connect Wallet", "role": "button", "name": "Connect Wallet", "unique": true }
+          {
+            "kind": "role",
+            "value": "button:Connect Wallet",
+            "role": "button",
+            "name": "Connect Wallet",
+            "unique": false,
+            "matchCount": 2,
+            "visibleMatchCount": 2,
+            "strength": "semantic"
+          }
         ]
       }
     }
@@ -42,8 +80,33 @@ The Desktop save API returns a SHA-256 digest alongside the relative file path. 
 recalculates the digest from file bytes when listing recordings; use that digest as
 `recordingSha256` in the generated case.
 
-Allowed selector kinds are `testId`, `dataTest`, `dataCy`, `id`, `ariaLabel`, `role`, `text`, and `css`. Allowed key presses are Enter, Escape, Tab, Space, and arrow keys. There are at most 100 steps and 8 selectors per target. Unknown fields are removed by the main process before persistence.
+If Desktop cannot start, stop, sanitize, or save a recording after it has resolved the exact
+source-qualified DApp directory, it should keep the complete error in its normal log and append
+only the compact recording-phase reason to the ignored sibling `e2e-failure.json`. Use the same
+bounded failure-log contract as generation and validation: latest 20 entries, 64 KiB total, and
+2,000 characters per reason. Do not store the incomplete capture, DOM, form values, cookies, or
+storage in that failure artifact.
 
-The recorder generates contextual CSS from stable ancestor `data-testid`, `data-test`, `data-cy`, `id`, or `aria-label` anchors when the clicked element's own semantic selectors are ambiguous. It stores only selector candidates that fit the existing bounded schema; it does not persist `outerHTML`, form values, or raw XPath.
+Current recordings use schema version 2. The compiler also accepts legacy schema-version-1 files and
+infers missing locator strengths and empty target context. Allowed selector kinds are `testId`,
+`dataTest`, `dataCy`, `id`, `ariaLabel`, `role`, `text`, and `css`. Each selector records whether it
+was unique, total and visible match counts capped at 10,000, and one strength: `stable`, `anchored`,
+`class`, `semantic`, or `structural`. Allowed key presses are Enter, Escape, Tab, Space, and arrow
+keys. There are at most 100 steps and 8 selectors per target. Unknown fields are removed by the
+main process before persistence; the Desktop schema-version-2 sanitizer must preserve every field
+shown above.
 
-`outcome.afterStep` is the one-based count of recorded steps present when the exact repository OneKey or joint icon was first detected. The pure-code compiler discards any later recorded modal actions. Legacy recordings may omit `outcome`; they compile only when exactly one click has connect semantics, or the capture contains a single click.
+The recorder generates contextual CSS from stable ancestor `data-testid`, `data-test`, `data-cy`,
+`id`, or `aria-label` anchors when the clicked element's own semantic selectors are ambiguous. The
+target fingerprint also contains tag, accessible name, role, aria label, non-sensitive input type,
+up to 6 stable non-generated class tokens, up to 4 ancestor scopes, up to 4 open shadow hosts with
+up to 4 selectors each, and viewport-normalized geometry. Geometry is weak evidence only. The
+recorder stores only bounded context; it never persists `outerHTML`, form values, raw XPath,
+cookies, storage, or network data.
+
+`outcome.afterStep` is the one-based count of recorded steps present when either an exact repository
+OneKey or joint icon, or an exact OneKey wallet ID produced by `createWalletId()`, was first
+detected. The version-1 `repository-wallet-icon` kind is retained for file compatibility and now
+represents either deterministic repository wallet marker. The pure-code compiler discards any later
+recorded modal actions. Legacy recordings may omit `outcome`; they compile only when exactly one
+click has connect semantics, or the capture contains a single click.

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "defillama",
+  "protocolId": "2542",
+  "site": "app.ondo.finance",
+  "recordingSha256": "6dbbca3ab10f2322b6ef38b5727bdea7eafe8e0fef7cd2ac9eac1fba7b1fc7de",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "f21cfba443cc61c244a1d056081c8a68dbf44b1609b899e8ee5cca89b776276f"
+}

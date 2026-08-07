@@ -152,22 +152,24 @@ node <skill-dir>/scripts/desktop-cdp.mjs verify --site <hostname>
 ```
 
 The CDP verdict is a development DOM check only. It confirms the custom-workspace runtime marker, a
-visible `OneKey & …` replacement, OneKey joint icon, unique wallet IDs, and current real Desktop
-injection. It must not create legacy coverage, regression, automation, evidence, or E2E state.
+visible `OneKey` or `OneKey & …` replacement, a repository icon or OneKey wallet ID, unique wallet
+IDs, and current real Desktop injection. It must not create legacy coverage, regression,
+automation, evidence, or E2E state.
 
 Do not create case manifests, Electron harness files, screenshots, traces, or E2E scripts. Do not
 write `manualReview` directly from this skill or from CDP. When Developer Settings and Custom
 Injection are both enabled, the isolated Desktop preload may automatically mark the selected
-protocol `processed` after its `MutationObserver` detects an exact OneKey or `OneKey & …` icon
-source exported by this repository. That path must still use the existing atomic registry updater
-and all session, WebView, URL, and bundle validation. If no repository icon is detected, leave the
-protocol pending for the manual toolbar action.
+protocol `processed` after its `MutationObserver` detects either an exact OneKey or `OneKey & …`
+icon source exported by this repository, or an exact OneKey wallet ID created by
+`createWalletId()`. That path must still use the existing atomic registry updater and all session,
+WebView, URL, and bundle validation. If neither marker is detected, leave the protocol pending for
+the manual toolbar action.
 
 Keep automatic review entirely deterministic and local. Base the decision only on DOM mutation
-events and exact icon sources from `WALLET_CONNECT_INFO`. Never call an LLM, AI/model inference,
-remote classifier, or natural-language heuristic to decide or write `manualReview`. LLM research
-and CDP inspection may help implement an adapter, but neither may participate in the runtime
-decision or directly mark a protocol processed.
+events, exact icon sources from `WALLET_CONNECT_INFO`, and exact `data-wallet-id` values produced by
+`createWalletId()`. Never call an LLM, AI/model inference, remote classifier, or natural-language
+heuristic to decide or write `manualReview`. LLM research and CDP inspection may help implement an
+adapter, but neither may participate in the runtime decision or directly mark a protocol processed.
 
 ## Final checks
 

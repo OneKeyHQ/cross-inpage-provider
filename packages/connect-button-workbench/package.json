@@ -12,6 +12,7 @@
     "registry:validate": "node src/cli/validate-registry.mjs",
     "registry:custom-injected": "node src/cli/custom-injected-registry.mjs",
     "generate:adapter-entry": "node scripts/generate-adapter-entry.mjs",
-    "generate:recording-e2e": "node src/cli/generate-recording-e2e.mjs"
+    "generate:recording-e2e": "node src/cli/generate-recording-e2e.mjs",
+    "validate:recording-e2es": "node src/cli/validate-recording-e2es.mjs"
   }
 }

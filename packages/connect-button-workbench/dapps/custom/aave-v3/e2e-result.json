@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "aave-v3",
+  "site": "app.aave.com",
+  "recordingSha256": "c0a0b54bb3d1634d14dececfa9127653bc72dbd8ef03c79aef4904c0a6f10d1f",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "b8eb187f110af10b3a25b708f3c4d1cd77d5ecea77a01bc388cace346df8f828"
+}

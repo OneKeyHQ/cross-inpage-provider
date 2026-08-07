@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "defillama",
+  "protocolId": "7583",
+  "site": "app.grove.finance",
+  "recordingSha256": "3a70b241d2f1d63855f68f5387cbfc795115e9f972bdb4acdbcc3119d0c08077",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "dd7871b3edbcab290a3bea5fae2e67f511cf106051519d4c42eef0ef6486f8af"
+}

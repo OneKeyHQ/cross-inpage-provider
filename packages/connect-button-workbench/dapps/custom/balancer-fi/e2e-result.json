@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "balancer-fi",
+  "site": "balancer.fi",
+  "recordingSha256": "2282c483d734af3f9c5fe1c7a744c749f261d97fc2bad30f3ca99bfa2dee07ec",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "5f511a4e4d1e9005c038f02b43af9621cdb68a9655d10d2c4226082cd42929af"
+}

@@ -25,18 +25,21 @@ test('generates the production adapter entry from canonical DApp directories', a
   assert.equal(generated.status, 0, generated.stderr);
   assert.deepEqual(JSON.parse(generated.stdout), {
     ok: true,
-    adapterCount: 39,
+    adapterCount: 40,
     disabled: ['custom:walletconnect'],
     output:
       'packages/providers/inpage-providers-hub/src/connectButtonHack/generated/workbench-adapters',
   });
 
   const adapters = await discoverAdapters(dappsDirectory);
-  assert.equal(adapters.length, 40);
-  assert.ok(adapters.every((adapter) => adapter.source === 'custom'));
+  assert.equal(adapters.length, 41);
+  assert.deepEqual(
+    adapters.filter(({ source }) => source === 'defillama').map(({ key }) => key),
+    ['defillama:degenswap'],
+  );
 
   const customRegistry = JSON.parse(
-    await fs.readFile(path.join(packageDirectory, 'custom-protocols.json'), 'utf8'),
+    await fs.readFile(path.join(packageDirectory, 'config/custom-protocols.json'), 'utf8'),
   );
   assert.deepEqual(validateCustomProtocolRegistry(customRegistry), []);
   assert.deepEqual(
@@ -53,7 +56,9 @@ test('generates the production adapter entry from canonical DApp directories', a
   );
   assert.match(generatedIndex, /\.\/custom\/aave-v3\/adapter/u);
   assert.match(generatedIndex, /\.\/custom\/iziswap\/adapter/u);
+  assert.match(generatedIndex, /\.\/defillama\/degenswap\/adapter/u);
   assert.match(generatedIndex, /"custom:aave-v3"/u);
+  assert.match(generatedIndex, /"defillama:degenswap"/u);
   assert.doesNotMatch(generatedIndex, /\.\/custom\/walletconnect\/adapter/u);
   await assert.rejects(
     fs.access(path.join(generatedDirectory, 'custom', 'walletconnect', 'adapter.ts')),

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "opensea",
+  "site": "opensea.io",
+  "recordingSha256": "18be776f58103e578ba175124bba40fb714c9575a319510d041281a7b159fb37",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "28d9101489dd1d7e8fd16280468b3bd8603796235cef68e5c64723b5da39efa7"
+}

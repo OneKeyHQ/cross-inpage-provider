@@ -6,6 +6,10 @@ import {
 import { IInjectedProviderNames } from '@onekeyfe/cross-inpage-provider-types';
 import { throttle, ThrottleSettings } from 'lodash-es';
 import type { IWindowOneKeyHub } from '../injectWeb3Provider';
+import {
+  MINIMUM_HACK_BUTTON_THROTTLE_DELAY_MS,
+  normalizeHackButtonThrottleDelay,
+} from './throttleDelay';
 
 const hackButtonLogger = new Logger('hackButton');
 function checkIfInjectedProviderConnected({
@@ -304,6 +308,9 @@ function hackConnectButton({
   throttleSettings?: ThrottleSettings;
   callbackDelay?: number;
 }) {
+  const effectiveThrottleDelay = normalizeHackButtonThrottleDelay(throttleDelay);
+  const throttleDelayWasClamped = effectiveThrottleDelay !== throttleDelay;
+  let throttleWarningEmitted = false;
   const isUrlMatched = () => {
     const r = Boolean(urls.includes(window.location.hostname) || urls.includes('*'));
     if (isSiteCustomMatchedFn) {
@@ -314,6 +321,14 @@ function hackConnectButton({
   const getEnabledInjectedProviders = () => {
     if (!isUrlMatched()) {
       return;
+    }
+    if (throttleDelayWasClamped && !throttleWarningEmitted) {
+      throttleWarningEmitted = true;
+      hackButtonLogger.warn(
+        `throttleDelay ${String(throttleDelay)}ms is below or invalid for the ${String(
+          MINIMUM_HACK_BUTTON_THROTTLE_DELAY_MS,
+        )}ms performance floor and was clamped`,
+      );
     }
     if (providers.find((providerName) => checkIfInjectedProviderConnected({ providerName }))) {
       return;
@@ -335,8 +350,10 @@ function hackConnectButton({
     if (!isUrlMatched()) {
       return;
     }
-    // Select the node that will be observed for mutations
-    const targetNode = document.body;
+    // Keep the observer attached across apps that replace body during
+    // first-load hydration. The existing throttle bounds callbacks from both
+    // head and body mutations.
+    const targetNode = document.documentElement;
 
     // Options for the observer (which mutations to observe)
     const config = mutationObserverOptions;
@@ -345,6 +362,7 @@ function hackConnectButton({
     const callback: MutationCallback = throttle(
       (mutationList, observer: MutationObserver) => {
         setTimeout(() => {
+          const pendingMutations = observer?.takeRecords?.() ?? [];
           try {
             const enabledProviders = getEnabledInjectedProviders();
             observer?.disconnect?.();
@@ -356,10 +374,13 @@ function hackConnectButton({
             hackButtonLogger.debug('hackConnectButton mutation ERROR (DEV only log):  ', error);
           } finally {
             observer?.observe?.(targetNode, config);
+            if (pendingMutations.length > 0) {
+              callback(pendingMutations, observer);
+            }
           }
         }, callbackDelay);
       },
-      throttleDelay,
+      effectiveThrottleDelay,
       throttleSettings,
     );
 

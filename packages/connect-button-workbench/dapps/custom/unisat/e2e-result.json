@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "unisat",
+  "site": "unisat.io",
+  "recordingSha256": "c290142e1bdc461aca5fc1b3e6de3891d61918d3fc7ab0e477d5395712a76f3a",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "unisat",
+      "iconLabel": "OneKey & UniSat"
+    }
+  ],
+  "e2eSha256": "314e2507eb2084b1fc036aa08b51865608625550e9681f81f989d18c244d28c5"
+}

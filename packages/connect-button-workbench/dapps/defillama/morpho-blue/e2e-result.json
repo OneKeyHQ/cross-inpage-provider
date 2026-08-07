@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "defillama",
+  "protocolId": "4025",
+  "site": "app.morpho.org",
+  "recordingSha256": "4584dc6b37f3da3826810a8920c127b9d5fa445b046b0f78ade5520c884fb2d7",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "204150237676aed068a3bb4ca0615bfe18831dd5d3fb98b13908a15f2641bfb4"
+}

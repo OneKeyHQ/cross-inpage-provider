@@ -44,11 +44,6 @@ export default () =>
           icon: WALLET_CONNECT_INFO.metamask.icon,
           text: WALLET_CONNECT_INFO.metamask.text,
         });
-        replaceFunc({
-          findName: 'WalletConnect',
-          icon: WALLET_CONNECT_INFO.walletconnect.icon,
-          text: WALLET_CONNECT_INFO.walletconnect.text,
-        });
       }
     },
   });

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "defillama",
+  "protocolId": "6212",
+  "site": "app.steakhouse.financial",
+  "recordingSha256": "6ddf0287acc4dd08455d4d29c8775e790e59b5deaede2fea789c6dc1bca5d313",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "8df2cea9388cad27cdc8c2fc9ed55eaa88ddc8a4fd1dd18c3a6d954c08ba975a"
+}

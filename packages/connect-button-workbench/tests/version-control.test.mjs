@@ -26,10 +26,11 @@ test('runtime artifacts stay ignored and persistent workflow files stay versiona
     'packages/connect-button-workbench/node_modules/example/package.json',
     'packages/connect-button-workbench/.data/results.json',
     'packages/connect-button-workbench/dapps/defillama/example/recording.json',
+    'packages/connect-button-workbench/dapps/defillama/example/e2e-failure.json',
     'packages/connect-button-workbench/coverage/lcov.info',
     'packages/connect-button-workbench/.cache/catalog.json',
     'app-monorepo/package.json',
-    'packages/providers/inpage-providers-hub/src/connectButtonHack/defillama-protocols.json.123.tmp',
+    'packages/connect-button-workbench/config/defillama-protocols.json.123.tmp',
     'packages/providers/inpage-providers-hub/src/connectButtonHack/generated/workbench-adapters/index.generated.ts',
   ];
   const ignored = git(['check-ignore', '--stdin'], `${runtimeFiles.join('\n')}\n`);
@@ -38,12 +39,14 @@ test('runtime artifacts stay ignored and persistent workflow files stay versiona
 
   const persistentFiles = [
     '.agents/skills/defillama-hack-buttons/SKILL.md',
-    'onekey-app-custom-injected.json',
+    'packages/connect-button-workbench/config/custom-protocols.json',
+    'packages/connect-button-workbench/config/defillama-protocols.json',
+    'packages/connect-button-workbench/config/injected-provider-capabilities.json',
+    'packages/connect-button-workbench/config/onekey-app-custom-injected.json',
     'packages/connect-button-workbench/scripts/build-desktop-preload.mjs',
     'packages/connect-button-workbench/dapps/defillama/example/e2e.mjs',
     'packages/connect-button-workbench/dapps/custom/example/adapter.ts',
     'packages/connect-button-workbench/dapps/custom/example/adapter.test.ts',
-    'packages/providers/inpage-providers-hub/src/connectButtonHack/defillama-protocols.json',
   ];
   for (const file of persistentFiles) {
     const result = git(['check-ignore', '-q', file]);

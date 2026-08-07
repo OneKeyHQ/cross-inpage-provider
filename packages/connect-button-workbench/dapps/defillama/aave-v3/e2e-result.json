@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "defillama",
+  "protocolId": "1599",
+  "site": "app.aave.com",
+  "recordingSha256": "3d6a413df8fb8ea51c2cb82b19f5bf72204d8588a55d20b5a34fdfbac20a7a67",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "99997b8c83494dd3dff339f8cc447863dfb8ce55c656998cec55ad524ea57c1a"
+}

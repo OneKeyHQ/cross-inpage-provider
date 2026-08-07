@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "defillama",
+  "protocolId": "4409",
+  "site": "dex.swapdegen.tips",
+  "recordingSha256": "b1a6638d01149f74ef8ccc3913ffd929ee10ddcc4606350fb8a0fb5e9e38c976",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "metamask",
+      "iconLabel": "OneKey & MetaMask"
+    }
+  ],
+  "e2eSha256": "3591dbc1e0c3f90e1f30e4ff2e9037403ca11040fe6312779c29f85b3b497d79"
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "defillama",
+  "protocolId": "3107",
+  "site": "app.eigenlayer.xyz",
+  "recordingSha256": "c9913ee7947238e02f44c9b8eaba5269a58ff67e49eb1fd1096fa7a27ef6b5cb",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "2c94e926d9865276965039766d76e49420d69ad31f6cef2a9e0a47c8a541fc75"
+}

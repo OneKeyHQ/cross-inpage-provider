@@ -33,16 +33,7 @@ export default () =>
         return;
       }
       const { isExtension, isDesktop, isNative } = onekeyHub.$walletInfo.platformEnv;
-      const replaceFunc = async ({
-        findName,
-        icon,
-        text,
-      }: {
-        findName: string;
-        findIcon?: string;
-        icon: string;
-        text: string;
-      }) => {
+      const replaceFunc = async ({ icon, text }: { icon: string; text: string }) => {
         const headerText = document.getElementById('walletconnect-qrcode-text');
         if (!headerText) {
           return;
@@ -237,7 +228,6 @@ export default () =>
       };
 
       void replaceFunc({
-        findName: 'WalletConnect',
         icon: WALLET_CONNECT_INFO.onekey.icon,
         text: WALLET_CONNECT_INFO.onekey.text,
       });

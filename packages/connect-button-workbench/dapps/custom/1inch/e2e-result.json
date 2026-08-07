@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "1inch",
+  "site": "1inch.com",
+  "recordingSha256": "a77408a0595c66e3a4cf7d2e22e81f09c9e15551d71a19932dd19076d7c1ac10",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "ed228065c446288d82bcbe8ed43503575461803f957740f4f9cabce6f9c23cef"
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "defillama",
+  "protocolId": "4133",
+  "site": "app.ethena.fi",
+  "recordingSha256": "645b0779d60399a39c0b78b302489b6bf9bf0732cc1016b1678eac07a1ee9b7a",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "026ae16e7d0473e860c8a24d24e868baa3a1b66b374bb37a5c450cf41a3232c6"
+}

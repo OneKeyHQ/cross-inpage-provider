@@ -7,6 +7,12 @@ import { replaceText as defaultReplaceText, makeTextEllipse } from './textUtils'
 import { FindResultType } from './type';
 import { createWalletId, universalLog } from './utils';
 
+function targetsWalletConnect(name: RegExp): boolean {
+  return ['WalletConnect', 'Wallet Connect'].some((label) =>
+    new RegExp(name.source, name.flags).test(label),
+  );
+}
+
 function hackWalletConnectButton(sites: SitesInfo[]) {
   for (const site of sites) {
     const { urls, walletsForProvider, mutationObserverOptions, constraintMap } = site;
@@ -27,6 +33,10 @@ function hackWalletConnectButton(sites: SitesInfo[]) {
           if (enabledProviders.includes(provider)) {
             const wallets = walletsForProvider[provider] || [];
             for (const wallet of wallets) {
+              // WalletConnect replacement is intentionally disabled. Keep this guard at
+              // the shared execution boundary so an upstream config cannot re-enable it.
+              if (targetsWalletConnect(wallet.name)) continue;
+
               const {
                 updatedIcon,
                 updatedName,

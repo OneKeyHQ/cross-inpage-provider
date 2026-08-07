@@ -66,12 +66,15 @@ function requireSafeSegment(value, label) {
 
 async function dappsDirectory(repository) {
   const manifest = JSON.parse(
-    await fs.readFile(path.join(repository, 'onekey-app-custom-injected.json'), 'utf8'),
+    await fs.readFile(
+      path.join(
+        repository,
+        'packages/connect-button-workbench/config/onekey-app-custom-injected.json',
+      ),
+      'utf8',
+    ),
   );
-  if (
-    ![2, 3].includes(manifest.schemaVersion) ||
-    manifest.kind !== 'onekey-app-custom-injected'
-  ) {
+  if (![2, 3].includes(manifest.schemaVersion) || manifest.kind !== 'onekey-app-custom-injected') {
     throw new Error('Unsupported custom injection manifest');
   }
   const relative = String(manifest.dappsDirectory || '');
@@ -101,7 +104,11 @@ async function dappsDirectory(repository) {
 }
 
 function validateEnvelope(value, file) {
-  if (!value || value.schemaVersion !== 1 || value.kind !== 'onekey-connect-button-recording') {
+  if (
+    !value ||
+    ![1, 2].includes(value.schemaVersion) ||
+    value.kind !== 'onekey-connect-button-recording'
+  ) {
     throw new Error(`${file}: unsupported recording envelope`);
   }
   if (value.runtime?.privateSession !== true) {
@@ -300,11 +307,132 @@ async function migrateLatestRecordings(repository, directory, filters) {
   return migrations;
 }
 
+function e2eStringField(source, field) {
+  const match = source.match(new RegExp(`\\b${field}\\s*:\\s*["']([^"']+)["']`, 'u'));
+  return match?.[1] || null;
+}
+
+async function readE2EMetadata(file) {
+  const stat = await fs.lstat(file);
+  if (!stat.isFile() || stat.isSymbolicLink() || stat.size <= 0 || stat.size > MAXIMUM_BYTES) {
+    throw new Error('E2E must be a regular file no larger than 1 MiB');
+  }
+  const source = await fs.readFile(file, 'utf8');
+  return {
+    compact: source.includes('runDesktopRecordingE2EModule'),
+    legacy: source.includes('runDesktopRecordingE2EAndExit'),
+    source: e2eStringField(source, 'source'),
+    protocolId: e2eStringField(source, 'protocolId'),
+    recordingSha256: e2eStringField(source, 'recordingSha256'),
+  };
+}
+
+async function auditE2Es(repository, directory, filters) {
+  const recordings = await listRecordings(repository, directory, filters);
+  const results = [];
+  const seenDirectories = new Set();
+  for (const recording of recordings) {
+    const relativeRecording = recording.file;
+    const directoryName = path.posix.dirname(relativeRecording);
+    seenDirectories.add(directoryName);
+    if (recording.error) {
+      results.push({
+        source: recording.source || null,
+        slug: recording.slug || null,
+        recordingFile: relativeRecording,
+        e2eFile: `${directoryName}/e2e.mjs`,
+        status: 'invalid-recording',
+        issues: [recording.error],
+      });
+      continue;
+    }
+    const e2eFile = path.join(repository, directoryName, 'e2e.mjs');
+    let metadata;
+    try {
+      metadata = await readE2EMetadata(e2eFile);
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        results.push({
+          source: recording.source,
+          slug: recording.slug,
+          protocolId: recording.protocolId,
+          recordingFile: relativeRecording,
+          e2eFile: `${directoryName}/e2e.mjs`,
+          status: 'missing',
+          issues: ['Canonical e2e.mjs is missing'],
+        });
+        continue;
+      }
+      results.push({
+        source: recording.source,
+        slug: recording.slug,
+        protocolId: recording.protocolId,
+        recordingFile: relativeRecording,
+        e2eFile: `${directoryName}/e2e.mjs`,
+        status: 'invalid-e2e',
+        issues: [error.message],
+      });
+      continue;
+    }
+    const issues = [];
+    if (metadata.source !== recording.source) issues.push('E2E source does not match recording');
+    if (metadata.protocolId !== recording.protocolId) {
+      issues.push('E2E protocolId does not match recording');
+    }
+    if (metadata.recordingSha256 !== recording.recordingSha256) {
+      issues.push('E2E recordingSha256 is stale');
+    }
+    if (!metadata.compact && !metadata.legacy) issues.push('E2E module template is unrecognized');
+    results.push({
+      source: recording.source,
+      slug: recording.slug,
+      protocolId: recording.protocolId,
+      recordingFile: relativeRecording,
+      e2eFile: `${directoryName}/e2e.mjs`,
+      status: issues.length > 0 ? 'stale' : metadata.compact ? 'current' : 'legacy',
+      compact: metadata.compact,
+      issues,
+    });
+  }
+
+  const sourceDirectories = await childDirectories(directory, 'DApp source');
+  for (const source of sourceDirectories) {
+    if (!filters.sources.has(source.name)) continue;
+    if (filters.source && source.name !== filters.source) continue;
+    const dapps = await childDirectories(source.directory, `${source.name} DApp slug`);
+    for (const dapp of dapps) {
+      const relativeDirectory = path.relative(repository, dapp.directory).split(path.sep).join('/');
+      if (seenDirectories.has(relativeDirectory)) continue;
+      const e2eFile = path.join(dapp.directory, 'e2e.mjs');
+      let metadata;
+      try {
+        metadata = await readE2EMetadata(e2eFile);
+      } catch (error) {
+        if (error.code === 'ENOENT') continue;
+        throw error;
+      }
+      if (filters.protocolId && metadata.protocolId !== filters.protocolId) continue;
+      results.push({
+        source: source.name,
+        slug: dapp.name,
+        recordingFile: `${relativeDirectory}/recording.json`,
+        e2eFile: `${relativeDirectory}/e2e.mjs`,
+        status: 'orphan',
+        issues: ['Canonical recording.json is missing'],
+      });
+    }
+  }
+  results.sort((left, right) => left.e2eFile.localeCompare(right.e2eFile));
+  const counts = {};
+  for (const result of results) counts[result.status] = (counts[result.status] || 0) + 1;
+  return { counts, results };
+}
+
 try {
   const command = process.argv[2];
-  if (!['list', 'show', 'migrate-latest'].includes(command)) {
+  if (!['list', 'show', 'audit', 'migrate-latest'].includes(command)) {
     throw new Error(
-      'Usage: recording-tools.mjs <list|show|migrate-latest> [--source <source>] [--protocol <id>] [--file <recording.json>]',
+      'Usage: recording-tools.mjs <list|show|audit|migrate-latest> [--source <source>] [--protocol <id>] [--file <recording.json>]',
     );
   }
   const repository = await findRepository();
@@ -351,6 +479,11 @@ try {
         null,
         2,
       )}\n`,
+    );
+  } else if (command === 'audit') {
+    const audit = await auditE2Es(repository, directory, filters);
+    process.stdout.write(
+      `${JSON.stringify({ dappsDirectory: relative, sources, ...audit }, null, 2)}\n`,
     );
   } else {
     const migrations = await migrateLatestRecordings(repository, directory, filters);

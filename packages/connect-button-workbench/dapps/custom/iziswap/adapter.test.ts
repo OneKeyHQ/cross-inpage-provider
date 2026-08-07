@@ -1,3 +1,5 @@
+import { WALLET_CONNECT_INFO } from '../../../../providers/inpage-providers-hub/src/connectButtonHack/consts';
+
 import { promoteOneKeyWalletItem } from './adapter.dom';
 
 function setRendered(element: HTMLElement) {
@@ -24,7 +26,7 @@ function createWallet(name: string, icon: string) {
   clickable.append(image, text);
   item.append(clickable);
   setRendered(item);
-  return { clickable, item };
+  return { clickable, image, item };
 }
 
 describe('iZiSwap OneKey wallet promotion', () => {
@@ -33,7 +35,7 @@ describe('iZiSwap OneKey wallet promotion', () => {
     jest.restoreAllMocks();
   });
 
-  test('moves OneKey first with CSS without changing DOM order or click handlers', () => {
+  test('moves OneKey first and replaces its icon without changing DOM order or click handlers', () => {
     const list = document.createElement('div');
     const metamask = createWallet('Metamask', 'https://izumi.finance/wallet/metamask.png');
     const walletConnect = createWallet(
@@ -44,6 +46,7 @@ describe('iZiSwap OneKey wallet promotion', () => {
     const onMetamaskClick = jest.fn();
     const onWalletConnectClick = jest.fn();
     const onClick = jest.fn();
+    onekey.image.srcset = 'https://izumi-finance.example/wallet/onekey@2x.png 2x';
     metamask.clickable.addEventListener('click', onMetamaskClick);
     walletConnect.clickable.addEventListener('click', onWalletConnectClick);
     onekey.clickable.addEventListener('click', onClick);
@@ -57,6 +60,8 @@ describe('iZiSwap OneKey wallet promotion', () => {
     expect(list.lastElementChild).toBe(onekey.item);
     expect(onekey.item.style.getPropertyValue('order')).toBe('-1');
     expect(onekey.item.style.getPropertyPriority('order')).toBe('important');
+    expect(onekey.image.src).toBe(WALLET_CONNECT_INFO.onekey.icon);
+    expect(onekey.image.hasAttribute('srcset')).toBe(false);
 
     metamask.clickable.click();
     walletConnect.clickable.click();
@@ -65,11 +70,12 @@ describe('iZiSwap OneKey wallet promotion', () => {
     expect(onWalletConnectClick).toHaveBeenCalledTimes(1);
     expect(onClick).toHaveBeenCalledTimes(1);
 
-    promoteOneKeyWalletItem();
+    expect(promoteOneKeyWalletItem()).toBe(onekey.item);
     expect(list.children).toHaveLength(3);
     expect(list.firstElementChild).toBe(metamask.item);
     expect(list.lastElementChild).toBe(onekey.item);
     expect(onekey.item.style.getPropertyValue('order')).toBe('-1');
+    expect(onekey.image.src).toBe(WALLET_CONNECT_INFO.onekey.icon);
   });
 
   test('ignores an unrelated OneKey image outside a wallet list', () => {

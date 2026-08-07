@@ -99,6 +99,7 @@ var ipcRenderer = electron.ipcRenderer;
 var webFrame = electron.webFrame;
 
 var HOST_CHANNEL = 'JsBridgeDesktopHostToInjected';
+var PAGE_TO_HOST_CHANNEL = 'onekey@JS_BRIDGE_MESSAGE_IPC_CHANNEL';
 
 // --- Custom Injection auto-review detector (isolated preload world only) ---
 ${customInjectionAutoReviewCode}
@@ -109,6 +110,9 @@ ${customInjectionRecorderCode}
 // --- IPC bridge (accessible from page world as window.__onekeyDesktopBridge) ---
 contextBridge.exposeInMainWorld('__onekeyDesktopBridge', {
   sendToHost: function (channel, data) {
+    if (channel !== PAGE_TO_HOST_CHANNEL) {
+      throw new Error('Blocked unsupported OneKey Desktop bridge channel');
+    }
     ipcRenderer.sendToHost(channel, data);
   },
   onHostMessage: function (callback) {

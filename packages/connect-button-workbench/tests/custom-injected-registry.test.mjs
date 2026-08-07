@@ -187,13 +187,26 @@ test('custom injected editor updates the lightweight custom adapter registry', a
 
 test('custom injected manifest exposes only portable workspace paths', async () => {
   const manifest = JSON.parse(
-    await fs.readFile(path.join(repoDir, 'onekey-app-custom-injected.json'), 'utf8'),
+    await fs.readFile(
+      path.join(
+        repoDir,
+        'packages/connect-button-workbench/config/onekey-app-custom-injected.json',
+      ),
+      'utf8',
+    ),
   );
   assert.equal(manifest.schemaVersion, 3);
   assert.equal(manifest.kind, 'onekey-app-custom-injected');
   assert.deepEqual(
     manifest.protocolSources.map(({ source }) => source),
     ['defillama', 'custom'],
+  );
+  assert.deepEqual(
+    manifest.protocolSources.map(({ protocolRegistry }) => protocolRegistry),
+    [
+      'packages/connect-button-workbench/config/defillama-protocols.json',
+      'packages/connect-button-workbench/config/custom-protocols.json',
+    ],
   );
   for (const field of ['desktopPreload', 'dappsDirectory', 'recordingE2EGenerator']) {
     assert.equal(path.isAbsolute(manifest[field]), false);

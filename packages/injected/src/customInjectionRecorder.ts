@@ -2,8 +2,22 @@ export type ICustomInjectionRecordingSelector = Readonly<{
   kind: 'testId' | 'dataTest' | 'dataCy' | 'id' | 'ariaLabel' | 'role' | 'text' | 'css';
   value: string;
   unique: boolean;
+  matchCount: number;
+  visibleMatchCount: number;
+  strength: 'stable' | 'anchored' | 'class' | 'semantic' | 'structural';
   role?: string;
   name?: string;
+}>;
+
+export type ICustomInjectionRecordingScope = Readonly<{
+  relation: 'ancestor';
+  tag: string;
+  locator: ICustomInjectionRecordingSelector;
+}>;
+
+export type ICustomInjectionRecordingShadowHost = Readonly<{
+  tag: string;
+  selectors: readonly ICustomInjectionRecordingSelector[];
 }>;
 
 export type ICustomInjectionRecordingTarget = Readonly<{
@@ -11,6 +25,16 @@ export type ICustomInjectionRecordingTarget = Readonly<{
   text: string | null;
   role: string | null;
   ariaLabel: string | null;
+  inputType: string | null;
+  stableClassTokens: readonly string[];
+  scopes: readonly ICustomInjectionRecordingScope[];
+  shadowHosts: readonly ICustomInjectionRecordingShadowHost[];
+  geometry: Readonly<{
+    centerXRatio: number;
+    centerYRatio: number;
+    widthRatio: number;
+    heightRatio: number;
+  }> | null;
   selectors: readonly ICustomInjectionRecordingSelector[];
 }>;
 
@@ -23,7 +47,7 @@ export type ICustomInjectionRecordingStep = Readonly<{
 }>;
 
 export type ICustomInjectionRecordingCapture = Readonly<{
-  schemaVersion: 1;
+  schemaVersion: 2;
   kind: 'onekey-connect-button-recording-capture';
   startedAt: string;
   finishedAt: string;
@@ -59,6 +83,11 @@ const MAX_TEXT_LENGTH = 240;
 const MAX_SELECTOR_LENGTH = 512;
 const MAX_CONTEXT_ANCESTORS = 8;
 const MAX_CONTEXT_CLASS_TOKENS = 12;
+const MAX_RECORDED_MATCH_COUNT = 10_000;
+const MAX_TARGET_SCOPES = 4;
+const MAX_SHADOW_HOSTS = 4;
+const MAX_SHADOW_HOST_SELECTORS = 4;
+const SCOPE_ROLES = new Set(['dialog', 'form', 'main', 'menu', 'navigation', 'region', 'listbox']);
 const ALLOWED_PRESS_KEYS = new Set([
   'Enter',
   'Escape',
@@ -105,12 +134,53 @@ function attributeSelector(name: string, value: string): string {
   return `[${name}="${escaped}"]`;
 }
 
-function queryCount(root: Document | ShadowRoot, selector: string): number {
+function queryElements(root: Document | ShadowRoot, selector: string): Element[] {
   try {
-    return root.querySelectorAll(selector).length;
+    return Array.from(root.querySelectorAll(selector));
   } catch {
-    return 0;
+    return [];
   }
+}
+
+function queryCount(root: Document | ShadowRoot, selector: string): number {
+  return queryElements(root, selector).length;
+}
+
+function isRendered(element: Element): boolean {
+  const view = element.ownerDocument.defaultView;
+  const style = view?.getComputedStyle(element);
+  const rect = element.getBoundingClientRect();
+  return Boolean(
+    style &&
+      style.display !== 'none' &&
+      style.visibility !== 'hidden' &&
+      Number(style.opacity || 1) > 0 &&
+      style.pointerEvents !== 'none' &&
+      rect.width > 0 &&
+      rect.height > 0,
+  );
+}
+
+function selectorStats(matches: readonly Element[]) {
+  const matchCount = Math.min(matches.length, MAX_RECORDED_MATCH_COUNT);
+  return {
+    unique: matchCount === 1,
+    matchCount,
+    visibleMatchCount: Math.min(matches.filter(isRendered).length, MAX_RECORDED_MATCH_COUNT),
+  };
+}
+
+function cssSelectorDescriptor(
+  root: Document | ShadowRoot,
+  value: string,
+  strength: ICustomInjectionRecordingSelector['strength'],
+): ICustomInjectionRecordingSelector {
+  return {
+    kind: 'css',
+    value,
+    strength,
+    ...selectorStats(queryElements(root, value)),
+  };
 }
 
 function implicitRole(element: Element): string | null {
@@ -119,6 +189,13 @@ function implicitRole(element: Element): string | null {
   const tag = element.tagName.toLowerCase();
   if (tag === 'button') return 'button';
   if (tag === 'a' && element.hasAttribute('href')) return 'link';
+  if (tag === 'dialog') return 'dialog';
+  if (tag === 'form') return 'form';
+  if (tag === 'main') return 'main';
+  if (tag === 'nav') return 'navigation';
+  if (tag === 'section' && (element.hasAttribute('aria-label') || element.hasAttribute('title'))) {
+    return 'region';
+  }
   if (tag === 'select') return 'combobox';
   if (tag === 'textarea') return 'textbox';
   if (tag === 'input') {
@@ -275,7 +352,7 @@ function contextualSelectors(
           continue;
         }
         seen.add(candidate);
-        result.push({ kind: 'css', value: candidate, unique: true });
+        result.push(cssSelectorDescriptor(root, candidate, 'anchored'));
         if (result.length >= 3) return result;
       }
     }
@@ -305,33 +382,43 @@ function targetSelectors(element: Element): ICustomInjectionRecordingSelector[] 
   for (const [attribute, kind] of stableAttributes) {
     const value = normalizeText(element.getAttribute(attribute));
     if (value) {
+      const matches = queryElements(root, attributeSelector(attribute, value));
       add({
         kind,
         value,
-        unique: queryCount(root, attributeSelector(attribute, value)) === 1,
+        strength: 'stable',
+        ...selectorStats(matches),
       });
     }
   }
 
   const id = normalizeText(element.id);
   if (id) {
+    const matches = queryElements(root, `#${cssEscape(id)}`);
     add({
       kind: 'id',
       value: id,
-      unique: queryCount(root, `#${cssEscape(id)}`) === 1,
+      strength: 'stable',
+      ...selectorStats(matches),
     });
   }
   const ariaLabel = normalizeText(element.getAttribute('aria-label'));
   if (ariaLabel) {
+    const matches = queryElements(root, attributeSelector('aria-label', ariaLabel));
     add({
       kind: 'ariaLabel',
       value: ariaLabel,
-      unique: queryCount(root, attributeSelector('aria-label', ariaLabel)) === 1,
+      strength: 'semantic',
+      ...selectorStats(matches),
     });
   }
 
   for (const selector of contextualSelectors(element, root)) {
     add(selector);
+  }
+
+  for (const selector of classTargetSelectors(element).slice(0, 2)) {
+    add(cssSelectorDescriptor(root, selector, 'class'));
   }
 
   const role = implicitRole(element);
@@ -345,7 +432,8 @@ function targetSelectors(element: Element): ICustomInjectionRecordingSelector[] 
       value: `${role}:${name}`,
       role,
       name,
-      unique: roleMatches.length === 1,
+      strength: 'semantic',
+      ...selectorStats(roleMatches),
     });
   }
   if (name) {
@@ -355,30 +443,141 @@ function targetSelectors(element: Element): ICustomInjectionRecordingSelector[] 
     add({
       kind: 'text',
       value: name,
-      unique: textMatches.length === 1,
+      strength: 'semantic',
+      ...selectorStats(textMatches),
     });
   }
 
   const css = structuralSelector(element, root);
   if (css) {
-    add({
-      kind: 'css',
-      value: css,
-      unique: queryCount(root, css) === 1,
-    });
+    add(cssSelectorDescriptor(root, css, 'structural'));
   }
   return selectors;
+}
+
+function scopeLocator(
+  element: Element,
+  root: Document | ShadowRoot,
+): ICustomInjectionRecordingSelector | null {
+  const stableAttributes = [
+    ['data-testid', 'testId'],
+    ['data-test', 'dataTest'],
+    ['data-cy', 'dataCy'],
+  ] as const;
+  for (const [attribute, kind] of stableAttributes) {
+    const value = normalizeText(element.getAttribute(attribute));
+    if (!value) continue;
+    return {
+      kind,
+      value,
+      strength: 'stable',
+      ...selectorStats(queryElements(root, attributeSelector(attribute, value))),
+    };
+  }
+  const id = normalizeText(element.id);
+  if (id) {
+    return {
+      kind: 'id',
+      value: id,
+      strength: 'stable',
+      ...selectorStats(queryElements(root, `#${cssEscape(id)}`)),
+    };
+  }
+  const ariaLabel = normalizeText(element.getAttribute('aria-label'));
+  if (ariaLabel) {
+    return {
+      kind: 'ariaLabel',
+      value: ariaLabel,
+      strength: 'semantic',
+      ...selectorStats(queryElements(root, attributeSelector('aria-label', ariaLabel))),
+    };
+  }
+  const role = implicitRole(element);
+  const name = accessibleName(element);
+  if (!role || !name || !SCOPE_ROLES.has(role)) return null;
+  const matches = Array.from(root.querySelectorAll('[role],dialog,form,main,nav')).filter(
+    (candidate) => implicitRole(candidate) === role && accessibleName(candidate) === name,
+  );
+  return {
+    kind: 'role',
+    value: `${role}:${name}`,
+    role,
+    name,
+    strength: 'semantic',
+    ...selectorStats(matches),
+  };
+}
+
+function targetScopes(
+  element: Element,
+  root: Document | ShadowRoot,
+): ICustomInjectionRecordingScope[] {
+  const scopes: ICustomInjectionRecordingScope[] = [];
+  let ancestor = element.parentElement;
+  let depth = 0;
+  while (ancestor && depth < MAX_CONTEXT_ANCESTORS && scopes.length < MAX_TARGET_SCOPES) {
+    const locator = scopeLocator(ancestor, root);
+    if (locator) {
+      scopes.push({
+        relation: 'ancestor',
+        tag: ancestor.tagName.toLowerCase(),
+        locator,
+      });
+    }
+    ancestor = ancestor.parentElement;
+    depth += 1;
+  }
+  return scopes;
+}
+
+function targetShadowHosts(element: Element): ICustomInjectionRecordingShadowHost[] {
+  const hosts: ICustomInjectionRecordingShadowHost[] = [];
+  let root: Node = element.getRootNode();
+  while (root instanceof ShadowRoot && hosts.length < MAX_SHADOW_HOSTS) {
+    const host = root.host;
+    hosts.push({
+      tag: host.tagName.toLowerCase(),
+      selectors: targetSelectors(host).slice(0, MAX_SHADOW_HOST_SELECTORS),
+    });
+    root = host.getRootNode();
+  }
+  return hosts;
+}
+
+function targetGeometry(element: Element): ICustomInjectionRecordingTarget['geometry'] {
+  const rect = element.getBoundingClientRect();
+  if (rect.width <= 0 || rect.height <= 0 || window.innerWidth <= 0 || window.innerHeight <= 0) {
+    return null;
+  }
+  const boundedRatio = (value: number) => Math.max(0, Math.min(1, Number(value.toFixed(6))));
+  return {
+    centerXRatio: boundedRatio((rect.left + rect.width / 2) / window.innerWidth),
+    centerYRatio: boundedRatio((rect.top + rect.height / 2) / window.innerHeight),
+    widthRatio: boundedRatio(rect.width / window.innerWidth),
+    heightRatio: boundedRatio(rect.height / window.innerHeight),
+  };
 }
 
 function describeTarget(element: Element): ICustomInjectionRecordingTarget | null {
   const selectors = targetSelectors(element);
   if (selectors.length === 0) return null;
   const text = accessibleName(element);
+  const rootNode = element.getRootNode();
+  const root = rootNode instanceof ShadowRoot ? rootNode : document;
+  const inputType =
+    element instanceof HTMLInputElement
+      ? normalizeText(element.getAttribute('type') || 'text')
+      : '';
   return {
     tag: element.tagName.toLowerCase(),
     text: text || null,
     role: implicitRole(element),
     ariaLabel: normalizeText(element.getAttribute('aria-label')) || null,
+    inputType: inputType || null,
+    stableClassTokens: stableClassTokens(element).slice(0, 6),
+    scopes: targetScopes(element, root),
+    shadowHosts: targetShadowHosts(element),
+    geometry: targetGeometry(element),
     selectors,
   };
 }
@@ -454,7 +653,7 @@ export function installCustomInjectionRecorder(
       window.removeEventListener('click', onClick, true);
       window.removeEventListener('keydown', onKeyDown, true);
       return {
-        schemaVersion: 1,
+        schemaVersion: 2,
         kind: 'onekey-connect-button-recording-capture',
         startedAt,
         finishedAt: new Date().toISOString(),

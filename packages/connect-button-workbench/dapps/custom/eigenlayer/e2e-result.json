@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "eigenlayer",
+  "site": "app.eigenlayer.xyz",
+  "recordingSha256": "c2b0b41cd5daa66ccda4561086d07a4cd85e3fc69fc2afdb5d9f380e37c980ab",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "94cb9872049ecef50cc7335a2a6bab622ed0efd9a9921b34eeb7c1ac6836fa8a"
+}

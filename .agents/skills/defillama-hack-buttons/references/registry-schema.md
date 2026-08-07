@@ -2,7 +2,7 @@
 
 The repository registry is:
 
-`packages/providers/inpage-providers-hub/src/connectButtonHack/defillama-protocols.json`
+`packages/connect-button-workbench/config/defillama-protocols.json`
 
 The skill selector reads this file but never edits, claims, or completes a protocol. This prevents
 an interrupted investigation or an explicitly named site from mutating unrelated queue entries.
@@ -12,7 +12,7 @@ an interrupted investigation or an explicitly named site from mutating unrelated
 - DeFiLlama CEX protocols and chains without a repository-supported provider are filtered during
   registry refresh.
 - Runtime support and non-EVM chain aliases come from
-  `packages/providers/inpage-providers-hub/src/injected-provider-capabilities.json`.
+  `packages/connect-button-workbench/config/injected-provider-capabilities.json`.
 - EVM candidates require DeFiLlama chain metadata; EIP-155 metadata may identify and deduplicate
   them but cannot create a chain from an ambiguous protocol key by itself.
 - A positive, non-CEX `protocol.chainTvls` key can add a chain missing from `/v2/chains` only when
@@ -53,9 +53,10 @@ The Desktop Custom Injection runtime and toolbar, through the project updater, o
 Changing `urlOverride` resets manual review to `pending`. Marking `processed` must go through the
 existing atomic project updater. It can happen either through the explicit toolbar action or,
 while Developer Settings and Custom Injection are both enabled, through the capability-
-authenticated isolated-preload event produced when a `MutationObserver` detects an exact OneKey or
-`OneKey & …` icon source exported by this repository. The Desktop side must validate the active
-session, actual WebView, current protocol URL, and injected bundle before invoking the updater.
+authenticated isolated-preload event produced when a `MutationObserver` detects either an exact
+OneKey or `OneKey & …` icon source exported by this repository, or an exact OneKey wallet ID
+produced by `createWalletId()`. The Desktop side must validate the active session, actual WebView,
+current protocol URL, and injected bundle before invoking the updater.
 This automatic decision is pure local code: it must not call or depend on an LLM, AI/model
 inference, remote classifier, or natural-language heuristic.
 

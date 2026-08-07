@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "defillama",
+  "protocolId": "2929",
+  "site": "app.spark.finance",
+  "recordingSha256": "682aa413bf2581555a9420db7f619e8155530f3f0250613f26e6e79835de70ef",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "4f68cbfdaf5594e801fe014261d4f5d9a58c3d1e9463df14d6e60247ddf88af6"
+}

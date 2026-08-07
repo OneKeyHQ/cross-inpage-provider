@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "idclub",
+  "site": "idclub.io",
+  "recordingSha256": "84fb65878f14c609a436c2b51f5d19a647dbb64f5c4cf0d32d23700b1cc1e851",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "unisat",
+      "iconLabel": "OneKey & UniSat"
+    }
+  ],
+  "e2eSha256": "b2f5290de11eddffb2b3f59e4ce275659c16d195e15b3e434155cf5786863c12"
+}

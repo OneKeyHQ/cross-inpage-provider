@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "defillama",
+  "protocolId": "118",
+  "site": "app.sky.money",
+  "recordingSha256": "829d0c1b0876c26192c16545a61ce49e9872f661721292bf6375bc671c817fc0",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "ad1de69e0074d62c0a53d48e49fb11de3d3fc9bfc422c49288168cde0bbb0375"
+}

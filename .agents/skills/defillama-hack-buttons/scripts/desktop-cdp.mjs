@@ -4,6 +4,8 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
+import { verifyPage } from './desktop-cdp-verification.mjs';
+
 const DEFAULT_ENDPOINT = 'http://127.0.0.1:9222';
 
 async function isRepository(directory) {
@@ -459,6 +461,7 @@ const safeHostClickTestIds = new Set([
   'custom-injected-next',
   'custom-injected-recording',
   'custom-injected-e2e-validate',
+  'dapp-connection-reject-btn',
   'explore-index-search',
 ]);
 
@@ -693,46 +696,6 @@ async function reload(WebSocketImpl, targets, site, endpoint) {
   return {
     ...result,
     webview: { id: webview.id, title: webview.title, url: webview.url },
-  };
-}
-
-function verifyPage(page) {
-  const replacements = page.replacements || [];
-  const walletIds = replacements.map((item) => item.walletId).filter(Boolean);
-  const uniqueWalletIds = new Set(walletIds);
-  const customInjectionActive =
-    page.customInjection?.runtime?.source === 'custom-workspace' &&
-    page.customInjection?.indicator?.visible === true;
-  const visibleJointReplacements = replacements.filter(
-    (item) =>
-      item.visible &&
-      /^OneKey\s*&\s*/i.test(item.walletLabel || item.text) &&
-      (item.image?.source?.startsWith('data:') || /onekey/i.test(item.image?.source || '')),
-  );
-  const passed =
-    customInjectionActive &&
-    replacements.length > 0 &&
-    walletIds.length === uniqueWalletIds.size &&
-    visibleJointReplacements.length > 0;
-  return {
-    desktopDomCheckPassed: passed,
-    verdictScope: 'development DOM check only; not Electron E2E and not registry verification',
-    customInjectionActive,
-    replacementCount: replacements.length,
-    uniqueWalletIds: walletIds.length === uniqueWalletIds.size,
-    visibleJointReplacementCount: visibleJointReplacements.length,
-    replacements: replacements.map((item) => ({
-      tag: item.tag,
-      id: item.id,
-      text: item.text,
-      walletLabel: item.walletLabel,
-      walletId: item.walletId,
-      disabled: item.disabled,
-      visible: item.visible,
-      opacity: item.opacity,
-      pointerEvents: item.pointerEvents,
-      imageSource: item.image?.source || null,
-    })),
   };
 }
 

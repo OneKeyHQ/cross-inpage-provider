@@ -1,11 +1,6 @@
-import { pathToFileURL } from 'node:url';
+import { runDesktopRecordingE2EModule } from '../../../src/lib/desktop-recording-e2e.mjs';
 
-import {
-  runDesktopRecordingE2EAndExit,
-  validateDesktopRecordingE2ECase,
-} from '../../../src/lib/desktop-recording-e2e.mjs';
-
-export const testCase = validateDesktopRecordingE2ECase({
+export const testCase = await runDesktopRecordingE2EModule(import.meta.url, {
   schemaVersion: 1,
   kind: "onekey-connect-button-desktop-e2e",
   source: "custom",
@@ -26,36 +21,7 @@ export const testCase = validateDesktopRecordingE2ECase({
           kind: "css",
           value: "div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(2)"
         }
-      ],
-      timeoutMs: 10000,
-      waitAfterMs: 750
-    },
-    {
-      action: "press",
-      description: "Wait for the Gamma connect control to finish initializing",
-      locators: [
-        {
-          kind: "role",
-          value: "button:Connect wallet",
-          role: "button",
-          name: "Connect wallet"
-        },
-        {
-          kind: "text",
-          value: "Connect wallet"
-        },
-        {
-          kind: "css",
-          value: "#root > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(3) > button"
-        },
-        {
-          kind: "css",
-          value: "div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(3) > button"
-        }
-      ],
-      timeoutMs: 10000,
-      waitAfterMs: 3000,
-      key: "Escape"
+      ]
     },
     {
       action: "click",
@@ -80,12 +46,7 @@ export const testCase = validateDesktopRecordingE2ECase({
           value: "div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(3) > button"
         }
       ],
-      timeoutMs: 10000,
-      waitAfterMs: 1000
+      readiness: true
     }
   ]
 });
-
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  await runDesktopRecordingE2EAndExit(testCase);
-}

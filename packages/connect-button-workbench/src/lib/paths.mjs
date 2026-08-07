@@ -4,11 +4,8 @@ import { fileURLToPath } from 'node:url';
 export const libDir = path.dirname(fileURLToPath(import.meta.url));
 export const packageDir = path.resolve(libDir, '../..');
 export const repoDir = path.resolve(packageDir, '../..');
-export const hackDir = path.join(
-  repoDir,
-  'packages/providers/inpage-providers-hub/src/connectButtonHack',
-);
-export const registryFile = path.join(hackDir, 'defillama-protocols.json');
+export const configDir = path.join(packageDir, 'config');
+export const registryFile = path.join(configDir, 'defillama-protocols.json');
 export const dappResolutionsFile = path.join(
   packageDir,
   'dapp-url-resolutions.json',

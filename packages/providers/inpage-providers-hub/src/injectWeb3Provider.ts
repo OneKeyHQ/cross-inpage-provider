@@ -43,13 +43,9 @@ import { detectWebsiteRiskLevel, listenPageFocus } from './detectRiskWebsite';
 import { injectFloatingButton } from './floatingButton';
 import hyperLiquidOneKeyWalletApi from './builtInPerpInjected/hyperLiquidOneKeyWalletApi';
 import { injectClipboardOverride } from './clipboardOverride';
-import providerCapabilities from './injected-provider-capabilities.json';
 
-type ConfiguredProviderId = keyof typeof providerCapabilities.providers;
-
-function defineInjectedChainProviders<
-  T extends Record<ConfiguredProviderId, unknown>,
->(providers: T & Record<Exclude<keyof T, ConfiguredProviderId>, never>) {
+// The prebuild validator checks these static keys against the centralized capabilities config.
+function defineInjectedChainProviders<T extends Record<string, unknown>>(providers: T) {
   return providers;
 }
 

@@ -106,6 +106,9 @@ export type IJsBridgeMessagePayload = {
   sync?: boolean;
   internal?: boolean;
   isWalletConnectRequest?: boolean;
+  // Set by the wallet's WebView host, never by the injected page, when the
+  // request comes from a developer Custom Injection preload.
+  isCustomInjectionRequest?: boolean;
 };
 
 export type IDebugLogger = {

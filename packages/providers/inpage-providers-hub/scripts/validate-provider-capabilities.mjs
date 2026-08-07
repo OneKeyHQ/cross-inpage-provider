@@ -9,7 +9,10 @@ const packageDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.
 
 function parseArguments(argv) {
   const defaults = {
-    config: path.join(packageDir, 'src/injected-provider-capabilities.json'),
+    config: path.resolve(
+      packageDir,
+      '../../connect-button-workbench/config/injected-provider-capabilities.json',
+    ),
     source: path.join(packageDir, 'src/injectWeb3Provider.ts'),
     packageJson: path.join(packageDir, 'package.json'),
   };

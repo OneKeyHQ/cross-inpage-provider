@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "sushi",
+  "site": "sushi.com",
+  "recordingSha256": "9d29adfb09aae2478d71139bb5da49c8b57a7671df154d68e4b0e00b6b402671",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "2613dfa86dd639f4695d27788e853e35c56edbe339a17c3fe8d8859ee0ea59d1"
+}

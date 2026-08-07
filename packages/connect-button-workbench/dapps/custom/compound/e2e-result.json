@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "compound",
+  "site": "app.compound.finance",
+  "recordingSha256": "3f6fe432d4e4478982072cd3e9d28950f250d2f0498364937b5e7290b9e2e66b",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "metamask",
+      "iconLabel": "OneKey & MetaMask"
+    }
+  ],
+  "e2eSha256": "3803dfaffe4c3ee953db5bf78ccb42c0c45b9e919af5bf31988b3ed4a281862c"
+}

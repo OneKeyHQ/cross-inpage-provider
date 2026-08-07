@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "ordinalsmarket",
+  "site": "satflow.com",
+  "recordingSha256": "3c07b5c2857ab8dc86e28becbc542a8baa59fc120df6102a8af3c4638cfbe684",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "unisat",
+      "iconLabel": "OneKey & UniSat"
+    }
+  ],
+  "e2eSha256": "5b0e4ba5a8fb4944b621cae385317a82910a739e8cd5bd1980c295b25f8455db"
+}

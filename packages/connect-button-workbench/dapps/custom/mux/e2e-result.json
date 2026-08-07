@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "mux",
+  "site": "app.mux.network",
+  "recordingSha256": "725ff75299d64180f909a0f4e189d9efafb43c81ae8ce09c2170fb74d5095207",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "metamask",
+      "iconLabel": "OneKey & MetaMask"
+    }
+  ],
+  "e2eSha256": "099cfcd7bc8b64518921ff4584a9217abd01b900f1b5f1e5d649bbe91e792a8a"
+}

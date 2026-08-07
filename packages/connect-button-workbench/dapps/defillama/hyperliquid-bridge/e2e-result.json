@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "defillama",
+  "protocolId": "4481",
+  "site": "app.hyperliquid.xyz",
+  "recordingSha256": "b2055fe708da08217e1782ea761ac4359e20bc9d6eeb4d3f8d32c1b30492aa6f",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "6bcd0d97939a4353cc2b792eecfb7559a3504e98acf21066e097a7b05f934348"
+}

@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { repoDir } from './paths.mjs';
+import { configDir, repoDir } from './paths.mjs';
 
 export const localProviderPackagesDir = path.join(
   repoDir,
@@ -8,8 +8,8 @@ export const localProviderPackagesDir = path.join(
 );
 
 export const injectedProviderCapabilitiesFile = path.join(
-  repoDir,
-  'packages/providers/inpage-providers-hub/src/injected-provider-capabilities.json',
+  configDir,
+  'injected-provider-capabilities.json',
 );
 
 export function readInjectedProviderCapabilities({

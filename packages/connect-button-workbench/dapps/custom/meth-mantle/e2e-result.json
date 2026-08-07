@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "meth-mantle",
+  "site": "app.methprotocol.xyz",
+  "recordingSha256": "53e64dc9ba632a01dc5f9020a1573178a41dd51d922f08c6cd8d1c460add5968",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "498347b8d83d638a6816431764aafa1d9e659d74204bfeb2f83d4344cab3a569"
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "indexcoop",
+  "site": "app.indexcoop.com",
+  "recordingSha256": "df443f0c3a64e18fd679fa86f2077d3613eb2ade1fbaa59c9237a4e5970e3666",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "13e6e331ed12d6ffd4d741eb70cde8f70b43cf77c413fd165fb0d261bf914cce"
+}

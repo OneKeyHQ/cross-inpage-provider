@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "elk",
+  "site": "app.elk.finance",
+  "recordingSha256": "1c718a757db0dfcb33202222d19f1c4d3054185807ffc2bf678b25bdfeb9f513",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": false,
+      "repositoryIconDetected": false,
+      "iconKey": null,
+      "iconLabel": null
+    },
+    {
+      "name": "clean-session-2",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "metamask",
+      "iconLabel": "OneKey & MetaMask"
+    }
+  ],
+  "e2eSha256": "003b37e377f41ab4466506e92888be28ec7995bacd2c3de87a7a5b3c31057702"
+}

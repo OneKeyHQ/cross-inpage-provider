@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "defillama",
+  "protocolId": "6359",
+  "site": "app.ssv.network",
+  "recordingSha256": "bf1d24bb859e163f169fb86640e671614c21698eaa29260fc92d31836287aa22",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "c79d29882ca9a32076bf0daa7778709311d368adcca552af09e087646b49562d"
+}

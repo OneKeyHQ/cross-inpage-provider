@@ -19,4 +19,4 @@ lerna-debug.log
 /.data/
 /.yarn/
 /.yarnrc.yml
-packages/providers/inpage-providers-hub/src/connectButtonHack/defillama-protocols.json.*.tmp
+packages/connect-button-workbench/config/defillama-protocols.json.*.tmp

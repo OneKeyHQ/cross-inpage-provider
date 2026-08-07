@@ -40,6 +40,7 @@ describe('custom injection manual recorder', () => {
     const capture = recorder.stop();
 
     expect(capture.kind).toBe('onekey-connect-button-recording-capture');
+    expect(capture.schemaVersion).toBe(2);
     expect(capture.steps).toHaveLength(2);
     expect(capture.steps[0]).toEqual(
       expect.objectContaining({
@@ -52,12 +53,16 @@ describe('custom injection manual recorder', () => {
               kind: 'testId',
               value: 'navbar-connect-wallet',
               unique: true,
+              matchCount: 1,
+              strength: 'stable',
             }),
             expect.objectContaining({
               kind: 'role',
               role: 'button',
               name: 'Connect wallet',
               unique: true,
+              matchCount: 1,
+              strength: 'semantic',
             }),
           ]),
         }),
@@ -103,6 +108,63 @@ describe('custom injection manual recorder', () => {
     expect(capture.steps[0].target.selectors.find((selector) => selector.kind === 'role')).toEqual(
       expect.objectContaining({ unique: false }),
     );
+    expect(capture.steps[0].target.scopes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          relation: 'ancestor',
+          tag: 'section',
+          locator: expect.objectContaining({
+            kind: 'testId',
+            value: 'widget-container',
+            strength: 'stable',
+          }),
+        }),
+      ]),
+    );
+  });
+
+  test('records bounded shadow-host, class, and geometry context', () => {
+    const host = document.createElement('div');
+    host.dataset.testid = 'wallet-shell';
+    const shadowRoot = host.attachShadow({ mode: 'open' });
+    const button = document.createElement('button');
+    button.className = 'wallet-trigger css-12345678';
+    button.textContent = 'Connect Wallet';
+    button.getBoundingClientRect = () => ({
+      bottom: 140,
+      height: 40,
+      left: 400,
+      right: 600,
+      top: 100,
+      width: 200,
+      x: 400,
+      y: 100,
+      toJSON: () => undefined,
+    });
+    shadowRoot.append(button);
+    document.body.append(host);
+    const recorder = installCustomInjectionRecorder({ requireTrustedEvents: false });
+
+    recorder.start();
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true, button: 0, composed: true }));
+    const capture = recorder.stop();
+    const target = capture.steps[0].target;
+
+    expect(target.stableClassTokens).toEqual(['wallet-trigger']);
+    expect(target.geometry).toEqual(
+      expect.objectContaining({
+        centerXRatio: expect.any(Number),
+        centerYRatio: expect.any(Number),
+      }),
+    );
+    expect(target.shadowHosts).toEqual([
+      expect.objectContaining({
+        tag: 'div',
+        selectors: expect.arrayContaining([
+          expect.objectContaining({ kind: 'testId', value: 'wallet-shell' }),
+        ]),
+      }),
+    ]);
   });
 
   test('does not record editable fields or input values', () => {

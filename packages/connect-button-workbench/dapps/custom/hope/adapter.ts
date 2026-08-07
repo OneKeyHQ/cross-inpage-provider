@@ -28,11 +28,6 @@ export default () =>
           icon: WALLET_CONNECT_INFO.metamask.icon,
           text: WALLET_CONNECT_INFO.metamask.text,
         });
-        replaceFunc({
-          id: 'connect-WALLET_CONNECT_V2',
-          icon: WALLET_CONNECT_INFO.walletconnect.icon,
-          text: WALLET_CONNECT_INFO.walletconnect.text,
-        });
       }
     },
   });

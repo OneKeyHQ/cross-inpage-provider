@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "benqi",
+  "site": "app.benqi.fi",
+  "recordingSha256": "b9e839d7acba9e3089750d9f9d3a816505abc5a2a983ed0328772ed73be3db99",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "96097d5273c6c4f334b6fbccb960c15de4fe5e8299f1a7a8bf5416ad728246bb"
+}

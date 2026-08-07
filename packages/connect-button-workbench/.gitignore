@@ -8,6 +8,7 @@ blob-report/
 test-results/
 traces/
 dapps/*/*/recording.json
+dapps/*/*/e2e-failure.json
 screenshots/
 videos/
 downloads/

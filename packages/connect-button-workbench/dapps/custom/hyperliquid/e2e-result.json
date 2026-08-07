@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "hyperliquid",
+  "site": "app.hyperliquid.xyz",
+  "recordingSha256": "5cd79563d2eeb07a99e0bc4e982474374904de64f49fe7a488959d79e6dbf388",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "1a7548351c0f7262f2a643df1d408c5d19c759a6ca9d0a0e08c0e4ed58d27e20"
+}

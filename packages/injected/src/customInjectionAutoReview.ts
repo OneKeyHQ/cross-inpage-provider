@@ -15,7 +15,8 @@ type ICustomInjectionWalletIconInfo = Readonly<{
 export type ICustomInjectionIconDetection = Readonly<{
   iconKey: string;
   iconLabel: string;
-  sourceKind: ICustomInjectionRepositoryIcon['sourceKind'];
+  sourceKind: ICustomInjectionRepositoryIcon['sourceKind'] | 'wallet-id';
+  walletId?: string;
 }>;
 
 type IInstallCustomInjectionAutoReviewObserverOptions = {
@@ -33,9 +34,10 @@ export type ICustomInjectionAutoReviewController = Readonly<{
   stop: () => void;
 }>;
 
-const ICON_CANDIDATE_SELECTOR = 'img,source,image,[style]';
+const WALLET_CANDIDATE_SELECTOR = '[data-wallet-id],img,source,image,[style]';
+const ONEKEY_WALLET_ID_PATTERN = /^[a-z0-9]+-onekey-[a-z0-9-]+$/u;
 const OBSERVER_OPTIONS: MutationObserverInit = {
-  attributeFilter: ['href', 'src', 'srcset', 'style', 'xlink:href'],
+  attributeFilter: ['data-wallet-id', 'href', 'src', 'srcset', 'style', 'xlink:href'],
   attributes: true,
   childList: true,
   subtree: true,
@@ -96,12 +98,21 @@ function elementSourceValues(element: Element): string[] {
   return values.filter((value): value is string => Boolean(value));
 }
 
-function detectRepositoryIcon(
+function detectRepositoryWallet(
   element: Element,
   icons: readonly ICustomInjectionRepositoryIcon[],
 ): ICustomInjectionIconDetection | null {
-  if (!element.matches(ICON_CANDIDATE_SELECTOR)) {
+  if (!element.matches(WALLET_CANDIDATE_SELECTOR)) {
     return null;
+  }
+  const walletId = element.getAttribute('data-wallet-id') || '';
+  if (ONEKEY_WALLET_ID_PATTERN.test(walletId)) {
+    return {
+      iconKey: 'onekey',
+      iconLabel: 'OneKey',
+      sourceKind: 'wallet-id',
+      walletId,
+    };
   }
   const values = elementSourceValues(element);
   const icon = icons.find(({ source }) =>
@@ -136,7 +147,7 @@ export function installCustomInjectionAutoReviewObserver({
   };
 
   const reportElement = (element: Element): boolean => {
-    const detection = detectRepositoryIcon(element, repositoryIcons);
+    const detection = detectRepositoryWallet(element, repositoryIcons);
     if (!detection) return false;
     stop();
     onDetected(detection);

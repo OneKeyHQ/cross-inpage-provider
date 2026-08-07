@@ -113,6 +113,45 @@ describe('custom injection automatic review observer', () => {
     cleanup();
   });
 
+  test('detects an exact OneKey wallet ID without a repository icon', async () => {
+    const onDetected = jest.fn();
+    const cleanup = installCustomInjectionAutoReviewObserver({
+      icons: repositoryIcons,
+      onDetected,
+    });
+    const wallet = document.createElement('button');
+
+    wallet.dataset.walletId = 'ethereum-onekey-wallet';
+    document.body.append(wallet);
+    await flushMutations();
+
+    expect(onDetected).toHaveBeenCalledWith({
+      iconKey: 'onekey',
+      iconLabel: 'OneKey',
+      sourceKind: 'wallet-id',
+      walletId: 'ethereum-onekey-wallet',
+    });
+    cleanup();
+  });
+
+  test('ignores unrelated and malformed wallet IDs', async () => {
+    const onDetected = jest.fn();
+    const cleanup = installCustomInjectionAutoReviewObserver({
+      icons: repositoryIcons,
+      onDetected,
+    });
+    const unrelated = document.createElement('button');
+    const malformed = document.createElement('button');
+
+    unrelated.dataset.walletId = 'ethereum-metamask';
+    malformed.dataset.walletId = 'onekey-wallet';
+    document.body.append(unrelated, malformed);
+    await flushMutations();
+
+    expect(onDetected).not.toHaveBeenCalled();
+    cleanup();
+  });
+
   test('detects attribute and inline background-image mutations without polling', async () => {
     const setIntervalSpy = jest.spyOn(globalThis, 'setInterval');
     const onDetected = jest.fn();

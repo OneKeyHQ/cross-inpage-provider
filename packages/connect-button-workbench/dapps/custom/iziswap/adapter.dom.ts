@@ -1,4 +1,16 @@
+import { WALLET_CONNECT_INFO } from '../../../../providers/inpage-providers-hub/src/connectButtonHack/consts';
+
 const ONEKEY_ICON_PATTERN = /\/wallet\/onekey\.png(?:[?#]|$)/i;
+
+function isOneKeyIcon(icon: HTMLImageElement) {
+  const sources = [icon.currentSrc, icon.src, icon.getAttribute('src')].filter(
+    (source): source is string => Boolean(source),
+  );
+  return sources.some(
+    (source) =>
+      ONEKEY_ICON_PATTERN.test(source) || source === WALLET_CONNECT_INFO.onekey.icon,
+  );
+}
 
 function normalizeText(value: string | null | undefined) {
   return String(value || '')
@@ -41,14 +53,16 @@ function findWalletItem(icon: HTMLImageElement) {
 
 export function promoteOneKeyWalletItem() {
   const candidates = Array.from(document.querySelectorAll<HTMLImageElement>('img'))
-    .filter((icon) =>
-      ONEKEY_ICON_PATTERN.test(icon.currentSrc || icon.src || icon.getAttribute('src') || ''),
-    )
-    .map(findWalletItem)
+    .filter(isOneKeyIcon)
+    .map((icon) => {
+      const candidate = findWalletItem(icon);
+      return candidate ? { ...candidate, icon } : null;
+    })
     .filter(
       (
         candidate,
       ): candidate is {
+        icon: HTMLImageElement;
         item: HTMLElement;
         list: HTMLElement;
       } => Boolean(candidate && isRendered(candidate.item) && isRendered(candidate.list)),
@@ -58,10 +72,12 @@ export function promoteOneKeyWalletItem() {
     return null;
   }
 
-  const { item, list } = candidate;
+  const { icon, item, list } = candidate;
   if (!/^(inline-)?(flex|grid)$/.test(window.getComputedStyle(list).display)) {
     return null;
   }
+  icon.src = WALLET_CONNECT_INFO.onekey.icon;
+  icon.removeAttribute('srcset');
   item.style.setProperty('order', '-1', 'important');
   return item;
 }

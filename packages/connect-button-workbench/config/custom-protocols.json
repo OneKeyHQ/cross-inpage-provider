@@ -12,14 +12,14 @@
       "totalTvl": 0,
       "sourceUrl": "https://app.1inch.io",
       "target": {
-        "urlOverride": null,
+        "urlOverride": "https://1inch.com",
         "resolvedDappUrl": null
       },
       "manualReview": {
-        "state": "unsupported",
-        "reviewedAt": null,
-        "reviewedUrl": null,
-        "injectedBundleSha256": null
+        "state": "processed",
+        "reviewedAt": "2026-08-06T15:56:43.555Z",
+        "reviewedUrl": "https://1inch.com/",
+        "injectedBundleSha256": "d9a9fb66fbcb5a2653e9146590239e3f00e0e282c21e6d6dfed381b9b551322e"
       }
     },
     {
@@ -36,9 +36,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-05T08:44:04.051Z",
+        "reviewedAt": "2026-08-06T12:16:17.272Z",
         "reviewedUrl": "https://app.aave.com/",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -55,9 +55,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-05T03:16:50.395Z",
+        "reviewedAt": "2026-08-06T12:16:35.012Z",
         "reviewedUrl": "https://balancer.fi/pools",
-        "injectedBundleSha256": "d839244e90304eff08e52875eef9cbecde5d83c7e13990c0b33a7f37052faf39"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -74,9 +74,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-05T03:31:47.025Z",
+        "reviewedAt": "2026-08-06T12:18:18.503Z",
         "reviewedUrl": "https://app.benqi.fi/savax",
-        "injectedBundleSha256": "d839244e90304eff08e52875eef9cbecde5d83c7e13990c0b33a7f37052faf39"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -112,9 +112,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-05T03:34:31.448Z",
+        "reviewedAt": "2026-08-06T12:18:24.534Z",
         "reviewedUrl": "https://app.compound.finance/?market=usdc-mainnet",
-        "injectedBundleSha256": "d839244e90304eff08e52875eef9cbecde5d83c7e13990c0b33a7f37052faf39"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -130,10 +130,10 @@
         "resolvedDappUrl": null
       },
       "manualReview": {
-        "state": "pending",
-        "reviewedAt": null,
-        "reviewedUrl": null,
-        "injectedBundleSha256": null
+        "state": "processed",
+        "reviewedAt": "2026-08-07T00:44:20.164Z",
+        "reviewedUrl": "https://trade.dydx.exchange/portfolio/overview",
+        "injectedBundleSha256": "ce4ab1ee464a3ce35d4110c077c8cd135328664c62a147b6272e0257baa88102"
       }
     },
     {
@@ -149,10 +149,10 @@
         "resolvedDappUrl": null
       },
       "manualReview": {
-        "state": "pending",
-        "reviewedAt": null,
-        "reviewedUrl": null,
-        "injectedBundleSha256": null
+        "state": "processed",
+        "reviewedAt": "2026-08-06T14:51:06.484Z",
+        "reviewedUrl": "https://dydx.trade/markets",
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -169,9 +169,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-05T03:35:40.282Z",
+        "reviewedAt": "2026-08-06T12:18:31.124Z",
         "reviewedUrl": "https://app.eigenlayer.xyz/",
-        "injectedBundleSha256": "d839244e90304eff08e52875eef9cbecde5d83c7e13990c0b33a7f37052faf39"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -188,9 +188,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-06T09:07:41.356Z",
+        "reviewedAt": "2026-08-06T12:18:44.008Z",
         "reviewedUrl": "https://app.elk.finance/swap/43114/AVAX/ELK",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -207,9 +207,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-05T07:53:12.876Z",
+        "reviewedAt": "2026-08-06T12:18:52.758Z",
         "reviewedUrl": "https://gamma.io/ordinals/collections/soft-eulogies-domain-1-light/items",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -221,14 +221,14 @@
       "totalTvl": 0,
       "sourceUrl": "https://gem.xyz",
       "target": {
-        "urlOverride": null,
+        "urlOverride": "https://opensea.io",
         "resolvedDappUrl": null
       },
       "manualReview": {
-        "state": "pending",
-        "reviewedAt": null,
-        "reviewedUrl": null,
-        "injectedBundleSha256": null
+        "state": "processed",
+        "reviewedAt": "2026-08-06T14:56:52.178Z",
+        "reviewedUrl": "https://opensea.io/",
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -244,10 +244,10 @@
         "resolvedDappUrl": null
       },
       "manualReview": {
-        "state": "processed",
-        "reviewedAt": "2026-08-04T13:54:20.736Z",
-        "reviewedUrl": "https://app.hope.money/",
-        "injectedBundleSha256": "c0519700338fa600d6bad059ed9e1d3b242d92abe6b3818afa2cf85104107af6"
+        "state": "unsupported",
+        "reviewedAt": null,
+        "reviewedUrl": null,
+        "injectedBundleSha256": null
       }
     },
     {
@@ -263,10 +263,10 @@
         "resolvedDappUrl": null
       },
       "manualReview": {
-        "state": "pending",
-        "reviewedAt": null,
-        "reviewedUrl": null,
-        "injectedBundleSha256": null
+        "state": "processed",
+        "reviewedAt": "2026-08-06T14:57:02.186Z",
+        "reviewedUrl": "https://app.hyperliquid.xyz/trade",
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -283,9 +283,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-04T13:54:07.093Z",
+        "reviewedAt": "2026-08-06T14:57:13.415Z",
         "reviewedUrl": "https://idclub.io/marketplace",
-        "injectedBundleSha256": "c0519700338fa600d6bad059ed9e1d3b242d92abe6b3818afa2cf85104107af6"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -320,10 +320,10 @@
         "resolvedDappUrl": null
       },
       "manualReview": {
-        "state": "pending",
-        "reviewedAt": null,
-        "reviewedUrl": null,
-        "injectedBundleSha256": null
+        "state": "processed",
+        "reviewedAt": "2026-08-06T14:57:26.659Z",
+        "reviewedUrl": "https://app.indexcoop.com/trade",
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -339,10 +339,10 @@
         "resolvedDappUrl": null
       },
       "manualReview": {
-        "state": "pending",
-        "reviewedAt": null,
-        "reviewedUrl": null,
-        "injectedBundleSha256": null
+        "state": "processed",
+        "reviewedAt": "2026-08-06T15:24:05.027Z",
+        "reviewedUrl": "https://izumi.finance/trade/swap",
+        "injectedBundleSha256": "84b3d02ea738bb24c73a62be0acbe51628ffea417ca43df554ba1b886f3bc054"
       }
     },
     {
@@ -354,14 +354,14 @@
       "totalTvl": 0,
       "sourceUrl": "https://lite.instadapp.io",
       "target": {
-        "urlOverride": null,
+        "urlOverride": "https://fluid.io/1/lending",
         "resolvedDappUrl": null
       },
       "manualReview": {
-        "state": "pending",
-        "reviewedAt": null,
-        "reviewedUrl": null,
-        "injectedBundleSha256": null
+        "state": "processed",
+        "reviewedAt": "2026-08-06T14:57:37.908Z",
+        "reviewedUrl": "https://fluid.io/1/lending",
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -377,10 +377,10 @@
         "resolvedDappUrl": null
       },
       "manualReview": {
-        "state": "pending",
-        "reviewedAt": null,
-        "reviewedUrl": null,
-        "injectedBundleSha256": null
+        "state": "processed",
+        "reviewedAt": "2026-08-06T15:09:34.075Z",
+        "reviewedUrl": "https://magiceden.io/",
+        "injectedBundleSha256": "55107bfef8ad39b5cba8b41844cf88fd5385dd7b858b0d9af484a869bef2dd79"
       }
     },
     {
@@ -392,14 +392,14 @@
       "totalTvl": 0,
       "sourceUrl": "https://meth.mantle.xyz",
       "target": {
-        "urlOverride": null,
+        "urlOverride": "https://app.methprotocol.xyz",
         "resolvedDappUrl": null
       },
       "manualReview": {
-        "state": "pending",
-        "reviewedAt": null,
-        "reviewedUrl": null,
-        "injectedBundleSha256": null
+        "state": "processed",
+        "reviewedAt": "2026-08-06T14:57:52.689Z",
+        "reviewedUrl": "https://app.methprotocol.xyz/stake",
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -416,9 +416,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-06T10:39:35.714Z",
-        "reviewedUrl": "https://app.mux.network/#/trade?chainId=42161&unit=USD&market=ETH&collateral=USDC",
-        "injectedBundleSha256": "ecab3f51b08b72b664f34f7f61f8940fe39dbd15e7043acc3717c589c2150a48"
+        "reviewedAt": "2026-08-06T14:21:33.785Z",
+        "reviewedUrl": "https://app.mux.network/#/trade?chainId=42161&unit=USD",
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -454,9 +454,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-06T10:36:19.415Z",
+        "reviewedAt": "2026-08-06T14:19:46.931Z",
         "reviewedUrl": "https://opensea.io/",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -472,7 +472,7 @@
         "resolvedDappUrl": null
       },
       "manualReview": {
-        "state": "pending",
+        "state": "unsupported",
         "reviewedAt": null,
         "reviewedUrl": null,
         "injectedBundleSha256": null
@@ -487,14 +487,14 @@
       "totalTvl": 0,
       "sourceUrl": "https://ordinals.market",
       "target": {
-        "urlOverride": null,
+        "urlOverride": "https://www.satflow.com",
         "resolvedDappUrl": null
       },
       "manualReview": {
-        "state": "pending",
-        "reviewedAt": null,
-        "reviewedUrl": null,
-        "injectedBundleSha256": null
+        "state": "processed",
+        "reviewedAt": "2026-08-06T14:58:03.184Z",
+        "reviewedUrl": "https://www.satflow.com/",
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -511,9 +511,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-06T11:02:49.413Z",
+        "reviewedAt": "2026-08-06T14:18:05.156Z",
         "reviewedUrl": "https://ordinalswallet.com/",
-        "injectedBundleSha256": "4d11b4ddf165a50fdb9564fbe092f5534c846d1c6112338a319b20e1d1fb47ae"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -529,10 +529,10 @@
         "resolvedDappUrl": null
       },
       "manualReview": {
-        "state": "pending",
-        "reviewedAt": null,
-        "reviewedUrl": null,
-        "injectedBundleSha256": null
+        "state": "processed",
+        "reviewedAt": "2026-08-06T14:47:36.352Z",
+        "reviewedUrl": "https://rarible.com/all",
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -549,9 +549,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-06T11:00:09.769Z",
+        "reviewedAt": "2026-08-06T12:35:26.478Z",
         "reviewedUrl": "https://app.renzoprotocol.com/explore",
-        "injectedBundleSha256": "4d11b4ddf165a50fdb9564fbe092f5534c846d1c6112338a319b20e1d1fb47ae"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -567,7 +567,7 @@
         "resolvedDappUrl": null
       },
       "manualReview": {
-        "state": "pending",
+        "state": "unsupported",
         "reviewedAt": null,
         "reviewedUrl": null,
         "injectedBundleSha256": null
@@ -587,9 +587,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-06T10:19:08.759Z",
+        "reviewedAt": "2026-08-06T14:01:59.959Z",
         "reviewedUrl": "https://app.silo.finance/explore",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -606,9 +606,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-06T10:19:05.564Z",
+        "reviewedAt": "2026-08-06T13:59:24.546Z",
         "reviewedUrl": "https://stargate.finance/",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -620,14 +620,14 @@
       "totalTvl": 0,
       "sourceUrl": "https://sushi.com",
       "target": {
-        "urlOverride": null,
+        "urlOverride": "https://www.sushi.com",
         "resolvedDappUrl": null
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-06T10:18:59.098Z",
+        "reviewedAt": "2026-08-06T13:55:50.716Z",
         "reviewedUrl": "https://www.sushi.com/ethereum/swap",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -643,7 +643,7 @@
         "resolvedDappUrl": null
       },
       "manualReview": {
-        "state": "pending",
+        "state": "unsupported",
         "reviewedAt": null,
         "reviewedUrl": null,
         "injectedBundleSha256": null
@@ -663,9 +663,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-06T10:18:45.998Z",
+        "reviewedAt": "2026-08-06T13:44:59.324Z",
         "reviewedUrl": "https://unisat.io/",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -682,9 +682,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-06T10:18:04.332Z",
+        "reviewedAt": "2026-08-06T13:45:36.006Z",
         "reviewedUrl": "https://velocity.exchange/",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -738,10 +738,10 @@
         "resolvedDappUrl": null
       },
       "manualReview": {
-        "state": "pending",
-        "reviewedAt": null,
-        "reviewedUrl": null,
-        "injectedBundleSha256": null
+        "state": "processed",
+        "reviewedAt": "2026-08-06T14:43:23.417Z",
+        "reviewedUrl": "https://app.zerion.io/connect-wallet",
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     }
   ]

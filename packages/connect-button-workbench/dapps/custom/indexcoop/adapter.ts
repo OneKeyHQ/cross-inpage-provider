@@ -97,11 +97,6 @@ export default () =>
         icon: WALLET_CONNECT_INFO.metamask.icon,
         text: WALLET_CONNECT_INFO.metamask.text,
       });
-      void replaceFunc({
-        findName: 'WalletConnect',
-        icon: WALLET_CONNECT_INFO.walletconnect.icon,
-        text: WALLET_CONNECT_INFO.walletconnect.text,
-      });
 
       // TODO indexcoop WalletConnect Qrcode is WRONG
       void replaceWalletConnectQrcode();

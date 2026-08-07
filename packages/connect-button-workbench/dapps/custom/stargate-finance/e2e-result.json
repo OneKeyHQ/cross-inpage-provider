@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "stargate-finance",
+  "site": "stargate.finance",
+  "recordingSha256": "c9b0dae8161e70c282240b74b6f2fb84d288752b91519c5534bb5d5ba676fde8",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "7ba72fd73636d8ef2c8ba8caa15724aeae4e5c8750e7b27286dd94c774b622c0"
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "gamma",
+  "site": "gamma.io",
+  "recordingSha256": "b4e8f9147a2184176607884787dd83e7b7a4f040385e5ceecfa82074e270663b",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "unisat",
+      "iconLabel": "OneKey & UniSat"
+    }
+  ],
+  "e2eSha256": "328f53b0ae62dda7b5a83857220703fc0e207ecab1671a503a5a859f5452b3cb"
+}

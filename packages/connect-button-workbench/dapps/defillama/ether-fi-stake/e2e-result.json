@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "defillama",
+  "protocolId": "2626",
+  "site": "ether.fi",
+  "recordingSha256": "b80c3324b45ed77a4b0432fe6c3f1981f80b6d4f91de19b3f916882083b240c7",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "1414966d247afba01399ddf7ab878be598772944a583581b50f44696175a9e88"
+}

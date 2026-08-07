@@ -4,7 +4,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const SKILL_RELATIVE_PATH = '.agents/skills/defillama-hack-buttons';
-const MANIFEST_RELATIVE_PATH = 'onekey-app-custom-injected.json';
+const MANIFEST_RELATIVE_PATH =
+  'packages/connect-button-workbench/config/onekey-app-custom-injected.json';
 
 async function isRepository(directory) {
   try {

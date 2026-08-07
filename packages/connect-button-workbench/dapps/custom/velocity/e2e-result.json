@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "velocity",
+  "site": "velocity.exchange",
+  "recordingSha256": "22f82d75a18f34adf8f6c40dcd18ffa90dc5623ea9079853a21ac55dac2658ed",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "solflare",
+      "iconLabel": "OneKey & Solflare"
+    }
+  ],
+  "e2eSha256": "0a7cdac92127a84a40efd41a8448fa981d843527c6bc65c1ece9bd4f03737aec"
+}

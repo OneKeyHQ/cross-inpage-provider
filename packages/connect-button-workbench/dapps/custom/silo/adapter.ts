@@ -43,12 +43,6 @@ export default () =>
           updatedIcon: WALLET_CONNECT_INFO.metamask.icon,
           updatedText: WALLET_CONNECT_INFO.metamask.text,
         });
-        replaceFunc({
-          selector: 'button[data-cy="select-wallet-WalletConnect"]',
-          walletName: 'WalletConnect',
-          updatedIcon: WALLET_CONNECT_INFO.walletconnect.icon,
-          updatedText: WALLET_CONNECT_INFO.walletconnect.text,
-        });
       }
     },
   });

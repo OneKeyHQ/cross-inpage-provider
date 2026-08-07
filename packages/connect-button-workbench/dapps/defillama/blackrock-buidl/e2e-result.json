@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "defillama",
+  "protocolId": "4853",
+  "site": "stocks.securitize.io",
+  "recordingSha256": "7c97d2bfd3b6b049170f0947b07b5338b7c240588a2aac14e8c71a6f9923997a",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "metamask",
+      "iconLabel": "OneKey & MetaMask"
+    }
+  ],
+  "e2eSha256": "3d7d653043fb4d9fa8f67e0e6f9cc4d40bea425617ec18ff249b5feafb4aaf32"
+}

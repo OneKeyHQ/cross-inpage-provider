@@ -53,6 +53,10 @@ markers, the custom-workspace runtime marker, and duplicate IDs. `open-wallet` c
 visible enabled connect-wallet trigger; it never clicks a wallet option, terms checkbox, signature
 prompt, or transaction action.
 
+The host control allowlist permits `dapp-connection-reject-btn` so an unexpected connection request
+can be cancelled. Approval, confirmation, connection, signing, and transaction controls remain
+blocked.
+
 If a framework rejects programmatic click, use Computer Use only to open the wallet modal, then
 inspect it with CDP.
 

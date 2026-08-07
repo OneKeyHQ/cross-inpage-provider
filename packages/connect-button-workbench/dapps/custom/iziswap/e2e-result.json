@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "onekey-connect-button-desktop-e2e-result",
+  "passed": true,
+  "verdict": "deterministic-repository-icon-source",
+  "source": "custom",
+  "protocolId": "iziswap",
+  "site": "izumi.finance",
+  "recordingSha256": "6877dc8ec45635fedf59bfcf57f5bfbc7cfaac10f5096952dacb597a216a6d68",
+  "passes": [
+    {
+      "name": "clean-session-1",
+      "freshWebView": true,
+      "passed": true,
+      "repositoryIconDetected": true,
+      "iconKey": "onekey",
+      "iconLabel": "OneKey"
+    }
+  ],
+  "e2eSha256": "27835cd3ea3a5a649f2cfb61aa394b3033c7e3990dbede75fa4ac75755b00197"
+}

@@ -34,9 +34,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-05T08:21:41.186Z",
+        "reviewedAt": "2026-08-06T12:17:00.733Z",
         "reviewedUrl": "https://stake.lido.fi",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -63,9 +63,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-05T08:21:59.738Z",
+        "reviewedAt": "2026-08-06T12:17:07.316Z",
         "reviewedUrl": "https://app.aave.com",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -81,13 +81,13 @@
       },
       "sourceUrl": "https://ssv.network",
       "target": {
-        "urlOverride": "https://app.ssv.network"
+        "urlOverride": "https://app.ssv.network/connect"
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-06T08:33:17.331Z",
+        "reviewedAt": "2026-08-06T12:17:13.884Z",
         "reviewedUrl": "https://app.ssv.network/connect",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -111,9 +111,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-05T08:25:54.745Z",
+        "reviewedAt": "2026-08-06T12:17:21.020Z",
         "reviewedUrl": "https://app.morpho.org/vaults",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -171,9 +171,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-06T08:34:34.520Z",
+        "reviewedAt": "2026-08-06T12:17:28.914Z",
         "reviewedUrl": "https://stargate.finance",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -215,9 +215,9 @@
       ],
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-05T07:58:59.069Z",
+        "reviewedAt": "2026-08-06T12:17:35.255Z",
         "reviewedUrl": "https://app.hyperliquid.xyz/trade",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -238,9 +238,9 @@
       ],
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-07-31T08:59:15.088Z",
-        "reviewedUrl": "https://app.sky.money/?network=unichain",
-        "injectedBundleSha256": "27b9a27c6a1459ee20d4e84884d170c9e3defbd16ba3d30b9399fc101a8ad9de"
+        "reviewedAt": "2026-08-07T00:53:48.998Z",
+        "reviewedUrl": "https://app.sky.money/?network=ethereum",
+        "injectedBundleSha256": "ce4ab1ee464a3ce35d4110c077c8cd135328664c62a147b6272e0257baa88102"
       }
     },
     {
@@ -260,9 +260,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-05T08:00:27.201Z",
+        "reviewedAt": "2026-08-06T12:17:47.665Z",
         "reviewedUrl": "https://app.eigenlayer.xyz",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -280,7 +280,13 @@
       "sourceProtocolIds": [
         "4133",
         "6463"
-      ]
+      ],
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-06T15:48:40.816Z",
+        "reviewedUrl": "https://www.app.ethena.fi/join/3y20d",
+        "injectedBundleSha256": "d9a9fb66fbcb5a2653e9146590239e3f00e0e282c21e6d6dfed381b9b551322e"
+      }
     },
     {
       "id": "2929",
@@ -304,9 +310,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-05T08:13:40.642Z",
+        "reviewedAt": "2026-08-06T12:17:53.866Z",
         "reviewedUrl": "https://app.spark.finance",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -333,9 +339,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-05T09:01:44.268Z",
+        "reviewedAt": "2026-08-06T12:18:03.781Z",
         "reviewedUrl": "https://stocks.securitize.io/trading",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -355,9 +361,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-06T08:38:09.262Z",
+        "reviewedAt": "2026-08-06T15:28:27.674Z",
         "reviewedUrl": "https://app.justlend.org/home?lang=en-US",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "84b3d02ea738bb24c73a62be0acbe51628ffea417ca43df554ba1b886f3bc054"
       }
     },
     {
@@ -377,9 +383,9 @@
       },
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-05T08:06:01.967Z",
+        "reviewedAt": "2026-08-06T12:18:10.666Z",
         "reviewedUrl": "https://usdt0.to/transfer",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "19380548648c842e45b8cbe98c4ddb5deda9ec266b712f6f2a191a334ef3d8ee"
       }
     },
     {
@@ -402,9 +408,9 @@
       ],
       "manualReview": {
         "state": "processed",
-        "reviewedAt": "2026-08-06T08:51:18.978Z",
+        "reviewedAt": "2026-08-06T15:48:57.972Z",
         "reviewedUrl": "https://www.ether.fi/app/cash/referral?ref_code=04bb2542",
-        "injectedBundleSha256": "ec9992f77566c463f7cc7c650b22022abde38de9a2bd363842c812bdabc5d9d4"
+        "injectedBundleSha256": "d9a9fb66fbcb5a2653e9146590239e3f00e0e282c21e6d6dfed381b9b551322e"
       }
     },
     {
@@ -418,7 +424,16 @@
         "rankedChainCount": 4,
         "maxChainTvl": 1769589033.480208
       },
-      "sourceUrl": "https://www.steakhouse.financial"
+      "sourceUrl": "https://www.steakhouse.financial",
+      "target": {
+        "urlOverride": "https://app.steakhouse.financial"
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-06T15:49:07.178Z",
+        "reviewedUrl": "https://app.steakhouse.financial",
+        "injectedBundleSha256": "d9a9fb66fbcb5a2653e9146590239e3f00e0e282c21e6d6dfed381b9b551322e"
+      }
     },
     {
       "id": "3698",
@@ -435,7 +450,10 @@
       "sourceProtocolIds": [
         "3698",
         "8111"
-      ]
+      ],
+      "manualReview": {
+        "state": "unsupported"
+      }
     },
     {
       "id": "4863",
@@ -448,7 +466,10 @@
         "rankedChainCount": 5,
         "maxChainTvl": 2932463998.4274483
       },
-      "sourceUrl": "https://gold.tether.to"
+      "sourceUrl": "https://gold.tether.to",
+      "manualReview": {
+        "state": "unsupported"
+      }
     },
     {
       "id": "3777",
@@ -478,7 +499,16 @@
         "rankedChainCount": 1,
         "maxChainTvl": 2606582396.273009
       },
-      "sourceUrl": "https://babylonlabs.io"
+      "sourceUrl": "https://babylonlabs.io",
+      "target": {
+        "urlOverride": "https://btc-vaults.testnet.babylonlabs.io"
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-06T15:37:53.093Z",
+        "reviewedUrl": "https://btc-vaults.testnet.babylonlabs.io",
+        "injectedBundleSha256": "d9a9fb66fbcb5a2653e9146590239e3f00e0e282c21e6d6dfed381b9b551322e"
+      }
     },
     {
       "id": "240",
@@ -491,7 +521,10 @@
         "rankedChainCount": 1,
         "maxChainTvl": 2585688653.0467663
       },
-      "sourceUrl": "https://polygon.technology"
+      "sourceUrl": "https://polygon.technology",
+      "manualReview": {
+        "state": "unsupported"
+      }
     },
     {
       "id": "2542",
@@ -508,7 +541,16 @@
       "sourceProtocolIds": [
         "2542",
         "6650"
-      ]
+      ],
+      "target": {
+        "urlOverride": "https://app.ondo.finance"
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-06T15:39:32.611Z",
+        "reviewedUrl": "https://app.ondo.finance",
+        "injectedBundleSha256": "d9a9fb66fbcb5a2653e9146590239e3f00e0e282c21e6d6dfed381b9b551322e"
+      }
     },
     {
       "id": "7583",
@@ -521,7 +563,16 @@
         "rankedChainCount": 5,
         "maxChainTvl": 1856070505.5466697
       },
-      "sourceUrl": "https://data.grove.finance"
+      "sourceUrl": "https://data.grove.finance",
+      "target": {
+        "urlOverride": "https://app.grove.finance"
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-06T15:41:30.588Z",
+        "reviewedUrl": "https://app.grove.finance/dashboard",
+        "injectedBundleSha256": "d9a9fb66fbcb5a2653e9146590239e3f00e0e282c21e6d6dfed381b9b551322e"
+      }
     },
     {
       "id": "587",
@@ -534,7 +585,16 @@
         "rankedChainCount": 1,
         "maxChainTvl": 2301348998.5917144
       },
-      "sourceUrl": "https://www.maple.finance"
+      "sourceUrl": "https://www.maple.finance",
+      "target": {
+        "urlOverride": "https://app.maple.finance/earn?_gl=1*ah824o*_ga*MjAwOTc2NjQyMi4xNzg1NDg4NjM2*_ga_7GW90C7X77*czE3ODYwMzA5MDckbzIkZzEkdDE3ODYwMzA5MTUkajUyJGwwJGgw"
+      },
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-06T15:42:45.210Z",
+        "reviewedUrl": "https://app.maple.finance/earn?_gl=1*ah824o*_ga*MjAwOTc2NjQyMi4xNzg1NDg4NjM2*_ga_7GW90C7X77*czE3ODYwMzA5MDckbzIkZzEkdDE3ODYwMzA5MTUkajUyJGwwJGgw",
+        "injectedBundleSha256": "d9a9fb66fbcb5a2653e9146590239e3f00e0e282c21e6d6dfed381b9b551322e"
+      }
     },
     {
       "id": "4980",
@@ -12829,7 +12889,13 @@
         "rankedChainCount": 1,
         "maxChainTvl": 49.43698351643102
       },
-      "sourceUrl": "https://dex.swapdegen.tips"
+      "sourceUrl": "https://dex.swapdegen.tips",
+      "manualReview": {
+        "state": "processed",
+        "reviewedAt": "2026-08-06T15:07:25.122Z",
+        "reviewedUrl": "https://dex.swapdegen.tips",
+        "injectedBundleSha256": "55107bfef8ad39b5cba8b41844cf88fd5385dd7b858b0d9af484a869bef2dd79"
+      }
     },
     {
       "id": "5435",

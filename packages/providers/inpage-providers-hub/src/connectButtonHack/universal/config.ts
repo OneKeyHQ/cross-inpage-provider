@@ -46,11 +46,6 @@ export const basicWalletInfo = {
     updatedName: WALLET_CONNECT_INFO.metamask.text,
     name: /^meta\s*mask$/i,
   },
-  [WALLET_NAMES.walletconnect]: {
-    updatedIcon: WALLET_CONNECT_INFO.walletconnect.icon,
-    updatedName: WALLET_CONNECT_INFO.walletconnect.text,
-    name: /^wallet\s*connect$/i,
-  },
   [WALLET_NAMES.suiwallet]: {
     updatedIcon: WALLET_CONNECT_INFO.suiwallet.icon,
     updatedName: WALLET_CONNECT_INFO.suiwallet.text,
@@ -213,22 +208,6 @@ const metamaskForRainbowKit: WalletInfo = {
   },
 };
 
-const walletConnectForRainbowKit: WalletInfo = {
-  ...basicWalletInfo[WALLET_NAMES.walletconnect],
-  skip: async (page: Page) => (await page.locator(onekeySelectorInRowbowkit).count()) > 0,
-  container: () => {
-    if (hasOnekeyWallet()) {
-      return null;
-    }
-    return document.querySelector('button[data-testid="rk-wallet-option-walletConnect"]');
-  },
-  afterUpdate(textNode) {
-    if (textNode?.parentElement) {
-      textNode.parentElement.style.whiteSpace = 'normal';
-    }
-  },
-};
-
 const petraForRainbowKit: WalletInfo = {
   ...basicWalletInfo[WALLET_NAMES.petra],
   container: () => {
@@ -265,16 +244,6 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['metamask'],
           findIconAndName({ name }) {
             return findIconAndNameByIcon('.button-option.MetaMask > svg', 'auto-search-text', name);
-          },
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName({ name }) {
-            return findIconAndNameByIcon(
-              '.button-option.WalletConnect > svg',
-              'auto-search-text',
-              name,
-            );
           },
         },
       ],
@@ -342,11 +311,6 @@ export const sitesConfig: SitesInfo[] = [
           container: () =>
             getConnectWalletModalByTitle('div.MuiModal-root .venus-modal', 'Connect a wallet'),
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: () =>
-            getConnectWalletModalByTitle('div.MuiModal-root .venus-modal', 'Connect a wallet'),
-        },
       ],
     },
   },
@@ -359,13 +323,6 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['metamask'],
           container: () => getWalletListByBtn("div[role='dialog'] .v-card .c-list"),
           skip: { mobile: true },
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: () => getWalletListByBtn("div[role='dialog'] .v-card .c-list"),
-          afterUpdate(textNode, img) {
-            if (img) img.style.height = 'auto';
-          },
         },
       ],
     },
@@ -382,13 +339,6 @@ export const sitesConfig: SitesInfo[] = [
             textNode?.parentElement && (textNode.parentElement.style.textAlign = 'left');
           },
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: '#wallet-connect',
-          afterUpdate(textNode, img) {
-            textNode?.parentElement && (textNode.parentElement.style.textAlign = 'left');
-          },
-        },
       ],
     },
   },
@@ -400,17 +350,13 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['metamask'],
           container: () => getConnectWalletModalByTitle('div.MuiModal-root', 'Connect Wallet'),
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: () => getConnectWalletModalByTitle('div.MuiModal-root', 'Connect Wallet'),
-        },
       ],
     },
   },
   {
     urls: ['app.orbitlending.io'],
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
@@ -424,28 +370,6 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['metamask'],
           container: '[data-testid="metaMask-connector-button"]',
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: '[data-testid="walletConnect-connector-button"]',
-        },
-      ],
-    },
-  },
-
-  {
-    urls: ['aerodrome.finance'],
-    walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName({ name }) {
-            return findIconAndNameByIcon(
-              '.bg-connect button[type="button"] img[src*="connect-walletConnect.svg"]',
-              'auto-search-text',
-              name,
-            );
-          },
         },
       ],
     },
@@ -461,21 +385,6 @@ export const sitesConfig: SitesInfo[] = [
       [IInjectedProviderNames.ethereum]: [
         {
           ...basicWalletInfo['metamask'],
-          container: '.modal .outer-container div.wallets-container ',
-          findIconAndName: ({ container, name }) => {
-            return findIconAndNameInShadowRoot('onboard-v2', container as string, name);
-          },
-          updateIcon(icon, iconSrc) {
-            const res = replaceIcon(icon, iconSrc);
-            res.style.width = '32px';
-            res.style.height = '32px';
-            res.style.maxWidth = '32px';
-            res.style.maxHeight = '32px';
-            return res;
-          },
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
           container: '.modal .outer-container div.wallets-container ',
           findIconAndName: ({ container, name }) => {
             return findIconAndNameInShadowRoot('onboard-v2', container as string, name);
@@ -566,16 +475,6 @@ export const sitesConfig: SitesInfo[] = [
           findIconAndName({ name }) {
             return findIconAndNameByIcon(
               '.MuiPaper-root.MuiPaper-elevation a img[src*="icon-metamask"]',
-              (icon: HTMLElement) => icon.parentElement?.parentElement,
-              name,
-            );
-          },
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName({ name }) {
-            return findIconAndNameByIcon(
-              '.MuiPaper-root.MuiPaper-elevation a img[src*="icon-walletconnect"]',
               (icon: HTMLElement) => icon.parentElement?.parentElement,
               name,
             );
@@ -687,12 +586,6 @@ export const sitesConfig: SitesInfo[] = [
             return getConnectWalletModalByTitle('.fixed[role="dialog"]', 'Select wallet');
           },
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: () => {
-            return getConnectWalletModalByTitle('.fixed[role="dialog"]', 'Select wallet');
-          },
-        },
       ],
     },
   },
@@ -723,7 +616,7 @@ export const sitesConfig: SitesInfo[] = [
       mobile: true, //WARN:没有连接钱包弹窗，点击链接钱包后会自动连接默认钱包
     },
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
@@ -749,10 +642,6 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['metamask'],
           container: 'button[data-testid="wallet-select-dialog-wallet-metamask"]',
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: 'button[data-testid="wallet-select-dialog-wallet-walletconnect"]',
-        },
       ],
     },
   },
@@ -767,10 +656,6 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['metamask'],
           container: 'button[id="METAMASK"]',
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: 'button[id="WALLETCONNECT"]',
         },
       ],
     },
@@ -825,14 +710,14 @@ export const sitesConfig: SitesInfo[] = [
       mobile: [':text("Connect")'],
     },
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
     urls: ['app.arrakis.finance'],
     testPath: [':text("For Users")', ':text("Connect Wallet")'],
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
@@ -850,10 +735,6 @@ export const sitesConfig: SitesInfo[] = [
               ['div.fixed[role="dialog"]', '#headlessui-dialog-1'],
               'Connect Wallet',
             ),
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: () => getConnectWalletModalByTitle('#headlessui-dialog-1', 'Connect Wallet'),
         },
       ],
     },
@@ -942,11 +823,6 @@ export const sitesConfig: SitesInfo[] = [
           container: () =>
             document.querySelector('div[role="dialog"][aria-labelledby="rk_connect_title"]'), // for rk_connect_title is unique
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: () =>
-            document.querySelector('div[role="dialog"][aria-labelledby="rk_connect_title"]'), /// for rk_connect_title is unique
-        },
       ],
     },
   },
@@ -965,24 +841,6 @@ export const sitesConfig: SitesInfo[] = [
               modal &&
               findIconAndNameByIcon(
                 'img[alt="MetaMask"]',
-                (icon) => icon.parentElement?.parentElement,
-                name,
-                modal,
-              )
-            );
-          },
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName({ name }) {
-            const modal = getConnectWalletModalByTitle('div.chakra-modal__content-container', [
-              'Connect Wallet',
-              '链接钱包',
-            ]);
-            return (
-              modal &&
-              findIconAndNameByIcon(
-                'img[alt="WalletConnect"]',
                 (icon) => icon.parentElement?.parentElement,
                 name,
                 modal,
@@ -1091,22 +949,6 @@ export const sitesConfig: SitesInfo[] = [
             );
           },
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName({ name }) {
-            const modal = getConnectWalletModalByTitle(
-              'div[data-testid="modal-container"]',
-              'Connect Wallet',
-            );
-            return (
-              modal &&
-              findIconAndNameByName(modal, name, 'auto-search-icon', {
-                text: [],
-                icon: [isWalletIconLessEqualThan],
-              })
-            );
-          },
-        },
       ],
     },
   },
@@ -1157,10 +999,6 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['metamask'],
           container: () => getConnectWalletModalByTitle('div#connectWallet', 'Select Your Wallet'),
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: () => getConnectWalletModalByTitle('div#connectWallet', 'Select Your Wallet'),
-        },
       ],
     },
   },
@@ -1185,16 +1023,6 @@ export const sitesConfig: SitesInfo[] = [
             );
           },
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName({ name }) {
-            return findIconAndNameByIcon(
-              'div.connectWalletModel img[src*="walletconnect"]',
-              (e) => e.parentElement?.parentElement,
-              name,
-            );
-          },
-        },
       ],
     },
   },
@@ -1213,18 +1041,7 @@ export const sitesConfig: SitesInfo[] = [
             return icon ? replaceIcon(icon, updatedIcon) : null;
           },
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          update({ updatedIcon }) {
-            const modal = domUtils.findTextNode('div.MuiContainer-root', 'Connect Wallet') as Text;
-            const icon = modal?.parentElement?.parentElement?.querySelector<HTMLImageElement>(
-              'img[alt="walletconnect wallet logo"][src*="walletconnect.svg"]',
-            );
-            return icon ? replaceIcon(icon, updatedIcon) : null;
-          },
-        },
         metamaskForRainbowKit,
-        walletConnectForRainbowKit,
       ],
     },
   },
@@ -1265,19 +1082,19 @@ export const sitesConfig: SitesInfo[] = [
     urls: ['app.init.capital'],
     testPath: ['button:has-text("Continue")', ':text("Connect Wallet")'],
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
     urls: ['www.dx.app'],
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
     urls: ['app.redacted.finance'],
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
@@ -1327,24 +1144,6 @@ export const sitesConfig: SitesInfo[] = [
             );
           },
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName(wallet) {
-            const modal = getConnectWalletModalByTitle(
-              'div[id*="headlessui-dialog-panel"]',
-              'Connect a wallet',
-            );
-            return (
-              modal &&
-              findIconAndNameByIcon(
-                'img[src*="walletconnect"]',
-                'auto-search-text',
-                wallet.name,
-                modal,
-              )
-            );
-          },
-        },
       ],
     },
   },
@@ -1368,17 +1167,13 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['metamask'],
           container: '#rlogin-connect-modal',
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: '#rlogin-connect-modal',
-        },
       ],
     },
   },
   {
     urls: ['app.extrafi.io'],
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
@@ -1408,24 +1203,6 @@ export const sitesConfig: SitesInfo[] = [
             );
           },
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName(wallet) {
-            const modal = getConnectWalletModalByTitle(
-              'section.mantine-Modal-content',
-              'Connect Wallet',
-            );
-            return (
-              modal &&
-              findIconAndNameByIcon(
-                'img[src*="walletConnect"]',
-                (icon) => icon.parentElement?.parentElement,
-                wallet.name,
-                modal,
-              )
-            );
-          },
-        },
       ],
     },
   },
@@ -1440,10 +1217,6 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['metamask'],
           container: 'div.wallet-provider-modal--item.meta-mask',
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: 'div.wallet-provider-modal--item.wallet-connect',
         },
       ],
     },
@@ -1460,21 +1233,6 @@ export const sitesConfig: SitesInfo[] = [
             return (
               modal &&
               findIconAndNameByIcon('img[src*="metamask"]', 'auto-search-text', wallet.name, modal)
-            );
-          },
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName({ name }) {
-            const modal = getConnectWalletModalByTitle('div.ant-modal-content', 'Select a wallet');
-            return (
-              modal &&
-              findIconAndNameByIcon(
-                'img[src*="wallet-connect.svg"]',
-                'auto-search-text',
-                name,
-                modal,
-              )
             );
           },
         },
@@ -1499,19 +1257,6 @@ export const sitesConfig: SitesInfo[] = [
             );
           },
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName({ name }) {
-            const modal = getConnectWalletModalByTitle(
-              'div.chakra-modal__content-container',
-              'Select a wallet',
-            );
-            return (
-              modal &&
-              findIconAndNameByIcon('img[alt="WalletConnect"]', 'auto-search-text', name, modal)
-            );
-          },
-        },
       ],
     },
   },
@@ -1532,35 +1277,31 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['metamask'],
           container: 'ul[class*="UnlockCore__ListWrap"]',
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: 'ul[class*="UnlockCore__ListWrap"]',
-        },
       ],
     },
   },
   {
     urls: ['app.aura.finance'],
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
     urls: ['app.frax.finance'],
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
     urls: ['beets.fi'],
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
     urls: ['app.gmx.io'],
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
@@ -1577,7 +1318,7 @@ export const sitesConfig: SitesInfo[] = [
   {
     urls: ['app.mento.org'],
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
@@ -1587,7 +1328,7 @@ export const sitesConfig: SitesInfo[] = [
       desktop: [':text("Connect Wallet")'],
     },
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
 
@@ -1632,13 +1373,6 @@ export const sitesConfig: SitesInfo[] = [
             textNode?.parentElement && makeTextEllipse(textNode.parentElement);
           },
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: 'button#wallet-connect-walletconnect',
-          afterUpdate(textNode, updatedName) {
-            textNode?.parentElement && makeTextEllipse(textNode.parentElement);
-          },
-        },
       ],
     },
   },
@@ -1659,16 +1393,6 @@ export const sitesConfig: SitesInfo[] = [
             );
           },
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName({ name }) {
-            return findIconAndNameByIcon(
-              'img[alt="WalletConnect Logo"][title="WalletConnect"]',
-              'auto-search-text',
-              name,
-            );
-          },
-        },
       ],
     },
   },
@@ -1683,7 +1407,7 @@ export const sitesConfig: SitesInfo[] = [
       ],
     },
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
 
@@ -1695,13 +1419,6 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['metamask'],
           container: '#wallet-dropdown-scroll-wrapper',
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: '#wallet-dropdown-scroll-wrapper',
-          afterUpdate(textNode, img) {
-            textNode?.parentElement && (textNode.parentElement.style.textAlign = 'left');
-          },
         },
       ],
     },
@@ -1825,7 +1542,7 @@ export const sitesConfig: SitesInfo[] = [
     testUrls: ['www.staderlabs.com/eth/stake/'],
     constraintMap: { icon: [isWalletIconLessEqualThan], text: [] },
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
@@ -1932,27 +1649,6 @@ export const sitesConfig: SitesInfo[] = [
     },
   },
 
-  {
-    urls: ['app.radiant.capital'],
-    testPath: [':text("Continue")', ':text("Connect Wallet")'],
-    walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [
-        // {
-        //   ...basicWalletInfo['metamask'],
-        // },
-        {
-          container: '.connect-wallet-modal',
-          ...basicWalletInfo['walletconnect'],
-          afterUpdate(textNode, img) {
-            if (img) {
-              img.style.height = '40px';
-              img.style.width = '40px';
-            }
-          },
-        },
-      ],
-    },
-  },
   {
     //mobile version is redirected to app-mobile.ariesmarkets.xyz. check next item
     urls: ['app.ariesmarkets.xyz'],
@@ -2070,23 +1766,6 @@ export const sitesConfig: SitesInfo[] = [
               modal &&
               findIconAndNameByIcon(
                 'img[src*="wallets/metamask.png"]',
-                'auto-search-text',
-                name,
-                modal,
-                { text: [], icon: [] },
-                5,
-              )
-            );
-          },
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName({ name }) {
-            const modal = getConnectWalletModalByTitle('#portal-root', 'Connect Wallet');
-            return (
-              modal &&
-              findIconAndNameByIcon(
-                'img[src*="wallets/walletconnect.png"]',
                 'auto-search-text',
                 name,
                 modal,
@@ -2224,24 +1903,6 @@ export const sitesConfig: SitesInfo[] = [
             textNode?.parentElement && makeTextWordBreak(textNode.parentElement);
           },
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName({ name }) {
-            const modal = getConnectWalletModalByTitle('div.dialog-container', 'Available Wallets');
-            return (
-              modal &&
-              findIconAndNameByIcon(
-                'img[src*="icon-wallet-connect"]',
-                'auto-search-text',
-                name,
-                modal,
-              )
-            );
-          },
-          afterUpdate(textNode) {
-            textNode?.parentElement && makeTextWordBreak(textNode.parentElement);
-          },
-        },
       ],
     },
   },
@@ -2252,11 +1913,6 @@ export const sitesConfig: SitesInfo[] = [
         {
           ...basicWalletInfo['metamask'],
           container: 'div[data-testid="wallet-modal"]',
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: 'div[data-testid="wallet-modal"]',
-          skip: { mobile: true },
         },
       ],
     },
@@ -2348,10 +2004,6 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['metamask'],
           container: '#metamask',
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: '#walletConnect',
-        },
       ],
     },
   },
@@ -2391,7 +2043,7 @@ export const sitesConfig: SitesInfo[] = [
     urls: ['app.ichi.org'],
     testPath: ['button:text("Connect Wallet")'],
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
@@ -2502,24 +2154,6 @@ export const sitesConfig: SitesInfo[] = [
             );
           },
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName(wallet) {
-            const modal = getConnectWalletModalByTitle(
-              '#headlessui-portal-root div[role="dialog"]',
-              'Choose Network',
-            );
-            return (
-              modal &&
-              findIconAndNameByIcon(
-                'img[src*="wallet_connect"][alt="WalletConnect logo"]',
-                'auto-search-text',
-                wallet.name,
-                modal,
-              )
-            );
-          },
-        },
       ],
     },
   },
@@ -2590,24 +2224,6 @@ export const sitesConfig: SitesInfo[] = [
             return (
               modal &&
               findIconAndNameByIcon('img.logo[alt="MetaMask"]', 'auto-search-text', name, modal)
-            );
-          },
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName({ name }) {
-            const modal = getConnectWalletModalByTitle('div.connect-options', [
-              'Select Wallet',
-              '选择钱包',
-            ]);
-            return (
-              modal &&
-              findIconAndNameByIcon(
-                'img.logo[alt="WalletConnect"]',
-                'auto-search-text',
-                name,
-                modal,
-              )
             );
           },
         },
@@ -2689,7 +2305,7 @@ export const sitesConfig: SitesInfo[] = [
       desktop: [':text("Connect Wallet")'],
     },
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
@@ -2701,7 +2317,7 @@ export const sitesConfig: SitesInfo[] = [
       desktop: [':text("Connect Wallet")'],
     },
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
@@ -2733,20 +2349,6 @@ export const sitesConfig: SitesInfo[] = [
               : null;
           },
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName({ name }) {
-            const modal = document.querySelector('div[role="presentation"].MuiModal-root');
-            return modal
-              ? findIconAndNameByIcon(
-                  'img[src*="static/media/2.cb9826961cbcd25676"]',
-                  'auto-search-text',
-                  name,
-                  modal as HTMLElement,
-                )
-              : null;
-          },
-        },
       ],
     },
   },
@@ -2762,21 +2364,6 @@ export const sitesConfig: SitesInfo[] = [
       [IInjectedProviderNames.ethereum]: [
         {
           ...basicWalletInfo['metamask'],
-          container: '.modal .outer-container div.wallets-container ',
-          findIconAndName: ({ container, name }) => {
-            return findIconAndNameInShadowRoot('onboard-v2', container as string, name);
-          },
-          afterUpdate(textNode, img) {
-            if (img) {
-              img.style.width = '32px';
-              img.style.height = '32px';
-              img.style.maxWidth = '32px';
-              img.style.maxHeight = '32px';
-            }
-          },
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
           container: '.modal .outer-container div.wallets-container ',
           findIconAndName: ({ container, name }) => {
             return findIconAndNameInShadowRoot('onboard-v2', container as string, name);
@@ -2825,31 +2412,6 @@ export const sitesConfig: SitesInfo[] = [
             }
           },
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName({ name }) {
-            const modal = getConnectWalletModalByTitle(
-              'div.MuiDrawer-paper.MuiDrawer-paperAnchorRight',
-              ['CONNECT A WALLET', '连接钱包', 'ウォレットを接続'],
-            );
-            if (!modal) {
-              return null;
-            }
-            const text = findWalletTextByParent(modal, name, []);
-            const img = text?.parentElement?.parentElement?.querySelector('img');
-            return img && text
-              ? {
-                  textNode: text,
-                  iconNode: img,
-                }
-              : null;
-          },
-          afterUpdate(textNode, img) {
-            if (textNode?.parentElement) {
-              textNode.parentElement.style.overflow = 'visible';
-            }
-          },
-        },
       ],
     },
   },
@@ -2861,10 +2423,6 @@ export const sitesConfig: SitesInfo[] = [
           ...basicWalletInfo['metamask'],
           container: 'button#connect-0',
           skip: { mobile: true }, //mobile is not supported by the site
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: 'button#connect-1',
         },
       ],
     },
@@ -2878,7 +2436,7 @@ export const sitesConfig: SitesInfo[] = [
       'button:text("Next")',
     ],
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
@@ -2910,35 +2468,6 @@ export const sitesConfig: SitesInfo[] = [
             }
           },
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName({ name }) {
-            const modal = getConnectWalletModalByTitle(
-              'section.chakra-modal__content[role="dialog"]',
-              'Connect to a wallet',
-            );
-            return (
-              modal &&
-              findIconAndNameByIcon(
-                'img[src*="wallet-connect-icon"][alt="Icon"]',
-                'auto-search-text',
-                name,
-                modal,
-              )
-            );
-          },
-          afterUpdate(textNode, iconNode) {
-            if (iconNode && textNode) {
-              iconNode.style.aspectRatio = '1';
-              iconNode.style.minWidth = '32px';
-              const { defaultVal } = getMaxWithOfText(textNode, iconNode);
-              textNode.parentElement &&
-                makeTextEllipse(textNode.parentElement, {
-                  maxWidth: defaultVal,
-                });
-            }
-          },
-        },
       ],
     },
   },
@@ -2946,7 +2475,7 @@ export const sitesConfig: SitesInfo[] = [
     urls: ['www.mev.io'],
     testUrls: ['www.mev.io/stake'],
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
@@ -2968,10 +2497,6 @@ export const sitesConfig: SitesInfo[] = [
       [IInjectedProviderNames.ethereum]: [
         {
           ...basicWalletInfo['metamask'],
-          container: () => getConnectWalletModalByTitle('div[role="dialog"]', 'Connect a wallet'),
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
           container: () => getConnectWalletModalByTitle('div[role="dialog"]', 'Connect a wallet'),
         },
       ],
@@ -3010,7 +2535,7 @@ export const sitesConfig: SitesInfo[] = [
       desktop: [':text("Coming Soon")', ':text("Connect Wallet")'],
     },
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
@@ -3037,21 +2562,6 @@ export const sitesConfig: SitesInfo[] = [
             );
           },
         },
-        {
-          ...basicWalletInfo['walletconnect'],
-          findIconAndName(wallet) {
-            const modal = getConnectWalletModalByTitle('div[role="dialog"]', 'Connect Wallet');
-            return (
-              modal &&
-              findIconAndNameByIcon(
-                'img[src*="wallet-connect"][alt="Wallet Connect"]',
-                'auto-search-text',
-                wallet.name,
-                modal,
-              )
-            );
-          },
-        },
       ],
     },
   },
@@ -3062,13 +2572,6 @@ export const sitesConfig: SitesInfo[] = [
       [IInjectedProviderNames.ethereum]: [
         {
           ...basicWalletInfo['metamask'],
-          container: 'section.fixed',
-          findIconAndName: ({ container, name }) => {
-            return findIconAndNameInShadowRoot('onboard-v2', container as string, name);
-          },
-        },
-        {
-          ...basicWalletInfo['walletconnect'],
           container: 'section.fixed',
           findIconAndName: ({ container, name }) => {
             return findIconAndNameInShadowRoot('onboard-v2', container as string, name);
@@ -3215,7 +2718,7 @@ export const sitesConfig: SitesInfo[] = [
     urls: ['app.gyro.finance'],
     skip: { mobile: true }, //not supported by mobile
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
@@ -4470,17 +3973,6 @@ export const sitesConfig: SitesInfo[] = [
     },
   },
   {
-    urls: ['yieldlayer.cian.app'],
-    walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: () => getConnectWalletModalByTitle('div[role="dialog"]', 'Connect Wallet'),
-        },
-      ],
-    },
-  },
-  {
     urls: ['app.unirouter.io'],
     walletsForProvider: {
       [IInjectedProviderNames.btc]: [
@@ -4694,7 +4186,7 @@ export const sitesConfig: SitesInfo[] = [
   {
     urls: ['tsunami.finance'],
     walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit, walletConnectForRainbowKit],
+      [IInjectedProviderNames.ethereum]: [metamaskForRainbowKit],
     },
   },
   {
@@ -5280,17 +4772,6 @@ export const sitesConfig: SitesInfo[] = [
     },
   },
   {
-    urls: ['app.uniswap.org'],
-    walletsForProvider: {
-      [IInjectedProviderNames.ethereum]: [
-        {
-          ...basicWalletInfo['walletconnect'],
-          container: 'div[data-testid="option-grid"]',
-        },
-      ],
-    },
-  },
-  {
     urls: ['monadvision.com'],
     walletsForProvider: {
       [IInjectedProviderNames.ethereum]: [
@@ -5404,4 +4885,3 @@ export const sitesConfig: SitesInfo[] = [
     },
   },
 ];
-

@@ -4,13 +4,13 @@
   "protocolSources": [
     {
       "source": "defillama",
-      "protocolRegistry": "packages/providers/inpage-providers-hub/src/connectButtonHack/defillama-protocols.json",
+      "protocolRegistry": "packages/connect-button-workbench/config/defillama-protocols.json",
       "registryUpdater": "packages/connect-button-workbench/src/cli/custom-injected-registry.mjs",
       "registryRefresher": "packages/connect-button-workbench/src/cli/sync-registry.mjs"
     },
     {
       "source": "custom",
-      "protocolRegistry": "packages/connect-button-workbench/custom-protocols.json",
+      "protocolRegistry": "packages/connect-button-workbench/config/custom-protocols.json",
       "registryUpdater": "packages/connect-button-workbench/src/cli/custom-injected-registry.mjs"
     }
   ],

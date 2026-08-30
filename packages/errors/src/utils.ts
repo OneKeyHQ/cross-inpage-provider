@@ -148,17 +148,35 @@ export function toNativeErrorObject(error: unknown) {
   if (error instanceof Error) {
     return error;
   }
-  const plainErrorObject = error as {
-    name: string;
-    stack: string;
-    message: string;
-    autoToast: boolean;
-  };
-  const newError = new Error(plainErrorObject.message);
-  const keys = Object.keys(plainErrorObject);
+  const plainErrorObject = error as Record<string, unknown> | null;
+  let message: string | undefined;
+  try {
+    if (typeof error === 'string') {
+      message = error;
+    } else if (typeof plainErrorObject?.message === 'string') {
+      message = plainErrorObject.message;
+    }
+  } catch {
+    // Reading serialized error metadata is best-effort across runtime boundaries.
+  }
+
+  const newError = new Error(message);
+  if (!plainErrorObject || typeof plainErrorObject !== 'object') {
+    return newError;
+  }
+
+  let keys: string[] = [];
+  try {
+    keys = Object.keys(plainErrorObject);
+  } catch {
+    return newError;
+  }
   for (const key of keys) {
-    (newError as unknown as Record<string, unknown>)[key] =
-      plainErrorObject[key as keyof typeof plainErrorObject];
+    try {
+      (newError as unknown as Record<string, unknown>)[key] = plainErrorObject[key];
+    } catch {
+      // Keep the usable Error when one metadata field cannot be restored.
+    }
   }
   return newError;
 }

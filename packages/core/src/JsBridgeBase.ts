@@ -41,6 +41,23 @@ function toPlainError(errorInfo: IErrorInfo) {
   };
 }
 
+function createFallbackError(error: unknown): Error {
+  let message = 'Unknown bridge error';
+  try {
+    if (typeof error === 'string') {
+      message = error;
+    } else if (error && typeof error === 'object') {
+      const remoteMessage = (error as { message?: unknown }).message;
+      if (typeof remoteMessage === 'string') {
+        message = remoteMessage;
+      }
+    }
+  } catch {
+    // Reading serialized error metadata is best-effort across runtime boundaries.
+  }
+  return new Error(message);
+}
+
 function isLegacyExtMessage(payload: unknown): boolean {
   const payloadObj = payload as { name: string };
   return (
@@ -325,6 +342,7 @@ abstract class JsBridgeBase extends CrossEventEmitter {
   }) {
     const callbackInfo = this.callbacks[id as number];
     if (callbackInfo) {
+      this.clearCallbackCache(id);
       if (method === 'reject') {
         if (callbackInfo.reject) {
           callbackInfo.reject(error);
@@ -336,7 +354,6 @@ abstract class JsBridgeBase extends CrossEventEmitter {
           callbackInfo.resolve(data);
         }
       }
-      this.clearCallbackCache(id);
     }
   }
 
@@ -463,17 +480,20 @@ abstract class JsBridgeBase extends CrossEventEmitter {
       }
       const callbackInfo = this.callbacks[id];
       if (callbackInfo) {
-        try {
-          if (error) {
-            const errorObject = toNativeErrorObject(error);
-            this.rejectCallback(id, errorObject);
-          } else {
-            this.resolveCallback(id, data);
+        if (error) {
+          let errorObject: Error;
+          try {
+            errorObject = toNativeErrorObject(error);
+          } catch {
+            errorObject = createFallbackError(error);
           }
-        } catch (error0) {
-          this.emit(BRIDGE_EVENTS.error, error0);
-        } finally {
-          // noop
+          this.rejectCallback(id, errorObject);
+        } else {
+          try {
+            this.resolveCallback(id, data);
+          } catch (error0) {
+            this.emit(BRIDGE_EVENTS.error, error0);
+          }
         }
       }
     } else if (type === IJsBridgeMessageTypes.REQUEST) {

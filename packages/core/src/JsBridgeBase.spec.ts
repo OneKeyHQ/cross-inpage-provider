@@ -174,14 +174,57 @@ describe('JsBridgeBase response error lifecycle', () => {
     }
   });
 
-  test('falls back, clears the callback, and ignores a duplicate response', async () => {
-    jest.spyOn(providerErrors, 'toNativeErrorObject').mockImplementationOnce(() => {
-      throw new Error('Error reconstruction failed');
+  test('keeps the native Error prototype when metadata contains unsafe keys', async () => {
+    const bridge = new TestBridge({ timeout: 1000 });
+    const requestPromise = bridge.request({ data: { method: 'test_method' } });
+    if (!requestPromise) {
+      throw new Error('Expected an asynchronous bridge request');
+    }
+    const rejectionPromise = requestPromise.catch((error: unknown) => error);
+    const requestPayload = JSON.parse(String(bridge.lastPayload));
+    const serializedError = JSON.parse(`{
+      "message": "Remote failure with unsafe metadata",
+      "className": "OneKeyLocalError",
+      "__proto__": { "polluted": true },
+      "constructor": { "name": "FakeError" },
+      "prototype": { "polluted": true }
+    }`);
+
+    bridge.receive(
+      {
+        id: requestPayload.id,
+        type: 'RESPONSE',
+        error: serializedError,
+      },
+      { origin: 'https://example.com', internal: true },
+    );
+
+    const rejectedError = await rejectionPromise;
+    expect(rejectedError).toBeInstanceOf(Error);
+    expect(Object.getPrototypeOf(rejectedError)).toBe(Error.prototype);
+    expect(rejectedError).toMatchObject({
+      message: 'Remote failure with unsafe metadata',
+      className: 'OneKeyLocalError',
     });
+    expect(Object.prototype.hasOwnProperty.call(rejectedError, '__proto__')).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(rejectedError, 'constructor')).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(rejectedError, 'prototype')).toBe(false);
+  });
+
+  test('falls back, clears the callback, and ignores a duplicate response', async () => {
+    const toNativeErrorObjectSpy = jest
+      .spyOn(providerErrors, 'toNativeErrorObject')
+      .mockImplementationOnce(() => {
+        throw new Error('Error reconstruction failed');
+      });
     const bridge = new TestBridge({ timeout: 1000 });
     const rejectCallbackSpy = jest.spyOn(bridge, 'rejectCallback');
     const clearCallbackSpy = jest.spyOn(bridge, 'clearCallbackCache');
     const requestPromise = bridge.request({ data: { method: 'test_method' } });
+    if (!requestPromise) {
+      throw new Error('Expected an asynchronous bridge request');
+    }
+    const rejectionPromise = requestPromise.catch((error: unknown) => error);
     const requestPayload = JSON.parse(String(bridge.lastPayload));
     const response = {
       id: requestPayload.id,
@@ -195,9 +238,15 @@ describe('JsBridgeBase response error lifecycle', () => {
     bridge.receive(response, { origin: 'https://example.com', internal: true });
     bridge.receive(response, { origin: 'https://example.com', internal: true });
 
-    await expect(requestPromise).rejects.toMatchObject({
+    const rejectedError = await rejectionPromise;
+    expect(toNativeErrorObjectSpy).toHaveBeenCalledTimes(1);
+    expect(rejectedError).toBeInstanceOf(Error);
+    expect(rejectedError).toMatchObject({
       message: 'Original remote message',
     });
+    expect(Object.prototype.hasOwnProperty.call(rejectedError, 'constructorName')).toBe(
+      false,
+    );
     expect(rejectCallbackSpy).toHaveBeenCalledTimes(1);
     expect(clearCallbackSpy).toHaveBeenCalledTimes(1);
   });

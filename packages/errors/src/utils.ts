@@ -7,6 +7,11 @@ const FALLBACK_ERROR: SerializedWeb3RpcError = {
   code: FALLBACK_ERROR_CODE,
   message: getMessageFromCode(FALLBACK_ERROR_CODE),
 };
+const UNSAFE_ERROR_METADATA_KEYS = new Set([
+  '__proto__',
+  'prototype',
+  'constructor',
+]);
 
 export const JSON_RPC_SERVER_ERROR_MESSAGE = 'Unspecified server error.';
 
@@ -172,6 +177,9 @@ export function toNativeErrorObject(error: unknown) {
     return newError;
   }
   for (const key of keys) {
+    if (UNSAFE_ERROR_METADATA_KEYS.has(key)) {
+      continue;
+    }
     try {
       (newError as unknown as Record<string, unknown>)[key] = plainErrorObject[key];
     } catch {

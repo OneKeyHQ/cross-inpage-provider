@@ -7,6 +7,11 @@ const FALLBACK_ERROR: SerializedWeb3RpcError = {
   code: FALLBACK_ERROR_CODE,
   message: getMessageFromCode(FALLBACK_ERROR_CODE),
 };
+const UNSAFE_ERROR_METADATA_KEYS = new Set([
+  '__proto__',
+  'prototype',
+  'constructor',
+]);
 
 export const JSON_RPC_SERVER_ERROR_MESSAGE = 'Unspecified server error.';
 
@@ -148,17 +153,38 @@ export function toNativeErrorObject(error: unknown) {
   if (error instanceof Error) {
     return error;
   }
-  const plainErrorObject = error as {
-    name: string;
-    stack: string;
-    message: string;
-    autoToast: boolean;
-  };
-  const newError = new Error(plainErrorObject.message);
-  const keys = Object.keys(plainErrorObject);
+  const plainErrorObject = error as Record<string, unknown> | null;
+  let message: string | undefined;
+  try {
+    if (typeof error === 'string') {
+      message = error;
+    } else if (typeof plainErrorObject?.message === 'string') {
+      message = plainErrorObject.message;
+    }
+  } catch {
+    // Reading serialized error metadata is best-effort across runtime boundaries.
+  }
+
+  const newError = new Error(message);
+  if (!plainErrorObject || typeof plainErrorObject !== 'object') {
+    return newError;
+  }
+
+  let keys: string[] = [];
+  try {
+    keys = Object.keys(plainErrorObject);
+  } catch {
+    return newError;
+  }
   for (const key of keys) {
-    (newError as unknown as Record<string, unknown>)[key] =
-      plainErrorObject[key as keyof typeof plainErrorObject];
+    if (UNSAFE_ERROR_METADATA_KEYS.has(key)) {
+      continue;
+    }
+    try {
+      (newError as unknown as Record<string, unknown>)[key] = plainErrorObject[key];
+    } catch {
+      // Keep the usable Error when one metadata field cannot be restored.
+    }
   }
   return newError;
 }

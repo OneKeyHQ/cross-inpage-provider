@@ -371,7 +371,13 @@ export default function BTCExample() {
                   name="toAddress"
                   defaultValue={account?.address ?? ''}
                 />
-                <Input label="转账金额" type="number" name="amount" defaultValue="1000" />
+                <Input label="第一笔转账金额" type="number" name="amount" defaultValue="1000" />
+                <Input
+                  label="第二笔转账金额"
+                  type="number"
+                  name="secondAmount"
+                  defaultValue="2000"
+                />
                 <Input label="手续费 sat/vB" type="number" name="gasPrice" defaultValue="20" />
               </>
             );
@@ -379,27 +385,29 @@ export default function BTCExample() {
           onGenerateRequest={async (fromData: Record<string, any>) => {
             const toAddress = fromData['toAddress'] as string;
             const amount = parseInt(fromData['amount'] as string);
+            const secondAmount = parseInt(fromData['secondAmount'] as string);
             const gasPrice = parseInt((fromData['gasPrice'] as string) ?? '20');
 
-            if (!toAddress || !amount) {
-              throw new Error('toAddress or amount is required');
+            if (!toAddress || !amount || !secondAmount) {
+              throw new Error('toAddress, amount or secondAmount is required');
             }
 
             const network = await provider?.getNetwork();
-            const psbt = await createPSBT(
-              account?.address ?? '',
-              toAddress,
-              amount,
-              gasPrice,
-              network === 'livenet' ? bitcoin.networks.bitcoin : bitcoin.networks.testnet,
+            const bitcoinNetwork =
+              network === 'livenet' ? bitcoin.networks.bitcoin : bitcoin.networks.testnet;
+            const psbts = await Promise.all(
+              [amount, secondAmount].map((value) =>
+                createPSBT(account?.address ?? '', toAddress, value, gasPrice, bitcoinNetwork),
+              ),
             );
-
-            const pabtObj = JSON.parse(psbt);
+            const parsedPsbts = psbts.map(
+              (psbt) => JSON.parse(psbt) as { psbtHex: string; options: Record<string, unknown> },
+            );
 
             return Promise.resolve(
               JSON.stringify({
-                psbtHexs: [pabtObj.psbtHex],
-                options: [pabtObj.options],
+                psbtHexs: parsedPsbts.map(({ psbtHex }) => psbtHex),
+                options: parsedPsbts.map(({ options }) => options),
               }),
             );
           }}

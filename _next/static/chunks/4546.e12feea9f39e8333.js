@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[4546,3225],{54217:function(t,u,a){t.exports=a.p+"static/media/cardano_multiplatform_lib_bg.a0893782.wasm"},33225:function(t,u,a){a.d(u,{Z:function(){return Module}});let Module=class Module{}}}]);
+//# sourceMappingURL=4546.e12feea9f39e8333.js.map

@@ -50,6 +50,7 @@ import type {
 } from '@aptos-labs/wallet-standard';
 
 import type { ProviderAptos } from './OnekeyAptosProvider';
+import { serializeStandardTransaction } from './standardWalletUtils';
 import type { WalletInfo } from './types';
 
 export class WalletAccount implements AptosWalletAccount {
@@ -213,7 +214,7 @@ export class AptosStandardProvider implements AptosWallet {
     }
 
     const signature = await this.provider.signTransactionV2({
-      transaction: transaction.bcsToHex().toStringWithoutPrefix(),
+      transaction: serializeStandardTransaction(transaction),
       transactionType,
       asFeePayer,
     });

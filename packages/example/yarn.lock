@@ -175,22 +175,10 @@
     axios "1.7.4"
     got "^11.8.6"
 
-"@aptos-labs/aptos-client@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@aptos-labs/aptos-client/-/aptos-client-1.2.0.tgz#6965f897827bf7d6a638eef4b5cc1d6aba9a9b08"
-  integrity sha512-pBlIAT/W+Qa0TOr/318U8r0Gxw/jfyRLcvDGMEXgcVrPqO9Qhwsmozw6LPPIZ963FB7smwIaMeexWFDs3zijcg==
-
-"@aptos-labs/aptos-dynamic-transaction-composer@^0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@aptos-labs/aptos-dynamic-transaction-composer/-/aptos-dynamic-transaction-composer-0.1.3.tgz#7aa7c80c48d2a9540ade74a4a687820080953c3c"
-  integrity sha512-bJl+Zq5QbhpcPIJakAkl9tnT3T02mxCYhZThQDhUmjsOZ5wMRlKJ0P7aaq1dmlybSHkVj7vRgOy2t86/NDKKng==
-
-"@aptos-labs/script-composer-pack@^0.0.9":
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/@aptos-labs/script-composer-pack/-/script-composer-pack-0.0.9.tgz#e838514eab239c90bb5c4c60e3d55bb2905a0786"
-  integrity sha512-Y3kA1rgF65HETgoTn2omDymsgO+fnZouPLrKJZ9sbxTGdOekIIHtGee3A2gk84eCqa02ZKBumZmP+IDCXRtU/g==
-  dependencies:
-    "@aptos-labs/aptos-dynamic-transaction-composer" "^0.1.3"
+"@aptos-labs/aptos-client@^2.0.0":
+  version "2.2.0"
+  resolved "https://registry.npmjs.org/@aptos-labs/aptos-client/-/aptos-client-2.2.0.tgz#230815237bb0c4459e212d30fb21d9b02f100d3b"
+  integrity sha512-lYgHI8ehgD+Ykhix0IwzLaTCknHp1KNmExbq2bPZk8IeTwQg79D5BOkD46MjW0jGbJbl+J/RBtVF9vM7Te/hWA==
 
 "@aptos-labs/siwa@^0.4.0":
   version "0.4.0"
@@ -200,14 +188,13 @@
     "@aptos-labs/wallet-standard" ">=0.5.0"
     "@noble/hashes" "^1.7.1"
 
-"@aptos-labs/ts-sdk@^1.39.0":
-  version "1.39.0"
-  resolved "https://registry.yarnpkg.com/@aptos-labs/ts-sdk/-/ts-sdk-1.39.0.tgz#a2dc713c00f303a641ef6b4f4cd762138978dcdb"
-  integrity sha512-VFEWZsqb8Mto8XbLK8lDRdUvyHjp+geiwFxRzRcQK6HftMGB4bYuEsOI2Vy6u/TqkUft8DvmpV5yX027R5/SMQ==
+"@aptos-labs/ts-sdk@3.1.3":
+  version "3.1.3"
+  resolved "https://registry.npmjs.org/@aptos-labs/ts-sdk/-/ts-sdk-3.1.3.tgz#65423d7b58738b89a47254887d16c6b6f03de55a"
+  integrity sha512-42CiChUnHzsZXE25p3gPiETFUTlchTd20zl9vAiq6es1vQaaf95LvVQ0q3GxeOgmW9ENn2q72gAsuGLIOYRohg==
   dependencies:
     "@aptos-labs/aptos-cli" "^1.0.2"
-    "@aptos-labs/aptos-client" "^1.2.0"
-    "@aptos-labs/script-composer-pack" "^0.0.9"
+    "@aptos-labs/aptos-client" "^2.0.0"
     "@noble/curves" "^1.6.0"
     "@noble/hashes" "^1.5.0"
     "@scure/bip32" "^1.4.0"

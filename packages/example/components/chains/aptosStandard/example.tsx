@@ -570,7 +570,6 @@ function Example() {
             const res = await signTransaction({
               transactionOrPayload: {
                 data: {
-                  type: 'entry_function_payload',
                   function: '0x1::aptos_account::batch_transfer_coins',
                   typeArguments: [APTOS_COIN],
                   functionArguments: [

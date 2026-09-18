@@ -1,3 +1,5 @@
+jest.mock('lodash-es', () => require('lodash'));
+
 import { ProviderTon } from './OnekeyTonProvider';
 
 describe('TON restoreConnection', () => {

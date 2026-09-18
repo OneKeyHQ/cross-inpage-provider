@@ -41,6 +41,7 @@ const PROVIDER_EVENTS = {
 
 export type TonRequest = {
   'connect': (protocolVersion?: number, message?: ConnectRequest) => Promise<AccountInfo>;
+  'restoreConnection': () => Promise<AccountInfo | null>;
   'disconnect': () => Promise<void>;
   'sendTransaction': (payload: TransactionRequest) => Promise<string>;
   'signData': (payload: SignDataRequest) => Promise<SignDataResult>;
@@ -384,8 +385,41 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
     }
   }
 
-  restoreConnection(): Promise<ConnectEvent> {
-    return this._connect();
+  async restoreConnection(): Promise<ConnectEvent> {
+    const id = Date.now();
+    try {
+      // Always recheck authorization instead of trusting the injected account cache.
+      const account = await this._callBridge({ method: 'restoreConnection', params: [] });
+      if (account) {
+        this._handleConnected(account, { emit: true });
+        return {
+          event: 'connect',
+          id,
+          payload: { items: [{ name: 'ton_addr', ...account }], device: this.deviceInfo },
+        };
+      }
+      this._handleDisconnected({ emit: false });
+      this.connectionStatus = 'disconnected';
+      return {
+        event: 'connect_error',
+        id,
+        payload: {
+          code: CONNECT_EVENT_ERROR_CODES.UNKNOWN_APP_ERROR,
+          message: ConnectEventErrorMessage.UNKNOWN_APP,
+        },
+      };
+    } catch {
+      this._handleDisconnected({ emit: false });
+      this.connectionStatus = 'disconnected';
+      return {
+        event: 'connect_error',
+        id,
+        payload: {
+          code: CONNECT_EVENT_ERROR_CODES.UNKNOWN_ERROR,
+          message: ConnectEventErrorMessage.UNKNOWN_ERROR,
+        },
+      };
+    }
   }
 
   convertError<T extends RpcMethod>(

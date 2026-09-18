@@ -1,5 +1,3 @@
-jest.mock('lodash-es', () => require('lodash'));
-
 import * as providerErrors from '../../errors/src';
 
 import { JsBridgeBase } from './JsBridgeBase';

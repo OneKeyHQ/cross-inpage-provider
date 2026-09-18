@@ -2,6 +2,7 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   moduleNameMapper: {
+    '^lodash-es$': '<rootDir>/node_modules/lodash',
     '^@onekeyfe/cross-inpage-provider-core$': '<rootDir>/packages/core/src/index.ts',
     '^@onekeyfe/extension-bridge-injected$':
       '<rootDir>/packages/extension/extension-bridge-injected/src',

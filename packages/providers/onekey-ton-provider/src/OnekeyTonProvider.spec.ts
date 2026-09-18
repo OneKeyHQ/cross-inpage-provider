@@ -4,14 +4,46 @@ describe('TON restoreConnection', () => {
   function setup() {
     const provider = Object.create(ProviderTon.prototype) as ProviderTon;
     const bridgeRequest = jest.fn();
+    const emit = jest.fn();
     Object.assign(provider, {
       bridgeRequest,
+      emit,
       deviceInfo: { appName: 'OneKey' },
       _accountInfo: { address: 'stale-account' },
       connectionStatus: 'connected',
     });
-    return { provider, bridgeRequest };
+    return { provider, bridgeRequest, emit };
   }
+
+  it.each(['connect', 'restoreConnection'] as const)(
+    '%s returns the TON event and emits the same internal connection notifications',
+    async (method) => {
+      const { provider, bridgeRequest, emit } = setup();
+      Object.assign(provider, { _accountInfo: null, connectionStatus: 'disconnected' });
+      const account = { address: 'authorized-account' };
+      bridgeRequest.mockResolvedValue(account);
+      const result =
+        method === 'connect'
+          ? await provider.connect(2, {
+              manifestUrl: 'https://dapp.example/manifest.json',
+              items: [{ name: 'ton_addr' }],
+            })
+          : await provider.restoreConnection();
+      expect(result).toMatchObject({
+        event: 'connect',
+        payload: { items: [{ name: 'ton_addr', ...account }], device: provider.deviceInfo },
+      });
+      expect(provider.connectionStatus).toBe('connected');
+      expect(Reflect.get(provider, '_accountInfo')).toEqual(account);
+      expect(emit.mock.calls).toEqual([
+        ['connect', account.address],
+        ['accountChanged', account.address],
+      ]);
+      // A repeated restoration must not duplicate connection notifications.
+      await provider.restoreConnection();
+      expect(emit).toHaveBeenCalledTimes(2);
+    },
+  );
 
   it('rechecks backend authorization even when an account is cached', async () => {
     const { provider, bridgeRequest } = setup();

@@ -391,8 +391,7 @@ export class ProviderTon extends ProviderTonBase implements IProviderTon {
       // Always recheck authorization instead of trusting the injected account cache.
       const account = await this._callBridge({ method: 'restoreConnection', params: [] });
       if (account) {
-        this._handleConnected(account, { emit: false });
-        this.connectionStatus = 'connected';
+        this._handleConnected(account, { emit: true });
         return {
           event: 'connect',
           id,

@@ -349,9 +349,15 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
 
   /**
    * @experimental May change in future versions.
-   * Derive a deterministic 32-byte value from the wallet's key material via
-   * HKDF-SHA-256. The wallet backend handles validation, user approval, and
-   * the actual derivation.
+   * Derive a deterministic 32-byte secret via HKDF-SHA-256, bound to the
+   * wallet's key material, current BTC network, connected public key,
+   * appName, and context. The wallet backend handles validation, user
+   * approval, derivation, and hardware firmware/protocol checks.
+   * Hardware requires an App with this integration and Classic 1s firmware
+   * 3.21.0 or later using Protocol V1.
+   * @param appName - 1-64 ASCII bytes, `[a-z0-9-]` only.
+   * @param context - 1-1024 bytes as lowercase, even-length hex without `0x`.
+   * @returns 64-character lowercase hex secret.
    */
   async deriveContextHash(appName: string, context: string) {
     return this._request<string>({

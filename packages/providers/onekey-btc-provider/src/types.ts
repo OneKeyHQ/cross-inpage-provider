@@ -165,21 +165,20 @@ export interface IProviderBtc extends ProviderBtcBase {
   pushPsbt(psbt: string): Promise<string>;
   inscribeTransfer(ticker: string, amount: string): Promise<string>;
   /**
-   * @experimental Deterministic 32-byte value derived from the connected
-   * address's key material via HKDF-SHA-256. Output is per-public-key:
-   * the same connected address always produces the same value; different
-   * connected addresses (different public keys) produce different values.
-   * Cross-wallet portable — any conforming wallet produces the same value
-   * for the same connected public key + appName + context.
+   * @experimental Deterministic 32-byte secret derived via HKDF-SHA-256.
+   * Bound to the wallet's key material, current BTC network, connected
+   * public key, appName, and context. The same inputs produce the same
+   * secret across conforming wallets; changing any input changes the secret.
    *
-   * Supported on HD (mnemonic / xpriv) software accounts. Hardware, QR,
-   * watching-only, and external accounts are not yet supported (need
-   * firmware-side derivation). Requires user approval — the wallet shows
-   * the application name, context bytes, and bound address before deriving.
+   * Supported on HD (mnemonic / xpriv) software accounts. Hardware requires
+   * an App with this integration and OneKey Classic 1s firmware 3.21.0 or
+   * later using Protocol V1. Other hardware, QR, watching-only, imported
+   * private-key, and external accounts are not supported by this integration.
+   * Requires user approval; the wallet handles validation and derivation.
    *
-   * @param appName - 1-64 bytes, `[a-z0-9-]` only.
-   * @param context - lowercase hex, even-length, no `0x` prefix, ≤ 2048 chars.
-   * @returns 64-char lowercase hex string.
+   * @param appName - 1-64 ASCII bytes, `[a-z0-9-]` only.
+   * @param context - 1-1024 bytes as lowercase, even-length hex without `0x`.
+   * @returns 64-character lowercase hex secret.
    */
   deriveContextHash(appName: string, context: string): Promise<string>;
 }

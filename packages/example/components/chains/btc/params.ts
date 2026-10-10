@@ -86,11 +86,78 @@ export default {
   deriveContextHash: [
     {
       id: 'deriveContextHash',
-      name: 'deriveContextHash',
+      name: 'Valid context',
+      description: 'Approve to receive a 64-character lowercase hex secret. Use a test wallet.',
       value: JSON.stringify({
         appName: 'test-app',
         context: 'deadbeef',
       }),
+    },
+    {
+      id: 'deriveContextHash-minimum',
+      name: 'Valid minimum lengths',
+      description: 'A 1-byte appName and 1-byte context must succeed after approval.',
+      value: JSON.stringify({ appName: 'a', context: '00' }),
+    },
+    {
+      id: 'deriveContextHash-maximum',
+      name: 'Valid maximum lengths',
+      description: 'A 64-byte appName and 1024-byte context must succeed after approval.',
+      value: JSON.stringify({ appName: 'a'.repeat(64), context: 'ab'.repeat(1024) }),
+    },
+    {
+      id: 'deriveContextHash-empty-context',
+      name: 'Invalid: empty context',
+      description: 'Expect -32602 before approval or a device call: context must not be empty.',
+      value: JSON.stringify({ appName: 'test-app', context: '' }),
+    },
+    {
+      id: 'deriveContextHash-odd-context',
+      name: 'Invalid: odd-length context',
+      description: 'Expect -32602 before approval or a device call: hex must have even length.',
+      value: JSON.stringify({ appName: 'test-app', context: 'abc' }),
+    },
+    {
+      id: 'deriveContextHash-prefixed-context',
+      name: 'Invalid: 0x-prefixed context',
+      description: 'Expect -32602 before approval or a device call: no 0x prefix is allowed.',
+      value: JSON.stringify({ appName: 'test-app', context: '0xdeadbeef' }),
+    },
+    {
+      id: 'deriveContextHash-uppercase-context',
+      name: 'Invalid: uppercase context',
+      description: 'Expect -32602 before approval or a device call: hex must be lowercase.',
+      value: JSON.stringify({ appName: 'test-app', context: 'DEADBEEF' }),
+    },
+    {
+      id: 'deriveContextHash-non-hex-context',
+      name: 'Invalid: non-hex context',
+      description: 'Expect -32602 before approval or a device call: context must be hex.',
+      value: JSON.stringify({ appName: 'test-app', context: 'gg' }),
+    },
+    {
+      id: 'deriveContextHash-oversized-context',
+      name: 'Invalid: 1025-byte context',
+      description: 'Expect -32602 before approval or a device call: context exceeds 1024 bytes.',
+      value: JSON.stringify({ appName: 'test-app', context: 'ab'.repeat(1025) }),
+    },
+    {
+      id: 'deriveContextHash-empty-app-name',
+      name: 'Invalid: empty appName',
+      description: 'Expect -32602 before approval or a device call: appName must not be empty.',
+      value: JSON.stringify({ appName: '', context: 'deadbeef' }),
+    },
+    {
+      id: 'deriveContextHash-invalid-app-name',
+      name: 'Invalid: appName characters',
+      description: 'Expect -32602 before approval or a device call: appName allows only [a-z0-9-].',
+      value: JSON.stringify({ appName: 'Test_App', context: 'deadbeef' }),
+    },
+    {
+      id: 'deriveContextHash-oversized-app-name',
+      name: 'Invalid: 65-byte appName',
+      description: 'Expect -32602 before approval or a device call: appName exceeds 64 bytes.',
+      value: JSON.stringify({ appName: 'a'.repeat(65), context: 'deadbeef' }),
     },
   ],
   sendBitcoin: (address: string) => [

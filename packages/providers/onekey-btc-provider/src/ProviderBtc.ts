@@ -353,7 +353,7 @@ class ProviderBtc extends ProviderBtcBase implements IProviderBtc {
    * wallet's key material, current BTC network, connected public key,
    * appName, and context. The wallet backend handles validation, user
    * approval, derivation, and hardware firmware/protocol checks.
-   * Hardware requires an App with this integration and Classic 1s firmware
+   * Hardware requires an App with this integration and Classic 1s / Pure firmware
    * 3.21.0 or later using Protocol V1.
    * @param appName - 1-64 ASCII bytes, `[a-z0-9-]` only.
    * @param context - 1-1024 bytes as lowercase, even-length hex without `0x`.

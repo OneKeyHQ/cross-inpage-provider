@@ -33,9 +33,11 @@ namespace, not proof of the caller's identity; wallet approval is still required
 - HD software accounts backed by a mnemonic or xpriv are supported.
 - OneKey hardware requires an App build containing the
   [hardware integration](https://github.com/OneKeyHQ/app-monorepo/pull/13846),
-  **Classic 1s firmware >= 3.21.0**, and **Protocol V1**. The integration uses
-  Hardware SDK `1.2.8-alpha.4`; installing this Provider alone does not enable
-  hardware derivation in older App builds.
+  **Classic 1s / Classic 1s Pure firmware >= 3.21.0**, and **Protocol V1**. The integration uses
+  Hardware SDK `1.2.8-alpha.4`. Pure also requires an SDK build containing the
+  [Pure support fix](https://github.com/OneKeyHQ/hardware-js-sdk/pull/966);
+  the published `alpha.4` does not contain that fix. Installing this Provider
+  alone does not enable hardware derivation in older App builds.
 - Other hardware models, Protocol V2, Ledger/Trezor, QR, watching-only,
   imported private-key, and external accounts are unsupported by this integration.
 - The App integration supports Bitcoin Mainnet, Testnet, and Signet. SDK Regtest
@@ -64,9 +66,9 @@ is deployed; use `yarn example` for the local version.
 3. **Cancellation:** run a valid request and reject it in the App. With supported
    hardware, also cancel PIN/passphrase/device approval. Each request must fail
    without returning a secret; retrying must remain possible.
-4. **Hardware restrictions:** test Classic 1s firmware below 3.21.0, another
+4. **Hardware restrictions:** test Classic 1s / Pure firmware below 3.21.0, another
    model, and Protocol V2. Each must fail without deriving a secret. Test Classic
-   1s >= 3.21.0 on V1 separately for successful approval and derivation.
+   1s and Pure >= 3.21.0 on V1 separately for successful approval and derivation.
 5. **Network binding:** use the existing `switchChain` presets to switch between
    Mainnet, Testnet, and Signet, reconnect if needed, and repeat the same inputs.
    Verify the bound address/network in approval. Secrets must differ between

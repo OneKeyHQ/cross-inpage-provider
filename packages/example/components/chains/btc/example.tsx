@@ -243,7 +243,7 @@ export default function BTCExample() {
         />
         <ApiPayload
           title="deriveContextHash"
-          description="Derive a 32-byte secret bound to the connected BTC public key and current network. Use a test wallet. Hardware requires an App with this integration, Classic 1s firmware >= 3.21.0, and Protocol V1."
+          description="Derive a 32-byte secret bound to the connected BTC public key and current network. Use a test wallet. Hardware requires an App with this integration, Classic 1s / Pure firmware >= 3.21.0, and Protocol V1."
           presupposeParams={params.deriveContextHash}
           onExecute={async (request: string) => {
             const obj = JSON.parse(request) as { appName: string; context: string };

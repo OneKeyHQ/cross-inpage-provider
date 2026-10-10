@@ -171,7 +171,7 @@ export interface IProviderBtc extends ProviderBtcBase {
    * secret across conforming wallets; changing any input changes the secret.
    *
    * Supported on HD (mnemonic / xpriv) software accounts. Hardware requires
-   * an App with this integration and OneKey Classic 1s firmware 3.21.0 or
+   * an App with this integration and OneKey Classic 1s / Pure firmware 3.21.0 or
    * later using Protocol V1. Other hardware, QR, watching-only, imported
    * private-key, and external accounts are not supported by this integration.
    * Requires user approval; the wallet handles validation and derivation.

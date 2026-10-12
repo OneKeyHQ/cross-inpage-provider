@@ -30,4 +30,4 @@ jobs:
 
       - name: Build Example
         run: |
-          cd packages/example && yarn build
+          cd packages/example && yarn test:csp && yarn build

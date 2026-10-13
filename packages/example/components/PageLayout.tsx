@@ -56,7 +56,7 @@ function PageContent({ children }: { children: React.ReactNode }) {
 
   return (
     <WalletProvider>
-      <div ref={contentRef} className="flex flex-col flex-grow p-3 gap-3">
+      <div ref={contentRef} className="flex min-w-0 flex-col flex-grow p-3 gap-3">
         {children}
         <SettingsMenu />
       </div>
@@ -67,8 +67,8 @@ function PageContent({ children }: { children: React.ReactNode }) {
 function PageLayout({ children, title }: IPageLayoutProps) {
   return (
     <SearchContentProvider>
-      <div className="flex min-h-screen flex-col">
-        <div className="p-2 shadow-lg">
+      <div className="flex h-screen supports-[height:100dvh]:h-[100dvh] flex-col">
+        <div className="shrink-0 p-2 shadow-lg">
           <div className="mx-auto flex items-center justify-between">
             <Button
               variant="link"
@@ -82,12 +82,12 @@ function PageLayout({ children, title }: IPageLayoutProps) {
           </div>
         </div>
 
-        <ResizablePanelGroup direction="vertical" className="flex-grow">
-          <ResizablePanel className="overflow-auto flex">
+        <ResizablePanelGroup direction="vertical" className="min-h-0 flex-1">
+          <ResizablePanel className="flex" style={{ overflow: 'auto' }}>
             <PageContent>{children}</PageContent>
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={5} className="overflow-auto flex">
+          <ResizablePanel defaultSize={5} className="flex">
             <div className=" bg-black flex-grow">
               <LogsContainer />
             </div>

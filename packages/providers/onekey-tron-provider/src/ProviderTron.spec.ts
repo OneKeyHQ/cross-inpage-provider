@@ -1,9 +1,8 @@
-import { TextEncoder } from 'util';
+import { TronWeb } from 'tronweb';
 import { ProviderTron } from './ProviderTron';
 
 // Exercise the browser polyfill rather than Node's built-in buffer module.
 jest.mock('buffer', () => jest.requireActual<typeof import('buffer')>('buffer/'));
-jest.mock('tronweb', () => ({ TronWeb: class {} }));
 jest.mock('sunweb', () => jest.fn());
 jest.mock('@onekeyfe/cross-inpage-provider-core', () => ({ ProviderBase: class {} }));
 jest.mock('@onekeyfe/extension-bridge-injected', () => ({}));
@@ -35,11 +34,7 @@ describe('TRON signMessageV2 without a global Buffer', () => {
     const bridgeRequest = jest.fn().mockResolvedValue('wallet-signature');
     Object.assign(provider, {
       bridgeRequest,
-      tronWeb: {
-        utils: {
-          ethersUtils: { toUtf8Bytes: (value: string) => new TextEncoder().encode(value) },
-        },
-      },
+      tronWeb: new TronWeb({ fullHost: 'https://rpc.example.invalid' }),
     });
 
     expect(Reflect.has(globalThis, 'Buffer')).toBe(false);

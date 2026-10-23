@@ -5,7 +5,6 @@ const path = require('path');
 const webpack = require('webpack');
 const packageJson = require('./package.json');
 const { merge } = require('webpack-merge');
-const TerserPlugin = require('terser-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 const IS_PRD = process.env.NODE_ENV === 'production';
@@ -62,6 +61,7 @@ const commonConfig = {
     fallback: {
       'crypto': false,
       'crypto-browserify': require.resolve('crypto-browserify'),
+      buffer: require.resolve('buffer/'),
     },
   },
   module: {
@@ -104,7 +104,11 @@ const commonConfig = {
       },
     ],
   },
-  plugins: [].filter(Boolean),
+  plugins: [
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
+  ],
 
   devtool: IS_PRD ? undefined : 'inline-source-map',
   output: {
@@ -119,18 +123,8 @@ const commonConfig = {
 };
 
 const extensionConfig = merge(commonConfig, {
-  resolve: {
-    fallback: {
-      buffer: require.resolve('buffer/'),
-    },
-  },
   target: 'web',
-  plugins: [
-    new webpack.ProvidePlugin({
-      Buffer: ['buffer', 'Buffer'],
-    }),
-    createAnalyzer('extension-and-native'),
-  ],
+  plugins: [createAnalyzer('extension-and-native')],
   entry: {
     injectedExtension: './src/injectedExtension.ts',
     injectedNative: './src/injectedNative.ts',

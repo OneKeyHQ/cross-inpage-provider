@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { Buffer } from 'buffer';
 import dequal from 'fast-deep-equal';
 import { TronWeb } from 'tronweb';
 import type { UnsignedTransaction, SignedTransaction } from 'tronweb';

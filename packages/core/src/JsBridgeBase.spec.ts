@@ -249,3 +249,149 @@ describe('JsBridgeBase response error lifecycle', () => {
     expect(clearCallbackSpy).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('JsBridgeBase callback ids and response routing', () => {
+  const internalSender = { origin: 'https://example.com', internal: true };
+
+  function sendRequest(bridge: TestBridge, remoteId?: string) {
+    const promise = bridge.request({ data: { method: 'test_method' }, remoteId });
+    if (!promise) {
+      throw new Error('Expected an asynchronous bridge request');
+    }
+    const payload = JSON.parse(String(bridge.lastPayload)) as { id: number };
+    return { promise, id: payload.id };
+  }
+
+  function mockGetRandomValues(implementation: (values: Uint32Array) => void) {
+    const getRandomValues = jest.fn((values: Uint32Array) => {
+      implementation(values);
+      return values;
+    });
+    const originalDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'crypto');
+    Object.defineProperty(globalThis, 'crypto', {
+      configurable: true,
+      value: { getRandomValues },
+    });
+    const restore = () => {
+      if (originalDescriptor) {
+        Object.defineProperty(globalThis, 'crypto', originalDescriptor);
+      } else {
+        delete (globalThis as { crypto?: unknown }).crypto;
+      }
+    };
+    return { getRandomValues, restore };
+  }
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  test('uses unique, non-sequential callback ids', () => {
+    const bridge = new TestBridge({ timeout: 1000 });
+    const ids = Array.from({ length: 50 }, () => sendRequest(bridge).id);
+
+    expect(new Set(ids).size).toBe(ids.length);
+    ids.forEach((id) => {
+      expect(Number.isSafeInteger(id)).toBe(true);
+      expect(id).toBeGreaterThan(0);
+    });
+    expect(ids.slice(1).every((id, index) => id === ids[index] + 1)).toBe(false);
+    expect(Math.max(...ids)).toBeGreaterThan(2 ** 32);
+  });
+
+  test('draws callback ids from crypto.getRandomValues and skips zero or taken ids', () => {
+    const draws = [
+      [0, 0],
+      [0x1fffff, 7],
+      [0x1fffff, 7],
+      [0, 9],
+    ];
+    const { getRandomValues, restore } = mockGetRandomValues((values) => {
+      const [high, low] = draws.shift() ?? [1, 1];
+      values[0] = high;
+      values[1] = low;
+    });
+    try {
+      const bridge = new TestBridge({ timeout: 1000 });
+
+      expect(sendRequest(bridge).id).toBe(0x1fffff * 2 ** 32 + 7);
+      expect(sendRequest(bridge).id).toBe(9);
+      expect(getRandomValues).toHaveBeenCalledTimes(4);
+    } finally {
+      restore();
+    }
+  });
+
+  test('still finds a free id when the random source keeps repeating', () => {
+    const { restore } = mockGetRandomValues((values) => {
+      values[0] = 0;
+      values[1] = 0;
+    });
+    try {
+      const bridge = new TestBridge({ timeout: 1000 });
+
+      expect(sendRequest(bridge).id).toBe(1);
+      expect(sendRequest(bridge).id).toBe(2);
+    } finally {
+      restore();
+    }
+  });
+
+  test('settles a request sent to a remote only with a response from that remote', async () => {
+    const bridge = new TestBridge({ timeout: 1000 });
+    const { promise, id } = sendRequest(bridge, 'remote-a');
+    const settled = jest.fn();
+    promise.then(settled, settled);
+
+    bridge.receive(
+      { id, type: 'RESPONSE', scope: 'ethereum', remoteId: 'remote-b', data: 'other remote' },
+      { origin: 'https://other.example', internal: false },
+    );
+    bridge.receive(
+      { id, type: 'RESPONSE', remoteId: 'remote-b', error: { message: 'other remote' } },
+      internalSender,
+    );
+    bridge.receive({ id, type: 'RESPONSE', data: 'no remote' }, internalSender);
+    await Promise.resolve();
+    expect(settled).not.toHaveBeenCalled();
+
+    bridge.receive({ id, type: 'RESPONSE', remoteId: 'remote-a', data: 'ok' }, internalSender);
+    await expect(promise).resolves.toBe('ok');
+  });
+
+  test('keeps requests without a remote answerable as before', async () => {
+    const bridge = new TestBridge({ timeout: 1000 });
+    const first = sendRequest(bridge);
+    const second = sendRequest(bridge);
+
+    bridge.receive(
+      { id: first.id, type: 'RESPONSE', remoteId: 'any-remote', data: 'first' },
+      internalSender,
+    );
+    bridge.receive(
+      JSON.stringify({ id: String(second.id), type: 'RESPONSE', data: 'second' }),
+      internalSender,
+    );
+
+    await expect(first.promise).resolves.toBe('first');
+    await expect(second.promise).resolves.toBe('second');
+  });
+
+  test('ignores responses with ids that are not callback ids', async () => {
+    const bridge = new TestBridge({ timeout: 50 });
+    const { promise } = sendRequest(bridge);
+    const rejection = promise.catch((error: unknown) => error);
+
+    ['constructor', '__proto__', 'hasOwnProperty', 'length', '0', '-1', '1.5'].forEach((id) => {
+      bridge.receive(JSON.stringify({ id, type: 'RESPONSE', data: 'unexpected' }), internalSender);
+    });
+    jest.advanceTimersByTime(120);
+
+    await expect(rejection).resolves.toMatchObject({ code: expect.any(Number) });
+  });
+});

@@ -89,6 +89,8 @@ export type IJsBridgeCallback = {
   resolve: (value: unknown) => void;
   reject: (value: unknown) => void;
   created: number;
+  // Remote the request was sent to; when set, only a RESPONSE from it settles the callback.
+  remoteId?: number | string | null;
 };
 
 export type IJsBridgeMessagePayload = {

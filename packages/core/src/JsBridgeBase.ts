@@ -105,16 +105,54 @@ const BRIDGE_EVENTS = {
   error: 'error',
 };
 
-abstract class JsBridgeBase extends CrossEventEmitter {
-  private callbacks: IJsBridgeCallback[] = [];
+const UINT32_RANGE = 0x100000000;
+const CALLBACK_ID_HIGH_BITS_MASK = 0x1fffff;
+const CALLBACK_ID_MAX_ATTEMPTS = 10;
+const REQUEST_PAYLOAD_CACHE_LIMIT = 100;
 
-  private callbacksCount = 0;
+// 21 random high bits + 32 random low bits, so ids stay safe integers through JSON.
+function createRandomCallbackId(): number {
+  let high: number | undefined;
+  let low: number | undefined;
+  try {
+    if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+      const values = new Uint32Array(2);
+      crypto.getRandomValues(values);
+      high = values[0];
+      low = values[1];
+    }
+  } catch {
+    // Some runtimes expose crypto without a working getRandomValues.
+  }
+  if (high === undefined || low === undefined) {
+    high = Math.floor(Math.random() * UINT32_RANGE);
+    low = Math.floor(Math.random() * UINT32_RANGE);
+  }
+  return (high & CALLBACK_ID_HIGH_BITS_MASK) * UINT32_RANGE + low;
+}
+
+// Remote peers echo the id back; accept the canonical numeric string form as well.
+function normalizeCallbackId(id: unknown): number | undefined {
+  let value = id;
+  if (typeof value === 'string' && String(Number(value)) === value) {
+    value = Number(value);
+  }
+  if (typeof value === 'number' && Number.isSafeInteger(value) && value > 0) {
+    return value;
+  }
+  return undefined;
+}
+
+function hasRemoteId(remoteId: unknown): remoteId is number | string {
+  return !isNil(remoteId) && remoteId !== '';
+}
+
+abstract class JsBridgeBase extends CrossEventEmitter {
+  private callbacks = new Map<number, IJsBridgeCallback>();
 
   private callbacksExpireTimer?: ReturnType<typeof setTimeout>;
 
-  private callbackId = 1;
-
-  private _requestPayloadCache: Record<string | number, IJsBridgeMessagePayload> = {};
+  private _requestPayloadCache = new Map<number, IJsBridgeMessagePayload>();
 
   protected isExtUi = false;
 
@@ -203,8 +241,23 @@ abstract class JsBridgeBase extends CrossEventEmitter {
   };
 
   private createCallbackId(): number {
-    this.callbackId += 1;
-    return this.callbackId;
+    let id = 0;
+    for (let attempt = 0; attempt < CALLBACK_ID_MAX_ATTEMPTS; attempt += 1) {
+      id = createRandomCallbackId();
+      if (id > 0 && !this.callbacks.has(id)) {
+        return id;
+      }
+    }
+    // A stubbed or broken random source can keep repeating; take the next free id instead of spinning.
+    do {
+      id = id >= Number.MAX_SAFE_INTEGER ? 1 : id + 1;
+    } while (this.callbacks.has(id));
+    return id;
+  }
+
+  private getCallback(id: unknown): IJsBridgeCallback | undefined {
+    const callbackId = normalizeCallbackId(id);
+    return callbackId === undefined ? undefined : this.callbacks.get(callbackId);
   }
 
   private createPayload(
@@ -217,14 +270,13 @@ abstract class JsBridgeBase extends CrossEventEmitter {
       reject?: (value: unknown) => void;
     },
   ) {
-    const { id, type } = payload;
+    const { id, type, remoteId } = payload;
     if (resolve && reject && id && type === IJsBridgeMessageTypes.REQUEST) {
-      if (this.callbacks[id]) {
+      if (this.callbacks.has(id)) {
         // TODO custom error
         throw new Error(`JsBridge ERROR: callback exists, id=${id}`);
       }
-      this.callbacks[id] = { id, resolve, reject, created: Date.now() };
-      this.callbacksCount += 1;
+      this.callbacks.set(id, { id, resolve, reject, created: Date.now(), remoteId });
       this.startCallbackExpireTimerLoop();
     }
 
@@ -280,10 +332,10 @@ abstract class JsBridgeBase extends CrossEventEmitter {
         // @ts-ignore
         if (this.debugLogger.jsBridge?.enabled) {
           if (payload && payload.id && payload.type === IJsBridgeMessageTypes.REQUEST) {
-            this._requestPayloadCache[payload.id] = payload;
-            if (payload.id % 100 === 0) {
-              this._requestPayloadCache = {};
+            if (this._requestPayloadCache.size >= REQUEST_PAYLOAD_CACHE_LIMIT) {
+              this._requestPayloadCache.clear();
             }
+            this._requestPayloadCache.set(payload.id, payload);
           }
         }
         this.debugLogger.jsBridge(
@@ -340,7 +392,7 @@ abstract class JsBridgeBase extends CrossEventEmitter {
     data?: unknown;
     error?: unknown;
   }) {
-    const callbackInfo = this.callbacks[id as number];
+    const callbackInfo = this.getCallback(id);
     if (callbackInfo) {
       this.clearCallbackCache(id);
       if (method === 'reject') {
@@ -358,20 +410,20 @@ abstract class JsBridgeBase extends CrossEventEmitter {
   }
 
   private rejectExpiredCallbacks() {
-    if (!this.callbacksExpireTimeout || this.callbacksCount === 0) {
+    if (!this.callbacksExpireTimeout || this.callbacks.size === 0) {
       return;
     }
     const now = Date.now();
-    const callbacksLength = this.callbacks.length;
-    for (let id = 0; id < callbacksLength; id++) {
-      const callbackInfo = this.callbacks[id];
-      if (callbackInfo && callbackInfo.created) {
-        if (now - callbackInfo.created > this.callbacksExpireTimeout) {
-          const error = web3Errors.provider.requestTimeout();
-          this.rejectCallback(id, error);
-        }
+    const expiredIds: number[] = [];
+    this.callbacks.forEach((callbackInfo, id) => {
+      if (callbackInfo.created && now - callbackInfo.created > this.callbacksExpireTimeout) {
+        expiredIds.push(id);
       }
-    }
+    });
+    expiredIds.forEach((id) => {
+      const error = web3Errors.provider.requestTimeout();
+      this.rejectCallback(id, error);
+    });
   }
 
   private stopCallbackExpireTimerLoop() {
@@ -382,7 +434,7 @@ abstract class JsBridgeBase extends CrossEventEmitter {
   }
 
   private startCallbackExpireTimerLoop() {
-    if (!this.callbacksExpireTimeout || this.callbacksCount === 0 || this.callbacksExpireTimer) {
+    if (!this.callbacksExpireTimeout || this.callbacks.size === 0 || this.callbacksExpireTimer) {
       return;
     }
     this.callbacksExpireTimer = setTimeout(() => {
@@ -394,13 +446,11 @@ abstract class JsBridgeBase extends CrossEventEmitter {
   }
 
   clearCallbackCache(id: number | string) {
-    const callbackInfo = this.callbacks[id as number];
-    if (callbackInfo) {
-      this.callbacksCount -= 1;
+    const callbackId = normalizeCallbackId(id);
+    if (callbackId !== undefined) {
+      this.callbacks.delete(callbackId);
     }
-    delete this.callbacks[id as number];
-    if (this.callbacksCount <= 0) {
-      this.callbacksCount = 0;
+    if (this.callbacks.size === 0) {
       this.stopCallbackExpireTimerLoop();
     }
   }
@@ -455,7 +505,9 @@ abstract class JsBridgeBase extends CrossEventEmitter {
       );
     }
 
-    const relatedSendPayload = this._requestPayloadCache[payload?.id ?? ''] ?? null;
+    const relatedCallbackId = normalizeCallbackId(payload?.id);
+    const relatedSendPayload =
+      (relatedCallbackId !== undefined && this._requestPayloadCache.get(relatedCallbackId)) || null;
     this.debugLogger.jsBridge(
       'receive',
       payload,
@@ -478,8 +530,19 @@ abstract class JsBridgeBase extends CrossEventEmitter {
           'JsBridge ERROR: parameter [id] is required in JsBridge.receive() when REQUEST type message',
         );
       }
-      const callbackInfo = this.callbacks[id];
+      const callbackInfo = this.getCallback(id);
       if (callbackInfo) {
+        if (
+          hasRemoteId(callbackInfo.remoteId) &&
+          (!hasRemoteId(remoteId) || String(remoteId) !== String(callbackInfo.remoteId))
+        ) {
+          // Only the remote the request was sent to may settle it.
+          this.debugLogger.jsBridge('receive: ignore RESPONSE from another remote', {
+            id,
+            remoteId,
+          });
+          return;
+        }
         if (error) {
           let errorObject: Error;
           try {

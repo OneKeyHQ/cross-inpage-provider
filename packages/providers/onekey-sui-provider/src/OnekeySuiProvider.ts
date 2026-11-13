@@ -165,6 +165,16 @@ export type OneKeySuiProviderProps = IInpageProviderConfig & {
   timeout?: number;
 };
 
+// Wallet-standard accounts expose their fields through getters, which the
+// bridge drops when serializing: send a request's account as its address.
+function withBridgeAccount(request: { method: string; params: unknown }) {
+  const params = request.params as { account?: { address: string } } | undefined;
+  if (!params?.account) {
+    return request;
+  }
+  return { ...request, params: { ...params, account: { address: params.account.address } } };
+}
+
 function isWalletEventMethodMatch({ method, name }: { method: string; name: string }) {
   return method === `wallet_events_${name}`;
 }
@@ -204,7 +214,7 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
     method: T;
     params: JsBridgeRequestParams<T>;
   }): JsBridgeRequestResponse<T> {
-    return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
+    return this.bridgeRequest(withBridgeAccount(params)) as JsBridgeRequestResponse<T>;
   }
 
   private _handleConnected(account: AccountInfo, options: { emit: boolean } = { emit: true }) {

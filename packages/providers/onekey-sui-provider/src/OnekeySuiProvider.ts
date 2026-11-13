@@ -24,6 +24,7 @@ import type {
   SuiSignTransactionBlockInput,
   SuiSignTransactionBlockOutput,
   SuiSignTransactionInput,
+  WalletAccount,
 } from '@mysten/wallet-standard';
 
 const PROVIDER_EVENTS = {
@@ -44,28 +45,48 @@ type SuiProviderEventsMap = {
   [PROVIDER_EVENTS.message_low_level]: (payload: IJsonRpcRequest) => void;
 };
 
-type SignAndExecuteTransactionBlockInput = Omit<SuiSignAndExecuteTransactionBlockInput, 'transactionBlock'> & {
-  blockSerialize: string;
-  walletSerialize: string;
-};
-type SignTransactionBlockInput = Omit<SuiSignTransactionBlockInput, 'transactionBlock'> & {
-  blockSerialize: string;
-  walletSerialize: string;
-};
-type SignMessageInput = SuiSignMessageInput & { messageSerialize: string; walletSerialize: string };
+// Wallet-standard accounts expose their fields through getters, which the
+// bridge drops when serializing, so an account crosses it as its address.
+type BridgeAccount = Pick<WalletAccount, 'address'>;
 
-type SignPersonalMessageInput = SuiSignPersonalMessageInput & {
+type WithBridgeAccount<T extends { account: WalletAccount }> = Omit<T, 'account'> & {
+  account?: BridgeAccount;
+};
+
+function toBridgeAccount(account: WalletAccount | undefined): BridgeAccount | undefined {
+  return account ? { address: account.address } : undefined;
+}
+
+type SignAndExecuteTransactionBlockInput = WithBridgeAccount<
+  Omit<SuiSignAndExecuteTransactionBlockInput, 'transactionBlock'>
+> & {
+  blockSerialize: string;
+  walletSerialize: string;
+};
+type SignTransactionBlockInput = WithBridgeAccount<
+  Omit<SuiSignTransactionBlockInput, 'transactionBlock'>
+> & {
+  blockSerialize: string;
+  walletSerialize: string;
+};
+type SignMessageInput = WithBridgeAccount<SuiSignMessageInput> & {
   messageSerialize: string;
   walletSerialize: string;
 };
 
-type OneKeySuiSignTransactionInput = Omit<SuiSignTransactionInput, 'transaction' | 'signal'> & {
+type SignPersonalMessageInput = WithBridgeAccount<SuiSignPersonalMessageInput> & {
+  messageSerialize: string;
+  walletSerialize: string;
+};
+
+type OneKeySuiSignTransactionInput = WithBridgeAccount<
+  Omit<SuiSignTransactionInput, 'transaction' | 'signal'>
+> & {
   transaction: string;
 };
 
-type OneKeySuiSignAndExecuteTransactionInput = Omit<
-  SuiSignAndExecuteTransactionInput,
-  'transaction' | 'signal'
+type OneKeySuiSignAndExecuteTransactionInput = WithBridgeAccount<
+  Omit<SuiSignAndExecuteTransactionInput, 'transaction' | 'signal'>
 > & {
   transaction: string;
 };
@@ -301,12 +322,13 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
   async signAndExecuteTransactionBlock(
     input: SuiSignAndExecuteTransactionBlockInput,
   ): Promise<SuiSignAndExecuteTransactionBlockOutput> {
+    const account = toBridgeAccount(input.account);
     return this._callBridge({
       method: 'signAndExecuteTransactionBlock',
       params: {
-        account: input.account,
+        account,
         chain: input.chain,
-        walletSerialize: JSON.stringify(input.account),
+        walletSerialize: JSON.stringify(account),
         blockSerialize: await serializeSuiTransactionBlock(input.transactionBlock),
       },
     }) as Promise<SuiSignAndExecuteTransactionBlockOutput>;
@@ -315,23 +337,26 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
   async signTransactionBlock(
     input: SuiSignTransactionBlockInput,
   ): Promise<SuiSignTransactionBlockOutput> {
+    const account = toBridgeAccount(input.account);
     return this._callBridge({
       method: 'signTransactionBlock',
       params: {
-        account: input.account,
+        account,
         chain: input.chain,
-        walletSerialize: JSON.stringify(input.account),
+        walletSerialize: JSON.stringify(account),
         blockSerialize: await serializeSuiTransactionBlock(input.transactionBlock),
       },
     });
   }
 
   async signMessage(input: SuiSignMessageInput): Promise<SuiSignMessageOutput> {
+    const account = toBridgeAccount(input.account);
     return this._callBridge({
       method: 'signMessage',
       params: {
         ...input,
-        walletSerialize: JSON.stringify(input.account),
+        account,
+        walletSerialize: JSON.stringify(account),
         messageSerialize: bytesToHex(input.message),
       },
     });
@@ -340,11 +365,13 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
   async signPersonalMessage(
     input: SuiSignPersonalMessageInput,
   ): Promise<SuiSignPersonalMessageOutput> {
+    const account = toBridgeAccount(input.account);
     return this._callBridge({
       method: 'signPersonalMessage',
       params: {
         ...input,
-        walletSerialize: JSON.stringify(input.account),
+        account,
+        walletSerialize: JSON.stringify(account),
         messageSerialize: bytesToHex(input.message),
       },
     });
@@ -355,7 +382,7 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
       method: 'signTransaction',
       params: {
         transaction: await serializeSuiTransaction(input.transaction),
-        account: input.account,
+        account: toBridgeAccount(input.account),
         chain: input.chain,
       },
     });
@@ -368,7 +395,7 @@ class ProviderSui extends ProviderSuiBase implements IProviderSui {
       method: 'signAndExecuteTransaction',
       params: {
         transaction: await serializeSuiTransaction(input.transaction),
-        account: input.account,
+        account: toBridgeAccount(input.account),
         chain: input.chain,
       },
     });

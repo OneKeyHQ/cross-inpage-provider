@@ -20,7 +20,6 @@ import {
   BenfenSignPersonalMessageOutput,
   BenfenSignTransactionBlockInput,
   BenfenSignTransactionBlockOutput,
-  WalletAccount,
 } from '@benfen/bfc.js/wallet-standard';
 
 const PROVIDER_EVENTS = {
@@ -41,33 +40,17 @@ type BfcProviderEventsMap = {
   [PROVIDER_EVENTS.message_low_level]: (payload: IJsonRpcRequest) => void;
 };
 
-// Wallet-standard accounts expose their fields through getters, which the
-// bridge drops when serializing, so an account crosses it as its address.
-type BridgeAccount = Pick<WalletAccount, 'address'>;
-
-type WithBridgeAccount<T extends { account: WalletAccount }> = Omit<T, 'account'> & {
-  account?: BridgeAccount;
-};
-
-function toBridgeAccount(account: WalletAccount | undefined): BridgeAccount | undefined {
-  return account ? { address: account.address } : undefined;
-}
-
-type SignAndExecuteTransactionBlockInput =
-  WithBridgeAccount<BenfenSignAndExecuteTransactionBlockInput> & {
-    blockSerialize: string;
-    walletSerialize: string;
-  };
-type SignTransactionBlockInput = WithBridgeAccount<BenfenSignTransactionBlockInput> & {
+type SignAndExecuteTransactionBlockInput = BenfenSignAndExecuteTransactionBlockInput & {
   blockSerialize: string;
   walletSerialize: string;
 };
-type SignMessageInput = WithBridgeAccount<BenfenSignMessageInput> & {
-  messageSerialize: string;
+type SignTransactionBlockInput = BenfenSignTransactionBlockInput & {
+  blockSerialize: string;
   walletSerialize: string;
 };
+type SignMessageInput = BenfenSignMessageInput & { messageSerialize: string; walletSerialize: string };
 
-type SignPersonalMessageInput = WithBridgeAccount<BenfenSignPersonalMessageInput> & {
+type SignPersonalMessageInput = BenfenSignPersonalMessageInput & {
   messageSerialize: string;
   walletSerialize: string;
 };
@@ -129,6 +112,16 @@ export type OneKeyBfcProviderProps = IInpageProviderConfig & {
   timeout?: number;
 };
 
+// Wallet-standard accounts expose their fields through getters, which the
+// bridge drops when serializing: send a request's account as its address.
+function withBridgeAccount(request: { method: string; params: unknown }) {
+  const params = request.params as { account?: { address: string } } | undefined;
+  if (!params?.account) {
+    return request;
+  }
+  return { ...request, params: { ...params, account: { address: params.account.address } } };
+}
+
 function isWalletEventMethodMatch({ method, name }: { method: string; name: string }) {
   return method === `wallet_events_${name}`;
 }
@@ -168,7 +161,7 @@ class ProviderBfc extends ProviderBfcBase implements IProviderBfc {
     method: T;
     params: JsBridgeRequestParams<T>;
   }): JsBridgeRequestResponse<T> {
-    return this.bridgeRequest(params) as JsBridgeRequestResponse<T>;
+    return this.bridgeRequest(withBridgeAccount(params)) as JsBridgeRequestResponse<T>;
   }
 
   private _handleConnected(account: AccountInfo, options: { emit: boolean } = { emit: true }) {
@@ -265,16 +258,14 @@ class ProviderBfc extends ProviderBfcBase implements IProviderBfc {
   async signAndExecuteTransactionBlock(
     input: BenfenSignAndExecuteTransactionBlockInput,
   ): Promise<BenfenSignAndExecuteTransactionBlockOutput> {
-    const account = toBridgeAccount(input.account);
     return this._callBridge({
       method: 'signAndExecuteTransactionBlock',
       params: {
         ...input,
-        account,
         // https://github.com/MystenLabs/sui/blob/ace69fa8404eb704b504082d324ebc355a3d2948/sdk/typescript/src/transactions/object.ts#L6-L17
         // With a few more objects, other wallets have steps for tojson.
         transactionBlock: TransactionBlock.from(input.transactionBlock.serialize()),
-        walletSerialize: JSON.stringify(account),
+        walletSerialize: JSON.stringify(input.account),
         blockSerialize: input.transactionBlock.serialize(),
       },
     }) as Promise<BenfenSignAndExecuteTransactionBlockOutput>;
@@ -283,27 +274,23 @@ class ProviderBfc extends ProviderBfcBase implements IProviderBfc {
   async signTransactionBlock(
     input: BenfenSignTransactionBlockInput,
   ): Promise<BenfenSignTransactionBlockOutput> {
-    const account = toBridgeAccount(input.account);
     return this._callBridge({
       method: 'signTransactionBlock',
       params: {
         ...input,
-        account,
         transactionBlock: TransactionBlock.from(input.transactionBlock.serialize()),
-        walletSerialize: JSON.stringify(account),
+        walletSerialize: JSON.stringify(input.account),
         blockSerialize: input.transactionBlock.serialize(),
       },
     });
   }
 
   async signMessage(input: BenfenSignMessageInput): Promise<BenfenSignMessageOutput> {
-    const account = toBridgeAccount(input.account);
     return this._callBridge({
       method: 'signMessage',
       params: {
         ...input,
-        account,
-        walletSerialize: JSON.stringify(account),
+        walletSerialize: JSON.stringify(input.account),
         messageSerialize: bytesToHex(input.message),
       },
     });
@@ -312,13 +299,11 @@ class ProviderBfc extends ProviderBfcBase implements IProviderBfc {
   async signPersonalMessage(
     input: BenfenSignPersonalMessageInput,
   ): Promise<BenfenSignPersonalMessageOutput> {
-    const account = toBridgeAccount(input.account);
     return this._callBridge({
       method: 'signPersonalMessage',
       params: {
         ...input,
-        account,
-        walletSerialize: JSON.stringify(account),
+        walletSerialize: JSON.stringify(input.account),
         messageSerialize: bytesToHex(input.message),
       },
     });

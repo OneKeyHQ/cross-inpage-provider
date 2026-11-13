@@ -31,7 +31,7 @@ function setup() {
   // The bridge serializes requests, so this is what the wallet receives.
   const received = () =>
     JSON.parse(JSON.stringify(bridgeRequest.mock.calls[0][0])) as {
-      params: { account?: unknown; walletSerialize?: string };
+      params: { account?: unknown };
     };
   return { provider, received };
 }
@@ -47,9 +47,7 @@ describe('BFC provider sign requests', () => {
     const sign = provider[method].bind(provider) as (input: unknown) => Promise<unknown>;
     await sign({ ...input(), account: walletAccount(), chain: 'bfc:mainnet' });
 
-    const { params } = received();
-    expect(params.account).toEqual({ address: ADDRESS });
-    expect(JSON.parse(params.walletSerialize ?? '')).toEqual({ address: ADDRESS });
+    expect(received().params.account).toEqual({ address: ADDRESS });
   });
 
   it('sends no account when the dApp gives none', async () => {

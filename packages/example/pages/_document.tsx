@@ -16,20 +16,6 @@ export default function Document() {
           href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.14.1/css/mdb.min.css"
           rel="stylesheet"
         />
-        <script src="https://cdn.tailwindcss.com" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-            tailwind.config = {
-              // disable reset css (normalize css)
-              // https://tailwindcss.com/docs/preflight#disabling-preflight
-              corePlugins: {
-                preflight: false,
-              },
-            };
-        `,
-          }}
-        />
         {/* <script src="https://cdn.jsdelivr.net/npm/eruda"/> */}
         {/* <script>eruda.init();</script> */}
 

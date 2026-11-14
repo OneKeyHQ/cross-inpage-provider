@@ -1,0 +1,22 @@
+diff --git a/node_modules/console-feed/lib/Transform/replicator/index.js b/node_modules/console-feed/lib/Transform/replicator/index.js
+index c20287c..e82a629 100644
+--- a/node_modules/console-feed/lib/Transform/replicator/index.js
++++ b/node_modules/console-feed/lib/Transform/replicator/index.js
+@@ -5,11 +5,12 @@ var TRANSFORMED_TYPE_KEY = '@t';
+ var CIRCULAR_REF_KEY = '@r';
+ var KEY_REQUIRE_ESCAPING_RE = /^#*@(t|r)$/;
+ var REMAINING_KEY = '__console_feed_remaining__';
+-var GLOBAL = (function getGlobal() {
+-    // NOTE: see http://www.ecma-international.org/ecma-262/6.0/index.html#sec-performeval step 10
+-    var savedEval = eval;
+-    return savedEval('this');
+-})();
++// OneKey patch: access the global object without CSP-blocked string evaluation.
++// var GLOBAL = (function getGlobal() {
++//     var savedEval = eval;
++//     return savedEval('this');
++// })();
++var GLOBAL = globalThis;
+ var ARRAY_BUFFER_SUPPORTED = typeof ArrayBuffer === 'function';
+ var MAP_SUPPORTED = typeof Map === 'function';
+ var SET_SUPPORTED = typeof Set === 'function';

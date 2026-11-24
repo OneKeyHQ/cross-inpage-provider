@@ -9,6 +9,7 @@
     "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider next build && next export",
     "start-web": "next start",
     "lint": "next lint",
+    "test:cardano-cbor": "node --test components/chains/cardano/originalCbor.node-test.mjs",
     "clean": "rm -rf ./node_modules && rm -rf ./.next && rm -rf ./out",
     "swap-lock-registry": "npx swap-lock-registry --yarn --parallel --url https://registry.yarnpkg.com yarn.lock"
   },
@@ -33,6 +34,7 @@
     "@mizuwallet-sdk/core": "^1.4.0",
     "@mysten/dapp-kit": "1.1.0",
     "@mysten/sui": "2.18.0",
+    "@noble/hashes": "1.7.1",
     "@onekeyfe/cross-inpage-provider-core": "2.2.78",
     "@onekeyfe/cross-inpage-provider-types": "2.2.78",
     "@onekeyfe/onekey-aptos-provider": "2.2.78",
@@ -92,6 +94,7 @@
     "bitcoinjs-lib": "^6.1.5",
     "bitcore-lib": "10.0.0",
     "bs58": "^5.0.0",
+    "cborg": "4.2.6",
     "cfx-sig-util": "^2.1.2",
     "cip-23": "^0.2.0",
     "class-variance-authority": "^0.7.0",

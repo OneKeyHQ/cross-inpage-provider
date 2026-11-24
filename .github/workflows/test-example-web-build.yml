@@ -28,6 +28,9 @@ jobs:
           yarn bootstrap
           NODE_ENV=production yarn build
 
+      - name: Test Cardano original CBOR signing
+        run: yarn --cwd packages/example test:cardano-cbor
+
       - name: Build Example
         run: |
           cd packages/example && yarn build

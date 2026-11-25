@@ -17,6 +17,7 @@ const bodyHash = (body: string) => bytesToHex(C.hash_blake2b256(hexToBytes(body)
 export async function createSigningDraft(
   wallet: SigningWallet,
   encoding: string,
+  validityIntervalStart = '',
 ): Promise<SigningDraft> {
   const [utxos, changeAddress] = await Promise.all([
     wallet.getUtxos(),
@@ -41,10 +42,14 @@ export async function createSigningDraft(
   // Reuse the CBOR length header with the byte-string major type.
   addressHeader[0] |= 0x40;
   const address = bytesToHex(addressHeader) + changeAddress;
+  const validityStart = validityIntervalStart.trim();
+  const validityField = validityStart
+    ? `08${bytesToHex(C.BigNum.from_str(validityStart).to_bytes())}`
+    : '';
   const encodeBody = (tagged: boolean, map: boolean) => {
     const output = map ? `a200${address}01${amount}` : `82${address}${amount}`;
     // Build the raw body directly; a transaction round trip may change its encoding.
-    return `a300${tagged ? 'd90102' : ''}81${input}0181${output}02${bytesToHex(fee.to_bytes())}`;
+    return `${validityField ? 'a4' : 'a3'}00${tagged ? 'd90102' : ''}81${input}0181${output}02${bytesToHex(fee.to_bytes())}${validityField}`;
   };
   const bodyHex = encodeBody(encoding.startsWith('tagged'), encoding.endsWith('map'));
   return {

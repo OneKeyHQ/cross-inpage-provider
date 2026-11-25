@@ -32,6 +32,7 @@ import { ProviderPolkadot, registerPolkadot } from '@onekeyfe/onekey-polkadot-pr
 import { ProviderPrivate } from '@onekeyfe/onekey-private-provider';
 import { ProviderScdo } from '@onekeyfe/onekey-scdo-provider';
 import { ProviderSolana, registerSolanaWallet, WalletIcon } from '@onekeyfe/onekey-solana-provider';
+import { ProviderStarknet } from '@onekeyfe/onekey-starknet-provider';
 import { ProviderSui, registerSuiWallet } from '@onekeyfe/onekey-sui-provider';
 import { createTonProviderOpenMask, ProviderTon } from '@onekeyfe/onekey-ton-provider';
 import { ProviderTron, registerTIP6963Provider } from '@onekeyfe/onekey-tron-provider';
@@ -190,6 +191,11 @@ function injectWeb3Provider({
 
   const stellar = new ProviderStellar({ bridge });
 
+  const starknet = new ProviderStarknet({
+    bridge,
+    icon: WALLET_CONNECT_INFO.onekey.icon,
+  });
+
   // providerHub
   const $onekey = {
     ...window.$onekey,
@@ -217,6 +223,7 @@ function injectWeb3Provider({
     algorand,
     neo: NEOLineN3,
     stellar,
+    starknet,
   };
 
   defineWindowProperty('$onekey', $onekey, { enumerable: true, alwaysInject: true });
@@ -282,6 +289,7 @@ function injectWeb3Provider({
   defineWindowProperty('algorand', algorand);
 
   defineWindowProperty('hanaWallet', { stellar: new ProviderStellarHana(stellar) });
+  defineWindowProperty('starknet_onekey', starknet, { enumerable: true });
 
   if (!['core.allbridge.io'].includes(window.location.hostname)) {
     defineWindowProperty('exodus', {

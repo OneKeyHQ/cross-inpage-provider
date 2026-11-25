@@ -44,6 +44,7 @@
     "@onekeyfe/onekey-private-provider": "2.2.78",
     "@onekeyfe/onekey-scdo-provider": "2.2.78",
     "@onekeyfe/onekey-solana-provider": "2.2.78",
+    "@onekeyfe/onekey-starknet-provider": "2.2.78",
     "@onekeyfe/onekey-stellar-provider": "2.2.78",
     "@onekeyfe/onekey-sui-provider": "2.2.78",
     "@onekeyfe/onekey-ton-provider": "2.2.78",

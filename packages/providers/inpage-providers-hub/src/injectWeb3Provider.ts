@@ -289,7 +289,10 @@ function injectWeb3Provider({
   defineWindowProperty('algorand', algorand);
 
   defineWindowProperty('hanaWallet', { stellar: new ProviderStellarHana(stellar) });
-  defineWindowProperty('starknet_onekey', starknet, { enumerable: true });
+  defineWindowProperty('starknet_onekey', starknet, {
+    enumerable: true,
+    alwaysInject: true,
+  });
 
   if (!['core.allbridge.io'].includes(window.location.hostname)) {
     defineWindowProperty('exodus', {

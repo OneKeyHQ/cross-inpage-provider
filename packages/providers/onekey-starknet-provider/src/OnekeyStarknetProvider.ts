@@ -10,9 +10,9 @@ export enum STARKNET_PROVIDER_EVENTS {
 }
 
 export type IStarknetWalletEventMap = {
-  [STARKNET_PROVIDER_EVENTS.accountsChanged]: (accounts?: string[]) => void;
-  [STARKNET_PROVIDER_EVENTS.networkChanged]: (chainId?: string, accounts?: string[]) => void;
-  [STARKNET_PROVIDER_EVENTS.message_low_level]: (payload: IJsonRpcRequest) => void;
+  accountsChanged: (accounts?: string[]) => void;
+  networkChanged: (chainId?: string, accounts?: string[]) => void;
+  message_low_level: (payload: IJsonRpcRequest) => void;
 };
 
 export type IStarknetRequestCall = {
@@ -51,6 +51,14 @@ export class ProviderStarknet extends ProviderStarknetBase {
 
   public readonly isOneKey = true;
 
+  // Store wallet-event listeners in a Map instead of EventEmitter3's own
+  // properties so `off()` works even when accessed through `defineWindowProperty`'s
+  // defineProperty-blocking Proxy in extension injection mode.
+  private readonly _walletListeners = new Map<
+    'accountsChanged' | 'networkChanged',
+    Set<(...args: any[]) => void>
+  >();
+
   constructor(props: IProviderStarknetConfig) {
     super({
       ...props,
@@ -64,11 +72,11 @@ export class ProviderStarknet extends ProviderStarknetBase {
   }
 
   private _registerEvents() {
-    window.addEventListener('app_bridge_disconnect', () => {
+    window.addEventListener('onekey_bridge_disconnect', () => {
       this._handleAccountsChanged([]);
     });
 
-    this.on(STARKNET_PROVIDER_EVENTS.message_low_level, (payload) => {
+    super.on('message_low_level', (payload: IJsonRpcRequest) => {
       const { method, params } = payload;
       if (method === 'wallet_events_accountsChanged') {
         const accounts = Array.isArray(params)
@@ -85,11 +93,11 @@ export class ProviderStarknet extends ProviderStarknetBase {
   }
 
   private _handleAccountsChanged(accounts: string[]) {
-    this.emit(STARKNET_PROVIDER_EVENTS.accountsChanged, accounts);
+    this.emit('accountsChanged', accounts);
   }
 
   private _handleNetworkChanged(chainId?: string, accounts?: string[]) {
-    this.emit(STARKNET_PROVIDER_EVENTS.networkChanged, chainId, accounts);
+    this.emit('networkChanged', chainId, accounts);
   }
 
   public async request<T = unknown>(call: IStarknetRequestCall): Promise<T> {
@@ -107,6 +115,15 @@ export class ProviderStarknet extends ProviderStarknetBase {
     event: E,
     listener: IStarknetWalletEventMap[E],
   ): this {
+    if (event === 'accountsChanged' || event === 'networkChanged') {
+      let set = this._walletListeners.get(event);
+      if (!set) {
+        set = new Set();
+        this._walletListeners.set(event, set);
+      }
+      set.add(listener as (...args: any[]) => void);
+      return this;
+    }
     return super.on(event, listener);
   }
 
@@ -114,6 +131,10 @@ export class ProviderStarknet extends ProviderStarknetBase {
     event: E,
     listener: IStarknetWalletEventMap[E],
   ): this {
+    if (event === 'accountsChanged' || event === 'networkChanged') {
+      this._walletListeners.get(event)?.delete(listener as (...args: any[]) => void);
+      return this;
+    }
     return super.off(event, listener);
   }
 
@@ -121,6 +142,14 @@ export class ProviderStarknet extends ProviderStarknetBase {
     event: E,
     ...args: Parameters<IStarknetWalletEventMap[E]>
   ): boolean {
+    if (event === 'accountsChanged' || event === 'networkChanged') {
+      const listeners = this._walletListeners.get(event);
+      if (!listeners || listeners.size === 0) {
+        return false;
+      }
+      Array.from(listeners).forEach((fn) => fn(...args));
+      return true;
+    }
     return super.emit(event, ...args);
   }
 }

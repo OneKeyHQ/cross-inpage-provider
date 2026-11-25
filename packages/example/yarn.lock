@@ -9493,11 +9493,6 @@ cbor-sync@^1.0.4:
   resolved "https://registry.yarnpkg.com/cbor-sync/-/cbor-sync-1.0.4.tgz#5a11a1ab75c2a14d1af1b237fd84aa8c1593662f"
   integrity sha512-GWlXN4wiz0vdWWXBU71Dvc1q3aBo0HytqwAZnXF1wOwjqNnDWA1vZ1gDMFLlqohak31VQzmhiYfiCX5QSSfagA==
 
-cborg@4.2.6:
-  version "4.2.6"
-  resolved "https://registry.yarnpkg.com/cborg/-/cborg-4.2.6.tgz#7491c29986a87c647d6e2c232e64c82214ca660e"
-  integrity sha512-77vo4KlSwfjCIXcyZUVei4l2gdjesSCeYSx4U/Upwix7pcWZq8uw21sVRpjwn7mjEi//ieJPTj1MRWDHmud1Rg==
-
 cfx-sig-util@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/cfx-sig-util/-/cfx-sig-util-2.1.2.tgz#845538621781b7d66672f8ba6ed421e5b904606c"

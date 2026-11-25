@@ -4,7 +4,7 @@
 import { dapps } from './dapps.config';
 import ConnectButton from '../../../components/connect/ConnectButton';
 import { useEffect, useRef, useState } from 'react';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { IProviderApi, IProviderInfo } from './types';
 import { ApiPayload, ApiGroup } from '../../ApiActuator';
 import { useWallet } from '../../../components/connect/WalletContext';
@@ -17,7 +17,8 @@ import { Blockfrost, Lucid, C, coreToUtxo } from 'lucid-cardano';
 import type { WalletApi, SignedMessage } from 'lucid-cardano';
 import { InputWithSave } from '../../InputWithSave';
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
-import OriginalCborSigning from './OriginalCborSigning';
+import { createSigningDraft, signAndVerifyOriginalBody } from './originalCbor';
+import type { SigningDraft } from './originalCbor';
 
 // https://use-cardano.alangaming.com/
 // https://github.com/spacebudz/lucid
@@ -58,21 +59,17 @@ export default function Example() {
   const [walletApi, setWalletApi] = useState<WalletApi | null>(null);
   const [lucid, setLucid] = useState<Lucid | null>(null);
 
-  const getLucid = async () => {
-    if (lucid) return lucid;
-    if (!walletApi) throw new Error('请先连接钱包');
-    const projectId = projectIdRef.current || process.env.NEXT_PUBLIC_BLOCKFROST_CARDANO_PROJECT_ID;
-    if (!projectId) throw new Error('此项 Lucid 测试需要填写 Blockfrost Key');
-    const client = await Lucid.new(
-      new Blockfrost('https://cardano-mainnet.blockfrost.io/api/v0', projectId),
-      'Mainnet',
-    );
-    client.selectWallet(walletApi);
-    setLucid(client);
-    return client;
-  };
-
   const onConnectWallet = async (selectedWallet: IKnownWallet) => {
+    if (!projectIdRef.current && !process.env.NEXT_PUBLIC_BLOCKFROST_CARDANO_PROJECT_ID) {
+      toast({
+        title: 'Project ID is required',
+        description: 'Please set the project ID in the input box above',
+      });
+
+      window.open('https://blockfrost.io/dashboard');
+      return;
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const providerDetail = walletsRef.current?.find((w) => w.uuid === selectedWallet.id);
     if (!providerDetail) {
@@ -96,7 +93,6 @@ export default function Example() {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, no-unsafe-optional-chaining
     const walletApi = await provider?.enable();
 
-    setLucid(null);
     setWalletApi(walletApi);
 
     let chainId;
@@ -106,7 +102,21 @@ export default function Example() {
       console.log('error', error);
     }
 
-    const address = cborToAddress(await walletApi.getChangeAddress());
+    let projectId = projectIdRef.current;
+    if (!projectId || isEmpty(projectId)) {
+      projectId = process.env.NEXT_PUBLIC_BLOCKFROST_CARDANO_PROJECT_ID;
+    }
+    const lucid = await Lucid.new(
+      // test id
+      new Blockfrost('https://cardano-mainnet.blockfrost.io/api/v0', projectId),
+      'Mainnet',
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    lucid.selectWallet(walletApi);
+    setLucid(lucid);
+
+    const address = await lucid.wallet.address();
 
     return {
       provider,
@@ -164,7 +174,7 @@ export default function Example() {
       <ApiGroup title="Blockfrost Project ID">
         <div className="flex flex-col">
           <p>
-            可选：原有 Lucid 交易 / 消息测试需要 RPC Key，原始 CBOR 回归验证不需要。在 https://cardano-mainnet.blockfrost.io
+            动态生成交易需要一个公开的 RPC 节点，在这里 https://cardano-mainnet.blockfrost.io
             创建一个 Project 复制 project_id 粘贴到这里（会自动保存）
           </p>
           <InputWithSave
@@ -205,14 +215,8 @@ export default function Example() {
         onConnect={onConnectWallet}
         onDisconnect={() => {
           setWalletApi(null);
-          setLucid(null);
           return Promise.resolve();
         }}
-      />
-      <OriginalCborSigning
-        walletApi={walletApi}
-        accountAddress={account?.address}
-        formatAddress={cborToAddress}
       />
       <ApiGroup title="Basics">
         <ApiPayload
@@ -377,12 +381,10 @@ export default function Example() {
           description="(报错) 签名消息"
           presupposeParams={params.signData}
           onExecute={async (request: string) => {
-            const lucid = await getLucid();
             const res = await lucid.newMessage(account.address, request).sign();
             return JSON.stringify(res);
           }}
           onValidate={async (request: string, response: string) => {
-            const lucid = await getLucid();
             const signedMessage = JSON.parse(response) as SignedMessage;
 
             console.log('signedMessage', signedMessage);
@@ -394,10 +396,29 @@ export default function Example() {
       </ApiGroup>
       <ApiGroup title="Transafer">
         <ApiPayload
+          title="signTx 原始 CBOR 验签"
+          description="准备至少一个 2 ADA 的纯 ADA UTXO。生成自转样本后点击 Call；只签名验签，不广播。固定手续费 0.2 ADA，未按实时参数估算。"
+          generateRequestFrom={() => (
+            <select name="encoding" className="w-full rounded-md border p-2">
+              <option value="plain-map">复现：普通 inputs + map outputs</option>
+              <option value="plain-array">普通 inputs + array outputs</option>
+              <option value="tagged-map">tag 258 inputs + map outputs</option>
+              <option value="tagged-array">对照：tag 258 inputs + array outputs</option>
+            </select>
+          )}
+          onGenerateRequest={async ({ encoding }: Record<string, string>) => {
+            if (!walletApi) throw new Error('请先连接钱包');
+            return JSON.stringify(await createSigningDraft(walletApi, encoding), null, 2);
+          }}
+          onExecute={async (request: string) => {
+            if (!walletApi) throw new Error('请先连接钱包');
+            return signAndVerifyOriginalBody(walletApi, JSON.parse(request) as SigningDraft);
+          }}
+        />
+        <ApiPayload
           title="signTx"
           description="签署交易"
           onExecute={async (request: string) => {
-            const lucid = await getLucid();
             // const res = await walletApi?.signTx(request, true);
 
             const signedTx = await lucid.fromTx(request).sign().complete();
@@ -434,7 +455,6 @@ export default function Example() {
             );
           }}
           onGenerateRequest={async (fromData: Record<string, any>) => {
-            const lucid = await getLucid();
             const toAddress = fromData['toAddress'] as string;
             const amount = parseInt(fromData['amount'] as string);
             const coin = (fromData['coin'] as string)?.toUpperCase();

@@ -64,6 +64,7 @@ export enum IInjectedProviderNames {
   bfc = 'bfc',
   neo = 'neo',
   stellar = 'stellar',
+  starknet = 'starknet',
   $private = '$private',
   $hardware_sdk = '$hardware_sdk',
   $walletConnect = '$walletConnect',

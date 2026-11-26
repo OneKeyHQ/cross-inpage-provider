@@ -17,6 +17,8 @@ import { Blockfrost, Lucid, C, coreToUtxo } from 'lucid-cardano';
 import type { WalletApi, SignedMessage } from 'lucid-cardano';
 import { InputWithSave } from '../../InputWithSave';
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
+import { createSigningDraft, signAndVerifyOriginalBody } from './originalCbor';
+import type { SigningDraft } from './originalCbor';
 
 // https://use-cardano.alangaming.com/
 // https://github.com/spacebudz/lucid
@@ -393,6 +395,26 @@ export default function Example() {
         />
       </ApiGroup>
       <ApiGroup title="Transafer">
+        <ApiPayload
+          title="signTx 原始 CBOR 验签"
+          description="准备至少一个 2 ADA 的纯 ADA UTXO。生成自转样本后点击 Call；只签名验签，不广播。固定手续费 0.2 ADA，未按实时参数估算。"
+          generateRequestFrom={() => (
+            <select name="encoding" className="w-full rounded-md border p-2">
+              <option value="plain-map">复现：普通 inputs + map outputs</option>
+              <option value="plain-array">普通 inputs + array outputs</option>
+              <option value="tagged-map">tag 258 inputs + map outputs</option>
+              <option value="tagged-array">对照：tag 258 inputs + array outputs</option>
+            </select>
+          )}
+          onGenerateRequest={async ({ encoding }: Record<string, string>) => {
+            if (!walletApi) throw new Error('请先连接钱包');
+            return JSON.stringify(await createSigningDraft(walletApi, encoding), null, 2);
+          }}
+          onExecute={async (request: string) => {
+            if (!walletApi) throw new Error('请先连接钱包');
+            return signAndVerifyOriginalBody(walletApi, JSON.parse(request) as SigningDraft);
+          }}
+        />
         <ApiPayload
           title="signTx"
           description="签署交易"

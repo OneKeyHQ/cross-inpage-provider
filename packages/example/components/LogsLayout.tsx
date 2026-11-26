@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import React from 'react';
-import { useEffect, useState } from 'react';
-import { Console, Hook, Unhook } from 'console-feed';
+import React, { useEffect, useState } from 'react';
 import { JsBridgeBase } from '@onekeyfe/cross-inpage-provider-core';
-import { isString } from 'lodash';
 import { Button } from './ui/button';
 import { Checkbox } from './ui/checkbox';
+import { ConsoleLogEntry, ConsoleMethod, hookConsole } from './consoleUtils';
 
 const loggers: Record<string, boolean> = {};
 
@@ -24,42 +22,22 @@ function loadLoggersConfig() {
 
 loadLoggersConfig();
 
+const METHOD_STYLES: Record<ConsoleMethod, string> = {
+  log: 'text-gray-100 border-gray-800',
+  info: 'text-sky-300 border-sky-900/60 bg-sky-950/30',
+  warn: 'text-amber-300 border-amber-900/60 bg-amber-950/30',
+  error: 'text-red-300 border-red-900/60 bg-red-950/40',
+  debug: 'text-gray-400 border-gray-800',
+};
+
 export const LogsContainer = ({ bridge }: { bridge?: JsBridgeBase } = {}) => {
-  const [logs, setLogs] = useState<any[]>([]);
+  const [logs, setLogs] = useState<ConsoleLogEntry[]>([]);
 
   // run once!
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    Hook(
-      window.console,
-      (...logs) => {
-        setLogs((currLogs) => {
-          const newLogs = [...(currLogs || []), ...(logs || [])];
-          newLogs.forEach((item) => {
-            item.data = (item.data || []).map((content: any, index: number) => {
-              try {
-                // second console.log params should be string type
-                if (index > 0 && !isString(content)) {
-                  return JSON.stringify(content);
-                }
-              } catch (error) {
-                // noop
-                return `LogsContainer: JSON.stringify error` || 'LogsContainer:  ERROR';
-              }
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-              return content;
-            });
-          });
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return newLogs;
-        });
-      },
-      false,
-    );
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return () => void Unhook(window.console);
+    return hookConsole(window.console, (entry) => {
+      setLogs((currLogs) => [...currLogs, entry]);
+    });
   }, []);
 
   return (
@@ -100,8 +78,34 @@ export const LogsContainer = ({ bridge }: { bridge?: JsBridgeBase } = {}) => {
         })}
       </div>
 
-      <div className="flex-grow z-10">
-        <Console logs={logs} variant="dark" />
+      <div className="flex-grow z-10 font-mono text-xs divide-y divide-gray-800">
+        {logs.map((entry) => (
+          <div
+            key={entry.id}
+            className={`px-2 py-1.5 flex items-start gap-2 border-b ${METHOD_STYLES[entry.method]}`}
+          >
+            <span className="text-gray-500 shrink-0 select-none">{entry.timestamp}</span>
+            <span className="uppercase text-[10px] opacity-70 shrink-0 select-none w-10">
+              {entry.method}
+            </span>
+            <div className="flex flex-wrap gap-x-2 gap-y-1 min-w-0 break-all">
+              {entry.items.map((item, idx) =>
+                item.isExpandable && item.detail ? (
+                  <details key={idx} className="max-w-full">
+                    <summary className="cursor-pointer hover:underline">{item.preview}</summary>
+                    <pre className="mt-1 p-2 rounded bg-gray-900 text-gray-200 overflow-x-auto whitespace-pre-wrap break-all">
+                      {item.detail}
+                    </pre>
+                  </details>
+                ) : (
+                  <span key={idx} className="whitespace-pre-wrap">
+                    {item.preview}
+                  </span>
+                ),
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

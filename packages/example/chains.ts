@@ -172,6 +172,12 @@ export const registeredChains: IChainInfo[] = [
   },
   {
     id: uuid.v4(),
+    name: 'Starknet',
+    href: '/starknet',
+    icon: 'https://uni.onekey-asset.com/static/chain/strk.png',
+  },
+  {
+    id: uuid.v4(),
     name: 'Stellar',
     href: '/stellar',
     icon: 'https://uni.onekey-asset.com/static/chain/stellar.png',

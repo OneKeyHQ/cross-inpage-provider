@@ -67,6 +67,8 @@ export type IWindowOneKeyHub = {
   scdo?: ProviderScdo;
   NEOLineN3?: NEOLineN3;
   NEOLine?: NEOLineN3;
+  stellar?: ProviderStellar;
+  starknet?: ProviderStarknet;
   $private?: ProviderPrivate;
   $walletInfo?: {
     buildNumber: string;

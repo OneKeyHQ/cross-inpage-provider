@@ -147,7 +147,13 @@ export class ProviderStarknet extends ProviderStarknetBase {
       if (!listeners || listeners.size === 0) {
         return false;
       }
-      Array.from(listeners).forEach((fn) => fn(...args));
+      Array.from(listeners).forEach((fn) => {
+        try {
+          fn(...args);
+        } catch (err) {
+          console.error(err);
+        }
+      });
       return true;
     }
     return super.emit(event, ...args);

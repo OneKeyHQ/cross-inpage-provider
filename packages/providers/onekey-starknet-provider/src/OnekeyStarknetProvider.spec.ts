@@ -61,4 +61,23 @@ describe('ProviderStarknet', () => {
     window.dispatchEvent(new Event('onekey_bridge_disconnect'));
     expect(onAccounts).toHaveBeenCalledWith([]);
   });
+
+  it('isolates throwing wallet-event listeners so remaining listeners still run', () => {
+    const { provider } = setup();
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const throwingListener = jest.fn(() => {
+      throw new Error('listener boom');
+    });
+    const healthyListener = jest.fn();
+
+    provider.on('accountsChanged', throwingListener);
+    provider.on('accountsChanged', healthyListener);
+
+    expect(() => provider.emit('accountsChanged', ['0x123'])).not.toThrow();
+    expect(throwingListener).toHaveBeenCalledWith(['0x123']);
+    expect(healthyListener).toHaveBeenCalledWith(['0x123']);
+    expect(errorSpy).toHaveBeenCalledTimes(1);
+
+    errorSpy.mockRestore();
+  });
 });

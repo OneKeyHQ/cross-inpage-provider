@@ -16,5 +16,6 @@ module.exports = {
     '/node_modules/',
     '/__tests__/fixtures/',
     '/dist/',
+    '/packages/example/',
   ],
 };
